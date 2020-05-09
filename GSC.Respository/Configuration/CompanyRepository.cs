@@ -1,0 +1,67 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using GSC.Common.GenericRespository;
+using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.Master;
+using GSC.Data.Entities.Configuration;
+using GSC.Domain.Context;
+using GSC.Helper;
+using GSC.Helper.DocumentService;
+
+namespace GSC.Respository.Configuration
+{
+    public class CompanyRepository : GenericRespository<Company, GscContext>, ICompanyRepository
+    {
+        private readonly IUploadSettingRepository _uploadSettingRepository;
+
+        public CompanyRepository(IUnitOfWork<GscContext> uow,
+            IJwtTokenAccesser jwtTokenAccesser,
+            IUploadSettingRepository uploadSettingRepository)
+            : base(uow, jwtTokenAccesser)
+        {
+            _uploadSettingRepository = uploadSettingRepository;
+        }
+
+        public IList<CompanyDto> GetCompanies(bool isDeleted)
+        {
+            var companies = FindByInclude(t => t.IsDeleted == isDeleted, t => t.Location).Select(s => new CompanyDto
+            {
+                Id = s.Id,
+                CompanyCode = s.CompanyCode,
+                CompanyName = s.CompanyName,
+                Phone1 = s.Phone1,
+                Phone2 = s.Phone2,
+                Location = s.Location,
+                Logo = s.Logo,
+                IsDeleted = s.IsDeleted
+            }).OrderByDescending(t => t.Id).ToList();
+            var imageUrl = _uploadSettingRepository.GetWebImageUrl();
+            foreach (var company in companies)
+            {
+                company.LogoPath = imageUrl + (company.Logo ?? DocumentService.DefulatLogo);
+
+                if (company.Location == null)
+                    continue;
+
+                var id = company.Location.CountryId;
+                company.Location.CountryName = id > 0 ? Context.Country.Find(id).CountryName : "";
+
+                id = company.Location.StateId;
+                company.Location.StateName = id > 0 ? Context.State.Find(id).StateName : "";
+
+                id = company.Location.CityId;
+                company.Location.CityName = id > 0 ? Context.City.Find(id).CityName : "";
+            }
+
+            return companies;
+        }
+
+        public List<DropDownDto> GetCompanyDropDown()
+        {
+            return All.Where(x => x.DeletedDate == null)
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.CompanyName, Code = c.CompanyCode})
+                .OrderBy(o => o.Value).ToList();
+        }
+    }
+}

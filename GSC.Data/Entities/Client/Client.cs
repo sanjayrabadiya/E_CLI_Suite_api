@@ -1,0 +1,23 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Master;
+using GSC.Data.Entities.UserMgt;
+
+namespace GSC.Data.Entities.Client
+{
+    public class Client : BaseEntity
+    {
+        public string ClientCode { get; set; }
+        public string ClientName { get; set; }
+        public int ClientTypeId { get; set; }
+        public int? CompanyId { get; set; }
+        public int? UserId { get; set; }
+        public int? RoleId { get; set; }
+        public User User { get; set; }
+        public string Logo { get; set; }
+
+        [ForeignKey("RoleId")] public SecurityRole SecurityRole { get; set; }
+
+        public ClientType ClientType { get; set; }
+    }
+}

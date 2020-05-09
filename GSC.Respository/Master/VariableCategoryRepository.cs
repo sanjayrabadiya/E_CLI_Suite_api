@@ -1,0 +1,41 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using GSC.Common.GenericRespository;
+using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Master;
+using GSC.Data.Entities.Master;
+using GSC.Domain.Context;
+using GSC.Helper;
+
+namespace GSC.Respository.Master
+{
+    public class VariableCategoryRepository : GenericRespository<VariableCategory, GscContext>,
+        IVariableCategoryRepository
+    {
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+
+        public VariableCategoryRepository(IUnitOfWork<GscContext> uow,
+            IJwtTokenAccesser jwtTokenAccesser)
+            : base(uow, jwtTokenAccesser)
+        {
+            _jwtTokenAccesser = jwtTokenAccesser;
+        }
+
+        public List<DropDownDto> GetVariableCategoryDropDown()
+        {
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.CategoryName, Code = c.CategoryCode})
+                .OrderBy(o => o.Value).ToList();
+        }
+
+        public string Duplicate(VariableCategory objSave)
+        {
+            if (All.Any(x => x.Id != objSave.Id && x.CategoryCode == objSave.CategoryCode && x.DeletedDate == null))
+                return "Duplicate Variable Category code : " + objSave.CategoryCode;
+            if (All.Any(x => x.Id != objSave.Id && x.CategoryName == objSave.CategoryName && x.DeletedDate == null))
+                return "Duplicate Variable Category name : " + objSave.CategoryName;
+            return "";
+        }
+    }
+}

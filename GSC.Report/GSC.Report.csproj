@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <PackageReference Include="Telerik.Reporting" Version="14.0.20.219" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GSC.Data\GSC.Data.csproj" />
+    <ProjectReference Include="..\GSC.Helper\GSC.Helper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Telerik.Reporting">
+      <HintPath>bin\Debug\netcoreapp2.2\Telerik.Reporting.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

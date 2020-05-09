@@ -1,0 +1,11 @@
+﻿using GSC.Data.Entities.Common;
+
+namespace GSC.Data.Entities.Pharmacy
+{
+    public class PharmacyTemplateValueChild : BaseEntity
+    {
+        public int PharmacyTemplateValueId { get; set; }
+        public int VariableValueId { get; set; }
+        public string Value { get; set; }
+    }
+}
