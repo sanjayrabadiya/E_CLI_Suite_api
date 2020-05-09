@@ -1,0 +1,144 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AutoMapper;
+using GSC.Api.Controllers.Common;
+using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.UserMgt;
+using GSC.Data.Entities.UserMgt;
+using GSC.Domain.Context;
+using GSC.Respository.Configuration;
+using GSC.Respository.UserMgt;
+using Microsoft.AspNetCore.Mvc;
+
+namespace GSC.Api.Controllers.UserMgt
+{
+    [Route("api/[controller]")]
+    public class AppScreenController : BaseController
+    {
+        private readonly IAppScreenRepository _appScreenRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly ICompanyRepository _companyRepository;
+        private readonly IMapper _mapper;
+        private readonly IUnitOfWork<GscContext> _uow;
+
+        public AppScreenController(IAppScreenRepository appScreenRepository,
+            IUserRepository userRepository,
+            ICompanyRepository companyRepository,
+            IUnitOfWork<GscContext> uow, IMapper mapper)
+        {
+            _appScreenRepository = appScreenRepository;
+            _userRepository = userRepository;
+            _companyRepository = companyRepository;
+            _uow = uow;
+            _mapper = mapper;
+        }
+
+        // GET: api/<controller>
+        [HttpGet("{isDeleted:bool?}")]
+        public IActionResult Get(bool isDeleted)
+        {
+            var appScreens = _appScreenRepository.All.Where(x =>
+                x.IsDeleted == isDeleted 
+            ).OrderByDescending(x => x.Id).ToList();
+            var appScreensDto = _mapper.Map<IEnumerable<AppScreenDto>>(appScreens);
+            appScreensDto.ForEach(b =>
+            {
+                if (b.CreatedBy != null)
+                    b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+                if (b.ModifiedBy != null)
+                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+                if (b.DeletedBy != null)
+                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+                if (b.CompanyId != null)
+                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            });
+            foreach (var item in appScreensDto)
+            {
+                var name = _appScreenRepository.All.Where(x => x.Id == item.ParentAppScreenId).Select(c => c.ScreenName)
+                    .FirstOrDefault();
+                item.ParentScreenName = name;
+            }
+
+            return Ok(appScreensDto);
+        }
+
+
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var appScreen = _appScreenRepository.Find(id);
+            var appScreenDto = _mapper.Map<AppScreenDto>(appScreen);
+            return Ok(appScreenDto);
+        }
+
+
+        [HttpPost]
+        public IActionResult Post([FromBody] AppScreenDto appScreenDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            appScreenDto.Id = 0;
+            var appScreen = _mapper.Map<AppScreen>(appScreenDto);
+            _appScreenRepository.Add(appScreen);
+            if (_uow.Save() <= 0) throw new Exception("Creating App Screen failed on save.");
+            return Ok(appScreen.Id);
+        }
+
+        [HttpPut]
+        public IActionResult Put([FromBody] AppScreenDto appScreenDto)
+        {
+            if (appScreenDto.Id <= 0) return BadRequest();
+
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var appScreen = _mapper.Map<AppScreen>(appScreenDto);
+
+            _appScreenRepository.Update(appScreen);
+            if (_uow.Save() <= 0) throw new Exception("Updating App Screen failed on save.");
+            return Ok(appScreen.Id);
+        }
+
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var record = _appScreenRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+
+            _appScreenRepository.Delete(record);
+            _uow.Save();
+
+            return Ok();
+        }
+
+        [HttpPatch("{id}")]
+        public ActionResult Active(int id)
+        {
+            var record = _appScreenRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+            _appScreenRepository.Active(record);
+            _uow.Save();
+
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetAppScreenParentFromDropDown")]
+        public IActionResult GetAppScreenParentFromDropDown()
+        {
+            return Ok(_appScreenRepository.GetAppScreenParentFromDropDown());
+        }
+
+        [HttpGet]
+        [Route("GetMasterTableName")]
+        public IActionResult GetMasterTableName()
+        {
+            return Ok(_appScreenRepository.GetMasterTableName());
+        }
+    }
+}

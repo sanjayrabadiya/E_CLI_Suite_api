@@ -1,0 +1,11 @@
+{
+  "ImagePath": {
+    "ImageDir": "C:\\GSCImage",
+    "OriginalDir": "Original",
+    "ThumbnailDir": "Thumbnail"
+  },
+  "DocPath": {
+    "DocDir": "",
+    "SavedDoc": ""
+  }
+}

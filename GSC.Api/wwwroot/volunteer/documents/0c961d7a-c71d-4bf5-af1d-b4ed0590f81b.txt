@@ -1,0 +1,15 @@
+1)      Data form > account name should be replaced with user name
+
+2)      Template as well as invoice/renewal base reminder
+
+3)      Whenever user delete the data ( like payment ,invoice or any such any ) it should pop up the text for providing reason for deletion
+
+4)      Template  duration should be changed to 12 moths , 2 moths and 1 moths instead of yearly , monthly
+
+5)      Dashboard – latest reminder should be on top
+
+6)      User can able to edit the payment details even after payment done
+
+7)      Report should be customize like – user can select the particular column while generating pdf reports
+
+8)      While selecting payment mode as cash – user is not able to enter the bank details

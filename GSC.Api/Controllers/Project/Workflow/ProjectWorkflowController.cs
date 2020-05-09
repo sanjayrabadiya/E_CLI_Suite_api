@@ -1,0 +1,182 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AutoMapper;
+using GSC.Api.Controllers.Common;
+using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Project.Design;
+using GSC.Data.Dto.Project.Workflow;
+using GSC.Data.Entities.Project.Workflow;
+using GSC.Domain.Context;
+using GSC.Respository.Project.Design;
+using GSC.Respository.Project.Workflow;
+using Microsoft.AspNetCore.Mvc;
+
+namespace GSC.Api.Controllers.Project.Workflow
+{
+    [Route("api/[controller]")]
+    public class ProjectWorkflowController : BaseController
+    {
+        private readonly IMapper _mapper;
+        private readonly IProjectWorkflowIndependentRepository _projectWorkflowIndependentRepository;
+        private readonly IProjectWorkflowLevelRepository _projectWorkflowLevelRepository;
+        private readonly IProjectWorkflowRepository _projectWorkflowRepository;
+        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IProjectDesignRepository _projectDesignRepository;
+
+        public ProjectWorkflowController(IProjectWorkflowRepository projectWorkflowRepository,
+            IProjectWorkflowIndependentRepository projectWorkflowIndependentRepository,
+            IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
+            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IProjectDesignRepository projectDesignRepository)
+        {
+            _projectWorkflowRepository = projectWorkflowRepository;
+            _projectWorkflowIndependentRepository = projectWorkflowIndependentRepository;
+            _projectWorkflowLevelRepository = projectWorkflowLevelRepository;
+            _uow = uow;
+            _mapper = mapper;
+            _projectDesignRepository = projectDesignRepository;
+        }
+
+        [HttpGet("{isDeleted:bool?}")]
+        public IList<ProjectWorkflowDto> Get(bool isDeleted)
+        {
+            return _projectWorkflowRepository.GetProjectWorkFlowList(isDeleted);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var projectWorkflow = _projectWorkflowRepository.FindByInclude(t => t.Id == id,
+                t => t.Levels, t => t.ProjectDesign, t => t.Independents).FirstOrDefault();
+
+            if (projectWorkflow != null && projectWorkflow.Independents != null)
+                projectWorkflow.Independents = projectWorkflow.Independents.Where(x => x.DeletedDate == null).ToList();
+
+            if (projectWorkflow != null && projectWorkflow.Levels != null)
+                projectWorkflow.Levels = projectWorkflow.Levels.Where(x => x.DeletedDate == null).ToList();
+
+            var projectWorkflowDto = _mapper.Map<ProjectWorkflowDto>(projectWorkflow);
+            if (projectWorkflow != null) projectWorkflowDto.IsLock = !projectWorkflow.ProjectDesign.IsUnderTesting;
+
+            return Ok(projectWorkflowDto);
+        }
+
+        [HttpGet("CheckProjectWorkflow/{projectDesignId}")]
+        public IActionResult CheckProjectWorkflow(int projectDesignId)
+        {
+            if (projectDesignId <= 0) return BadRequest();
+            var projectWorkflow = _projectWorkflowRepository
+                .FindBy(t => t.ProjectDesignId == projectDesignId && t.DeletedDate == null).FirstOrDefault();
+
+            if (projectWorkflow == null)
+                return Ok(0);
+            return Ok(projectWorkflow.Id);
+        }
+
+        [HttpGet("checkProjectWorkflowLocked/{projectDesignId}")]
+        public IActionResult checkProjectWorkflowLocked(int projectDesignId)
+        {
+            if (projectDesignId <= 0) return BadRequest();
+            var projectDesign = _projectDesignRepository
+                .FindBy(t => t.Id == projectDesignId && t.DeletedDate == null).FirstOrDefault();
+
+            var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
+            if (projectDesign != null) projectDesignDto.Locked = !projectDesign.IsUnderTesting;
+
+            return Ok(projectDesignDto);
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] ProjectWorkflowDto projectWorkflowDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            if (!projectWorkflowDto.IsIndependent)
+                projectWorkflowDto.Independents = null;
+
+            var projectWorkflow = _mapper.Map<ProjectWorkflow>(projectWorkflowDto);
+            _projectWorkflowRepository.Add(projectWorkflow);
+            if (_uow.Save() <= 0) throw new Exception("Creating Project Workflow failed on save.");
+            return Ok(projectWorkflow.Id);
+        }
+
+        [HttpPut]
+        public IActionResult Put([FromBody] ProjectWorkflowDto projectWorkflowDto)
+        {
+            if (projectWorkflowDto.Id <= 0) return BadRequest();
+
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            if (!projectWorkflowDto.IsIndependent)
+                projectWorkflowDto.Independents = null;
+
+            var projectWorkflow = _mapper.Map<ProjectWorkflow>(projectWorkflowDto);
+            UpdateIndependents(projectWorkflow);
+            UpdateLevels(projectWorkflow);
+            _projectWorkflowRepository.Update(projectWorkflow);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating Project Workflow failed on save.");
+            return Ok(projectWorkflow.Id);
+        }
+
+        private void UpdateIndependents(ProjectWorkflow projectWorkflow)
+        {
+            var deleteIndependents = _projectWorkflowIndependentRepository.FindBy(x =>
+                x.ProjectWorkflowId == projectWorkflow.Id
+                && !projectWorkflow.Independents.Any(c => c.Id == x.Id)).ToList();
+            foreach (var item in deleteIndependents)
+            {
+                item.DeletedDate = DateTime.Now;
+                _projectWorkflowIndependentRepository.Update(item);
+            }
+        }
+
+        private void UpdateLevels(ProjectWorkflow projectWorkflow)
+        {
+            var deleteLevels = _projectWorkflowLevelRepository.FindBy(x => x.ProjectWorkflowId == projectWorkflow.Id
+                                                                           && !projectWorkflow.Levels.Any(c =>
+                                                                               c.Id == x.Id)).ToList();
+            foreach (var level in deleteLevels)
+            {
+                level.DeletedDate = DateTime.Now;
+                _projectWorkflowLevelRepository.Update(level);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var record = _projectWorkflowRepository.FindByInclude(x => x.Id == id, x => x.ProjectDesign)
+                .FirstOrDefault();
+
+            if (record == null)
+                return NotFound();
+
+            if (!record.ProjectDesign.IsUnderTesting)
+            {
+                ModelState.AddModelError("Message", "Can not delete worklow!");
+                return BadRequest(ModelState);
+            }
+
+            _projectWorkflowRepository.Delete(record);
+            _uow.Save();
+
+            return Ok();
+        }
+
+        [HttpPatch("{id}")]
+        public ActionResult Active(int id)
+        {
+            var record = _projectWorkflowRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+            _projectWorkflowRepository.Active(record);
+            _uow.Save();
+
+            return Ok();
+        }
+    }
+}
