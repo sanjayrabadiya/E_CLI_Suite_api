@@ -131,56 +131,5 @@ namespace GSC.Api
 
             return settings;
         }
-
-        private static string ParseMessage(Exception ex)
-        {
-            var message = ex.GetFullMessage();
-
-            SqlException baseException = null;
-            if (ex.Source.Contains("EntityFramework"))
-            {
-                baseException = ex.GetBaseException() as SqlException;
-            }
-            else
-            {
-                baseException = ex as SqlException;
-            }
-
-            if (baseException == null)
-            {
-                return message;
-            }
-
-            var errorNo = baseException.Number;
-
-            switch (errorNo)
-            {
-                case 547: //Reference Error
-                    if (baseException.Message.Contains("DELETE statement"))
-                    {
-                        message = "You cannot delete this record, reference exists for this record.";
-                    }
-                    else if (baseException.Message.Contains("INSERT statement"))
-                    {
-                        message = "Reference conflict, cannot Insert.";
-                    }
-                    else
-                    {
-                        message = "Reference Error.";
-                    }
-                    break;
-
-                case 2627:
-                case 2601:
-                    message = "Record already exists with same data.";
-                    break;
-
-                default:
-                    message = ex.GetFullMessage();
-                    break;
-            }
-
-            return message;
-        }
     }
 }

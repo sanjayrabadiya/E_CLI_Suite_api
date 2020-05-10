@@ -101,15 +101,15 @@ namespace GSC.Api.Controllers.UserMgt
                 return Ok(dto);
             }
 
-            var loginUser = await CheckifAlreadyLogin(user);
-            if (!dto.IsAnotherDevice && loginUser.IsLogin)
-            {
-                var errorResult = new ObjectResult(dto.UserName)
-                {
-                    StatusCode = 409
-                };
-                return errorResult;
-            }
+            //var loginUser = await CheckifAlreadyLogin(user);
+            //if (!dto.IsAnotherDevice && loginUser.IsLogin)
+            //{
+            //    var errorResult = new ObjectResult(dto.UserName)
+            //    {
+            //        StatusCode = 409
+            //    };
+            //    return errorResult;
+            //}
 
             return Ok(BuildUserAuthObject(user, dto.RoleId));
         }
