@@ -1,3 +1,4 @@
+using GSC.Data.Dto.Configuration;
 using System;
 
 namespace GSC.Data.Dto.UserMgt
@@ -21,5 +22,6 @@ namespace GSC.Data.Dto.UserMgt
         public string CompanyName { get; set; }
         public int RoleId { get; set; }
         public string RoleName { get; set; }
+        public GeneralSettingsDto GeneralSettings { get; set; }
     }
 }

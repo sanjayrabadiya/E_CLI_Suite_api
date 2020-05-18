@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
@@ -31,7 +32,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IHubContext<Notification> _notificationHubContext;
-
+        private readonly IAppSettingRepository _appSettingRepository;
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -40,7 +41,8 @@ namespace GSC.Api.Controllers.UserMgt
             IUnitOfWork<GscContext> uow,
             ICompanyRepository companyRepository,
             IUploadSettingRepository uploadSettingRepositor,
-            IHubContext<Notification> notificationHubContext)
+            IHubContext<Notification> notificationHubContext,
+            IAppSettingRepository appSettingRepository)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -50,6 +52,7 @@ namespace GSC.Api.Controllers.UserMgt
             _companyRepository = companyRepository;
             _uploadSettingRepository = uploadSettingRepositor;
             _notificationHubContext = notificationHubContext;
+            _appSettingRepository = appSettingRepository;
         }
 
         [HttpPost]
@@ -111,7 +114,10 @@ namespace GSC.Api.Controllers.UserMgt
             //    return errorResult;
             //}
 
-            return Ok(BuildUserAuthObject(user, dto.RoleId));
+            var validatedUser = BuildUserAuthObject(user, dto.RoleId);
+            validatedUser.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(user.CompanyId);
+
+            return Ok(validatedUser);
         }
 
         [HttpPost]
