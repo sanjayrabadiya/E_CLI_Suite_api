@@ -47,8 +47,7 @@ namespace GSC.Api.Controllers.Master
                 .OrderByDescending(x => x.Id).ToList();
             var testsDto = _mapper.Map<IEnumerable<TestDto>>(tests);
             testsDto.ForEach(b =>
-            {
-                b.TestName = _testRepository.Find(b.TestGroupId).TestName;
+            {                
                 if (b.CreatedBy != null)
                     b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
                 if (b.ModifiedBy != null)

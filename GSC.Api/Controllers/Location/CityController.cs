@@ -56,7 +56,7 @@ namespace GSC.Api.Controllers.Location
             var cityAreasDto = _mapper.Map<IEnumerable<CityDto>>(citys);
             cityAreasDto.ForEach(b =>
             {
-                b.StateName = _stateRepository.Find(b.StateId).StateName;
+               // b.StateName = _stateRepository.Find(b.StateId).StateName;
                 b.CountryName = _countryRepository.Find(b.State.CountryId).CountryName;
                 if (b.CreatedBy != null)
                     b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
