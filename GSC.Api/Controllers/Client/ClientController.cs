@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.Client
             clientsDto.ForEach(b =>
             {
                 b.LogoPath = imageUrl + (b.Logo ?? DocumentService.DefulatLogo);
-                b.FirstName = _userRepository.Find((int)b.UserId).FirstName;
+                b.FirstName = _userRepository.Find((int)b.UserId).FirstName +" "+ _userRepository.Find((int)b.UserId).LastName;
                 b.LastName = _userRepository.Find((int)b.UserId).LastName;
                 b.RoleName = _securityRoleRepository.Find((int)b.RoleId).RoleName;
                 b.ClientTypeName = _clientTypeRepository.Find(b.ClientTypeId).ClientTypeName;
