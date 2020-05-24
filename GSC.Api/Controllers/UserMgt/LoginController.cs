@@ -33,6 +33,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IHubContext<Notification> _notificationHubContext;
         private readonly IAppSettingRepository _appSettingRepository;
+        private readonly IRolePermissionRepository _rolePermissionRepository;
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -42,7 +43,8 @@ namespace GSC.Api.Controllers.UserMgt
             ICompanyRepository companyRepository,
             IUploadSettingRepository uploadSettingRepositor,
             IHubContext<Notification> notificationHubContext,
-            IAppSettingRepository appSettingRepository)
+            IAppSettingRepository appSettingRepository,
+            IRolePermissionRepository rolePermissionRepository)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -53,6 +55,7 @@ namespace GSC.Api.Controllers.UserMgt
             _uploadSettingRepository = uploadSettingRepositor;
             _notificationHubContext = notificationHubContext;
             _appSettingRepository = appSettingRepository;
+            _rolePermissionRepository = rolePermissionRepository;
         }
 
         [HttpPost]
@@ -115,7 +118,9 @@ namespace GSC.Api.Controllers.UserMgt
             //}
 
             var validatedUser = BuildUserAuthObject(user, dto.RoleId);
+
             validatedUser.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(user.CompanyId);
+            validatedUser.Rights = _rolePermissionRepository.GetByUserId(validatedUser.UserId, validatedUser.RoleId);
 
             return Ok(validatedUser);
         }
@@ -275,7 +280,6 @@ namespace GSC.Api.Controllers.UserMgt
             return await _userRepository.FindAsync(user.Id);
         }
 
-
         [HttpPost]
         [Route("Refresh")]
         [AllowAnonymous]
@@ -283,7 +287,6 @@ namespace GSC.Api.Controllers.UserMgt
         {
             return Ok(_userRepository.Refresh(token.AccessToken, token.RefreshToken));
         }
-
 
         [HttpPost]
         [Route("ValidateUserForSignature")]

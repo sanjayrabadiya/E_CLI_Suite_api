@@ -1,5 +1,7 @@
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Entities.UserMgt;
 using System;
+using System.Collections.Generic;
 
 namespace GSC.Data.Dto.UserMgt
 {
@@ -23,5 +25,6 @@ namespace GSC.Data.Dto.UserMgt
         public int RoleId { get; set; }
         public string RoleName { get; set; }
         public GeneralSettingsDto GeneralSettings { get; set; }
+        public List<AppScreen> Rights { get; set; }
     }
 }
