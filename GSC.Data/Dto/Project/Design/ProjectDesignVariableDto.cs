@@ -38,7 +38,7 @@ namespace GSC.Data.Dto.Project.Design
         public string HighRangeValue { get; set; }
         public int? UnitId { get; set; }
         public string UnitAnnotation { get; set; }
-        public PrintType PrintType { get; set; }
+        public PrintType? PrintType { get; set; }
         public IList<ProjectDesignVariableValueDto> Values { get; set; } = null;
         public UnitDto Unit { get; set; }
         public int DesignOrder { get; set; }

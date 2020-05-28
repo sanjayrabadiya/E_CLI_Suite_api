@@ -28,7 +28,7 @@ namespace GSC.Data.Entities.Master
         public string HighRangeValue { get; set; }
         public int? UnitId { get; set; }
         public string UnitAnnotation { get; set; }
-        public PrintType PrintType { get; set; }
+        public PrintType? PrintType { get; set; }
         public bool IsDocument { get; set; }
         public IList<VariableValue> Values { get; set; } = null;
         public Unit Unit { get; set; }

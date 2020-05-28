@@ -49,7 +49,7 @@ namespace GSC.Data.Dto.Master
 
         public int? UnitId { get; set; }
         public string UnitAnnotation { get; set; }
-        public PrintType PrintType { get; set; }
+        public PrintType? PrintType { get; set; }
         public bool IsDocument { get; set; }
         public IList<VariableValue> Values { get; set; } = null;
         public VariableCategoryType? SystemType { get; set; }
