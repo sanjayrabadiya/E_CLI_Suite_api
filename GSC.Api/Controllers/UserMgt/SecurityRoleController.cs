@@ -18,6 +18,7 @@ namespace GSC.Api.Controllers.UserMgt
     public class SecurityRoleController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
@@ -25,11 +26,13 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUnitOfWork<GscContext> _uow;
 
         public SecurityRoleController(IRoleRepository securityRoleRepository,
+            IRolePermissionRepository rolePermissionRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork<GscContext> uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
         {
             _securityRoleRepository = securityRoleRepository;
+            _rolePermissionRepository = rolePermissionRepository;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _uow = uow;
@@ -86,7 +89,12 @@ namespace GSC.Api.Controllers.UserMgt
 
             _securityRoleRepository.Add(securityrole);
             if (_uow.Save() <= 0) throw new Exception("Creating Occupation failed on save.");
-            return Ok(securityrole.Id);
+
+            var i = securityrole.Id;
+            var permissionDtos = _rolePermissionRepository.GetByRoleId(i);
+
+            return Ok(permissionDtos);
+            //return Ok(securityrole.Id);
         }
 
         // PUT api/<controller>/5
