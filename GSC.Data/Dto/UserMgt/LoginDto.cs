@@ -17,5 +17,6 @@ namespace GSC.Data.Dto.UserMgt
         public int RoleId { get; set; }
 
         public IList<DropDownDto> Roles { get; set; }
+        public bool AskToSelectRole { get; set; }
     }
 }

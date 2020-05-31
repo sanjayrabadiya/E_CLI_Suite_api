@@ -101,9 +101,11 @@ namespace GSC.Api.Controllers.UserMgt
             if (roles.Count == 1)
                 dto.RoleId = roles.First().Id;
 
+            dto.AskToSelectRole = false;
             if (dto.RoleId == 0)
             {
                 dto.Roles = roles;
+                dto.AskToSelectRole = true;
                 return Ok(dto);
             }
 
@@ -118,9 +120,6 @@ namespace GSC.Api.Controllers.UserMgt
             //}
 
             var validatedUser = BuildUserAuthObject(user, dto.RoleId);
-
-            validatedUser.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(user.CompanyId);
-            validatedUser.Rights = _rolePermissionRepository.GetByUserId(validatedUser.UserId, validatedUser.RoleId);
 
             return Ok(validatedUser);
         }
@@ -145,7 +144,9 @@ namespace GSC.Api.Controllers.UserMgt
                 return BadRequest(ModelState);
             }
 
-            return Ok(BuildUserAuthObject(user, loginDto.RoleId));
+            var validatedUser = BuildUserAuthObject(user, loginDto.RoleId);
+
+            return Ok(validatedUser);
         }
 
         [HttpGet]
@@ -187,7 +188,10 @@ namespace GSC.Api.Controllers.UserMgt
                                    (authUser.ProfilePic ?? DocumentService.DefulatProfilePic);
             }
 
-            login.RoleName = _uow.Context.SecurityRole.Find(roleId)?.RoleName;
+            login.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(authUser.CompanyId);
+            login.Rights = _rolePermissionRepository.GetByUserId(authUser.Id, roleId);
+            login.Roles = _userRoleRepository.GetRoleByUserName(authUser.UserName);
+            login.RoleName = login.Roles.FirstOrDefault(t=>t.Id == roleId)?.Value;
 
             authUser.FailedLoginAttempts = 0;
             authUser.RoleTokenId = roleTokenId;

@@ -27,5 +27,10 @@ namespace GSC.Common.GenericRespository
         void Delete(TC entity);
         void Active(TC entity);
         void InsertUpdateGraph(TC entity);
+        /// <summary>
+        /// Adds new record and marks existing record as deleted if reference exists, or updates the record if no referece exists
+        /// </summary>
+        /// <param name="entity"></param>
+        void AddOrUpdate(TC entity);
     }
 }

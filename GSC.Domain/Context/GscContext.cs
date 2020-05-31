@@ -268,6 +268,11 @@ namespace GSC.Domain.Context
             return result;
         }
 
+        public int SaveChanges(int fake)
+        {
+            return base.SaveChanges();
+        }
+
         public async Task<int> SaveChangesAsync(IJwtTokenAccesser jwtTokenAccesser)
         {
             SetModifiedInformation(jwtTokenAccesser);

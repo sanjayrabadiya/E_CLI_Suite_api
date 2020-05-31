@@ -113,10 +113,7 @@ namespace GSC.Api.Controllers.Location
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(country.Id);
-            country.Id = 0;
-            _countryRepository.Add(country);
+            _countryRepository.AddOrUpdate(country);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Country failed on save.");
 

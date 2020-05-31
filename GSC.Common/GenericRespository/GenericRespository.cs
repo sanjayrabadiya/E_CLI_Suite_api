@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -122,6 +123,42 @@ namespace GSC.Common.GenericRespository
         public virtual void Remove(TC entity)
         {
             Context.Remove(entity);
+        }
+
+        public virtual void AddOrUpdate(TC entity)
+        {
+            var referenceExists = false;
+            using (var transaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    Context.Remove(entity);
+                    Context.SaveChanges(1);
+                    transaction.Rollback();
+                }
+                catch (Exception)
+                {
+                    referenceExists = true;
+                    transaction.Rollback();
+                }
+            }
+
+            Context.Entry(entity).State = EntityState.Detached;
+
+            if (referenceExists)
+            {
+                var record = entity as BaseEntity;
+                Delete(record.Id);
+
+                Context.Entry(entity).State = EntityState.Detached;
+                record.Id = 0;
+
+                Add(entity);
+            }
+            else
+            {
+                Context.Update(entity);
+            }
         }
 
         public void Dispose()
