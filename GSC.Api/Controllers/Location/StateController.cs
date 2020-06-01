@@ -131,10 +131,7 @@ namespace GSC.Api.Controllers.Location
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(state.Id);
-            state.Id = 0;
-            _stateRepository.Add(state);
+            _stateRepository.AddOrUpdate(state);
 
             if (_uow.Save() <= 0) throw new Exception("Updating State failed on save.");
 
