@@ -80,5 +80,13 @@ namespace GSC.Respository.Master
                 Value = t.CityName
             }).ToList();
         }
+
+        public List<DropDownDto> GetCityByStateDropDown(int StateId)
+        {
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.StateId == StateId)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CityName, Code = c.CityCode, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value)
+                .ToList();
+        }
     }
 }

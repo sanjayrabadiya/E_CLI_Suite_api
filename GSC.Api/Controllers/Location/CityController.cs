@@ -165,8 +165,8 @@ namespace GSC.Api.Controllers.Location
 
         [HttpGet("GetCitiesByState/{id}")]
         public IActionResult GetCitiesByState(int id)
-        {
-            return Ok(_cityRepository.All.Where(x => x.StateId == id));
+        {            
+            return Ok(_cityRepository.GetCityByStateDropDown(id));
         }
 
 

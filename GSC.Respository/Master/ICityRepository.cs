@@ -12,5 +12,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetCityDropDown();
         List<CityDto> GetCities(bool isDeleted);
         IList<DropDownDto> AutoCompleteSearch(string searchText, bool isAutoSearch = false);
+        List<DropDownDto> GetCityByStateDropDown(int StateId);
     }
 }
