@@ -113,6 +113,7 @@ namespace GSC.Api.Controllers.Location
                 return BadRequest(ModelState);
             }
 
+            /* Added by swati for effective Date on 02-06-2019 */
             _countryRepository.AddOrUpdate(country);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Country failed on save.");

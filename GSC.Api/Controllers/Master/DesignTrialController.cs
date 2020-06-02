@@ -100,10 +100,8 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(designTrial.Id);
-            designTrial.Id = 0;
-            _designTrialRepository.Add(designTrial);
+            /* Added by swati for effective Date on 02-06-2019 */
+            _designTrialRepository.AddOrUpdate(designTrial);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Design Trial failed on save.");
             return Ok(designTrial.Id);

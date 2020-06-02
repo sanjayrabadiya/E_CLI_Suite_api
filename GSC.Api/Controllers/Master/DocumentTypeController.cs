@@ -104,10 +104,8 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(document.Id);
-            document.Id = 0;
-            _documentRepository.Add(document);
+            /* Added by swati for effective Date on 02-06-2019 */
+            _documentRepository.AddOrUpdate(document);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
             return Ok(document.Id);

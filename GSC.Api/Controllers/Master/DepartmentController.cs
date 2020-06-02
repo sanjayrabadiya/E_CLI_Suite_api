@@ -124,10 +124,8 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(department.Id);
-            department.Id = 0;
-            _departmentRepository.Add(department);
+            /* Added by swati for effective Date on 02-06-2019 */
+            _departmentRepository.AddOrUpdate(department);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Department failed on save.");
             return Ok(department.Id);

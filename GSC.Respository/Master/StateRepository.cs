@@ -23,9 +23,9 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetStateDropDown(int countryId)
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null &&
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) &&
                     x.CountryId == countryId)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.StateName}).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.StateName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
         public string DuplicateState(State objSave)

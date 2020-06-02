@@ -96,10 +96,8 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(scopeName.Id);
-            scopeName.Id = 0;
-            _scopeNameRepository.Add(scopeName);
+            /* Added by swati for effective Date on 02-06-2019 */
+            _scopeNameRepository.AddOrUpdate(scopeName);
 
             if (_uow.Save() <= 0) throw new Exception("Updating scope failed on save.");
 

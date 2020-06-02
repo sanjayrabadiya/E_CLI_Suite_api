@@ -50,8 +50,8 @@ namespace GSC.Respository.UserMgt
         public List<DropDownDto> GetSecurityRoleDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.RoleName}).OrderBy(o => o.Value).ToList();
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.RoleName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }
 }

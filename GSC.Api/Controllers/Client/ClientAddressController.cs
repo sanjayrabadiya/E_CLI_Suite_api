@@ -63,10 +63,8 @@ namespace GSC.Api.Controllers.Client
             var clientAddress = _mapper.Map<ClientAddress>(clientAddressDto);
             clientAddress.Location = _locationRepository.SaveLocation(clientAddress.Location);
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(clientAddress.Id);
-            clientAddress.Id = 0;
-            _clientAddressRepository.Add(clientAddress);
+            /* Added by swati for effective Date on 02-06-2019 */
+            _clientAddressRepository.AddOrUpdate(clientAddress);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Client address failed on save.");
             return Ok(clientAddress.Id);

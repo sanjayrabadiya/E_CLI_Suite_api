@@ -106,10 +106,8 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(productType.Id);
-            productType.Id = 0;
-            _productTypeRepository.Add(productType);
+            /* Added by swati for effective Date on 02-06-2019 */
+            _productTypeRepository.AddOrUpdate(productType);
 
             if (_uow.Save() <= 0) throw new Exception("Updating product type failed on save.");
             return Ok(productType.Id);

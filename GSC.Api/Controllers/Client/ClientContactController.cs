@@ -74,10 +74,9 @@ namespace GSC.Api.Controllers.Client
             }
 
             clientContact.Id = clientContactDto.Id;
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(clientContact.Id);
-            clientContact.Id = 0;
-            _clientContactRepository.Add(clientContact);
+
+            /* Added by swati for effective Date on 02-06-2019 */
+            _clientContactRepository.AddOrUpdate(clientContact);
 
             if (_uow.Save() <= 0) throw new Exception("Updating client contact failed on save.");
             return Ok(clientContact.Id);

@@ -42,10 +42,8 @@ namespace GSC.Respository.UserMgt
 
         public IList<DropDownDto> GetUserNameByRoleId(int roleId)
         {
-            return All.Where(x =>
-                    x.User.DeletedDate == null && x.SecurityRole.Id == roleId && x.DeletedDate == null &&
-                    x.SecurityRole.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.User.Id, Value = c.User.FirstName + ' ' + c.User.LastName})
+            return All.Where(x => x.SecurityRole.Id == roleId)
+                .Select(c => new DropDownDto {Id = c.User.Id, Value = c.User.FirstName + ' ' + c.User.LastName, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
 
