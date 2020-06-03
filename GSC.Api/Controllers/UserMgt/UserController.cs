@@ -127,10 +127,10 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(user.Id);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] UserDto userDto)
+        [HttpPut]
+        public IActionResult Put([FromBody] UserDto userDto)
         {
-            if (id <= 0) return BadRequest();
+            if (userDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 

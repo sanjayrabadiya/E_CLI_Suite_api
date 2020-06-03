@@ -156,7 +156,7 @@ namespace GSC.Api.Controllers.Master
             var auditReasons = _auditReasonRepository
                 .All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.IsDeleted == false &&
-                    ((int) x.ModuleId == modulelId || (int) x.ModuleId == 2)
+                    ((int) x.ModuleId == modulelId || x.ModuleId == AuditModule.Common)
                 ).OrderBy(o => o.ReasonName).ToList();
             var auditReasonsDto = _mapper.Map<IEnumerable<AuditReasonDto>>(auditReasons);
             auditReasonsDto.ForEach(t => t.ModuleName = t.ModuleId.GetDescription());

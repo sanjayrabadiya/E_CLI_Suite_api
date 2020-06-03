@@ -261,10 +261,10 @@ namespace GSC.Domain.Context
 
             var auditTrails = GetAuditTrailCommons(jwtTokenAccesser);
 
-
             var result = base.SaveChanges();
 
             SaveAuditTrailCommons(auditTrails);
+
             return result;
         }
 
