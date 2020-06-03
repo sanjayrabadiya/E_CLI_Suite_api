@@ -101,11 +101,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(test.Id);
-            test.Id = 0;
-            _testRepository.Add(test);
+            _testRepository.AddOrUpdate(test);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Test failed on save.");
             return Ok(test.Id);

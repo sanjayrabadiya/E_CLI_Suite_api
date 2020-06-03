@@ -102,11 +102,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(unit.Id);
-            unit.Id = 0;
-            _unitRepository.Add(unit);
+            _unitRepository.AddOrUpdate(unit);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Unit failed on save.");
             return Ok(unit.Id);

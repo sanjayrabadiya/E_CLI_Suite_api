@@ -113,11 +113,7 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var cityArea = _mapper.Map<CityArea>(cityAreaDto);
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(cityArea.Id);
-            cityArea.Id = 0;
-            _cityAreaRepository.Add(cityArea);
+            _cityAreaRepository.AddOrUpdate(cityArea);
 
             if (_uow.Save() <= 0) throw new Exception("Updating City Area failed on save.");
             return Ok(cityArea.Id);

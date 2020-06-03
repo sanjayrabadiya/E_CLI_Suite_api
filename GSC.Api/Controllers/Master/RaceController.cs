@@ -103,11 +103,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(race.Id);
-            race.Id = 0;
-            _raceRepository.Add(race);
+            _raceRepository.AddOrUpdate(race);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Race failed on save.");
             return Ok(race.Id);

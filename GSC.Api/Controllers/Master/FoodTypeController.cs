@@ -103,11 +103,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(foodType.Id);
-            foodType.Id = 0;
-            _foodTypeRepository.Add(foodType);
+            _foodTypeRepository.AddOrUpdate(foodType);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Food Type failed on save.");
             return Ok(foodType.Id);

@@ -102,11 +102,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(blockCategory.Id);
-            blockCategory.Id = 0;
-            _blockCategoryRepository.Add(blockCategory);
+            _blockCategoryRepository.AddOrUpdate(blockCategory);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Block Category failed on save.");
             return Ok(blockCategory.Id);

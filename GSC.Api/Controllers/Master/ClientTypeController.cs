@@ -104,11 +104,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(clientType.Id);
-            clientType.Id = 0;
-            _clientTypeRepository.Add(clientType);
+            _clientTypeRepository.AddOrUpdate(clientType);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Client Type failed on save.");
             return Ok(clientType.Id);

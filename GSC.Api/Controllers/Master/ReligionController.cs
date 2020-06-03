@@ -103,11 +103,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(religion.Id);
-            religion.Id = 0;
-            _religionRepository.Add(religion);
+            _religionRepository.AddOrUpdate(religion);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Religion failed on save.");
             return Ok(religion.Id);

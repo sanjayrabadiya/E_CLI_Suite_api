@@ -102,11 +102,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(contactType.Id);
-            contactType.Id = 0;
-            _contactTypeRepository.Add(contactType);
+            _contactTypeRepository.AddOrUpdate(contactType);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Contact Type failed on save.");
             return Ok(contactType.Id);

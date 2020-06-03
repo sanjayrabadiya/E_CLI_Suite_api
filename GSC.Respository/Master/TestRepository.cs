@@ -23,14 +23,14 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetTestDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.TestName}).OrderBy(o => o.Value).ToList();
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.TestName,IsDeleted=c.DeletedDate!=null}).OrderBy(o => o.Value).ToList();
         }
 
         public List<DropDownDto> GetTestDropDownByTestGroup(int id)
         {
-            return All.Where(x => x.TestGroupId == id && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.TestName}).OrderBy(o => o.Value).ToList();
+            return All.Where(x => x.TestGroupId == id)
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.TestName,IsDeleted=c.DeletedDate!=null}).OrderBy(o => o.Value).ToList();
         }
 
         public string Duplicate(Test objSave)

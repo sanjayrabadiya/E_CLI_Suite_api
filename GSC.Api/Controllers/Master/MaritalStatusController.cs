@@ -104,11 +104,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(maritalStatus.Id);
-            maritalStatus.Id = 0;
-            _maritalStatusRepository.Add(maritalStatus);
+            _maritalStatusRepository.AddOrUpdate(maritalStatus);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Marital Status failed on save.");
             return Ok(maritalStatus.Id);

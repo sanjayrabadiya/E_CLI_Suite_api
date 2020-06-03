@@ -99,11 +99,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(document.Id);
-            document.Id = 0;
-            _documentNameRepository.Add(document);
+            _documentNameRepository.AddOrUpdate(document);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
             return Ok(document.Id);
