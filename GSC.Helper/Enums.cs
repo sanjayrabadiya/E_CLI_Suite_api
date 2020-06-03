@@ -138,7 +138,7 @@ namespace GSC.Helper
         [Description("User management")] UserManagement = 5,
         [Description("Project")] Project = 6,
         [Description("Screening")] Screening = 7,
-        [Description("Template")] Template = 8,
+        [Description("Design library")] DesignLibrary = 8,
         [Description("Master")] Master = 9,
         [Description("Barcode")] Barcode = 10
     }
