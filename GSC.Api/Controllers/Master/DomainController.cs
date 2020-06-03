@@ -120,10 +120,8 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(domain.Id);
-            domain.Id = 0;
-            _domainRepository.Add(domain);
+            /* Added by swati for effective Date on 02-06-2019 */          
+            _domainRepository.AddOrUpdate(domain);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Domain failed on save.");
 

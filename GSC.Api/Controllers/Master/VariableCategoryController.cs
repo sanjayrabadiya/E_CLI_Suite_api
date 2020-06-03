@@ -105,10 +105,8 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(variableCategory.Id);
-            variableCategory.Id = 0;
-            _variableCategoryRepository.Add(variableCategory);
+            /* Added by swati for effective Date on 02-06-2019 */
+            _variableCategoryRepository.AddOrUpdate(variableCategory);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Variable Category failed on save.");
             return Ok(variableCategory.Id);

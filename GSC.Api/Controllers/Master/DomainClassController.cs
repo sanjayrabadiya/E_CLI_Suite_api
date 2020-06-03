@@ -107,10 +107,8 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(domainClass.Id);
-            domainClass.Id = 0;
-            _domainClassRepository.Add(domainClass);
+            /* Added by swati for effective Date on 02-06-2019 */
+            _domainClassRepository.AddOrUpdate(domainClass);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Domain Class failed on save.");
             return Ok(domainClass.Id);
