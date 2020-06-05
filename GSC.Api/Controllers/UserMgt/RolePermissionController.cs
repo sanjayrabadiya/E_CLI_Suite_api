@@ -47,5 +47,15 @@ namespace GSC.Api.Controllers.UserMgt
 
             return Ok();
         }
+        [HttpPut]
+        public IActionResult Put([FromBody] List<RolePermission> rolePermissions)
+        {
+            if (!ModelState.IsValid || !rolePermissions.Any()) return new UnprocessableEntityObjectResult(ModelState);
+
+            _rolePermissionRepository.updatePermission(rolePermissions);
+
+            return Ok();
+        }
+
     }
 }

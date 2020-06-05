@@ -38,6 +38,25 @@ namespace GSC.Respository.UserMgt
             Context.SaveChanges(_jwtTokenAccesser);
         }
 
+
+        [HttpPut]
+        public void updatePermission(List<RolePermission> rolePermissions)
+        {
+            var userRoleId = rolePermissions.First().UserRoleId;
+
+            var existing = Context.RolePermission.Where(t => t.UserRoleId == userRoleId).ToList();
+            if (existing.Any())
+            {
+                Context.RolePermission.RemoveRange(existing);
+                Context.SaveChanges(_jwtTokenAccesser);
+            }
+
+            rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
+                .ToList();
+            Context.RolePermission.UpdateRange(rolePermissions);
+            Context.SaveChanges(_jwtTokenAccesser);
+        }
+
         public List<RolePermissionDto> GetByRoleId(int roleId)
         {
             var permissions = Context.AppScreen.Where(t => t.IsPermission && t.DeletedDate == null).Select(t =>
@@ -62,6 +81,7 @@ namespace GSC.Respository.UserMgt
                     s.ScreenCode == t.ScreenCode && s.UserRoleId == roleId);
                 if (p == null) return;
                 t.IsAdd = p.IsAdd;
+                t.RolePermissionId = p.Id;
                 t.IsDelete = p.IsDelete;
                 t.IsEdit = p.IsEdit;
                 t.IsExport = p.IsExport;

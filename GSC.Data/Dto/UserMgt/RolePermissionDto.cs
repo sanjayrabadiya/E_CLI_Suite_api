@@ -11,6 +11,7 @@ namespace GSC.Data.Dto.UserMgt
         public string ScreenName { get; set; }
 
         public int? ParentAppScreenId { get; set; }
+        public int? RolePermissionId { get; set; }
 
         public bool IsView { get; set; }
 
