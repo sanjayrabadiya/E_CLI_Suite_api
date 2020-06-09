@@ -37,9 +37,7 @@ namespace GSC.Respository.UserMgt
             Context.RolePermission.AddRange(rolePermissions);
             Context.SaveChanges(_jwtTokenAccesser);
         }
-
-
-        [HttpPut]
+       
         public void updatePermission(List<RolePermission> rolePermissions)
         {
             var userRoleId = rolePermissions.First().UserRoleId;
