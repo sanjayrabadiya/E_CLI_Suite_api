@@ -72,7 +72,7 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode && x.DeletedDate == null))
                 return "Duplicate Template code : " + objSave.TemplateCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.ActivityName == objSave.ActivityName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ActivityName == objSave.ActivityName && x.DeletedDate == null && !string.IsNullOrEmpty(x.ActivityName)))
                 return "Duplicate Activity name : " + objSave.ActivityName;
 
             if (All.Any(x => x.Id != objSave.Id && x.TemplateName == objSave.TemplateName && x.DeletedDate == null))
