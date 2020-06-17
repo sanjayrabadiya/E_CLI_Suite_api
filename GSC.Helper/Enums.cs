@@ -136,7 +136,7 @@ namespace GSC.Helper
         [Description("Attendance")] Attendance = 3,
         [Description("Configuration")] Configuration = 4,
         [Description("User management")] UserManagement = 5,
-        [Description("Project")] Project = 6,
+        [Description("Study Set Up")] StudySetUp = 6,
         [Description("Screening")] Screening = 7,
         [Description("Design library")] DesignLibrary = 8,
         [Description("Master")] Master = 9,
