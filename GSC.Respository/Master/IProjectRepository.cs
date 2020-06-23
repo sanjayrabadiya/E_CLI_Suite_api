@@ -23,5 +23,6 @@ namespace GSC.Respository.Master
         int GetNoOfSite(int id);
         List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId);
         IList<ProjectDropDown> GetProjectsByLock(bool isLock);
+        ProjectDetailsDto GetProjectDetails(int projectId, int? parentProjectId);
     }
 }

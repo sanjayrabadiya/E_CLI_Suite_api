@@ -28,8 +28,8 @@ namespace GSC.Respository.Client
         public List<DropDownDto> GetClientDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.ClientName}).OrderBy(o => o.Value).ToList();
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.ClientName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
         public string DuplicateClient(Data.Entities.Client.Client objSave)

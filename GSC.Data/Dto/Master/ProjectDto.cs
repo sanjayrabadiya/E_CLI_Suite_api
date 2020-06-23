@@ -1,7 +1,7 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using GSC.Data.Entities.Common;
+﻿using GSC.Data.Entities.Common;
 using GSC.Helper;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.Master
 {
@@ -43,7 +43,7 @@ namespace GSC.Data.Dto.Master
 
         public DateTime? ToDate { get; set; }
 
-     //   public int? CompanyId { get; set; }
+        //   public int? CompanyId { get; set; }
 
         public string ParentProjectName { get; set; }
         public string DesignTrialName { get; set; }
@@ -75,5 +75,55 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         public string CompanyName { get; set; }
         public bool Locked { get; set; }
+    }
+
+    public class ProjectDetailsDto 
+    {
+        public SiteDetailsDto siteDetails { get; set; }
+        public DesignDetailsDto designDetails { get; set; }
+        public WorkflowDetailsDto workflowDetails { get; set; }
+        public UserRightDetailsDto userRightDetails { get; set; }
+        public SchedulesDetailsDto schedulesDetails { get; set; }
+        public EditCheckDetailsDto editCheckDetails { get; set; }
+    }
+
+    public class SiteDetailsDto
+    {
+        public int? NoofSite { get; set; }
+        public int? NoofCountry { get; set; }
+        public bool MarkAsCompleted { get; set; }
+    }
+
+    public class DesignDetailsDto
+    {
+        public int? NoofPeriod { get; set; }
+        public int? NoofVisit { get; set; }
+        public int? NoofECrf { get; set; }
+        public bool? MarkAsCompleted { get; set; }
+    }
+
+    public class WorkflowDetailsDto
+    {
+        public int? Independent { get; set; }
+        public int? NoofLevels { get; set; }       
+        public bool MarkAsCompleted { get; set; }
+    }
+    public class UserRightDetailsDto
+    {       
+        public int? NoofUser { get; set; }
+        public bool MarkAsCompleted { get; set; }
+    }
+
+    public class SchedulesDetailsDto
+    {
+        public int? NoofVisit { get; set; }
+        public bool MarkAsCompleted { get; set; }
+    }
+
+    public class EditCheckDetailsDto
+    {
+        public int? NoofRules { get; set; }
+        public int? NoofFormulas { get; set; }
+        public bool MarkAsCompleted { get; set; }
     }
 }

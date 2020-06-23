@@ -35,8 +35,8 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetProjectCountryDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.CountryName, Code = c.CountryCode })
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CountryName, Code = c.CountryCode, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
 

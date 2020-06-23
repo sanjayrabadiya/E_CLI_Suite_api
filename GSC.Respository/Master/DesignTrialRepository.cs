@@ -29,8 +29,8 @@ namespace GSC.Respository.Master
 
         public List<DropDownDto> GetDesignTrialDropDownByTrialType(int id)
         {
-            return All.Where(x => x.TrialTypeId == id && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.DesignTrialName}).OrderBy(o => o.Value).ToList();
+            return All.Where(x => x.TrialTypeId == id)
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.DesignTrialName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
         public string Duplicate(DesignTrial objSave)
