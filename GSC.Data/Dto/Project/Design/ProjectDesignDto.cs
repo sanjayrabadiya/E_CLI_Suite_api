@@ -20,7 +20,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsUnderTesting { get; set; }
         public string ProjectNumber { get; set; }
         public string ProjectName { get; set; }
-        public string IsStatic { get; set; }
+        public bool IsStatic { get; set; }
         public bool Locked { get; set; }
         public ProjectDto Project { get; set; }
 

@@ -62,7 +62,7 @@ namespace GSC.Api.Controllers.Project.Design
                     Period = x.Period,
                     ProjectId = x.ProjectId,
                     ProjectName = x.Project.ProjectName,
-                    IsStatic = x.Project.IsStatic ? "Yes" : "No",
+                    IsStatic = x.Project.IsStatic,
                     ProjectNumber = x.Project.ProjectCode,
                     IsDeleted = x.IsDeleted,
                     CreatedBy = x.CreatedBy,
@@ -260,6 +260,14 @@ namespace GSC.Api.Controllers.Project.Design
             var projectDesign = _projectDesignRepository.FindByInclude(x => x.Id == projectDesignId, x => x.Project)
                 .FirstOrDefault();
             return Ok(projectDesign);
+        }
+
+
+        [HttpPut("updateElectricSignature/{projectDesignId}/{moduleName}/{isComplete}")]
+        public IActionResult updateElectricSignature(int projectDesignId, string moduleName, bool isComplete)
+        {
+            var record = _projectDesignRepository.IsCompleteExist(projectDesignId, moduleName, isComplete);
+            return Ok();
         }
     }
 }

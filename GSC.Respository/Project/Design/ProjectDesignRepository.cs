@@ -113,5 +113,70 @@ namespace GSC.Respository.Project.Design
                 return "Duplicate Design : " + project.ProjectName;
             return "";
         }
+
+
+        public bool IsCompleteExist(int projectDesignId, string moduleName, bool isComplete)
+        {
+            var exist = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
+            var electronicSignature = new ElectronicSignature();
+            electronicSignature.ProjectDesignId = projectDesignId;
+
+            if (moduleName == "workflow")
+            {
+                if (exist != null)
+                {
+                    exist.IsCompleteWorkflow = isComplete;
+                }
+                else
+                {
+                    electronicSignature.IsCompleteWorkflow = isComplete;
+                }
+            }
+            else if (moduleName == "schedule")
+            {
+                if (exist != null)
+                {
+                    exist.IsCompleteSchedule = isComplete;
+                }
+                else
+                {
+                    electronicSignature.IsCompleteSchedule = isComplete;
+                }
+            }
+            else if (moduleName == "editcheck")
+            {
+                if (exist != null)
+                {
+                    exist.IsCompleteEditCheck = isComplete;
+                }
+                else
+                {
+                    electronicSignature.IsCompleteEditCheck = isComplete;
+                }
+            }
+            else if (moduleName == "design")
+            {
+                if (exist != null)
+                {
+                    exist.IsCompleteDesign = isComplete;
+                }
+                else
+                {
+                    electronicSignature.IsCompleteDesign = isComplete;
+                }
+            }
+
+
+            if (exist == null)
+            {
+                Context.ElectronicSignature.Add(electronicSignature);
+            }
+            else
+            {
+                Context.ElectronicSignature.Update(exist);
+            }
+            Context.SaveChanges(_jwtTokenAccesser);
+            return true;
+        }
     }
 }

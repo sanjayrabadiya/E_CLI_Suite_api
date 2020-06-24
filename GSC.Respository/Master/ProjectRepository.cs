@@ -511,17 +511,17 @@ namespace GSC.Respository.Master
             var projectWorkflowId = Context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.Id;
             workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : Context.ProjectWorkflowIndependent.Where(x=>x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null).ToList().Count();
             workflowDetailsDto.NoofLevels = projectWorkflowId == null ? 0 : Context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null).ToList().Count();
-            workflowDetailsDto.MarkAsCompleted = false;
+            workflowDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x=>x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
 
             userRightDetailsDto.NoofUser = Context.ProjectRight.Where(x=>x.ProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(y=>y.UserId).Count();
             userRightDetailsDto.MarkAsCompleted = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).Any();
 
             schedulesDetailsDto.NoofVisit = Context.ProjectSchedule.Where(x => x.ProjectId == (parentProjectId != null ? parentProjectId : projectId) && x.DeletedDate == null).ToList().GroupBy(y => y.ProjectDesignVisitId).Count(); 
-            schedulesDetailsDto.MarkAsCompleted = false;
+            schedulesDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteSchedule; ;
 
             editCheckDetailsDto.NoofFormulas = GetNoOfFormulas(projectDeisgnId);
             editCheckDetailsDto.NoofRules = projectDeisgnId == null ? 0 : Context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
-            editCheckDetailsDto.MarkAsCompleted = false;
+            editCheckDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteEditCheck; ;
 
             projectDetailsDto.siteDetails = siteDetailsDto;
             projectDetailsDto.designDetails = designDetailsDto;

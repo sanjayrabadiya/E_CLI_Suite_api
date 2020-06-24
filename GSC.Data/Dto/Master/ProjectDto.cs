@@ -106,24 +106,24 @@ namespace GSC.Data.Dto.Master
     {
         public int? Independent { get; set; }
         public int? NoofLevels { get; set; }       
-        public bool MarkAsCompleted { get; set; }
+        public bool? MarkAsCompleted { get; set; }
     }
     public class UserRightDetailsDto
     {       
         public int? NoofUser { get; set; }
-        public bool MarkAsCompleted { get; set; }
+        public bool? MarkAsCompleted { get; set; }
     }
 
     public class SchedulesDetailsDto
     {
         public int? NoofVisit { get; set; }
-        public bool MarkAsCompleted { get; set; }
+        public bool? MarkAsCompleted { get; set; }
     }
 
     public class EditCheckDetailsDto
     {
         public int? NoofRules { get; set; }
         public int? NoofFormulas { get; set; }
-        public bool MarkAsCompleted { get; set; }
+        public bool? MarkAsCompleted { get; set; }
     }
 }
