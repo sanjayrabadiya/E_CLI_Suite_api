@@ -27,8 +27,8 @@ namespace GSC.Data.Dto.UserMgt
 
         public string MiddleName { get; set; }
 
-        [Required(ErrorMessage = "Gender is required.")]
-        public Gender GenderId { get; set; }
+        //[Required(ErrorMessage = "Gender is required.")]
+        //public Gender GenderId { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
         public string Email { get; set; }
@@ -43,11 +43,11 @@ namespace GSC.Data.Dto.UserMgt
 
         public string Phone { get; set; }
 
-        [Required(ErrorMessage = "Company is required.")]
-        public int CompanyId { get; set; }
+       
+        public int? CompanyId { get; set; }
 
-        [Required(ErrorMessage = "Department is required.")]
-        public int DepartmentId { get; set; }
+        
+        public int? DepartmentId { get; set; }
 
         public DateTime? ValidFrom { get; set; }
 
@@ -80,5 +80,6 @@ namespace GSC.Data.Dto.UserMgt
         public bool IsPowerAdmin { get; set; }
         public bool IsFirstTime { get; set; }
         public string Note { get; set; }
+        public int ProjectId { get; set; }
     }
 }

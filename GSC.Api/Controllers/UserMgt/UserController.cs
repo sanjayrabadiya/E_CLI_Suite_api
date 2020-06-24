@@ -100,6 +100,8 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         public IActionResult Post([FromBody] UserDto userDto)
         {
+            userDto.CompanyId = 1;
+            userDto.DepartmentId = 1;
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             if (userDto.FileModel?.Base64?.Length > 0)
@@ -130,6 +132,8 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPut]
         public IActionResult Put([FromBody] UserDto userDto)
         {
+            userDto.CompanyId = 1;
+            userDto.DepartmentId = 1;
             if (userDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
