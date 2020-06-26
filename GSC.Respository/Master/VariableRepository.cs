@@ -36,7 +36,7 @@ namespace GSC.Respository.Master
                     && (x.DomainId == domainId || x.DomainId == null))
                 .Select(c => new VariableListDto
                 {
-                    VariableId = c.Id, Name = c.VariableName + " - " + c.VariableName,
+                    VariableId = c.Id, Name = c.VariableName,
                     Type = c.CoreVariableType, CollectionSourcesName = c.CollectionSource.ToString(),
                     DataTypeName = c.DataType.ToString()
                 }).OrderBy(o => o.Name).ToList();
