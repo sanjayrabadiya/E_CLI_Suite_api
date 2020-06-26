@@ -19,5 +19,8 @@ namespace GSC.Data.Dto.Configuration
 
         [Required(ErrorMessage = "Document Url is required.")]
         public string DocumentUrl { get; set; }
+
+        [Required(ErrorMessage = "Data Recycle Days is required.")]
+        public int? DataRecycleDays { get; set; }
     }
 }

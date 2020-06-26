@@ -9,5 +9,6 @@ namespace GSC.Respository.Configuration
         string GetDocumentPath();
         string GetWebImageUrl();
         string GetWebDocumentUrl();
+        object getWebImageUrl();
     }
 }

@@ -11,5 +11,6 @@ namespace GSC.Data.Entities.Configuration
         public string DocumentUrl { get; set; }
 
         public int CompanyId { get; set; }
+        public int? DataRecycleDays { get; set; }
     }
 }

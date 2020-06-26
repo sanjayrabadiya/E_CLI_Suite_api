@@ -41,5 +41,10 @@ namespace GSC.Respository.Configuration
             return FindBy(x => x.CompanyId == _jwtTokenAccesser.CompanyId && x.DeletedDate == null).FirstOrDefault()
                 ?.DocumentUrl;
         }
+
+        public object getWebImageUrl()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
