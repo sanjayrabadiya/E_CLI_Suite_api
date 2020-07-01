@@ -220,7 +220,7 @@ namespace GSC.Api.Controllers.Medra
             return Ok(medra.Id);
         }
 
-        public void InsertFileData(string root)
+        private void InsertFileData(string root)
         {
             if (_uow.Save() <= 0)
             {
