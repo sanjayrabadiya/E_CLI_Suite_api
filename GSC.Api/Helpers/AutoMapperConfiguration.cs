@@ -6,6 +6,7 @@ using GSC.Data.Dto.Barcode.Generate;
 using GSC.Data.Dto.Client;
 using GSC.Data.Dto.Common;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Medra;
@@ -25,6 +26,7 @@ using GSC.Data.Entities.Barcode.Generate;
 using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
@@ -216,6 +218,11 @@ namespace GSC.Api.Helpers
             CreateMap<MeddraSocTerm, MeddraSocTermDto>().ReverseMap();
             CreateMap<ScreeningTemplateLockUnlockAudit, ScreeningTemplateLockUnlockAuditDto>().ReverseMap();
             CreateMap<MeddraCoding, MeddraCodingDto>().ReverseMap();
+
+
+            CreateMap<EtmfZoneMasterLibrary, EtmfZoneMasterLibraryDto>().ReverseMap();
+            CreateMap<EtmfSectionMasterLibrary, EtmfSectionMasterLibraryDto>().ReverseMap();
+            CreateMap<EtmfArtificateMasterLbrary, EtmfArtificateMasterLbraryDto>().ReverseMap();
         }
     }
 }

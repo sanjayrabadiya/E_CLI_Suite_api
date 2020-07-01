@@ -12,6 +12,7 @@ using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Custom;
+using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
 using GSC.Data.Entities.Master;
@@ -221,6 +222,10 @@ namespace GSC.Domain.Context
         public DbSet<MeddraCoding> MeddraCoding { get; set; }
 
         public DbSet<ElectronicSignature> ElectronicSignature { get; set; }
+
+        public DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
+        public DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
+        public DbSet<EtmfArtificateMasterLbrary> EtmfArtificateMasterLbrary { get; set; }
 
         private List<string> ColumnsToSkip
         {

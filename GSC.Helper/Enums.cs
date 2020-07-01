@@ -382,4 +382,11 @@ namespace GSC.Helper
         [Description("Re-Coded")] ReCoded = 4
     }
 
+    public enum InclutionTypeData : short
+    {
+        [Description("Recommended")] Recommended= 1,
+        [Description("Core")] Core = 2,
+         
+    }
+
 }

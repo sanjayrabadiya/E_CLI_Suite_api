@@ -11,6 +11,7 @@ using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.EmailSender;
+using GSC.Respository.Etmf;
 using GSC.Respository.LogReport;
 using GSC.Respository.Master;
 using GSC.Respository.Medra;
@@ -201,6 +202,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IMeddraCodingRepository, MeddraCodingRepository>();
             services.AddScoped<IScreeningProgress, ScreeningProgress>();
             services.AddScoped<IEditCheckFormulaRepository, EditCheckFormulaRepository>();
+            services.AddScoped<IEtmfZoneMasterLibraryRepository, EtmfZoneMasterLibraryRepository>();
+            services.AddScoped<IEtmfSectionMasterLibraryRepository, EtmfSectionMasterLibraryRepository>();
+            services.AddScoped<IEtmfArtificateMasterLbraryRepository, EtmfArtificateMasterLbraryRepository>();
         }
     }
 }
