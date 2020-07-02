@@ -179,7 +179,7 @@ namespace GSC.Api.Controllers.UserMgt
             var imageUrl = _uploadSettingRepository
                 .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
 
-            var company = _companyRepository.Find(authUser.CompanyId);
+            var company = _companyRepository.Find((int)authUser.CompanyId);
             if (company != null)
             {
                 login.CompanyName = company.CompanyName;
@@ -219,7 +219,7 @@ namespace GSC.Api.Controllers.UserMgt
             var userInfo = new UserInfo();
             userInfo.UserId = user.Id;
             userInfo.UserName = user.UserName;
-            userInfo.CompanyId = user.CompanyId;
+            userInfo.CompanyId = (int)user.CompanyId;
             userInfo.RoleId = roleId;
             var claims = new List<Claim> { new Claim("gsc_user_token", userInfo.ToJsonString()) };
             return _userRepository.GenerateAccessToken(claims);

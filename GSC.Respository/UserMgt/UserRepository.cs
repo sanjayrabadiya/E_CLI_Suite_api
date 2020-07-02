@@ -46,7 +46,7 @@ namespace GSC.Respository.UserMgt
         public List<UserDto> GetUsers(bool isDeleted)
         {
             return All.Where(x =>
-                x.CompanyId == _jwtTokenAccesser.CompanyId &&
+                
                 x.IsDeleted == isDeleted
             ).Select(t => new UserDto
             {
@@ -59,6 +59,7 @@ namespace GSC.Respository.UserMgt
                 UserName = t.UserName,
                 IsLocked = t.IsLocked,
                 IsDeleted = t.IsDeleted,
+                ProjectName  = this.Context.Project.FirstOrDefault(b => b.Id == t.ProjectId).ProjectName,
                 Role = string.Join(", ",
                     t.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
             }).OrderByDescending(x => x.Id).ToList();

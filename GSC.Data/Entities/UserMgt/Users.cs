@@ -44,6 +44,7 @@ namespace GSC.Data.Entities.UserMgt
         public string Phone { get; set; }
 
         public int DepartmentId { get; set; }
+        public int? ProjectId { get; set; }
 
         public DateTime? ValidFrom
         {
@@ -72,7 +73,7 @@ namespace GSC.Data.Entities.UserMgt
 
         public string LastSystemName { get; set; }
 
-        public int CompanyId { get; set; }
+        public int? CompanyId { get; set; }
 
         public bool IsFirstTime { get; set; }
 
@@ -89,5 +90,7 @@ namespace GSC.Data.Entities.UserMgt
         [NotMapped] public string FullName => FirstName + " " + MiddleName + " " + LastName;
 
         public string Note { get; set; }
+
+       
     }
 }

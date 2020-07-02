@@ -52,7 +52,7 @@ namespace GSC.Respository.EmailSender
         {
             var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
             var result = All.Include(x => x.EmailSetting).FirstOrDefault(x =>
-                x.CompanyId == user.CompanyId && x.DeletedDate == null && x.KeyName == keyName);
+               x.DeletedDate == null && x.KeyName == keyName);
             var emailMessage = new EmailMessage();
 
             if (result != null)

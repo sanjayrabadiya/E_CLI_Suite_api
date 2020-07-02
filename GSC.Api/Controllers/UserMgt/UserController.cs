@@ -11,6 +11,7 @@ using GSC.Helper.DocumentService;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
+using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ namespace GSC.Api.Controllers.UserMgt
     {
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly ILocationRepository _locationRepository;
+        private readonly IProjectRepository _projectRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork<GscContext> _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
@@ -35,7 +37,8 @@ namespace GSC.Api.Controllers.UserMgt
             ILocationRepository locationRepository, IUserPasswordRepository userPasswordRepository,
             IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
-            IUserRoleRepository userRoleRepository)
+            IUserRoleRepository userRoleRepository,
+            IProjectRepository projectRepository)
         {
             _userRepository = userRepository;
             _uow = uow;
@@ -45,6 +48,7 @@ namespace GSC.Api.Controllers.UserMgt
             _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
             _userRoleRepository = userRoleRepository;
+            _projectRepository = projectRepository;
         }
 
 
@@ -100,8 +104,6 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         public IActionResult Post([FromBody] UserDto userDto)
         {
-            userDto.CompanyId = 1;
-            userDto.DepartmentId = 1;
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             if (userDto.FileModel?.Base64?.Length > 0)
@@ -110,7 +112,7 @@ namespace GSC.Api.Controllers.UserMgt
 
             var user = _mapper.Map<User>(userDto);
             user.IsLocked = false;
-            user.Location = _locationRepository.SaveLocation(user.Location);
+            //user.Location = _locationRepository.SaveLocation(user.Location);
             user.IsFirstTime = true;
             var validate = _userRepository.DuplicateUserName(user);
             if (!string.IsNullOrEmpty(validate))
@@ -132,8 +134,6 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPut]
         public IActionResult Put([FromBody] UserDto userDto)
         {
-            userDto.CompanyId = 1;
-            userDto.DepartmentId = 1;
             if (userDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -163,8 +163,7 @@ namespace GSC.Api.Controllers.UserMgt
         private void UpdateRole(User user)
         {
             var roleDelete = _userRoleRepository.FindBy(x => x.UserId == user.Id
-                                                             && x.DeletedDate == null
-                                                             && !user.UserRoles.Any(c => c.UserRoleId == x.UserRoleId))
+                                                             )
                 .ToList();
             foreach (var item in roleDelete)
             {
