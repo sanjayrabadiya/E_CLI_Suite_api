@@ -58,7 +58,7 @@ namespace GSC.Respository.Master
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<ProjectDto>();
 
-            var projects = FindBy(x => x.IsDeleted == isDeleted
+            var projects = FindBy(x => x.IsDeleted == isDeleted && x.ParentProjectId == null
                 && projectList.Any(c => c == x.Id)
             ).Select(x => new ProjectDto
             {
@@ -576,7 +576,7 @@ namespace GSC.Respository.Master
             });
 
             return formulasCount;
-        }
+        }    
 
     }
 }
