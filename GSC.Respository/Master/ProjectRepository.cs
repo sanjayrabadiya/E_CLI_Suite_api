@@ -96,7 +96,8 @@ namespace GSC.Respository.Master
                 ModifiedBy = x.ModifiedBy,
                 DeletedBy = x.DeletedBy,
                 IsDeleted = x.IsDeleted,
-                AttendanceLimit = x.AttendanceLimit
+                AttendanceLimit = x.AttendanceLimit,
+                NoofSite = GetNoOfSite(x.Id),
             }).OrderByDescending(x => x.Id).ToList();
             foreach (var b in projects)
             {
@@ -503,20 +504,20 @@ namespace GSC.Respository.Master
             siteDetailsDto.MarkAsCompleted = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).Any();
 
             var projectDeisgnId = Context.ProjectDesign.Where(x => x.ProjectId == (parentProjectId != null ? parentProjectId : projectId) && x.DeletedDate == null).FirstOrDefault()?.Id;
-            designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : Context.ProjectDesignPeriod.Where(x=>x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
+            designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : Context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
             designDetailsDto.NoofVisit = projectDeisgnId == null ? 0 : GetNoOfVisit(projectDeisgnId);
             designDetailsDto.NoofECrf = projectDeisgnId == null ? 0 : GetNoOfTemplate(projectDeisgnId);
             designDetailsDto.MarkAsCompleted = projectDeisgnId == null ? false : Context.ProjectDesign.Where(x => x.ProjectId == (parentProjectId != null ? parentProjectId : projectId)).FirstOrDefault()?.IsCompleteDesign;
 
             var projectWorkflowId = Context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.Id;
-            workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : Context.ProjectWorkflowIndependent.Where(x=>x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null).ToList().Count();
+            workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : Context.ProjectWorkflowIndependent.Where(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null).ToList().Count();
             workflowDetailsDto.NoofLevels = projectWorkflowId == null ? 0 : Context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null).ToList().Count();
-            workflowDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x=>x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
+            workflowDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
 
-            userRightDetailsDto.NoofUser = Context.ProjectRight.Where(x=>x.ProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(y=>y.UserId).Count();
+            userRightDetailsDto.NoofUser = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(y => y.UserId).Count();
             userRightDetailsDto.MarkAsCompleted = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).Any();
 
-            schedulesDetailsDto.NoofVisit = Context.ProjectSchedule.Where(x => x.ProjectId == (parentProjectId != null ? parentProjectId : projectId) && x.DeletedDate == null).ToList().GroupBy(y => y.ProjectDesignVisitId).Count(); 
+            schedulesDetailsDto.NoofVisit = Context.ProjectSchedule.Where(x => x.ProjectId == (parentProjectId != null ? parentProjectId : projectId) && x.DeletedDate == null).ToList().GroupBy(y => y.ProjectDesignVisitId).Count();
             schedulesDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteSchedule; ;
 
             editCheckDetailsDto.NoofFormulas = GetNoOfFormulas(projectDeisgnId);
@@ -535,7 +536,7 @@ namespace GSC.Respository.Master
         public int GetNoOfVisit(int? projectDesignId)
         {
             var periods = Context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).ToList();
-            var visitCount = 0;           
+            var visitCount = 0;
 
             periods.ForEach(b =>
              {
@@ -558,7 +559,7 @@ namespace GSC.Respository.Master
                 {
                     var template = Context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisitId == v.Id && x.DeletedDate == null).ToList().Count;
                     temCount += template;
-                });                
+                });
             });
 
             return temCount;
@@ -576,7 +577,85 @@ namespace GSC.Respository.Master
             });
 
             return formulasCount;
-        }    
+        }
 
+        public IList<ProjectDto> GetSitesList(int projectId, bool isDeleted)
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return new List<ProjectDto>();
+
+            var projects = FindBy(x => x.IsDeleted == isDeleted && x.ParentProjectId == projectId
+                && projectList.Any(c => c == x.Id)
+            ).Select(x => new ProjectDto
+            {
+                Id = x.Id,
+                ProjectCode = x.ProjectCode,
+                ProjectName = x.ProjectName,
+                ProjectNumber = x.ProjectNumber,
+                ParentProjectId = x.ParentProjectId,
+                DesignTrialId = x.DesignTrialId,
+                CountryId = x.CountryId,
+                ClientId = x.ClientId,
+                DrugId = x.DrugId,
+                Period = x.Period,
+                RegulatoryType = x.RegulatoryType,
+                FromDate = x.FromDate,
+                ToDate = x.ToDate,
+                CompanyId = x.CompanyId,
+                ParentProjectName =
+                    x.ParentProjectId == null ? "" : Context.Project.Find(x.ParentProjectId).ProjectName,
+                DesignTrialName = Context.DesignTrial.Find(x.DesignTrialId).DesignTrialName,
+                TrialTypeId = Context.DesignTrial.Find(x.DesignTrialId).TrialTypeId,
+                CountryName = Context.Country.Find(x.CountryId).CountryName,
+                ClientName = Context.Client.Find(x.ClientId).ClientName,
+                DrugName = Context.Drug.Find(x.DrugId).DrugName,
+                RegulatoryTypeName = x.RegulatoryType.GetDescription(),
+                StateName = x.StateId == null ? "" : Context.State.Find(x.StateId).StateName,
+                CityName = x.CityId == null ? "" : Context.City.Find(x.CityId).CityName,
+                AreaName = x.CityAreaId == null ? "" : Context.CityArea.Find(x.CityAreaId).AreaName,
+                SiteName = x.SiteName,
+                PinCode = x.PinCode,
+                CreatedBy = x.CreatedBy,
+                CreatedDate = x.CreatedDate,
+                ModifiedDate = x.ModifiedDate,
+                DeletedDate = x.DeletedDate,
+                ModifiedBy = x.ModifiedBy,
+                DeletedBy = x.DeletedBy,
+                IsDeleted = x.IsDeleted,
+                AttendanceLimit = x.AttendanceLimit
+            }).OrderByDescending(x => x.Id).ToList();
+            foreach (var b in projects)
+            {
+                b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+                if (b.ModifiedBy != null)
+                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+                if (b.DeletedBy != null)
+                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+                if (b.CompanyId != null)
+                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            }
+            projects.ForEach(x =>
+            {
+                var design = Context.ProjectDesign.FirstOrDefault(t =>
+                    t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null);
+                if (design != null)
+                {
+                    x.ProjectDesignId = design.Id;
+                    x.Locked = !design.IsUnderTesting;
+                }
+            });
+            return projects;
+        }
+
+        public string GetAutoNumber()
+        {
+            var projectCode = _numberFormatRepository.GenerateNumber("pro");
+            var country = "In";
+            var design = "007";
+            projectCode = projectCode.Replace("DESIGN", design);
+            projectCode = projectCode.Replace("COUNTRY", country);
+
+            return projectCode.ToUpper();
+        }       
     }
 }

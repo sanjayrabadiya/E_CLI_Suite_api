@@ -257,5 +257,22 @@ namespace GSC.Api.Controllers.Master
             if (projectId <= 0) return BadRequest();
             return Ok(_projectRepository.GetProjectDetails(projectId, parentProjectId));
         }
+
+        [HttpGet]
+        [Route("GetSites/{projectId}/{isDeleted:bool?}")]
+        public IActionResult GetSites(int projectId, bool isDeleted)
+        {
+            var projectsDto = _projectRepository.GetSitesList(projectId, isDeleted);
+            return Ok(projectsDto);
+        }
+
+        [HttpGet]
+        [Route("GetAutoNumber")]
+        public IActionResult GetAutoNumber()
+        {
+            var autoNumber = _projectRepository.GetAutoNumber();
+            ModelState.AddModelError("AutoNumber", autoNumber);            
+            return Ok(ModelState);
+        }
     }
 }

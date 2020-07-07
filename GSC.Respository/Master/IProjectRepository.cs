@@ -24,5 +24,9 @@ namespace GSC.Respository.Master
         List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId);
         IList<ProjectDropDown> GetProjectsByLock(bool isLock);
         ProjectDetailsDto GetProjectDetails(int projectId, int? parentProjectId);
+
+        IList<ProjectDto> GetSitesList(int projectId, bool isDeleted);
+
+        string GetAutoNumber();
     }
 }
