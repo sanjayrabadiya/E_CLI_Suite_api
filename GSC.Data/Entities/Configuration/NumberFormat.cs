@@ -14,5 +14,6 @@ namespace GSC.Data.Entities.Configuration
         public bool ResetYear { get; set; }
         public string Hint { get; set; }
         public int NumberLength { get; set; }
+        public bool IsManual { get; set; }
     }
 }

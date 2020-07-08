@@ -17,5 +17,6 @@ namespace GSC.Data.Dto.Configuration
         public bool ResetYear { get; set; }
         public string Hint { get; set; }
         public int NumberLength { get; set; }
+        public bool IsManual { get; set; }
     }
 }

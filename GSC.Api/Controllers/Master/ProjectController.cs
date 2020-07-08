@@ -9,6 +9,7 @@ using GSC.Data.Entities.Common;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Common;
+using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,13 +25,15 @@ namespace GSC.Api.Controllers.Master
         private readonly ITrialTypeRepository _trialTypeRepository;
         private readonly IUnitOfWork<GscContext> _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
+        private readonly INumberFormatRepository _numberFormatRepository;
 
         public ProjectController(IProjectRepository projectRepository,
             IDesignTrialRepository designTrialRepository,
             ITrialTypeRepository trialTypeRepository,
             IDrugRepository drugRepository,
             IUnitOfWork<GscContext> uow, IMapper mapper,
-            IUserRecentItemRepository userRecentItemRepository)
+            IUserRecentItemRepository userRecentItemRepository,
+            INumberFormatRepository numberFormatRepository)
         {
             _projectRepository = projectRepository;
             _designTrialRepository = designTrialRepository;
@@ -39,6 +42,7 @@ namespace GSC.Api.Controllers.Master
             _uow = uow;
             _mapper = mapper;
             _userRecentItemRepository = userRecentItemRepository;
+            _numberFormatRepository = numberFormatRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -273,6 +277,14 @@ namespace GSC.Api.Controllers.Master
             var autoNumber = _projectRepository.GetAutoNumber();
             ModelState.AddModelError("AutoNumber", autoNumber);            
             return Ok(ModelState);
+        }
+
+        [HttpGet]
+        [Route("CheckNumberFormat")]
+        public IActionResult CheckNumberFormat()
+        {
+            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "pro" && x.DeletedDate == null).FirstOrDefault();
+            return Ok(numberFormat);
         }
     }
 }

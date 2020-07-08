@@ -216,7 +216,16 @@ namespace GSC.Respository.Master
 
         public void Save(Data.Entities.Master.Project project)
         {
-            project.ProjectCode = GetProjectCode(project);
+            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "pro" && x.DeletedDate == null).FirstOrDefault();
+            if (numberFormat.IsManual)
+            {
+                project.ProjectCode = project.ProjectCode;
+            }
+            else
+            {
+                project.ProjectCode = GetProjectCode(project);
+            }
+
             project.ProjectRight = new List<Data.Entities.ProjectRight.ProjectRight>();
             project.ProjectRight.Add(new Data.Entities.ProjectRight.ProjectRight
             {
@@ -231,10 +240,21 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Data.Entities.Master.Project objSave)
         {
+            if (objSave.ParentProjectId != null || objSave.ParentProjectId <= 0)
+            {
+                if (All.Any(x => x.Id != objSave.Id && x.ParentProjectId == objSave.ParentProjectId && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
+                    return "Duplicate Project Code : " + objSave.ProjectCode;
+            }
+
             if (objSave.ParentProjectId == null || objSave.ParentProjectId <= 0)
+            {
                 if (All.AsNoTracking().Any(x =>
                     x.Id != objSave.Id && x.ProjectName == objSave.ProjectName && x.DeletedDate == null))
                     return "Duplicate Project name : " + objSave.ProjectName;
+
+                if (All.Any(x => x.Id != objSave.Id && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
+                    return "Duplicate Project Code : " + objSave.ProjectCode;
+            }
 
             if (objSave.Id > 0 && objSave.AttendanceLimit != null && !objSave.IsStatic)
             {
@@ -656,6 +676,6 @@ namespace GSC.Respository.Master
             projectCode = projectCode.Replace("COUNTRY", country);
 
             return projectCode.ToUpper();
-        }       
+        }
     }
 }
