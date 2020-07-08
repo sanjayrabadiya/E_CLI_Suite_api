@@ -126,7 +126,9 @@ namespace GSC.Helper
         [Description("Volunteer")] Volunteer = 3,
         [Description("Project")] Project = 4,
         [Description("Screening")] Screening = 5,
-        [Description("Medra Dictionary")] MedraDictionary = 6
+        [Description("Medra Dictionary")] MedraDictionary = 6,
+        [Description("DossierReport")] DossierReport = 7,
+        [Description("ExcleTemplate")] ExcleTemplate = 8,
     }
 
     public enum AuditModule : short
@@ -384,9 +386,30 @@ namespace GSC.Helper
 
     public enum InclutionTypeData : short
     {
-        [Description("Recommended")] Recommended= 1,
+        [Description("Recommended")] Recommended = 1,
         [Description("Core")] Core = 2,
-         
+
+    }
+
+
+    public enum ETMFMaterLibraryColumn : short
+    {
+        [Description("Zone #")] Zone = 1,
+        [Description("Zone Name")] ZoneName = 2,
+        [Description("Section #")] Section = 3,
+        [Description("Section Name")] SectionName = 4,
+        [Description("Artifact #")] Artifact = 5,
+        [Description("Artifact name")] Artifactname = 6,
+        [Description("Core or Recommended for inclusion")] CoreorRecommendedforinclusion = 7,
+        [Description("Non Device Sponsor Document")] NonDeviceSponsorDocument = 8,
+        [Description("Non Device Investigator Document")] NonDeviceInvestigatorDocument = 9,
+        [Description("Device Sponsor Document")] DeviceSponsorDocument = 10,
+        [Description("Device Investigator Document")] DeviceInvestigatorDocument = 11,
+        [Description("Investigator Initiated Study Artifacts")] InvestigatorInitiatedStudyArtifacts = 12,
+        [Description("Trial Level Document ")] TrialLevelDocument = 13,
+        [Description("Country/ Region Level Document")] CountryRegionLevelDocument = 14,
+        [Description("Site Level Document")] SiteLevelDocument = 15,
+
     }
 
 }

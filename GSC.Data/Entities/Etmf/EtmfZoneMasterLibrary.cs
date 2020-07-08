@@ -10,7 +10,7 @@ namespace GSC.Data.Entities.Etmf
         public string ZoneNo { get; set; }
         public string ZonName { get; set; }
         public string Version { get; set; }
-
+        public string FileName { get; set; }
         public ICollection<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
     }
 }

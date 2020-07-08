@@ -378,5 +378,18 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
         }
+
+        [HttpGet]
+        [Route("ETMFMaterLibraryColumn")]
+        public IList<DropDownEnum> ETMFMaterLibraryColumn()
+        {
+            return Enum.GetValues(typeof(ETMFMaterLibraryColumn))
+                .Cast<ETMFMaterLibraryColumn>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription(),
+                }).OrderBy(o => o.Id).ToList();
+        }
+
     }
 }

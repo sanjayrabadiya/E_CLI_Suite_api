@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GSC.Helper.DocumentService;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -25,5 +26,7 @@ namespace GSC.Data.Dto.Etmf
         public string TrailLevelDoc { get; set; }
         public string CountryLevelDoc { get; set; }
         public string SiteLevelDoc { get; set; }
+
+        public FileModel fileModel { get; set; }
     }
 }

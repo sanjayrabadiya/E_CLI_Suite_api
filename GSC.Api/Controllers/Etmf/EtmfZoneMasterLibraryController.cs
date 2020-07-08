@@ -8,6 +8,8 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
+using GSC.Helper.DocumentService;
+using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -26,12 +28,14 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IEtmfZoneMasterLibraryRepository _etmfZoneMasterLibraryRepository;
         private readonly IEtmfSectionMasterLibraryRepository _etmfSectionMasterLibraryRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLibraryRepository;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         public EtmfZoneMasterLibraryController(
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
             IEtmfZoneMasterLibraryRepository etmfZoneMasterLibraryRepository,
             IEtmfSectionMasterLibraryRepository etmfSectionMasterLibraryRepository,
-            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLibraryRepository
+            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLibraryRepository,
+                IUploadSettingRepository uploadSettingRepository
             )
         {
             _uow = uow;
@@ -39,7 +43,7 @@ namespace GSC.Api.Controllers.Etmf
             _etmfZoneMasterLibraryRepository = etmfZoneMasterLibraryRepository;
             _etmfSectionMasterLibraryRepository = etmfSectionMasterLibraryRepository;
             _etmfArtificateMasterLibraryRepository = etmfArtificateMasterLibraryRepository;
-
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
 
@@ -59,8 +63,8 @@ namespace GSC.Api.Controllers.Etmf
             if (data != null)
             {
                 result = _etmfZoneMasterLibraryRepository.ExcelDataConvertToEntityformat(data);
-
-                var LastVersiondata = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).ToList();
+                
+                 var LastVersiondata = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).ToList();
                 if (LastVersiondata != null && LastVersiondata.Count > 0)
                 {
                     foreach (var Lastdata in LastVersiondata)
@@ -81,8 +85,12 @@ namespace GSC.Api.Controllers.Etmf
 
                 if (result != null)
                 {
+                    string filePath = string.Empty;
+                    filePath = System.IO.Path.Combine(_uploadSettingRepository.GetImagePath(), "DossierReport");
+                    string FileName = DocumentService.SaveETMFDocument(data[0].fileModel, filePath, Helper.FolderType.ExcleTemplate, result[0].Version);
                     foreach (var item in result)
                     {
+                        item.FileName = FileName;
                         _etmfZoneMasterLibraryRepository.Add(item);
                         _uow.Save();
                     }
@@ -128,7 +136,7 @@ namespace GSC.Api.Controllers.Etmf
         {
             var result = _etmfZoneMasterLibraryRepository.FindBy(x => x.DeletedBy != null).Select(x => x.Version).Distinct();
             int cnt = 1;
-           List<DropDownDto> dtolist = new List<DropDownDto>();
+            List<DropDownDto> dtolist = new List<DropDownDto>();
             foreach (var val in result)
             {
                 DropDownDto obj = new DropDownDto();
@@ -137,14 +145,14 @@ namespace GSC.Api.Controllers.Etmf
                 cnt++;
                 dtolist.Add(obj);
             }
-            return Ok(dtolist.OrderByDescending(x=>x.Id));
+            return Ok(dtolist.OrderByDescending(x => x.Id));
         }
 
         [Route("GetInActiveVersionData/{version}")]
         [HttpGet]
         public ActionResult GetInActiveVersionData(string version)
         {
-            var result = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.Version == version , x => x.EtmfSectionMasterLibrary);
+            var result = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.Version == version, x => x.EtmfSectionMasterLibrary);
             return Ok(result);
         }
     }
