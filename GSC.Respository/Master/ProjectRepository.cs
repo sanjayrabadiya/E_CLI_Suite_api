@@ -216,14 +216,15 @@ namespace GSC.Respository.Master
 
         public void Save(Data.Entities.Master.Project project)
         {
-            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "pro" && x.DeletedDate == null).FirstOrDefault();
-            if (numberFormat.IsManual)
+            if (project.ParentProjectId == null)
             {
-                project.ProjectCode = project.ProjectCode;
+                var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "pro" && x.DeletedDate == null).FirstOrDefault();
+                project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectCode(project);                
             }
             else
             {
-                project.ProjectCode = GetProjectCode(project);
+                var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "prochild" && x.DeletedDate == null).FirstOrDefault();
+                project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectSitesCode(project);               
             }
 
             project.ProjectRight = new List<Data.Entities.ProjectRight.ProjectRight>();
@@ -508,6 +509,17 @@ namespace GSC.Respository.Master
             return parent.ProjectCode + "-" + number.ToString().PadLeft(2, '0');
         }
 
+        private string GetProjectSitesCode(Data.Entities.Master.Project project)
+        {
+            var projectCode = _numberFormatRepository.GenerateNumber("prochild");
+            var country = _countryRepository.Find(project.CountryId).CountryCode;
+            var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
+            projectCode = projectCode.Replace("DESIGN", design);
+            projectCode = projectCode.Replace("COUNTRY", country);
+
+            return projectCode.ToUpper();
+        }
+
         public ProjectDetailsDto GetProjectDetails(int projectId, int? parentProjectId)
         {
             var projectDetailsDto = new ProjectDetailsDto();
@@ -670,6 +682,17 @@ namespace GSC.Respository.Master
         public string GetAutoNumber()
         {
             var projectCode = _numberFormatRepository.GenerateNumber("pro");
+            var country = "In";
+            var design = "007";
+            projectCode = projectCode.Replace("DESIGN", design);
+            projectCode = projectCode.Replace("COUNTRY", country);
+
+            return projectCode.ToUpper();
+        }
+
+        public string GetAutoNumberForSites()
+        {
+            var projectCode = _numberFormatRepository.GenerateNumber("prochild");
             var country = "In";
             var design = "007";
             projectCode = projectCode.Replace("DESIGN", design);

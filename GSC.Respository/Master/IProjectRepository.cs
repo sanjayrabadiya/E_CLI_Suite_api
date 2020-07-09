@@ -28,5 +28,6 @@ namespace GSC.Respository.Master
         IList<ProjectDto> GetSitesList(int projectId, bool isDeleted);
 
         string GetAutoNumber();
+        string GetAutoNumberForSites();
     }
 }

@@ -286,5 +286,22 @@ namespace GSC.Api.Controllers.Master
             var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "pro" && x.DeletedDate == null).FirstOrDefault();
             return Ok(numberFormat);
         }
+
+        [HttpGet]
+        [Route("CheckSitesNumberFormat")]
+        public IActionResult CheckSitesNumberFormat()
+        {
+            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "prochild" && x.DeletedDate == null).FirstOrDefault();
+            return Ok(numberFormat);
+        }
+
+        [HttpGet]
+        [Route("GetAutoNumberForSites")]
+        public IActionResult GetAutoNumberForSites()
+        {
+            var autoNumber = _projectRepository.GetAutoNumberForSites();
+            ModelState.AddModelError("AutoNumber", autoNumber);
+            return Ok(ModelState);
+        }
     }
 }
