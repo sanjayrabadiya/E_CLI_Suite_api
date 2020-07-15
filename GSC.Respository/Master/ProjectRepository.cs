@@ -470,6 +470,16 @@ namespace GSC.Respository.Master
             return "";
         }
 
+        public int? GetParentProjectId(int id)
+        {
+            var childData = All.Where(x => x.Id == id).FirstOrDefault();
+           
+            {
+                return childData.ParentProjectId;
+            }
+
+        }
+
         public int GetNoOfSite(int id)
         {
             var childData = All.Where(x => x.ParentProjectId == id && x.DeletedDate == null).ToList();

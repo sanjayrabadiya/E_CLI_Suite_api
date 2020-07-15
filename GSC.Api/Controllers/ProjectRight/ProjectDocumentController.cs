@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
@@ -57,15 +58,52 @@ namespace GSC.Api.Controllers.ProjectRight
         {
             if (id <= 0) return BadRequest();
 
+            var childProjectIds = _projectRepository.GetChildProjectDropDown(id);
+
+            List<ProjectDocumentDto> termsList = new List<ProjectDocumentDto>();
+
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             // var volunteerDocumentas = _projectDocumentRepository.FindByInclude(t => t.ProjectId == id && t.DeletedDate == null).OrderByDescending(t => t.Id);           
-            var volunteerDocument = _projectDocumentRepository.GetDocument(id);
+            var projectDocuments = _projectDocumentRepository.GetDocument(id);
+            if (childProjectIds.Count!=0)
+            {
+                for (var i = 0; i < childProjectIds.Count; i++)
+                {
+                    var i1 = i;
 
-            volunteerDocument.ForEach(t => t.PathName = documentUrl + t.PathName);
-            volunteerDocument.ForEach(t => t.IsReview = false);
+                    projectDocuments = _projectDocumentRepository.GetDocument(childProjectIds[i1].Id);
+                    
+                    //if (i1 < 1)
+                    {
 
-            if (volunteerDocument.Count() > 0)
-                foreach (var item in volunteerDocument)
+                        projectDocuments.ForEach(t => t.PathName = documentUrl + t.PathName);
+                        projectDocuments.ForEach(t => t.IsReview = false);
+                       
+
+                        if (projectDocuments.Count() > 0)
+                        foreach (var item in projectDocuments)
+                        {
+                            var projectCreatedBy = _projectRepository.FindByInclude(project => project.Id == item.ProjectId)
+                                .FirstOrDefault();
+                            var isExists = _documentReviewRepository.FindByInclude(t =>
+                                t.ProjectDocumentId == item.Id && t.IsReview && t.UserId != projectCreatedBy.CreatedBy);
+                            if (isExists.Count() > 0) item.IsReview = true;
+                        }
+                    }
+                    termsList.AddRange(projectDocuments);
+
+
+                }
+                return Ok(termsList);
+            }
+            else {
+            var projectDocument = _projectDocumentRepository.GetDocument(id);
+
+                projectDocument.ForEach(t => t.PathName = documentUrl + t.PathName);
+                projectDocument.ForEach(t => t.IsReview = false);
+
+            if (projectDocument.Count() > 0)
+                foreach (var item in projectDocument)
                 {
                     var projectCreatedBy = _projectRepository.FindByInclude(project => project.Id == item.ProjectId)
                         .FirstOrDefault();
@@ -74,53 +112,91 @@ namespace GSC.Api.Controllers.ProjectRight
                     if (isExists.Count() > 0) item.IsReview = true;
                 }
 
-            return Ok(volunteerDocument);
+            return Ok(projectDocument);
+            }
+            //return Ok(id);
         }
 
         [HttpPost]
         public IActionResult Post([FromBody] ProjectDocumentDto projectDocumentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            var parentProject = _projectRepository.GetParentProjectId(projectDocumentDto.ProjectId);
+            if (parentProject != null)
+            {
+                var projectDesign = _projectDesignRepository
+                .FindBy(t => t.ProjectId == parentProject && t.DeletedDate == null).FirstOrDefault();
 
+                if (projectDesign == null || !projectDesign.IsCompleteDesign)
+                {
+                    ModelState.AddModelError("Message", "Design not completed for this project");
+                    return BadRequest(ModelState);
+                }
 
+                projectDocumentDto.Id = 0;
+                if (projectDocumentDto.FileModel?.Base64?.Length > 0)
+                {
+                    projectDocumentDto.PathName = DocumentService.SaveProjectDocument(projectDocumentDto.FileModel,
+                        _uploadSettingRepository.GetDocumentPath(), FolderType.Project);
+                    projectDocumentDto.MimeType = projectDocumentDto.FileModel.Extension;
+                }
 
-            var projectDesign = _projectDesignRepository
+                projectDocumentDto.ModifiedBy = _jwtTokenAccesser.UserId;
+                projectDocumentDto.ModifiedDate = DateTime.Now.ToUniversalTime();
+                var projectDocument = _mapper.Map<ProjectDocument>(projectDocumentDto);
+                /* Added by Vipul for effective Date on 16-10-2019 */
+                var validate = _projectDocumentRepository.Duplicate(projectDocument);
+                if (!string.IsNullOrEmpty(validate))
+                {
+                    ModelState.AddModelError("Message", validate);
+                    return BadRequest(ModelState);
+                }
+                _projectDocumentRepository.Add(projectDocument);
+                if (_uow.Save() <= 0) throw new Exception("Creating project document failed on save.");
+                _documentReviewRepository.SaveByDocumentId(projectDocument.Id, projectDocument.ProjectId);
+            }
+            else
+            {
+                var projectDesign = _projectDesignRepository
                 .FindBy(t => t.ProjectId == projectDocumentDto.ProjectId && t.DeletedDate == null).FirstOrDefault();
+                if (projectDesign == null || !projectDesign.IsCompleteDesign)
+                {
+                    ModelState.AddModelError("Message", "Design not completed for this project");
+                    return BadRequest(ModelState);
+                }
+                var childProjectIds = _projectRepository.GetChildProjectDropDown(projectDocumentDto.ProjectId);
+                for (var i = 0; i < childProjectIds.Count; i++)
+                {
+                    var i1 = i;
+                    projectDocumentDto.ProjectId = childProjectIds[i1].Id;
+                    var projectDocuments = _mapper.Map<ProjectDocument>(projectDocumentDto);
+                    projectDocumentDto.Id = 0;
+                    if (i1 < 1)
+                    {
+                        if (projectDocumentDto.FileModel?.Base64?.Length > 0)
+                        {
+                            projectDocumentDto.PathName = DocumentService.SaveProjectDocument(projectDocumentDto.FileModel,
+                                _uploadSettingRepository.GetDocumentPath(), FolderType.Project);
+                            projectDocumentDto.MimeType = projectDocumentDto.FileModel.Extension;
+                        }
+                        projectDocumentDto.ModifiedBy = _jwtTokenAccesser.UserId;
+                        projectDocumentDto.ModifiedDate = DateTime.Now.ToUniversalTime();
+                        projectDocuments = _mapper.Map<ProjectDocument>(projectDocumentDto);
+                        var validates = _projectDocumentRepository.Duplicate(projectDocuments);
+                        if (!string.IsNullOrEmpty(validates))
+                        {
+                            ModelState.AddModelError("Message", validates);
+                            return BadRequest(ModelState);
+                        }
+                    }
+                    _projectDocumentRepository.Add(projectDocuments);
+                    if (_uow.Save() <= 0) throw new Exception("Creating project document failed on save.");
 
-            if (projectDesign == null || !projectDesign.IsCompleteDesign)
-            {
-                ModelState.AddModelError("Message", "Design not completed for this project");
-                return BadRequest(ModelState);
+                    _documentReviewRepository.SaveByDocumentId(projectDocuments.Id, projectDocuments.ProjectId);
+                }
             }
-
-            projectDocumentDto.Id = 0;
-            if (projectDocumentDto.FileModel?.Base64?.Length > 0)
-            {
-                projectDocumentDto.PathName = DocumentService.SaveProjectDocument(projectDocumentDto.FileModel,
-                    _uploadSettingRepository.GetDocumentPath(), FolderType.Project);
-                projectDocumentDto.MimeType = projectDocumentDto.FileModel.Extension;
-            }
-
-            projectDocumentDto.ModifiedBy = _jwtTokenAccesser.UserId;
-            projectDocumentDto.ModifiedDate = DateTime.Now.ToUniversalTime();
-
-            var projectDocument = _mapper.Map<ProjectDocument>(projectDocumentDto);
-
-            /* Added by Vipul for effective Date on 16-10-2019 */
-            var validate = _projectDocumentRepository.Duplicate(projectDocument);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
-
-            _projectDocumentRepository.Add(projectDocument);
-
-            if (_uow.Save() <= 0) throw new Exception("Creating project document failed on save.");
-
-            _documentReviewRepository.SaveByDocumentId(projectDocument.Id, projectDocument.ProjectId);
             _projectRightRepository.UpdateIsReviewDone(projectDocumentDto.ProjectId);
-            return Ok(projectDocument.Id);
+            return Ok(projectDocumentDto.Id);
         }
 
         [HttpPut]
