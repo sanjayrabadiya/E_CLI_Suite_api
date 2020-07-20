@@ -33,6 +33,7 @@ namespace GSC.Api.Controllers.Project.Schedule
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
+        private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IUnitOfWork<GscContext> _uow;
 
         public ProjectScheduleController(IProjectScheduleRepository projectScheduleRepository,
@@ -46,6 +47,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             IUnitOfWork<GscContext> uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository,
+            INumberFormatRepository numberFormatRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository)
         {
             _projectScheduleRepository = projectScheduleRepository;
@@ -61,6 +63,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
+            _numberFormatRepository = numberFormatRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -117,12 +120,12 @@ namespace GSC.Api.Controllers.Project.Schedule
             return Ok(projectScheduleDto);
         }
 
-        [HttpGet("CheckProjectSchedule/{projectDesignTemplateId}")]
-        public IActionResult CheckProjectSchedule(int projectDesignTemplateId)
+        [HttpGet("CheckProjectSchedule/{projectDesignVariableId}")]
+        public IActionResult CheckProjectSchedule(int projectDesignVariableId)
         {
-            if (projectDesignTemplateId <= 0) return BadRequest();
+            if (projectDesignVariableId <= 0) return BadRequest();
             var projectSchedule = _projectScheduleRepository
-                .FindBy(t => t.ProjectDesignVariableId == projectDesignTemplateId && t.DeletedDate == null)
+                .FindBy(t => t.ProjectDesignVariableId == projectDesignVariableId && t.DeletedDate == null)
                 .FirstOrDefault();
 
             if (projectSchedule == null)
@@ -148,7 +151,8 @@ namespace GSC.Api.Controllers.Project.Schedule
 
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
+            var number = _projectScheduleRepository.All.Count(x => x.ProjectDesignId == projectScheduleDto.ProjectDesignId);
+            projectScheduleDto.AutoNumber = _numberFormatRepository.GetNumberFormat("Schedule", number);
             var projectSchedule = _mapper.Map<ProjectSchedule>(projectScheduleDto);
 
             projectSchedule.ProjectId = _projectDesignRepository.Find(projectScheduleDto.ProjectDesignId).ProjectId;
@@ -263,6 +267,7 @@ namespace GSC.Api.Controllers.Project.Schedule
                 .Select(x => new ProjectScheduleDto
                 {
                     Id = x.Id,
+                    AutoNumber = x.AutoNumber,
                     ProjectId = x.ProjectId,
                     ProjectName = x.Project.ProjectName,
                     PeriodName = x.ProjectDesignPeriod.DisplayName,

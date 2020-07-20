@@ -20,5 +20,7 @@ namespace GSC.Respository.Project.Design
         IList<DropDownVaribleDto> GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId);
 
         IList<DropDownVaribleAnnotationDto> GetVariabeAnnotationByDomainDropDown(int domainId, int projectId);
+
+        IList<DropDownVaribleDto> GetTargetVariabeAnnotationForScheduleDropDown(int projectDesignTemplateId);
     }
 }

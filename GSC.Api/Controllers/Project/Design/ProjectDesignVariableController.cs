@@ -225,5 +225,14 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(
                 _projectDesignVariableValueRepository.GetProjectDesignVariableValueDropDown(projectDesignVariableId));
         }
+
+        //Added method By Vipul 25062020
+
+        [HttpGet]
+        [Route("GetTargetVariabeAnnotationForScheduleDropDown/{projectDesignTemplateId}")]
+        public IActionResult GetTargetVariabeAnnotationForScheduleDropDown(int projectDesignTemplateId)
+        {
+            return Ok(_projectDesignVariableRepository.GetTargetVariabeAnnotationForScheduleDropDown(projectDesignTemplateId));
+        }
     }
 }

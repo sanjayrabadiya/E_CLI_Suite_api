@@ -32,7 +32,7 @@ namespace GSC.Data.Dto.Project.Schedule
         public string TemplateName { get; set; }
         public string VariableName { get; set; }
         public bool IsLock { get; set; }
-
+        public string AutoNumber { get; set; }
         public string CreatedByUser { get; set; }
         public string DeletedByUser { get; set; }
         public string ModifiedByUser { get; set; }

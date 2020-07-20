@@ -203,5 +203,32 @@ namespace GSC.Respository.Project.Design
                 ExtraData = variableResult.FirstOrDefault(v => v.Value == c.Key.Value)?.ExtraData
             }).ToList();
         }
+
+        //Added method By Vipul 25062020
+        public IList<DropDownVaribleDto> GetTargetVariabeAnnotationForScheduleDropDown(int projectDesignTemplateId)
+        {
+            var query =
+                from c in Context.ProjectDesignVariable
+                where c.ProjectDesignTemplateId == projectDesignTemplateId &&
+                      !(from o in Context.ProjectScheduleTemplate
+                        where o.DeletedDate == null
+                        select o.ProjectDesignVariableId)
+                          .Contains(c.Id) && (c.CollectionSource == CollectionSources.Date || c.CollectionSource == CollectionSources.Time || c.CollectionSource == CollectionSources.DateTime)
+                select c;
+
+
+            return query.Where(x => x.DeletedDate == null
+                                    && x.ProjectDesignTemplateId == projectDesignTemplateId).OrderBy(o => o.DesignOrder)
+                .Select(c => new DropDownVaribleDto
+                {
+                    Id = c.Id,
+                    Value = c.VariableName +
+                            Convert.ToString(string.IsNullOrEmpty(c.Annotation) ? "" : " [" + c.Annotation + "]"),
+                    Code = c.Annotation,
+                    DataType = c.DataType,
+                    CollectionSources = c.CollectionSource,
+                    ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList())
+                }).ToList();
+        }
     }
 }

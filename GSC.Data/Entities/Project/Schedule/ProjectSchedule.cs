@@ -14,7 +14,7 @@ namespace GSC.Data.Entities.Project.Schedule
         public int ProjectDesignTemplateId { get; set; }
         public int ProjectDesignVariableId { get; set; }
         public int? CompanyId { get; set; }
-
+        public string AutoNumber { get; set; }
         [ForeignKey("ProjectId")] public Master.Project Project { get; set; }
 
         [ForeignKey("ProjectDesignId")] public ProjectDesign ProjectDesign { get; set; }
