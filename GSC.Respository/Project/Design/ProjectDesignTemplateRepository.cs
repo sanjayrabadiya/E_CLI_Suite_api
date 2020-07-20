@@ -139,12 +139,13 @@ namespace GSC.Respository.Project.Design
                                            && x.ProjectDesignVisitId == projectDesignVisitId
                                            && x.Variables.Where(y =>
                                                y.CollectionSource == CollectionSources.Date ||
-                                               y.CollectionSource == CollectionSources.Time).Any()).OrderBy(t => t.Id)
+                                               y.CollectionSource == CollectionSources.Time ||
+                                               y.CollectionSource == CollectionSources.DateTime).Any()).OrderBy(t => t.Id)
                 .Select(t => new DropDownDto
                 {
                     Id = t.Id,
                     Value = t.TemplateName,
-                    Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
+                    Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""                    
                 }).ToList();
 
             return templates;
