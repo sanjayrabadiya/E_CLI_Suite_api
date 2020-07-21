@@ -391,5 +391,17 @@ namespace GSC.Api.Controllers.Common
                 }).OrderBy(o => o.Id).ToList();
         }
 
+        [HttpGet]
+        [Route("WorkplaceFolderList")]
+        public IList<DropDownEnum> WorkplaceFolderList()
+        {
+            return Enum.GetValues(typeof(WorkPlaceFolder))
+                .Cast<WorkPlaceFolder>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription(),
+                }).OrderBy(o => o.Id).ToList();
+        }
+
     }
 }

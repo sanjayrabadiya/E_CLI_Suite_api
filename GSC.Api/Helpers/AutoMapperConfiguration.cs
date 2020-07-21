@@ -145,10 +145,7 @@ namespace GSC.Api.Helpers
             CreateMap<ClientType, ClientTypeDto>().ReverseMap();
             CreateMap<DocumentName, DocumentNameDto>().ReverseMap();
             CreateMap<EditCheck, EditCheckDto>().ReverseMap();
-
-
-            CreateMap<EditCheckDetail, EditCheckDetailDto>().ReverseMap();
-
+          
             CreateMap<EditCheckDetail, EditCheckValidateDto>()
                 .ForMember(x => x.AutoNumber, x => x.MapFrom(a => a.EditCheck.AutoNumber))
                 .ForMember(x => x.CollectionSource, y => y.MapFrom(a => a.ProjectDesignVariable.CollectionSource))
@@ -223,6 +220,12 @@ namespace GSC.Api.Helpers
             CreateMap<EtmfZoneMasterLibrary, EtmfZoneMasterLibraryDto>().ReverseMap();
             CreateMap<EtmfSectionMasterLibrary, EtmfSectionMasterLibraryDto>().ReverseMap();
             CreateMap<EtmfArtificateMasterLbrary, EtmfArtificateMasterLbraryDto>().ReverseMap();
+
+            CreateMap<ProjectWorkplace, ETMFWorkplaceDto>().ReverseMap();
+            CreateMap<ProjectWorkplaceArtificatedocument, ProjectWorkplaceArtificatedocumentDto>().ReverseMap();
+            CreateMap<ProjectWorkplaceSubSection, ProjectWorkplaceSubSectionDto>().ReverseMap();
+            CreateMap<ProjectWorkplaceSubSectionArtifact, ProjectWorkplaceSubSectionArtifactDto>().ReverseMap();
+
         }
     }
 }

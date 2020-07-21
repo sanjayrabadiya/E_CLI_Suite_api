@@ -85,6 +85,25 @@ namespace GSC.Helper.DocumentService
             return fileName;
         }
 
+        public static string SaveWorkplaceDocument(FileModel file, string path, string Filename)
+        {
+            string[] paths = { path };
+            var fullPath = Path.Combine(paths);
+
+            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+
+            file.Base64 = file.Base64.Split("base64,")[1];
+
+            var strGuid = Filename + "_" + DateTime.Now.Ticks + "." + file.Extension;
+            var fileName = Path.Combine(strGuid);
+
+            var imageBytes = Convert.FromBase64String(file.Base64);
+            var documentPath = Path.Combine(path, fileName);
+            File.WriteAllBytes(documentPath, imageBytes);
+
+            return fileName;
+        }
+
         public static string SaveETMFDocument(FileModel file, string path, FolderType folderType, string Version)
         {
             string[] paths = { path, folderType.ToString() };
@@ -94,7 +113,7 @@ namespace GSC.Helper.DocumentService
 
             file.Base64 = file.Base64.Split("base64,")[1];
 
-            var strGuid =  Version + "_" + Guid.NewGuid() + "." + file.Extension;
+            var strGuid = Version + "_" + Guid.NewGuid() + "." + file.Extension;
             var fileName = Path.Combine(folderType.ToString(), strGuid);
 
             var imageBytes = Convert.FromBase64String(file.Base64);
@@ -136,7 +155,7 @@ namespace GSC.Helper.DocumentService
                     string baseDirectorySeq = Path.GetDirectoryName(fullpath) + "\\Unzip\\SeqAscii";
 
                     if (Directory.Exists(Path.GetDirectoryName(fullpath) + "\\Unzip"))
-                        Directory.Delete(Path.GetDirectoryName(fullpath) + "\\Unzip",true);
+                        Directory.Delete(Path.GetDirectoryName(fullpath) + "\\Unzip", true);
 
                     Directory.CreateDirectory(baseDirectory);
                     Directory.CreateDirectory(baseDirectorySeq);

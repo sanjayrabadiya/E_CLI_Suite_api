@@ -39,6 +39,7 @@ namespace GSC.Respository.UserMgt
             if (userPassword != null)
             {
             }
+      
 
             if (userPassword != null && !string.Equals(userPassword.Password, Cryptography.CreatePasswordHash(password, userPassword.Salt),
                     StringComparison.Ordinal)) return "Invalid Password";

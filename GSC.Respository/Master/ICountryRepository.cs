@@ -11,5 +11,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetProjectCountryDropDown();
         string DuplicateCountry(Country objSave);
         List<DropDownDto> GetCountryByParentProjectIdDropDown(int ParentProjectId);
+        List<DropDownDto> GetCountryByProjectIdDropDown(int ParentProjectId);
     }
 }

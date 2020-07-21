@@ -29,4 +29,22 @@ namespace GSC.Data.Dto.Etmf
 
         public FileModel fileModel { get; set; }
     }
+
+    public class MasterLibraryJoinDto
+    {
+        public int ZoneId { get; set; }
+        public string ZoneName { get; set; }
+        public string Level { get; set; }
+        public string Zoneno { get; set; }
+        public int  SectionId{ get; set; }
+        public string SectionName { get; set; }
+        public string SectionNo { get; set; }
+
+        public int ArtificateId { get; set; }
+        public string ArtificateName { get; set; }
+        public string ArtificateNo { get; set; }
+        public bool TrailLevelDoc { get; set; }
+        public bool CountryLevelDoc { get; set; }
+        public bool SiteLevelDoc { get; set; }
+    }
 }

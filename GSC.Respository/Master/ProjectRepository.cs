@@ -411,7 +411,6 @@ namespace GSC.Respository.Master
             }
             return projects;
         }
-
         public List<ProjectDropDown> GetChildProjectDropDown(int parentProjectId)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();

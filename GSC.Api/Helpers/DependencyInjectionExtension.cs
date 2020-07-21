@@ -174,7 +174,7 @@ namespace GSC.Api.Helpers
 
             services.AddScoped<IInvestigatorContactRepository, InvestigatorContactRepository>();
             services.AddScoped<IReportSettingRepository, ReportSettingRepository>();
-
+            services.AddScoped<IProjectWorkplaceArtificatedocumentRepository, ProjectWorkplaceArtificatedocumentRepository>();
 
             services.AddScoped<IReportBaseRepository, ReportBaseRepository>();
             services.AddScoped<IGscReport, GscReport>();
@@ -205,6 +205,14 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEtmfZoneMasterLibraryRepository, EtmfZoneMasterLibraryRepository>();
             services.AddScoped<IEtmfSectionMasterLibraryRepository, EtmfSectionMasterLibraryRepository>();
             services.AddScoped<IEtmfArtificateMasterLbraryRepository, EtmfArtificateMasterLbraryRepository>();
+            services.AddScoped<IETMFWorkplaceRepository, ETMFWorkplaceRepository>();
+
+            services.AddScoped<IProjectWorkPlaceZoneRepository, ProjectWorkPlaceZoneRepository>();
+            services.AddScoped<IProjectWorkplaceSectionRepository, ProjectWorkplaceSectionRepository>();
+            services.AddScoped<IProjectWorkplaceArtificateRepository, ProjectWorkplaceArtificateRepository>();
+            services.AddScoped<IProjectWorkplaceDetailRepository, ProjectWorkplaceDetailRepository>();
+            services.AddScoped<IProjectWorkplaceSubSectionRepository, ProjectWorkplaceSubSectionRepository>();
+            services.AddScoped<IProjectWorkplaceSubSectionArtifactRepository, ProjectWorkplaceSubSectionArtifactRepository>();
         }
     }
 }

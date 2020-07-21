@@ -129,6 +129,8 @@ namespace GSC.Helper
         [Description("Medra Dictionary")] MedraDictionary = 6,
         [Description("DossierReport")] DossierReport = 7,
         [Description("ExcleTemplate")] ExcleTemplate = 8,
+        [Description("Project Worksplace")] ProjectWorksplace = 9,
+
     }
 
     public enum AuditModule : short
@@ -412,4 +414,10 @@ namespace GSC.Helper
 
     }
 
+    public enum WorkPlaceFolder : short
+    {
+        [Description("Country")] Country = 1,
+        [Description("Site")] Site = 2,
+        [Description("Trial")] Trial = 3,
+    }
 }
