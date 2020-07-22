@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Configuration
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly INumberFormatRepository _numberFormatRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public NumberFormatController(INumberFormatRepository numberFormatRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _numberFormatRepository = numberFormatRepository;
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Configuration
         {
             var numberFormats = _numberFormatRepository.All.Where(x =>
                 x.CompanyId == _jwtTokenAccesser.CompanyId
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var numberFormatsDto = _mapper.Map<IEnumerable<NumberFormatDto>>(numberFormats);
             return Ok(numberFormatsDto);

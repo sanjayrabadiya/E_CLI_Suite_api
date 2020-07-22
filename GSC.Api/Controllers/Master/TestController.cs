@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly ITestRepository _testRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public TestController(ITestRepository testRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _testRepository = testRepository;
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var tests = _testRepository.FindByInclude(x => x.IsDeleted == isDeleted, x => x.TestGroup)
+            var tests = _testRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.TestGroup)
                 .OrderByDescending(x => x.Id).ToList();
             var testsDto = _mapper.Map<IEnumerable<TestDto>>(tests);
             testsDto.ForEach(b =>

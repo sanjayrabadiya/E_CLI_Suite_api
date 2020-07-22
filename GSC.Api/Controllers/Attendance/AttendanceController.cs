@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Attendance
         private readonly IMapper _mapper;
 
         private readonly IProjectSubjectRepository _projectSubjectRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public AttendanceController(IAttendanceRepository attendanceRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IProjectSubjectRepository projectSubjectRepository,
             IAttendanceHistoryRepository attendanceHistoryRepository)
         {

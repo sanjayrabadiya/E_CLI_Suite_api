@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public FreezerController(IFreezerRepository freezerRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _freezerRepository = freezerRepository;
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var freezers = _freezerRepository.All.Where(x => x.IsDeleted == isDeleted
+            var freezers = _freezerRepository.All.Where(x => isDeleted ? x.DeletedDate == null : x.DeletedDate !=null
             ).OrderByDescending(x => x.Id).ToList();
             var freezersDto = _mapper.Map<IEnumerable<FreezerDto>>(freezers);
             freezersDto.ForEach(t => t.FreezerTypeName = t.FreezerType.GetDescription());

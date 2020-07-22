@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IPopulationTypeRepository _populationTypeRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public PopulationTypeController(IPopulationTypeRepository populationTypeRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _populationTypeRepository = populationTypeRepository;
@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
             var populationTypes = _populationTypeRepository
-                .All.Where(x =>x.IsDeleted == isDeleted
+                .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                 ).OrderByDescending(x => x.Id).ToList();
             var populationTypesDto = _mapper.Map<IEnumerable<PopulationTypeDto>>(populationTypes);
             populationTypesDto.ForEach(b =>

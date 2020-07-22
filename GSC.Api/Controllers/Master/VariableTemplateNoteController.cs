@@ -14,11 +14,11 @@ namespace GSC.Api.Controllers.Master
     public class VariableTemplateNoteController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVariableTemplateNoteRepository _variableTemplateNoteRepository;
 
         public VariableTemplateNoteController(IVariableTemplateNoteRepository variableTemplateNoteRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _variableTemplateNoteRepository = variableTemplateNoteRepository;
             _uow = uow;

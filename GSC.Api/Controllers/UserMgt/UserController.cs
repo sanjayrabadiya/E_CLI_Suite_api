@@ -25,14 +25,14 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly ILocationRepository _locationRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
 
         public UserController(IUserRepository userRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             ILocationRepository locationRepository, IUserPasswordRepository userPasswordRepository,
             IEmailSenderRespository emailSenderRespository,

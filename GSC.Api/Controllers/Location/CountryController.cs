@@ -25,13 +25,13 @@ namespace GSC.Api.Controllers.Location
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public CountryController(
             ICountryRepository countryRepository,
               IUserRepository userRepository,
               ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
@@ -46,7 +46,7 @@ namespace GSC.Api.Controllers.Location
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var countries = _countryRepository.FindBy(x => x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).ToList();
+            var countries = _countryRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
 
             var countriesDto = _mapper.Map<IEnumerable<CountryDto>>(countries).ToList();
             countriesDto.ForEach(b =>

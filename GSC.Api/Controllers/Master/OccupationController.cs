@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IOccupationRepository _occupationRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public OccupationController(IOccupationRepository occupationRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _occupationRepository = occupationRepository;
@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
             var occupations = _occupationRepository.All.Where(x =>
-                 x.IsDeleted == isDeleted
+                 isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var occupationsDto = _mapper.Map<IEnumerable<OccupationDto>>(occupations);
             occupationsDto.ForEach(b =>

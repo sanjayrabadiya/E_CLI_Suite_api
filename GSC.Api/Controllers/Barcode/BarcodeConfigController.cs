@@ -15,10 +15,10 @@ namespace GSC.Api.Controllers.Barcode
     {
         private readonly IBarcodeConfigRepository _barcodeConfigRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public BarcodeConfigController(IBarcodeConfigRepository barcodeConfigRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _barcodeConfigRepository = barcodeConfigRepository;
             _uow = uow;

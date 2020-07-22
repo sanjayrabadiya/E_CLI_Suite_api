@@ -1,4 +1,6 @@
-﻿using GSC.Common.UnitOfWork;
+﻿using GSC.Common;
+using GSC.Common.UnitOfWork;
+using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Report;
 using GSC.Report.Common;
@@ -25,6 +27,7 @@ using GSC.Respository.PropertyMapping;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,8 +37,11 @@ namespace GSC.Api.Helpers
     {
         public static void AddDependencyInjection(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddScoped(typeof(IUnitOfWork<>),
-                typeof(UnitOfWork<>));
+
+
+            services.AddScoped<IUnitOfWork, UnitOfWork<GscContext>>();
+            services.AddScoped(typeof(IUnitOfWork<GscContext>), typeof(UnitOfWork<GscContext>));
+
             services.AddScoped<IPropertyMappingService, PropertyMappingService>();
             services.AddScoped<IAppUserClaimRepository, AppUserClaimRepository>();
             services.AddScoped<ITypeHelperService, TypeHelperService>();

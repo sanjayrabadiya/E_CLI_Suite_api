@@ -25,10 +25,10 @@ namespace GSC.Respository.Barcode.Generate
         {
             var barcodeSubjectDetail = All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).Select(c => new BarcodeSubjectDetailDto
+                    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new BarcodeSubjectDetailDto
                     {
                         Id = c.Id,
-                        IsDeleted = c.IsDeleted
+                        IsDeleted = c.DeletedDate != null
                     }
                 )
                 .ToList();

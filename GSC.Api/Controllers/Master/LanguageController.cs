@@ -24,10 +24,10 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly ILanguageRepository _languageRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public LanguageController(ILanguageRepository languageRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IMapper mapper,
@@ -60,7 +60,7 @@ namespace GSC.Api.Controllers.Master
         {
             var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
            
-            var languages = _languageRepository.FindBy(x => x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).ToList();
+            var languages = _languageRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
 
             var languagesDto = _mapper.Map<IEnumerable<LanguageDto>>(languages);
             languagesDto.ForEach(b =>

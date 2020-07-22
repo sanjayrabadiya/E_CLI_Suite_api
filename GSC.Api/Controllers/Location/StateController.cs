@@ -26,14 +26,14 @@ namespace GSC.Api.Controllers.Location
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
         private readonly IStateRepository _stateRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public StateController(
             IStateRepository stateRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             ICountryRepository countryRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
@@ -49,12 +49,12 @@ namespace GSC.Api.Controllers.Location
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult GetStates(bool isDeleted)
         {
-            var states = _stateRepository.FindByInclude(x => x.IsDeleted == isDeleted
+            var states = _stateRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                , t => t.Country).OrderByDescending(x => x.Id).ToList();
             //var states = _stateRepository
             //    .FindByInclude(
             //        x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) &&
-            //             x.IsDeleted == isDeleted, x => x.Country)
+            //             isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Country)
             //    .Select(x => new StateDto
             //    {
             //        Id = x.Id,

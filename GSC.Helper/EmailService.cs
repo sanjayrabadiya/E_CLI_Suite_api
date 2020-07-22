@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -35,8 +36,7 @@ namespace GSC.Helper
                 }
                 catch (Exception ex)
                 {
-                    //throw;
-                    //_logger.LogError(ex, "OtpSend error");
+                    Log.Error(ex,"");
                 }
             });
         }

@@ -1,135 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Net;
+﻿using System.IO;
+using System.Reflection;
 using AutoMapper;
 using GSC.Api.Helpers;
-using GSC.Api.Middleware;
 using GSC.Data.Dto.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Helper.GSCException;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Serilog;
-using Swashbuckle.AspNetCore.Swagger;
+
 
 namespace GSC.Api
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private static IConfigurationRoot _configuration;
+
+        public Startup(IWebHostEnvironment env)
         {
-            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddEnvironmentVariables()
+                .AddJsonFile("ipAddress.json", false, true)
+                .AddJsonFile("appSettings.json", false, true);
+            _configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+
         public void ConfigureServices(IServiceCollection services)
         {
-            // Get JWT Token Settings from JwtSettings.json file
-            JwtSettings settings;
-            settings = GetJwtSettings();
-            services.AddHttpContextAccessor();
-            services.AddAuth(settings);
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
-
-                // Swagger 2.+ support
-                var security = new Dictionary<string, IEnumerable<string>>
-                {
-                    {"Bearer", new string[] { }}
-                };
-
-                c.AddSecurityDefinition("Bearer", new ApiKeyScheme
-                {
-                    Description =
-                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                    Name = "Authorization",
-                    In = "header",
-                    Type = "apiKey"
-                });
-                c.AddSecurityRequirement(security);
-            });
-            // Create singleton of JwtSettings
-            services.AddSingleton(settings);
-
+         
+            services.AddAuth(_configuration);
             services.AddDbContextPool<GscContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("dbConnectionString"));
+                options.UseSqlServer(_configuration.GetConnectionString("dbConnectionString"));
             });
-            services.AddDependencyInjection(Configuration);
-
-            services.AddCors(options =>
+            services.AddConfig(_configuration);
+            services.AddDependencyInjection(_configuration);
+            services.AddAutoMapper(Assembly.GetAssembly(typeof(AutoMapperConfiguration)));
+            services.AddScoped<AllowedSafeCallerFilter>();
+            services.AddControllers(options =>
             {
-                options.AddPolicy("ExposeResponseHeaders",
-                    builder =>
-                    {
-                        builder.WithOrigins("http://localhost:4200")
-                            .WithExposedHeaders("X-Pagination")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
-                    });
+                options.EnableEndpointRouting = false;
+                options.Filters.Add(typeof(ValidateModelAttribute));
+                options.Filters.Add(typeof(TransactionFilter));
+            }).AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
-            services.AddAutoMapper(System.Reflection.Assembly.GetAssembly(typeof(AutoMapperConfiguration)));
-            services.AddMvc()
-                .AddJsonOptions(options =>
-                    {
-                        options.SerializerSettings.ContractResolver =
-                            new CamelCasePropertyNamesContractResolver();
-                        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    }
-                );
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "GSC API", Version = "v3.1" });
+            });
+            services.AddHttpContextAccessor();
+
             services.AddSignalR();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCustomException();
-            app.UseCors("ExposeResponseHeaders");
+            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
+
+            app.UseExceptionHandler(ErrorHandler.HttpExceptionHandling(env));
+            app.UseAuthentication();
+            app.UseMiddleware<LogMiddleware>();
+            app.UseCors("AllowCorsPolicy");
             app.UseStaticFiles();
+            var doc = _configuration["DocPath:DocDir"];
+
+            if (!string.IsNullOrEmpty(doc))
+            {
+                if (!Directory.Exists(doc))
+                    Directory.CreateDirectory(doc);
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(
+                        Path.Combine(Directory.GetCurrentDirectory(), "TempDoc")),
+                    RequestPath = "/static"
+                });
+            }
 
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                c.RoutePrefix = string.Empty;
-            });
 
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "GSC API v3.1"); });
 
-            app.UseAuthentication();
-            //Mapper.Initialize(x => { x.AddProfile<AutoMapperConfiguration>(); });
-
-            //Mapper.Configuration.AssertConfigurationIsValid();
-            app.UseMvc();
-
-            app.UseSignalR(routes => { routes.MapHub<Notification>("/notify"); });
+            app.UseRouting();
+            app.UseAuthorization();
+            app.UseEndpoints(e => e.MapControllers());
+            app.UseSpa(spa => { spa.Options.SourcePath = "wwwroot"; });
         }
 
-        public JwtSettings GetJwtSettings()
-        {
-            var settings = new JwtSettings();
 
-            settings.Key = Configuration["JwtSettings:key"];
-            settings.Audience = Configuration["JwtSettings:audience"];
-            settings.Issuer = Configuration["JwtSettings:issuer"];
-            settings.MinutesToExpiration =
-                Convert.ToInt32(
-                    Configuration["JwtSettings:minutesToExpiration"]);
-
-            return settings;
-        }
     }
 }

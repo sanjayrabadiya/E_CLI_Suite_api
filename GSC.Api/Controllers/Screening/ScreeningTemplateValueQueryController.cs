@@ -18,12 +18,12 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
 
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ScreeningTemplateValueQueryController(
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;

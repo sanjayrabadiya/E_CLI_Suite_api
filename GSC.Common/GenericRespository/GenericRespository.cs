@@ -88,6 +88,12 @@ namespace GSC.Common.GenericRespository
             if (entity != null) Delete(entity);
         }
 
+        public virtual void Remove(TC entity)
+        {
+            Context.Set<TC>().Remove(entity);
+        }
+
+        
         public virtual void Delete(TC entityData)
         {
             var entity = entityData as BaseEntity;
@@ -120,9 +126,10 @@ namespace GSC.Common.GenericRespository
                 (queryable, (current, includeProperty) => current.Include(includeProperty));
         }
 
-        public virtual void Remove(TC entity)
+        
+        public void Dispose()
         {
-            Context.Remove(entity);
+            Context.Dispose();
         }
 
         public virtual void AddOrUpdate(TC entity)
@@ -161,9 +168,6 @@ namespace GSC.Common.GenericRespository
             }
         }
 
-        public void Dispose()
-        {
-            Context.Dispose();
-        }
+
     }
 }

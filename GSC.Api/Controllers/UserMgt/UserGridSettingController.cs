@@ -17,13 +17,13 @@ namespace GSC.Api.Controllers.UserMgt
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUserGridSettingRepository _userGridSettingRepository;
 
         public UserGridSettingController(IUserGridSettingRepository userGridSettingRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper,
-            IUnitOfWork<GscContext> uow)
+            IUnitOfWork uow)
         {
             _userGridSettingRepository = userGridSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;

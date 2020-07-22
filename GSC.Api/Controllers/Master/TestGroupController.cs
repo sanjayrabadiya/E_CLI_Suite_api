@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly ITestGroupRepository _testGroupRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public TestGroupController(ITestGroupRepository testGroupRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _testGroupRepository = testGroupRepository;
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
             var testGroups = _testGroupRepository
-                .All.Where(x =>x.IsDeleted == isDeleted
+                .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                 ).OrderByDescending(x => x.Id).ToList();
             var testGroupsDto = _mapper.Map<IEnumerable<TestGroupDto>>(testGroups);
             testGroupsDto.ForEach(b =>

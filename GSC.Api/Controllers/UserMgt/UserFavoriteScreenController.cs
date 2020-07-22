@@ -10,11 +10,11 @@ namespace GSC.Api.Controllers.UserMgt
     [Route("api/[controller]")]
     public class UserFavoriteScreenController : BaseController
     {
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUserFavoriteScreenRepository _userFavoriteScreenRepository;
 
         public UserFavoriteScreenController(IUserFavoriteScreenRepository userFavoriteScreenRepository,
-            IUnitOfWork<GscContext> uow)
+            IUnitOfWork uow)
         {
             _userFavoriteScreenRepository = userFavoriteScreenRepository;
             _uow = uow;

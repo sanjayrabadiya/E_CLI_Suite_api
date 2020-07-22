@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IRaceRepository _raceRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public RaceController(IRaceRepository raceRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _raceRepository = raceRepository;
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var races = _raceRepository.All.Where(x =>x.IsDeleted == isDeleted
+            var races = _raceRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var racesDto = _mapper.Map<IEnumerable<RaceDto>>(races);
             racesDto.ForEach(b =>

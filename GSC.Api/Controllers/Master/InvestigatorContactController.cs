@@ -24,7 +24,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public InvestigatorContactController(IInvestigatorContactRepository investigatorContactRepository,
             IUserRepository userRepository,
@@ -32,7 +32,7 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _investigatorContactRepository = investigatorContactRepository;
             _cityRepository = cityRepository;
@@ -49,7 +49,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
          //   return Ok(_investigatorContactRepository.GetInvestigatorContact(isDeleted));
-            var investigatorContacts = _investigatorContactRepository.FindByInclude(x => x.IsDeleted == isDeleted
+            var investigatorContacts = _investigatorContactRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                , t => t.City, t => t.City.State, t => t.City.State.Country).OrderByDescending(x => x.Id).ToList();
             var investigatorContactsDto = _mapper.Map<IEnumerable<InvestigatorContactDto>>(investigatorContacts);
             investigatorContactsDto.ForEach(b =>

@@ -38,7 +38,9 @@ namespace GSC.Data.Entities.Common
 
         [NotMapped] public ObjectState ObjectState { get; set; }
 
-        [NotMapped] public bool IsDeleted => DeletedDate == null ? false : true;
+        [NotMapped] 
+        public bool InActiveRecord { get; set; }
+
 
         [NotMapped] public AuditAction AuditAction { get; set; }
     }

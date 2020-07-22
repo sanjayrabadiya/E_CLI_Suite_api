@@ -25,7 +25,7 @@ namespace GSC.Api.Controllers.Client
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public ClientController(IClientRepository clientRepository,
@@ -33,7 +33,7 @@ namespace GSC.Api.Controllers.Client
             IRoleRepository securityRoleRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IUploadSettingRepository uploadSettingRepository)
         {
             _clientTypeRepository = clientTypeRepository;
@@ -50,7 +50,7 @@ namespace GSC.Api.Controllers.Client
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var clients = _clientRepository.All.Where(x => x.IsDeleted == isDeleted
+            var clients = _clientRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var clientsDto = _mapper.Map<IEnumerable<ClientDto>>(clients);
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();

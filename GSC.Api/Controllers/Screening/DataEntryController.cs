@@ -14,11 +14,11 @@ namespace GSC.Api.Controllers.Screening
     {
         private readonly IDataEntryRespository _dataEntryRespository;
         private readonly IScreeningTemplateValueEditCheckRepository _screeningTemplateValueEditCheckRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public DataEntryController(IDataEntryRespository dataEntryRespository,
             IScreeningTemplateValueEditCheckRepository screeningTemplateValueEditCheckRepository,
-            IUnitOfWork<GscContext> uow)
+            IUnitOfWork uow)
         {
             _dataEntryRespository = dataEntryRespository;
             _screeningTemplateValueEditCheckRepository = screeningTemplateValueEditCheckRepository;

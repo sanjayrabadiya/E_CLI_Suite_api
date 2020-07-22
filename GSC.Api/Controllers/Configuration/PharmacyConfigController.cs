@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Configuration
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IPharmacyConfigRepository _pharmacyConfigRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public PharmacyConfigController(IPharmacyConfigRepository pharmacyConfigRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _pharmacyConfigRepository = pharmacyConfigRepository;
@@ -37,13 +37,13 @@ namespace GSC.Api.Controllers.Configuration
         {
             var pharmacyConfig = _pharmacyConfigRepository.FindByInclude(
                     x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) &&
-                         x.IsDeleted == isDeleted, x => x.VariableTemplate)
+                         isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.VariableTemplate)
                 .Select(x => new PharmacyConfigDto
                 {
                     Id = x.Id,
                     FormId = x.FormId,
                     FormName = x.FormName,
-                    IsDeleted = x.IsDeleted,
+                    IsDeleted = x.DeletedDate != null,
                     VariableTemplateId = x.VariableTemplateId,
                     TemplateName = x.VariableTemplate.TemplateName
                 }).OrderByDescending(x => x.Id).ToList();

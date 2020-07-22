@@ -20,11 +20,11 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
 
         public EtmfArtificateMasterLbraryController(
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository)
         {

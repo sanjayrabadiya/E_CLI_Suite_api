@@ -20,10 +20,10 @@ namespace GSC.Api.Controllers.Master
         private readonly IMapper _mapper;
         private readonly ITemplateRightsRepository _templateRightsRepository;
         private readonly ITemplateRightsRoleListRepository _templateRightsRoleListRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public TemplateRightsController(ITemplateRightsRepository templateRightsRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
             ITemplateRightsRoleListRepository templateRightsRoleListRepository
         )
@@ -41,14 +41,14 @@ namespace GSC.Api.Controllers.Master
         {
             //var templaterights = _templateRightsRepository.All.Where(x =>
             //    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-            //    && (x.IsDeleted == isDeleted)
+            //    && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
             //).ToList();
 
 
             var templaterights = _templateRightsRepository.FindByInclude(x => (x.CompanyId == null
                                                                                || x.CompanyId ==
                                                                                _jwtTokenAccesser.CompanyId) &&
-                                                                              x.IsDeleted == isDeleted,
+                                                                              isDeleted ? x.DeletedDate != null : x.DeletedDate == null,
                 x => x.VariableTemplate).ToList();
 
 

@@ -26,7 +26,7 @@ namespace GSC.Api.Controllers.Location
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public CityController(ICityRepository cityRepository,
             IUserRepository userRepository,
@@ -34,7 +34,7 @@ namespace GSC.Api.Controllers.Location
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
             ICityAreaRepository areaRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper)
         {
             _cityRepository = cityRepository;
@@ -50,13 +50,13 @@ namespace GSC.Api.Controllers.Location
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult GetCities(bool isDeleted)
         {
-         //   return Ok(_cityRepository.GetCities(isDeleted));
-            var citys = _cityRepository.FindByInclude(x => x.IsDeleted == isDeleted
+
+            var citys = _cityRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                , t => t.State, t => t.State.Country).OrderByDescending(x => x.Id).ToList();
             var cityAreasDto = _mapper.Map<IEnumerable<CityDto>>(citys);
             cityAreasDto.ForEach(b =>
             {
-               // b.StateName = _stateRepository.Find(b.StateId).StateName;
+                // b.StateName = _stateRepository.Find(b.StateId).StateName;
                 b.CountryName = _countryRepository.Find(b.State.CountryId).CountryName;
                 if (b.CreatedBy != null)
                     b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
@@ -165,7 +165,7 @@ namespace GSC.Api.Controllers.Location
 
         [HttpGet("GetCitiesByState/{id}")]
         public IActionResult GetCitiesByState(int id)
-        {            
+        {
             return Ok(_cityRepository.GetCityByStateDropDown(id));
         }
 

@@ -17,10 +17,10 @@ namespace GSC.Api.Controllers.Client
         private readonly IClientAddressRepository _clientAddressRepository;
         private readonly ILocationRepository _locationRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ClientAddressController(IClientAddressRepository clientAddressRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             ILocationRepository locationRepository)
         {
             _clientAddressRepository = clientAddressRepository;

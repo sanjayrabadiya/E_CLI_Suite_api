@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Master
         private readonly IActivityRepository _activityRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ActivityController(IActivityRepository activityRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _activityRepository = activityRepository;
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Master
         {
             var activitys = _activityRepository.All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).ToList();
             var activitysDto = _mapper.Map<IEnumerable<ActivityDto>>(activitys);
             return Ok(activitysDto);

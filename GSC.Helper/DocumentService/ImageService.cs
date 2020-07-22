@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+using Serilog;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -51,9 +53,9 @@ namespace GSC.Helper.DocumentService
                 return ImageToByteArray(NistCompliant(frontImg, new Size(180, 225),
                     InterpolationMode.HighQualityBilinear));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //ignored
+                Log.Error(ex, "");
             }
 
             return null;

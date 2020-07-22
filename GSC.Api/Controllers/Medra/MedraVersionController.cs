@@ -20,13 +20,13 @@ namespace GSC.Api.Controllers.Medra
     {
         private readonly IMedraVersionRepository _medraVersionRepository;
         private readonly IDictionaryRepository _dictionaryRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public MedraVersionController(IMedraVersionRepository medraVersionRepository,
            IDictionaryRepository dictionaryRepository,
-        IUnitOfWork<GscContext> uow,
+        IUnitOfWork uow,
           IMapper mapper,
           IJwtTokenAccesser jwtTokenAccesser
           )
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Medra
         public IActionResult Get(bool isDeleted)
         {
             var medra = _medraVersionRepository.FindByInclude(x => (x.CompanyId == null
-                                                           || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.IsDeleted == isDeleted, x => x.Dictionary).OrderByDescending(x => x.Id).ToList();
+                                                           || x.CompanyId == _jwtTokenAccesser.CompanyId) && isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Dictionary).OrderByDescending(x => x.Id).ToList();
 
             var medraDto = _mapper.Map<IEnumerable<MedraVersionDto>>(medra).ToList();
             return Ok(medraDto);

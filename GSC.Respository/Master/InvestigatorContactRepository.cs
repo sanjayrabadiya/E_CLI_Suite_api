@@ -35,7 +35,7 @@ namespace GSC.Respository.Master
         {
             var investigatorContact = All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).Select(c => new InvestigatorContactDto
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new InvestigatorContactDto
             {
                 NameOfInvestigator = c.NameOfInvestigator,
                 Specialization = c.Specialization,
@@ -45,7 +45,7 @@ namespace GSC.Respository.Master
                 ContactNumber = c.ContactNumber,
                 IECIRBName = c.IECIRBName,
                 CityName = c.City.CityName,
-                IsDeleted = c.IsDeleted,
+                IsDeleted = c.DeletedDate != null,
                 CountryName = c.City.State.Country.CountryName,
                 StateName = c.City.State.StateName,
                 City = c.City,

@@ -24,7 +24,7 @@ namespace GSC.Api.Controllers.Medra
         private readonly IMedraConfigRepository _medraConfigRepository;
         private readonly IDictionaryRepository _dictionaryRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;        
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IDocumentTypeRepository _documentTypeRepository;
@@ -33,7 +33,7 @@ namespace GSC.Api.Controllers.Medra
            IStudyScopingRepository studyScopingRepository,
            IDictionaryRepository dictionaryRepository,
            IUserRepository userRepository,
-        IUnitOfWork<GscContext> uow,
+        IUnitOfWork uow,
           IMapper mapper,          
           IJwtTokenAccesser jwtTokenAccesser,
           IDocumentTypeRepository documentTypeRepository
@@ -54,7 +54,7 @@ namespace GSC.Api.Controllers.Medra
         public IActionResult Get(bool isDeleted)
         {
             var studyscoping = _studyScopingRepository.FindByInclude(x => (x.CompanyId == null
-                                                           || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).ToList();
+                                                           || x.CompanyId == _jwtTokenAccesser.CompanyId) && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
             
             var studyscopingDto = _mapper.Map<IEnumerable<StudyScoping>>(studyscoping).ToList();           
             return Ok(studyscopingDto);

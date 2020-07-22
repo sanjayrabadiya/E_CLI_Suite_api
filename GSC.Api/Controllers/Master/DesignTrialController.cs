@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public DesignTrialController(IDesignTrialRepository designTrialRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _designTrialRepository = designTrialRepository;
@@ -42,7 +42,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var designTrials = _designTrialRepository.FindByInclude(x =>x.IsDeleted == isDeleted
+            var designTrials = _designTrialRepository.FindByInclude(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                 , t => t.TrialType).OrderByDescending(x => x.Id).ToList();
             var designTrialsDto = _mapper.Map<IEnumerable<DesignTrialDto>>(designTrials);
             designTrialsDto.ForEach(b =>

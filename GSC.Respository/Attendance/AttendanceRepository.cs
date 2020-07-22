@@ -147,7 +147,7 @@ namespace GSC.Respository.Attendance
                 AttendaceStatusName = x.Status != null ? x.Status.GetDescription() : "",
                 IsReplaced = x.ProjectSubject != null && x.ProjectSubject.IsRepaced,
                 ProjectDesignPeriodId = x.ProjectDesignPeriodId,
-                
+
                 CreatedBy = x.CreatedBy,
                 ModifiedBy = x.ModifiedBy,
                 DeletedBy = x.DeletedBy,
@@ -193,7 +193,7 @@ namespace GSC.Respository.Attendance
             foreach (var item in items)
             {
                 foreach (var item2 in template)
-                {                    
+                {
                     var screeningTemplateLock = Context.ScreeningTemplateLockUnlockAudit.Where(x => x.ProjectId == attendanceSearch.ProjectId && x.ProjectDesignTemplateId == item2.Id && x.ScreeningEntry.AttendanceId == item.AttendanceId).OrderByDescending(x => x.Id).FirstOrDefault();
                     if (screeningTemplateLock == null || screeningTemplateLock.IsLocked == false)
                     {
@@ -244,7 +244,7 @@ namespace GSC.Respository.Attendance
                     result = result.Where(x => x.ProjectId == attendanceSearch.ProjectId);
 
                 if (attendanceSearch.PeriodNo > 0)
-                    result = result.Where(x => x.PeriodNo == attendanceSearch.PeriodNo);                
+                    result = result.Where(x => x.PeriodNo == attendanceSearch.PeriodNo);
             }
 
             var items = result.Select(x => new AttendanceScreeningGridDto
@@ -267,14 +267,14 @@ namespace GSC.Respository.Attendance
                 AttendanceTemplateId = x.ProjectDesignPeriod.AttendanceTemplateId,
                 DiscontinuedTemplateId = x.ProjectDesignPeriod.DiscontinuedTemplateId,
                 ProjectSubjectId = x.ProjectSubjectId,
-                PeriodNo = x.PeriodNo,                
+                PeriodNo = x.PeriodNo,
                 IsStandby = x.IsStandby ? "Yes" : "No",
                 SubjectNumber = x.ProjectSubject != null ? x.ProjectSubject.Number : "",
                 AttendanceType = x.AttendanceType,
                 Status = x.Status,
                 AttendaceStatusName = x.Status != null ? x.Status.GetDescription() : "",
                 IsReplaced = x.ProjectSubject != null && x.ProjectSubject.IsRepaced,
-                ProjectDesignPeriodId = x.ProjectDesignPeriodId,             
+                ProjectDesignPeriodId = x.ProjectDesignPeriodId,
             }).ToList().OrderBy(x => x.Id).ToList();
 
             if (attendanceSearch.AttendanceType == AttendanceType.Project && items.Count > 0)
@@ -327,20 +327,20 @@ namespace GSC.Respository.Attendance
         }
 
         public List<AttendanceScreeningGridDto> GetAttendaceListByLock(ScreeningSearhParamDto attendanceSearch, bool isLock)
-        {            
+        {
             var items = new List<AttendanceScreeningGridDto>();
             if (isLock)
             {
-                items = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)                           
-                             select new AttendanceScreeningGridDto
-                             {
-                                 Id = attendance.Id,
-                                 ProjectId = attendance.ProjectId,
-                                 VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
-                                 VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
-                                 SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
-                                 AttendanceId = attendance.Id,
-                             }).ToList();
+                items = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
+                         select new AttendanceScreeningGridDto
+                         {
+                             Id = attendance.Id,
+                             ProjectId = attendance.ProjectId,
+                             VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
+                             VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
+                             SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
+                             AttendanceId = attendance.Id,
+                         }).ToList();
 
                 var lstsubject = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
                                   select new AttendanceScreeningGridDto
@@ -374,22 +374,22 @@ namespace GSC.Respository.Attendance
                         {
                             items.RemoveAll(x => x.Id == item.Id);
                         }
-                    }                    
+                    }
                 }
             }
             else
             {
-                var result = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)                           
-                           join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on attendance.Id equals locktemplate.ScreeningEntry.AttendanceId                           
-                           select new AttendanceScreeningGridDto
-                           {
-                               Id = attendance.Id,
-                               ProjectId = attendance.ProjectId,
-                               VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
-                               VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
-                               SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
-                               AttendanceId = attendance.Id,
-                           }).Distinct().ToList();
+                var result = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
+                              join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on attendance.Id equals locktemplate.ScreeningEntry.AttendanceId
+                              select new AttendanceScreeningGridDto
+                              {
+                                  Id = attendance.Id,
+                                  ProjectId = attendance.ProjectId,
+                                  VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
+                                  VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
+                                  SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
+                                  AttendanceId = attendance.Id,
+                              }).Distinct().ToList();
 
                 items = result.GroupBy(x => x.VolunteerName).Select(z => new AttendanceScreeningGridDto
                 {
@@ -400,7 +400,7 @@ namespace GSC.Respository.Attendance
                     SubjectNumber = z.FirstOrDefault().SubjectNumber,
                     AttendanceId = z.FirstOrDefault().AttendanceId,
                 }).ToList();
-                    
+
             }
             return items;
         }
@@ -427,10 +427,10 @@ namespace GSC.Respository.Attendance
             var volunteers = Context.Volunteer.Where(t => All.Where(x => x.DeletedDate == null
                                                                          && x.ProjectId == projectId)
                 .Select(s => s.VolunteerId).Contains(t.Id)).Select(t => new DropDownDto
-            {
-                Id = t.Id,
-                Value = t.FullName
-            }).ToList();
+                {
+                    Id = t.Id,
+                    Value = t.FullName
+                }).ToList();
 
             return volunteers;
         }
@@ -441,10 +441,10 @@ namespace GSC.Respository.Attendance
                                             && x.ProjectId == projectId &&
                                             x.ProjectSubject.NumberType == SubjectNumberType.StandBy
                                             && x.PeriodNo == 1).Select(t => new DropDownDto
-            {
-                Id = t.Id,
-                Value = t.Volunteer.FullName
-            }).ToList();
+                                            {
+                                                Id = t.Id,
+                                                Value = t.Volunteer.FullName
+                                            }).ToList();
 
             return volunteers;
         }
@@ -509,9 +509,9 @@ namespace GSC.Respository.Attendance
                 FullName = x.Volunteer.FullName,
                 FromAge = x.Volunteer.FromAge,
                 ToAge = x.Volunteer.ToAge,
-                Gender = x.Volunteer.GenderId == null ? "" : ((Gender) x.Volunteer.GenderId).GetDescription(),
+                Gender = x.Volunteer.GenderId == null ? "" : ((Gender)x.Volunteer.GenderId).GetDescription(),
                 Race = x.Volunteer.Race.RaceName,
-                IsDeleted = x.Volunteer.IsDeleted,
+                IsDeleted = x.Volunteer.DeletedDate != null,
                 Blocked = x.Volunteer.IsBlocked ?? false
             }).OrderByDescending(x => x.FullName).ToList();
         }

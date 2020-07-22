@@ -75,7 +75,7 @@ namespace GSC.Respository.Pharmacy
                     config.FormId
                 select new PharmacyEntryDto
                 {
-                    IsDeleted = pharmacyentry.IsDeleted,
+                    IsDeleted = pharmacyentry.DeletedDate != null,
                     Id = pharmacyentry.Id,
                     ProjectId = pharmacyentry.ProjectId,
                     PharmacyNo = pharmacyentry.PharmacyNo,
@@ -100,7 +100,7 @@ namespace GSC.Respository.Pharmacy
                 ).OrderBy(a => a.SeqNo) on variable.Id equals variabletemplateDetail.VariableId
                 select new VariableDto
                 {
-                    IsDeleted = variable.IsDeleted,
+                    IsDeleted = variable.DeletedDate!=null,
                     Id = variable.Id,
                     VariableName = variable.VariableName,
                     VariableCode = variable.VariableCode
@@ -115,7 +115,7 @@ namespace GSC.Respository.Pharmacy
                     equals productType.Id
                 select new PharmacyEntryDto
                 {
-                    IsDeleted = pharmacyentry.IsDeleted,
+                    IsDeleted = pharmacyentry.DeletedDate != null,
                     Id = pharmacyentry.Id,
                     Status = pharmacyentry.Status,
                     PharmacyDate = pharmacyentry.PharmacyDate,

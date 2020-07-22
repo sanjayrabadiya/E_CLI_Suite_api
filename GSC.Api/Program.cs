@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore;
+﻿using GSC.Helper;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
+using System.IO;
 
 namespace GSC.Api
 {
@@ -8,13 +10,23 @@ namespace GSC.Api
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            LogConfiguration.Configure();
+
+            var webHost = CreateWebHostBuilder(args);
+
+            webHost.Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        private static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
             return WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>().UseSerilog();
+                //.UseKestrel()
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseSetting("detailedErrors", "true")
+                .UseIISIntegration()
+                .UseStartup<Startup>()
+                .CaptureStartupErrors(true)
+                .UseSerilog();
         }
     }
 }

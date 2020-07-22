@@ -17,11 +17,11 @@ namespace GSC.Api.Controllers.Screening
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IScreeningTemplateValueCommentRepository _screeningTemplateValueCommentRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ScreeningTemplateValueCommentController(
             IScreeningTemplateValueCommentRepository screeningTemplateValueCommentRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
         {
             _screeningTemplateValueCommentRepository = screeningTemplateValueCommentRepository;
             _uow = uow;

@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IMaritalStatusRepository _maritalStatusRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public MaritalStatusController(IMaritalStatusRepository maritalStatusRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _maritalStatusRepository = maritalStatusRepository;
@@ -45,7 +45,7 @@ namespace GSC.Api.Controllers.Master
         {
             var maritalStatuss = _maritalStatusRepository.All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var maritalStatussDto = _mapper.Map<IEnumerable<MaritalStatusDto>>(maritalStatuss);
             maritalStatussDto.ForEach(b =>

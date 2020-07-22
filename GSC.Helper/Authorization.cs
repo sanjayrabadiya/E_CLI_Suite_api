@@ -1,18 +1,19 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using GSC.Data.Dto.UserMgt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
-namespace GSC.Api.Helpers
+namespace GSC.Helper
 {
     public static class Authorization
     {
-        public static void AddAuth(this IServiceCollection services, JwtSettings configuration)
+        public static void AddAuth(this IServiceCollection services, IConfigurationRoot configuration)
         {
             services.AddCors(o => o.AddPolicy("AllowCorsPolicy", builder =>
             {
@@ -25,16 +26,15 @@ namespace GSC.Api.Helpers
                 {
                     jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ClockSkew = new TimeSpan(0),
                         ValidateActor = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = configuration.Issuer,
-                        ValidAudience = configuration.Audience,
+                        ValidIssuer = configuration["JwtSettings:Issuer"],
+                        ValidAudience = configuration["JwtSettings:Audience"],
                         IssuerSigningKey =
                             new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(configuration.Key))
+                                Encoding.UTF8.GetBytes(configuration["JwtSettings:key"]))
                     };
                     jwtBearerOptions.Events = new JwtBearerEvents
                     {
@@ -42,15 +42,17 @@ namespace GSC.Api.Helpers
                         {
                             if (context.SecurityToken is JwtSecurityToken accessToken)
                             {
-                                var userInfo = accessToken.Claims.FirstOrDefault(a => a.Type == "gsc_user_token")
-                                    ?.Value;
+                                var userInfo = accessToken.Claims.Where(a => a.Type == "gsc_user_token").FirstOrDefault()?.Value;
+                                if (userInfo == null)
+                                    userInfo = accessToken.Claims.Where(a => a.Type == ClaimTypes.GivenName).FirstOrDefault()?.Value;
+                                                
                                 context.HttpContext.Request.Headers.Add("user", userInfo);
                             }
-
                             return Task.CompletedTask;
                         }
                     };
                 });
+
         }
     }
 }

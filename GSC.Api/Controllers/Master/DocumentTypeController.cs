@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public DocumentTypeController(IDocumentTypeRepository documentRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _documentRepository = documentRepository;
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var documents = _documentRepository.FindBy(x =>x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).ToList();
+            var documents = _documentRepository.FindBy(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
             var documentsDto = _mapper.Map<IEnumerable<DocumentTypeDto>>(documents).ToList();
             documentsDto.ForEach(b =>
             {

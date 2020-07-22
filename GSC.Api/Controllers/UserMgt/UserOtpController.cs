@@ -18,12 +18,12 @@ namespace GSC.Api.Controllers.UserMgt
     public class UserOtpController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUserOtpRepository _userOtpRepository;
         private readonly IUserRepository _userRepository;
 
         public UserOtpController(IUserOtpRepository userOtpRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IUserRepository userRepository,
             IMapper mapper)
         {

@@ -4,12 +4,13 @@ using GSC.Domain.Context;
 
 namespace GSC.Common.UnitOfWork
 {
-    public interface IUnitOfWork<TContext>
-        where TContext : GscContext
+    public interface IUnitOfWork
     {
-        TContext Context { get; }
         int Save();
         Task<int> SaveAsync();
+        void Begin();
+        void Commit();
+        void Rollback();
         IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class;
     }
 }

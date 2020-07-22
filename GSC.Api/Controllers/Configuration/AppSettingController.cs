@@ -15,10 +15,10 @@ namespace GSC.Api.Controllers.Configuration
     {
         private readonly IAppSettingRepository _appSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public AppSettingController(IAppSettingRepository appSettingRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _appSettingRepository = appSettingRepository;

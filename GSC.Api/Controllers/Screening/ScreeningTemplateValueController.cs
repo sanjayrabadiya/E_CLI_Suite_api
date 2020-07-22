@@ -21,14 +21,14 @@ namespace GSC.Api.Controllers.Screening
         private readonly IMapper _mapper;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public ScreeningTemplateValueController(IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IUploadSettingRepository uploadSettingRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;

@@ -16,11 +16,11 @@ namespace GSC.Api.Controllers.Volunteer
     public class VolunteerBiometricController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVolunteerBiometricRepository _volunteerBiometricRepository;
 
         public VolunteerBiometricController(IVolunteerBiometricRepository volunteerBiometricRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _volunteerBiometricRepository = volunteerBiometricRepository;
             _uow = uow;

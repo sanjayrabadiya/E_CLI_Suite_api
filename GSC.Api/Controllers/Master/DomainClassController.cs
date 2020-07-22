@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public DomainClassController(IDomainClassRepository domainClassRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _domainClassRepository = domainClassRepository;
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var domainClasss = _domainClassRepository.All.Where(x =>x.IsDeleted == isDeleted
+            var domainClasss = _domainClassRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var domainClasssDto = _mapper.Map<IEnumerable<DomainClassDto>>(domainClasss);
             domainClasssDto.ForEach(b =>

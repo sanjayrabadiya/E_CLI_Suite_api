@@ -27,12 +27,12 @@ namespace GSC.Api.Controllers.ProjectRight
         private readonly IProjectDocumentRepository _projectDocumentRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectRightRepository _projectRightRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
 
 
         public ProjectDocumentController(IProjectDocumentRepository projectDocumentRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IUploadSettingRepository uploadSettingRepository,
             IJwtTokenAccesser jwtTokenAccesser,

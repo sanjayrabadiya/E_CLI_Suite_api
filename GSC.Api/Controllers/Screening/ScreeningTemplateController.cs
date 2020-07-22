@@ -30,13 +30,13 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateReviewRepository _screeningTemplateReviewRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ScreeningTemplateController(IScreeningTemplateRepository screeningTemplateRepository,
             IScreeningEntryRepository screeningEntryRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IProjectSubjectRepository projectSubjectRepository,
@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.Screening
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var screeningEntries = _screeningTemplateRepository.FindBy(x => x.IsDeleted == isDeleted).ToList();
+            var screeningEntries = _screeningTemplateRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).ToList();
             var screeningTemplateiesDto = _mapper.Map<IEnumerable<ScreeningTemplateDto>>(screeningEntries);
             return Ok(screeningTemplateiesDto);
         }

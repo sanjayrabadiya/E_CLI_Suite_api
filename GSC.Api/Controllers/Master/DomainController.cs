@@ -24,12 +24,12 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public DomainController(IDomainRepository domainRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser, IProjectDesignRepository projectDesignRepository)
         {
             _domainRepository = domainRepository;
@@ -45,7 +45,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var domains = _domainRepository.FindByInclude(x => x.IsDeleted == isDeleted, x => x.DomainClass)
+            var domains = _domainRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.DomainClass)
                 .OrderByDescending(x => x.Id).ToList();
             var domainsDto = _mapper.Map<IEnumerable<DomainDto>>(domains);
             domainsDto.ForEach(b =>
@@ -62,7 +62,7 @@ namespace GSC.Api.Controllers.Master
 
             //var domains = _domainRepository.All.Where(x =>
             //    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-            //    && (x.IsDeleted == isDeleted)
+            //    && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
             //).ToList();
             //var domainsDto = _mapper.Map<IEnumerable<DomainDto>>(domains);
             //domainsDto.ForEach(t => t.DomainClassName = t.DomainClassName);

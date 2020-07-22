@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ClientTypeController(IClientTypeRepository clientTypeRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _clientTypeRepository = clientTypeRepository;
@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
           
-            var clientTypess = _clientTypeRepository.FindByInclude(x =>  x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).ToList();
+            var clientTypess = _clientTypeRepository.FindByInclude(x =>  isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
 
 
             var clientTypessDto = _mapper.Map<IEnumerable<ClientTypeDto>>(clientTypess).ToList();

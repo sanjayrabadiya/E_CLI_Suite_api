@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace GSC.Common.GenericRespository
 {
-    public interface IGenericRepository<TC>
-        where TC : class
+    public interface IGenericRepository<TC> : IDisposable
     {
         IQueryable<TC> All { get; }
         IQueryable<TC> AllIncluding(params Expression<Func<TC, object>>[] includeProperties);
@@ -24,6 +23,7 @@ namespace GSC.Common.GenericRespository
         void Add(TC entity);
         void Update(TC entity);
         void Delete(int id);
+        void Remove(TC entity);
         void Delete(TC entity);
         void Active(TC entity);
         void InsertUpdateGraph(TC entity);

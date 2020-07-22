@@ -11,11 +11,11 @@ namespace GSC.Api.Controllers.Volunteer
     [Route("api/[controller]")]
     public class VolunteerFoodController : BaseController
     {
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVolunteerFoodRepository _volunteerFoodRepository;
 
         public VolunteerFoodController(IVolunteerFoodRepository volunteerFoodRepository,
-            IUnitOfWork<GscContext> uow)
+            IUnitOfWork uow)
         {
             _volunteerFoodRepository = volunteerFoodRepository;
             _uow = uow;

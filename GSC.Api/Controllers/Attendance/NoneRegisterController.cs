@@ -22,10 +22,10 @@ namespace GSC.Api.Controllers.Attendance
         private readonly IMapper _mapper;
         private readonly INoneRegisterRepository _noneRegisterRepository;
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public NoneRegisterController(INoneRegisterRepository noneRegisterterRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IAttendanceRepository attendanceRepository)
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Attendance
         {
             var volunteerNonregisters = _noneRegisterRepository.All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(t => t.Id).ToList();
             var volunteerNonregisterDto = _mapper.Map<IEnumerable<NoneRegisterDto>>(volunteerNonregisters);
             return Ok(volunteerNonregisterDto);

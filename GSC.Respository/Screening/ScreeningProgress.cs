@@ -3,9 +3,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Custom;
 using GSC.Domain.Context;
 using GSC.Helper;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 
 

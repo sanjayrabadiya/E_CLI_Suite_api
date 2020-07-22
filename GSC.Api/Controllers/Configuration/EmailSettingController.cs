@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Configuration
         private readonly IEmailSettingRepository _emailSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public EmailSettingController(IEmailSettingRepository emailSettingRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _emailSettingRepository = emailSettingRepository;
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Configuration
         {
             var emailSettings = _emailSettingRepository.All.Where(x =>
                 x.CompanyId == _jwtTokenAccesser.CompanyId
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var emailSettingsDto = _mapper.Map<IEnumerable<EmailSettingDto>>(emailSettings);
             return Ok(emailSettingsDto);

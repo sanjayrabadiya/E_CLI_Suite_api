@@ -86,7 +86,7 @@ namespace GSC.Respository.Pharmacy
                      .FormId equals config.FormId
                  select new PharmacyVerificationEntryDto
                  {
-                     IsDeleted = pharmacyverificationentry.IsDeleted,
+                     IsDeleted = pharmacyverificationentry.DeletedDate != null,
                      Id = pharmacyverificationentry.Id,
                      ProjectId = pharmacyverificationentry.ProjectId,
                      PharmacyVerificationNo = pharmacyverificationentry.PharmacyVerificationNo,
@@ -112,7 +112,7 @@ namespace GSC.Respository.Pharmacy
                                                 ).OrderBy(a => a.SeqNo) on variable.Id equals variabletemplateDetail.VariableId
                                                 select new VariableDto
                                                 {
-                                                    IsDeleted = variable.IsDeleted,
+                                                    IsDeleted = variable.DeletedDate != null,
                                                     Id = variable.Id,
                                                     VariableName = variable.VariableName,
                                                     VariableCode = variable.VariableCode
@@ -123,7 +123,7 @@ namespace GSC.Respository.Pharmacy
                                                  //join productType in Context.ProductType.Where(t=>t.DeletedBy == null) on pharmacyverificationentry.ProductTypeId equals productType.Id
                                              select new PharmacyVerificationEntryDto
                                              {
-                                                 IsDeleted = pharmacyverificationentry.IsDeleted,
+                                                 IsDeleted = pharmacyverificationentry.DeletedDate != null,
                                                  Id = pharmacyverificationentry.Id,
                                                  PharmacyEntryId = pharmacyverificationentry.PharmacyEntryId,
                                                  PharmacyVerificationDate = pharmacyverificationentry.PharmacyVerificationDate,

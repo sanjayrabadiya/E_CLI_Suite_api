@@ -26,7 +26,7 @@ namespace GSC.Api.Controllers.Medra
         private readonly IMedraVersionRepository _medraVersionRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMedraLanguageRepository _languageRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -52,7 +52,7 @@ namespace GSC.Api.Controllers.Medra
            IUserRepository userRepository,
            IMedraLanguageRepository languageRepository,
            IMedraConfigCommonRepository medraConfigCommonRepository,
-           IUnitOfWork<GscContext> uow,
+           IUnitOfWork uow,
            IMapper mapper,
            IUploadSettingRepository uploadSettingRepository,
            IJwtTokenAccesser jwtTokenAccesser,
@@ -101,7 +101,7 @@ namespace GSC.Api.Controllers.Medra
         public IActionResult Get(bool isDeleted)
         {
             var medra = _medraConfigRepository.FindByInclude(x => (x.CompanyId == null
-                                                           || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.IsDeleted == isDeleted, x => x.MedraVersion
+                                                           || x.CompanyId == _jwtTokenAccesser.CompanyId) && isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.MedraVersion
                                                            , x => x.MedraVersion.Dictionary, x => x.Language).OrderByDescending(x => x.Id).ToList();
 
             var medraDto = _mapper.Map<IEnumerable<MedraConfigDto>>(medra).ToList();

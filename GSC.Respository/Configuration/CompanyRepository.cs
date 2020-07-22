@@ -25,7 +25,7 @@ namespace GSC.Respository.Configuration
 
         public IList<CompanyDto> GetCompanies(bool isDeleted)
         {
-            var companies = FindByInclude(t => t.IsDeleted == isDeleted, t => t.Location).Select(s => new CompanyDto
+            var companies = FindByInclude(t => isDeleted ? t.DeletedDate == null : t.DeletedDate != null, t => t.Location).Select(s => new CompanyDto
             {
                 Id = s.Id,
                 CompanyCode = s.CompanyCode,
@@ -34,7 +34,7 @@ namespace GSC.Respository.Configuration
                 Phone2 = s.Phone2,
                 Location = s.Location,
                 Logo = s.Logo,
-                IsDeleted = s.IsDeleted
+                IsDeleted = s.DeletedDate != null
             }).OrderByDescending(t => t.Id).ToList();
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
             foreach (var company in companies)
@@ -60,7 +60,7 @@ namespace GSC.Respository.Configuration
         public List<DropDownDto> GetCompanyDropDown()
         {
             return All.Where(x => x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.CompanyName, Code = c.CompanyCode})
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CompanyName, Code = c.CompanyCode })
                 .OrderBy(o => o.Value).ToList();
         }
     }

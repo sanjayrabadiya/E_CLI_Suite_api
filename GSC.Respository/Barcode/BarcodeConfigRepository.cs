@@ -25,10 +25,10 @@ namespace GSC.Respository.Barcode
         {
             var barcodeconfig = All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).Select(c => new BarcodeConfigDto
+                    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new BarcodeConfigDto
                     {
                         Id = c.Id,
-                        IsDeleted = c.IsDeleted,
+                        IsDeleted = c.DeletedDate != null,
                         BarcodeTypeId = c.BarcodeTypeId,
                         BarcodeTypeName = c.BarcodeType.BarcodeTypeName,
                         SubjectNo = c.SubjectNo,
@@ -37,7 +37,7 @@ namespace GSC.Respository.Barcode
                         VolunteerId = c.VolunteerId,
                         RandomizationNo = c.RandomizationNo,
                         BarcodeFor = c.BarcodeFor,
-                        BarcodeForName = c.BarcodeFor == 0 ? "" : ((BarcodeFor) c.BarcodeFor).GetDescription(),
+                        BarcodeForName = c.BarcodeFor == 0 ? "" : ((BarcodeFor)c.BarcodeFor).GetDescription(),
                         Width = c.Width,
                         Height = c.Height,
                         DisplayValue = c.DisplayValue,
@@ -69,7 +69,7 @@ namespace GSC.Respository.Barcode
                 new BarcodeConfigDto
                 {
                     Id = c.Id,
-                    IsDeleted = c.IsDeleted,
+                    IsDeleted = c.DeletedDate != null,
                     BarcodeTypeId = c.BarcodeTypeId,
                     BarcodeTypeName = c.BarcodeType.BarcodeTypeName,
                     SubjectNo = c.SubjectNo,
@@ -78,7 +78,7 @@ namespace GSC.Respository.Barcode
                     VolunteerId = c.VolunteerId,
                     RandomizationNo = c.RandomizationNo,
                     BarcodeFor = c.BarcodeFor,
-                    BarcodeForName = c.BarcodeFor == 0 ? "" : ((BarcodeFor) c.BarcodeFor).GetDescription(),
+                    BarcodeForName = c.BarcodeFor == 0 ? "" : ((BarcodeFor)c.BarcodeFor).GetDescription(),
                     Width = c.Width,
                     Height = c.Height,
                     DisplayValue = c.DisplayValue,

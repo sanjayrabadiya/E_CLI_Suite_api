@@ -16,12 +16,12 @@ namespace GSC.Api.Controllers.Report
     {
         private readonly IProjectRightRepository _ProjectRightRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         public UserReportController(IProjectRightRepository projectRightRepository,
            
             IJwtTokenAccesser jwtTokenAccesser,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _ProjectRightRepository = projectRightRepository;
             _jwtTokenAccesser = jwtTokenAccesser;

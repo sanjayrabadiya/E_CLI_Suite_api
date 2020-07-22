@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Barcode.Generate;
 using GSC.Data.Entities.Barcode.Generate;
@@ -25,13 +26,13 @@ namespace GSC.Api.Controllers.Barcode.Generate
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IProjectSubjectRepository _projectSubjectRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public BarcodeGenerateController(IBarcodeGenerateRepository barcodeGenerateRepository,
             IProjectSubjectRepository projectSubjectRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IBarcodeConfigRepository barcodeConfigRepository)
         {
             _barcodeGenerateRepository = barcodeGenerateRepository;
@@ -61,64 +62,53 @@ namespace GSC.Api.Controllers.Barcode.Generate
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] BarcodeGenerateDto barcodeGenerateDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            try
+            barcodeGenerateDto.Id = 0;
+            //For Multiple Template
+            foreach (var id in barcodeGenerateDto.Ids)
             {
-                // _uow.Context.Database.BeginTransaction();
+                barcodeGenerateDto.ProejctDesignTemplateId = id;
 
-                barcodeGenerateDto.Id = 0;
-                //For Multiple Template
-                foreach (var id in barcodeGenerateDto.Ids)
-                {
-                    barcodeGenerateDto.ProejctDesignTemplateId = id;
+                if (barcodeGenerateDto.ProejctDesignTemplateId <= 0) return BadRequest();
 
-                    if (barcodeGenerateDto.ProejctDesignTemplateId <= 0) return BadRequest();
+                var barcodeGenerate = _mapper.Map<BarcodeGenerate>(barcodeGenerateDto);
 
-                    var barcodeGenerate = _mapper.Map<BarcodeGenerate>(barcodeGenerateDto);
+                var barcodeConfigDto = _barcodeConfigRepository.GetBarcodeConfig(barcodeGenerateDto.BarcodeTypeId);
+                var subs = new BarcodeSubjectDetailDto();
+                subs.ProjectNo = barcodeGenerateDto.ProjectCode;
+                var period = _projectDesignPeriodRepository.GetPeriod(barcodeGenerateDto.ProjectDesignPeriodId);
+                subs.PeriodNo = period.DisplayName;
+                var template =
+                    _projectDesignTemplateRepository.GetTemplate(barcodeGenerateDto.ProejctDesignTemplateId);
+                subs.TemmplateNo = template.TemplateCode;
+                subs.RandomizationNo = "R001";
+                barcodeGenerate.BarcodeSubjects = new List<BarcodeSubjectDetail>();
+                if (barcodeGenerateDto.NoOfSubjectGenerate != null)
+                    for (var i = 0; i < barcodeGenerateDto.NoOfSubjectGenerate; i++)
+                    {
+                        var barcodeDetail = new BarcodeSubjectDetail();
 
-                    var barcodeConfigDto = _barcodeConfigRepository.GetBarcodeConfig(barcodeGenerateDto.BarcodeTypeId);
-                    var subs = new BarcodeSubjectDetailDto();
-                    subs.ProjectNo = barcodeGenerateDto.ProjectCode;
-                    var period = _projectDesignPeriodRepository.GetPeriod(barcodeGenerateDto.ProjectDesignPeriodId);
-                    subs.PeriodNo = period.DisplayName;
-                    var template =
-                        _projectDesignTemplateRepository.GetTemplate(barcodeGenerateDto.ProejctDesignTemplateId);
-                    subs.TemmplateNo = template.TemplateCode;
-                    subs.RandomizationNo = "R001";
-                    barcodeGenerate.BarcodeSubjects = new List<BarcodeSubjectDetail>();
-                    if (barcodeGenerateDto.NoOfSubjectGenerate != null)
-                        for (var i = 0; i < barcodeGenerateDto.NoOfSubjectGenerate; i++)
-                        {
-                            var barcodeDetail = new BarcodeSubjectDetail();
+                        barcodeDetail.ProjectSubject =
+                            _projectSubjectRepository.SaveSubjectForProject(barcodeGenerateDto.ProjectId,
+                                SubjectNumberType.Normal);
 
-                            barcodeDetail.ProjectSubject =
-                                _projectSubjectRepository.SaveSubjectForProject(barcodeGenerateDto.ProjectId,
-                                    SubjectNumberType.Normal);
+                        if (barcodeConfigDto.SubjectNo)
+                            barcodeDetail.BarcodeLabelString += barcodeDetail.ProjectSubject.Number;
+                        if (barcodeConfigDto.ProjectNo) barcodeDetail.BarcodeLabelString += subs.ProjectNo;
+                        if (barcodeConfigDto.Period) barcodeDetail.BarcodeLabelString += subs.PeriodNo;
+                        if (barcodeConfigDto.RandomizationNo)
+                            barcodeDetail.BarcodeLabelString += subs.RandomizationNo;
+                        barcodeDetail.BarcodeLabelString += subs.TemmplateNo;
+                        barcodeGenerate.BarcodeSubjects.Add(barcodeDetail);
+                    }
 
-                            if (barcodeConfigDto.SubjectNo)
-                                barcodeDetail.BarcodeLabelString += barcodeDetail.ProjectSubject.Number;
-                            if (barcodeConfigDto.ProjectNo) barcodeDetail.BarcodeLabelString += subs.ProjectNo;
-                            if (barcodeConfigDto.Period) barcodeDetail.BarcodeLabelString += subs.PeriodNo;
-                            if (barcodeConfigDto.RandomizationNo)
-                                barcodeDetail.BarcodeLabelString += subs.RandomizationNo;
-                            barcodeDetail.BarcodeLabelString += subs.TemmplateNo;
-                            barcodeGenerate.BarcodeSubjects.Add(barcodeDetail);
-                        }
-
-                    _barcodeGenerateRepository.Add(barcodeGenerate);
-                    _uow.Save();
-                }
-
-                // _uow.Context.Database.CommitTransaction();
-                return Ok();
+                _barcodeGenerateRepository.Add(barcodeGenerate);
+                _uow.Save();
             }
-            catch (Exception)
-            {
-                _uow.Context.Database.RollbackTransaction();
-                throw;
-            }
+            return Ok();
         }
 
 

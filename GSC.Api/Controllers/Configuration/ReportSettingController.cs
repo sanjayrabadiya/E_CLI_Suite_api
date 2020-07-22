@@ -18,10 +18,10 @@ namespace GSC.Api.Controllers.Configuration
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IReportSettingRepository _reportSettingRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ReportSettingController(IReportSettingRepository reportSettingRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _reportSettingRepository = reportSettingRepository;
@@ -34,7 +34,7 @@ namespace GSC.Api.Controllers.Configuration
         public IActionResult Get(bool isDeleted)
         {
             var reportSettig = _reportSettingRepository.All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.IsDeleted == false)
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
                 .Select(x => new ReportSettingDto
                 {
                     Id = x.Id,
@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.Configuration
                     RightMargin = x.RightMargin,
                     TopMargin = x.TopMargin,
                     BottomMargin = x.BottomMargin,
-                    IsDeleted = x.IsDeleted
+                    IsDeleted = x.DeletedDate != null
                 }).OrderByDescending(x => x.Id).ToList();
             return Ok(reportSettig);
         }

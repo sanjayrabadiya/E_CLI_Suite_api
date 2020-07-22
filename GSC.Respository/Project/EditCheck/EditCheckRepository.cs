@@ -49,7 +49,7 @@ namespace GSC.Respository.Project.EditCheck
 
             return All.Where(t => (t.CompanyId == null
                                    || t.CompanyId == _jwtTokenAccesser.CompanyId)
-                                  && t.IsDeleted == isDeleted
+                                  && isDeleted ? t.DeletedDate != null : t.DeletedDate == null
                                   && t.ProjectDesignId == projectDesignId
                                   && projectList.Any(c => c == t.ProjectDesign.ProjectId)
             ).Select(r => new EditCheckDto
@@ -67,7 +67,7 @@ namespace GSC.Respository.Project.EditCheck
                 IsLock = !r.ProjectDesign.IsUnderTesting,
                 IsFormula = r.IsFormula,
                 IsReferenceVerify = r.IsReferenceVerify,
-                IsDeleted = r.IsDeleted
+                IsDeleted = r.DeletedDate != null
             })
             .OrderByDescending(x => x.Id).ToList();
         }
@@ -112,7 +112,7 @@ namespace GSC.Respository.Project.EditCheck
                 IsOnlyTarget = x.IsOnlyTarget,
                 IsReferenceVerify = x.IsReferenceVerify,
                 CompanyId = x.CompanyId,
-                EditCheckDetails = x.EditCheckDetails.Where(r => r.IsDeleted == isDeleted).Select
+                EditCheckDetails = x.EditCheckDetails.Where(r => isDeleted ? r.DeletedDate != null : r.DeletedDate == null).Select
                  (c => new EditCheckDetailDto
                  {
                      EditCheckId = c.EditCheckId,

@@ -21,43 +21,17 @@ namespace GSC.Common.UnitOfWork
 
         public int Save()
         {
-            using (var transaction = Context.Database.BeginTransaction())
-            {
-                try
-                {
-                    var retValu = Context.SaveChanges(_jwtTokenAccesser);
-                    transaction.Commit();
-                    return retValu;
-                }
-                catch (DbException)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
-            }
+            return Context.SaveChanges(_jwtTokenAccesser);
         }
 
         public async Task<int> SaveAsync()
         {
-            using (var transaction = Context.Database.BeginTransaction())
-            {
-                try
-                {
-                    var val = await Context.SaveChangesAsync(_jwtTokenAccesser);
-                    transaction.Commit();
-                    return val;
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
-            }
+            return await Context.SaveChangesAsync(_jwtTokenAccesser);
         }
 
         public IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class
         {
-            return Context.Set<TEntity>().FromSql(sql, parameters);
+            return Context.Set<TEntity>().FromSqlRaw(sql, parameters);
         }
 
         public TContext Context { get; }
@@ -65,6 +39,20 @@ namespace GSC.Common.UnitOfWork
         public void Dispose()
         {
             Context.Dispose();
+        }
+
+        public void Begin()
+        {
+            Context.Begin();
+        }
+        public void Commit()
+        {
+            Context.Commit();
+        }
+
+        public void Rollback()
+        {
+            Context.Rollback();
         }
     }
 }

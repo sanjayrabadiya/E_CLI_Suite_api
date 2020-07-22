@@ -21,12 +21,12 @@ namespace GSC.Api.Controllers.Configuration
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUserRepository _userRepository;
 
         public LoginPreferenceController(IUserRepository userRepository,
             ILoginPreferenceRepository loginPreferenceRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _userRepository = userRepository;
@@ -42,7 +42,7 @@ namespace GSC.Api.Controllers.Configuration
         {
             var loginPreferences = _loginPreferenceRepository.All.Where(x =>
                 x.CompanyId == _jwtTokenAccesser.CompanyId
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var loginPreferencesDto = _mapper.Map<IEnumerable<LoginPreferenceDto>>(loginPreferences);
             return Ok(loginPreferencesDto);

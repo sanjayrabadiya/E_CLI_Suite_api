@@ -34,7 +34,7 @@ namespace GSC.Api.Controllers.Project.Schedule
         private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
         private readonly INumberFormatRepository _numberFormatRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ProjectScheduleController(IProjectScheduleRepository projectScheduleRepository,
             IUserRepository userRepository,
@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignRepository projectDesignRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository,
             INumberFormatRepository numberFormatRepository,
@@ -68,14 +68,14 @@ namespace GSC.Api.Controllers.Project.Schedule
 
         [HttpGet("{isDeleted:bool?}")]
         public IList<ProjectScheduleDto> Get(bool isDeleted)
-            //public IActionResult Get(bool isDeleted)
+        //public IActionResult Get(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<ProjectScheduleDto>();
 
             var projectSchedules = _projectScheduleRepository.FindByInclude(
                     x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                         && x.IsDeleted == isDeleted
+                         && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                          && projectList.Any(c => c == x.Project.Id),
                     x => x.Project, x => x.ProjectDesignPeriod, x => x.ProjectDesignVisit, x => x.ProjectDesignTemplate,
                     x => x.ProjectDesignVariable)
@@ -87,8 +87,8 @@ namespace GSC.Api.Controllers.Project.Schedule
                     VisitName = x.ProjectDesignVisit.DisplayName,
                     TemplateName = x.ProjectDesignTemplate.TemplateName,
                     VariableName = x.ProjectDesignVariable.VariableName,
-                    IsDeleted = x.IsDeleted,
-                   
+                    IsDeleted = x.DeletedDate != null,
+
                 }).OrderByDescending(x => x.Id).ToList();
             //return Ok(projectSchedules);
             return projectSchedules;
@@ -252,14 +252,14 @@ namespace GSC.Api.Controllers.Project.Schedule
 
         [HttpGet("GetData/{id}")]
         public IList<ProjectScheduleDto> GetData(int id)
-            //public IActionResult Get(bool isDeleted)
+        //public IActionResult Get(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<ProjectScheduleDto>();
 
             var projectSchedules = _projectScheduleRepository.FindByInclude(
                     x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                         && x.IsDeleted == false
+                         && x.DeletedDate == null
                          && x.ProjectDesignId == id
                          && projectList.Any(c => c == x.Project.Id),
                     x => x.Project, t => t.ProjectDesign, x => x.ProjectDesignPeriod, x => x.ProjectDesignVisit, x => x.ProjectDesignTemplate,
@@ -274,7 +274,7 @@ namespace GSC.Api.Controllers.Project.Schedule
                     VisitName = x.ProjectDesignVisit.DisplayName,
                     TemplateName = x.ProjectDesignTemplate.TemplateName,
                     VariableName = x.ProjectDesignVariable.VariableName,
-                    IsDeleted = x.IsDeleted,
+                    IsDeleted = x.DeletedDate != null,
                     CreatedBy = x.CreatedBy,
                     ModifiedBy = x.ModifiedBy,
                     DeletedBy = x.DeletedBy,
@@ -314,6 +314,6 @@ namespace GSC.Api.Controllers.Project.Schedule
 
             var data = _projectScheduleRepository.GetRefVariableValuefromTargetVariable(projectDesignVariableId);
             return Ok(data);
-        }       
+        }
     }
 }

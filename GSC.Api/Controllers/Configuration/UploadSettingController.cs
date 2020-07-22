@@ -18,11 +18,11 @@ namespace GSC.Api.Controllers.Configuration
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public UploadSettingController(IUploadSettingRepository uploadSettingRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _uploadSettingRepository = uploadSettingRepository;
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Configuration
         {
             var uploadSettings = _uploadSettingRepository.All.Where(x =>
                 x.CompanyId == _jwtTokenAccesser.CompanyId
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var uploadSettingsDto = _mapper.Map<IEnumerable<UploadSettingDto>>(uploadSettings);
             return Ok(uploadSettingsDto);

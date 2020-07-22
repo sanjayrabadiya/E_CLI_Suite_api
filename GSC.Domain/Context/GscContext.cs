@@ -315,7 +315,7 @@ namespace GSC.Domain.Context
                     entry.Property(x => x.CreatedBy).IsModified = false;
                     entry.Property(x => x.CreatedDate).IsModified = false;
 
-                    if (entry.Entity.IsDeleted)
+                    if (entry.Entity.InActiveRecord)
                     {
                         entry.Entity.DeletedBy = jwtTokenAccesser.UserId;
                         entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
@@ -353,7 +353,7 @@ namespace GSC.Domain.Context
 
             foreach (var dbEntry in changedEntityEntries)
             {
-                var tableName = dbEntry.Metadata.Relational().TableName;
+                var tableName = dbEntry.Metadata.Name;
                 if (_tablesToSkip.Contains(tableName)) continue;
 
                 var action = Enum.GetName(typeof(EntityState), dbEntry.State);
@@ -432,6 +432,21 @@ namespace GSC.Domain.Context
                     .Select(t => t.Item2)
             );
             base.SaveChanges();
+        }
+
+        public void Begin()
+        {
+            base.Database.BeginTransaction();
+        }
+
+        public void Commit()
+        {
+            base.Database.CommitTransaction();
+        }
+
+        public void Rollback()
+        {
+            base.Database.RollbackTransaction();
         }
     }
 

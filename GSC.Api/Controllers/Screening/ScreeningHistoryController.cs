@@ -16,10 +16,10 @@ namespace GSC.Api.Controllers.Screening
     {
         private readonly IMapper _mapper;
         private readonly IScreeningHistoryRepository _screeningHistoryRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ScreeningHistoryController(IScreeningHistoryRepository screeningHistoryRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IUserRecentItemRepository userRecentItemRepository)
         {
             _screeningHistoryRepository = screeningHistoryRepository;

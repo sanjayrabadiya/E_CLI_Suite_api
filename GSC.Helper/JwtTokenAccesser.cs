@@ -3,7 +3,7 @@ using GSC.Helper;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
-namespace GSC.Api.Helpers
+namespace GSC.Helper
 {
     public class JwtTokenAccesser : IJwtTokenAccesser
     {
@@ -13,17 +13,17 @@ namespace GSC.Api.Helpers
         {
             _httpContextAccessor = httpContextAccessor;
 
-            var user = GetHeader("user");
-            if (user != null && user.Any())
-            {
-                var userInfo = JsonConvert.DeserializeObject<UserInfo>(user);
-                UserId = userInfo.UserId;
-                UserName = userInfo.UserName;
-                CompanyId = userInfo.CompanyId;
-                RoleId = userInfo.RoleId;
-            }
-
-            IpAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+            //var user = GetHeader("user");
+            //if (user != null && user.Any())
+            //{
+            //    var userInfo = JsonConvert.DeserializeObject<UserInfo>(user);
+            //    UserId = userInfo.UserId;
+            //    UserName = userInfo.UserName;
+            //    CompanyId = userInfo.CompanyId;
+            //    RoleId = userInfo.RoleId;
+            //}
+            if (_httpContextAccessor != null && _httpContextAccessor.HttpContext != null)
+                IpAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
         }
 
 
@@ -33,13 +33,13 @@ namespace GSC.Api.Helpers
             return value;
         }
 
-        public int UserId { get; }
+        public int UserId { get; set; }
 
-        public string UserName { get; }
+        public string UserName { get; set; }
 
-        public int CompanyId { get; }
+        public int CompanyId { get; set; }
 
-        public int RoleId { get; }
+        public int RoleId { get; set; }
 
         public string IpAddress { get; }
     }

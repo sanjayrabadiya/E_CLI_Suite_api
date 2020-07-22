@@ -11,11 +11,11 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class VariableTemplateRightController : BaseController
     {
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVariableTemplateRightRepository _variableTemplateRightRepository;
 
         public VariableTemplateRightController(IVariableTemplateRightRepository variableTemplateRightRepository,
-            IUnitOfWork<GscContext> uow)
+            IUnitOfWork uow)
         {
             _variableTemplateRightRepository = variableTemplateRightRepository;
             _uow = uow;

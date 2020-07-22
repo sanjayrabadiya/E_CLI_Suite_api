@@ -34,11 +34,11 @@ namespace GSC.Respository.Master
         {
             var cityAreas = All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).Select(c => new CityAreaDto
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new CityAreaDto
             {
                 AreaName = c.AreaName,
                 CityName = c.City.CityName,
-                IsDeleted = c.IsDeleted,
+                IsDeleted = c.DeletedDate != null,
                 CountryName = c.City.State.Country.CountryName,
                 StateName = c.City.State.StateName,
                 City = c.City,
@@ -77,13 +77,13 @@ namespace GSC.Respository.Master
         {
             var cityareas = All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).Select(c => new CityAreaDto
             {
                 Id = c.Id,
                 AreaName = c.AreaName,
                 CityName = c.City.CityName,
-                IsDeleted = c.IsDeleted
+                IsDeleted = c.DeletedDate != null
             }).ToList();
 
             return cityareas;

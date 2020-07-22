@@ -11,6 +11,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Project.Schedule;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Design
@@ -21,19 +22,25 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IMapper _mapper;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
+        private readonly IDomainRepository _domainRepository;
+        private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
 
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IVariableTemplateRepository variableTemplateRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IDomainRepository domainRepository,
+            IProjectScheduleTemplateRepository projectScheduleTemplateRepository,
+            IUnitOfWork uow, IMapper mapper)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _variableTemplateRepository = variableTemplateRepository;
             _uow = uow;
             _mapper = mapper;
+            _projectScheduleTemplateRepository = projectScheduleTemplateRepository;
+            _domainRepository = domainRepository;
         }
 
         [HttpGet("{projectDesignVisitId}")]
@@ -49,9 +56,8 @@ namespace GSC.Api.Controllers.Project.Design
             templatesDto.ForEach(t =>
             {
                 t.DomainId = t.DomainId;
-                t.DomainName = _uow.Context.Domain.Find(t.DomainId)?.DomainName;
-                //if (sheduleTemplate != null)
-                //    t.RefTimeInterval = sheduleTemplate.RefTimeInterval;
+                t.DomainName = _domainRepository.Find(t.DomainId)?.DomainName;
+
             });
 
             return Ok(templatesDto);
@@ -84,9 +90,8 @@ namespace GSC.Api.Controllers.Project.Design
             if (variableTemplate == null) return NotFound();
 
             var designOrder = 0;
-            if (_uow.Context.ProjectDesignTemplate.Any(t => t.ProjectDesignVisitId == projectDesignVisitId))
-                designOrder = _uow.Context.ProjectDesignTemplate
-                    .Where(t => t.ProjectDesignVisitId == projectDesignVisitId).Max(t => t.DesignOrder);
+            if (_projectDesignTemplateRepository.All.Any(t => t.ProjectDesignVisitId == projectDesignVisitId))
+                designOrder = _projectDesignTemplateRepository.All.Where(t => t.ProjectDesignVisitId == projectDesignVisitId).Max(t => t.DesignOrder);
 
             for (var i = 0; i < noOfTemplates; i++)
             {
@@ -137,9 +142,8 @@ namespace GSC.Api.Controllers.Project.Design
                 _projectDesignTemplateRepository.Find(projectDesignTempateId).ProjectDesignVisitId;
 
             var designOrder = 0;
-            if (_uow.Context.ProjectDesignTemplate.Any(t => t.ProjectDesignVisitId == projectDesignVisitId))
-                designOrder = _uow.Context.ProjectDesignTemplate
-                    .Where(t => t.ProjectDesignVisitId == projectDesignVisitId).Max(t => t.DesignOrder);
+            if (_projectDesignTemplateRepository.All.Any(t => t.ProjectDesignVisitId == projectDesignVisitId))
+                designOrder = _projectDesignTemplateRepository.All.Where(t => t.ProjectDesignVisitId == projectDesignVisitId).Max(t => t.DesignOrder);
 
             for (var i = 0; i < noOfClones; i++)
             {
@@ -236,8 +240,8 @@ namespace GSC.Api.Controllers.Project.Design
 
         [HttpGet]
         [Route("GetTemplateByLockedDropDown")]
-        public IActionResult GetTemplateByLockedDropDown([FromQuery]LockUnlockDDDto lockUnlockDDDto)
-        {            
+        public IActionResult GetTemplateByLockedDropDown([FromQuery] LockUnlockDDDto lockUnlockDDDto)
+        {
             return Ok(_projectDesignTemplateRepository.GetTemplateByLockedDropDown(lockUnlockDDDto));
         }
 
@@ -284,13 +288,11 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult GetProjectScheduleTemplateId(int id)
         {
             if (id <= 0) return BadRequest();
-            var projectScheduleTemplate =
-                _uow.Context.ProjectScheduleTemplate.FirstOrDefault(t => t.ProjectDesignTemplateId == id);
+            var projectScheduleTemplate = _projectScheduleTemplateRepository.All.Where(t => t.ProjectDesignTemplateId == id).FirstOrDefault();
 
             if (projectScheduleTemplate == null)
                 return Ok(id);
-            return Ok(_uow.Context.ProjectSchedule.Find(projectScheduleTemplate.ProjectScheduleId)
-                .ProjectDesignTemplateId);
+            return Ok(_projectScheduleTemplateRepository.Find(projectScheduleTemplate.ProjectScheduleId).ProjectDesignTemplateId);
         }
 
         [HttpGet("GetTemplate/{id}")]

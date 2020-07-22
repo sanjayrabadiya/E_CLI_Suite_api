@@ -26,7 +26,7 @@ namespace GSC.Respository.Volunteer
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IRolePermissionRepository _rolePermissionRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;        
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
 
@@ -50,7 +50,7 @@ namespace GSC.Respository.Volunteer
             _cityRepository = cityRepository;
             _companyRepository = companyRepository;
             _rolePermissionRepository = rolePermissionRepository;
-            _projectDesignPeriodRepository = projectDesignPeriodRepository; 
+            _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
         }
 
@@ -122,7 +122,7 @@ namespace GSC.Respository.Volunteer
                 if (search.Status.HasValue)
                     query = query.Where(x => x.Status == search.Status);
                 if (search.IsDeleted.HasValue)
-                    query = query.Where(x => x.IsDeleted == search.IsDeleted);
+                    query = query.Where(x => search.IsDeleted == true ? x.DeletedDate != null : x.DeletedDate == null);
 
                 if (search.IsBlocked.HasValue && search.IsBlocked == true)
                     query = query.Where(x => x.IsBlocked == true);
@@ -140,7 +140,7 @@ namespace GSC.Respository.Volunteer
             var volunteer = Find(id);
             if (volunteer.Status == VolunteerStatus.Completed)
                 return new VolunteerStatusCheck
-                    {Id = id, VolunteerNo = volunteer.VolunteerNo, Status = VolunteerStatus.Completed, IsNew = false};
+                { Id = id, VolunteerNo = volunteer.VolunteerNo, Status = VolunteerStatus.Completed, IsNew = false };
 
             var propsToCheck = new List<string>
             {
@@ -205,13 +205,16 @@ namespace GSC.Respository.Volunteer
                 Context.SaveChanges(_jwtTokenAccesser);
                 return new VolunteerStatusCheck
                 {
-                    Id = id, VolunteerNo = volunteer.VolunteerNo, Status = VolunteerStatus.Completed, IsNew = true,
+                    Id = id,
+                    VolunteerNo = volunteer.VolunteerNo,
+                    Status = VolunteerStatus.Completed,
+                    IsNew = true,
                     StatusName = message
                 };
             }
 
             return new VolunteerStatusCheck
-                {Id = id, Status = VolunteerStatus.InCompleted, IsNew = true, StatusName = message};
+            { Id = id, Status = VolunteerStatus.InCompleted, IsNew = true, StatusName = message };
         }
 
         public IList<VolunteerAttendaceDto> GetVolunteerForAttendance(VolunteerSearchDto search)
@@ -255,9 +258,9 @@ namespace GSC.Respository.Volunteer
                 FullName = x.FullName,
                 FromAge = x.FromAge,
                 ToAge = x.ToAge,
-                Gender = x.GenderId == null ? "" : ((Gender) x.GenderId).GetDescription(),
+                Gender = x.GenderId == null ? "" : ((Gender)x.GenderId).GetDescription(),
                 Race = x.Race.RaceName,
-                IsDeleted = x.IsDeleted,
+                IsDeleted = x.DeletedDate != null,
                 Blocked = x.IsBlocked ?? false
             }).OrderByDescending(x => x.FullName).ToList();
         }
@@ -389,7 +392,7 @@ namespace GSC.Respository.Volunteer
                 var lstsubjects = new List<DropDownDto>();
                 lstsubjects.AddRange(attendance);
                 lstsubjects.AddRange(screeningEntry);
-                
+
                 var lockUnlockDDDto = new LockUnlockDDDto();
                 var template = _projectDesignTemplateRepository.GetAllTemplate(proId, null);
                 //var lockUnlockDDDto = new LockUnlockDDDto();
@@ -399,7 +402,7 @@ namespace GSC.Respository.Volunteer
                     {
                         var screeningTemplateLock = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningEntry).Where(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == item2.Id && x.ScreeningEntry.AttendanceId == (int)item.ExtraData).OrderByDescending(x => x.Id).FirstOrDefault();
                         if (screeningTemplateLock == null || screeningTemplateLock.IsLocked == false)
-                        {                                                      
+                        {
                             var itemexist = subjects.Where(x => x.Id == item.Id).FirstOrDefault();
                             if (itemexist == null)
                             {
@@ -409,9 +412,9 @@ namespace GSC.Respository.Volunteer
                         }
                         else
                         {
-                            subjects.RemoveAll(x => x.Id == item.Id);                            
+                            subjects.RemoveAll(x => x.Id == item.Id);
                         }
-                    }                   
+                    }
                 }
             }
             else
@@ -421,42 +424,42 @@ namespace GSC.Respository.Volunteer
                                                               a.ProjectDesignPeriodId == PeriodId
                                                               && a.ProjectId == projectId
                                                               && a.AttendanceType != AttendanceType.Screening)
-                                 join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on atten.Id equals locktemplate.ScreeningEntry.AttendanceId
-                                   select new DropDownDto
-                                   {
-                                       Id = atten.Id,
-                                       Value = atten.Volunteer == null
-                                           ? Convert.ToString(atten.NoneRegister.ScreeningNumber + " - " + atten.NoneRegister.Initial +
-                                                              (atten.NoneRegister.RandomizationNumber == null
-                                                                  ? ""
-                                                                  : " - " + atten.NoneRegister.RandomizationNumber))
-                                           : Convert.ToString(Convert.ToString(atten.ProjectSubject != null ? atten.ProjectSubject.Number : "") +
-                                                              " - " + atten.Volunteer.FullName),
-                                       Code = "Attendance",
-                                       ExtraData = atten.Id
-                                   }).ToList();
+                                  join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on atten.Id equals locktemplate.ScreeningEntry.AttendanceId
+                                  select new DropDownDto
+                                  {
+                                      Id = atten.Id,
+                                      Value = atten.Volunteer == null
+                                          ? Convert.ToString(atten.NoneRegister.ScreeningNumber + " - " + atten.NoneRegister.Initial +
+                                                             (atten.NoneRegister.RandomizationNumber == null
+                                                                 ? ""
+                                                                 : " - " + atten.NoneRegister.RandomizationNumber))
+                                          : Convert.ToString(Convert.ToString(atten.ProjectSubject != null ? atten.ProjectSubject.Number : "") +
+                                                             " - " + atten.Volunteer.FullName),
+                                      Code = "Attendance",
+                                      ExtraData = atten.Id
+                                  }).ToList();
 
                 var screeningEntry = (from screening in Context.ScreeningEntry.Where(a => a.DeletedDate == null
                                                                        && a.ProjectDesignPeriodId == PeriodId
                                                                        && a.ProjectId == projectId
                                                                        && a.EntryType != AttendanceType.Screening)
-                                 join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on screening.AttendanceId equals locktemplate.ScreeningEntry.AttendanceId
-                                 select new DropDownDto
-                                    {
-                                        Id = screening.Id,
-                                        Value = screening.Attendance.Volunteer == null
-                                            ? Convert.ToString(screening.Attendance.NoneRegister.ScreeningNumber + " - " +
-                                                               screening.Attendance.NoneRegister.Initial +
-                                                               (screening.Attendance.NoneRegister.RandomizationNumber == null
-                                                                   ? ""
-                                                                   : " - " + screening.Attendance.NoneRegister.RandomizationNumber))
-                                            : Convert.ToString(
-                                                Convert.ToString(screening.Attendance.ProjectSubject != null
-                                                    ? screening.Attendance.ProjectSubject.Number
-                                                    : "") + " - " + screening.Attendance.Volunteer.FullName),
-                                        Code = "Screening",
-                                        ExtraData = screening.AttendanceId
-                                    }).Distinct().ToList();
+                                      join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on screening.AttendanceId equals locktemplate.ScreeningEntry.AttendanceId
+                                      select new DropDownDto
+                                      {
+                                          Id = screening.Id,
+                                          Value = screening.Attendance.Volunteer == null
+                                                 ? Convert.ToString(screening.Attendance.NoneRegister.ScreeningNumber + " - " +
+                                                                    screening.Attendance.NoneRegister.Initial +
+                                                                    (screening.Attendance.NoneRegister.RandomizationNumber == null
+                                                                        ? ""
+                                                                        : " - " + screening.Attendance.NoneRegister.RandomizationNumber))
+                                                 : Convert.ToString(
+                                                     Convert.ToString(screening.Attendance.ProjectSubject != null
+                                                         ? screening.Attendance.ProjectSubject.Number
+                                                         : "") + " - " + screening.Attendance.Volunteer.FullName),
+                                          Code = "Screening",
+                                          ExtraData = screening.AttendanceId
+                                      }).Distinct().ToList();
                 subjects.AddRange(attendance);
                 subjects.AddRange(screeningEntry);
             }
@@ -478,7 +481,7 @@ namespace GSC.Respository.Volunteer
             var roleBlock = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock");
             var roleScreening = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_screeningEntry");
             var roleVolunteer = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerlist");
-            var result= query.Select(x => new VolunteerGridDto
+            var result = query.Select(x => new VolunteerGridDto
             {
                 Id = x.Id,
                 VolunteerNo = x.VolunteerNo,
@@ -494,7 +497,7 @@ namespace GSC.Respository.Volunteer
                 Occupation = x.Occupation.OccupationName,
                 Education = x.Education,
                 AnnualIncome = x.AnnualIncome,
-                Gender = x.GenderId == null ? "" : ((Gender) x.GenderId).GetDescription(),
+                Gender = x.GenderId == null ? "" : ((Gender)x.GenderId).GetDescription(),
                 Race = x.Race.RaceName,
                 MaritalStatus = x.MaritalStatus.MaritalStatusName,
                 PopulationType = x.PopulationType.PopulationName,
@@ -502,17 +505,17 @@ namespace GSC.Respository.Volunteer
                 Address = x.Addresses.FirstOrDefault(a => a.IsCurrent).Location.FullAddress,
                 ProfilePicPath = imageUrl + (x.ProfilePic ?? DocumentService.DefulatProfilePic),
                 Foods = !isSummary
-                    ? ""
-                    : string.Join(", ",
-                        Context.FoodType
-                            .Where(t => Context.VolunteerFood.Where(v => v.VolunteerId == x.Id)
-                                .Select(s => s.FoodTypeId).Contains(t.Id)).Select(s => s.TypeName).ToList()),
+                     ? ""
+                     : string.Join(", ",
+                         Context.FoodType
+                             .Where(t => Context.VolunteerFood.Where(v => v.VolunteerId == x.Id)
+                                 .Select(s => s.FoodTypeId).Contains(t.Id)).Select(s => s.TypeName).ToList()),
                 RegisterDate = x.RegisterDate,
                 StatusName = x.Status.GetDescription(),
-                IsDeleted = x.IsDeleted,
+                IsDeleted = x.DeletedDate != null,
                 Blocked = roleBlock.IsAdd && x.IsBlocked != null ? x.IsBlocked == true ? "Yes" :
-                    "No" :
-                    roleBlock.IsAdd ? "No" : "",
+                     "No" :
+                     roleBlock.IsAdd ? "No" : "",
                 IsBlockDisplay = roleBlock.IsView && x.IsBlocked != null,
                 IsScreeningHisotry = roleScreening.IsView,
                 IsDeleteRole = roleVolunteer.IsDelete,
@@ -527,7 +530,7 @@ namespace GSC.Respository.Volunteer
 
             result.ForEach(b =>
             {
-              //  b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+                //  b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
                 if (b.CreatedBy != null)
                     b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
                 if (b.ModifiedBy != null)
@@ -547,7 +550,7 @@ namespace GSC.Respository.Volunteer
             var companyLocation = _companyRepository.Find(_jwtTokenAccesser.CompanyId).Location;
             var cityCode = "";
             if (companyLocation != null && companyLocation.CityId != null)
-                cityCode = _cityRepository.Find((int) companyLocation.CityId).CityCode;
+                cityCode = _cityRepository.Find((int)companyLocation.CityId).CityCode;
 
 
             number = number.Replace("CITY", cityCode);

@@ -26,7 +26,7 @@ namespace GSC.Api.Controllers.Master
         private readonly ICountryRepository _countryRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public CityAreaController(ICityAreaRepository cityAreaRepository,
             IUserRepository userRepository,
@@ -34,7 +34,7 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _cityAreaRepository = cityAreaRepository;
@@ -53,7 +53,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
             //  return Ok(_cityAreaRepository.GetCitiesArea(isDeleted));
-            var cityAreas = _cityAreaRepository.FindByInclude(x => x.IsDeleted == isDeleted
+            var cityAreas = _cityAreaRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                 , t => t.City,t=>t.City.State,t=>t.City.State.Country).OrderByDescending(x => x.Id).ToList();
             var cityAreasDto = _mapper.Map<IEnumerable<CityAreaDto>>(cityAreas);
             cityAreasDto.ForEach(b =>

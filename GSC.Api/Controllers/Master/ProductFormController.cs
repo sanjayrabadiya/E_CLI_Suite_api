@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProductFomRepository _productFormRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ProductFormController(IProductFomRepository productFormRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _productFormRepository = productFormRepository;
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Master
         {
             var units = _productFormRepository.All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var productFormDto = _mapper.Map<IEnumerable<ProductFormDto>>(units);
             return Ok(productFormDto);

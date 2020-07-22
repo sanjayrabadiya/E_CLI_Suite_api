@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProductRepository _productRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ProductController(IProductRepository productRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _productRepository = productRepository;
@@ -38,12 +38,12 @@ namespace GSC.Api.Controllers.Master
             //var products = _productRepository
             //    .All.Where(x =>
             //        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-            //        && (x.IsDeleted == isDeleted)
+            //        && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
             //    ).ToList();
 
             var products = _productRepository.FindByInclude(x => (x.CompanyId == null
                                                                   || x.CompanyId == _jwtTokenAccesser.CompanyId) &&
-                                                                 x.IsDeleted == isDeleted, x => x.Project,
+                                                                 isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Project,
                 x => x.ProductType).ToList();
 
             var productsDto = _mapper.Map<IEnumerable<ProductDto>>(products);

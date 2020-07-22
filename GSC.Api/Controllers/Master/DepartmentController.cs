@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public DepartmentController(IDepartmentRepository departmentRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _departmentRepository = departmentRepository;
@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
             var departments = _departmentRepository.FindBy(x =>
-               x.IsDeleted == isDeleted
+               isDeleted ? x.DeletedDate != null : x.DeletedDate == null
           ).OrderByDescending(x => x.Id).ToList();
             var departmentsDto = _mapper.Map<IEnumerable<DepartmentDto>>(departments).ToList();
 

@@ -22,10 +22,10 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMedraLanguageRepository _medraLanguageRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public MedraLanguageController(IMedraLanguageRepository medraLanguageRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
@@ -55,7 +55,7 @@ namespace GSC.Api.Controllers.Master
             var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
             var languages = _medraLanguageRepository.All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).Select(x => _mapper.Map<MedraLanguageDto>(x)).OrderByDescending(x => x.Id);
             return Ok(languages);
         }

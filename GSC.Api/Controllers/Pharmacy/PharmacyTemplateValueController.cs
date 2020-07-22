@@ -16,12 +16,12 @@ namespace GSC.Api.Controllers.Pharmacy
     {
         private readonly IMapper _mapper;
         private readonly IPharmacyTemplateValueRepository _pharmacyTemplateValueRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public PharmacyTemplateValueController(IPharmacyTemplateValueRepository pharmacyTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _pharmacyTemplateValueRepository = pharmacyTemplateValueRepository;
             _uploadSettingRepository = uploadSettingRepository;

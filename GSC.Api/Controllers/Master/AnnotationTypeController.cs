@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Master
         private readonly IAnnotationTypeRepository _annotationTypeRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public AnnotationTypeController(IAnnotationTypeRepository annotationTypeRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _annotationTypeRepository = annotationTypeRepository;
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Master
         {
             var annotationTypes = _annotationTypeRepository.All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).ToList();
             var annotationTypesDto = _mapper.Map<IEnumerable<AnnotationTypeDto>>(annotationTypes);
             return Ok(annotationTypesDto);

@@ -19,12 +19,12 @@ namespace GSC.Api.Controllers.Pharmacy
     {
         private readonly IMapper _mapper;
         private readonly IPharmacyEntryRepository _pharmacyEntryRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IVariableValueRepository _variableValueRepository;
 
         public PharmacyEntryController(IPharmacyEntryRepository pharmacyEntryRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IVariableRepository variableRepository,
             IVariableValueRepository variableValueRepository)
         {

@@ -16,12 +16,12 @@ namespace GSC.Api.Controllers.Project.Design
     public class ProjectDesignReportSettingController : BaseController
     {
         private readonly IProjectDesignReportSettingRepository _projectDesignReportSettingRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public ProjectDesignReportSettingController(IProjectDesignReportSettingRepository projectDesignReportSettingRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IJwtTokenAccesser jwtTokenAccesser
           )
         {

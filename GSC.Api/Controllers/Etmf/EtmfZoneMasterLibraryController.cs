@@ -24,13 +24,13 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IEtmfZoneMasterLibraryRepository _etmfZoneMasterLibraryRepository;
         private readonly IEtmfSectionMasterLibraryRepository _etmfSectionMasterLibraryRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLibraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public EtmfZoneMasterLibraryController(
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IEtmfZoneMasterLibraryRepository etmfZoneMasterLibraryRepository,
             IEtmfSectionMasterLibraryRepository etmfSectionMasterLibraryRepository,

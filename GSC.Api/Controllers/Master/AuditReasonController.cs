@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public AuditReasonController(IAuditReasonRepository auditReasonRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _auditReasonRepository = auditReasonRepository;
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
             var auditReasons = _auditReasonRepository
-                .All.Where(x =>x.IsDeleted == isDeleted
+                .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                 ).OrderByDescending(x => x.Id).ToList();
             var auditReasonsDto = _mapper.Map<IEnumerable<AuditReasonDto>>(auditReasons);
             auditReasonsDto.ForEach(t => t.ModuleName = t.ModuleId.GetDescription());
@@ -155,7 +155,7 @@ namespace GSC.Api.Controllers.Master
         {
             var auditReasons = _auditReasonRepository
                 .All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.IsDeleted == false &&
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate==null &&
                     ((int) x.ModuleId == modulelId || x.ModuleId == AuditModule.Common)
                 ).OrderBy(o => o.ReasonName).ToList();
             var auditReasonsDto = _mapper.Map<IEnumerable<AuditReasonDto>>(auditReasons);

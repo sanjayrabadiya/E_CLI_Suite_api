@@ -22,12 +22,12 @@ namespace GSC.Api.Controllers.Volunteer
         private readonly IAuditTrailRepository _auditTrailRepository;
         private readonly IDocumentTypeRepository _documentTypeRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IVolunteerDocumentRepository _volunteerDocumentRepository;
 
         public VolunteerDocumentController(IVolunteerDocumentRepository volunteerDocumentRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IUploadSettingRepository uploadSettingRepository,
             IDocumentTypeRepository documentTypeRepository,
             IAuditTrailRepository auditTrailRepository)

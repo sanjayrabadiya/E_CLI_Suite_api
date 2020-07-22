@@ -18,12 +18,12 @@ namespace GSC.Api.Controllers.LogReport
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
 
         public UserLoginReportController(
             IUserLoginReportRespository userLoginReportRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
@@ -39,7 +39,7 @@ namespace GSC.Api.Controllers.LogReport
         {
             var userLoginReports = _userLoginReportRepository.All.Where(x =>
                 x.user.CompanyId == _jwtTokenAccesser.CompanyId
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).ToList();
             var userLoginReportsDto = _mapper.Map<IEnumerable<UserLoginReportDto>>(userLoginReports);
             return Ok(userLoginReportsDto);

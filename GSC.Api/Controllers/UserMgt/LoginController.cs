@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
 using GSC.Respository.Configuration;
@@ -18,6 +18,8 @@ using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
+
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -25,8 +27,9 @@ namespace GSC.Api.Controllers.UserMgt
     public class LoginController : BaseController
     {
         private readonly ICompanyRepository _companyRepository;
-        private readonly JwtSettings _settings;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IOptions<JwtSettings> _settings;
+        private readonly IMapper _mapper;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserRepository _userRepository;
@@ -38,8 +41,9 @@ namespace GSC.Api.Controllers.UserMgt
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
-            JwtSettings settings, IUserLoginReportRespository userLoginReportRepository,
-            IUnitOfWork<GscContext> uow,
+            IOptions<JwtSettings> settings,
+            IUserLoginReportRespository userLoginReportRepository,
+            IUnitOfWork uow,
             ICompanyRepository companyRepository,
             IUploadSettingRepository uploadSettingRepositor,
             IHubContext<Notification> notificationHubContext,
@@ -165,7 +169,7 @@ namespace GSC.Api.Controllers.UserMgt
                 UserName = authUser.UserName,
                 Token = roleId == 0 ? null : BuildJwtToken(authUser, roleId),
                 RefreshToken = roleId == 0 ? null : _userRepository.GenerateRefreshToken(),
-                ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.MinutesToExpiration),
+                ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.Value.MinutesToExpiration),
                 IsFirstTime = authUser.IsFirstTime,
                 UserId = authUser.Id,
                 RoleTokenId = roleTokenId,

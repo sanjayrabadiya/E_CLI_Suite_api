@@ -23,13 +23,13 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IRoleRepository _securityRoleRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public SecurityRoleController(IRoleRepository securityRoleRepository,
             IRolePermissionRepository rolePermissionRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
         {
             _securityRoleRepository = securityRoleRepository;
             _rolePermissionRepository = rolePermissionRepository;
@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var securityRoles = _securityRoleRepository.All.Where(x =>x.IsDeleted == isDeleted
+            var securityRoles = _securityRoleRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var securityRolesDto = _mapper.Map<IEnumerable<SecurityRoleDto>>(securityRoles);
             securityRolesDto.ForEach(b =>

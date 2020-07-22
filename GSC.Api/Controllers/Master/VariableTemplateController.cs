@@ -22,12 +22,12 @@ namespace GSC.Api.Controllers.Master
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
 
         public VariableTemplateController(IVariableTemplateRepository variableTemplateRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -45,7 +45,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var variableTemplates = _variableTemplateRepository.All.Where(x => x.IsDeleted == isDeleted
+            var variableTemplates = _variableTemplateRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var variableTemplatesDto = _mapper.Map<IEnumerable<VariableTemplateDto>>(variableTemplates);
             variableTemplatesDto.ForEach(b =>

@@ -18,10 +18,10 @@ namespace GSC.Api.Controllers.Project.EditCheck
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IEditCheckRepository _editCheckRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public EditCheckDetailController(IEditCheckDetailRepository editCheckDetailRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper, IEditCheckRepository editCheckRepository)
+            IUnitOfWork uow, IMapper mapper, IEditCheckRepository editCheckRepository)
         {
             _editCheckDetailRepository = editCheckDetailRepository;
             _uow = uow;
@@ -33,7 +33,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
         public IActionResult Get(bool isDeleted)
         {
             var drugs = _editCheckDetailRepository.All.Where(x =>
-                x.IsDeleted == isDeleted
+                isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(t => t.Id).ToList();
             var drugsDto = _mapper.Map<IEnumerable<EditCheckDetailDto>>(drugs);
             return Ok(drugsDto);

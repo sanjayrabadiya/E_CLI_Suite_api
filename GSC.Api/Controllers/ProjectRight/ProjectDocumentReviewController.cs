@@ -18,11 +18,11 @@ namespace GSC.Api.Controllers.ProjectRight
         private readonly IMapper _mapper;
         private readonly IProjectDocumentReviewRepository _projectDocumentReviewRepository;
         private readonly IProjectRightRepository _projectRightRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public ProjectDocumentReviewController(IProjectDocumentReviewRepository projectDocumentReviewRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IProjectRightRepository projectRightRepository,
             IUploadSettingRepository uploadSettingRepository)

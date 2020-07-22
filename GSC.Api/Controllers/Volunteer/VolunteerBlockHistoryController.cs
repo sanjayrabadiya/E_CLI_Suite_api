@@ -14,13 +14,13 @@ namespace GSC.Api.Controllers.Volunteer
     public class VolunteerBlockHistoryController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVolunteerBlockHistoryRepository _volunteerBlockHistoryRepository;
         private readonly IVolunteerRepository _volunteerRepository;
 
         public VolunteerBlockHistoryController(IVolunteerRepository volunteerRepository,
             IVolunteerBlockHistoryRepository volunteerBlockHistoryRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _volunteerBlockHistoryRepository = volunteerBlockHistoryRepository;
             _uow = uow;

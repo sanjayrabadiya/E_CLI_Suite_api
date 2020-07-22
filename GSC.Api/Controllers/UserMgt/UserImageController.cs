@@ -14,11 +14,11 @@ namespace GSC.Api.Controllers.UserMgt
     public class UserImageController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUserImageRepository _userImageRepository;
 
         public UserImageController(IUserImageRepository userImageRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper)
         {
             _userImageRepository = userImageRepository;

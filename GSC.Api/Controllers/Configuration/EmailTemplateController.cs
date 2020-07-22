@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Configuration
         private readonly IEmailTemplateRepository _emailTemplateRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public EmailTemplateController(IEmailTemplateRepository emailTemplateRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _emailTemplateRepository = emailTemplateRepository;
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Configuration
         {
             var emailTemplates = _emailTemplateRepository.All.Where(x =>
                 x.CompanyId == _jwtTokenAccesser.CompanyId &&
-                x.IsDeleted == isDeleted
+                isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var emailTemplatesDto = _mapper.Map<IEnumerable<EmailTemplateDto>>(emailTemplates);
             return Ok(emailTemplatesDto);

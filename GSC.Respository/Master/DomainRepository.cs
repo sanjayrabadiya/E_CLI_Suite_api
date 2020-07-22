@@ -61,14 +61,14 @@ namespace GSC.Respository.Master
         {
             var domains = All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && x.IsDeleted == isDeleted
+                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).Select(c => new DomainDto
             {
                 Id = c.Id,
                 DomainName = c.DomainName,
                 DomainCode = c.DomainCode,
                 DomainClassName = c.DomainClass.DomainClassName,
-                IsDeleted = c.IsDeleted
+                IsDeleted = c.DeletedDate != null
             }).ToList();
 
             return domains;

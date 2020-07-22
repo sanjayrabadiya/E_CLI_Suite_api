@@ -21,13 +21,13 @@ namespace GSC.Api.Controllers.Project.Workflow
         private readonly IProjectWorkflowIndependentRepository _projectWorkflowIndependentRepository;
         private readonly IProjectWorkflowLevelRepository _projectWorkflowLevelRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IProjectDesignRepository _projectDesignRepository;
 
         public ProjectWorkflowController(IProjectWorkflowRepository projectWorkflowRepository,
             IProjectWorkflowIndependentRepository projectWorkflowIndependentRepository,
             IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IProjectDesignRepository projectDesignRepository)
         {
             _projectWorkflowRepository = projectWorkflowRepository;

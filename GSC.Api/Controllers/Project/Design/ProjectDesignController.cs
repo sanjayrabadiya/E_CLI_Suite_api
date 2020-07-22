@@ -28,13 +28,13 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IProjectRightRepository _projectRightRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
 
         public ProjectDesignController(IProjectDesignRepository projectDesignRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
             IUserRecentItemRepository userRecentItemRepository, IProjectRightRepository projectRightRepository)
         {
@@ -54,7 +54,7 @@ namespace GSC.Api.Controllers.Project.Design
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<ProjectDesignDto>();
 
-            var projectDesigns = _projectDesignRepository.FindByInclude(x => x.IsDeleted == isDeleted
+            var projectDesigns = _projectDesignRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                     && projectList.Any(c => c == x.ProjectId), x => x.Project)
                 .Select(x => new ProjectDesignDto
                 {
@@ -64,7 +64,7 @@ namespace GSC.Api.Controllers.Project.Design
                     ProjectName = x.Project.ProjectName,
                     IsStatic = x.Project.IsStatic,
                     ProjectNumber = x.Project.ProjectCode,
-                    IsDeleted = x.IsDeleted,
+                    IsDeleted = x.DeletedDate != null,
                     CreatedBy = x.CreatedBy,
                     ModifiedBy = x.ModifiedBy,
                     DeletedBy = x.DeletedBy,

@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Barcode
         private readonly IBarcodeTypeRepository _barcodeTypeRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public BarcodeTypeController(IBarcodeTypeRepository barcodeTypeRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _barcodeTypeRepository = barcodeTypeRepository;
@@ -38,7 +38,7 @@ namespace GSC.Api.Controllers.Barcode
             var barcodeTypes = _barcodeTypeRepository
                 .All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.IsDeleted == isDeleted
+                    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                 ).OrderByDescending(x => x.Id).ToList();
             var barcodeTypesDto = _mapper.Map<IEnumerable<BarcodeTypeDto>>(barcodeTypes);
             return Ok(barcodeTypesDto);

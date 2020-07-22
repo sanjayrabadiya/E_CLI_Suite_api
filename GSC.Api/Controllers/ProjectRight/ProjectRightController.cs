@@ -13,10 +13,10 @@ namespace GSC.Api.Controllers.ProjectRight
     public class ProjectRightController : BaseController
     {
         private readonly IProjectRightRepository _projectRightRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ProjectRightController(IProjectRightRepository projectRightRepository,
-            IUnitOfWork<GscContext> uow)
+            IUnitOfWork uow)
         {
             _projectRightRepository = projectRightRepository;
             _uow = uow;

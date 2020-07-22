@@ -11,6 +11,7 @@ using GSC.Helper;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
+using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Master
@@ -23,15 +24,17 @@ namespace GSC.Api.Controllers.Master
         private readonly IMapper _mapper;
         private readonly IProjectRepository _projectRepository;
         private readonly ITrialTypeRepository _trialTypeRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly INumberFormatRepository _numberFormatRepository;
+        private readonly IProjectDesignRepository _projectDesignRepository;
 
         public ProjectController(IProjectRepository projectRepository,
             IDesignTrialRepository designTrialRepository,
             ITrialTypeRepository trialTypeRepository,
             IDrugRepository drugRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IProjectDesignRepository projectDesignRepository,
+            IUnitOfWork uow, IMapper mapper,
             IUserRecentItemRepository userRecentItemRepository,
             INumberFormatRepository numberFormatRepository)
         {
@@ -43,6 +46,7 @@ namespace GSC.Api.Controllers.Master
             _mapper = mapper;
             _userRecentItemRepository = userRecentItemRepository;
             _numberFormatRepository = numberFormatRepository;
+            _projectDesignRepository = projectDesignRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -63,8 +67,7 @@ namespace GSC.Api.Controllers.Master
             projectDto.DrugName = _drugRepository.Find(projectDto.DrugId).DrugName;
             projectDto.NoofSite = _projectRepository.GetNoOfSite(id);
 
-            var projectDesign =
-                _uow.Context.ProjectDesign.FirstOrDefault(t => t.ProjectId == id && t.DeletedDate == null);
+            var projectDesign = _projectDesignRepository.All.Where(t => t.ProjectId == id && t.DeletedDate == null).FirstOrDefault();
             projectDto.ProjectDesignId = projectDesign == null ? (int?) null : projectDesign.Id;
 
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem

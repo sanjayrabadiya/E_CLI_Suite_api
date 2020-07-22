@@ -14,6 +14,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GSC.Respository.UserMgt
@@ -25,14 +26,14 @@ namespace GSC.Respository.UserMgt
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
-        private readonly JwtSettings _settings;
+        private readonly IOptions<JwtSettings> _settings;
 
         public UserRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUserPasswordRepository userPasswordRepository,
             IRefreshTokenRepository refreshTokenRepository,
-            JwtSettings settings)
+            IOptions<JwtSettings> settings)
             : base(uow, jwtTokenAccesser)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
@@ -46,8 +47,8 @@ namespace GSC.Respository.UserMgt
         public List<UserDto> GetUsers(bool isDeleted)
         {
             return All.Where(x =>
-                
-                x.IsDeleted == isDeleted
+
+              isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).Select(t => new UserDto
             {
                 FirstName = t.FirstName,
@@ -58,8 +59,8 @@ namespace GSC.Respository.UserMgt
                 Id = t.Id,
                 UserName = t.UserName,
                 IsLocked = t.IsLocked,
-                IsDeleted = t.IsDeleted,
-                ProjectName  = this.Context.Project.FirstOrDefault(b => b.Id == t.ProjectId).ProjectName,
+                IsDeleted = t.DeletedDate != null,
+                ProjectName = this.Context.Project.FirstOrDefault(b => b.Id == t.ProjectId).ProjectName,
                 Role = string.Join(", ",
                     t.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
             }).OrderByDescending(x => x.Id).ToList();
@@ -67,10 +68,9 @@ namespace GSC.Respository.UserMgt
 
         public User ValidateUser(string userName, string password)
         {
-            var user = All.SingleOrDefault(x =>
-                (string.Equals(userName, x.UserName, StringComparison.InvariantCultureIgnoreCase) ||
-                 string.Equals(userName, x.Email, StringComparison.InvariantCultureIgnoreCase))
-                && x.DeletedDate == null);
+            var user = All.Where(x =>
+                (x.UserName == userName || x.Email == userName)
+                && x.DeletedDate == null).FirstOrDefault();
             if (user == null)
             {
                 _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
@@ -133,7 +133,7 @@ namespace GSC.Respository.UserMgt
         {
             var result = All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.FirstName + " " + c.LastName}).OrderBy(o => o.Value)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.FirstName + " " + c.LastName }).OrderBy(o => o.Value)
                 .ToList();
             return result;
         }
@@ -159,7 +159,7 @@ namespace GSC.Respository.UserMgt
             return new RefreshTokenDto
             {
                 AccessToken = GenerateAccessToken(principal.Claims),
-                ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.MinutesToExpiration),
+                ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.Value.MinutesToExpiration),
                 RefreshToken = refreshToken
             };
         }
@@ -167,13 +167,13 @@ namespace GSC.Respository.UserMgt
 
         public string GenerateAccessToken(IEnumerable<Claim> claims)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Key));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Value.Key));
 
-            var jwtToken = new JwtSecurityToken(_settings.Issuer,
-                _settings.Audience,
+            var jwtToken = new JwtSecurityToken(_settings.Value.Issuer,
+                _settings.Value.Audience,
                 claims,
                 DateTime.UtcNow,
-                DateTime.UtcNow.AddMinutes(_settings.MinutesToExpiration),
+                DateTime.UtcNow.AddMinutes(_settings.Value.MinutesToExpiration),
                 new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );
             return new JwtSecurityTokenHandler().WriteToken(jwtToken);
@@ -218,7 +218,7 @@ namespace GSC.Respository.UserMgt
                     false, //you might want to validate the audience and issuer depending on your use case
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Key)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Value.Key)),
                 ValidateLifetime = false //here we are saying that we don't care about the token's expiration date
             };
 

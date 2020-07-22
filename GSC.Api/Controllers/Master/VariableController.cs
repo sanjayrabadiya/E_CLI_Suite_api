@@ -23,7 +23,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IVariableValueRepository _variableValueRepository;
 
@@ -31,7 +31,7 @@ namespace GSC.Api.Controllers.Master
             IVariableValueRepository variableValueRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _variableRepository = variableRepository;
@@ -47,7 +47,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var variables = _variableRepository.All.Where(x =>x.IsDeleted == isDeleted
+            var variables = _variableRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var variablesDto = _mapper.Map<IEnumerable<VariableDto>>(variables);
             variablesDto.ForEach(b =>
@@ -132,9 +132,8 @@ namespace GSC.Api.Controllers.Master
                                                                     && !variable.Values.Any(c => c.Id == x.Id))
                 .ToList();
             foreach (var value in deleteValues)
-                _uow.Context.Remove(value);
-            //value.DeletedDate = DateTime.Now;
-            //_variableValueRepository.Update(value);
+                _variableValueRepository.Remove(value);
+
         }
 
         [HttpDelete("{id}")]

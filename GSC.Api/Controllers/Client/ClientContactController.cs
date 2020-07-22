@@ -15,10 +15,10 @@ namespace GSC.Api.Controllers.Client
     {
         private readonly IClientContactRepository _clientContactRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ClientContactController(IClientContactRepository clientContactRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _clientContactRepository = clientContactRepository;
             _uow = uow;

@@ -20,12 +20,12 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public AppScreenController(IAppScreenRepository appScreenRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _appScreenRepository = appScreenRepository;
             _userRepository = userRepository;
@@ -39,7 +39,7 @@ namespace GSC.Api.Controllers.UserMgt
         public IActionResult Get(bool isDeleted)
         {
             var appScreens = _appScreenRepository.All.Where(x =>
-                x.IsDeleted == isDeleted 
+                isDeleted ? x.DeletedDate != null : x.DeletedDate == null 
             ).OrderByDescending(x => x.Id).ToList();
             var appScreensDto = _mapper.Map<IEnumerable<AppScreenDto>>(appScreens);
             appScreensDto.ForEach(b =>

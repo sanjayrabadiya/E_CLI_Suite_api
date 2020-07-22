@@ -44,11 +44,11 @@ namespace GSC.Respository.Master
         {
             var cities = All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).Select(c => new CityDto
+                    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new CityDto
                     {
                         CityCode = c.CityCode,
                         CityName = c.CityName,
-                        IsDeleted = c.IsDeleted,
+                        IsDeleted = c.DeletedDate != null,
                         CountryName = c.State.Country.CountryName,
                         State = c.State,
                         Id = c.Id,

@@ -21,10 +21,10 @@ namespace GSC.Api.Controllers.Report
     {
         private readonly IGscReport _gscReport;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IProjectDesignReportSettingRepository _projectDesignReportSettingRepository;
         public ReportController(IProjectDesignReportSettingRepository projectDesignReportSettingRepository, IGscReport gscReport
-            , IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
+            , IUnitOfWork uow, IJwtTokenAccesser jwtTokenAccesser)
         {
             _uow = uow;
             _gscReport = gscReport;

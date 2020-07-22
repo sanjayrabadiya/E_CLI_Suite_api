@@ -17,10 +17,10 @@ namespace GSC.Api.Controllers.Project.Design
     {
         private readonly IMapper _mapper;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ProjectDesignVisitController(IProjectDesignVisitRepository projectDesignVisitRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _uow = uow;

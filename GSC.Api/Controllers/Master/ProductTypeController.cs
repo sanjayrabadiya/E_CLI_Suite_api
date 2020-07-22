@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IProductTypeRepository _productTypeRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ProductTypeController(IProductTypeRepository productTypeRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _productTypeRepository = productTypeRepository;
@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(bool isDeleted)
         {
             var productTypes = _productTypeRepository
-                .All.Where(x =>x.IsDeleted == isDeleted
+                .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                 ).OrderByDescending(x => x.Id).ToList();
             var productTypesDto = _mapper.Map<IEnumerable<ProductTypeDto>>(productTypes);
             productTypesDto.ForEach(b =>

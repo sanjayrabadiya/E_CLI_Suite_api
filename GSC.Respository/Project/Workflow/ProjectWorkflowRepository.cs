@@ -46,13 +46,13 @@ namespace GSC.Respository.Project.Workflow
 
             var projectWorkflows = FindByInclude(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.IsDeleted == isDeleted
+                    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                     && projectList.Any(c => c == x.ProjectDesign.ProjectId), x => x.ProjectDesign.Project)
                 .Select(x => new ProjectWorkflowDto
                 {
                     Id = x.Id,
                     ProjectName = x.ProjectDesign.Project.ProjectName,
-                    IsDeleted = x.IsDeleted,
+                    IsDeleted = x.DeletedDate != null,
                     IsIndependent = x.IsIndependent,
                     CreatedBy = x.CreatedBy,
                     ModifiedBy = x.ModifiedBy,

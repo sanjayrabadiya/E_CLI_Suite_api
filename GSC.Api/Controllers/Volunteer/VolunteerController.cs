@@ -25,13 +25,13 @@ namespace GSC.Api.Controllers.Volunteer
         private readonly ILocationRepository _locationRepository;
         private readonly IMapper _mapper;
         private readonly IRolePermissionRepository _rolePermissionRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IVolunteerRepository _volunteerRepository;
 
         public VolunteerController(IVolunteerRepository volunteerRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             ILocationRepository locationRepository,
             IUploadSettingRepository uploadSettingRepository,
             IAuditTrailRepository auditTrailRepository,

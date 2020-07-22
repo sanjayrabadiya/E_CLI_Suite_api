@@ -23,12 +23,12 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IScopeNameRepository _scopeNameRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ScopeNameController(IScopeNameRepository scopeNameRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var scopeName = _scopeNameRepository.All.Where(x =>x.IsDeleted == isDeleted
+            var scopeName = _scopeNameRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).Select(x => _mapper.Map<ScopeNameDto>(x)).OrderByDescending(x => x.Id);
 
             var scopeNamesDto = _mapper.Map<IEnumerable<ScopeNameDto>>(scopeName);
