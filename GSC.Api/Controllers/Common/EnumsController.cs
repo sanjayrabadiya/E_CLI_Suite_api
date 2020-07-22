@@ -403,5 +403,16 @@ namespace GSC.Api.Controllers.Common
                 }).OrderBy(o => o.Id).ToList();
         }
 
+        [HttpGet]
+        [Route("HolidayType")]
+        public IList<DropDownEnum> HolidayType()
+        {
+            return Enum.GetValues(typeof(HolidayType))
+                .Cast<HolidayType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

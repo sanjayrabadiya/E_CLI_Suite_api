@@ -26,7 +26,7 @@ namespace GSC.Respository.Master
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                     && x.CityId == cityId && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.NameOfInvestigator})
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.NameOfInvestigator })
                 .OrderBy(o => o.Value).ToList();
         }
 
@@ -36,25 +36,29 @@ namespace GSC.Respository.Master
             var investigatorContact = All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                 && x.IsDeleted == isDeleted).OrderByDescending(x => x.Id).Select(c => new InvestigatorContactDto
-            {
-                NameOfInvestigator = c.NameOfInvestigator,
-                Specialization = c.Specialization,
-                RegistrationNumber = c.RegistrationNumber,
-                HospitalName = c.HospitalName,
-                HospitalAddress = c.HospitalAddress,
-                ContactNumber = c.ContactNumber,
-                IECIRBName = c.IECIRBName,
-                CityName = c.City.CityName,
-                IsDeleted = c.IsDeleted,
-                CountryName = c.City.State.Country.CountryName,
-                StateName = c.City.State.StateName,
-                City = c.City,
-                CityId = c.CityId,
-                Id = c.Id,
-                CountryId = c.City.State.Country.Id,
-                StateId = c.City.State.Id,
-                CompanyId = c.CompanyId
-            }).OrderByDescending(x => x.Id).ToList();
+                {
+                    NameOfInvestigator = c.NameOfInvestigator,
+                    EmailOfInvestigator = c.EmailOfInvestigator,
+                    Specialization = c.Specialization,
+                    RegistrationNumber = c.RegistrationNumber,
+                    HospitalName = c.HospitalName,
+                    HospitalAddress = c.HospitalAddress,
+                    ContactNumber = c.ContactNumber,
+                    IECIRBName = c.IECIRBName,
+                    IECIRBContactNo = c.IECIRBContactNo,
+                    IECIRBContactName = c.IECIRBContactName,
+                    IECIRBContactEmail = c.IECIRBContactEmail,
+                    CityName = c.City.CityName,
+                    IsDeleted = c.IsDeleted,
+                    CountryName = c.City.State.Country.CountryName,
+                    StateName = c.City.State.StateName,
+                    City = c.City,
+                    CityId = c.CityId,
+                    Id = c.Id,
+                    CountryId = c.City.State.Country.Id,
+                    StateId = c.City.State.Id,
+                    CompanyId = c.CompanyId
+                }).OrderByDescending(x => x.Id).ToList();
 
             return investigatorContact;
         }
@@ -71,7 +75,7 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.NameOfInvestigator, IsDeleted = c.DeletedDate != null })
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.NameOfInvestigator, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
     }

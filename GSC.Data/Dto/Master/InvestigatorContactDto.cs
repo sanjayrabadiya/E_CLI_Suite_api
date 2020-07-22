@@ -9,6 +9,8 @@ namespace GSC.Data.Dto.Master
     {
         [Required(ErrorMessage = "Investigator Name is required.")]
         public string NameOfInvestigator { get; set; }
+        [Required(ErrorMessage = "Investigator Email is required.")]
+        public string EmailOfInvestigator { get; set; }
 
         [Required(ErrorMessage = "Specialization is required.")]
         public string Specialization { get; set; }
@@ -27,6 +29,11 @@ namespace GSC.Data.Dto.Master
 
         public string IECIRBName { get; set; }
 
+        public string IECIRBContactNo { get; set; }
+        [Required(ErrorMessage = " IECIRB Contact Name is required.")]
+        public string IECIRBContactName { get; set; }
+        [Required(ErrorMessage = "IECIRB Contact Email is required.")]
+        public string IECIRBContactEmail { get; set; }
         [Required(ErrorMessage = "City is required.")]
         public int CityId { get; set; }
 

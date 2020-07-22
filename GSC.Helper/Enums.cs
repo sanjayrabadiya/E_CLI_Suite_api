@@ -420,4 +420,9 @@ namespace GSC.Helper
         [Description("Site")] Site = 2,
         [Description("Trial")] Trial = 3,
     }
+    public enum HolidayType : short
+    {
+        [Description("Public")] Public = 1,
+        [Description("Week Off")] WeekOff = 2
+    }
 }
