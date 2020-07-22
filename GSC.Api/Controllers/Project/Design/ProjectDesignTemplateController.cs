@@ -242,10 +242,10 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
-        [Route("GetTemplateDropDownForProjectSchedule/{projectDesignVisitId}")]
-        public IActionResult GetTemplateDropDownForProjectSchedule(int projectDesignVisitId)
+        [Route("GetTemplateDropDownForProjectSchedule/{projectDesignVisitId}/{collectionSource}/{refVariable}")]
+        public IActionResult GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource, int? refVariable)
         {
-            return Ok(_projectDesignTemplateRepository.GetTemplateDropDownForProjectSchedule(projectDesignVisitId));
+            return Ok(_projectDesignTemplateRepository.GetTemplateDropDownForProjectSchedule(projectDesignVisitId, collectionSource, refVariable));
         }
 
         [HttpGet]
