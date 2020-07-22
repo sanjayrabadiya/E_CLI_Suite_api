@@ -219,6 +219,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectWorkplaceDetailRepository, ProjectWorkplaceDetailRepository>();
             services.AddScoped<IProjectWorkplaceSubSectionRepository, ProjectWorkplaceSubSectionRepository>();
             services.AddScoped<IProjectWorkplaceSubSectionArtifactRepository, ProjectWorkplaceSubSectionArtifactRepository>();
+            services.AddScoped<IInvestigatorContactDetailRepository, InvestigatorContactDetailRepository>();
+            services.AddScoped<IHolidayRepository, HolidayRepository>();
         }
     }
 }

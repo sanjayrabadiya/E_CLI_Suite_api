@@ -134,12 +134,8 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-
-            Delete(investigatorContact.Id);
-            investigatorContact.Id = 0;
-            _investigatorContactRepository.Add(investigatorContact);
-
+              
+            _investigatorContactRepository.AddOrUpdate(investigatorContact);
             if (_uow.Save() <= 0) throw new Exception("Updating Investigator Contact failed on save.");
             return Ok(investigatorContact.Id);
         }
