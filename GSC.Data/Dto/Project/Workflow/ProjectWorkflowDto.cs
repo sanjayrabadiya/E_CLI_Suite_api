@@ -28,6 +28,7 @@ namespace GSC.Data.Dto.Project.Workflow
         public DateTime? DeletedDate { get; set; }
         public int? CompanyId { get; set; }
         public string CompanyName { get; set; }
+        public bool? IsCompleteWorkflow { get; set; }
     }
 
     public class WorkFlowLevelDto

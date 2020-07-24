@@ -10,5 +10,6 @@ namespace GSC.Respository.Project.Workflow
         WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId);
         IList<ProjectWorkflowDto> GetProjectWorkFlowList(bool isDeleted);
         int GetMaxWorkFlowLevel(int projectDesignId);
+        bool IsElectronicsSignatureComplete(int ProjectDesignId);
     }
 }
