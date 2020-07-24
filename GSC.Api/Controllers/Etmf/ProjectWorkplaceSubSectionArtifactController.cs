@@ -8,6 +8,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -64,6 +65,48 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Creating Sub Section failed on save.");
             return Ok(projectWorkplaceSubSectionArtifact.Id);
  
+        }
+
+
+        [HttpPut]
+        public IActionResult Put([FromBody] ProjectWorkplaceSubSectionArtifactDto projectWorkplaceSubSectionArtifactDto)
+        {
+            var data = _projectWorkplaceSubSectionArtifactRepository.UpdateArtifactDetail(projectWorkplaceSubSectionArtifactDto);
+
+            var projectWorkplaceSubSectionArtifact = _mapper.Map<ProjectWorkplaceSubSectionArtifact>(projectWorkplaceSubSectionArtifactDto);
+           
+            var validate = _projectWorkplaceSubSectionArtifactRepository.Duplicate(projectWorkplaceSubSectionArtifact);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            _projectWorkplaceSubSectionArtifactRepository.Update(projectWorkplaceSubSectionArtifact);
+            if (_uow.Save() <= 0) throw new Exception("Creating Sub Section failed on save.");
+            return Ok(projectWorkplaceSubSectionArtifact.Id);
+
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var subArtifact = _projectWorkplaceSubSectionArtifactRepository.FindByInclude(x => x.Id == id, x => x.ProjectWorkplaceSubSecArtificatedocument)
+                .FirstOrDefault();
+
+            if (subArtifact == null)
+                return NotFound();
+            _projectWorkplaceSubSectionArtifactRepository.Delete(subArtifact);
+            _uow.Save();
+            var aa = _projectWorkplaceSubSectionArtifactRepository.DeletArtifactDetailFolder(id);
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetDrodDown/{subsectionId}")]
+        public IActionResult GetDrodDown(int subsectionId)
+        {
+            return Ok(_projectWorkplaceSubSectionArtifactRepository.GetDrodDown(subsectionId));
         }
     }
 }
