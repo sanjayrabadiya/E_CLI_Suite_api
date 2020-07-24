@@ -14,7 +14,7 @@ using GSC.Respository.Etmf;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Mvc;
-
+ 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GSC.Api.Controllers.Etmf
@@ -32,7 +32,6 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ProjectWorkplaceArtificatedocumentController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
@@ -41,8 +40,7 @@ namespace GSC.Api.Controllers.Etmf
             ICompanyRepository companyRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
               IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository,
-              IJwtTokenAccesser jwtTokenAccesser
+              IUploadSettingRepository uploadSettingRepository
             )
         {
             _userRepository = userRepository;
@@ -54,7 +52,6 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [Route("GetTreeview")]
@@ -69,23 +66,19 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public IActionResult Get(int id)
         {
-            var documentList = _projectWorkplaceArtificatedocumentRepository.FindByInclude(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null, x => x.ProjectWorkplaceArtificate).ToList();
-
-            List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
-            foreach (var item in documentList)
+            var documentList = _projectWorkplaceArtificatedocumentRepository.FindBy(x => x.ProjectWorkplaceArtificateId == id).ToList();
+            var docuement = _mapper.Map<IEnumerable<ProjectWorkplaceArtificatedocumentDto>>(documentList).ToList();
+            docuement.ForEach(b =>
             {
-                CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
-                obj.Id = item.Id;
-                obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
-                obj.Artificatename = _etmfArtificateMasterLbraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId).ArtificateName;
-                obj.DocumentName = item.DocumentName;
-                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), item.DocPath, item.DocumentName);
-                obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
-                obj.CreatedDate = item.CreatedDate;
-                obj.Level = 6;
-                dataList.Add(obj);
-            }
-            return Ok(dataList);
+                b.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), b.DocPath, b.DocumentName);
+                b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
+                if (b.ModifiedBy != null)
+                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+                if (b.DeletedBy != null)
+                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+
+            });
+            return Ok(docuement);
         }
 
         [HttpPost]
@@ -121,19 +114,6 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
             return Ok(projectWorkplaceArtificatedocument.Id);
 
-        }
-
-        [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
-        {
-            var subArtifactdoc = _projectWorkplaceArtificatedocumentRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
-
-            if (subArtifactdoc == null)
-                return NotFound();
-            _projectWorkplaceArtificatedocumentRepository.Delete(subArtifactdoc);
-            _uow.Save();
-            var aa = _projectWorkplaceArtificatedocumentRepository.deleteFile(id);
-            return Ok(aa);
         }
     }
 }

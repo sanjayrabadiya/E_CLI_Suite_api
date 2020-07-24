@@ -10,14 +10,5 @@ namespace GSC.Data.Dto.Etmf
         public int ProjectWorkplaceSubSectionId { get; set; }
         public string ArtifactName { get; set; }
 
-        public string SubSectionName { get; set; }
-        public string SectionName { get; set; }
-        public int ProjectWorkplaceZoneId { get; set; }
-        public string ZonName { get; set; }
-        public int WorkPlaceFolderId { get; set; }
-        public string ChildName { get; set; }
-        public string ProjectName { get; set; }
-        public int projectWorkplaceDetailId { get; set; }
-        
     }
 }

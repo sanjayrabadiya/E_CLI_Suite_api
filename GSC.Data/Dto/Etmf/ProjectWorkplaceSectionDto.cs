@@ -10,7 +10,5 @@ namespace GSC.Data.Dto.Etmf
         public int ProjectWorkPlaceZoneId { get; set; }
 
         public int EtmfSectionMasterLibraryId { get; set; }
-
-        public string SectionName { get; set; }
     }
 }

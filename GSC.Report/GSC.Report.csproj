@@ -7,12 +7,18 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Telerik.Reporting" Version="13.2.19.1030" />
+    <PackageReference Include="Telerik.Reporting" Version="14.0.20.219" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GSC.Data\GSC.Data.csproj" />
     <ProjectReference Include="..\GSC.Helper\GSC.Helper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Telerik.Reporting">
+      <HintPath>bin\Debug\netcoreapp2.2\Telerik.Reporting.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

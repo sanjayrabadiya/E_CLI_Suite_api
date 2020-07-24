@@ -11,7 +11,5 @@ namespace GSC.Data.Entities.Etmf
         public int EtmfArtificateMasterLbraryId { get; set; }
         public int? CompanyId { get; set; }
         public EtmfArtificateMasterLbrary EtmfArtificateMasterLbrary { get; set; }
-
-        public List<ProjectWorkplaceArtificatedocument> ProjectWorkplaceArtificatedocument { get; set; }
     }
 }

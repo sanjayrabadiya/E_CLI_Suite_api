@@ -10,9 +10,5 @@ namespace GSC.Data.Entities.Etmf
         public int ProjectWorkplaceSectionId { get; set; }
         public string SubSectionName { get; set; }
         public int CompanyId { get; set; }
-
-        public ProjectWorkplaceSection ProjectWorkplaceSection { get; set; }
-
-        public List<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
     }
 }

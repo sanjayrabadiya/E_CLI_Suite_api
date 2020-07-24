@@ -12,7 +12,5 @@ namespace GSC.Data.Entities.Etmf
 
         public string DocPath { get; set; }
         public int CompanyId { get; set; }
-
-        public ProjectWorkplaceArtificate ProjectWorkplaceArtificate { get; set; }
     }
 }
