@@ -234,6 +234,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectWorkplaceArtificatedocument> ProjectWorkplaceArtificatedocument { get; set; }
         public DbSet<ProjectWorkplaceSubSection> ProjectWorkplaceSubSection { get; set; }
         public DbSet<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
+        public DbSet<ProjectWorkplaceSubSecArtificatedocument> ProjectWorkplaceSubSecArtificatedocument { get; set; }
         public DbSet<InvestigatorContactDetail> InvestigatorContactDetail { get; set; }
         public DbSet<Holiday> Holiday { get; set; }
         private List<string> ColumnsToSkip

@@ -5,14 +5,13 @@ using System.Text;
 
 namespace GSC.Data.Entities.Etmf
 {
-    public class ProjectWorkplaceArtificatedocument : BaseEntity
+    public class ProjectWorkplaceSubSecArtificatedocument : BaseEntity
     {
-        public int ProjectWorkplaceArtificateId { get; set; }
+        public int ProjectWorkplaceSubSectionArtifactId { get; set; }
         public string DocumentName { get; set; }
-
         public string DocPath { get; set; }
         public int CompanyId { get; set; }
 
-        public ProjectWorkplaceArtificate ProjectWorkplaceArtificate { get; set; }
+        public ProjectWorkplaceSubSectionArtifact ProjectWorkplaceSubSectionArtifact { get; set; }
     }
 }

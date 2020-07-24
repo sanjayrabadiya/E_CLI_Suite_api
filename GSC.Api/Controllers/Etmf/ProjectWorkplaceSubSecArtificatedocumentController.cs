@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GSC.Api.Controllers.Etmf
 {
     [Route("api/[controller]")]
-    public class ProjectWorkplaceArtificatedocumentController : BaseController
+    public class ProjectWorkplaceSubSecArtificatedocumentController : BaseController
     {
 
         private readonly IMapper _mapper;
@@ -29,20 +29,18 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IProjectRepository _projectRepository;
-        private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
+        private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public ProjectWorkplaceArtificatedocumentController(IProjectRepository projectRepository,
+        public ProjectWorkplaceSubSecArtificatedocumentController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
             IETMFWorkplaceRepository eTMFWorkplaceRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
+            IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
               IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository,
-              IJwtTokenAccesser jwtTokenAccesser
+              IUploadSettingRepository uploadSettingRepository
             )
         {
             _userRepository = userRepository;
@@ -51,73 +49,54 @@ namespace GSC.Api.Controllers.Etmf
             _uow = uow;
             _mapper = mapper;
             _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
-            _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
+            _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
-        [Route("GetTreeview")]
-        [HttpGet]
-        public IActionResult GetTreeview()
-        {
-            var projectworkplace = _eTMFWorkplaceRepository.GetTreeview(1);
-            return Ok(projectworkplace);
-        }
 
         [Route("Get/{id}")]
         [HttpGet]
         public IActionResult Get(int id)
         {
-            var documentList = _projectWorkplaceArtificatedocumentRepository.FindByInclude(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null, x => x.ProjectWorkplaceArtificate).ToList();
-
+            var documentList = _projectWorkplaceSubSecArtificatedocumentRepository.FindByInclude(x => x.ProjectWorkplaceSubSectionArtifactId == id && x.DeletedDate == null, x => x.ProjectWorkplaceSubSectionArtifact)
+                .ToList()
+                .OrderByDescending(x=>x.Id);
+         
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
             foreach (var item in documentList)
             {
                 CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
                 obj.Id = item.Id;
-                obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
-                obj.Artificatename = _etmfArtificateMasterLbraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId).ArtificateName;
+                obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceSubSectionArtifactId;
+                obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
                 obj.DocumentName = item.DocumentName;
                 obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
-                obj.Level = 6;
+                obj.Level = 5.2;
                 dataList.Add(obj);
             }
             return Ok(dataList);
+             
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
+        public IActionResult Post([FromBody] ProjectWorkplaceSubSecArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
         {
-            var Project = _projectRepository.Find(projectWorkplaceArtificatedocumentDto.ProjectId);
-            var Projectname = Project.ProjectName + "-" + Project.ProjectCode;
+            string filePath = "";
 
-            string filePath = string.Empty;
-            string path = string.Empty;
-
-            if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Country)
-
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Country.GetDescription(),
-                  projectWorkplaceArtificatedocumentDto.Countryname.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
-            else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Site)
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Site.GetDescription(),
-                 projectWorkplaceArtificatedocumentDto.Sitename.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
-            else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Trial)
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Trial.GetDescription(),
-                   projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
-
+            string path = _projectWorkplaceSubSecArtificatedocumentRepository.getArtifactSectionDetail(projectWorkplaceArtificatedocumentDto);
             filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
             string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceArtificatedocumentDto.FileModel, filePath, projectWorkplaceArtificatedocumentDto.FileName);
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             projectWorkplaceArtificatedocumentDto.Id = 0;
-            var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
+            var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceSubSecArtificatedocument>(projectWorkplaceArtificatedocumentDto);
             projectWorkplaceArtificatedocument.DocumentName = FileName;
             projectWorkplaceArtificatedocument.DocPath = path;
 
-            _projectWorkplaceArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
+            _projectWorkplaceSubSecArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
             return Ok(projectWorkplaceArtificatedocument.Id);
 
@@ -126,13 +105,13 @@ namespace GSC.Api.Controllers.Etmf
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var subArtifactdoc = _projectWorkplaceArtificatedocumentRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
+            var subArtifactdoc = _projectWorkplaceSubSecArtificatedocumentRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
 
             if (subArtifactdoc == null)
                 return NotFound();
-            _projectWorkplaceArtificatedocumentRepository.Delete(subArtifactdoc);
+            _projectWorkplaceSubSecArtificatedocumentRepository.Delete(subArtifactdoc);
             _uow.Save();
-            var aa = _projectWorkplaceArtificatedocumentRepository.deleteFile(id);
+            var aa = _projectWorkplaceSubSecArtificatedocumentRepository.deleteSubsectionArtifactfile(id);
             return Ok(aa);
         }
     }
