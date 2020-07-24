@@ -48,7 +48,7 @@ namespace GSC.Helper
             var user = httpContext.Request.Headers["user"];
             if (!string.IsNullOrEmpty(user))
             {
-                var userdata = JsonConvert.DeserializeObject<JwtTokenAccesser>(user);
+                var userdata = JsonConvert.DeserializeObject<UserInfo>(user);
                 LogContext.PushProperty("UserId", userdata.UserId);
                 LogContext.PushProperty("CorrelationId", httpContext.TraceIdentifier);
             }
