@@ -25,7 +25,7 @@ namespace GSC.Respository.Configuration
 
         public IList<CompanyDto> GetCompanies(bool isDeleted)
         {
-            var companies = FindByInclude(t => isDeleted ? t.DeletedDate == null : t.DeletedDate != null, t => t.Location).Select(s => new CompanyDto
+            var companies = FindByInclude(t => isDeleted ? t.DeletedDate != null : t.DeletedDate == null, t => t.Location).Select(s => new CompanyDto
             {
                 Id = s.Id,
                 CompanyCode = s.CompanyCode,

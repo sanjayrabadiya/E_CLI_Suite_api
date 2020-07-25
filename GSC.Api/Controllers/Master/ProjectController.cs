@@ -258,11 +258,11 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
-        [Route("GetProjectDetails/{projectId}/{parentProjectId}")]
-        public IActionResult GetProjectDetails(int projectId, int? parentProjectId)
+        [Route("GetProjectDetails/{projectId}")]
+        public IActionResult GetProjectDetails(int projectId)
         {
             if (projectId <= 0) return BadRequest();
-            return Ok(_projectRepository.GetProjectDetails(projectId, parentProjectId));
+            return Ok(_projectRepository.GetProjectDetails(projectId));
         }
 
         [HttpGet]
