@@ -47,11 +47,11 @@ namespace GSC.Data.Dto.Project.EditCheck
         public string StartParens { get; set; }
         public string EndParens { get; set; }
         public int ProjectDesignId { get; set; }
-
     }
 
     public class EditCheckValidate
     {
+        public int Id { get; set; }
         public string FieldName { get; set; }
         public string CollectionValue { get; set; }
         public string OperatorName { get; set; }
@@ -61,8 +61,9 @@ namespace GSC.Data.Dto.Project.EditCheck
         public string StartParens { get; set; }
         public CollectionSources? CollectionSource { get; set; }
         public DataType? DataType { get; set; }
-        public string Input1 { get; set; }
-        public string Input2 { get; set; }
+        public string InputValue { get; set; }
+        public string RefernceFieldName { get; set; }
+        public bool IsReferenceValue { get; set; }
         public Operator? Operator { get; set; }
         public bool IsFormula { get; set; }
         public bool IsTarget { get; set; }
@@ -70,11 +71,14 @@ namespace GSC.Data.Dto.Project.EditCheck
 
     public class EditCheckResult
     {
+        public int Id { get; set; }
         public bool IsValid { get; set; }
-        public string ResultMessage { get; set; }
-        public string ReferenceString { get; set; }
+        public string SampleText { get; set; }
         public string Result { get; set; }
-        public string ErrorMessage { get; set; }
+        public string ResultMessage { get; set; }
+        public string ErrorMessage { get; set; } = "";
+        public List<EditCheckResult> Target { get; set; }
 
     }
+
 }

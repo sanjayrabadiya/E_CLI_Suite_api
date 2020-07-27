@@ -11,38 +11,43 @@ namespace GSC.Respository.EditCheckImpact
 {
     public class EditCheckFormulaRepository : IEditCheckFormulaRepository
     {
-
-        public EditCheckFormulaRepository()
-        {
-
-        }
-
         public EditCheckResult ValidateFormula(List<EditCheckValidate> editCheck)
         {
             var result = ValidateFormulaReference(editCheck.Where(r => !r.IsTarget).ToList());
 
             if (result.IsValid && editCheck.Any(r => r.IsTarget && r.IsFormula == true))
             {
+                result.Target = new List<EditCheckResult>();
 
-                var dataType = editCheck.FirstOrDefault(r => r.IsTarget && r.DataType != null);
-                if (dataType != null)
+                editCheck.Where(r => r.IsTarget).ForEach(r =>
                 {
+                    var targetResult = new EditCheckResult();
+                    targetResult.Id = r.Id;
+                    targetResult.Result = result.Result;
+                    targetResult.ResultMessage = result.ResultMessage;
+                    targetResult.IsValid = result.IsValid;
+                    targetResult.SampleText = result.SampleText;
 
-                    if (dataType.Operator == Operator.SquareRoot)
-                    {
-                        
-                        result.Result = Math.Sqrt(Convert.ToDouble(result.Result)).ToString();
-                        result.ResultMessage = result.Result + " -> " + result.ReferenceString;
-                    }
+                    if (r.Operator == Operator.SquareRoot)
+                        targetResult.Result = Math.Sqrt(Convert.ToDouble(targetResult.Result)).ToString();
+                    int round = 1;
 
-                    int round = (int)dataType.DataType;
+                    if (r.DataType != null)
+                        round = (int)r.DataType;
 
                     if (round == 1) round = 0;
                     if (round > 3)
                         round = round - 3;
 
-                    result.Result = Decimal.Round(Convert.ToDecimal(result.Result), round, MidpointRounding.AwayFromZero).ToString();
-                }
+                    decimal value;
+                    decimal.TryParse(targetResult.Result, out value);
+                    targetResult.Result = Decimal.Round(value, round, MidpointRounding.AwayFromZero).ToString();
+
+                    if (r.Operator == Operator.SquareRoot)
+                        targetResult.ResultMessage = $"{targetResult.Result} {"->"}{"Sqrt("}{targetResult.ResultMessage}{")"}";
+
+                    result.Target.Add(targetResult);
+                });
             }
             return result;
         }
@@ -57,17 +62,18 @@ namespace GSC.Respository.EditCheckImpact
                 editCheck.Where(x => !x.IsTarget).ForEach(r =>
                 {
                     if (r.Operator == Operator.SquareRoot)
-                        ruleStr = ruleStr + $"{r.CollectionValue2}{r.StartParens}{"sqrt("}{r.Input1}{")"}{r.EndParens}{r.CollectionValue}";
+                        ruleStr = ruleStr + $"{r.CollectionValue2}{r.StartParens}{"sqrt("}{r.InputValue}{")"}{r.EndParens}{r.CollectionValue}";
                     else
-                        ruleStr = ruleStr + $"{r.CollectionValue2}{r.StartParens}{r.Input1}{r.OperatorName}{r.EndParens}{r.CollectionValue}";
+                        ruleStr = ruleStr + $"{r.CollectionValue2}{r.StartParens}{r.InputValue}{r.OperatorName}{r.EndParens}{r.CollectionValue}";
                 });
 
                 if (string.IsNullOrEmpty(ruleStr))
                 {
-                    result.ResultMessage = "Not defined reference!";
+                    result.SampleText = "Not defined reference!";
                     result.IsValid = false;
                     return result;
                 }
+
                 double editCheckResult;
                 if (ruleStr.Contains("^") || ruleStr.Contains("sqrt"))
                 {
@@ -86,9 +92,8 @@ namespace GSC.Respository.EditCheckImpact
             {
                 result.ErrorMessage = ex.Message;
                 result.IsValid = false;
-                result.ResultMessage = ruleStr;
             }
-            result.ReferenceString = ruleStr;
+            result.SampleText = ruleStr;
             return result;
         }
 

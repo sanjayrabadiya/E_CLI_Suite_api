@@ -302,6 +302,17 @@ namespace GSC.Domain.Context
             return result;
         }
 
+        public void DetectionAll()
+        {
+            var entries = ChangeTracker.Entries().Where(e =>
+                    e.State == EntityState.Added ||
+                    e.State == EntityState.Unchanged ||
+                    e.State == EntityState.Modified ||
+                    e.State == EntityState.Deleted)
+                .ToList();
+            entries.ForEach(r => r.State = EntityState.Detached);
+        }
+
         private void SetModifiedInformation(IJwtTokenAccesser jwtTokenAccesser)
         {
             if (jwtTokenAccesser == null || jwtTokenAccesser.UserId <= 0) return;

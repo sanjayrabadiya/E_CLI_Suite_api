@@ -12,6 +12,7 @@ using GSC.Helper.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +30,7 @@ namespace GSC.Respository.Volunteer
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        private readonly IScreeningTemplateRepository _screeningTemplateRepository;
 
         public VolunteerRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -39,7 +41,8 @@ namespace GSC.Respository.Volunteer
             ICompanyRepository companyRepository,
             IRolePermissionRepository rolePermissionRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository
+            IProjectDesignTemplateRepository projectDesignTemplateRepository,
+            IScreeningTemplateRepository screeningTemplateRepository
         )
             : base(uow, jwtTokenAccesser)
         {
@@ -52,6 +55,7 @@ namespace GSC.Respository.Volunteer
             _rolePermissionRepository = rolePermissionRepository;
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _screeningTemplateRepository = screeningTemplateRepository;
         }
 
         public IList<VolunteerGridDto> GetVolunteerList()
@@ -228,12 +232,12 @@ namespace GSC.Respository.Volunteer
             }
 
             if (search.PeriodNo == 1)
-                query = query.Where(x => x.Attendances.Any(r => r.ScreeningEntry.Any(t => t.IsFitnessFit == true
-                                                                                          && t.ScreeningDate.Date >=
+                query = query.Where(x => x.Attendances.Any(r => r.ScreeningEntry.IsFitnessFit == true
+                                                                                          && r.ScreeningEntry.ScreeningDate.Date >=
                                                                                           DateTime.Now
                                                                                               .AddDays(-search
                                                                                                   .LastScreening)
-                                                                                              .Date)));
+                                                                                              .Date));
 
             var projectId = Context.ProjectDesignPeriod.Where(t => t.Id == search.ProjectDesignPeriodId)
                 .Select(x => x.ProjectDesign.ProjectId).FirstOrDefault();
@@ -393,27 +397,20 @@ namespace GSC.Respository.Volunteer
                 lstsubjects.AddRange(attendance);
                 lstsubjects.AddRange(screeningEntry);
 
-                var lockUnlockDDDto = new LockUnlockDDDto();
-                var template = _projectDesignTemplateRepository.GetAllTemplate(proId, null);
-                //var lockUnlockDDDto = new LockUnlockDDDto();
                 foreach (var item in lstsubjects)
                 {
-                    foreach (var item2 in template)
+                    var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningEntry.AttendanceId == (int)item.ExtraData && x.DeletedDate == null).ToList();
+                    if (screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false))
                     {
-                        var screeningTemplateLock = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningEntry).Where(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == item2.Id && x.ScreeningEntry.AttendanceId == (int)item.ExtraData).OrderByDescending(x => x.Id).FirstOrDefault();
-                        if (screeningTemplateLock == null || screeningTemplateLock.IsLocked == false)
+                        var itemexist = subjects.Where(x => x.Id == item.Id).FirstOrDefault();
+                        if (itemexist == null)
                         {
-                            var itemexist = subjects.Where(x => x.Id == item.Id).FirstOrDefault();
-                            if (itemexist == null)
-                            {
-                                subjects.Add(item);
-                            }
-                            break;
+                            subjects.Add(item);
                         }
-                        else
-                        {
-                            subjects.RemoveAll(x => x.Id == item.Id);
-                        }
+                    }
+                    else
+                    {
+                        subjects.RemoveAll(x => x.Id == item.Id);
                     }
                 }
             }
@@ -424,7 +421,8 @@ namespace GSC.Respository.Volunteer
                                                               a.ProjectDesignPeriodId == PeriodId
                                                               && a.ProjectId == projectId
                                                               && a.AttendanceType != AttendanceType.Screening)
-                                  join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on atten.Id equals locktemplate.ScreeningEntry.AttendanceId
+                                  join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
+                                  on atten.Id equals locktemplate.ScreeningEntry.AttendanceId
                                   select new DropDownDto
                                   {
                                       Id = atten.Id,
@@ -443,20 +441,21 @@ namespace GSC.Respository.Volunteer
                                                                        && a.ProjectDesignPeriodId == PeriodId
                                                                        && a.ProjectId == projectId
                                                                        && a.EntryType != AttendanceType.Screening)
-                                      join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on screening.AttendanceId equals locktemplate.ScreeningEntry.AttendanceId
+                                      join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
+                                      on screening.AttendanceId equals locktemplate.ScreeningEntry.AttendanceId
                                       select new DropDownDto
                                       {
                                           Id = screening.Id,
                                           Value = screening.Attendance.Volunteer == null
-                                                 ? Convert.ToString(screening.Attendance.NoneRegister.ScreeningNumber + " - " +
-                                                                    screening.Attendance.NoneRegister.Initial +
-                                                                    (screening.Attendance.NoneRegister.RandomizationNumber == null
-                                                                        ? ""
-                                                                        : " - " + screening.Attendance.NoneRegister.RandomizationNumber))
-                                                 : Convert.ToString(
-                                                     Convert.ToString(screening.Attendance.ProjectSubject != null
-                                                         ? screening.Attendance.ProjectSubject.Number
-                                                         : "") + " - " + screening.Attendance.Volunteer.FullName),
+                                            ? Convert.ToString(screening.Attendance.NoneRegister.ScreeningNumber + " - " +
+                                                               screening.Attendance.NoneRegister.Initial +
+                                                               (screening.Attendance.NoneRegister.RandomizationNumber == null
+                                                                   ? ""
+                                                                   : " - " + screening.Attendance.NoneRegister.RandomizationNumber))
+                                            : Convert.ToString(
+                                                Convert.ToString(screening.Attendance.ProjectSubject != null
+                                                    ? screening.Attendance.ProjectSubject.Number
+                                                    : "") + " - " + screening.Attendance.Volunteer.FullName),
                                           Code = "Screening",
                                           ExtraData = screening.AttendanceId
                                       }).Distinct().ToList();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 
@@ -42,8 +43,11 @@ namespace GSC.Data.Dto.Screening
         public string ProjectCode { get; set; }
         public string Gender { get; set; }
         public bool MyReview { get; set; }
+        public string LevelName1 { get; set; }
+        public bool IsSystemQueryUpdate { get; set; }
         public List<int> ProjectAttendanceTemplateIds { get; set; }
         public bool IsElectronicSignature { get; set; }
+        public List<WorkFlowText> WorkFlowText { get; set; }
     }
 
     public class ScreeningAuditDto

@@ -183,9 +183,9 @@ namespace GSC.Api.Controllers.Project.Design
 
             projectDesignTemplateDto.ClonnedTemplateIds.ForEach(t =>
             {
-                var parent = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateDto.Id);
+                var parent = _projectDesignTemplateRepository.GetTemplateClone(projectDesignTemplateDto.Id);
 
-                var clonnedTemplate = _projectDesignTemplateRepository.GetTemplate(t);
+                var clonnedTemplate = _projectDesignTemplateRepository.GetTemplateClone(t);
                 foreach (var variable in clonnedTemplate.Variables)
                     variable.DeletedDate = DateTime.Now.UtcDate();
 
@@ -204,6 +204,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             return Ok();
         }
+
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
@@ -246,17 +247,17 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
-        [Route("GetTemplateDropDownForProjectSchedule/{projectDesignVisitId}/{collectionSource}/{refVariable}")]
-        public IActionResult GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource, int? refVariable)
+        [Route("GetTemplateDropDownForProjectSchedule/{projectDesignVisitId}")]
+        public IActionResult GetTemplateDropDownForProjectSchedule(int projectDesignVisitId)
         {
-            return Ok(_projectDesignTemplateRepository.GetTemplateDropDownForProjectSchedule(projectDesignVisitId, collectionSource, refVariable));
+            return Ok(_projectDesignTemplateRepository.GetTemplateDropDownForProjectSchedule(projectDesignVisitId));
         }
 
         [HttpGet]
         [Route("GetClonnedTemplates/{id}")]
         public IActionResult GetClonnedTemplates(int id)
         {
-            return Ok(_projectDesignTemplateRepository.GetClonnedTemplates(id));
+            return Ok(_projectDesignTemplateRepository.GetClonnedTemplateDropDown(id));
         }
 
         [HttpGet]

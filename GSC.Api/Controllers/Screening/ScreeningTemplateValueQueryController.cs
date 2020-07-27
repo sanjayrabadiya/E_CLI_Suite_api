@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.EditCheckImpact;
+using GSC.Respository.Medra;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,18 +22,29 @@ namespace GSC.Api.Controllers.Screening
         private readonly IMapper _mapper;
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-
-        private readonly IUnitOfWork _uow;
+        private readonly IMeddraCodingRepository _meddraCodingRepository;
+        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        private readonly IEditCheckImpactRepository _editCheckImpactRepository;
+        private readonly IScheduleRuleRespository _scheduleRuleRespository;
 
         public ScreeningTemplateValueQueryController(
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUnitOfWork uow, IMapper mapper)
+            IMeddraCodingRepository meddraCodingRepository,
+            IScheduleRuleRespository scheduleRuleRespository,
+            IEditCheckImpactRepository editCheckImpactRepository,
+            IScreeningTemplateRepository screeningTemplateRepository,
+            IUnitOfWork<GscContext> uow, IMapper mapper)
         {
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
+            _meddraCodingRepository = meddraCodingRepository;
             _uow = uow;
+            _scheduleRuleRespository = scheduleRuleRespository;
             _mapper = mapper;
+            _screeningTemplateRepository = screeningTemplateRepository;
+            _editCheckImpactRepository = editCheckImpactRepository;
         }
 
         [HttpGet("{screeningTemplateValueId}")]
@@ -65,6 +81,7 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpPost("update")]
+        [TransactionRequired]
         public IActionResult Update([FromBody] ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -82,6 +99,10 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateValueQueryRepository.UpdateQuery(screeningTemplateValueQueryDto,
                 screeningTemplateValueQuery, screeningTemplateValue);
+
+            if (screeningTemplateValue.QueryStatus == QueryStatus.Resolved)
+               // _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
+
             if (_uow.Save() <= 0) throw new Exception("Updating Screening Template Value Query failed on save.");
 
             return Ok(screeningTemplateValueQuery.Id);
@@ -124,6 +145,7 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpPost("self-generate")]
+        [TransactionRequired]
         public IActionResult SelfGenerate([FromBody] ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -132,8 +154,7 @@ namespace GSC.Api.Controllers.Screening
                 ? screeningTemplateValueQueryDto.Value
                 : screeningTemplateValueQueryDto.ValueName;
 
-            var screeningTemplateValue =
-                _screeningTemplateValueRepository.Find(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
+            var screeningTemplateValue = _screeningTemplateValueRepository.Find(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
 
             if (!screeningTemplateValueQueryDto.IsNa)
                 if (!string.IsNullOrEmpty(value) &&
@@ -145,17 +166,38 @@ namespace GSC.Api.Controllers.Screening
                     return BadRequest(ModelState);
                 }
 
+            var screeningTemplate = _screeningTemplateRepository.Find(screeningTemplateValue.ScreeningTemplateId);
 
             var screeningTemplateValueQuery = _mapper.Map<ScreeningTemplateValueQuery>(screeningTemplateValueQueryDto);
             screeningTemplateValueQuery.OldValue = screeningTemplateValueQueryDto.OldValue;
             screeningTemplateValueQuery.Value = value;
             _screeningTemplateValueQueryRepository.SelfGenerate(screeningTemplateValueQuery,
-                screeningTemplateValueQueryDto);
+                screeningTemplateValueQueryDto, screeningTemplateValue, screeningTemplate);
 
+            //_meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
             if (_uow.Save() <= 0)
                 throw new Exception("Creating Self Generate Screening Template Value Query failed on save.");
 
-            return Ok(screeningTemplateValueQuery.Id);
+            if (screeningTemplateValue.Children != null && screeningTemplateValue.Children.Count > 0)
+                screeningTemplateValueQueryDto.Value = string.Join(",", _uow.Context.ScreeningTemplateValueChild.Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
+
+            var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningTemplate.ScreeningEntryId, screeningTemplate.Id,
+                screeningTemplateValueQueryDto.IsNa ? "NA" : screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
+                screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.RepeatSeqNo);
+
+            List<ScheduleCheckValidateDto> scheduleResult = null;
+            if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Date ||
+                screeningTemplateValueQueryDto.CollectionSource == CollectionSources.DateTime ||
+                screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Time)
+            {
+                scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.Id,
+                   screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
+                   screeningTemplateValue.ProjectDesignVariableId, true);
+            }
+
+            var result = _scheduleRuleRespository.VariableResultProcess(editResult, scheduleResult);
+
+            return Ok(result);
         }
 
         [HttpPost("AcknowledgeQuery")]

@@ -14,12 +14,12 @@ namespace GSC.Respository.Screening
 
         QueryStatusDto GetQueryStatusCount(int screeningTemplateId);
 
-        QueryStatusDto GetQueryStatusByModel(List<ScreeningTemplateValue> screeningTemplateValue,
+        QueryStatusDto GetQueryStatusByModel(List<Data.Dto.Screening.ScreeningTemplateValueBasic> screeningTemplateValue,
             int screeningTemplateId);
 
         void DeleteChild(int screeningTemplateValueId);
         void UpdateChild(List<ScreeningTemplateValueChild> children);
-        string CheckCloseQueries(List<ScreeningTemplateValue> screeningTemplateValues);
+        string CheckCloseQueries(int screeningTemplateId);
         string GetValueForAudit(ScreeningTemplateValueDto screeningTemplateValueDto);
         bool IsFitness(int screeningTemplateId);
         bool IsDiscontinued(int screeningTemplateId);
@@ -27,8 +27,8 @@ namespace GSC.Respository.Screening
 
         int GetQueryCountByVisitId(int projectDesignVisitId, int screeningEntryid);
 
-        //List<DashboardQueryStatusDto> GetQueryByProjectDesignId(int projectDesignId, int screeningEntryId);
         List<DashboardQueryStatusDto> GetQueryByProjectDesignId(int projectDesignId);
-        IList<ProjectDatabaseDto> GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters);
+        CommonDto GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters);
+        List<QueryStatusDto> GetQueryStatusBySubject(int screeningEntryId);
     }
 }

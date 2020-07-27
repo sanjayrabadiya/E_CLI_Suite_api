@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
@@ -15,6 +17,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Workflow;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
 {
@@ -25,13 +28,18 @@ namespace GSC.Respository.Screening
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IScreeningTemplateValueEditCheckRepository _screeningTemplateValueEditCheckRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
+        private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IEditCheckImpactRepository _editCheckImpactRepository;
+        private readonly IMapper _mapper;
+        private readonly IScheduleRuleRespository _scheduleRuleRespository;
         public ScreeningTemplateRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUploadSettingRepository uploadSettingRepository,
+            IUploadSettingRepository uploadSettingRepository, IMapper mapper,
             IProjectWorkflowRepository projectWorkflowRepository,
             IEditCheckImpactRepository editCheckImpactRepository,
+            IScheduleRuleRespository scheduleRuleRespository,
+            IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
             IScreeningTemplateValueEditCheckRepository screeningTemplateValueEditCheckRepository)
             : base(uow, jwtTokenAccesser)
         {
@@ -39,40 +47,65 @@ namespace GSC.Respository.Screening
             _uploadSettingRepository = uploadSettingRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
+            _scheduleRuleRespository = scheduleRuleRespository;
+            _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
             _editCheckImpactRepository = editCheckImpactRepository;
             _screeningTemplateValueEditCheckRepository = screeningTemplateValueEditCheckRepository;
         }
 
-        public ProjectDesignTemplateDto GetScreeningTemplate(ProjectDesignTemplateDto designTemplateDto,
-            ScreeningTemplateDto screeningTemplate)
+        private ScreeningTemplateBasic GetScreeningTemplateBasic(int screeningTemplateId)
         {
+            return All.AsNoTracking().Where(r => r.Id == screeningTemplateId).Select(
+               c => new ScreeningTemplateBasic
+               {
+                   Id = c.Id,
+                   ScreeningEntryId = c.ScreeningEntryId,
+                   ProjectDesignId = c.ScreeningEntry.ProjectDesignId,
+                   ProjectDesignTemplateId = c.ProjectDesignTemplateId,
+                   Status = c.Status,
+                   DomainId = c.ProjectDesignTemplate.DomainId,
+                   ReviewLevel = c.ReviewLevel,
+                   RepeatedVisit = c.RepeatedVisit,
+                   IsLocked = c.IsLocked,
+                   IsDisable = c.IsDisable,
+                   ParentId = c.ParentId
+               }).FirstOrDefault();
+        }
+
+        private List<Data.Dto.Screening.ScreeningTemplateValueBasic> GetScreeningValues(int screeningTemplateId)
+        {
+            return _screeningTemplateValueRepository.All.AsNoTracking().Where(t => t.ScreeningTemplateId == screeningTemplateId)
+                    .ProjectTo<Data.Dto.Screening.ScreeningTemplateValueBasic>(_mapper.ConfigurationProvider).ToList();
+        }
+
+        public Data.Dto.Project.Design.DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto,
+            int screeningTemplateId)
+        {
+
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-            var screeningTemplateObject = Find(screeningTemplate.Id);
 
-            var projectDesignId = Context.ScreeningEntry.Find(screeningTemplateObject.ScreeningEntryId).ProjectDesignId;
+            var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
 
-            var statusId = (int)screeningTemplateObject.Status;
-            
-            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
+            var statusId = (int)screeningTemplateBasic.Status;
 
+            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningTemplateBasic.ProjectDesignId);
+
+            designTemplateDto.ScreeningTemplateId = screeningTemplateId;
             designTemplateDto.IsSubmittedButton = statusId < 3 && workflowlevel.IsStartTemplate;
             if (workflowlevel.LevelNo >= 0 && designTemplateDto.IsRepeated)
                 designTemplateDto.IsRepeated = workflowlevel.IsStartTemplate;
-            if (screeningTemplateObject.ParentId != null)
+            if (screeningTemplateBasic.ParentId != null)
                 designTemplateDto.IsRepeated = false;
 
-            designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateObject.ReviewLevel;
-            designTemplateDto.ScreeningTemplateId = screeningTemplateObject.Id;
-            designTemplateDto.IsLocked = screeningTemplate.IsLocked;
-            designTemplateDto.Status = screeningTemplateObject.Status;
-            designTemplateDto.StatusName = GetStatusName(screeningTemplateObject,
-                workflowlevel.LevelNo == screeningTemplateObject.ReviewLevel, workflowlevel);
+            designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
+            designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
+            designTemplateDto.IsLocked = screeningTemplateBasic.IsLocked;
+            designTemplateDto.Status = screeningTemplateBasic.Status;
+            designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic,
+                workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
 
-            var values = _screeningTemplateValueRepository
-                .FindByInclude(t => t.ScreeningTemplateId == screeningTemplate.Id, t => t.Comments, t => t.Queries,
-                    t => t.Children).ToList();
-
-            _editCheckImpactRepository.CheckValidation(screeningTemplateObject, values, projectDesignId, projectDesignId);
+            var values = GetScreeningValues(screeningTemplateBasic.Id);
 
             values.ForEach(t =>
             {
@@ -82,13 +115,14 @@ namespace GSC.Respository.Screening
                     variable.ScreeningValue = t.Value;
                     variable.ScreeningValueOld = t.Value;
                     variable.ScreeningTemplateValueId = t.Id;
+                    variable.ScheduleDate = t.ScheduleDate;
                     variable.QueryStatus = t.QueryStatus;
-                    variable.HasComments = t.Comments.Any();
-                    variable.HasQueries = t.Queries.Any();
+                    variable.HasComments = t.IsComment;
+                    variable.HasQueries = t.QueryStatus != null ? true : false;
                     variable.IsNaValue = t.IsNa;
                     variable.IsSystem = t.IsSystem;
                     variable.WorkFlowButton =
-                        SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateObject);
+                        SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
 
                     variable.DocPath = t.DocPath != null ? documentUrl + t.DocPath : null;
                     if (!string.IsNullOrWhiteSpace(variable.ScreeningValue) || variable.IsNaValue)
@@ -106,55 +140,159 @@ namespace GSC.Respository.Screening
                                 val.ScreeningTemplateValueChildId = childValue.Id;
                             }
                         });
+
+                    variable.IsSaved = variable.IsValid;
                 }
             });
 
-            var editChecks =
-                _screeningTemplateValueEditCheckRepository.EditCheckSet(designTemplateDto.ScreeningTemplateId, false);
-            designTemplateDto.Variables.ForEach(t =>
+            if (!screeningTemplateBasic.IsLocked)
             {
-                if (designTemplateDto.VariableTemplate != null)
-                {
-                    t.Note = designTemplateDto.VariableTemplate
-                        .VariableTemplateDetails.FirstOrDefault(x => x.VariableId == t.VariableId)?.Note;
+                EditCheckProcess(designTemplateDto, values, screeningTemplateBasic);
+                CheckSchedule(designTemplateDto, values, screeningTemplateBasic);
+            }
 
-                    if (!string.IsNullOrEmpty(t.Note))
-                        t.Note = "[" + t.Note + "]";
-                }
-
-                if (t.ScreeningValue == null && !t.IsNaValue) t.ScreeningValue = t.DefaultValue;
-
-                t.OriginalValidationType = t.ValidationType;
-                t.EditCheckValidation = editChecks.FirstOrDefault(r => r.ProjectDesignVariableId == t.Id) ??
-                                        new EditCheckTargetValidation();
-                if (t.EditCheckValidation.ProjectDesignVariableId > 0 &&
-                    t.EditCheckValidation.OriginalValidationType != null)
-                    t.ValidationType = (ValidationType)t.EditCheckValidation.OriginalValidationType;
-            });
-
-            if (screeningTemplateObject.EditCheckDetailId.HasValue && screeningTemplateObject.IsDisable)
+            if (screeningTemplateBasic.IsDisable && string.IsNullOrEmpty(designTemplateDto.EditCheckMessage))
             {
-                var editCheck = Context.EditCheckDetail.Where(x => x.Id == screeningTemplateObject.EditCheckDetailId)
-                    .Select(r => new { r.EditCheck.AutoNumber, r.Message, r.Operator }).FirstOrDefault();
-
-                if (editCheck != null)
-                {
-                    //designTemplateDto.IsSubmittedButton = editCheck.Operator == Operator.Warning;
-                    //designTemplateDto.RuleOperator = editCheck.Operator;
-                    //designTemplateDto.EditCheckMessage = editCheck.AutoNumber + " - " + editCheck.Message;
-                }
-
+                var template = Find(screeningTemplateBasic.Id);
+                template.IsDisable = false;
+                Update(template);
+                Context.SaveChanges(_jwtTokenAccesser);
             }
 
             return designTemplateDto;
         }
 
-  
-        public List<ScreeningTemplateDto> GetTemplateTree(int screeningEntryId, int? parentId,
-            List<ScreeningTemplateValue> templateValues, WorkFlowLevelDto workFlowLevel)
-        {            
+        void EditCheckProcess(DesignScreeningTemplateDto projectDesignTemplateDto, List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic)
+        {
+            var result = _editCheckImpactRepository.CheckValidation(values, screeningTemplateBasic, false);
+
+
+            result.Where(t => t.IsTarget && t.ProjectDesignTemplateId == projectDesignTemplateDto.ProjectDesignTemplateId &&
+            (t.CheckBy == EditCheckRuleBy.ByTemplate || t.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
+            {
+                if (r.Operator == Operator.Warning && r.ValidateType != EditCheckValidateType.RuleValidated)
+                {
+                    projectDesignTemplateDto.IsWarning = true;
+                    projectDesignTemplateDto.EditCheckMessage = $"{r.AutoNumber} {r.Message}";
+                }
+                else if (r.Operator == Operator.Enable && r.ValidateType != EditCheckValidateType.RuleValidated)
+                {
+                    projectDesignTemplateDto.IsRepeated = false;
+                    projectDesignTemplateDto.IsSubmittedButton = false;
+                    projectDesignTemplateDto.IsLocked = true;
+                    projectDesignTemplateDto.EditCheckMessage = $"{r.AutoNumber} {r.Message}";
+                }
+            });
+
+            var variableTargetResult = _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), false, false);
+            projectDesignTemplateDto.Variables.ForEach(r =>
+            {
+                var singleResult = variableTargetResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
+                if (singleResult != null)
+                {
+                    r.EditCheckValidation = new EditCheckTargetValidation();
+
+                    if (singleResult.IsValueSet || (singleResult.IsSoftFetch && (string.IsNullOrEmpty(r.ScreeningValue))))
+                    {
+                        if (r.ScreeningValue != singleResult.Value)
+                        {
+                            _editCheckImpactRepository.InsertScreeningValue(projectDesignTemplateDto.ScreeningTemplateId,
+                                                          (int)r.ProjectDesignVariableId, singleResult.Value, singleResult.Note, singleResult.IsSoftFetch, r.CollectionSource);
+                        }
+
+                        r.ScreeningValue = singleResult.Value;
+                        r.ScreeningValueOld = singleResult.Value;
+                    }
+
+                    if (singleResult.OriginalValidationType != null)
+                        r.ValidationType = (ValidationType)singleResult.OriginalValidationType;
+
+                    r.EditCheckValidation.EditCheckMsg = singleResult.EditCheckMsg;
+                    r.EditCheckValidation.isInfo = singleResult.isInfo;
+                    r.EditCheckValidation.EditCheckDisable = singleResult.EditCheckDisable;
+                }
+                r.editCheckIds = GetEditCheckIds(result, (int)r.ProjectDesignVariableId);
+            });
+
+
+        }
+
+        void CheckSchedule(DesignScreeningTemplateDto projectDesignTemplateDto, List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic)
+        {
+            if (screeningTemplateBasic.ParentId == null)
+            {
+                var scheduleResult = _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, false);
+                if (scheduleResult != null && scheduleResult.Count > 0)
+                {
+                    projectDesignTemplateDto.Variables.ForEach(r =>
+                    {
+                        var scheduleVariable = scheduleResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).ToList();
+                        if (scheduleVariable != null && scheduleVariable.Count > 0)
+                        {
+                            if (r.EditCheckValidation == null)
+                            {
+                                r.EditCheckValidation = new EditCheckTargetValidation();
+                                r.EditCheckValidation.isInfo = true;
+                            }
+
+                            if (scheduleVariable.Any(x => x.ValidateType == EditCheckValidateType.Failed))
+                                r.EditCheckValidation.isInfo = false;
+
+                            if (scheduleVariable.Any(x => x.HasQueries))
+                                r.EditCheckValidation.HasQueries = true;
+
+                            var schMessage = scheduleResult.Select(t => new EditCheckMessage
+                            {
+                                AutoNumber = t.AutoNumber,
+                                Message = t.Message,
+                                ValidateType = t.ValidateType.GetDescription()
+                            }).ToList();
+
+                            r.EditCheckValidation.EditCheckMsg.AddRange(schMessage);
+                        }
+                    });
+                }
+            }
+        }
+
+        List<EditCheckIds> GetEditCheckIds(List<EditCheckValidateDto> editCheckValidateDtos, int projectDesignVariableId)
+        {
+            var editCheckIds = editCheckValidateDtos.
+                Where(x => x.ProjectDesignVariableId == projectDesignVariableId).
+                GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
+
+            var projectDesignVariableIds = editCheckValidateDtos.
+                Where(x => editCheckIds.Contains(x.EditCheckId)).
+               Select(t => t.ProjectDesignVariableId).Distinct().ToList();
+
+            projectDesignVariableIds.ForEach(r =>
+            {
+                editCheckIds.AddRange(editCheckValidateDtos.
+                Where(x => x.ProjectDesignVariableId == r).
+                GroupBy(t => t.EditCheckId).Select(c => c.Key).ToList());
+            });
+
+            return editCheckIds.Distinct().
+               Select(t => new EditCheckIds
+               {
+                   EditCheckId = t
+               }).ToList();
+        }
+        public void SubmitReviewTemplate(int screeningTemplateId, bool isLockUnLock)
+        {
+            Context.DetectionAll();
+            var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
+            var values = GetScreeningValues(screeningTemplateBasic.Id);
+            var result = _editCheckImpactRepository.CheckValidation(values, screeningTemplateBasic, true);
+            _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), true, true);
+            if (!isLockUnLock)
+                _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, true);
+        }
+
+        public List<ScreeningTemplateDto> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel)
+        {
             return All.Where(s =>
-                   s.ScreeningEntryId == screeningEntryId && s.ParentId == parentId && s.DeletedDate == null).Select(s =>
+                   s.ScreeningEntryId == screeningEntryId && s.DeletedDate == null).Select(s =>
                    new ScreeningTemplateDto
                    {
                        Id = s.Id,
@@ -163,22 +301,20 @@ namespace GSC.Respository.Screening
                        Status = s.Status,
                        ProjectDesignVisitId = s.ProjectDesignTemplate.ProjectDesignVisitId,
                        ProjectDesignTemplateName = s.ProjectDesignTemplate.TemplateName,
-                       DesignOrder = s.ProjectDesignTemplate.DesignOrder,
+                       DesignOrder = Convert.ToDecimal(s.ProjectDesignTemplate.DesignOrder + Convert.ToString(s.RepeatSeqNo == null ? "" : ("." + s.RepeatSeqNo.ToString()))),
                        IsVisitRepeated = s.RepeatedVisit != null ? false :
                            workFlowLevel.LevelNo >= 0 && s.ProjectDesignVisit.IsRepeated ? workFlowLevel.IsStartTemplate :
                            s.ProjectDesignVisit.IsRepeated,
                        ProjectDesignVisitName = s.ProjectDesignTemplate.ProjectDesignVisit.DisplayName +
                                                 Convert.ToString(s.RepeatedVisit == null ? "" : "_" + s.RepeatedVisit),
-                       StatusName = GetStatusName(s, workFlowLevel.LevelNo == s.ReviewLevel, workFlowLevel),
+                       StatusName = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = s.ReviewLevel, Status = s.Status }, workFlowLevel.LevelNo == s.ReviewLevel, workFlowLevel),
                        Progress = s.Progress ?? 0,
                        ReviewLevel = s.ReviewLevel,
+                       IsLocked = s.IsLocked,
                        MyReview = workFlowLevel.LevelNo == s.ReviewLevel,
+                       ParentId = s.ParentId,
                        TemplateQueryStatus = _screeningTemplateValueRepository.GetQueryStatusByModel(templateValues, s.Id),
-                       IsParent = s.Children.Any(),
-                       IsLocked = Context.ScreeningTemplateLockUnlockAudit.Any(x => x.ProjectDesignTemplateId == s.ProjectDesignTemplateId && x.ScreeningEntryId == screeningEntryId && x.ProjectId == s.ScreeningEntry.ProjectId
-                       ) ? Context.ScreeningTemplateLockUnlockAudit.Where(x => x.ProjectDesignTemplateId == s.ProjectDesignTemplateId && x.ScreeningEntryId == screeningEntryId && x.ProjectId == s.ScreeningEntry.ProjectId
-                        ).OrderByDescending(b => b.Id).FirstOrDefault().IsLocked : false                           
-                   }).ToList().OrderBy(o => o.ProjectDesignVisitId).ThenBy(t => t.DesignOrder).ToList();           
+                   }).ToList().OrderBy(o => o.ProjectDesignVisitId).ThenBy(t => t.DesignOrder).ToList();
         }
 
         public List<MyReviewDto> GetScreeningTemplateReview()
@@ -231,6 +367,7 @@ namespace GSC.Respository.Screening
             var originalTemplate = Find(id);
             screeningTemplate.ParentId = originalTemplate.Id;
             screeningTemplate.Id = 0;
+            screeningTemplate.RepeatSeqNo = All.Count(x => x.ParentId == originalTemplate.Id) + 1;
             screeningTemplate.ProjectDesignVisitId = originalTemplate.ProjectDesignVisitId;
             screeningTemplate.ScreeningEntryId = originalTemplate.ScreeningEntryId;
             screeningTemplate.EditCheckDetailId = originalTemplate.EditCheckDetailId;
@@ -239,7 +376,7 @@ namespace GSC.Respository.Screening
             screeningTemplate.IsEditChecked = false;
             screeningTemplate.Status = ScreeningStatus.Pending;
             screeningTemplate.Children = null;
-
+            screeningTemplate.IsDisable = false;
             Add(screeningTemplate);
 
             return screeningTemplate;
@@ -316,10 +453,10 @@ namespace GSC.Respository.Screening
                     ScreeningEntryId = screeningEntryId,
                     ProjectDesignTemplateId = t.Id,
                     EditCheckDetailId = oldTemplate != null ? oldTemplate.EditCheckDetailId : null,
-                    IsDisable = oldTemplate != null ? oldTemplate.IsDisable : false,
                     RepeatedVisit = repeatedCount + 1,
                     ProjectDesignVisitId = t.ProjectDesignVisitId,
                     IsEditChecked = false,
+                    IsDisable = false,
                     Status = ScreeningStatus.Pending
                 });
             });
@@ -450,266 +587,197 @@ namespace GSC.Respository.Screening
             return queryDtos.Where(x => x.VolunteerDelete == null).ToList();
         }
 
-        private WorkFlowButton SetWorkFlowButton(ScreeningTemplateValue screningTemplateValue,
-            WorkFlowLevelDto workflowlevel, ProjectDesignTemplateDto designTemplateDto,
-            ScreeningTemplate screeningTemplate)
+        private WorkFlowButton SetWorkFlowButton(Data.Dto.Screening.ScreeningTemplateValueBasic screeningValue,
+            WorkFlowLevelDto workflowlevel, DesignScreeningTemplateDto designTemplateDto,
+            ScreeningTemplateBasic templateBasic)
         {
             var workFlowButton = new WorkFlowButton();
-            var statusId = (int)screeningTemplate.Status;
+            var statusId = (int)templateBasic.Status;
 
-            if (screeningTemplate.Status == ScreeningStatus.Completed)
+            if (templateBasic.Status == ScreeningStatus.Completed)
             {
                 designTemplateDto.MyReview = false;
                 designTemplateDto.IsSubmittedButton = false;
                 return workFlowButton;
             }
 
-            if (statusId>2)
+            if (statusId > 2)
             {
-                if (workflowlevel.LevelNo <= screeningTemplate.ReviewLevel || workflowlevel.LevelNo == 0)
+                if (workflowlevel.LevelNo <= templateBasic.ReviewLevel || workflowlevel.LevelNo == 0)
                     workFlowButton.SelfCorrection = workflowlevel.SelfCorrection &&
-                                                    screningTemplateValue.QueryStatus != QueryStatus.SelfCorrection;
+                                                    screeningValue.QueryStatus != QueryStatus.SelfCorrection;
 
 
-                if (workflowlevel.LevelNo == screningTemplateValue.AcknowledgeLevel ||
+                if (workflowlevel.LevelNo == screeningValue.AcknowledgeLevel ||
                     workflowlevel.LevelNo == 0 && workflowlevel.IsStartTemplate)
-                    workFlowButton.Update = screningTemplateValue.QueryStatus == QueryStatus.Open ||
-                                            screningTemplateValue.QueryStatus == QueryStatus.Reopened;
+                    workFlowButton.Update = screeningValue.QueryStatus == QueryStatus.Open ||
+                                            screeningValue.QueryStatus == QueryStatus.Reopened;
 
                 if (workflowlevel.IsGenerateQuery && (designTemplateDto.MyReview || workflowlevel.LevelNo == 0))
-                    workFlowButton.Generate = screningTemplateValue.QueryStatus == null ||
-                                              screningTemplateValue.QueryStatus == QueryStatus.Closed;
+                    workFlowButton.Generate = screeningValue.QueryStatus == null ||
+                                              screeningValue.QueryStatus == QueryStatus.Closed;
 
-                if (workflowlevel.LevelNo == screningTemplateValue.ReviewLevel &&
-                    screningTemplateValue.ReviewLevel == screningTemplateValue.AcknowledgeLevel)
+                if (workflowlevel.LevelNo == screeningValue.ReviewLevel &&
+                    screeningValue.ReviewLevel == screeningValue.AcknowledgeLevel)
                 {
-                    workFlowButton.DeleteQuery = screningTemplateValue.QueryStatus == QueryStatus.Open;
-                    workFlowButton.Review = screningTemplateValue.QueryStatus == QueryStatus.Answered ||
-                                            screningTemplateValue.QueryStatus == QueryStatus.Resolved;
+                    workFlowButton.DeleteQuery = screeningValue.QueryStatus == QueryStatus.Open;
+                    workFlowButton.Review = screeningValue.QueryStatus == QueryStatus.Answered ||
+                                            screeningValue.QueryStatus == QueryStatus.Resolved;
                 }
 
                 if (workflowlevel.LevelNo == 0 && workFlowButton.Review)
-                    workFlowButton.Review = screningTemplateValue.UserRoleId == _jwtTokenAccesser.RoleId;
+                    workFlowButton.Review = screeningValue.UserRoleId == _jwtTokenAccesser.RoleId;
 
-                if (screningTemplateValue.IsSystem && screningTemplateValue.QueryStatus == QueryStatus.Open &&
+                if (screeningValue.IsSystem && screeningValue.QueryStatus == QueryStatus.Open &&
                     workflowlevel.IsStartTemplate)
                 {
-                    workFlowButton.Update = screningTemplateValue.QueryStatus == QueryStatus.Open;
+                    workFlowButton.Update = screeningValue.QueryStatus == QueryStatus.Open;
                     workFlowButton.DeleteQuery = false;
                 }
 
-                if (!designTemplateDto.MyReview && workflowlevel.LevelNo == screningTemplateValue.AcknowledgeLevel &&
-                  screningTemplateValue.AcknowledgeLevel != screningTemplateValue.ReviewLevel)
-                    workFlowButton.Acknowledge = screningTemplateValue.QueryStatus == QueryStatus.Resolved ||
-                                                 screningTemplateValue.QueryStatus == QueryStatus.SelfCorrection;
+                if (!designTemplateDto.MyReview && workflowlevel.LevelNo == screeningValue.AcknowledgeLevel &&
+                  screeningValue.AcknowledgeLevel != screeningValue.ReviewLevel)
+                    workFlowButton.Acknowledge = screeningValue.QueryStatus == QueryStatus.Resolved ||
+                                                 screeningValue.QueryStatus == QueryStatus.SelfCorrection;
 
 
             }
 
             workFlowButton.Clear = designTemplateDto.IsSubmittedButton;
-            
+
             return workFlowButton;
         }
 
-        private string GetStatusName(ScreeningTemplate screeningTemplate, bool myReview, WorkFlowLevelDto workFlowLevel)
+        private string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel)
         {
             if (myReview) return "My Review";
 
-            if (screeningTemplate.Status != ScreeningStatus.Completed && screeningTemplate.ReviewLevel != null &&
-                screeningTemplate.ReviewLevel > 0)
+            if (basicDetail.Status != ScreeningStatus.Completed && basicDetail.ReviewLevel != null &&
+                basicDetail.ReviewLevel > 0)
             {
                 if (workFlowLevel.WorkFlowText != null
-                    && workFlowLevel.WorkFlowText.Any(x => x.LevelNo == screeningTemplate.ReviewLevel))
-                    return workFlowLevel.WorkFlowText.FirstOrDefault(x => x.LevelNo == screeningTemplate.ReviewLevel)
+                    && workFlowLevel.WorkFlowText.Any(x => x.LevelNo == basicDetail.ReviewLevel))
+                    return workFlowLevel.WorkFlowText.FirstOrDefault(x => x.LevelNo == basicDetail.ReviewLevel)
                         ?.RoleName;
                 return "Completed";
             }
 
-            return screeningTemplate.Status.GetDescription();
+            return basicDetail.Status.GetDescription();
         }
 
         public List<LockUnlockListDto> GetLockUnlockList(LockUnlockSearchDto lockUnlockParams)
         {
             var ProjectCode = Context.Project.Find(lockUnlockParams.ParentProjectId).ProjectCode;
 
-            var ParentProjectId = Context.Project.Where(x => x.Id == lockUnlockParams.ProjectId).FirstOrDefault().ParentProjectId;
-            var ProjectDesignId = ParentProjectId == null ? Context.ProjectDesign.Where(x => x.ProjectId == lockUnlockParams.ProjectId).FirstOrDefault().Id :
-                 Context.ProjectDesign.Where(x => x.ProjectId == ParentProjectId).FirstOrDefault().Id;
+            var ProjectDesignId = Context.ProjectDesign.Where(x => x.ProjectId == lockUnlockParams.ParentProjectId).Select(r => r.Id).FirstOrDefault();
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(ProjectDesignId);
-            var grpresult = new List<LockUnlockListDto>();
 
-            var lockedin = Context.ScreeningTemplateLockUnlockAudit.Where(x => x.ProjectId == lockUnlockParams.ProjectId).ToList();
+            var screeningEntry = lockUnlockParams.Status == false ? Context.ScreeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId)
+                : Context.ScreeningEntry.Where(r => r.ProjectDesignId == ProjectDesignId);
 
-            var grplockedIn = lockedin.GroupBy(x => new { x.ScreeningEntryId, x.ProjectDesignId, x.ProjectDesignTemplateId })
-                      .Select(y => new LockUnlockListDto()
-                      {
-                          Id = y.Key.ScreeningEntryId,
-                          ProjectDesignId = y.Key.ProjectDesignId,
-                          TemplateId = y.Key.ProjectDesignTemplateId,
-                          IsLocked = y.LastOrDefault().IsLocked,
-                          ProjectId = y.LastOrDefault().ProjectId
-                      }).ToList();
+            if (lockUnlockParams.ParentProjectId != lockUnlockParams.ProjectId)
+                screeningEntry = screeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId);
 
-            if (lockUnlockParams.Status)
+            if (lockUnlockParams.SubjectIds != null && lockUnlockParams.SubjectIds.Length > 0)
+                screeningEntry = screeningEntry.Where(r => lockUnlockParams.SubjectIds.Contains(r.AttendanceId) && r.EntryType != AttendanceType.Screening);
+
+            if (lockUnlockParams.PeriodIds != null && lockUnlockParams.PeriodIds.Length > 0)
+                screeningEntry = screeningEntry.Where(r => lockUnlockParams.PeriodIds.Contains(r.ProjectDesignPeriodId));
+
+            var grpresult = screeningEntry.Select(x => new LockUnlockListDto
             {
-                var result = (from screening in Context.ScreeningEntry.Where(t => t.ProjectId == lockUnlockParams.ProjectId && (lockUnlockParams.PeriodIds == null || lockUnlockParams.PeriodIds.Contains(t.ProjectDesignPeriodId)) && t.DeletedDate == null
-                              && (lockUnlockParams.SubjectIds == null || lockUnlockParams.SubjectIds.Contains(t.AttendanceId)) && t.EntryType != AttendanceType.Screening)
-                              join template in Context.ScreeningTemplate.Where(u => (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(u.ProjectDesignTemplateId))
-                              && (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId)) && u.DeletedDate == null
-                              && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(u.ReviewLevel))
-                              || (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)u.Status)) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(u.ReviewLevel))
-                              && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)u.Status))))
-                              on screening.Id equals template.ScreeningEntryId
-                              join volunteerTemp in Context.Volunteer.Where(x => x.DeletedDate == null) on screening.Attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
-                              from volunteer in volunteerDto.DefaultIfEmpty()
-                              join noneregisterTemp in Context.NoneRegister.Where(x => x.DeletedDate == null) on screening.Attendance.Id equals noneregisterTemp.AttendanceId into noneregisterDto
-                              from nonregister in noneregisterDto.DefaultIfEmpty()
-                              join projectSubjectTemp in Context.ProjectSubject.Where(x => x.DeletedDate == null) on screening.Attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
-                              from projectsubject in projectsubjectDto.DefaultIfEmpty()
-                              select new LockUnlockListDto
-                              {
-                                  Id = screening.Id,
-                                  ProjectId = screening.ProjectId,
-                                  ProjectDesignId = screening.ProjectDesignId,
-                                  AttendanceId = screening.AttendanceId,
-                                  ScreeningTemplateId = template.Id,
-                                  ScreeningTemplateParentId = template.ParentId,
-                                  ParentProjectId = screening.Project.ParentProjectId,
-                                  ProjectCode = ProjectCode,
-                                  ProjectName = screening.Project.ProjectCode,
-                                  PeriodName = screening.ProjectDesignPeriod.DisplayName,
-                                  ScreeningNo = screening.ScreeningNo,
-                                  TemplateId = template.ProjectDesignTemplateId,
-                                  TemplateName = template.ProjectDesignTemplate.TemplateName,
-                                  VisitId = template.ProjectDesignTemplate.ProjectDesignVisitId,
-                                  VisitName = template.ProjectDesignTemplate.ProjectDesignVisit.DisplayName +
-                                            Convert.ToString(template.RepeatedVisit == null ? "" : "_" + template.RepeatedVisit),
-                                  Initial = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
-                                  SubjectNo = volunteer.FullName == null ? nonregister.ScreeningNumber : volunteer.VolunteerNo,
-                                  RandomizationNumber = volunteer.FullName == null ? nonregister.RandomizationNumber : projectsubject.Number,
-                                  IsElectronicSignature = workflowlevel.IsElectricSignature,
-                                  ScreeningStatusNo = template.Status,
-                                  ReviewLevel = template.ReviewLevel,
-                              }).OrderBy(x => x.Id).ToList();
-
-                result.RemoveAll(r => grplockedIn.Any(a => a.TemplateId == r.TemplateId && a.Id == r.Id && a.ProjectDesignId == r.ProjectDesignId && a.ProjectId == r.ProjectId && a.IsLocked));
-
-                grpresult = result.GroupBy(x => x.SubjectNo).Select(s => new LockUnlockListDto
+                Id = x.Id,
+                screeningEntryId = x.Id,
+                ProjectId = x.ProjectId,
+                ProjectDesignId = x.ProjectDesignId,
+                AttendanceId = x.AttendanceId,
+                ParentProjectId = x.Project.ParentProjectId,
+                ProjectCode = ProjectCode,
+                ProjectName = x.Project.ProjectCode,
+                PeriodName = x.ProjectDesignPeriod.DisplayName,
+                ScreeningNo = x.ScreeningNo,
+                Initial = x.Attendance.Volunteer == null ? x.Attendance.NoneRegister.Initial : x.Attendance.Volunteer.AliasName,
+                SubjectNo = x.Attendance.Volunteer == null ? x.Attendance.NoneRegister.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
+                RandomizationNumber = x.Attendance.Volunteer == null ? x.Attendance.NoneRegister.RandomizationNumber : x.Attendance.Volunteer.VolunteerNo,
+                IsElectronicSignature = workflowlevel.IsElectricSignature,
+                PeriodCount = x.ScreeningTemplates.Where(g => (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
+                                && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
+                                && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
+                                && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
+                                  || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
+                                  && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
+                                .Select(a => a.ProjectDesignVisit.ProjectDesignPeriodId).Distinct().Count(),
+                TemplateCount = x.ScreeningTemplates.Where(g => (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
+                                && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
+                                && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
+                                && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
+                                  || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
+                                  && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status)))).Count(),
+                VisitCount = x.ScreeningTemplates.Where(g => (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
+                                && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
+                                && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
+                                && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
+                                  || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
+                                  && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
+                                .Select(a => new { a.ProjectDesignVisit, a.RepeatedVisit }).Distinct().Count(),
+                lstTemplate = x.ScreeningTemplates.Where(g => (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
+                                && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
+                                && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
+                                && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
+                                  || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
+                                  && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
+                .Select(t => new LockUnlockListDto
                 {
-                    SubjectNo = s.Key,
-                    AttendanceId = s.FirstOrDefault().AttendanceId,
-                    Id = s.FirstOrDefault().Id,
-                    ProjectId = s.FirstOrDefault().ProjectId,
-                    ParentProjectId = s.FirstOrDefault().ParentProjectId,
-                    ProjectCode = s.FirstOrDefault().ProjectCode,
-                    ProjectDesignId = s.FirstOrDefault().ProjectDesignId,
-                    ProjectName = s.FirstOrDefault().ProjectName,
-                    Status = lockUnlockParams.Status,
-                    Initial = s.FirstOrDefault().Initial,
-                    TemplateName = s.FirstOrDefault().TemplateName,
-                    VisitId = s.FirstOrDefault().VisitId,
-                    VisitName = s.FirstOrDefault().VisitName,
-                    RandomizationNumber = s.FirstOrDefault().RandomizationNumber,
-                    PeriodCount = s.GroupBy(p => p.PeriodName).Count(),
-                    TemplateCount = s.GroupBy(t => new { t.VisitName, t.TemplateId }).Count(),
-                    VisitCount = s.GroupBy(v => v.VisitName).Count(),
-                    IsElectronicSignature = s.FirstOrDefault().IsElectronicSignature,
-                    lstTemplate = s.GroupBy(t => new { t.TemplateName, t.VisitName }).Select(t => new LockUnlockListDto
-                    {
-                        TemplateId = t.FirstOrDefault().TemplateId,
-                        ProjectCode = s.FirstOrDefault().ProjectCode,
-                        ProjectName = s.FirstOrDefault().ProjectName,
-                        PeriodName = s.FirstOrDefault().PeriodName,
-                        ParentProjectId = s.FirstOrDefault().ParentProjectId,
-                        VisitId = t.FirstOrDefault().VisitId,
-                        VisitName = t.FirstOrDefault().VisitName,
-                        TemplateName = t.FirstOrDefault().TemplateName
-                    }).OrderBy(x => x.VisitId).ToList()
-                }).ToList();
-            }
-            else
-            {
-                var result = (from screening in Context.ScreeningEntry.Where(t => t.ProjectId == lockUnlockParams.ProjectId && (lockUnlockParams.PeriodIds == null || lockUnlockParams.PeriodIds.Contains(t.ProjectDesignPeriodId)) && t.DeletedDate == null
-                              && (lockUnlockParams.SubjectIds == null || lockUnlockParams.SubjectIds.Contains(t.AttendanceId)) && t.EntryType != AttendanceType.Screening)
-                              join template in Context.ScreeningTemplate.Where(u => (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(u.ProjectDesignTemplateId))
-                              && (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId)) && u.DeletedDate == null
-                              && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(u.ReviewLevel))
-                              || (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)u.Status)) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(u.ReviewLevel))
-                              && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)u.Status))))
-                              on screening.Id equals template.ScreeningEntryId
-                              join locktemplate in Context.ScreeningTemplateLockUnlockAudit.Where(x => x.IsLocked) on new { x = screening.Attendance.Id, y = template.ProjectDesignTemplateId } equals new { x = locktemplate.ScreeningEntry.AttendanceId, y = locktemplate.ProjectDesignTemplateId }
-                              join volunteerTemp in Context.Volunteer.Where(x => x.DeletedDate == null) on screening.Attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
-                              from volunteer in volunteerDto.DefaultIfEmpty()
-                              join noneregisterTemp in Context.NoneRegister.Where(x => x.DeletedDate == null) on screening.Attendance.Id equals noneregisterTemp.AttendanceId into noneregisterDto
-                              from nonregister in noneregisterDto.DefaultIfEmpty()
-                              join projectSubjectTemp in Context.ProjectSubject.Where(x => x.DeletedDate == null) on screening.Attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
-                              from projectsubject in projectsubjectDto.DefaultIfEmpty()
-                              select new LockUnlockListDto
-                              {
-                                  Id = screening.Id,
-                                  ProjectId = screening.ProjectId,
-                                  ProjectDesignId = screening.ProjectDesignId,
-                                  AttendanceId = screening.AttendanceId,
-                                  ScreeningTemplateId = template.Id,
-                                  ScreeningTemplateParentId = template.ParentId,
-                                  ParentProjectId = screening.Project.ParentProjectId,
-                                  ProjectCode = ProjectCode,
-                                  ProjectName = screening.Project.ProjectCode,
-                                  PeriodName = screening.ProjectDesignPeriod.DisplayName,
-                                  ScreeningNo = screening.ScreeningNo,
-                                  TemplateId = template.ProjectDesignTemplateId,
-                                  TemplateName = template.ProjectDesignTemplate.TemplateName,
-                                  VisitId = template.ProjectDesignTemplate.ProjectDesignVisitId,
-                                  VisitName = template.ProjectDesignTemplate.ProjectDesignVisit.DisplayName +
-                                            Convert.ToString(template.RepeatedVisit == null ? "" : "_" + template.RepeatedVisit),
-                                  Initial = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
-                                  SubjectNo = volunteer.FullName == null ? nonregister.ScreeningNumber : volunteer.VolunteerNo,
-                                  RandomizationNumber = volunteer.FullName == null ? nonregister.RandomizationNumber : projectsubject.Number,
-                                  IsElectronicSignature = workflowlevel.IsElectricSignature,
-                                  ScreeningStatusNo = template.Status,
-                                  ReviewLevel = template.ReviewLevel,
-                              }).OrderBy(x => x.Id).ToList();
-
-                result.RemoveAll(r => grplockedIn.Any(a => a.TemplateId == r.TemplateId && a.Id == r.Id && a.ProjectDesignId == r.ProjectDesignId && a.ProjectId == r.ProjectId && !a.IsLocked));
-
-                grpresult = result.GroupBy(x => x.SubjectNo).Select(s => new LockUnlockListDto
-                {
-                    SubjectNo = s.Key,
-                    AttendanceId = s.FirstOrDefault().AttendanceId,
-                    Id = s.FirstOrDefault().Id,
-                    ParentProjectId = s.FirstOrDefault().ParentProjectId,
-                    ProjectId = s.FirstOrDefault().ProjectId,
-                    ProjectCode = s.FirstOrDefault().ProjectCode,
-                    ProjectDesignId = s.FirstOrDefault().ProjectDesignId,
-                    ProjectName = s.FirstOrDefault().ProjectName,
-                    Status = lockUnlockParams.Status,
-                    Initial = s.FirstOrDefault().Initial,
-                    TemplateName = s.FirstOrDefault().TemplateName,
-                    VisitId = s.FirstOrDefault().VisitId,
-                    VisitName = s.FirstOrDefault().VisitName,
-                    RandomizationNumber = s.FirstOrDefault().RandomizationNumber,
-                    PeriodCount = s.GroupBy(p => p.PeriodName).Count(),
-                    TemplateCount = s.GroupBy(t => new { t.VisitName, t.TemplateId }).Count(),
-                    VisitCount = s.GroupBy(v => v.VisitName).Count(),
-                    IsElectronicSignature = s.FirstOrDefault().IsElectronicSignature,
-                    lstTemplate = s.GroupBy(t => new { t.TemplateName, t.VisitName }).Select(t => new LockUnlockListDto
-                    {
-                        TemplateId = t.FirstOrDefault().TemplateId,
-                        ProjectCode = s.FirstOrDefault().ProjectCode,
-                        ProjectName = s.FirstOrDefault().ProjectName,
-                        PeriodName = s.FirstOrDefault().PeriodName,
-                        ParentProjectId = s.FirstOrDefault().ParentProjectId,
-                        VisitId = t.FirstOrDefault().VisitId,
-                        VisitName = t.FirstOrDefault().VisitName,
-                        TemplateName = t.FirstOrDefault().TemplateName
-                    }).OrderBy(x => x.VisitId).ToList()
-                }).ToList();
-            }
+                    TemplateId = t.ProjectDesignTemplateId,
+                    ScreeningTemplateId = t.Id,
+                    screeningEntryId = t.ScreeningEntryId,
+                    ProjectCode = ProjectCode,
+                    ProjectName = t.ScreeningEntry.Project.ProjectCode,
+                    PeriodName = t.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
+                    ParentProjectId = t.ScreeningEntry.Project.ParentProjectId,
+                    VisitId = t.ProjectDesignVisitId,
+                    VisitName = t.ProjectDesignVisit.DisplayName + Convert.ToString(t.RepeatedVisit == null ? "" : "_" + t.RepeatedVisit),
+                    ScreeningTemplateParentId = t.ParentId,
+                    TemplateName = t.RepeatSeqNo == null && t.ParentId == null ? t.ProjectDesignTemplate.DesignOrder + " " + t.ProjectDesignTemplate.TemplateName
+                                    : t.ProjectDesignTemplate.DesignOrder + "." + t.RepeatSeqNo + " " + t.ProjectDesignTemplate.TemplateName,
+                    DesignOrder = t.ProjectDesignTemplate.DesignOrder.ToString(),
+                    SeqNo = t.ProjectDesignTemplate.DesignOrder
+                }).OrderBy(b => b.VisitId).ThenBy(a => a.SeqNo).ThenBy(a => a.ScreeningTemplateId).ToList()
+            }).Where(x => x.lstTemplate.Count > 0).OrderBy(x => x.ProjectId).ToList();
 
             return grpresult;
         }
 
+        public ScreeningTemplateValueSaveBasics ValidateVariableValue(ScreeningTemplateValue screeningTemplateValue, List<EditCheckIds> EditCheckIds, CollectionSources? collectionSource)
+        {
+            var result = new ScreeningTemplateValueSaveBasics();
+            result.Children = screeningTemplateValue.Children.Select(r => new ScreeningTemplateValueChildBasic { Id = r.Id }).ToList();
+            result.Id = screeningTemplateValue.Id;
+
+            if ((EditCheckIds != null && EditCheckIds.Count() > 0) || collectionSource == CollectionSources.Date
+                || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time)
+            {
+                var value = screeningTemplateValue.IsNa ? "NA" : screeningTemplateValue.Value;
+
+                if (screeningTemplateValue.Children != null && screeningTemplateValue.Children.Count > 0)
+                    value = string.Join(",", _screeningTemplateValueChildRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
+
+                var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).FirstOrDefault();
+
+                var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningTemplate.ScreeningEntryId, screeningTemplateValue.ScreeningTemplateId,
+                    screeningTemplateValue.IsNa ? "NA" : screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
+                    screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.RepeatedVisit);
+
+                var scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.Id,
+                 screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
+                 screeningTemplateValue.ProjectDesignVariableId, true);
+
+                result.EditCheckResult = _scheduleRuleRespository.VariableResultProcess(editResult, scheduleResult);
+            }
+
+            return result;
+        }
     }
 }
 

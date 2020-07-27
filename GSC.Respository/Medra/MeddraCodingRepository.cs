@@ -252,6 +252,24 @@ namespace GSC.Respository.Medra
             //}
         }
 
+        public void UpdateEditCheck(int ScreeningTemplateValueId)
+        {
+            var data = All.Where(x => x.DeletedDate == null && x.ScreeningTemplateValueId == ScreeningTemplateValueId).FirstOrDefault();
+            if (data != null)
+            {
+                data.CodedType = CodedType.ReCoded;
+                //data.CreatedRole = _jwtTokenAccesser.RoleId;
+                //data.MeddraLowLevelTermId = null;
+                data.MeddraSocTermId = null;
+                data.IsApproved = false;
+                data.ApprovedBy = null;
+                data.DeletedBy = _jwtTokenAccesser.UserId;
+                data.DeletedDate = DateTime.Now.ToUniversalTime();
+                Update(data);
+                //_meddraCodingAuditRepository.SaveAudit("Remove from meddra Coding", data.Id, null, null, "Removed due to edit check fired.", null, null);
+            }
+        }
+
         public IList<MeddraCodingSearchDetails> AutoCodes(MeddraCodingSearchDto meddraCodingSearchDto)
         {
             //var Exists = All.Where(x => x.ProjectDesignVariableId == meddraCodingSearchDto.ProjectDesignVariableId).ToList();

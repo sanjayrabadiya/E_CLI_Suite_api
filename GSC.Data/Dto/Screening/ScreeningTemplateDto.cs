@@ -20,8 +20,7 @@ namespace GSC.Data.Dto.Screening
         public int ProjectDesignVisitId { get; set; }
         public int? RepeatedVisit { get; set; }
         public string ProjectDesignTemplateName { get; set; }
-        public string ProjectDesignTemplateNameWithIndex { get; set; }
-        public int DesignOrder { get; set; }
+        public decimal DesignOrder { get; set; }
         public string ProjectDesignVisitName { get; set; }
         public string StatusName { get; set; }
         public int Progress { get; set; }
@@ -32,13 +31,36 @@ namespace GSC.Data.Dto.Screening
         public ICollection<ScreeningTemplateValueDto> ScreeningTemplateValues { get; set; }
         public ICollection<ScreeningTemplateDto> Children { get; set; }
         public QueryStatusDto TemplateQueryStatus { get; set; }
-        public bool IsStartReview { get; set; }
         public bool IsCompleteReview { get; set; }
         public bool MyReview { get; set; }
         public bool IsVisitRepeated { get; set; }
-        public int? EditCheckDetailId { get; set; }
-        public bool IsEditChecked { get; set; }
         public bool IsDisable { get; set; }
         public bool IsLocked { get; set; }
+        public int? RepeatSeqNo { get; set; }
+    }
+
+
+    public class ScreeningTemplateBasic
+    {
+        public int Id { get; set; }
+        public int ScreeningEntryId { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public ScreeningStatus Status { get; set; }
+        public int? ParentId { get; set; }
+        public int? DomainId { get; set; }
+        public int? RepeatedVisit { get; set; }
+        public int ProjectDesignId { get; set; }
+        public short? ReviewLevel { get; set; }
+        public bool IsLocked { get; set; }
+        public bool IsDisable { get; set; }
+
+    }
+
+
+    public class ScreeningTemplateRequest
+    {
+        public int Id { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+
     }
 }

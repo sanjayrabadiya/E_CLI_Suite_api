@@ -11,6 +11,7 @@ namespace GSC.Respository.Screening
 {
     public interface IScreeningTemplateLockUnlockRepository : IGenericRepository<ScreeningTemplateLockUnlockAudit>
     {
+        void Insert(ScreeningTemplateLockUnlockAudit screeningTemplateLockUnlock);
         List<LockUnlockHistoryListDto> ProjectLockUnLockHistory(int projectId, int parentProjectId);
     }
 }

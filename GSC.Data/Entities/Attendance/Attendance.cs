@@ -43,7 +43,7 @@ namespace GSC.Data.Entities.Attendance
         public bool IsStandby { get; set; }
         public AttendaceStatus? Status { get; set; }
         public AttendanceHistory AttendanceHistory { get; set; }
-        public virtual ICollection<ScreeningEntry> ScreeningEntry { get; set; }
+        public virtual ScreeningEntry ScreeningEntry { get; set; }
         public NoneRegister NoneRegister { get; set; }
     }
 }

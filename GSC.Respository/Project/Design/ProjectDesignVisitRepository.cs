@@ -78,18 +78,18 @@ namespace GSC.Respository.Project.Design
             var screeninglockAudit = new List<ScreeningTemplateLockUnlockAudit>();
             if (lockUnlockDDDto.ChildProjectId != lockUnlockDDDto.ProjectId)
             {
-                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
+                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
             }
             else
             {
-                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
+                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
             }
 
             if (lockUnlockDDDto.IsLock)
-            {               
+            {
                 var lstvisit = Context.ProjectDesignVisit.Where(x => x.DeletedDate == null
                                             && x.ProjectDesignPeriodId == lockUnlockDDDto.Id).Include(x => x.Templates).OrderBy(t => t.Id).ToList();
-                               
+
                 visits = All.Where(x => x.DeletedDate == null
                                             && x.ProjectDesignPeriodId == lockUnlockDDDto.Id).OrderBy(t => t.Id).Select(
                     t => new DropDownDto
@@ -97,10 +97,10 @@ namespace GSC.Respository.Project.Design
                         Id = t.Id,
                         Value = t.DisplayName
                     }).ToList();
-               
+
                 foreach (var item in lstvisit)
                 {
-                   lockUnlockDDDto.Id = item.Id;
+                    lockUnlockDDDto.Id = item.Id;
                     var template = _projectDesignTemplateRepository.GetTemplateByLockedDropDown(lockUnlockDDDto);
                     if (template.Count == 0)
                     {
@@ -110,25 +110,25 @@ namespace GSC.Respository.Project.Design
 
             }
             else
-            {                
+            {
                 visits = (from visit in Context.ProjectDesignVisit.Where(x => x.DeletedDate == null && x.ProjectDesignPeriodId == lockUnlockDDDto.Id)
                           join template in Context.ProjectDesignTemplate.Where(x => x.DeletedDate == null) on visit.Id equals template.ProjectDesignVisitId
-                          join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ProjectDesignId, x.ProjectDesignTemplateId })
+                          join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
                           .Select(y => new LockUnlockListDto
                           {
-                              Id = y.LastOrDefault().Id,                              
+                              Id = y.LastOrDefault().Id,
                               screeningEntryId = y.Key.ScreeningEntryId,
-                              ProjectDesignId = y.Key.ProjectDesignId,
-                              TemplateId = y.Key.ProjectDesignTemplateId,
+                              ScreeningTemplateId = y.Key.ScreeningTemplateId,
+                              TemplateId = y.LastOrDefault(t => t.ScreeningTemplateId == y.Key.ScreeningTemplateId).ScreeningTemplate.ProjectDesignTemplateId,
                               IsLocked = y.LastOrDefault().IsLocked
-                          }).Where(x=>x.IsLocked && screeningEntryId.Any(y => y.Id == x.screeningEntryId)).ToList()
+                          }).Where(x => x.IsLocked && screeningEntryId.Any(y => y.Id == x.screeningEntryId)).ToList()
                           on template.Id equals locktemplate.TemplateId
                           group visit by visit.Id into gcs
                           select new DropDownDto
-                           {
-                               Id = gcs.Key,
-                               Value = gcs.FirstOrDefault().DisplayName,                               
-                           }).OrderBy(t => t.Id).Distinct().ToList();                
+                          {
+                              Id = gcs.Key,
+                              Value = gcs.FirstOrDefault().DisplayName,
+                          }).OrderBy(t => t.Id).Distinct().ToList();
             }
             return visits;
         }

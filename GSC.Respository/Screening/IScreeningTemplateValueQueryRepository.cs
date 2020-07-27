@@ -14,7 +14,9 @@ namespace GSC.Respository.Screening
         void AcknowledgeQuery(ScreeningTemplateValueQuery screeningTemplateValueQuery);
 
         void SelfGenerate(ScreeningTemplateValueQuery screeningTemplateValueQuery,
-            ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto);
+            ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto,
+            ScreeningTemplateValue screeningTemplateValue,
+            ScreeningTemplate screeningTemplate);
 
         void ReviewQuery(ScreeningTemplateValue screeningTemplateValue,
             ScreeningTemplateValueQuery screeningTemplateValueQuery);

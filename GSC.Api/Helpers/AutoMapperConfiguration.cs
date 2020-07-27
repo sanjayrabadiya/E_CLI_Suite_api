@@ -145,14 +145,17 @@ namespace GSC.Api.Helpers
             CreateMap<ClientType, ClientTypeDto>().ReverseMap();
             CreateMap<DocumentName, DocumentNameDto>().ReverseMap();
             CreateMap<EditCheck, EditCheckDto>().ReverseMap();
-          
+
+            CreateMap<EditCheckDetail, EditCheckDetailDto>().ReverseMap();
+
             CreateMap<EditCheckDetail, EditCheckValidateDto>()
                 .ForMember(x => x.AutoNumber, x => x.MapFrom(a => a.EditCheck.AutoNumber))
                 .ForMember(x => x.CollectionSource, y => y.MapFrom(a => a.ProjectDesignVariable.CollectionSource))
                 .ForMember(x => x.DataType, x => x.MapFrom(a => a.ProjectDesignVariable.DataType))
                 .ForMember(x => x.EditCheckDetailId, x => x.MapFrom(a => a.Id))
                 .ForMember(x => x.EditCheckId, x => x.MapFrom(a => a.EditCheckId))
-                .ForMember(x => x.DeletedDate, x => x.MapFrom(a => a.EditCheck.DeletedDate??a.DeletedDate));
+                .ForMember(x => x.IsOnlyTarget, x => x.MapFrom(a => a.EditCheck.IsOnlyTarget))
+                .ForMember(x => x.IsFormula, x => x.MapFrom(a => a.EditCheck.IsFormula));
 
 
             CreateMap<ProjectScheduleTemplate, ProjectScheduleTemplateDto>().ReverseMap();

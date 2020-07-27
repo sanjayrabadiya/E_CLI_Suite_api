@@ -6,6 +6,7 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
+using GSC.Helper;
 
 namespace GSC.Respository.Screening
 {
@@ -15,11 +16,10 @@ namespace GSC.Respository.Screening
         ScreeningTemplate TemplateRepeat(int id);
         void VisitRepeat(int projectDesignVisitId, int screeningEntryId);
 
-        List<ScreeningTemplateDto> GetTemplateTree(int screeningEntryId, int? parentId,
-            List<ScreeningTemplateValue> templateValues, WorkFlowLevelDto workFlowLevel);
+        List<ScreeningTemplateDto> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel);
 
-        ProjectDesignTemplateDto GetScreeningTemplate(ProjectDesignTemplateDto designTemplateDto,
-            ScreeningTemplateDto screeningTemplate);
+        DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto,
+            int screeningTemplateId);
 
         List<ScreeningTemplateLockUnlockDto> GetTemplatesLockUnlock(ScreeningTemplateLockUnlockParams lockUnlockParams);
         List<DashboardStudyStatusDto> GetDashboardStudyStatusByVisit(int projectId);
@@ -27,6 +27,10 @@ namespace GSC.Respository.Screening
         List<DashboardStudyStatusDto> GetDashboardStudyStatusBySite(int projectId);
 
         IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters);
-        List<LockUnlockListDto> GetLockUnlockList(LockUnlockSearchDto lockUnlockParams);        
+        List<LockUnlockListDto> GetLockUnlockList(LockUnlockSearchDto lockUnlockParams);
+
+        ScreeningTemplateValueSaveBasics ValidateVariableValue(ScreeningTemplateValue screeningTemplateValue, List<EditCheckIds> EditCheckIds, CollectionSources? collectionSource);
+
+        void SubmitReviewTemplate(int screeningTemplateId,bool isLockUnLock);
     }
 }

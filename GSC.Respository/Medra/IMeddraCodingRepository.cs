@@ -13,7 +13,7 @@ namespace GSC.Respository.Medra
         MeddraCodingMainDto GetVariableCount(MeddraCodingSearchDto meddraCodingDto);
         List<DropDownDto> MeddraCodingVariableDropDown(int ProjectId);
         IList<MeddraCodingSearchDetails> GetMedDRACodingDetails(MeddraCodingSearchDto filters);
-
+        void UpdateEditCheck(int ScreeningTemplateValueId);
         IList<MeddraCodingSearchDetails> AutoCodes(MeddraCodingSearchDto meddraCodingSearchDto);
     }
 }

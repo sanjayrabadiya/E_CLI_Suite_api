@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
@@ -25,26 +26,24 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWork<GscContext> _uow;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IScreeningTemplateReviewRepository _screeningTemplateReviewRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IProjectSubjectRepository _projectSubjectRepository;
-        private readonly ISchedulerRuleRespository _schedulerRule;
         public ScreeningTemplateLockUnlockController(IScreeningTemplateRepository screeningTemplateRepository,
             IScreeningTemplateLockUnlockRepository screeningTemplateLockUnlockRepository,
             IScreeningEntryRepository screeningEntryRepository,
             IAttendanceRepository attendanceRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUnitOfWork uow, IMapper mapper,
+            IUnitOfWork<GscContext> uow, IMapper mapper,
             IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
              IProjectWorkflowRepository projectWorkflowRepository,
              IProjectSubjectRepository projectSubjectRepository,
-            IJwtTokenAccesser jwtTokenAccesser,
-            ISchedulerRuleRespository schedulerRule)
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _screeningTemplateRepository = screeningTemplateRepository;
             _screeningTemplateLockUnlockRepository = screeningTemplateLockUnlockRepository;
@@ -58,12 +57,11 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateReviewRepository = screeningTemplateReviewRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
             _projectSubjectRepository = projectSubjectRepository;
-            _schedulerRule = schedulerRule;
-        }        
+        }
 
         [HttpGet]
         [Route("GetLockUnlockList")]
-        public IActionResult GetLockUnlockList([FromQuery]LockUnlockSearchDto lockUnlockParams)
+        public IActionResult GetLockUnlockList([FromQuery] LockUnlockSearchDto lockUnlockParams)
         {
             if (lockUnlockParams.ProjectId <= 0)
             {
@@ -77,33 +75,40 @@ namespace GSC.Api.Controllers.Screening
 
         [HttpPut]
         [Route("LockUnlockTemplateList/{status}")]
-        public IActionResult LockUnlockTemplateList([FromBody]ScreeningTemplateLockUnlockAuditDto item, ScreeningStatus status)
+        [TransactionRequired]
+        public IActionResult LockUnlockTemplateList([FromBody] ScreeningTemplateLockUnlockAuditDto item, ScreeningStatus status)
         {
-            var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningEntryId == item.ScreeningEntryId && x.ProjectDesignTemplateId == item.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+            var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.Id == item.ScreeningTemplateId && x.DeletedDate == null).FirstOrDefault();
 
-            var screeningTemplateValue = _screeningTemplateValueRepository.FindByInclude(x =>
-                   x.ScreeningTemplateId == screeningTemplate.Id && x.DeletedDate == null, x => x.ProjectDesignVariable).ToList();
-            string validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(screeningTemplateValue);
-            
+            if (item.IsLocked)
+                CheckEditCheck(item.ScreeningTemplateId);
+
+            string validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(item.ScreeningTemplateId);
+
             if (!string.IsNullOrEmpty(validateMsg))
-            {               
+            {
                 ModelState.AddModelError("Message", validateMsg);
                 return BadRequest(ModelState);
             }
 
             var screeningTemplateLockUnlock = _mapper.Map<ScreeningTemplateLockUnlockAudit>(item);
-            screeningTemplateLockUnlock.IpAddress = _jwtTokenAccesser.IpAddress;
-            screeningTemplateLockUnlock.TimeZone = _jwtTokenAccesser.GetHeader("timeZone");
-            screeningTemplateLockUnlock.CreatedRoleBy = _jwtTokenAccesser.RoleId;
-
-            _screeningTemplateLockUnlockRepository.Add(screeningTemplateLockUnlock);
-
+            _screeningTemplateLockUnlockRepository.Insert(screeningTemplateLockUnlock);
+            screeningTemplate.IsLocked = item.IsLocked;
+            _screeningTemplateRepository.Update(screeningTemplate);
             if (_uow.Save() <= 0)
             {
                 throw new Exception($"Failed Lock Unlock Template");
-            }           
+            }
 
+            if (!item.IsLocked)
+                CheckEditCheck(item.ScreeningTemplateId);
             return Ok();
+        }
+
+        void CheckEditCheck(int id)
+        {
+            _screeningTemplateRepository.SubmitReviewTemplate(id, true);
+            _uow.Save();
         }
 
         [HttpGet]

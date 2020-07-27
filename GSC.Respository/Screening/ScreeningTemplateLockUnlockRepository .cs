@@ -1,17 +1,11 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Project.Design;
-using GSC.Data.Dto.Project.Workflow;
-using GSC.Data.Dto.ProjectRight;
-using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
-using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Workflow;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +36,14 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueEditCheckRepository = screeningTemplateValueEditCheckRepository;
         }
 
+        public void Insert(ScreeningTemplateLockUnlockAudit screeningTemplateLockUnlock)
+        {
+            screeningTemplateLockUnlock.IpAddress = _jwtTokenAccesser.IpAddress;
+            screeningTemplateLockUnlock.TimeZone = _jwtTokenAccesser.GetHeader("timeZone");
+            screeningTemplateLockUnlock.CreatedRoleBy = _jwtTokenAccesser.RoleId;
+            Add(screeningTemplateLockUnlock);
+        }
+
         public List<LockUnlockHistoryListDto> ProjectLockUnLockHistory(int projectId, int ParentProjectId)
         {
             var ProjectCode = Context.Project.Find(ParentProjectId).ProjectCode;
@@ -51,35 +53,38 @@ namespace GSC.Respository.Screening
             var result = All.Where(y => parent.Contains(y.ProjectId)).Select(x => new LockUnlockHistoryListDto
             {
                 Id = x.Id,
-                ScreeningEntryId = x.ScreeningEntryId,                
+                ScreeningEntryId = x.ScreeningEntryId,
                 VolunteerName = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.NoneRegister.Initial : x.ScreeningEntry.Attendance.Volunteer.FullName,
                 VolunteerNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.NoneRegister.ScreeningNumber : x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
                 RandomizationNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.NoneRegister.RandomizationNumber : x.ScreeningEntry.Attendance.ProjectSubject.Number,
                 AttendanceId = x.ScreeningEntry.Attendance.Id,
-                ProjectDesignId = x.ProjectDesignId,
-                ProjectDesignTemplateId = x.ProjectDesignTemplateId,
-                //PeriodName = Context.ProjectDesignTemplate.Where(tem => tem.Id == x.ProjectDesignTemplateId).FirstOrDefault().ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
-                VisitName = Context.ProjectDesignTemplate.Where(tem => tem.Id == x.ProjectDesignTemplateId).FirstOrDefault().ProjectDesignVisit.DisplayName,
-                ProjectDesignTemplateName = Context.ProjectDesignTemplate.Where(tem => tem.Id == x.ProjectDesignTemplateId).FirstOrDefault().TemplateName,
+                ProjectDesignTemplateId = x.ScreeningTemplate.ProjectDesignTemplate.Id,
+                VisitId = x.ScreeningTemplate.ProjectDesignVisitId,
+                VisitName = x.ScreeningTemplate.ProjectDesignTemplate.ProjectDesignVisit.DisplayName + Convert.ToString(x.ScreeningTemplate.RepeatedVisit == null ? "" : "_" + x.ScreeningTemplate.RepeatedVisit),
+                ProjectDesignTemplateName = x.ScreeningTemplate.RepeatSeqNo == null && x.ScreeningTemplate.ParentId == null ? x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + " " + x.ScreeningTemplate.ProjectDesignTemplate.TemplateName
+                                            : x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder+ "." + x.ScreeningTemplate.RepeatSeqNo + " " + x.ScreeningTemplate.ProjectDesignTemplate.TemplateName,                
+                DesignOrder = x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder.ToString(),
+                ScreeningTemplateParentId = x.ScreeningTemplate.ParentId,
+                ScreeningTemplateId = x.ScreeningTemplateId,
                 IsLocked = x.IsLocked,
                 Locked = x.IsLocked ? "Locked" : "Unlocked",
-                IpAddress  = x.IpAddress,
+                IpAddress = x.IpAddress,
                 TimeZone = x.TimeZone,
                 CreatedBy = x.CreatedBy,
-                CreatedByName = Context.Users.Where(u => u.Id == x.CreatedBy).FirstOrDefault().UserName + " ("+ Context.SecurityRole.Where(u => u.Id == x.CreatedRoleBy).FirstOrDefault().RoleShortName + ") ",
+                CreatedByName = Context.Users.Where(u => u.Id == x.CreatedBy).FirstOrDefault().UserName + " (" + Context.SecurityRole.Where(u => u.Id == x.CreatedRoleBy).FirstOrDefault().RoleShortName + ") ",
                 CreatedRoleByName = Context.SecurityRole.Where(u => u.Id == x.CreatedRoleBy).FirstOrDefault().RoleShortName,
                 CreatedRoleBy = x.CreatedRoleBy,
                 CreatedDate = x.CreatedDate,
                 AuditReasonComment = x.AuditReasonComment,
                 AuditReasonId = x.AuditReasonId,
                 AuditReasonName = Context.AuditReason.FirstOrDefault(y => y.Id == x.AuditReasonId).ReasonName,
-                ProjectName = x.ScreeningEntry.Project.ParentProjectId != null ? x.ScreeningEntry.Project.ProjectCode: null,
-                ProjectCode = ProjectCode,     
+                ProjectName = x.ScreeningEntry.Project.ParentProjectId != null ? x.ScreeningEntry.Project.ProjectCode : null,
+                ProjectCode = ProjectCode,
                 ParentProjectId = x.ScreeningEntry.Project.ParentProjectId,
-            }).OrderByDescending(x => x.Id).ToList();          
+                SeqNo = x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder
+            }).OrderByDescending(x => x.Id).ToList();            
 
             return result;
         }
-
     }
 }

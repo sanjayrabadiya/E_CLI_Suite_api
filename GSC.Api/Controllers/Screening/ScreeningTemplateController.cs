@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
-using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.Screening;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Screening
@@ -30,13 +30,13 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateReviewRepository _screeningTemplateReviewRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWork<GscContext> _uow;
 
         public ScreeningTemplateController(IScreeningTemplateRepository screeningTemplateRepository,
             IScreeningEntryRepository screeningEntryRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUnitOfWork uow, IMapper mapper,
+            IUnitOfWork<GscContext> uow, IMapper mapper,
             IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IProjectSubjectRepository projectSubjectRepository,
@@ -132,22 +132,18 @@ namespace GSC.Api.Controllers.Screening
             return Ok();
         }
 
-        [HttpPost("GetTemplate")]
-        public IActionResult GetTemplate([FromBody] ScreeningTemplateDto screeningTemplate)
+        [HttpGet]
+        [Route("GetTemplate/{id}/{projectDesignTemplateId}")]
+        public IActionResult GetTemplate([FromRoute] int id, int projectDesignTemplateId)
         {
-            if (screeningTemplate.Id <= 0) return BadRequest();
+            var designTemplate = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
 
-            if (screeningTemplate.ProjectDesignTemplateId <= 0) return BadRequest();
-            var designTemplate =
-                _projectDesignTemplateRepository.GetTemplate(screeningTemplate.ProjectDesignTemplateId);
-            var designTemplateDto = _mapper.Map<ProjectDesignTemplateDto>(designTemplate);
-            designTemplateDto.ProjectDesignVisitName = designTemplate.ProjectDesignVisit.DisplayName;
-
-            return Ok(_screeningTemplateRepository.GetScreeningTemplate(designTemplateDto, screeningTemplate));
+            return Ok(_screeningTemplateRepository.GetScreeningTemplate(designTemplate, id));
         }
 
         [HttpPut]
         [Route("SubmitTemplate/{id}")]
+        [TransactionRequired]
         public IActionResult SubmitTemplate(int id)
         {
             if (_projectDesignTemplateRepository.All.Any(x =>
@@ -159,7 +155,11 @@ namespace GSC.Api.Controllers.Screening
             else
                 SubmittedTemplate(id);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design Period failed on clone period.");
+            if (_uow.Save() <= 0) throw new Exception("SubmitTemplate Failed!");
+
+            _screeningTemplateRepository.SubmitReviewTemplate(id, false);
+
+            _uow.Save();
 
             return Ok();
         }
@@ -167,7 +167,7 @@ namespace GSC.Api.Controllers.Screening
         private void SubmittedTemplate(int id)
         {
             if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id
-                                                                && x.Status == ScreeningStatus.Submitted))
+                                                                && x.Status == ScreeningStatus.Submitted && !x.IsRepeat))
             {
                 ModelState.AddModelError("Message", "Template already submitted!");
                 BadRequest(ModelState);
@@ -188,7 +188,7 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplate.ReviewLevel = 1;
                 screeningTemplate.StartLevel = -1;
             }
-
+            screeningTemplate.IsDisable = false;
             screeningTemplate.ScreeningTemplateReview = new List<ScreeningTemplateReview>();
             screeningTemplate.ScreeningTemplateReview.Add(new ScreeningTemplateReview
             {
@@ -215,14 +215,12 @@ namespace GSC.Api.Controllers.Screening
 
         [HttpPut]
         [Route("ReviewedTemplate/{id}")]
+        [TransactionRequired]
         public IActionResult ReviewedTemplate(int id)
         {
             var screeningTemplate = _screeningTemplateRepository.Find(id);
 
-            var screeningTemplateValue = _screeningTemplateValueRepository.FindByInclude(x =>
-                x.ScreeningTemplateId == id && x.DeletedDate == null, x => x.ProjectDesignVariable).ToList();
-
-            var validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(screeningTemplateValue);
+            var validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(id);
 
             if (!string.IsNullOrEmpty(validateMsg))
             {
@@ -239,12 +237,12 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
-            screeningTemplate.Status = ScreeningStatus.Reviewed;
+            screeningTemplate.Status = ScreeningStatus.Completed;
 
             screeningTemplate.ScreeningTemplateReview = new List<ScreeningTemplateReview>();
             screeningTemplate.ScreeningTemplateReview.Add(new ScreeningTemplateReview
             {
-                Status = ScreeningStatus.Reviewed,
+                Status = ScreeningStatus.Completed,
                 ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel),
                 RoleId = _jwtTokenAccesser.RoleId
             });
@@ -257,9 +255,13 @@ namespace GSC.Api.Controllers.Screening
 
             if (_uow.Save() <= 0) throw new Exception("Failed Template Review");
 
-            return Ok();
+            _screeningTemplateRepository.SubmitReviewTemplate(screeningTemplate.Id, false);
+
+            _uow.Save();
+
+            return Ok(id);
         }
-               
+
 
         [HttpGet]
         [Route("GetScreeningTemplateReview")]
@@ -285,40 +287,10 @@ namespace GSC.Api.Controllers.Screening
             return Ok(lockUnlockTemplates);
         }
 
-        [HttpPut]
-        [Route("LockUnlockTemplate/{id}/{status}")]
-        public IActionResult LockUnlockTemplate(int id, ScreeningStatus status)
-        {
-            var screeningTemplate = _screeningTemplateRepository.Find(id);
-
-            if (status == ScreeningStatus.Completed && _screeningTemplateValueRepository.All.Any(x =>
-                    x.DeletedDate == null && x.ScreeningTemplateId == id && !x.ScreeningTemplate.IsCompleteReview))
-            {
-                ModelState.AddModelError("Message", "This template under review!");
-                return BadRequest(ModelState);
-            }
-
-            var screeningTemplateValue = _screeningTemplateValueRepository.FindByInclude(x =>
-                x.ScreeningTemplateId == id && x.DeletedDate == null, x => x.ProjectDesignVariable).ToList();
-            var validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(screeningTemplateValue);
-
-            if (!string.IsNullOrEmpty(validateMsg))
-            {
-                ModelState.AddModelError("Message", validateMsg);
-                return BadRequest(ModelState);
-            }
-
-            screeningTemplate.Status = status;
-
-            _screeningTemplateRepository.Update(screeningTemplate);
-
-            if (_uow.Save() <= 0) throw new Exception("Failed Lock Unlock Template");
-
-            return Ok();
-        }
 
         [HttpPut]
         [Route("SubmitAttendanceTemplate/{id}")]
+        [TransactionRequired]
         public IActionResult SubmitAttendanceTemplate(int id)
         {
             var screeningTemplate = _screeningTemplateRepository.Find(id);
@@ -329,6 +301,10 @@ namespace GSC.Api.Controllers.Screening
             _projectSubjectRepository.SaveSubjectForVolunteer(screeningEntry.AttendanceId, id);
 
             if (_uow.Save() <= 0) throw new Exception("Submit Attendance Template failed.");
+
+            _screeningTemplateRepository.SubmitReviewTemplate(screeningTemplate.Id, false);
+
+            _uow.Save();
 
             return Ok();
         }

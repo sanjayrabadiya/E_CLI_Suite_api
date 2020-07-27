@@ -75,11 +75,11 @@ namespace GSC.Respository.Project.Design
             var screeninglockAudit = new List<ScreeningTemplateLockUnlockAudit>();
             if (lockUnlockDDDto.ChildProjectId != lockUnlockDDDto.ProjectId)
             {
-                 screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
+                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
             }
             else
             {
-                 screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
+                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
             }
             if (lockUnlockDDDto.IsLock)
             {
@@ -107,28 +107,28 @@ namespace GSC.Respository.Project.Design
                 }
             }
             else
-            {               
-               periods = (from design in Context.ProjectDesignPeriod.Where(x => x.DeletedDate == null && x.ProjectDesign.DeletedDate == null
-                                                                    && x.ProjectDesign.ProjectId == lockUnlockDDDto.ProjectId && x.ProjectDesign.IsCompleteDesign)
+            {
+                periods = (from design in Context.ProjectDesignPeriod.Where(x => x.DeletedDate == null && x.ProjectDesign.DeletedDate == null
+                                                                     && x.ProjectDesign.ProjectId == lockUnlockDDDto.ProjectId && x.ProjectDesign.IsCompleteDesign)
                            join visit in Context.ProjectDesignVisit.Where(x => x.DeletedDate == null) on design.Id equals visit.ProjectDesignPeriodId
                            join template in Context.ProjectDesignTemplate.Where(x => x.DeletedDate == null) on visit.Id equals template.ProjectDesignVisitId
-                           join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ProjectDesignId, x.ProjectDesignTemplateId})
+                           join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
                           .Select(y => new LockUnlockListDto
                           {
-                              Id = y.LastOrDefault().Id,                             
+                              Id = y.LastOrDefault().Id,
                               screeningEntryId = y.Key.ScreeningEntryId,
-                              ProjectDesignId = y.Key.ProjectDesignId,
-                              TemplateId = y.Key.ProjectDesignTemplateId,
+                              ScreeningTemplateId = y.Key.ScreeningTemplateId,
+                              TemplateId = y.LastOrDefault(t => t.ScreeningTemplateId == y.Key.ScreeningTemplateId).ScreeningTemplate.ProjectDesignTemplateId,
                               IsLocked = y.LastOrDefault().IsLocked
                           }).Where(x => x.IsLocked && screeningEntryId.Any(y => y.Id == x.screeningEntryId)).ToList()
                           on template.Id equals locktemplate.TemplateId
-                          group design by design.Id into gcs
-                          select new DropDownWithSeqDto
-                          {
-                              Id = gcs.Key,
-                              Value = gcs.FirstOrDefault().DisplayName
-                          }).Distinct().ToList();
-                
+                           group design by design.Id into gcs
+                           select new DropDownWithSeqDto
+                           {
+                               Id = gcs.Key,
+                               Value = gcs.FirstOrDefault().DisplayName
+                           }).Distinct().ToList();
+
             }
             return periods;
         }

@@ -20,13 +20,13 @@ namespace GSC.Api.Controllers.Project.EditCheck
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IEditCheckRepository _editCheckRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWork<GscContext> _uow;
         private readonly IProjectDesignRepository _projectDesignRepository;
-        private readonly IEditCheckImpactRepository _editCheckImpactRepository;
+        private readonly IEditCheckRuleRepository _editCheckRuleRepository;
         public EditCheckController(
-            IUnitOfWork uow, IMapper mapper, IEditCheckRepository editCheckRepository,
+            IUnitOfWork<GscContext> uow, IMapper mapper, IEditCheckRepository editCheckRepository,
             IEditCheckDetailRepository editCheckDetailRepository,
-            IEditCheckImpactRepository editCheckImpactRepository,
+            IEditCheckRuleRepository editCheckRuleRepository,
             IProjectDesignRepository projectDesignRepository)
         {
             _uow = uow;
@@ -34,7 +34,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
             _editCheckRepository = editCheckRepository;
             _editCheckDetailRepository = editCheckDetailRepository;
             _projectDesignRepository = projectDesignRepository;
-            _editCheckImpactRepository =editCheckImpactRepository;
+            _editCheckRuleRepository = editCheckRuleRepository;
         }
 
         [HttpGet("{Id}/{isDeleted:bool?}")]
@@ -121,7 +121,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
         [HttpPost("ValidateEditCheck")]
         public IActionResult ValidateEditCheck([FromBody] List<EditCheckValidate> editCheck)
         {
-            return Ok(_editCheckImpactRepository.ValidateEditCheck(editCheck));
+            return Ok(_editCheckRuleRepository.ValidateEditCheck(editCheck));
         }
     }
 }

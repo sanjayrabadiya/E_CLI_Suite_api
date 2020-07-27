@@ -389,14 +389,13 @@ namespace GSC.Respository.Master
             else
             {
                 projects = (from project in Context.Project.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && projectIds.Any(c => c == x.Id))
-                            join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ProjectDesignId, x.ProjectDesignTemplateId })
+                            join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
                             .Select(y => new LockUnlockListDto
                             {
                                 Id = y.LastOrDefault().Id,
                                 screeningEntryId = y.Key.ScreeningEntryId,
                                 ProjectId = y.LastOrDefault().ProjectId,
-                                ProjectDesignId = y.Key.ProjectDesignId,
-                                TemplateId = y.Key.ProjectDesignTemplateId,
+                                ScreeningTemplateId = y.LastOrDefault().ScreeningTemplateId,
                                 IsLocked = y.LastOrDefault().IsLocked
                             }).Where(x => x.IsLocked).ToList()
                           on project.Id equals locktemplate.ProjectId
@@ -411,6 +410,7 @@ namespace GSC.Respository.Master
             }
             return projects;
         }
+
         public List<ProjectDropDown> GetChildProjectDropDown(int parentProjectId)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();

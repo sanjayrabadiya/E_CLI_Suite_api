@@ -36,17 +36,17 @@ namespace GSC.Data.Dto.Screening
         public int?[] SubjectIds { get; set; }
         public int?[] VisitIds { get; set; }
         public int?[] TemplateIds { get; set; }
-        public int?[] DataEntryStatus { get; set; }        
+        public int?[] DataEntryStatus { get; set; }
         public int?[] DataEntryReviewStatus { get; set; }
         public bool Status { get; set; }
     }
 
     public class LockUnlockDDDto
-    {       
+    {
         public int Id { get; set; }
-        public int ProjectId { get; set; }        
+        public int ProjectId { get; set; }
         public int ChildProjectId { get; set; }
-        public int?[] SubjectIds { get; set; }        
+        public int?[] SubjectIds { get; set; }
         public bool IsLock { get; set; }
     }
 
@@ -54,12 +54,11 @@ namespace GSC.Data.Dto.Screening
     {
         public int ScreeningEntryId { get; set; }
         public int Id { get; set; }
-        public int ProjectDesignTemplateId { get; set; }
+        public int ScreeningTemplateId { get; set; }
         public int ProjectId { get; set; }
-        public int ProjectDesignId { get; set; }
         public int AuditReasonId { get; set; }
         public string AuditReasonComment { get; set; }
-        public bool IsLocked { get; set; }      
+        public bool IsLocked { get; set; }
 
     }
 
@@ -87,7 +86,7 @@ namespace GSC.Data.Dto.Screening
         public int CollectionSource { get; set; }
         public string Initial { get; set; }
         public string SubjectNo { get; set; }
-        public string RandomizationNumber { get; set; }        
+        public string RandomizationNumber { get; set; }
         public string ProjectCode { get; set; }
         public int TemplateCount { get; set; }
         public int VisitCount { get; set; }
@@ -96,10 +95,13 @@ namespace GSC.Data.Dto.Screening
         public bool IsElectronicSignature { get; set; }
         public bool IsLocked { get; set; }
         public int ProjectDesignId { get; set; }
-        public int ProjectId { get; set; }        
+        public int ProjectId { get; set; }
         public int? ParentProjectId { get; set; }
         public ScreeningStatus ScreeningStatusNo { get; set; }
         public short? ReviewLevel { get; set; }
+        public string DesignOrder { get; set; }
+        public int SeqNo { get; set; }
+
     }
 
     public class LockUnlockHistoryListDto
@@ -125,7 +127,7 @@ namespace GSC.Data.Dto.Screening
         public string CreatedByName { get; set; }
         public int CreatedRoleBy { get; set; }
         public string CreatedRoleByName { get; set; }
-        public string ProjectCode { get; set; }        
+        public string ProjectCode { get; set; }
 
         private DateTime? _createdDate;
         public DateTime? CreatedDate
@@ -137,5 +139,12 @@ namespace GSC.Data.Dto.Screening
         public string VolunteerNumber { get; set; }
         public string RandomizationNumber { get; set; }
         public int AttendanceId { get; set; }
+        public string DesignOrder { get; set; }
+
+        public int? ScreeningTemplateParentId { get; set; }
+        public int ScreeningTemplateId { get; set; }
+
+        public int SeqNo { get; set; }
+        public int VisitId { get; set; }
     }
 }

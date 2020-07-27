@@ -8,4 +8,10 @@ namespace GSC.Data.Dto.Screening
         public int ProjectDesignVariableValueId { get; set; }
         public string Value { get; set; }
     }
+
+    public class ScreeningTemplateValueChildBasic
+    {
+        public int Id { get; set; }
+    }
+
 }

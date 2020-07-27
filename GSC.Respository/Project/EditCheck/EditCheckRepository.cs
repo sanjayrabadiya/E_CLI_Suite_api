@@ -7,6 +7,7 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
+using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
@@ -24,20 +25,20 @@ namespace GSC.Respository.Project.EditCheck
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IMapper _mapper;
-        private readonly IEditCheckImpactRepository _editCheckImpactRepository;
+        private readonly IEditCheckRuleRepository _editCheckRuleRepository;
         public EditCheckRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository,
             IMapper mapper,
             IEditCheckDetailRepository editCheckDetailRepository,
-            IEditCheckImpactRepository editCheckImpactRepository,
+            IEditCheckRuleRepository editCheckRuleRepository,
             INumberFormatRepository numberFormatRepository) : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _numberFormatRepository = numberFormatRepository;
             _editCheckDetailRepository = editCheckDetailRepository;
-            _editCheckImpactRepository = editCheckImpactRepository;
+            _editCheckRuleRepository = editCheckRuleRepository;
             _mapper = mapper;
         }
 
@@ -179,7 +180,11 @@ namespace GSC.Respository.Project.EditCheck
             {
 
                 if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
-                    x.CollectionSource = GetCollectionSources(x.VariableAnnotation, resut.ProjectDesignId);
+                {
+                    var variableAnnotation = GetCollectionSources(x.VariableAnnotation, x.ProjectDesignId);
+                    x.CollectionSource = variableAnnotation?.CollectionSource;
+                    x.DataType = variableAnnotation?.DataType;
+                }
 
                 x.CollectionValue =
                          string.IsNullOrEmpty(x.CollectionValue)
@@ -194,17 +199,15 @@ namespace GSC.Respository.Project.EditCheck
             return resut;
         }
 
-        CollectionSources? GetCollectionSources(string annotation, int projectDesignId)
+        ProjectDesignVariable GetCollectionSources(string annotation, int projectDesignId)
         {
             if (string.IsNullOrEmpty(annotation)) return null;
 
             var annotationVariable = Context.ProjectDesignVariable.Where(a => a.Annotation == annotation
                        && a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId).FirstOrDefault();
 
-            if (annotationVariable != null)
-                return annotationVariable.CollectionSource;
+            return annotationVariable;
 
-            return null;
         }
 
         public Data.Entities.Project.EditCheck.EditCheck UpdateFormula(int id)
@@ -214,9 +217,12 @@ namespace GSC.Respository.Project.EditCheck
             editCheck.SourceFormula = GetFormula(id, false);
             editCheck.CheckFormula = editCheck.TargetFormula + " -> " + editCheck.SourceFormula;
             var verifyResult = CheckParens(editCheck.Id, editCheck.IsFormula);
-            editCheck.IsReferenceVerify = verifyResult.IsValid;
-            editCheck.SampleResult = verifyResult.ResultMessage;
-            editCheck.ErrorMessage = verifyResult.ErrorMessage;
+            if (verifyResult != null)
+            {
+                editCheck.IsReferenceVerify = verifyResult.IsValid;
+                editCheck.SampleResult = verifyResult.SampleText;
+                editCheck.ErrorMessage = verifyResult.ErrorMessage;
+            }
             editCheck.IsOnlyTarget = !_editCheckDetailRepository.All.
                 Any(t => t.EditCheckId == editCheck.Id &&
                 t.DeletedDate == null && !t.IsTarget);
@@ -232,13 +238,16 @@ namespace GSC.Respository.Project.EditCheck
         {
             var data = _editCheckDetailRepository.All.AsNoTracking().
                 Where(x => x.DeletedDate == null &&
-                !x.IsTarget && x.EditCheckId == editCheckId).Select(r => new EditCheckValidate
+                x.EditCheckId == editCheckId).Select(r => new EditCheckValidate
                 {
                     IsTarget = r.IsTarget,
                     StartParens = r.StartParens,
-                    Input1 = "1",
+                    InputValue = isFormula ? "1" : r.CollectionValue ?? "1",
                     IsFormula = r.EditCheck.IsFormula,
                     Operator = r.Operator,
+                    IsReferenceValue = r.IsReferenceValue,
+                    FieldName = r.ProjectDesignVariable.Annotation ?? r.ProjectDesignVariable.VariableName ?? r.VariableAnnotation,
+                    LogicalOperator = r.LogicalOperator,
                     OperatorName = r.Operator == null ? "" : r.Operator.GetDescription(),
                     EndParens = r.EndParens,
                     CollectionValue2 = r.CollectionValue2,
@@ -246,14 +255,10 @@ namespace GSC.Respository.Project.EditCheck
                 }).ToList();
 
             if (isFormula)
-            {
-                return _editCheckImpactRepository.ValidateEditCheckReference(data);
-            }
+                data = data.Where(x => !x.IsTarget).ToList();
 
-            var startParens = string.Join(" ", data.Select(r => r.StartParens ?? ""));
-            var endParens = string.Join(" ", data.Select(r => r.EndParens ?? ""));
+            return _editCheckRuleRepository.ValidateEditCheckReference(data);
 
-            return new EditCheckResult { IsValid = (startParens.Trim().Length == endParens.Trim().Length) };
         }
 
         List<int> ProjectDesignVariableId(string collectionValue)
@@ -321,56 +326,61 @@ namespace GSC.Respository.Project.EditCheck
 
             var last = result.LastOrDefault();
             result.ForEach(x =>
-           {
-               if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
-                   x.CollectionSource = GetCollectionSources(x.VariableAnnotation, x.ProjectDesignId);
+            {
+                if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                {
+                    var variableAnnotation = GetCollectionSources(x.VariableAnnotation, x.ProjectDesignId);
+                    x.CollectionSource = variableAnnotation?.CollectionSource;
+                    x.DataType = variableAnnotation?.DataType;
+                }
 
 
-               var name = (x.CheckBy == EditCheckRuleBy.ByTemplate ?
-                    x.PeriodName + "." + x.VisitName + "." + x.TemplateName :
-                    x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation ?
-                        x.DomainName :
-                     x.CheckBy == EditCheckRuleBy.ByVariableAnnotation
-                           ? x.VariableAnnotation :
-                            x.PeriodName + "." + x.VisitName + "." +
-                            x.TemplateName + "." + x.VariableName);
 
-               var operatorName = x.Operator.GetDescription();
+                var name = (x.CheckBy == EditCheckRuleBy.ByTemplate ?
+                     x.PeriodName + "." + x.VisitName + "." + x.TemplateName :
+                     x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation ?
+                         x.DomainName :
+                      x.CheckBy == EditCheckRuleBy.ByVariableAnnotation
+                            ? x.VariableAnnotation :
+                             x.PeriodName + "." + x.VisitName + "." +
+                             x.TemplateName + "." + x.VariableName);
 
-               var collectionValue = (string.IsNullOrEmpty(x.CollectionValue) ? ""
-                        : IsMultiCollection(x.CollectionSource) ?
-                        Convert.ToString(IsInFilter(x.Operator) ? "(" : "") +
-                        string.Join(", ", Context.ProjectDesignVariableValue
-                        .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
-                        Select(a => a.ValueName).ToList()) +
-                        Convert.ToString(IsInFilter(x.Operator) ? ")" : "")
-                        : x.CollectionValue);
+                var operatorName = x.Operator.GetDescription();
+
+                var collectionValue = (string.IsNullOrEmpty(x.CollectionValue) ? ""
+                         : IsMultiCollection(x.CollectionSource) ?
+                         Convert.ToString(IsInFilter(x.Operator) ? "(" : "") +
+                         string.Join(", ", Context.ProjectDesignVariableValue
+                         .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
+                         Select(a => a.ValueName).ToList()) +
+                         Convert.ToString(IsInFilter(x.Operator) ? ")" : "")
+                         : x.CollectionValue);
 
 
-               if (x.Operator != null && ((Operator)x.Operator).CheckMathOperator())
-               {
-                   if (x.Equals(last))
-                       name = $"{x.StartParens}{"{"}{name.Trim()}{"}"}{x.EndParens ?? ""} {collectionValue}";
-                   else
-                       name = $"{x.StartParens}{"{"}{name.Trim()}{"}"} {operatorName}{x.EndParens ?? ""} {collectionValue}";
-               }
+                if (x.Operator != null && ((Operator)x.Operator).CheckMathOperator())
+                {
+                    if (x.Equals(last))
+                        name = $"{x.StartParens}{"{"}{name.Trim()}{"}"}{x.EndParens ?? ""} {collectionValue}";
+                    else
+                        name = $"{x.StartParens}{"{"}{name.Trim()}{"}"} {operatorName}{x.EndParens ?? ""} {collectionValue}";
+                }
 
-               else
-               {
-                   name = $"{x.StartParens}{"{"}{name.Trim()} {operatorName}{x.EndParens ?? ""} {collectionValue}";
+                else
+                {
+                    name = $"{x.StartParens}{"{"}{name.Trim()} {operatorName}{x.EndParens ?? ""} {collectionValue}";
 
-                   if (!string.IsNullOrEmpty(x.CollectionValue2) && (x.Operator == Operator.Between || x.Operator == Operator.NotBetween))
-                       name = name + " AND " + x.CollectionValue2;
+                    if (!string.IsNullOrEmpty(x.CollectionValue2) && (x.Operator == Operator.Between || x.Operator == Operator.NotBetween))
+                        name = name + " AND " + x.CollectionValue2;
 
-                   if (x.Equals(last))
-                       name = $"{name}{"}"}";
-                   else
-                       name = $"{name}{"}"} {x.LogicalOperator}";
-               }
+                    if (x.Equals(last))
+                        name = $"{name}{"}"}";
+                    else
+                        name = $"{name}{"}"} {x.LogicalOperator}";
+                }
 
-               x.QueryFormula = name;
+                x.QueryFormula = name;
 
-           });
+            });
 
             return string.Join(" ", result.Select(r => r.QueryFormula));
         }

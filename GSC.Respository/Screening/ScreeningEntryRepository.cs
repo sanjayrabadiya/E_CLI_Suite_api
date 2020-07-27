@@ -5,6 +5,7 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -60,7 +61,13 @@ namespace GSC.Respository.Screening
         public ScreeningEntryDto GetDetails(int id)
         {
             var screeningTemplateValue = _screeningTemplateValueRepository
-                .FindBy(x => x.DeletedDate == null && x.ScreeningTemplate.ScreeningEntryId == id).ToList();
+                .FindBy(x => x.DeletedDate == null
+                && x.ScreeningTemplate.ScreeningEntryId == id).
+                Select(r => new Data.Dto.Screening.ScreeningTemplateValueBasic
+                {
+                    ScreeningTemplateId = r.ScreeningTemplateId,
+                    QueryStatus = r.QueryStatus
+                }).ToList();
 
             var screeningEntryDto = Context.ScreeningEntry.Where(t => t.Id == id)
                 .Select(t => new ScreeningEntryDto
@@ -86,25 +93,16 @@ namespace GSC.Respository.Screening
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningEntryDto.ProjectDesignId);
 
-            screeningEntryDto.ScreeningTemplates =
-                _screeningTemplateRepository.GetTemplateTree(screeningEntryDto.Id, null, screeningTemplateValue,
+            var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryDto.Id, screeningTemplateValue,
                     workflowlevel);
+
+            screeningEntryDto.ScreeningTemplates = templates.Where(r => r.ParentId == null).ToList();
+
             screeningEntryDto.IsElectronicSignature = workflowlevel.IsElectricSignature;
+
             screeningEntryDto.ScreeningTemplates.ForEach(x =>
             {
-                if (x.IsParent)
-                    x.Children = _screeningTemplateRepository.GetTemplateTree(screeningEntryDto.Id, x.Id,
-                        screeningTemplateValue, workflowlevel);
-                if (x.Children != null)
-                {
-                    var i = 0;
-                    foreach (var item in x.Children)
-                    {
-                        item.ProjectDesignTemplateNameWithIndex =
-                            item.DesignOrder + "." + (i + 1) + " " + item.ProjectDesignTemplateName;
-                        i++;
-                    }
-                }
+                x.Children = templates.Where(c => c.ParentId == x.Id).ToList();
             });
 
 
@@ -112,6 +110,26 @@ namespace GSC.Respository.Screening
                                                      .Select(s => s.ProjectDesignVisitName).Distinct().Count() > 1;
 
             screeningEntryDto.MyReview = screeningEntryDto.ScreeningTemplates.Any(x => x.MyReview);
+
+            if (workflowlevel != null && workflowlevel.WorkFlowText != null)
+            {
+                screeningEntryDto.WorkFlowText = new List<WorkFlowText>
+                {
+                    new WorkFlowText
+                    {
+                        LevelNo=-1,
+                        RoleName="Operator"
+                    }
+                };
+                screeningEntryDto.WorkFlowText.AddRange(workflowlevel.WorkFlowText);
+                screeningEntryDto.WorkFlowText.Add(new WorkFlowText
+                {
+                    LevelNo = 0,
+                    RoleName = "Independent"
+                });
+                screeningEntryDto.LevelName1 = workflowlevel.WorkFlowText.Where(r => r.LevelNo == 1).Select(t => t.RoleName).FirstOrDefault();
+                screeningEntryDto.IsSystemQueryUpdate = workflowlevel.IsStartTemplate;
+            }
 
             return screeningEntryDto;
         }
@@ -234,7 +252,7 @@ namespace GSC.Respository.Screening
             return items.OrderByDescending(x => x.ScreeningDate).ToList();
         }
 
-   
+
         public IList<DropDownDto> AutoCompleteSearch(string searchText)
         {
             if (string.IsNullOrWhiteSpace(searchText)) return new List<DropDownDto>();

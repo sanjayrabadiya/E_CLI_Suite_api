@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
@@ -14,7 +15,7 @@ namespace GSC.Data.Dto.Screening
         public int? ReasonId { get; set; }
         public string ReasonOth { get; set; }
         public bool IsSubmitted { get; set; }
-
+        public CollectionSources? CollectionSource { get; set; }
         public string ReasonName { get; set; }
         public QueryStatus? QueryStatus { get; set; }
         public string CreatedByName { get; set; }
@@ -34,5 +35,6 @@ namespace GSC.Data.Dto.Screening
         public bool IsNa { get; set; }
         public bool IsSystem { get; set; }
         public ICollection<ScreeningTemplateValueChild> Children { get; set; }
+        public List<EditCheckIds> EditCheckIds { get; set; }
     }
 }

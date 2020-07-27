@@ -1,15 +1,19 @@
-﻿using GSC.Data.Dto.Project.EditCheck;
+﻿
+
+using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Project.Design;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
-using System;
+using GSC.Helper;
 using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Respository.EditCheckImpact
 {
-    public interface IEditCheckImpactRepository
+    public interface IEditCheckImpactRepository: IGenericRepository<ScreeningTemplate>
     {
-        void CheckValidation(ScreeningTemplate screeningTemplate, List<ScreeningTemplateValue> values, int projectDesignId, int domainId);
-        EditCheckResult ValidateEditCheckReference(List<EditCheckValidate> editCheck);
-        EditCheckResult ValidateEditCheck(List<EditCheckValidate> editCheck);
+        List<EditCheckValidateDto> CheckValidation(List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic, bool isQuery);
+        List<EditCheckTargetValidationList> VariableValidateProcess(int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckIds> editCheckIds, bool isQueryRaise,int? repeatedVisit);
+        List<EditCheckTargetValidationList> UpdateVariale(List<EditCheckValidateDto> editCheckValidateDto, bool isVariable, bool isQueryRaise);
+        int InsertScreeningValue(int screeningTemplateId, int projectDesignVariableId, string value, string note, bool isSoftFetch, CollectionSources? collectionSource);
     }
 }
