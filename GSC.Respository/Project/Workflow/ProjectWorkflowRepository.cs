@@ -154,5 +154,15 @@ namespace GSC.Respository.Project.Workflow
                 SelfCorrection = false
             };
         }
+
+        public bool IsElectronicsSignatureComplete(int projectDesignId)
+        {
+            var IsElectronicsSignature = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
+            if (IsElectronicsSignature == null)
+            {
+                IsElectronicsSignature = false;
+            }
+            return (bool)IsElectronicsSignature;
+        }
     }
 }

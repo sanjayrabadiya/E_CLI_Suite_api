@@ -38,7 +38,8 @@ namespace GSC.Respository.Project.Design
                 .Select(c => new DropDownDto
                 {
                     Id = c.Id,
-                    Value = c.Project.ProjectCode + " - " + c.Project.ProjectName
+                    //Value = c.Project.ProjectCode + " - " + c.Project.ProjectName
+                     Value = c.Project.ProjectCode
                 }).OrderBy(o => o.Value).ToList();
         }
 

@@ -529,7 +529,7 @@ namespace GSC.Respository.Master
             return projectCode.ToUpper();
         }
 
-        public ProjectDetailsDto GetProjectDetails(int projectId, int? parentProjectId)
+        public ProjectDetailsDto GetProjectDetails(int projectId)
         {
             var projectDetailsDto = new ProjectDetailsDto();
             var siteDetailsDto = new SiteDetailsDto();
@@ -544,11 +544,11 @@ namespace GSC.Respository.Master
             siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(x => x.CountryId).Count();
             siteDetailsDto.MarkAsCompleted = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).Any();
 
-            var projectDeisgnId = Context.ProjectDesign.Where(x => x.ProjectId == (parentProjectId != null ? parentProjectId : projectId) && x.DeletedDate == null).FirstOrDefault()?.Id;
+            var projectDeisgnId = Context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault()?.Id;
             designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : Context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
             designDetailsDto.NoofVisit = projectDeisgnId == null ? 0 : GetNoOfVisit(projectDeisgnId);
             designDetailsDto.NoofECrf = projectDeisgnId == null ? 0 : GetNoOfTemplate(projectDeisgnId);
-            designDetailsDto.MarkAsCompleted = projectDeisgnId == null ? false : Context.ProjectDesign.Where(x => x.ProjectId == (parentProjectId != null ? parentProjectId : projectId)).FirstOrDefault()?.IsCompleteDesign;
+            designDetailsDto.MarkAsCompleted = projectDeisgnId == null ? false : Context.ProjectDesign.Where(x => x.ProjectId == projectId).FirstOrDefault()?.IsCompleteDesign;
 
             var projectWorkflowId = Context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.Id;
             workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : Context.ProjectWorkflowIndependent.Where(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null).ToList().Count();
@@ -558,7 +558,7 @@ namespace GSC.Respository.Master
             userRightDetailsDto.NoofUser = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(y => y.UserId).Count();
             userRightDetailsDto.MarkAsCompleted = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).Any();
 
-            schedulesDetailsDto.NoofVisit = Context.ProjectSchedule.Where(x => x.ProjectId == (parentProjectId != null ? parentProjectId : projectId) && x.DeletedDate == null).ToList().GroupBy(y => y.ProjectDesignVisitId).Count();
+            schedulesDetailsDto.NoofVisit = Context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(y => y.ProjectDesignVisitId).Count();
             schedulesDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteSchedule; ;
 
             editCheckDetailsDto.NoofFormulas = GetNoOfFormulas(projectDeisgnId);

@@ -210,13 +210,13 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEtmfSectionMasterLibraryRepository, EtmfSectionMasterLibraryRepository>();
             services.AddScoped<IEtmfArtificateMasterLbraryRepository, EtmfArtificateMasterLbraryRepository>();
             services.AddScoped<IETMFWorkplaceRepository, ETMFWorkplaceRepository>();
-
             services.AddScoped<IProjectWorkPlaceZoneRepository, ProjectWorkPlaceZoneRepository>();
             services.AddScoped<IProjectWorkplaceSectionRepository, ProjectWorkplaceSectionRepository>();
             services.AddScoped<IProjectWorkplaceArtificateRepository, ProjectWorkplaceArtificateRepository>();
             services.AddScoped<IProjectWorkplaceDetailRepository, ProjectWorkplaceDetailRepository>();
             services.AddScoped<IProjectWorkplaceSubSectionRepository, ProjectWorkplaceSubSectionRepository>();
             services.AddScoped<IProjectWorkplaceSubSectionArtifactRepository, ProjectWorkplaceSubSectionArtifactRepository>();
+            services.AddScoped<IProjectWorkplaceSubSecArtificatedocumentRepository, ProjectWorkplaceSubSecArtificatedocumentRepository>();
             services.AddScoped<IInvestigatorContactDetailRepository, InvestigatorContactDetailRepository>();
             services.AddScoped<IHolidayRepository, HolidayRepository>();
         }

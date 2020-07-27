@@ -75,6 +75,14 @@ namespace GSC.Api.Controllers.Project.Workflow
             return Ok(projectWorkflow.Id);
         }
 
+        [HttpGet("checkElectronicsSignature/{projectDesignId}")]
+        public IActionResult checkElectronicsSignature(int projectDesignId)
+        {
+            if (projectDesignId <= 0) return BadRequest();
+            var projectDesign = _projectWorkflowRepository.IsElectronicsSignatureComplete(projectDesignId);
+            return Ok(projectDesign);
+        }
+
         [HttpGet("checkProjectWorkflowLocked/{projectDesignId}")]
         public IActionResult checkProjectWorkflowLocked(int projectDesignId)
         {
