@@ -72,7 +72,7 @@ namespace GSC.Api.Controllers.Etmf
                         _etmfZoneMasterLibraryRepository.Delete(Lastdata.Id);
                         foreach (var SectionLast in Lastdata.EtmfSectionMasterLibrary)
                         {
-                            _etmfSectionMasterLibraryRepository.Delete(SectionLast);
+                            _etmfSectionMasterLibraryRepository.Delete(SectionLast.Id);
                             var LastArtificateVersiondata = _etmfArtificateMasterLibraryRepository.FindBy(x => x.EtmfSectionMasterLibraryId == SectionLast.Id).ToList();
                             foreach (var ArtificateLast in LastArtificateVersiondata)
                             {
