@@ -694,6 +694,7 @@ namespace GSC.Respository.Screening
                 AttendanceId = x.AttendanceId,
                 ParentProjectId = x.Project.ParentProjectId,
                 ProjectCode = ProjectCode,
+                Status = lockUnlockParams.Status,
                 ProjectName = x.Project.ProjectCode,
                 PeriodName = x.ProjectDesignPeriod.DisplayName,
                 ScreeningNo = x.ScreeningNo,
@@ -707,7 +708,7 @@ namespace GSC.Respository.Screening
                                 && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
                                   || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
                                   && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
-                                .Select(a => a.ProjectDesignVisit.ProjectDesignPeriodId).Distinct().Count(),
+                                    .Select(a => a.ProjectDesignVisit.ProjectDesignPeriodId).Distinct().Count(),
                 TemplateCount = x.ScreeningTemplates.Where(g => (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
                                 && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
                                 && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
@@ -720,33 +721,33 @@ namespace GSC.Respository.Screening
                                 && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
                                   || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
                                   && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
-                                .Select(a => new { a.ProjectDesignVisit, a.RepeatedVisit }).Distinct().Count(),
+                                    .Select(a => new { a.ProjectDesignVisit, a.RepeatedVisit }).Distinct().Count(),
                 lstTemplate = x.ScreeningTemplates.Where(g => (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
                                 && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
                                 && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
                                 && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
                                   || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
                                   && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
-                .Select(t => new LockUnlockListDto
-                {
-                    TemplateId = t.ProjectDesignTemplateId,
-                    ScreeningTemplateId = t.Id,
-                    screeningEntryId = t.ScreeningEntryId,
-                    ProjectCode = ProjectCode,
-                    ProjectName = t.ScreeningEntry.Project.ProjectCode,
-                    PeriodName = t.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
-                    ParentProjectId = t.ScreeningEntry.Project.ParentProjectId,
-                    VisitId = t.ProjectDesignVisitId,
-                    VisitName = t.ProjectDesignVisit.DisplayName + Convert.ToString(t.RepeatedVisit == null ? "" : "_" + t.RepeatedVisit),
-                    ScreeningTemplateParentId = t.ParentId,
-                    TemplateName = t.RepeatSeqNo == null && t.ParentId == null ? t.ProjectDesignTemplate.DesignOrder + " " + t.ProjectDesignTemplate.TemplateName
-                                    : t.ProjectDesignTemplate.DesignOrder + "." + t.RepeatSeqNo + " " + t.ProjectDesignTemplate.TemplateName,
-                    DesignOrder = t.ProjectDesignTemplate.DesignOrder.ToString(),
-                    SeqNo = t.ProjectDesignTemplate.DesignOrder
-                }).OrderBy(b => b.VisitId).ThenBy(a => a.SeqNo).ThenBy(a => a.ScreeningTemplateId).ToList()
-            }).Where(x => x.lstTemplate.Count > 0).OrderBy(x => x.ProjectId).ToList();
+                    .Select(t => new LockUnlockListDto
+                    {
+                        TemplateId = t.ProjectDesignTemplateId,
+                        ScreeningTemplateId = t.Id,
+                        screeningEntryId = t.ScreeningEntryId,
+                        ProjectCode = ProjectCode,
+                        ProjectName = t.ScreeningEntry.Project.ParentProjectId != null ? t.ScreeningEntry.Project.ProjectCode : "",
+                        PeriodName = t.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
+                        ParentProjectId = t.ScreeningEntry.Project.ParentProjectId,
+                        VisitId = t.ProjectDesignVisitId,
+                        VisitName = t.ProjectDesignVisit.DisplayName + Convert.ToString(t.RepeatedVisit == null ? "" : "_" + t.RepeatedVisit),
+                        ScreeningTemplateParentId = t.ParentId,
+                        TemplateName = t.RepeatSeqNo == null && t.ParentId == null ? t.ProjectDesignTemplate.DesignOrder + " " + t.ProjectDesignTemplate.TemplateName
+                                        : t.ProjectDesignTemplate.DesignOrder + "." + t.RepeatSeqNo + " " + t.ProjectDesignTemplate.TemplateName,
+                        DesignOrder = t.ProjectDesignTemplate.DesignOrder.ToString(),
+                        SeqNo = t.ProjectDesignTemplate.DesignOrder
+                    }).OrderBy(b => b.VisitId).ThenBy(a => a.SeqNo).ThenBy(a => a.ScreeningTemplateId).ToList()
+            }).OrderBy(x => x.ProjectId).ToList();
 
-            return grpresult;
+            return grpresult.Where(x => x.lstTemplate.Count > 0).ToList();
         }
 
         public ScreeningTemplateValueSaveBasics ValidateVariableValue(ScreeningTemplateValue screeningTemplateValue, List<EditCheckIds> EditCheckIds, CollectionSources? collectionSource)
