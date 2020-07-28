@@ -168,11 +168,12 @@ namespace GSC.Api.Helpers
             services.AddScoped<INoneRegisterRepository, NoneRegisterRepository>();
             services.AddScoped<IEditCheckRepository, EditCheckRepository>();
             services.AddScoped<IEditCheckImpactRepository, EditCheckImpactRepository>();
-            services.AddScoped<ISchedulerRuleRespository, SchedulerRuleRespository>();
+            services.AddScoped<IEditCheckRuleRepository, EditCheckRuleRepository>();
+            services.AddScoped<IScheduleRuleRespository, ScheduleRuleRespository>();
+            services.AddScoped<IImpactService, ImpactService>();
             services.AddScoped<IEditCheckDetailRepository, EditCheckDetailRepository>();
             services.AddScoped<IProjectDesignReportSettingRepository, ProjectDesignReportSettingRepository>();
-            services
-                .AddScoped<IPharmacyVerificationTemplateValueRepository, PharmacyVerificationTemplateValueRepository>();
+            services.AddScoped<IPharmacyVerificationTemplateValueRepository, PharmacyVerificationTemplateValueRepository>();
             services.AddScoped<IPharmacyVerificationEntryRepository, PharmacyVerificationEntryRepository>();
             services.AddScoped<IAttendanceHistoryRepository, AttendanceHistoryRepository>();
 
