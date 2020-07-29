@@ -15,7 +15,9 @@ namespace GSC.Data.Entities.Medra
         public string Description { get; set; }
         public string Password { get; set; }
         public int? CompanyId { get; set; }
+        public bool IsActive { get; set; }
         public MedraVersion MedraVersion { get; set; }
         public MedraLanguage Language { get; set; }
+        public int? CreatedRole { get; set; }
     }
 }

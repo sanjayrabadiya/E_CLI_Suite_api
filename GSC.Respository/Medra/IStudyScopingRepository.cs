@@ -10,5 +10,7 @@ namespace GSC.Respository.Medra
     {
         string Duplicate(StudyScoping objSave);
         List<StudyScopingDto> GetStudyScopingList(int projectId);
+        bool checkForScopingEdit(int ProjectDesignVariableId);
+        //  StudyScoping GetData(int MeddraCodingId);
     }
 }

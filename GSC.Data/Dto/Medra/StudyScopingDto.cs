@@ -42,5 +42,6 @@ namespace GSC.Data.Dto.Medra
         public Variable Variable { get; set; } 
         public MedraVersion MedraVersion { get; set; }      
         public Entities.Master.Project Project { get; set; }
+        public bool? IsEnable { get; set; }
     }
 }

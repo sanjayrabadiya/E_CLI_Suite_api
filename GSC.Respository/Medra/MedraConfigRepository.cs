@@ -31,7 +31,7 @@ namespace GSC.Respository.Medra
             }
             return "";
         }
-     
+
 
         public List<DropDownDto> GetMedraVesrionByDictionaryDropDown(int DictionaryId)
         {
@@ -50,11 +50,16 @@ namespace GSC.Respository.Medra
 
         public DropDownDto GetDetailByMeddraConfigId(int MeddraConfigId)
         {
-            var  result = All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && x.Id==MeddraConfigId)
+            var result = All.Where(x =>
+                   (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && x.Id == MeddraConfigId)
                 .Select(c => new DropDownDto { Value = c.MedraVersion.Dictionary.DictionaryName + "-" + c.Language.LanguageName + "-" + c.MedraVersion.Version }).OrderBy(o => o.Value).FirstOrDefault();
 
             return result;
+        }
+
+        public MedraConfig GetActiveDictionaryId()
+        {
+            return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && x.IsActive).FirstOrDefault();
         }
     }
 }

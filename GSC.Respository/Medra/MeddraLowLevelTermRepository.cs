@@ -77,32 +77,32 @@ namespace GSC.Respository.Medra
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && search.Value == x.llt_name);
             }
 
-            return GetItems(query, search.MeddraConfigId);
+            return GetItems(query, search);
         }
 
 
-        private IList<MeddraCodingSearchDetails> GetItems(IQueryable<Data.Entities.Medra.MeddraLowLevelTerm> query, int MeddraConfigId)
+        private IList<MeddraCodingSearchDetails> GetItems(IQueryable<Data.Entities.Medra.MeddraLowLevelTerm> query, MeddraCodingSearchDto search)
         {
             return (from q in query
-                    join mpt in Context.MeddraPrefTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == MeddraConfigId) on q.pt_code equals mpt.pt_code
-                    join soc in Context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == MeddraConfigId) on mpt.pt_soc_code equals soc.soc_code
-                    join hpt in Context.MeddraHltPrefComp.Where(t => t.DeletedDate == null && t.MedraConfigId == MeddraConfigId) on mpt.pt_code equals hpt.pt_code
-                    join hlt in Context.MeddraHltPrefTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == MeddraConfigId) on hpt.hlt_code equals hlt.hlt_code
-                    join hlgtHLT in Context.MeddraHlgtHltComp.Where(t => t.DeletedDate == null && t.MedraConfigId == MeddraConfigId) on hlt.hlt_code equals hlgtHLT.hlt_code
-                    join hlgt in Context.MeddraHlgtPrefTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == MeddraConfigId) on hlgtHLT.hlgt_code equals hlgt.hlgt_code
-                    join md in Context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == MeddraConfigId) on q.pt_code equals md.pt_code
+                    join md in Context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == search.MeddraConfigId) on q.pt_code equals md.pt_code
+                    join soc in Context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == search.MeddraConfigId) on md.soc_code equals soc.soc_code
+
                     select new MeddraCodingSearchDetails
                     {
                         LLTValue = q.llt_name,
-                        SocCode = soc.soc_code,
-                        PT = mpt.pt_name,
-                        HLT = hlt.hlt_name,
-                        HLGT = hlgt.hlgt_name,
+                        SocCode = soc.soc_code.ToString(),
+                        PT = md.pt_name,
+                        HLT = md.hlt_name,
+                        HLGT = md.hlgt_name,
                         SOCValue = soc.soc_name,
                         PrimarySoc = md.primary_soc_fg,
-                        MeddraConfigId = MeddraConfigId,
-                        MeddraLowLevelTermId = q.Id
-                    }).ToList();
+                        MeddraConfigId = search.MeddraConfigId,
+                        MeddraLowLevelTermId = q.Id,
+                        MeddraSocTermId = soc.Id,
+                        LltCurrent = q.llt_currency
+                    }).OrderBy(m => m.LLTValue.StartsWith(search.Value)
+                                     ? (m.LLTValue == search.Value ? 0 : 1)
+                                     : 2).ToList();
         }
     }
 }

@@ -9,7 +9,7 @@ using System.Text;
 
 namespace GSC.Data.Dto.Medra
 {
-    public class MedraConfigDto:BaseDto
+    public class MedraConfigDto : BaseDto
     {
         public int MedraVersionId { get; set; }
         public int LanguageId { get; set; }
@@ -20,9 +20,12 @@ namespace GSC.Data.Dto.Medra
         public string Password { get; set; }
         public string DictionaryName { get; set; }
         public int? CompanyId { get; set; }
+        public bool IsActive { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int CreatedBy { get; set; }
+        public int CreatedRole { get; set; }
         public string UserName { get; set; }
+        public string RoleName { get; set; }
         public FileModel FileModel { get; set; }
         public MedraVersion MedraVersion { get; set; }
         public MedraLanguage Language { get; set; }

@@ -205,6 +205,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IMeddraSocIntlOrderRepository, MeddraSocIntlOrderRepository>();
             services.AddScoped<IMeddraSocTermRepository, MeddraSocTermRepository>();
             services.AddScoped<IMeddraCodingRepository, MeddraCodingRepository>();
+            services.AddScoped<IMeddraCodingCommentRepository, MeddraCodingCommentRepository>();
+            services.AddScoped<IMeddraCodingAuditRepository, MeddraCodingAuditRepository>();
             services.AddScoped<IScreeningProgress, ScreeningProgress>();
             services.AddScoped<IEditCheckFormulaRepository, EditCheckFormulaRepository>();
             services.AddScoped<IEtmfZoneMasterLibraryRepository, EtmfZoneMasterLibraryRepository>();

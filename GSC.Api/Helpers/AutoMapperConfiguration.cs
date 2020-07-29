@@ -218,6 +218,8 @@ namespace GSC.Api.Helpers
             CreateMap<MeddraSocTerm, MeddraSocTermDto>().ReverseMap();
             CreateMap<ScreeningTemplateLockUnlockAudit, ScreeningTemplateLockUnlockAuditDto>().ReverseMap();
             CreateMap<MeddraCoding, MeddraCodingDto>().ReverseMap();
+            CreateMap<MeddraCodingComment, MeddraCodingCommentDto>().ReverseMap();
+            CreateMap<MeddraCodingAudit, MeddraCodingAuditDto>().ReverseMap();
 
 
             CreateMap<EtmfZoneMasterLibrary, EtmfZoneMasterLibraryDto>().ReverseMap();

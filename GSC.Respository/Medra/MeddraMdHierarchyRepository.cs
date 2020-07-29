@@ -56,5 +56,11 @@ namespace GSC.Respository.Medra
             }
             return count;
         }
+        public MeddraMdHierarchy GetHierarchyData(int meddraSocTermID, int meddraLowLevelTermId)
+        {
+            var SocCode = Context.MeddraSocTerm.Where(x => x.Id == meddraSocTermID).FirstOrDefault();
+            var LowLevelTermCode = Context.MeddraLowLevelTerm.Where(x => x.Id == meddraLowLevelTermId).FirstOrDefault();
+            return All.Where(x => x.pt_code == LowLevelTermCode.pt_code && x.soc_code == SocCode.soc_code).FirstOrDefault();
+        }
     }
 }

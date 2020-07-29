@@ -12,5 +12,6 @@ namespace GSC.Respository.Medra
         List<DropDownDto> GetMedraVesrionByDictionaryDropDown(int DictionaryId);
         List<DropDownDto> GetMedraLanguageVersionDropDown();
         DropDownDto GetDetailByMeddraConfigId(int MeddraConfigId);
+        MedraConfig GetActiveDictionaryId();
     }
 }

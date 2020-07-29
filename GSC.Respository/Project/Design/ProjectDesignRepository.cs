@@ -39,7 +39,7 @@ namespace GSC.Respository.Project.Design
                 {
                     Id = c.Id,
                     //Value = c.Project.ProjectCode + " - " + c.Project.ProjectName
-                     Value = c.Project.ProjectCode
+                    Value = c.Project.ProjectCode
                 }).OrderBy(o => o.Value).ToList();
         }
 
@@ -178,6 +178,11 @@ namespace GSC.Respository.Project.Design
             }
             Context.SaveChanges(_jwtTokenAccesser);
             return true;
+        }
+
+        public int GetParentProjectDetail(int ProjectDesignId)
+        {
+            return Find(ProjectDesignId).ProjectId;
         }
     }
 }

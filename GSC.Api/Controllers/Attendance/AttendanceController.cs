@@ -169,9 +169,9 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(_attendanceHistoryRepository.GetAttendanceHistory(id));
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetAttendanceForMeddraCodingDropDown")]
-        public IActionResult GetAttendanceForMeddraCodingDropDown([FromQuery]MeddraCodingSearchDto filters)
+        public IActionResult GetAttendanceForMeddraCodingDropDown([FromBody] MeddraCodingSearchDto filters)
         {
             return Ok(_attendanceRepository.GetAttendanceForMeddraCodingDropDown(filters));
         }

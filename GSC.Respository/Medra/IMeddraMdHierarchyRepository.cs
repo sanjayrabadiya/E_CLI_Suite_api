@@ -9,5 +9,6 @@ namespace GSC.Respository.Medra
     public interface IMeddraMdHierarchyRepository : IGenericRepository<MeddraMdHierarchy>
     {
         int AddMdhierFileData(SaveFileDto obj);
+        MeddraMdHierarchy GetHierarchyData(int meddraSocTermID, int meddraLowLevelTermId);
     }
 }

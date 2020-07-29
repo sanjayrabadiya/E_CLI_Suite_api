@@ -45,6 +45,8 @@ namespace GSC.Api.Controllers.Medra
         private readonly IMeddraSocHlgtCompRepository _meddraSocHlgtCompRepository;
         private readonly IMeddraSocIntlOrderRepository _meddraSocIntlOrderRepository;
         private readonly IMeddraSocTermRepository _meddraSocTermRepository;
+        private readonly IRoleRepository _securityRoleRepository;
+        private readonly IMeddraCodingRepository _meddraCodingRepository;
 
         public MedraConfigController(IMedraConfigRepository medraConfigRepository,
            IDictionaryRepository dictionaryRepository,
@@ -68,7 +70,9 @@ namespace GSC.Api.Controllers.Medra
         IMeddraSmqListRepository meddraSmqListRepository,
         IMeddraSocHlgtCompRepository meddraSocHlgtCompRepository,
         IMeddraSocIntlOrderRepository meddraSocIntlOrderRepository,
-        IMeddraSocTermRepository meddraSocTermRepository
+        IMeddraSocTermRepository meddraSocTermRepository,
+        IMeddraCodingRepository meddraCodingRepository,
+        IRoleRepository securityRoleRepository
           )
         {
             _medraConfigRepository = medraConfigRepository;
@@ -94,6 +98,8 @@ namespace GSC.Api.Controllers.Medra
             _meddraSocHlgtCompRepository = meddraSocHlgtCompRepository;
             _meddraSocIntlOrderRepository = meddraSocIntlOrderRepository;
             _meddraSocTermRepository = meddraSocTermRepository;
+            _meddraCodingRepository = meddraCodingRepository;
+            _securityRoleRepository = securityRoleRepository;
         }
 
         [HttpGet]
@@ -109,6 +115,7 @@ namespace GSC.Api.Controllers.Medra
             {
                 item.UserName = _userRepository.Find(item.CreatedBy).UserName;
                 item.Summary = _medraConfigCommonRepository.getSummary(item.Id);
+                item.RoleName = _securityRoleRepository.Find(item.CreatedRole).RoleName;
             }
             return Ok(medraDto);
         }
@@ -128,7 +135,7 @@ namespace GSC.Api.Controllers.Medra
 
 
         [HttpPost]
-        public IActionResult Post([FromBody]MedraConfigDto medraDto)
+        public IActionResult Post([FromBody] MedraConfigDto medraDto)
         {
             SaveFileDto obj = new SaveFileDto();
             obj.Path = _uploadSettingRepository.GetDocumentPath();
@@ -158,6 +165,8 @@ namespace GSC.Api.Controllers.Medra
             }
 
             var medra = _mapper.Map<MedraConfig>(medraDto);
+            medra.IsActive = false;
+            medra.CreatedRole = _jwtTokenAccesser.RoleId;
             _medraConfigRepository.Add(medra);
             string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.Language, obj.Version, obj.RootName) + "\\Unzip";
             if (_uow.Save() <= 0)
@@ -169,8 +178,8 @@ namespace GSC.Api.Controllers.Medra
             obj.MedraId = medra.Id;
 
             int Soccount = _meddraSocTermRepository.AddSocFileData(obj);
-            if(Soccount != 0)
-            InsertFileData(root);
+            if (Soccount != 0)
+                InsertFileData(root);
 
             int Hlgtcount = _meddraHlgtPrefTermRepository.AddHlgtFileData(obj);
             if (Hlgtcount != 0)
@@ -193,8 +202,8 @@ namespace GSC.Api.Controllers.Medra
                 InsertFileData(root);
 
             int HlgtHltcount = _meddraHlgtHltCompRepository.AddHlgtHltFileData(obj);
-            if(HlgtHltcount !=0)
-            InsertFileData(root);
+            if (HlgtHltcount != 0)
+                InsertFileData(root);
 
             int HltPtcount = _meddraHltPrefCompRepository.AddHltPtFileData(obj);
             if (HltPtcount != 0)
@@ -209,8 +218,8 @@ namespace GSC.Api.Controllers.Medra
                 InsertFileData(root);
 
             int SocHlgtcount = _meddraSocHlgtCompRepository.AddSocHlgtFileData(obj);
-            if(SocHlgtcount != 0)
-            InsertFileData(root);
+            if (SocHlgtcount != 0)
+                InsertFileData(root);
 
             int IntlOrdcount = _meddraSocIntlOrderRepository.AddIntlOrdFileData(obj);
             if (IntlOrdcount != 0)
@@ -230,7 +239,7 @@ namespace GSC.Api.Controllers.Medra
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody]MedraConfigDto medraDto)
+        public IActionResult Put([FromBody] MedraConfigDto medraDto)
         {
             if (medraDto.Id <= 0)
             {
@@ -334,6 +343,50 @@ namespace GSC.Api.Controllers.Medra
         {
             var details = _medraConfigRepository.GetDetailByMeddraConfigId(MeddraConfigId);
             return Ok(details);
+        }
+
+        [HttpPut]
+        [Route("UpdateDictionaryVersion")]
+        public IActionResult UpdateDictionaryVersion([FromBody] int id)
+        {
+            var activeResult = _medraConfigRepository.GetActiveDictionaryId();
+            if (activeResult != null)
+            {
+                var record = _medraConfigRepository.Find(activeResult.Id);
+                if (record != null)
+                {
+                    record.ModifiedBy = _jwtTokenAccesser.UserId;
+                    record.ModifiedDate = DateTime.Now.ToUniversalTime();
+                    record.IsActive = false;
+                    record.CreatedRole = _jwtTokenAccesser.RoleId;
+                    var medra = _mapper.Map<MedraConfig>(record);
+                    _medraConfigRepository.Update(medra);
+
+                    if (_uow.Save() <= 0)
+                    {
+                        throw new Exception($"Active Medra dictionary failed.");
+                    }
+                }
+            }
+
+            var active = _medraConfigRepository.Find(id);
+            if (active != null)
+            {
+                active.ModifiedBy = _jwtTokenAccesser.UserId;
+                active.ModifiedDate = DateTime.Now.ToUniversalTime();
+                active.IsActive = true;
+                var medra = _mapper.Map<MedraConfig>(active);
+                _medraConfigRepository.Update(medra);
+
+                if (_uow.Save() <= 0)
+                {
+                    throw new Exception($"Active Medra dictionary failed.");
+                }
+            }
+
+            //    _meddraCodingRepository.UpdateDictionaryVersion();
+
+            return Ok(active.Id);
         }
     }
 }

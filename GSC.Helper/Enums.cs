@@ -144,7 +144,8 @@ namespace GSC.Helper
         [Description("Screening")] Screening = 7,
         [Description("Design library")] DesignLibrary = 8,
         [Description("Master")] Master = 9,
-        [Description("Barcode")] Barcode = 10
+        [Description("Barcode")] Barcode = 10,
+        [Description("Medical Coding")] MedicalCoding = 13
     }
 
     public enum AuditAction : short
@@ -393,6 +394,14 @@ namespace GSC.Helper
 
     }
 
+    public enum CommentStatus : short
+    {
+        [Description("Open")] Open = 1,
+        [Description("Answered")] Answered = 2,
+        [Description("Resolved")] Resolved = 3,
+        [Description("Closed")] Closed = 4,
+        [Description("Self Correction")] SelfCorrection = 5
+    }
 
     public enum ETMFMaterLibraryColumn : short
     {

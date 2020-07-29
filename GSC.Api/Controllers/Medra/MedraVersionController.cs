@@ -8,7 +8,9 @@ using GSC.Data.Dto.Medra;
 using GSC.Data.Entities.Medra;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.Medra;
+using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,9 +25,13 @@ namespace GSC.Api.Controllers.Medra
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IUserRepository _userRepository;
+        private readonly ICompanyRepository _companyRepository;
 
         public MedraVersionController(IMedraVersionRepository medraVersionRepository,
            IDictionaryRepository dictionaryRepository,
+           IUserRepository userRepository,
+            ICompanyRepository companyRepository,
         IUnitOfWork uow,
           IMapper mapper,
           IJwtTokenAccesser jwtTokenAccesser
@@ -33,6 +39,8 @@ namespace GSC.Api.Controllers.Medra
         {
             _medraVersionRepository = medraVersionRepository;
             _dictionaryRepository = dictionaryRepository;
+            _userRepository = userRepository;
+            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -42,10 +50,21 @@ namespace GSC.Api.Controllers.Medra
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var medra = _medraVersionRepository.FindByInclude(x => (x.CompanyId == null
-                                                           || x.CompanyId == _jwtTokenAccesser.CompanyId) && isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Dictionary).OrderByDescending(x => x.Id).ToList();
-
+            var medra = _medraVersionRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Dictionary).OrderByDescending(x => x.Id).ToList();
             var medraDto = _mapper.Map<IEnumerable<MedraVersionDto>>(medra).ToList();
+
+            medraDto.ForEach(b =>
+            {
+
+                b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
+                if (b.ModifiedBy != null)
+                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+                if (b.DeletedBy != null)
+                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+                if (b.CompanyId != null)
+                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            });
+
             return Ok(medraDto);
         }
 
@@ -64,14 +83,14 @@ namespace GSC.Api.Controllers.Medra
 
 
         [HttpPost]
-        public IActionResult Post([FromBody]MedraVersionDto medraDto)
+        public IActionResult Post([FromBody] MedraVersionDto medraDto)
         {
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
             medraDto.Id = 0;
-            
+
             var medra = _mapper.Map<MedraVersion>(medraDto);
             var validate = _medraVersionRepository.Duplicate(medra);
             if (!string.IsNullOrEmpty(validate))
@@ -88,7 +107,7 @@ namespace GSC.Api.Controllers.Medra
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody]MedraVersionDto medraDto)
+        public IActionResult Put([FromBody] MedraVersionDto medraDto)
         {
             if (medraDto.Id <= 0) return BadRequest();
 
@@ -102,7 +121,7 @@ namespace GSC.Api.Controllers.Medra
                 return BadRequest(ModelState);
             }
 
-            _medraVersionRepository.Update(medra);
+            _medraVersionRepository.AddOrUpdate(medra);
 
             if (_uow.Save() <= 0)
             {

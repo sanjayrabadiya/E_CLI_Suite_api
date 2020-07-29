@@ -220,7 +220,8 @@ namespace GSC.Domain.Context
         public DbSet<MeddraSocIntlOrder> MeddraSocIntlOrder { get; set; }
         public DbSet<MeddraSocTerm> MeddraSocTerm { get; set; }
         public DbSet<MeddraCoding> MeddraCoding { get; set; }
-
+        public DbSet<MeddraCodingComment> MeddraCodingComment { get; set; }
+        public DbSet<MeddraCodingAudit> MeddraCodingAudit { get; set; }
         public DbSet<ElectronicSignature> ElectronicSignature { get; set; }
         public DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
         public DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }

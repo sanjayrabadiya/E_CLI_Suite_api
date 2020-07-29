@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using AutoMapper;
@@ -10,8 +11,10 @@ using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Medra;
+using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Master
@@ -23,14 +26,20 @@ namespace GSC.Api.Controllers.Master
         private readonly IMedraLanguageRepository _medraLanguageRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IUserRepository _userRepository;
+        private readonly ICompanyRepository _companyRepository;
 
         public MedraLanguageController(IMedraLanguageRepository medraLanguageRepository,
+                        IUserRepository userRepository,
+            ICompanyRepository companyRepository,
             IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _medraLanguageRepository = medraLanguageRepository;
             _uow = uow;
+            _userRepository = userRepository;
+            _companyRepository = companyRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
@@ -52,11 +61,20 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
-            var languages = _medraLanguageRepository.All.Where(x =>
-                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).Select(x => _mapper.Map<MedraLanguageDto>(x)).OrderByDescending(x => x.Id);
+            var language = _medraLanguageRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+           
+            var languages = _mapper.Map<IEnumerable<MedraLanguageDto>>(language).ToList();
+            languages.ForEach(b =>
+            {
+                b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
+                if (b.ModifiedBy != null)
+                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+                if (b.DeletedBy != null)
+                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+                if (b.CompanyId != null)
+                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            });
+
             return Ok(languages);
         }
 
@@ -98,9 +116,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             /* Added by Vipul for effective Date on 14-10-2019 */
-            Delete(language.Id);
-            language.Id = 0;
-            _medraLanguageRepository.Add(language);
+            //Delete(language.Id);
+            //language.Id = 0;
+            //_medraLanguageRepository.Add(language);
+            /* Added by vipul for new update method */
+            _medraLanguageRepository.AddOrUpdate(language);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Language failed on save.");
 

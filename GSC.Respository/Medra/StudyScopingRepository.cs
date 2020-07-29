@@ -18,15 +18,17 @@ namespace GSC.Respository.Medra
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public StudyScopingRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
+        private readonly IMeddraCodingRepository _meddraCodingRepository;
+        public StudyScopingRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService, IMeddraCodingRepository meddraCodingRepository) : base(uow, jwtTokenAccesser)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _meddraCodingRepository = meddraCodingRepository;
         }
 
         public string Duplicate(StudyScoping objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.ProjectDesignVariableId == objSave.ProjectDesignVariableId && x.DeletedDate == null))
+            if (All.AsNoTracking().Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.ProjectDesignVariableId == objSave.ProjectDesignVariableId && x.DeletedDate == null))
             {
                 return "Duplicate Variable name : " + Context.ProjectDesignVariable.Where(p => p.Id == objSave.ProjectDesignVariableId).FirstOrDefault().VariableName;
             }
@@ -55,9 +57,9 @@ namespace GSC.Respository.Medra
                             VariableAnnotation = x.IsByAnnotation ? x.ProjectDesignVariableId : 0,
                             VariableName = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariableId).FirstOrDefault().VariableName,
                             DomainId = x.DomainId,
-                            DomainName = x.Domain.DomainName,                            
+                            DomainName = x.Domain.DomainName,
                             MedraConfigId = x.MedraConfigId,
-                            VersionName = x.MedraConfig.MedraVersion.Dictionary.DictionaryName+"-"+ x.MedraConfig.Language.LanguageName + "-"+ x.MedraConfig.MedraVersion.Version,                            
+                            VersionName = x.MedraConfig.MedraVersion.Dictionary.DictionaryName + "-" + x.MedraConfig.Language.LanguageName + "-" + x.MedraConfig.MedraVersion.Version,
                             CoderProfile = x.CoderProfile,
                             CoderApprover = x.CoderApprover,
                             CoderProfileName = Context.SecurityRole.Where(s => s.Id == x.CoderProfile && s.DeletedDate == null).FirstOrDefault().RoleName,
@@ -67,12 +69,34 @@ namespace GSC.Respository.Medra
                                 x.ProjectDesignVariable.ProjectDesignTemplate.TemplateName + "." + x.ProjectDesignVariable.VariableName
                         }).OrderBy(x => x.Id).ToList();
 
+                foreach (var item in result)
+                {
+                    item.IsEnable = checkForScopingEdit((int)item.ProjectDesignVariableId);
+                }
+
                 return result;
             }
             catch (Exception ex)
-           {
+            {
                 throw ex;
             }
         }
+
+        public bool checkForScopingEdit(int ProjectDesignVariableId)
+        {
+            var Exists = Context.MeddraCoding.Where(x => x.ScreeningTemplateValue.ProjectDesignVariableId == ProjectDesignVariableId && x.DeletedDate == null).ToList();
+            if (Exists.Count > 0)
+                return true;
+            else
+                return false;
+        }
+
+        //public StudyScoping GetData(int MeddraCodingId)
+        //{
+        //    var medra = Context.MeddraCoding.Find(MeddraCodingId);
+        //    var template = Context.ScreeningTemplateValue.Find(medra.ScreeningTemplateValueId);
+        //    return All.Where(x => x.ProjectDesignVariableId == template.ProjectDesignVariableId).FirstOrDefault();
+        //}
+
     }
 }

@@ -414,5 +414,18 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
         }
+
+        //For Meddra
+        [HttpGet]
+        [Route("CommentStatus")]
+        public IList<DropDownEnum> CommentStatus()
+        {
+            return Enum.GetValues(typeof(CommentStatus))
+                .Cast<CommentStatus>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

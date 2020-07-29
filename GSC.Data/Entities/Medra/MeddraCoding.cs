@@ -7,11 +7,11 @@ using System.Text;
 
 namespace GSC.Data.Entities.Medra
 {
-   public class MeddraCoding:BaseEntity
+    public class MeddraCoding : BaseEntity
     {
         public int MeddraConfigId { get; set; }
         public int ScreeningTemplateValueId { get; set; }
-        public int MeddraLowLevelTermId { get; set; }
+        public int? MeddraLowLevelTermId { get; set; }
         public int? MeddraSocTermId { get; set; }
         public CodedType CodedType { get; set; }
         public int? ApprovedBy { get; set; }
@@ -19,5 +19,14 @@ namespace GSC.Data.Entities.Medra
         public int? CompanyId { get; set; }
         public Screening.ScreeningTemplateValue ScreeningTemplateValue { get; set; }
         public MeddraLowLevelTerm MeddraLowLevelTerm { get; set; }
+        public int? CreatedRole { get; set; }
+
+        private DateTime? _approveDate;
+
+        public DateTime? ApproveDate
+        {
+            get => _approveDate?.UtcDateTime();
+            set => _approveDate = value?.UtcDateTime();
+        }
     }
 }

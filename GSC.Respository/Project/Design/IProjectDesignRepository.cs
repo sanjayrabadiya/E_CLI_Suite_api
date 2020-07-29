@@ -14,7 +14,8 @@ namespace GSC.Respository.Project.Design
         bool IsScreeningStarted(int projectId);
         string CheckCompleteDesign(int id);
 
-        string Duplicate(ProjectDesign objSave);        
+        string Duplicate(ProjectDesign objSave);
         bool IsCompleteExist(int projectDesignId, string moduleName, bool isComplete);
+        int GetParentProjectDetail(int ProjectDesignId);
     }
 }

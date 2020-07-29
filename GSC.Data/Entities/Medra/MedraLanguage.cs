@@ -8,8 +8,6 @@ namespace GSC.Data.Entities.Medra
 
         public string Culture { get; set; }
 
-        public bool IsDefault { get; set; }
-
         public int? CompanyId { get; set; }
     }
 }
