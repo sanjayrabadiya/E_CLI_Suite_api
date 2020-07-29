@@ -20,7 +20,7 @@ namespace GSC.Respository.Client
 
         public IList<ClientContactDto> GetContactList(int clientId, bool isDeleted)
         {
-            return FindByInclude(t => t.ClientId == clientId && isDeleted ? t.DeletedDate != null : t.DeletedDate == null, t => t.ContactType).Select(c =>
+            return FindByInclude(t => (isDeleted ? t.DeletedDate != null : t.DeletedDate == null) && t.ClientId == clientId, t => t.ContactType).Select(c =>
                 new ClientContactDto
                 {
                     Id = c.Id,
