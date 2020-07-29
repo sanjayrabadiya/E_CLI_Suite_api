@@ -16,9 +16,9 @@ namespace GSC.Respository.Client
         {
         }
 
-        public List<ClientAddress> GetAddresses(int clientId)
+        public List<ClientAddress> GetAddresses(int clientId, bool isDeleted)
         {
-            var addresses = FindByInclude(t => t.ClientId == clientId && t.DeletedDate == null, t => t.Location)
+            var addresses = FindByInclude(t => t.ClientId == clientId && isDeleted ? t.DeletedDate != null : t.DeletedDate == null, t => t.Location)
                 .OrderByDescending(t => t.Id).ToList();
 
             foreach (var address in addresses)

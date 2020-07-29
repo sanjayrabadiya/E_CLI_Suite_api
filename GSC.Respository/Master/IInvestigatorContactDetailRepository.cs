@@ -9,6 +9,10 @@ namespace GSC.Respository.Master
     {
         IList<InvestigatorContactDetailDto> GetContactList(int clientId);
 
+        IList<InvestigatorContactDetailDto> GetContactList(int projectId, bool isDeleted);
+
         string DuplicateContact(InvestigatorContactDetail objSave);
+
+        List<DropDownDto> GetInvestigatorContactDetailDropDown();
     }
 }

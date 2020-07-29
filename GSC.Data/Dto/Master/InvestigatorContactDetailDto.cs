@@ -9,6 +9,7 @@ namespace GSC.Data.Dto.Master
     {
         public int? InvestigatorContactId { get; set; }
         public int? ContactTypeId { get; set; }
+        public int? SecurityRoleId { get; set; }
         [Required(ErrorMessage = "Contact Email is required.")]
         public string ContactEmail { get; set; }
         [Required(ErrorMessage = "Contact Name is required.")]

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.Master
 {
-    public class HolidayDto : BaseEntity
+    public class HolidayDto : BaseDto
     {
         public int InvestigatorContactId { get; set; }
         [Required(ErrorMessage = "Holiday Type is required.")]

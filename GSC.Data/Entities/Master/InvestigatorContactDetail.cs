@@ -6,6 +6,7 @@ namespace GSC.Data.Entities.Master
     {
         public int? InvestigatorContactId { get; set; }
         public int? ContactTypeId { get; set; }
+        public int? SecurityRoleId { get; set; }
         public string ContactEmail { get; set; }
         public string ContactName { get; set; }
         public string ContactNo { get; set; }

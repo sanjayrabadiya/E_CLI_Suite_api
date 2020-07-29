@@ -18,21 +18,17 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "RegistrationNumber is required.")]
         public string RegistrationNumber { get; set; }
 
-        [Required(ErrorMessage = "HospitalName is required.")]
-        public string HospitalName { get; set; }
+        [Required(ErrorMessage = "Site Name is required.")]
+        public int ManageSiteId { get; set; }
 
-        [Required(ErrorMessage = "HospitalAddress is required.")]
-        public string HospitalAddress { get; set; }
+        [Required(ErrorMessage = "Site Address is required.")]
+        public string Address { get; set; }
 
         [Required(ErrorMessage = "ContactNumber is required.")]
         public string ContactNumber { get; set; }
-
-        public string IECIRBName { get; set; }
-
+        public int IecirbId { get; set; }
         public string IECIRBContactNo { get; set; }
-        [Required(ErrorMessage = " IECIRB Contact Name is required.")]
         public string IECIRBContactName { get; set; }
-        [Required(ErrorMessage = "IECIRB Contact Email is required.")]
         public string IECIRBContactEmail { get; set; }
         [Required(ErrorMessage = "City is required.")]
         public int CityId { get; set; }

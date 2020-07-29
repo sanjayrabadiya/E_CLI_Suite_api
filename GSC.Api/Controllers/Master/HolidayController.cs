@@ -26,12 +26,12 @@ IUnitOfWork<GscContext> uow, IMapper mapper)
         }
 
         // GET: api/<controller>
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{id}/{isDeleted:bool?}")]
+        public IActionResult Get(int id, bool isDeleted)
         {
             if (id <= 0) return BadRequest();
 
-            var holiday = _holidayRepository.GetHolidayList(id);
+            var holiday = _holidayRepository.GetHolidayList(id, isDeleted);
             return Ok(holiday);
         }
 
@@ -106,6 +106,13 @@ IUnitOfWork<GscContext> uow, IMapper mapper)
             _uow.Save();
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetHolidayDropDown")]
+        public IActionResult GetHolidayDropDown()
+        {
+            return Ok(_holidayRepository.GetHolidayDropDown());
         }
     }
 }

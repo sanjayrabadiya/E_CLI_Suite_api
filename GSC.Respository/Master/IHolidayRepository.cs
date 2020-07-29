@@ -7,8 +7,10 @@ namespace GSC.Respository.Master
 {
     public interface IHolidayRepository : IGenericRepository<Holiday>
     {
-        IList<HolidayDto> GetHolidayList(int Id);
+        IList<HolidayDto> GetHolidayList(int Id, bool isDeleted);
 
         string DuplicateHoliday(Holiday objSave);
+
+        List<DropDownDto> GetHolidayDropDown();
     }
 }

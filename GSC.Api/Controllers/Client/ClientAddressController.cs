@@ -30,12 +30,12 @@ namespace GSC.Api.Controllers.Client
         }
 
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{id}/{isDeleted:bool?}")]
+        public IActionResult Get(int id, bool isDeleted)
         {
             if (id <= 0) return BadRequest();
 
-            var clientAddresses = _clientAddressRepository.GetAddresses(id);
+            var clientAddresses = _clientAddressRepository.GetAddresses(id, isDeleted);
             return Ok(clientAddresses);
         }
 

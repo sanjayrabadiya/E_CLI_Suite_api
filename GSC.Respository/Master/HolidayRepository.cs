@@ -12,16 +12,18 @@ namespace GSC.Respository.Master
 {
     public class HolidayRepository : GenericRespository<Holiday, GscContext>, IHolidayRepository
     {
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public HolidayRepository(IUnitOfWork<GscContext> uow,
 IJwtTokenAccesser jwtTokenAccesser)
 : base(uow, jwtTokenAccesser)
         {
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
 
-        public IList<HolidayDto> GetHolidayList(int InvestigatorContactId)
+        public IList<HolidayDto> GetHolidayList(int InvestigatorContactId, bool isDeleted)
         {
-            return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId && t.DeletedDate == null).Select(c =>
+            return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId && isDeleted ? t.DeletedDate != null : t.DeletedDate == null).Select(c =>
                 new HolidayDto
                 {
                     Id = c.Id,
@@ -31,7 +33,8 @@ IJwtTokenAccesser jwtTokenAccesser)
                     HolidayName = c.HolidayName,
                     HolidayDate = c.HolidayDate,
                     Description = c.Description,
-                    CompanyId = c.CompanyId
+                    CompanyId = c.CompanyId,
+                    IsDeleted = c.DeletedDate != null
                 }).OrderByDescending(t => t.Id).ToList();
         }
 
@@ -41,6 +44,13 @@ IJwtTokenAccesser jwtTokenAccesser)
                 return "Duplicate Holiday : " + objSave.HolidayName;
 
             return "";
+        }
+
+        public List<DropDownDto> GetHolidayDropDown()
+        {
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.HolidayName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }
 }

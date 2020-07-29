@@ -35,6 +35,14 @@ namespace GSC.Api.Controllers.Master
             return Ok(investigatorContactDetail);
         }
 
+        [HttpGet]
+        [Route("GetContact/{projectId}/{isDeleted:bool?}")]
+        public IActionResult GetContact(int projectId, bool isDeleted)
+        {
+            var investigatorContactDetail = _investigatorContactDetailRepository.GetContactList(projectId, isDeleted);
+            return Ok(investigatorContactDetail);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] InvestigatorContactDetailDto investigatorContactDetailDto)
         {
@@ -107,6 +115,13 @@ namespace GSC.Api.Controllers.Master
             _uow.Save();
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetInvestigatorContactDetailDropDown")]
+        public IActionResult GetInvestigatorContactDetailDropDown()
+        {
+            return Ok(_investigatorContactDetailRepository.GetInvestigatorContactDetailDropDown());
         }
     }
 }

@@ -238,6 +238,8 @@ namespace GSC.Domain.Context
         public DbSet<ProjectWorkplaceSubSecArtificatedocument> ProjectWorkplaceSubSecArtificatedocument { get; set; }
         public DbSet<InvestigatorContactDetail> InvestigatorContactDetail { get; set; }
         public DbSet<Holiday> Holiday { get; set; }
+        public DbSet<ManageSite> ManageSite { get; set; }
+        public DbSet<Iecirb> Iecirb { get; set; }
         private List<string> ColumnsToSkip
         {
             get

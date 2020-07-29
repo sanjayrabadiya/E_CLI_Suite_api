@@ -25,12 +25,12 @@ namespace GSC.Api.Controllers.Client
             _mapper = mapper;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{id}/{isDeleted:bool?}")]
+        public IActionResult Get(int id, bool isDeleted)
         {
             if (id <= 0) return BadRequest();
 
-            var clientContacts = _clientContactRepository.GetContactList(id);
+            var clientContacts = _clientContactRepository.GetContactList(id, isDeleted);
             return Ok(clientContacts);
         }
 

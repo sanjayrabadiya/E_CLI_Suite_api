@@ -10,7 +10,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetInvestigatorContactDropDown(int cityId);
         List<InvestigatorContactDto> GetInvestigatorContact(bool isDeleted);
         string Duplicate(InvestigatorContact objSave);
-
         List<DropDownDto> GetAllInvestigatorContactDropDown();
     }
 }

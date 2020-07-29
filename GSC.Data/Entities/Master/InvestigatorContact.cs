@@ -9,10 +9,10 @@ namespace GSC.Data.Entities.Master
         public string EmailOfInvestigator { get; set; }
         public string Specialization { get; set; }
         public string RegistrationNumber { get; set; }
-        public string HospitalName { get; set; }
-        public string HospitalAddress { get; set; }
+        public int ManageSiteId { get; set; }
+        public string Address { get; set; }
         public string ContactNumber { get; set; }
-        public string IECIRBName { get; set; }
+        public int IecirbId { get; set; }
         public string IECIRBContactNo { get; set; }
         public string IECIRBContactName { get; set; }
         public string IECIRBContactEmail { get; set; }

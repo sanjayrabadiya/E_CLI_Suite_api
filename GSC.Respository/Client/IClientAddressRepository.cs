@@ -6,6 +6,6 @@ namespace GSC.Respository.Client
 {
     public interface IClientAddressRepository : IGenericRepository<ClientAddress>
     {
-        List<ClientAddress> GetAddresses(int clientId);
+        List<ClientAddress> GetAddresses(int clientId, bool isDeleted);
     }
 }

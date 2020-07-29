@@ -234,6 +234,8 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectWorkplaceSubSecArtificatedocument, ProjectWorkplaceSubSecArtificatedocumentDto>().ReverseMap();
             CreateMap<InvestigatorContactDetail, InvestigatorContactDetailDto>().ReverseMap();
             CreateMap<Holiday, HolidayDto>().ReverseMap();
+            CreateMap<ManageSite, ManageSiteDto>().ReverseMap();
+            CreateMap<Iecirb, IecirbDto>().ReverseMap();
         }
     }
 }
