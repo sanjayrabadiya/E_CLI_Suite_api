@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
@@ -71,7 +72,9 @@ namespace GSC.Data.Entities.Volunteer
         public IList<VolunteerFood> Foods { get; set; } = null;
         public IList<VolunteerLanguage> Languages { get; set; } = null;
         public IList<VolunteerDocument> Documents { get; set; } = null;
-        public string FullName => FirstName + " " + MiddleName + " " + LastName;
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public string FullName { get; set; }
         public bool? IsBlocked { get; set; }
         public bool IsScreening { get; set; }
         public VolunteerStatus Status { get; set; }
