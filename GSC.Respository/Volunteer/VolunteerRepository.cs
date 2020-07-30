@@ -277,14 +277,8 @@ namespace GSC.Respository.Volunteer
             var query = All.Where(x => x.DeletedDate == null).AsQueryable();
 
             query = query.Where(x =>
-                x.LastName.Contains(searchText)
-                || x.MiddleName.Contains(searchText)
-                || x.FirstName.Contains(searchText)
-                || x.VolunteerNo.Contains(searchText)
-                || (x.LastName + " " + x.FirstName).Contains(searchText)
-                || (x.FirstName + " " + x.LastName).Contains(searchText)
-                || (x.FirstName + " " + x.MiddleName + " " + x.LastName).Contains(searchText)
-            );
+                x.FullName.Contains(searchText)
+                      || x.VolunteerNo.Contains(searchText));
 
             if (isAutoSearch)
                 query = query.Take(7);
