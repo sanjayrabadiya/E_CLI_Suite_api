@@ -283,6 +283,7 @@ namespace GSC.Respository.Medra
                                         b.Id == Convert.ToInt32(value.Value)).ValueName
                                         : value.Value,
                               CodedType = meddraCoding.CodedType,
+                              CodingType = meddraCoding.CodingType,
                               CommentStatus = meddraCoding.Id == null ? 0 :
                               Context.MeddraCodingComment.Where(x => x.MeddraCodingId == meddraCoding.Id).OrderByDescending(o => o.Id).FirstOrDefault().CommentStatus,
                               Code = meddraLLT.llt_name,

@@ -14,9 +14,10 @@ namespace GSC.Data.Dto.Medra
         public int ScreeningTemplateValueId { get; set; }
         public int MeddraLowLevelTermId { get; set; }
         public int? MeddraSocTermId { get; set; }
-        public CodedType CodedType { get; set; }
+        public CodedType? CodedType { get; set; }
+        public CodedType? CodingType { get; set; }
         public int? ApprovedBy { get; set; }
-        public bool IsApproved { get; set; }
+        public bool? IsApproved { get; set; }
         public int? CompanyId { get; set; }
         private DateTime? _modifiedDate;
 
@@ -61,6 +62,7 @@ namespace GSC.Data.Dto.Medra
         public int? CountryId { get; set; }
         public int? SiteId { get; set; }
         public CodedType? Status { get; set; }
+        public CodedType? CodingStatus { get; set; }
         public string Value { get; set; }
         public int SearchBy { get; set; }
         public int? TemplateStatus { get; set; }
@@ -137,6 +139,7 @@ namespace GSC.Data.Dto.Medra
         public int MeddraLowLevelTermId { get; set; }
         public int MeddraSocTermId { get; set; }
         public CodedType? CodedType { get; set; }
+        public CodedType? CodingType { get; set; }
         public string SiteCode { get; set; }
         public int? MeddraCodingId { get; set; }
         public CommentStatus? CommentStatus { get; set; }

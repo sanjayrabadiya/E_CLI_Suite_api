@@ -142,6 +142,7 @@ namespace GSC.Api.Controllers.Medra
                 data.ModifiedBy = _jwtTokenAccesser.UserId;
                 data.CreatedRole = _jwtTokenAccesser.RoleId;
                 data.CodedType = CodedType.AutoCoded;
+                data.CodingType= CodedType.AutoCoded;
                 data.IsApproved = false;
                 var autoCode = _mapper.Map<MeddraCoding>(data);
                 _meddraCodingRepository.Add(autoCode);
@@ -181,6 +182,7 @@ namespace GSC.Api.Controllers.Medra
                 else
                 {
                     data.CodedType = CodedType.ManualCoded;
+                    data.CodingType = CodedType.ManualCoded;
                     data.IsApproved = false;
                     data.ModifiedDate = DateTime.Now;
                     data.ModifiedBy = _jwtTokenAccesser.UserId;

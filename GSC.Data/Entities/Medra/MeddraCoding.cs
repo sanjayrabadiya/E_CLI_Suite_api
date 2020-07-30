@@ -14,6 +14,7 @@ namespace GSC.Data.Entities.Medra
         public int? MeddraLowLevelTermId { get; set; }
         public int? MeddraSocTermId { get; set; }
         public CodedType CodedType { get; set; }
+        public CodedType CodingType { get; set; }
         public int? ApprovedBy { get; set; }
         public bool IsApproved { get; set; }
         public int? CompanyId { get; set; }

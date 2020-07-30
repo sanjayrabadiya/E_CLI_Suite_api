@@ -90,7 +90,7 @@ namespace GSC.Respository.Medra
                         .Include(s => s.ScreeningTemplateValue).AsNoTracking().FirstOrDefault();
             ButtonShow button = new ButtonShow();
             var ProfileData = Context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectDesignVariableId == coding.ScreeningTemplateValue.ProjectDesignVariableId).FirstOrDefault();
-            var commentLatest = All.Where(t => t.MeddraCodingId == MeddraCodingId).LastOrDefault();
+            var commentLatest = All.Where(t => t.MeddraCodingId == MeddraCodingId).OrderByDescending(o => o.Id).FirstOrDefault();
             if (ProfileData != null)
             {
                 if (ProfileData.CoderApprover == _jwtTokenAccesser.RoleId)
