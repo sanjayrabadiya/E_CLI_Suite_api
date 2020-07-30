@@ -176,7 +176,6 @@ namespace GSC.Respository.Volunteer
                     break;
                 }
             }
-
             if (!Context.VolunteerAddress.Where(t => t.VolunteerId == id).Any())
             {
                 message += "#Address ";
@@ -276,9 +275,7 @@ namespace GSC.Respository.Volunteer
 
             var query = All.Where(x => x.DeletedDate == null).AsQueryable();
 
-            query = query.Where(x =>
-                x.FullName.Contains(searchText)
-                      || x.VolunteerNo.Contains(searchText));
+            query = query.Where(x => x.FullName.Contains(searchText) || x.VolunteerNo.Contains(searchText));
 
             if (isAutoSearch)
                 query = query.Take(7);

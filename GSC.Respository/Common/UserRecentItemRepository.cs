@@ -68,7 +68,7 @@ namespace GSC.Respository.Common
                     break;
             }
 
-            var result = Context.AppScreen.FirstOrDefault(x => x.ScreenCode == urlName);
+            var result = Context.AppScreen.Where(x => x.ScreenCode == urlName).FirstOrDefault();
             if (result != null)
             {
                 var parent = Context.AppScreen.FirstOrDefault(x => x.Id == result.ParentAppScreenId)?.IconPath;

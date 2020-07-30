@@ -264,7 +264,7 @@ namespace GSC.Respository.Attendance
                         t.DiscontinuedTemplateId = null;
                     }
 
-                    var screening = Context.ScreeningEntry.FirstOrDefault(x => x.AttendanceId == t.AttendanceId);
+                    var screening = Context.ScreeningEntry.Where(x => x.AttendanceId == t.AttendanceId).FirstOrDefault();
                     if (screening != null)
                     {
                         t.AttendanceScreeningEntryId = screening.Id;

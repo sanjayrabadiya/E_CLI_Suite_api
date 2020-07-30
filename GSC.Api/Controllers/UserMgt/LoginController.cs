@@ -257,7 +257,7 @@ namespace GSC.Api.Controllers.UserMgt
         [AllowAnonymous]
         public async Task<IActionResult> LogOutFromEveryWhere(string userName)
         {
-            var user = _userRepository.All.FirstOrDefault(x => x.UserName == userName && x.DeletedDate == null);
+            var user = _userRepository.All.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
 
             if (user != null)
             {

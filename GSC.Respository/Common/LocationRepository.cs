@@ -20,12 +20,12 @@ namespace GSC.Respository.Common
             if (location == null || string.IsNullOrEmpty(location.Address))
                 return null;
 
-            var result = All.FirstOrDefault(x => x.Address == location.Address
+            var result = All.Where(x => x.Address == location.Address
                                                  && x.CountryId == location.CountryId
                                                  && x.StateId == location.StateId
                                                  && x.CityId == location.CityId
                                                  && x.CityAreaId == location.CityAreaId
-                                                 && x.Zip == location.Zip);
+                                                 && x.Zip == location.Zip).FirstOrDefault();
             if (result != null)
                 return result;
 

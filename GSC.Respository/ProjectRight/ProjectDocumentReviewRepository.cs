@@ -270,13 +270,13 @@ namespace GSC.Respository.ProjectRight
 
             projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
             {
-                var projectRight = Context.ProjectRight.FirstOrDefault(a =>
+                var projectRight = Context.ProjectRight.Where(a =>
                     a.ProjectId == projectDocumentReview.ProjectId
-                    && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId);
+                    && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
                 if (projectRight != null)
                 {
                     projectDocumentReview.AssignedDate = projectRight.CreatedDate;
-                    var createdByUser = Context.Users.FirstOrDefault(user => user.Id == projectRight.CreatedBy);
+                    var createdByUser = Context.Users.Where(user => user.Id == projectRight.CreatedBy).FirstOrDefault();
                     if (createdByUser != null) projectDocumentReview.AssignedBy = createdByUser.UserName;
                 }
             });

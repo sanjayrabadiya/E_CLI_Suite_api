@@ -111,8 +111,8 @@ namespace GSC.Respository.Master
             }
             projects.ForEach(x =>
             {
-                var design = Context.ProjectDesign.FirstOrDefault(t =>
-                    t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null);
+                var design = Context.ProjectDesign.Where(t =>
+                    t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null).FirstOrDefault();
                 if (design != null)
                 {
                     x.ProjectDesignId = design.Id;
@@ -677,8 +677,8 @@ namespace GSC.Respository.Master
             }
             projects.ForEach(x =>
             {
-                var design = Context.ProjectDesign.FirstOrDefault(t =>
-                    t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null);
+                var design = Context.ProjectDesign.Where(t =>
+                    t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null).FirstOrDefault();
                 if (design != null)
                 {
                     x.ProjectDesignId = design.Id;
