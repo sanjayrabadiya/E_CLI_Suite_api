@@ -31,6 +31,7 @@ namespace GSC.Data.Dto.Medra
         public int? CoderApprover { get; set; }
         public int? CompanyId { get; set; }
         public string ProjectName { get; set; }
+        public string ProjectCode { get; set; }
         public string DomainName { get; set; }
         public string VariableName { get; set; }
         public string DictionaryName { get; set; }

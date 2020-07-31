@@ -45,6 +45,7 @@ namespace GSC.Respository.Medra
                             Id = x.Id,
                             ProjectId = x.ProjectId,
                             ProjectName = x.Project.ProjectName,
+                            ProjectCode = x.Project.ProjectCode,
                             TemplateId = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplateId,
                             TemplateName = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplate.TemplateName,
                             VisitId = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisitId,

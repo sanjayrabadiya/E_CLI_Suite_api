@@ -95,7 +95,7 @@ namespace GSC.Respository.Master
                 DeletedDate = x.DeletedDate,
                 ModifiedBy = x.ModifiedBy,
                 DeletedBy = x.DeletedBy,
-                IsDeleted = x.DeletedDate!=null,
+                IsDeleted = x.DeletedDate != null,
                 AttendanceLimit = x.AttendanceLimit,
                 NoofSite = GetNoOfSite(x.Id),
             }).OrderByDescending(x => x.Id).ToList();
@@ -171,7 +171,8 @@ namespace GSC.Respository.Master
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
-                    Value = c.ProjectCode + " - " + c.ProjectName,
+                    //Value = c.ProjectCode + " - " + c.ProjectName,
+                    Value = c.ProjectCode, //change by swati on 31-7-2020 for show only study code
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? c.Id,
@@ -219,12 +220,12 @@ namespace GSC.Respository.Master
             if (project.ParentProjectId == null)
             {
                 var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "pro" && x.DeletedDate == null).FirstOrDefault();
-                project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectCode(project);                
+                project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectCode(project);
             }
             else
             {
                 var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "prochild" && x.DeletedDate == null).FirstOrDefault();
-                project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectSitesCode(project);               
+                project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectSitesCode(project);
             }
 
             project.ProjectRight = new List<Data.Entities.ProjectRight.ProjectRight>();
@@ -472,7 +473,7 @@ namespace GSC.Respository.Master
         public int? GetParentProjectId(int id)
         {
             var childData = All.Where(x => x.Id == id).FirstOrDefault();
-           
+
             {
                 return childData.ParentProjectId;
             }
