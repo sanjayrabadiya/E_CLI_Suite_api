@@ -275,26 +275,27 @@ namespace GSC.Api.Controllers.Project.Schedule
                     TemplateName = x.ProjectDesignTemplate.TemplateName,
                     VariableName = x.ProjectDesignVariable.VariableName,
                     IsDeleted = x.DeletedDate != null,
-                    CreatedBy = x.CreatedBy,
-                    ModifiedBy = x.ModifiedBy,
-                    DeletedBy = x.DeletedBy,
-                    CreatedDate = x.CreatedDate,
-                    DeletedDate = x.DeletedDate,
-                    ModifiedDate = x.ModifiedDate,
+                    //CreatedBy = x.CreatedBy,
+                    //ModifiedBy = x.ModifiedBy,
+                    //DeletedBy = x.DeletedBy,
+                    //CreatedDate = x.CreatedDate,
+                    //DeletedDate = x.DeletedDate,
+                    //ModifiedDate = x.ModifiedDate,
                     IsLock = !x.ProjectDesign.IsUnderTesting,
                 }).OrderByDescending(x => x.Id).ToList();
-            projectSchedules.ForEach(b =>
-            {
-                //  b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.CreatedBy != null)
-                    b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
+            
+            //projectSchedules.ForEach(b =>
+            //{
+            //    //  b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+            //    if (b.CreatedBy != null)
+            //        b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+            //    if (b.ModifiedBy != null)
+            //        b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+            //    if (b.DeletedBy != null)
+            //        b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+            //    if (b.CompanyId != null)
+            //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            //});
             //return Ok(projectSchedules);
             return projectSchedules;
         }

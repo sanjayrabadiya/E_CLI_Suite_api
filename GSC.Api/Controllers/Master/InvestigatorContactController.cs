@@ -54,16 +54,16 @@ namespace GSC.Api.Controllers.Master
             var investigatorContactsDto = _mapper.Map<IEnumerable<InvestigatorContactDto>>(investigatorContacts);
             investigatorContactsDto.ForEach(b =>
             {
-                b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+                //b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
                 b.CityName = _cityRepository.Find((int)b.CityId).CityName;
                 b.StateName = _stateRepository.Find(b.City.StateId).StateName;
                 b.CountryName = _countryRepository.Find(b.City.State.CountryId).CountryName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+                //if (b.ModifiedBy != null)
+                //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+                //if (b.DeletedBy != null)
+                //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+                //if (b.CompanyId != null)
+                //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             });
             return Ok(investigatorContactsDto);
         }

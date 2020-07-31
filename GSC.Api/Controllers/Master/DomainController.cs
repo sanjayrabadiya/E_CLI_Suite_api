@@ -48,16 +48,17 @@ namespace GSC.Api.Controllers.Master
             var domains = _domainRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.DomainClass)
                 .OrderByDescending(x => x.Id).ToList();
             var domainsDto = _mapper.Map<IEnumerable<DomainDto>>(domains);
-            domainsDto.ForEach(b =>
-            {
-                b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
+
+            //domainsDto.ForEach(b =>
+            //{
+            //    b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
+            //    if (b.ModifiedBy != null)
+            //        b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+            //    if (b.DeletedBy != null)
+            //        b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+            //    if (b.CompanyId != null)
+            //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            //});
             return Ok(domainsDto);
 
             //var domains = _domainRepository.All.Where(x =>

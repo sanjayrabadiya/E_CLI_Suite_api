@@ -45,16 +45,17 @@ namespace GSC.Api.Controllers.Master
         {
             var documents = _documentRepository.FindBy(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
             var documentsDto = _mapper.Map<IEnumerable<DocumentTypeDto>>(documents).ToList();
-            documentsDto.ForEach(b =>
-            {
-                b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
+
+            //documentsDto.ForEach(b =>
+            //{
+            //    b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
+            //    if (b.ModifiedBy != null)
+            //        b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+            //    if (b.DeletedBy != null)
+            //        b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+            //    if (b.CompanyId != null)
+            //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            //});
 
             return Ok(documentsDto);
         }

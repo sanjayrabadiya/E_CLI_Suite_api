@@ -54,19 +54,19 @@ namespace GSC.Api.Controllers.Location
             var citys = _cityRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                , t => t.State, t => t.State.Country).OrderByDescending(x => x.Id).ToList();
             var cityAreasDto = _mapper.Map<IEnumerable<CityDto>>(citys);
-            cityAreasDto.ForEach(b =>
-            {
-                // b.StateName = _stateRepository.Find(b.StateId).StateName;
-                b.CountryName = _countryRepository.Find(b.State.CountryId).CountryName;
-                if (b.CreatedBy != null)
-                    b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
+            //cityAreasDto.ForEach(b =>
+            //{
+            //    // b.StateName = _stateRepository.Find(b.StateId).StateName;
+            //    b.CountryName = _countryRepository.Find(b.State.CountryId).CountryName;
+            //    if (b.CreatedBy != null)
+            //        b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+            //    if (b.ModifiedBy != null)
+            //        b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+            //    if (b.DeletedBy != null)
+            //        b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+            //    if (b.CompanyId != null)
+            //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            //});
             return Ok(cityAreasDto);
         }
 
