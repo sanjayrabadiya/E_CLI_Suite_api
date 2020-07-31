@@ -41,9 +41,9 @@ namespace GSC.Respository.Etmf
             // Level 4 : Zone Name
             // Level 5 : Section Name      Level 5.1 : Sub Section Name    Level 5.2 : Sub Section Artifact Name
             // Level 6 : Artifact Name     
-           
+
             var projectWorkplaces = Context.ProjectWorkplace.Where(t => t.DeletedBy == null && t.ProjectId == id)
-                            .Include(x => x.ProjectWorkplaceDetail )
+                            .Include(x => x.ProjectWorkplaceDetail)
                             .ThenInclude(x => x.ProjectWorkPlaceZone)
                             .ThenInclude(x => x.ProjectWorkplaceSection)
                             .ThenInclude(x => x.ProjectWorkplaceArtificate).AsNoTracking().ToList();
@@ -58,20 +58,25 @@ namespace GSC.Respository.Etmf
                 pvListObj.Level = 1;
                 pvListObj.Item = new List<TreeValue>();
                 pvListObj.ParentMasterId = b.ProjectId;
+                pvListObj.Icon = "folder";
+
                 TreeValue TrialFol = new TreeValue();
-                TrialFol.Id = 0;
+                TrialFol.Id = 11111111;
                 TrialFol.Text = "Trial";
                 TrialFol.Level = 2;
+                TrialFol.Icon = "folder";
 
                 TreeValue CountryFol = new TreeValue();
-                CountryFol.Id = 0;
+                CountryFol.Id = 11111112;
                 CountryFol.Text = "Country";
                 CountryFol.Level = 2;
+                CountryFol.Icon = "folder";
 
                 TreeValue SiteFol = new TreeValue();
-                SiteFol.Id = 0;
+                SiteFol.Id = 11111113;
                 SiteFol.Text = "Site";
                 SiteFol.Level = 2;
+                SiteFol.Icon = "folder";
 
                 CountryFol.Item = new List<TreeValue>();
                 SiteFol.Item = new List<TreeValue>();
@@ -80,11 +85,12 @@ namespace GSC.Respository.Etmf
                 {
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Item = new List<TreeValue>();
-                    pvListdetaiObj.Id = c.Id;
+                    pvListdetaiObj.Id = 22222222;
                     pvListdetaiObj.Text = c.ItemName;
                     pvListdetaiObj.Level = 3;
+                    pvListdetaiObj.Icon = "folder";
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
-                    foreach (var d in c.ProjectWorkPlaceZone.Where(x=>x.DeletedBy == null))
+                    foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                     {
                         d.EtmfZoneMasterLibrary = Context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
 
@@ -93,6 +99,7 @@ namespace GSC.Respository.Etmf
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
                         pvListZoneObj.Level = 4;
                         pvListZoneObj.ParentMasterId = b.ProjectId;
+                        pvListZoneObj.Icon = "folder";
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
@@ -105,6 +112,7 @@ namespace GSC.Respository.Etmf
                             pvListSectionObj.ZoneId = d.Id;
                             pvListSectionObj.CountryId = c.Id;
                             pvListSectionObj.ParentMasterId = b.ProjectId;
+                            pvListSectionObj.Icon = "folder";
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                             {
@@ -119,6 +127,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "audio";
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -127,11 +136,11 @@ namespace GSC.Respository.Etmf
                             var SectionData = Context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
                             foreach (var s in SectionData)
                             {
-                                 
+
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = s.Id;
                                 pvListArtificateObj.Text = s.SubSectionName;
-                                pvListArtificateObj.Level = 5.1 ;
+                                pvListArtificateObj.Level = 5.1;
 
                                 pvListArtificateObj.CountryId = c.Id;
                                 pvListArtificateObj.SiteId = 0;
@@ -139,7 +148,8 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.SubSectionId = s.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
-
+                                pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "folder";
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
                                 var artifactsubSectionData = Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                 foreach (var itemartifact in artifactsubSectionData)
@@ -154,6 +164,7 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SectionId = e.Id;
                                     pvListartifactsubsectionobj.SubSectionId = s.Id;
                                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
+                                    pvListartifactsubsectionobj.Icon = "audio";
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                 }
                                 pvListArtificateList.Add(pvListArtificateObj);
@@ -179,9 +190,10 @@ namespace GSC.Respository.Etmf
                 {
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Item = new List<TreeValue>();
-                    pvListdetaiObj.Id = c.Id;
+                    pvListdetaiObj.Id = 232323232;
                     pvListdetaiObj.Text = c.ItemName;
                     pvListdetaiObj.Level = 3;
+                    pvListdetaiObj.Icon = "folder";
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                     {
@@ -192,6 +204,7 @@ namespace GSC.Respository.Etmf
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
                         pvListZoneObj.Level = 4;
                         pvListZoneObj.ParentMasterId = b.ProjectId;
+                        pvListZoneObj.Icon = "folder";
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
@@ -204,6 +217,7 @@ namespace GSC.Respository.Etmf
                             pvListSectionObj.ZoneId = d.Id;
                             pvListSectionObj.SiteId = c.Id;
                             pvListSectionObj.ParentMasterId = b.ProjectId;
+                            pvListSectionObj.Icon = "folder";
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                             {
@@ -218,6 +232,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "audio";
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -237,7 +252,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
-
+                                pvListArtificateObj.Icon = "folder";
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
                                 var artifactsubSectionData = Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                 foreach (var itemartifact in artifactsubSectionData)
@@ -253,7 +268,9 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SectionId = e.Id;
                                     pvListartifactsubsectionobj.SubSectionId = s.Id;
                                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
+                                    pvListartifactsubsectionobj.Icon = "audio";
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
+                                    
                                 }
                                 pvListArtificateList.Add(pvListArtificateObj);
                                 pvListArtificateObj.Item = pvListartifactsubsectionList;
@@ -276,9 +293,10 @@ namespace GSC.Respository.Etmf
                 foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial && x.DeletedBy == null))
                 {
                     TreeValue pvListdetaiObj = new TreeValue();
-                    pvListdetaiObj.Id = c.Id;
+                    pvListdetaiObj.Id = 333333333;
                     pvListdetaiObj.Text = c.ItemName;
                     pvListdetaiObj.Level = 3;
+                    pvListdetaiObj.Icon = "folder";
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
 
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
@@ -290,6 +308,7 @@ namespace GSC.Respository.Etmf
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
                         pvListZoneObj.Level = 4;
                         pvListZoneObj.ParentMasterId = b.ProjectId;
+                        pvListZoneObj.Icon = "folder";
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
@@ -301,7 +320,7 @@ namespace GSC.Respository.Etmf
                             pvListSectionObj.Level = 5;
                             pvListSectionObj.ZoneId = d.Id;
                             pvListSectionObj.ParentMasterId = b.ProjectId;
-
+                            pvListSectionObj.Icon = "folder";
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                             {
@@ -316,6 +335,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "audio";
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -335,7 +355,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
-
+                                pvListArtificateObj.Icon = "folder";
                                 #region MyRegion
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
                                 var artifactsubSectionData = Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
@@ -351,6 +371,7 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SectionId = e.Id;
                                     pvListartifactsubsectionobj.SubSectionId = s.Id;
                                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
+                                    pvListartifactsubsectionobj.Icon = "audio";
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                 }
                                 #endregion
@@ -578,5 +599,7 @@ namespace GSC.Respository.Etmf
         public int ZoneId { get; set; }
         public int SectionId { get; set; }
         public int SubSectionId { get; set; }
+
+        public string Icon { get; set; }
     }
 }

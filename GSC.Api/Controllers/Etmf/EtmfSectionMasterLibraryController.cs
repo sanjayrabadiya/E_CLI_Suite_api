@@ -43,12 +43,11 @@ namespace GSC.Api.Controllers.Etmf
         [HttpPut]
         public IActionResult Put([FromBody] EtmfSectionMasterLibraryDto sectionMasterLibraryDto)
         {
-            if (sectionMasterLibraryDto.Id <= 0) return BadRequest();
 
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            var data = _etmfSectionMasterLibraryRepository.Find(sectionMasterLibraryDto.Id);
+            data.SectionName = sectionMasterLibraryDto.SectionName;
 
-            var sectionMasterLibrary = _mapper.Map<EtmfSectionMasterLibrary>(sectionMasterLibraryDto);
-            var validate = _etmfSectionMasterLibraryRepository.Duplicate(sectionMasterLibrary);
+            var validate = _etmfSectionMasterLibraryRepository.Duplicate(data);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
@@ -56,10 +55,10 @@ namespace GSC.Api.Controllers.Etmf
             }
 
             /* Added by swati for effective Date on 02-06-2019 */
-            _etmfSectionMasterLibraryRepository.Update(sectionMasterLibrary);
+            _etmfSectionMasterLibraryRepository.Update(data);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Drug failed on save.");
-            return Ok(sectionMasterLibrary.Id);
+            return Ok(data.Id);
         }
     }
 }

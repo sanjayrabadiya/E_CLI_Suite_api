@@ -61,8 +61,8 @@ namespace GSC.Api.Controllers.Etmf
         {
             var documentList = _projectWorkplaceSubSecArtificatedocumentRepository.FindByInclude(x => x.ProjectWorkplaceSubSectionArtifactId == id && x.DeletedDate == null, x => x.ProjectWorkplaceSubSectionArtifact)
                 .ToList()
-                .OrderByDescending(x=>x.Id);
-         
+                .OrderByDescending(x => x.Id);
+
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
             foreach (var item in documentList)
             {
@@ -71,14 +71,14 @@ namespace GSC.Api.Controllers.Etmf
                 obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceSubSectionArtifactId;
                 obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
                 obj.DocumentName = item.DocumentName;
-                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), item.DocPath, item.DocumentName);
+                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
                 obj.Level = 5.2;
                 dataList.Add(obj);
             }
             return Ok(dataList);
-             
+
         }
 
         [HttpPost]

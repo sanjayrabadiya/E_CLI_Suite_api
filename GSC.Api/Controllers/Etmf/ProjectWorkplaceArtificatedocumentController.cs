@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.Etmf
                 obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
                 obj.Artificatename = _etmfArtificateMasterLbraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId).ArtificateName;
                 obj.DocumentName = item.DocumentName;
-                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), item.DocPath, item.DocumentName);
+                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
                 obj.Level = 6;

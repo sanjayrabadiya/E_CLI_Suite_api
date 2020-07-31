@@ -111,22 +111,25 @@ namespace GSC.Api.Controllers.Etmf
         [HttpPut]
         public IActionResult Put([FromBody] EtmfZoneMasterLibraryDto etmfZoneMasterLibraryDto)
         {
-            if (etmfZoneMasterLibraryDto.Id <= 0) return BadRequest();
 
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            var data = _etmfZoneMasterLibraryRepository.Find(etmfZoneMasterLibraryDto.Id);
+            data.ZonName = etmfZoneMasterLibraryDto.ZonName;
+            //if (etmfZoneMasterLibraryDto.Id <= 0) return BadRequest();
 
-            var etmfZoneMasterLibrary = _mapper.Map<EtmfZoneMasterLibrary>(etmfZoneMasterLibraryDto);
-            var validate = _etmfZoneMasterLibraryRepository.Duplicate(etmfZoneMasterLibrary);
+            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            //var etmfZoneMasterLibrary = _mapper.Map<EtmfZoneMasterLibrary>(etmfZoneMasterLibraryDto);
+            var validate = _etmfZoneMasterLibraryRepository.Duplicate(data);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
 
-            _etmfZoneMasterLibraryRepository.Update(etmfZoneMasterLibrary);
+            _etmfZoneMasterLibraryRepository.Update(data);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Drug failed on save.");
-            return Ok(etmfZoneMasterLibrary.Id);
+            return Ok(data.Id);
         }
 
 
