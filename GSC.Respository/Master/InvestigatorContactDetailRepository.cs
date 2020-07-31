@@ -23,7 +23,7 @@ namespace GSC.Respository.Master
 
         public IList<InvestigatorContactDetailDto> GetContactList(int InvestigatorContactId)
         {
-            return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId && t.DeletedDate == null).Select(c =>
+            return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId).Select(c =>
                 new InvestigatorContactDetailDto
                 {
                     Id = c.Id,
@@ -47,7 +47,7 @@ namespace GSC.Respository.Master
 
         public IList<InvestigatorContactDetailDto> GetContactList(int projectId, bool isDeleted)
         {
-            return FindByInclude(t => t.InvestigatorContactId == projectId && isDeleted ? t.DeletedDate != null : t.DeletedDate == null).Select(c =>
+            return FindByInclude(t => (isDeleted ? t.DeletedDate != null : t.DeletedDate == null) && t.InvestigatorContactId == projectId).Select(c =>
      new InvestigatorContactDetailDto
      {
          Id = c.Id,

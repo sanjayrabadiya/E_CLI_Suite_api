@@ -20,9 +20,9 @@ IJwtTokenAccesser jwtTokenAccesser)
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
-        public IList<IecirbDto> GetIecirbList(int Id, bool isDeleted)
+        public IList<IecirbDto> GetIecirbList(int manageSiteId, bool isDeleted)
         {
-            return FindByInclude(t => t.ManageSiteId == Id && isDeleted ? t.DeletedDate != null : t.DeletedDate == null).Select(c =>
+            return FindByInclude(t => (isDeleted ? t.DeletedDate != null : t.DeletedDate == null) && t.ManageSiteId == manageSiteId).Select(c =>
                 new IecirbDto
                 {
                     Id = c.Id,

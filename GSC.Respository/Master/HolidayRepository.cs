@@ -23,7 +23,7 @@ IJwtTokenAccesser jwtTokenAccesser)
 
         public IList<HolidayDto> GetHolidayList(int InvestigatorContactId, bool isDeleted)
         {
-            return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId && isDeleted ? t.DeletedDate != null : t.DeletedDate == null).Select(c =>
+            return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId && (isDeleted ? t.DeletedDate != null : t.DeletedDate == null)).Select(c =>
                 new HolidayDto
                 {
                     Id = c.Id,
