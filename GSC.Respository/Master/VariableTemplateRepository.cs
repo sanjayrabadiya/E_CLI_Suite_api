@@ -26,7 +26,7 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode})
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode })
                 .OrderBy(o => o.Value).ToList();
         }
 
@@ -35,7 +35,7 @@ namespace GSC.Respository.Master
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null &&
                     x.DomainId == domainId)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode})
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode })
                 .OrderBy(o => o.Value).ToList();
         }
 
@@ -60,8 +60,7 @@ namespace GSC.Respository.Master
                 detail.Variable.Values = detail.Variable.Values.Where(t => t.DeletedDate == null).ToList();
                 detail.VariableCategoryName = detail.Variable.VariableCategoryId == null
                     ? ""
-                    : Context.VariableCategory.FirstOrDefault(t => t.Id == detail.Variable.VariableCategoryId)
-                        .CategoryName;
+                    : Context.VariableCategory.Where(t => t.Id == detail.Variable.VariableCategoryId).FirstOrDefault()?.CategoryName;
             });
 
             return template;

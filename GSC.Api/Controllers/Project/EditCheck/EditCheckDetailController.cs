@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.EditCheck;
 using GSC.Data.Entities.Project.EditCheck;
@@ -50,6 +51,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
 
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] EditCheckDetailDto editCheckDetailDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -88,6 +90,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
         }
 
         [HttpPut]
+        [TransactionRequired]
         public IActionResult Put([FromBody] EditCheckDetailDto editCheckDetailDto)
         {
             if (editCheckDetailDto.Id <= 0) return BadRequest();
@@ -116,6 +119,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
 
 
         [HttpDelete("{id}")]
+        [TransactionRequired]
         public ActionResult Delete(int id)
         {
             var record = _editCheckDetailRepository.Find(id);
@@ -128,6 +132,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
             _editCheckRepository.UpdateFormula(record.EditCheckId);
             return Ok();
         }
+
 
         [HttpPatch("{id}")]
         public ActionResult Active(int id)

@@ -291,30 +291,37 @@ namespace GSC.Respository.Screening
 
         public List<ScreeningTemplateDto> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel)
         {
-            return All.Where(s =>
-                   s.ScreeningEntryId == screeningEntryId && s.DeletedDate == null).Select(s =>
-                   new ScreeningTemplateDto
-                   {
-                       Id = s.Id,
-                       ScreeningEntryId = s.ScreeningEntryId,
-                       ProjectDesignTemplateId = s.ProjectDesignTemplateId,
-                       Status = s.Status,
-                       ProjectDesignVisitId = s.ProjectDesignTemplate.ProjectDesignVisitId,
-                       ProjectDesignTemplateName = s.ProjectDesignTemplate.TemplateName,
-                       DesignOrder = Convert.ToDecimal(s.ProjectDesignTemplate.DesignOrder + Convert.ToString(s.RepeatSeqNo == null ? "" : ("." + s.RepeatSeqNo.ToString()))),
-                       IsVisitRepeated = s.RepeatedVisit != null ? false :
-                           workFlowLevel.LevelNo >= 0 && s.ProjectDesignVisit.IsRepeated ? workFlowLevel.IsStartTemplate :
-                           s.ProjectDesignVisit.IsRepeated,
-                       ProjectDesignVisitName = s.ProjectDesignTemplate.ProjectDesignVisit.DisplayName +
-                                                Convert.ToString(s.RepeatedVisit == null ? "" : "_" + s.RepeatedVisit),
-                       StatusName = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = s.ReviewLevel, Status = s.Status }, workFlowLevel.LevelNo == s.ReviewLevel, workFlowLevel),
-                       Progress = s.Progress ?? 0,
-                       ReviewLevel = s.ReviewLevel,
-                       IsLocked = s.IsLocked,
-                       MyReview = workFlowLevel.LevelNo == s.ReviewLevel,
-                       ParentId = s.ParentId,
-                       TemplateQueryStatus = _screeningTemplateValueRepository.GetQueryStatusByModel(templateValues, s.Id),
-                   }).ToList().OrderBy(o => o.ProjectDesignVisitId).ThenBy(t => t.DesignOrder).ToList();
+            var result = All.Where(s =>
+                    s.ScreeningEntryId == screeningEntryId && s.DeletedDate == null).Select(s =>
+                    new ScreeningTemplateDto
+                    {
+                        Id = s.Id,
+                        ScreeningEntryId = s.ScreeningEntryId,
+                        ProjectDesignTemplateId = s.ProjectDesignTemplateId,
+                        Status = s.Status,
+                        ProjectDesignVisitId = s.ProjectDesignTemplate.ProjectDesignVisitId,
+                        ProjectDesignTemplateName = s.ProjectDesignTemplate.TemplateName,
+                        DesignOrder = s.RepeatSeqNo == null ? s.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(s.ProjectDesignTemplate.DesignOrder.ToString() + "." + s.RepeatSeqNo.Value.ToString()),
+                        IsVisitRepeated = s.RepeatedVisit != null ? false :
+                            workFlowLevel.LevelNo >= 0 && s.ProjectDesignVisit.IsRepeated ? workFlowLevel.IsStartTemplate :
+                            s.ProjectDesignVisit.IsRepeated,
+                        ProjectDesignVisitName = s.ProjectDesignTemplate.ProjectDesignVisit.DisplayName +
+                                                 Convert.ToString(s.RepeatedVisit == null ? "" : "_" + s.RepeatedVisit),
+                        Progress = s.Progress ?? 0,
+                        ReviewLevel = s.ReviewLevel,
+                        IsLocked = s.IsLocked,
+                        MyReview = workFlowLevel.LevelNo == s.ReviewLevel,
+                        ParentId = s.ParentId
+                    }).ToList().OrderBy(o => o.ProjectDesignVisitId).ThenBy(t => t.DesignOrder).ToList();
+
+
+            result.ForEach(s =>
+            {
+                s.StatusName = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = s.ReviewLevel, Status = s.Status }, workFlowLevel.LevelNo == s.ReviewLevel, workFlowLevel);
+                s.TemplateQueryStatus = _screeningTemplateValueRepository.GetQueryStatusByModel(templateValues, s.Id);
+            });
+
+            return result;
         }
 
         public List<MyReviewDto> GetScreeningTemplateReview()

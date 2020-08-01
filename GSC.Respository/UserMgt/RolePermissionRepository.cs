@@ -75,8 +75,8 @@ namespace GSC.Respository.UserMgt
             permissions.ForEach(t =>
             {
                 t.UserRoleId = roleId;
-                var p = Context.RolePermission.FirstOrDefault(s =>
-                    s.ScreenCode == t.ScreenCode && s.UserRoleId == roleId);
+                var p = Context.RolePermission.Where(s =>
+                    s.ScreenCode == t.ScreenCode && s.UserRoleId == roleId).FirstOrDefault();
                 if (p == null) return;
                 t.IsAdd = p.IsAdd;
                 t.RolePermissionId = p.Id;

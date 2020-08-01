@@ -101,10 +101,10 @@ namespace GSC.Respository.Project.Workflow
                     SelfCorrection = false
                 };
 
-            var independent = _context.ProjectWorkflowIndependent.FirstOrDefault(x => x.ProjectWorkflowId == project.Id
+            var independent = _context.ProjectWorkflowIndependent.Where(x => x.ProjectWorkflowId == project.Id
                                                                                       && x.SecurityRoleId ==
                                                                                       _jwtTokenAccesser.RoleId
-                                                                                      && x.DeletedDate == null);
+                                                                                      && x.DeletedDate == null).FirstOrDefault();
 
             levelNo = 0;
             if (independent != null)
@@ -119,10 +119,10 @@ namespace GSC.Respository.Project.Workflow
                     IsGenerateQuery = independent.IsGenerateQuery
                 };
 
-            var level = _context.ProjectWorkflowLevel.FirstOrDefault(x => x.ProjectWorkflowId == project.Id
+            var level = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == project.Id
                                                                           && x.SecurityRoleId ==
                                                                           _jwtTokenAccesser.RoleId
-                                                                          && x.DeletedDate == null);
+                                                                          && x.DeletedDate == null).FirstOrDefault();
 
             int totalLevel = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == project.Id
                                                                       && x.DeletedDate == null).Max(x => x.LevelNo);

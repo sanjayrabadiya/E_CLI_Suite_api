@@ -44,7 +44,6 @@ namespace GSC.Data.Entities.UserMgt
         public string Phone { get; set; }
 
         public int DepartmentId { get; set; }
-        public int? ProjectId { get; set; }
 
         public DateTime? ValidFrom
         {
@@ -86,8 +85,6 @@ namespace GSC.Data.Entities.UserMgt
         public string RoleTokenId { get; set; }
 
         public bool IsPowerAdmin { get; set; }
-
-        [NotMapped] public string FullName => FirstName + " " + MiddleName + " " + LastName;
 
         public string Note { get; set; }
 

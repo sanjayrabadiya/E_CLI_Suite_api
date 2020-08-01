@@ -60,7 +60,6 @@ namespace GSC.Respository.UserMgt
                 UserName = t.UserName,
                 IsLocked = t.IsLocked,
                 IsDeleted = t.DeletedDate != null,
-                ProjectName = this.Context.Project.FirstOrDefault(b => b.Id == t.ProjectId).ProjectName,
                 Role = string.Join(", ",
                     t.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
             }).OrderByDescending(x => x.Id).ToList();

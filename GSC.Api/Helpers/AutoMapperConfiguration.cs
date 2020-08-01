@@ -39,6 +39,7 @@ using GSC.Data.Entities.ProjectRight;
 using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
+using System.Linq;
 
 namespace GSC.Api.Helpers
 {
@@ -129,6 +130,11 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectDesignPeriod, ProjectDesignPeriodDto>().ReverseMap();
             CreateMap<ProjectDesignVisit, ProjectDesignVisitDto>().ReverseMap();
             CreateMap<ProjectDesignTemplate, ProjectDesignTemplateDto>().ReverseMap();
+            CreateMap<ProjectDesignVariable, DesignScreeningVariableDto>()
+           .ForMember(x => x.UnitName, opt => opt.MapFrom(y => y.Unit.UnitName))
+           .ForMember(x => x.ProjectDesignVariableId, opt => opt.MapFrom(y => y.Id))
+           .ForMember(x => x.VariableCategoryName, opt => opt.MapFrom(y => y.VariableCategory.CategoryName ?? ""));
+            CreateMap<ProjectDesignVariableValue, ScreeningVariableValueDto>().ReverseMap();
             CreateMap<ProjectDesignVariable, ProjectDesignVariableDto>().ReverseMap();
             CreateMap<ProjectDesignVariableValue, ProjectDesignVariableValueDto>().ReverseMap();
             CreateMap<ProjectDesignVariableValue, ProjectDesignVariableValueDropDown>().ReverseMap();
@@ -165,6 +171,9 @@ namespace GSC.Api.Helpers
             CreateMap<ScreeningEntry, ScreeningEntryDto>().ReverseMap();
             CreateMap<ScreeningTemplate, ScreeningTemplateDto>().ReverseMap();
             CreateMap<ScreeningTemplateValue, ScreeningTemplateValueDto>().ReverseMap();
+            CreateMap<ScreeningTemplateValue, Data.Dto.Screening.ScreeningTemplateValueBasic>()
+               .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Comments.Any()));
+
             CreateMap<ScreeningTemplateValueEditCheck, ScreeningTemplateValueEditCheckDto>().ReverseMap();
             CreateMap<ScreeningTemplateValueSchedule, ScreeningTemplateValueScheduleDto>().ReverseMap();
             CreateMap<ScreeningTemplateValueAudit, ScreeningTemplateValueAuditDto>().ReverseMap();

@@ -3,9 +3,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Custom;
 using GSC.Domain.Context;
 using GSC.Helper;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 
 
@@ -53,7 +51,7 @@ namespace GSC.Respository.Screening
 
                 SELECT ((@ScreeningCnt * 100) / @TotalCnt) AS Cnt";
 
-            var result = _uow.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).FirstOrDefault();
+            var result = _uow.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).ToList().FirstOrDefault();
 
             if (result != null)
                 return result.Cnt;
@@ -87,7 +85,7 @@ namespace GSC.Respository.Screening
 
                 SELECT ((@ScreeningCnt * 100) / @TotalCnt) AS Cnt";
 
-            var result = _uow.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).FirstOrDefault();
+            var result = _uow.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).ToList().FirstOrDefault();
 
             if (result != null)
                 return result.Cnt;

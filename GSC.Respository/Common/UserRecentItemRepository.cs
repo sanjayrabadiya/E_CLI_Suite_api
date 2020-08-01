@@ -71,7 +71,7 @@ namespace GSC.Respository.Common
             var result = Context.AppScreen.Where(x => x.ScreenCode == urlName).FirstOrDefault();
             if (result != null)
             {
-                var parent = Context.AppScreen.FirstOrDefault(x => x.Id == result.ParentAppScreenId)?.IconPath;
+                var parent = Context.AppScreen.Where(x => x.Id == result.ParentAppScreenId).FirstOrDefault()?.IconPath;
                 var finalResult = new ScreenModal {IconPath = parent + "small", UrlName = result.UrlName};
                 return finalResult;
             }
