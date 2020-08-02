@@ -302,9 +302,9 @@ namespace GSC.Api.Controllers.Project.Design
             if (id <= 0) return BadRequest();
             var designTemplate = _projectDesignTemplateRepository.GetTemplate(id);
 
-            var designTemplateDto = _mapper.Map<ProjectDesignTemplateDto>(designTemplate);
+           // var designTemplateDto = _mapper.Map<ProjectDesignTemplate>(designTemplate);
 
-            return Ok(designTemplateDto);
+            return Ok(designTemplate);
         }
 
         [HttpGet]
