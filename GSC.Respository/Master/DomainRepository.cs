@@ -46,12 +46,13 @@ namespace GSC.Respository.Master
                 Id = c.Id,
                 DomainCode = c.DomainCode,
                 DomainName = c.DomainName,
+                IsDeleted = c.DeletedDate != null,
                 DomainClassName = c.DomainClass.DomainClassName,
                 CreatedByUser = c.CreatedByUser.UserName,
                 DeletedByUser = c.DeletedByUser.UserName,
                 ModifiedByUser = c.ModifiedByUser.UserName,
-                CreatedDate =c.CreatedDate,
-                ModifiedDate=c.ModifiedDate
+                CreatedDate = c.CreatedDate,
+                ModifiedDate = c.ModifiedDate
 
             }).OrderByDescending(x => x.Id).ToList();
 
