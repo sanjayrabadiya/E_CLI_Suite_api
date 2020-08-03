@@ -41,35 +41,14 @@ namespace GSC.Api.Controllers.Master
             _projectDesignRepository = projectDesignRepository;
         }
 
-        // GET: api/<controller>
+
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var domains = _domainRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.DomainClass)
-                .OrderByDescending(x => x.Id).ToList();
-            var domainsDto = _mapper.Map<IEnumerable<DomainDto>>(domains);
+            var domains = _domainRepository.GetDomainList(isDeleted);
 
-            //domainsDto.ForEach(b =>
-            //{
-            //    b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-            //    if (b.ModifiedBy != null)
-            //        b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-            //    if (b.DeletedBy != null)
-            //        b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-            //    if (b.CompanyId != null)
-            //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            //});
-            return Ok(domainsDto);
+            return Ok(domains);
 
-            //var domains = _domainRepository.All.Where(x =>
-            //    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-            //    && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
-            //).ToList();
-            //var domainsDto = _mapper.Map<IEnumerable<DomainDto>>(domains);
-            //domainsDto.ForEach(t => t.DomainClassName = t.DomainClassName);
-            //return Ok(domainsDto);
-
-            //return Ok(_domainRepository.GetDomainAll(isDeleted));
         }
 
 

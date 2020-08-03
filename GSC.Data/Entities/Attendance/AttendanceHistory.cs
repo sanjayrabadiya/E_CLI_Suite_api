@@ -13,9 +13,7 @@ namespace GSC.Data.Entities.Attendance
         public int RoleId { get; set; }
         public AuditReason AuditReason { get; set; }
 
-        [ForeignKey("CreatedBy")] public User CreatedByUser { get; set; }
-
-        [ForeignKey("RoleId")] public SecurityRole Role { get; set; }
+         [ForeignKey("RoleId")] public SecurityRole Role { get; set; }
 
         public Attendance Attendance { get; set; }
         public string IpAddress { get; set; }

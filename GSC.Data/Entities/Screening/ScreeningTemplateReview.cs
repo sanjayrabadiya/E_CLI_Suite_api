@@ -13,8 +13,6 @@ namespace GSC.Data.Entities.Screening
         public short ReviewLevel { get; set; }
         public bool IsRepeat { get; set; }
 
-        [ForeignKey("CreatedBy")] public User CreatedByUser { get; set; }
-
 
         [ForeignKey("RoleId")] public SecurityRole Role { get; set; }
     }

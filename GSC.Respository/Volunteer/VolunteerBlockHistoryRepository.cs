@@ -20,7 +20,7 @@ namespace GSC.Respository.Volunteer
 
         public IList<VolunteerBlockHistoryDto> GetVolunteerBlockHistoryById(int volunteerId)
         {
-            return FindByInclude(x => x.DeletedDate == null && x.VolunteerId == volunteerId, x => x.User,
+            return FindByInclude(x => x.DeletedDate == null && x.VolunteerId == volunteerId, x => x.CreatedByUser,
                 x => x.BlockCategory).Select(
                 c => new VolunteerBlockHistoryDto
                 {
@@ -29,7 +29,7 @@ namespace GSC.Respository.Volunteer
                     PermanentlyString = c.IsPermanently ? "Yes" : "No",
                     BlockString = c.IsBlock ? "Yes" : "No",
                     Note = c.Note,
-                    UserName = c.User.UserName,
+                    UserName = c.CreatedByUser.UserName,
                     BlockDate = c.CreatedDate,
                     CategoryName = c.BlockCategory.BlockCategoryName
                 }).OrderByDescending(i => i.BlockDate).ToList();

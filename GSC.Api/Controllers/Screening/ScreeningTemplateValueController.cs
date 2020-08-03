@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
@@ -51,6 +52,7 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] ScreeningTemplateValueDto screeningTemplateValueDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -90,6 +92,7 @@ namespace GSC.Api.Controllers.Screening
 
 
         [HttpPut]
+        [TransactionRequired]
         public IActionResult Put([FromBody] ScreeningTemplateValueDto screeningTemplateValueDto)
         {
             if (screeningTemplateValueDto.Id <= 0) return BadRequest();

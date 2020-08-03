@@ -11,5 +11,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetDomainDropDown();
         List<DomainDto> GetDomainAll(bool isDeleted);
         List<DropDownDto> GetDomainByProjectDesignDropDown(int projectDesignId);
+        List<DomainGridDto> GetDomainList(bool isDeleted);
     }
 }

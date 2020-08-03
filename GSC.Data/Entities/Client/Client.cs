@@ -13,6 +13,7 @@ namespace GSC.Data.Entities.Client
         public int? CompanyId { get; set; }
         public int? UserId { get; set; }
         public int? RoleId { get; set; }
+        [ForeignKey("UserId")]
         public User User { get; set; }
         public string Logo { get; set; }
 

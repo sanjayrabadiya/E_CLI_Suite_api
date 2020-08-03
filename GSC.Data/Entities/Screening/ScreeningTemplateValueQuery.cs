@@ -20,8 +20,6 @@ namespace GSC.Data.Entities.Screening
         public short QueryLevel { get; set; }
         public string Note { get; set; }
 
-        [ForeignKey("CreatedBy")] public User CreatedByUser { get; set; }
-
         public string OldValue { get; set; }
         public int? UserRoleId { get; set; }
         public bool IsSystem { get; set; }

@@ -34,8 +34,27 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.DomainName, Code = c.DomainCode, IsDeleted = c.DeletedDate != null })
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.DomainName, Code = c.DomainCode, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
+        }
+
+
+        public List<DomainGridDto> GetDomainList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).Select(c => new DomainGridDto
+            {
+                Id = c.Id,
+                DomainCode = c.DomainCode,
+                DomainName = c.DomainName,
+                DomainClassName = c.DomainClass.DomainClassName,
+                CreatedByUser = c.CreatedByUser.UserName,
+                DeletedByUser = c.DeletedByUser.UserName,
+                ModifiedByUser = c.ModifiedByUser.UserName,
+                CreatedDate =c.CreatedDate,
+                ModifiedDate=c.ModifiedDate
+
+            }).OrderByDescending(x => x.Id).ToList();
+
         }
 
 
@@ -53,7 +72,7 @@ namespace GSC.Respository.Master
                                                                                                       && r
                                                                                                           .DeletedDate ==
                                                                                                       null))
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.DomainName, Code = c.DomainCode})
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.DomainName, Code = c.DomainCode })
                 .OrderBy(o => o.Value).ToList();
         }
 

@@ -11,8 +11,6 @@ namespace GSC.Data.Entities.Screening
         public string Comment { get; set; }
         public ScreeningTemplateValue ScreeningTemplateValue { get; set; }
 
-        [ForeignKey("CreatedBy")] public User CreatedByUser { get; set; }
-
         [ForeignKey("RoleId")] public SecurityRole Role { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
@@ -15,6 +16,7 @@ namespace GSC.Data.Entities.ProjectRight
         public string ReviewNote { get; set; }
         public Master.Project Project { get; set; }
         public ProjectDocument ProjectDocument { get; set; }
+        [ForeignKey("UserId")]
         public User User { get; set; }
         public TrainigType? TrainingType { get; set; }
         public int? TrainerId { get; set; }

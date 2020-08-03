@@ -30,8 +30,6 @@ namespace GSC.Data.Entities.Volunteer
             set => _ToDate = value.UtcDate();
         }
 
-        [ForeignKey("CreatedBy")] public User User { get; set; }
-
         public BlockCategory BlockCategory { get; set; }
 
         public string Note { get; set; }

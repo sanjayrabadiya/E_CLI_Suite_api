@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
@@ -30,6 +31,7 @@ namespace GSC.Data.Entities.LogReport
 
         public bool IsSessionOut { get; set; }
         public string IpAddress { get; set; }
+        [ForeignKey("UserId")]
         public User user { get; set; }
     }
 }

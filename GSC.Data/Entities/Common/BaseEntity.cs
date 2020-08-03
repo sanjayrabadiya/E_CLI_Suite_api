@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.Common
@@ -36,12 +37,24 @@ namespace GSC.Data.Entities.Common
 
         public int? DeletedBy { get; set; }
 
-        [NotMapped] public ObjectState ObjectState { get; set; }
+        [NotMapped] 
+        public ObjectState ObjectState { get; set; }
 
         [NotMapped] 
         public bool InActiveRecord { get; set; }
 
 
-        [NotMapped] public AuditAction AuditAction { get; set; }
+        [NotMapped] 
+        public AuditAction AuditAction { get; set; }
+
+        [ForeignKey("CreatedBy")]
+        public UserAduit CreatedByUser { get; set; }
+
+        [ForeignKey("DeletedBy")]
+        public UserAduit DeletedByUser { get; set; }
+
+
+        [ForeignKey("ModifiedBy")]
+        public UserAduit ModifiedByUser { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.UserMgt;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.ProjectRight
 {
@@ -10,6 +11,7 @@ namespace GSC.Data.Entities.ProjectRight
         public int RoleId { get; set; }
         public bool IsPrimary { get; set; }
         public bool IsTrainingRequired { get; set; }
+        [ForeignKey("UserId")]
         public User User { get; set; }
         public bool IsReviewDone { get; set; }
         public Master.Project project { get; set; }

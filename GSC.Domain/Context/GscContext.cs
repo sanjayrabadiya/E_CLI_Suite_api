@@ -98,6 +98,7 @@ namespace GSC.Domain.Context
         public DbSet<RefreshToken> RefreshToken { get; set; }
         public DbSet<UserRole> UserRole { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<UserAduit> UserAduit { get; set; }
         public DbSet<VariableGroup> VariableGroup { get; set; }
         public DbSet<Volunteer> Volunteer { get; set; }
         public DbSet<VolunteerAddress> VolunteerAddress { get; set; }
@@ -107,7 +108,6 @@ namespace GSC.Domain.Context
         public DbSet<VolunteerFood> VolunteerFood { get; set; }
         public DbSet<VolunteerHistory> VolunteerHistory { get; set; }
         public DbSet<VolunteerLanguage> VolunteerLanguage { get; set; }
-        public DbSet<Audit> Audits { get; set; }
         public DbSet<LoginPreference> LoginPreference { get; set; }
         public DbSet<EmailTemplate> EmailTemplate { get; set; }
         public DbSet<VolunteerImage> VolunteerImage { get; set; }

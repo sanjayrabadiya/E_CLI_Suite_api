@@ -71,6 +71,7 @@ namespace GSC.Api.Helpers
 
 
             CreateMap<Data.Entities.Master.Domain, DomainDto>().ReverseMap();
+
             CreateMap<ContactType, ContactTypeDto>().ReverseMap();
             CreateMap<NoneRegister, NoneRegisterDto>().ReverseMap();
             CreateMap<Department, DepartmentDto>().ReverseMap();
@@ -196,7 +197,6 @@ namespace GSC.Api.Helpers
             CreateMap<PharmacyTemplateValueAudit, PharmacyTemplateValueAuditDto>().ReverseMap();
             CreateMap<PharmacyTemplateValueChild, PharmacyTemplateValueChildDto>().ReverseMap();
             CreateMap<PharmacyEntry, PharmacyEntryDto>().ReverseMap();
-            //CreateMap<PharmacyTemplate, PharmacyTemplateDto>().ReverseMap();
             CreateMap<BarcodeConfig, BarcodeConfigDto>().ReverseMap();
             CreateMap<ProjectSubject, ProjectSubject>().ReverseMap();
             CreateMap<BarcodeGenerate, BarcodeGenerateDto>().ReverseMap();

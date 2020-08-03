@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
@@ -30,6 +31,7 @@ namespace GSC.Data.Entities.Attendance
         public int UserId { get; set; }
         public Volunteer.Volunteer Volunteer { get; set; }
         public Master.Project Project { get; set; }
+        [ForeignKey("UserId")]
         public User User { get; set; }
         public ProjectDesignPeriod ProjectDesignPeriod { get; set; }
         public AuditReason AuditReason { get; set; }
