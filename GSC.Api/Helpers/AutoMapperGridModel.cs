@@ -15,6 +15,7 @@ namespace GSC.Api.Helpers
         {
             CreateMap<BaseEntity, BaseAuditDto>()
             .ForMember(x => x.CreatedByUser, y => y.MapFrom(a => a.CreatedByUser.UserName))
+            .ForMember(x => x.IsDeleted, y => y.MapFrom(a => a.DeletedDate != null))
             .ForMember(x => x.DeletedByUser, y => y.MapFrom(a => a.DeletedByUser.UserName))
             .ForMember(x => x.ModifiedByUser, y => y.MapFrom(a => a.ModifiedByUser.UserName)).IncludeAllDerived();
 
