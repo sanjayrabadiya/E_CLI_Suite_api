@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -12,12 +14,14 @@ namespace GSC.Respository.Master
     public class DomainClassRepository : GenericRespository<DomainClass, GscContext>, IDomainClassRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
+        private readonly IMapper _mapper;
         public DomainClassRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
 
@@ -33,6 +37,14 @@ namespace GSC.Respository.Master
                 return "Duplicate Domain Class Name : " + objSave.DomainClassName;
 
             return "";
+        }
+
+        public List<DomainClassGridDto> GetDomainClassList(bool isDeleted)
+        {
+
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<DomainClassGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
         }
 
         public List<DropDownDto> GetDomainClassDropDown()

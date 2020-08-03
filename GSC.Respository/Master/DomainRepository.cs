@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -11,12 +13,14 @@ namespace GSC.Respository.Master
     public class DomainRepository : GenericRespository<Data.Entities.Master.Domain, GscContext>, IDomainRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
+        private readonly IMapper _mapper;
         public DomainRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public string ValidateDomain(Data.Entities.Master.Domain objSave)
@@ -41,20 +45,9 @@ namespace GSC.Respository.Master
 
         public List<DomainGridDto> GetDomainList(bool isDeleted)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).Select(c => new DomainGridDto
-            {
-                Id = c.Id,
-                DomainCode = c.DomainCode,
-                DomainName = c.DomainName,
-                IsDeleted = c.DeletedDate != null,
-                DomainClassName = c.DomainClass.DomainClassName,
-                CreatedByUser = c.CreatedByUser.UserName,
-                DeletedByUser = c.DeletedByUser.UserName,
-                ModifiedByUser = c.ModifiedByUser.UserName,
-                CreatedDate = c.CreatedDate,
-                ModifiedDate = c.ModifiedDate
-
-            }).OrderByDescending(x => x.Id).ToList();
+         
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<DomainGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
         }
 

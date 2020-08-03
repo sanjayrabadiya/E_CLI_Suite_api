@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         string ValidateDomainClass(DomainClass objSave);
         List<DropDownDto> GetDomainClassDropDown();
+        List<DomainClassGridDto> GetDomainClassList(bool isDeleted);
     }
 }
