@@ -626,7 +626,7 @@ namespace GSC.Respository.Master
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<ProjectDto>();
 
-            var projects = FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ParentProjectId == projectId
+            var projects = FindBy(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ParentProjectId == projectId
                 && projectList.Any(c => c == x.Id)
             ).Select(x => new ProjectDto
             {
@@ -663,7 +663,7 @@ namespace GSC.Respository.Master
                 DeletedDate = x.DeletedDate,
                 ModifiedBy = x.ModifiedBy,
                 DeletedBy = x.DeletedBy,
-                IsDeleted = x.DeletedDate != null,
+                IsDeleted = isDeleted,
                 AttendanceLimit = x.AttendanceLimit
             }).OrderByDescending(x => x.Id).ToList();
             foreach (var b in projects)
