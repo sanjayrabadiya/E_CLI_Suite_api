@@ -164,10 +164,11 @@ namespace GSC.Api.Controllers.Project.Design
 
         private void UpdateVariableValues(ProjectDesignVariable variable)
         {
-            var deleteValues = _projectDesignVariableValueRepository.FindBy(x =>
-                x.ProjectDesignVariableId == variable.Id
-                && !variable.Values.Any(c => c.Id == x.Id)).ToList();
-            foreach (var value in deleteValues)
+            var data = _projectDesignVariableValueRepository.FindBy(x =>
+                x.ProjectDesignVariableId == variable.Id).ToList(); //&& !variable.Values.Any(c => c.Id == x.Id)).ToList();
+            var deletevalues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+                //!variable.Values.Any(c => c.Id == x.Id)).ToList();
+            foreach (var value in deletevalues)
                 //value.DeletedDate = DateTime.Now;
                 //_projectDesignVariableValueRepository.Update(value);
 
