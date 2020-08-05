@@ -2,10 +2,12 @@
 using GSC.Data.Dto.Client;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Medra;
 using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
+using GSC.Data.Entities.Medra;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,6 +59,10 @@ namespace GSC.Api.Helpers
             CreateMap<ScopeName, ScopeNameGridDto>().ReverseMap();
             CreateMap<Client, ClientGridDto>().ReverseMap();
             CreateMap<DesignTrial, DesignTrialGridDto>().ReverseMap();
+            CreateMap<VariableCategory, VariableCategoryGridDto>().ReverseMap();
+            CreateMap<MedraVersion, MedraVersionGridDto>().ReverseMap();
+            CreateMap<MedraLanguage, MedraLanguageGridDto>().ReverseMap();
+            CreateMap<Variable, VariableGridDto>().ReverseMap();
 
         }
     }

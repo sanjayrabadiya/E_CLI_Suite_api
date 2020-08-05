@@ -10,5 +10,6 @@ namespace GSC.Respository.Medra
     {
         string Duplicate(MedraVersion objSave);
         List<DropDownDto> GetMedraVersionDropDown();
+        List<MedraVersionGridDto> GetMedraVersionList(bool isDeleted);
     }
 }

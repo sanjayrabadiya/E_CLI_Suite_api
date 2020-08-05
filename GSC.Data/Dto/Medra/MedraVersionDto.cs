@@ -28,4 +28,13 @@ namespace GSC.Data.Dto.Medra
         //public string CompanyName { get; set; }
 
     }
+
+    public class MedraVersionGridDto : BaseAuditDto
+    {
+        public int DictionaryId { get; set; }
+        public string Version { get; set; }
+        public string Description { get; set; }
+        public string DictionaryName { get; set; }
+        public Dictionary Dictionary { get; set; }
+    }
 }

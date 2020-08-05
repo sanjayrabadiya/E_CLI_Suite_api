@@ -47,9 +47,11 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var variables = _variableRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var variablesDto = _mapper.Map<IEnumerable<VariableDto>>(variables);
+            var variables = _variableRepository.GetVariableList(isDeleted);
+            return Ok(variables);
+            //var variables = _variableRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var variablesDto = _mapper.Map<IEnumerable<VariableDto>>(variables);
             //variablesDto.ForEach(b =>
             //{
             //    if (b.CreatedBy != null)
@@ -61,7 +63,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(variablesDto);
+            //return Ok(variablesDto);
         }
 
 

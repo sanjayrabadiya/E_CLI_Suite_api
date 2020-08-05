@@ -1,4 +1,6 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Medra;
@@ -17,10 +19,14 @@ namespace GSC.Respository.Medra
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MedraVersionRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
+        private readonly IMapper _mapper;
+        public MedraVersionRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, 
+            IPropertyMappingService propertyMappingService,
+            IMapper mapper) : base(uow, jwtTokenAccesser)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public string Duplicate(MedraVersion objSave)
@@ -37,6 +43,12 @@ namespace GSC.Respository.Medra
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.Dictionary.DictionaryName + "-" + c.Version }).OrderBy(o => o.Value).ToList();
+        }
+
+        public List<MedraVersionGridDto> GetMedraVersionList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<MedraVersionGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

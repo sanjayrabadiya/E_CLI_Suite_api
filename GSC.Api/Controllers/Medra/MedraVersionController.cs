@@ -50,8 +50,15 @@ namespace GSC.Api.Controllers.Medra
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var medra = _medraVersionRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Dictionary).OrderByDescending(x => x.Id).ToList();
-            var medraDto = _mapper.Map<IEnumerable<MedraVersionDto>>(medra).ToList();
+            var medraversion = _medraVersionRepository.GetMedraVersionList(isDeleted);
+            medraversion.ForEach(b =>
+            {
+                b.Dictionary = _dictionaryRepository.Find(b.DictionaryId);
+                b.DictionaryName = _dictionaryRepository.Find(b.DictionaryId).DictionaryName;
+            });
+            return Ok(medraversion);
+            //var medra = _medraVersionRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Dictionary).OrderByDescending(x => x.Id).ToList();
+            //var medraDto = _mapper.Map<IEnumerable<MedraVersionDto>>(medra).ToList();
 
             //medraDto.ForEach(b =>
             //{
@@ -65,7 +72,7 @@ namespace GSC.Api.Controllers.Medra
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
 
-            return Ok(medraDto);
+            //return Ok(medraDto);
         }
 
 

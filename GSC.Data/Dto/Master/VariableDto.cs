@@ -68,4 +68,17 @@ namespace GSC.Data.Dto.Master
         public string DeletedByUser { get; set; }
         public string ModifiedByUser { get; set; }
     }
+
+    public class VariableGridDto : BaseAuditDto
+    {
+        public string VariableName { get; set; }
+        public string VariableCode { get; set; }
+        public string VariableAlias { get; set; }
+        public int? AnnotationTypeId { get; set; }
+        public string Annotation { get; set; }
+        public string CollectionAnnotation { get; set; }
+        public string DefaultValue { get; set; }
+        public string LowRangeValue { get; set; }
+        public string HighRangeValue { get; set; }
+    }
 }

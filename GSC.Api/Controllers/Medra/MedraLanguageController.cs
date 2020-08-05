@@ -61,9 +61,11 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var language = _medraLanguageRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-           
-            var languages = _mapper.Map<IEnumerable<MedraLanguageDto>>(language).ToList();
+            var languages = _medraLanguageRepository.GetMedraLanguageList(isDeleted);
+            return Ok(languages);
+            //var language = _medraLanguageRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+
+            //var languages = _mapper.Map<IEnumerable<MedraLanguageDto>>(language).ToList();
             //languages.ForEach(b =>
             //{
             //    b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
@@ -75,7 +77,7 @@ namespace GSC.Api.Controllers.Master
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
 
-            return Ok(languages);
+            //return Ok(languages);
         }
 
         [HttpGet("{id}")]

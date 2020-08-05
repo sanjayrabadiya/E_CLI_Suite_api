@@ -21,4 +21,9 @@ namespace GSC.Data.Dto.Medra
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class MedraLanguageGridDto : BaseAuditDto
+    {
+        public string LanguageName { get; set; }
+    }
 }
