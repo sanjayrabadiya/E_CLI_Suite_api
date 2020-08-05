@@ -127,7 +127,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
-                                pvListArtificateObj.Icon = "audio";
+                                pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -164,7 +164,7 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SectionId = e.Id;
                                     pvListartifactsubsectionobj.SubSectionId = s.Id;
                                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
-                                    pvListartifactsubsectionobj.Icon = "audio";
+                                    pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                 }
                                 pvListArtificateList.Add(pvListArtificateObj);
@@ -232,7 +232,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
-                                pvListArtificateObj.Icon = "audio";
+                                pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -268,7 +268,7 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SectionId = e.Id;
                                     pvListartifactsubsectionobj.SubSectionId = s.Id;
                                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
-                                    pvListartifactsubsectionobj.Icon = "audio";
+                                    pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                     
                                 }
@@ -335,7 +335,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
-                                pvListArtificateObj.Icon = "audio";
+                                pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -371,7 +371,7 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SectionId = e.Id;
                                     pvListartifactsubsectionobj.SubSectionId = s.Id;
                                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
-                                    pvListartifactsubsectionobj.Icon = "audio";
+                                    pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                 }
                                 #endregion
