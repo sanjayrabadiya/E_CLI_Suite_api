@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetBlockCategoryDropDown();
         string Duplicate(BlockCategory objSave);
+        List<BlockCategoryGridDto> GetBlockCategoryList(bool isDeleted);
     }
 }

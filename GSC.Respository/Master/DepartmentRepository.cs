@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -12,12 +14,15 @@ namespace GSC.Respository.Master
     public class DepartmentRepository : GenericRespository<Department, GscContext>, IDepartmentRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
         public DepartmentRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
 
@@ -38,6 +43,12 @@ namespace GSC.Respository.Master
                 return "Duplicate Department name : " + objSave.DepartmentName;
 
             return "";
+        }
+
+        public List<DepartmentGridDto> GetDepartmentList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+       ProjectTo<DepartmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

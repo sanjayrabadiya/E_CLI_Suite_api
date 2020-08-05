@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Location;
@@ -13,12 +15,15 @@ namespace GSC.Respository.Master
     public class CityAreaRepository : GenericRespository<CityArea, GscContext>, ICityAreaRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
         public CityAreaRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public List<DropDownDto> GetCityAreaDropDown(int cityId)
@@ -87,6 +92,12 @@ namespace GSC.Respository.Master
             }).ToList();
 
             return cityareas;
+        }
+
+        public List<CityAreaGridDto> GetCityAreaList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<CityAreaGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

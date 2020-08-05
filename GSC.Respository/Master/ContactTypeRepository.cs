@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -12,12 +14,15 @@ namespace GSC.Respository.Master
     public class ContactTypeRepository : GenericRespository<ContactType, GscContext>, IContactTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
         public ContactTypeRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public List<DropDownDto> GetContactTypeDropDown()
@@ -35,6 +40,12 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.TypeName == objSave.TypeName && x.DeletedDate == null))
                 return "Duplicate ContactType name : " + objSave.TypeName;
             return "";
+        }
+
+        public List<ContactTypeGridDto> GetContactTypeList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+       ProjectTo<ContactTypeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

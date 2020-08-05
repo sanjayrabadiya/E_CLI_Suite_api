@@ -23,4 +23,12 @@ namespace GSC.Data.Dto.Location
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class CountryGridDto : BaseAuditDto
+    {
+        public string CountryName { get; set; }
+        public string CountryCallingCode { get; set; }
+        public string CountryCode { get; set; }
+
+    }
 }

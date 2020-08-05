@@ -10,5 +10,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetDesignTrialDropDown();
         List<DropDownDto> GetDesignTrialDropDownByTrialType(int id);
         string Duplicate(DesignTrial objSave);
+        List<DesignTrialGridDto> GetDesignTrialList(bool isDeleted);
     }
 }

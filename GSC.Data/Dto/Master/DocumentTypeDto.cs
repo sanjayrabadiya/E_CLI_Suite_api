@@ -22,4 +22,10 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class DocumentTypeGridDto : BaseAuditDto
+    {
+        public string TypeName { get; set; }
+        public string Note { get; set; }
+    }
 }

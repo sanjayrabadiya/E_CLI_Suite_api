@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetLanguageDropDown();
         string Duplicate(Language objSave);
+        List<LanguageGridDto> GetLanguageList(bool isDeleted);
     }
 }

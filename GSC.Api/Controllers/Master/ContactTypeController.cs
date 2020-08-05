@@ -43,9 +43,11 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var contactTypes = _contactTypeRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var contactTypesDto = _mapper.Map<IEnumerable<ContactTypeDto>>(contactTypes);
+            var contacttypes = _contactTypeRepository.GetContactTypeList(isDeleted);
+            return Ok(contacttypes);
+            //var contactTypes = _contactTypeRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var contactTypesDto = _mapper.Map<IEnumerable<ContactTypeDto>>(contactTypes);
 
             //contactTypesDto.ForEach(b =>
             //{
@@ -57,7 +59,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(contactTypesDto);
+            //return Ok(contactTypesDto);
         }
 
 

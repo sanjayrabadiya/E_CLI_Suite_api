@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -12,12 +14,15 @@ namespace GSC.Respository.Master
     public class AuditReasonRepository : GenericRespository<AuditReason, GscContext>, IAuditReasonRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
         public AuditReasonRepository(IUnitOfWork<GscContext> uow,
+            IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public List<DropDownDto> GetAuditReasonDropDown(AuditModule auditModule)
@@ -36,6 +41,12 @@ namespace GSC.Respository.Master
                 x.Id != objSave.Id && x.ReasonName == objSave.ReasonName && x.ModuleId == objSave.ModuleId &&
                 x.DeletedDate == null)) return "Duplicate Audit reason name : " + objSave.ReasonName;
             return "";
+        }
+
+        public List<AuditReasonGridDto> GetAuditReasonList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<AuditReasonGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

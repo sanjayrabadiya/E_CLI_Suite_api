@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Client;
@@ -15,14 +17,17 @@ namespace GSC.Respository.Client
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IMapper _mapper;
 
         public ClientRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser,
-            IUploadSettingRepository uploadSettingRepository)
+            IUploadSettingRepository uploadSettingRepository,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _uploadSettingRepository = uploadSettingRepository;
+            _mapper = mapper;
         }
 
         public List<DropDownDto> GetClientDropDown()
@@ -38,6 +43,12 @@ namespace GSC.Respository.Client
                 return "Duplicate Client code : " + objSave.ClientCode;
 
             return "";
+        }
+
+        public List<ClientGridDto> GetClientList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<ClientGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

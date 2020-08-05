@@ -50,11 +50,10 @@ namespace GSC.Api.Controllers.Client
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var clients = _clientRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var clientsDto = _mapper.Map<IEnumerable<ClientDto>>(clients);
+            var clients = _clientRepository.GetClientList(isDeleted);
+            
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
-            clientsDto.ForEach(b =>
+            clients.ForEach(b =>
             {
                 b.LogoPath = imageUrl + (b.Logo ?? DocumentService.DefulatLogo);
                 b.FirstName = _userRepository.Find((int)b.UserId).FirstName +" "+ _userRepository.Find((int)b.UserId).LastName;
@@ -69,7 +68,7 @@ namespace GSC.Api.Controllers.Client
                 //if (b.CompanyId != null)
                 //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             });
-            return Ok(clientsDto);
+            return Ok(clients);
         }
 
         [HttpGet("{id}")]

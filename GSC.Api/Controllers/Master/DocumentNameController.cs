@@ -19,6 +19,7 @@ namespace GSC.Api.Controllers.Master
     public class DocumentNameController : BaseController
     {
         private readonly IDocumentNameRepository _documentNameRepository;
+        private readonly IDocumentTypeRepository _documentTypeRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -27,11 +28,13 @@ namespace GSC.Api.Controllers.Master
 
         public DocumentNameController(IDocumentNameRepository documentNameRepository,
             IUserRepository userRepository,
+            IDocumentTypeRepository documentTypeRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _documentNameRepository = documentNameRepository;
+            _documentTypeRepository = documentTypeRepository;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _uow = uow;
@@ -42,9 +45,15 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var documents = _documentNameRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                , t => t.DocumentType).OrderByDescending(x => x.Id).ToList();
-            var documentsDto = _mapper.Map<IEnumerable<DocumentNameDto>>(documents);
+            var documents = _documentNameRepository.GetDocumentNameList(isDeleted);
+            documents.ForEach(b =>
+            {
+                b.DocumentType = _documentTypeRepository.Find((int)b.DocumentTypeId);
+            });
+            return Ok(documents);
+            //var documents = _documentNameRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //    , t => t.DocumentType).OrderByDescending(x => x.Id).ToList();
+            //var documentsDto = _mapper.Map<IEnumerable<DocumentNameDto>>(documents);
 
             //documentsDto.ForEach(b =>
             //{
@@ -56,7 +65,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(documentsDto);
+            //return Ok(documentsDto);
         }
 
         [HttpGet("{id}")]

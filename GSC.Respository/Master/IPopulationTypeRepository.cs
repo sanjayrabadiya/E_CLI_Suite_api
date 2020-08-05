@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetPopulationTypeDropDown();
         string Duplicate(PopulationType objSave);
+        List<PopulationTypeGridDto> GetPopulationTypeList(bool isDeleted);
     }
 }

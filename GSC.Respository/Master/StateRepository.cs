@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Location;
 using GSC.Domain.Context;
@@ -12,12 +15,15 @@ namespace GSC.Respository.Master
     public class StateRepository : GenericRespository<State, GscContext>, IStateRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
         public StateRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public List<DropDownDto> GetStateDropDown(int countryId)
@@ -34,6 +40,12 @@ namespace GSC.Respository.Master
                 return "Duplicate State name : " + objSave.StateName;
 
             return "";
+        }
+
+        public List<StateGridDto> GetStateList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                  ProjectTo<StateGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

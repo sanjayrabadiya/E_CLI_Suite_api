@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Location;
@@ -13,12 +15,15 @@ namespace GSC.Respository.Master
     public class CityRepository : GenericRespository<City, GscContext>, ICityRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
         public CityRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public string DuplicateCity(City objSave)
@@ -87,6 +92,12 @@ namespace GSC.Respository.Master
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.StateId == StateId)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.CityName, Code = c.CityCode, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value)
                 .ToList();
+        }
+
+        public List<CityGridDto> GetCityList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<CityGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

@@ -49,8 +49,15 @@ namespace GSC.Api.Controllers.Location
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult GetStates(bool isDeleted)
         {
-            var states = _stateRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-               , t => t.Country).OrderByDescending(x => x.Id).ToList();
+
+            var states = _stateRepository.GetStateList(isDeleted);
+            states.ForEach(b =>
+            {
+                b.CountryName = _countryRepository.Find(b.CountryId).CountryName;
+            });
+            return Ok(states);
+            //var states = _stateRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //   , t => t.Country).OrderByDescending(x => x.Id).ToList();
             //var states = _stateRepository
             //    .FindByInclude(
             //        x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) &&
@@ -63,22 +70,22 @@ namespace GSC.Api.Controllers.Location
             //        IsDeleted = x.IsDeleted,
             //        StateName = x.StateName
             //    }).OrderByDescending(x => x.Id).ToList();
-            var stateDtoDto = _mapper.Map<IEnumerable<StateDto>>(states);
-            stateDtoDto.ForEach(b =>
-            {
-                b.StateName = _stateRepository.Find(b.Id).StateName;
-                b.CountryName = _countryRepository.Find(b.CountryId).CountryName;
-                //if (b.CreatedBy != null)
-                //    b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                //if (b.ModifiedBy != null)
-                //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                //if (b.DeletedBy != null)
-                //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                //if (b.CompanyId != null)
-                //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
+            //var stateDtoDto = _mapper.Map<IEnumerable<StateDto>>(states);
+            //stateDtoDto.ForEach(b =>
+            //{
+            //    b.StateName = _stateRepository.Find(b.Id).StateName;
+            //    b.CountryName = _countryRepository.Find(b.CountryId).CountryName;
+            //    //if (b.CreatedBy != null)
+            //    //    b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+            //    //if (b.ModifiedBy != null)
+            //    //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+            //    //if (b.DeletedBy != null)
+            //    //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+            //    //if (b.CompanyId != null)
+            //    //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            //});
 
-            return Ok(stateDtoDto);
+            //return Ok(stateDtoDto);
         }
 
         [HttpGet("GetStateDropDown/{id}")]

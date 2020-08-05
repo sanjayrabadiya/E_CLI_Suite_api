@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetScopeNameDropDown();
         string Duplicate(ScopeName objSave);
+        List<ScopeNameGridDto> GetScopeNameList(bool isDeleted);
     }
 }

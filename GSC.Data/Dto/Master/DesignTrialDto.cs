@@ -31,4 +31,13 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class DesignTrialGridDto : BaseAuditDto
+    {
+        public string DesignTrialCode { get; set; }
+        public int TrialTypeId { get; set; }
+        public string DesignTrialName { get; set; }
+        public string Notes { get; set; }
+        public TrialType TrialType { get; set; }
+    }
 }

@@ -21,4 +21,9 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class OccupationGridDto : BaseAuditDto
+    {
+        public string OccupationName { get; set; }
+    }
 }

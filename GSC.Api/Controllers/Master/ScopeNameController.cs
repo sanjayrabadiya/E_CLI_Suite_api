@@ -43,10 +43,12 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var scopeName = _scopeNameRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).Select(x => _mapper.Map<ScopeNameDto>(x)).OrderByDescending(x => x.Id);
+            var scopeName = _scopeNameRepository.GetScopeNameList(isDeleted);
+            return Ok(scopeName);
+            //var scopeName = _scopeNameRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).Select(x => _mapper.Map<ScopeNameDto>(x)).OrderByDescending(x => x.Id);
 
-            var scopeNamesDto = _mapper.Map<IEnumerable<ScopeNameDto>>(scopeName);
+            //var scopeNamesDto = _mapper.Map<IEnumerable<ScopeNameDto>>(scopeName);
 
             //scopeNamesDto.ForEach(b =>
             //{
@@ -58,7 +60,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(scopeNamesDto);
+            //return Ok(scopeNamesDto);
         }
 
         [HttpGet("{id}")]

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -12,12 +14,15 @@ namespace GSC.Respository.Master
     public class FoodTypeRepository : GenericRespository<FoodType, GscContext>, IFoodTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
         public FoodTypeRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public List<DropDownDto> GetFoodTypeDropDown()
@@ -32,6 +37,22 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.TypeName == objSave.TypeName && x.DeletedDate == null))
                 return "Duplicate FoodType name : " + objSave.TypeName;
             return "";
+        }
+
+        List<DropDownDto> IFoodTypeRepository.GetFoodTypeDropDown()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        string IFoodTypeRepository.Duplicate(FoodType objSave)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        List<FoodTypeGridDto> IFoodTypeRepository.GetFoodTypeList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<FoodTypeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

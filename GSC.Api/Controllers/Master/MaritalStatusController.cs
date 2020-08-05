@@ -43,11 +43,13 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var maritalStatuss = _maritalStatusRepository.All.Where(x =>
-                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var maritalStatussDto = _mapper.Map<IEnumerable<MaritalStatusDto>>(maritalStatuss);
+            var maritalStatuss = _maritalStatusRepository.GetMaritalStatusList(isDeleted);
+            return Ok(maritalStatuss);
+            //var maritalStatuss = _maritalStatusRepository.All.Where(x =>
+            //    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+            //    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var maritalStatussDto = _mapper.Map<IEnumerable<MaritalStatusDto>>(maritalStatuss);
 
             //maritalStatussDto.ForEach(b =>
             //{
@@ -59,7 +61,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(maritalStatussDto);
+            //return Ok(maritalStatussDto);
         }
 
 

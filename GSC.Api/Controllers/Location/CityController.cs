@@ -50,10 +50,16 @@ namespace GSC.Api.Controllers.Location
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult GetCities(bool isDeleted)
         {
-
-            var citys = _cityRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-               , t => t.State, t => t.State.Country).OrderByDescending(x => x.Id).ToList();
-            var cityAreasDto = _mapper.Map<IEnumerable<CityDto>>(citys);
+            var cities = _cityRepository.GetCityList(isDeleted);
+            cities.ForEach(b =>
+            {
+                b.StateName = _stateRepository.Find(b.State.Id).StateName;
+                b.CountryName = _countryRepository.Find(b.State.CountryId).CountryName;
+            });
+            return Ok(cities);
+            //var citys = _cityRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //   , t => t.State, t => t.State.Country).OrderByDescending(x => x.Id).ToList();
+            //var cityAreasDto = _mapper.Map<IEnumerable<CityDto>>(citys);
             //cityAreasDto.ForEach(b =>
             //{
             //    // b.StateName = _stateRepository.Find(b.StateId).StateName;
@@ -67,7 +73,7 @@ namespace GSC.Api.Controllers.Location
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(cityAreasDto);
+            //return Ok(cityAreasDto);
         }
 
         [HttpGet("{id}")]

@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetFoodTypeDropDown();
         string Duplicate(FoodType objSave);
+        List<FoodTypeGridDto> GetFoodTypeList(bool isDeleted);
     }
 }

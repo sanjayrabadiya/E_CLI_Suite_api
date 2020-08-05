@@ -34,4 +34,13 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class TestGridDto : BaseAuditDto
+    {
+        public string TestName { get; set; }
+        public int TestGroupId { get; set; }
+        public string Anticoagulant { get; set; }
+        public string Notes { get; set; }
+        public TestGroup TestGroup { get; set; }
+    }
 }

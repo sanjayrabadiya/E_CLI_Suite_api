@@ -10,5 +10,6 @@ namespace GSC.Respository.Master
         string Duplicate(ClientType objSave);
 
         List<DropDownDto> GetClientTypeDropDown();
+        List<ClientTypeGridDto> GetClientTypeList(bool isDeleted);
     }
 }

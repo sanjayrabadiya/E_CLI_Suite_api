@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetProductTypeDropDown();
         string Duplicate(ProductType objSave);
+        List<ProductTypeGridDto> GetProductTypeList(bool isDeleted);
     }
 }

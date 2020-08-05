@@ -43,9 +43,11 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var races = _raceRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var racesDto = _mapper.Map<IEnumerable<RaceDto>>(races);
+            var races = _raceRepository.GetRaceList(isDeleted);
+            return Ok(races);
+            //var races = _raceRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var racesDto = _mapper.Map<IEnumerable<RaceDto>>(races);
 
             //racesDto.ForEach(b =>
             //{
@@ -57,7 +59,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(racesDto);
+            //return Ok(racesDto);
         }
 
 

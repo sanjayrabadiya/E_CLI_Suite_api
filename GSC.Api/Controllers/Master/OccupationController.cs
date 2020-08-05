@@ -43,10 +43,12 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var occupations = _occupationRepository.All.Where(x =>
-                 isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var occupationsDto = _mapper.Map<IEnumerable<OccupationDto>>(occupations);
+            var occupations = _occupationRepository.GetOccupationList(isDeleted);
+            return Ok(occupations);
+            //var occupations = _occupationRepository.All.Where(x =>
+            //     isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var occupationsDto = _mapper.Map<IEnumerable<OccupationDto>>(occupations);
 
             //occupationsDto.ForEach(b =>
             //{
@@ -58,7 +60,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(occupationsDto);
+            //return Ok(occupationsDto);
         }
 
 

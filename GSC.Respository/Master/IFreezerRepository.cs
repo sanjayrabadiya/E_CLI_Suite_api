@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetFreezerDropDown();
         string Duplicate(Freezer objSave);
+        List<FreezerGridDto> GetFreezerList(bool isDeleted);
     }
 }

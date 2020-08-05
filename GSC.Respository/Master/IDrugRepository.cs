@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetDrugDropDown();
         string Duplicate(Drug objSave);
+        List<DrugGridDto> GetDrugList(bool isDeleted);
     }
 }

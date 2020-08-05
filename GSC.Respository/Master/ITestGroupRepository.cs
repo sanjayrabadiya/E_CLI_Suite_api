@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetTestGroupDropDown();
         string Duplicate(TestGroup objSave);
+        List<TestGroupGridDto> GetTestGroupList(bool isDeleted);
     }
 }

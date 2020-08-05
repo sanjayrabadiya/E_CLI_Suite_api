@@ -43,9 +43,11 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var religions = _religionRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var religionsDto = _mapper.Map<IEnumerable<ReligionDto>>(religions);
+            var religions = _religionRepository.GetReligionList(isDeleted);
+            return Ok(religions);
+            //var religions = _religionRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var religionsDto = _mapper.Map<IEnumerable<ReligionDto>>(religions);
 
             //religionsDto.ForEach(b =>
             //{
@@ -57,7 +59,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(religionsDto);
+            //return Ok(religionsDto);
         }
 
 

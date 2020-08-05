@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -12,12 +14,15 @@ namespace GSC.Respository.Master
     public class ClientTypeRepository : GenericRespository<ClientType, GscContext>, IClientTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
         public ClientTypeRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public string Duplicate(ClientType objSave)
@@ -32,6 +37,12 @@ namespace GSC.Respository.Master
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
                 .Select(c => new DropDownDto {Id = c.Id, Value = c.ClientTypeName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+        }
+
+        public List<ClientTypeGridDto> GetClientTypeList(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+       ProjectTo<ClientTypeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

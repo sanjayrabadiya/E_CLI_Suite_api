@@ -52,24 +52,33 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            //  return Ok(_cityAreaRepository.GetCitiesArea(isDeleted));
-            var cityAreas = _cityAreaRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                , t => t.City,t=>t.City.State,t=>t.City.State.Country).OrderByDescending(x => x.Id).ToList();
-            var cityAreasDto = _mapper.Map<IEnumerable<CityAreaDto>>(cityAreas);
-            cityAreasDto.ForEach(b =>
+
+            var cityAreas = _cityAreaRepository.GetCityAreaList(isDeleted);
+            cityAreas.ForEach(b =>
             {
-                //b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
                 b.CityName = _cityRepository.Find((int)b.CityId).CityName;
                 b.StateName = _stateRepository.Find(b.City.StateId).StateName;
                 b.CountryName = _countryRepository.Find(b.City.State.CountryId).CountryName;
-                //if (b.ModifiedBy != null)
-                //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                //if (b.DeletedBy != null)
-                //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                //if (b.CompanyId != null)
-                //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             });
-            return Ok(cityAreasDto);
+            return Ok(cityAreas);
+            ////  return Ok(_cityAreaRepository.GetCitiesArea(isDeleted));
+            //var cityAreas = _cityAreaRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //    , t => t.City,t=>t.City.State,t=>t.City.State.Country).OrderByDescending(x => x.Id).ToList();
+            //var cityAreasDto = _mapper.Map<IEnumerable<CityAreaDto>>(cityAreas);
+            //cityAreasDto.ForEach(b =>
+            //{
+            //    //b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
+            //    b.CityName = _cityRepository.Find((int)b.CityId).CityName;
+            //    b.StateName = _stateRepository.Find(b.City.StateId).StateName;
+            //    b.CountryName = _countryRepository.Find(b.City.State.CountryId).CountryName;
+            //    //if (b.ModifiedBy != null)
+            //    //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+            //    //if (b.DeletedBy != null)
+            //    //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+            //    //if (b.CompanyId != null)
+            //    //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+            //});
+            //return Ok(cityAreasDto);
         }
 
 

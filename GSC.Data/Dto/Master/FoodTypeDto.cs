@@ -21,4 +21,9 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class FoodTypeGridDto : BaseAuditDto
+    {
+        public string TypeName { get; set; }
+    }
 }

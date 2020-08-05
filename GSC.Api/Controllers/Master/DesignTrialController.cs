@@ -19,6 +19,7 @@ namespace GSC.Api.Controllers.Master
     public class DesignTrialController : BaseController
     {
         private readonly IDesignTrialRepository _designTrialRepository;
+        private readonly ITrialTypeRepository _trialTypeRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -29,7 +30,8 @@ namespace GSC.Api.Controllers.Master
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            ITrialTypeRepository trialTypeRepository)
         {
             _designTrialRepository = designTrialRepository;
             _userRepository = userRepository;
@@ -37,14 +39,21 @@ namespace GSC.Api.Controllers.Master
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _trialTypeRepository = trialTypeRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var designTrials = _designTrialRepository.FindByInclude(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                , t => t.TrialType).OrderByDescending(x => x.Id).ToList();
-            var designTrialsDto = _mapper.Map<IEnumerable<DesignTrialDto>>(designTrials);
+            var designTrials = _designTrialRepository.GetDesignTrialList(isDeleted);
+            designTrials.ForEach(b =>
+            {
+                b.TrialType = _trialTypeRepository.Find(b.TrialTypeId);
+            });
+            return Ok(designTrials);
+            //var designTrials = _designTrialRepository.FindByInclude(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //    , t => t.TrialType).OrderByDescending(x => x.Id).ToList();
+            //var designTrialsDto = _mapper.Map<IEnumerable<DesignTrialDto>>(designTrials);
 
             //designTrialsDto.ForEach(b =>
             //{
@@ -56,7 +65,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(designTrialsDto);
+            //return Ok(designTrialsDto);
         }
 
         [HttpGet("{id}")]

@@ -9,5 +9,6 @@ namespace GSC.Respository.Client
     {
         List<DropDownDto> GetClientDropDown();
         string DuplicateClient(Data.Entities.Client.Client objSave);
+        List<ClientGridDto> GetClientList(bool isDeleted);
     }
 }

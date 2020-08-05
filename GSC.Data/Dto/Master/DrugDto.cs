@@ -24,4 +24,16 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class DrugGridDto : BaseAuditDto
+    {
+        public string DrugName { get; set; }
+        public string Strength { get; set; }
+        public string DosageForm { get; set; }
+    }
+
+
+
+
+
 }

@@ -43,9 +43,12 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var blockCategorys = _blockCategoryRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var blockCategorysDto = _mapper.Map<IEnumerable<BlockCategoryDto>>(blockCategorys);
+            var blockcategory = _blockCategoryRepository.GetBlockCategoryList(isDeleted);
+            return Ok(blockcategory);
+
+            //var blockCategorys = _blockCategoryRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var blockCategorysDto = _mapper.Map<IEnumerable<BlockCategoryDto>>(blockCategorys);
 
             //blockCategorysDto.ForEach(b =>
             //{
@@ -57,7 +60,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(blockCategorysDto);
+            //return Ok(blockCategorysDto);
         }
 
 

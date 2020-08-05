@@ -25,4 +25,11 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class DepartmentGridDto : BaseAuditDto
+    {
+        public string DepartmentCode { get; set; }
+        public string DepartmentName { get; set; }
+        public string Notes { get; set; }
+    }
 }

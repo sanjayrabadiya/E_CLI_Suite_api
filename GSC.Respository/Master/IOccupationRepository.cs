@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetOccupationDropDown();
         string Duplicate(Occupation objSave);
+        List<OccupationGridDto> GetOccupationList(bool isDeleted);
     }
 }

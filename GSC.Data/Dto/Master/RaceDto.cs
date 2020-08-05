@@ -20,4 +20,9 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class RaceGridDto : BaseAuditDto
+    {
+        public string RaceName { get; set; }
+    }
 }

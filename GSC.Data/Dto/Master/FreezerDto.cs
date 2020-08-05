@@ -36,4 +36,15 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class FreezerGridDto : BaseAuditDto
+    {
+        public string FreezerName { get; set; }
+        public string FreezerTypeName { get; set; }
+        public FreezerType FreezerType { get; set; }
+        public string Location { get; set; }
+        public string Temprature { get; set; }
+        public int Capacity { get; set; }
+        public string Note { get; set; }
+    }
 }

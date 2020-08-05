@@ -43,10 +43,11 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var foodTypes = _foodTypeRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var foodTypesDto = _mapper.Map<IEnumerable<FoodTypeDto>>(foodTypes);
-
+            //var foodTypes = _foodTypeRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var foodTypesDto = _mapper.Map<IEnumerable<FoodTypeDto>>(foodTypes);
+            var foodtype = _foodTypeRepository.GetFoodTypeList(isDeleted);
+            return Ok(foodtype);
             //foodTypesDto.ForEach(b =>
             //{
             //    b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
@@ -57,7 +58,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(foodTypesDto);
+            //return Ok(foodTypesDto);
         }
 
 

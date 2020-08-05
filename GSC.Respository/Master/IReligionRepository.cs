@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetReligionDropDown();
         string Duplicate(Religion objSave);
+        List<ReligionGridDto> GetReligionList(bool isDeleted);
     }
 }

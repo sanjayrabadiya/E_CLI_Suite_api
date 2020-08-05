@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetUnitDropDown();
         string Duplicate(Unit objSave);
+        List<UnitGridDto> GetUnitList(bool isDeleted);
     }
 }

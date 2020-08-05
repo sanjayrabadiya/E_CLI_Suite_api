@@ -10,5 +10,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetAuditReasonDropDown(AuditModule auditModule);
         string Duplicate(AuditReason objSave);
+        List<AuditReasonGridDto> GetAuditReasonList(bool isDeleted);
     }
 }

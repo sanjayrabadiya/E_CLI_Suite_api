@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetRaceDropDown();
         string Duplicate(Race objSave);
+        List<RaceGridDto> GetRaceList(bool isDeleted);
     }
 }

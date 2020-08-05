@@ -40,4 +40,23 @@ namespace GSC.Data.Dto.Client
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
     }
+
+    public class ClientGridDto : BaseAuditDto
+    {
+        public string ClientCode { get; set; }
+        public string ClientName { get; set; }
+        public int ClientTypeId { get; set; }
+        public string ClientTypeName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public int? UserId { get; set; }
+        public User User { get; set; }
+        public SecurityRole SecurityRole { get; set; }
+        public int? RoleId { get; set; }
+        public string RoleName { get; set; }
+        public string UserName { get; set; }
+        public ClientType ClientType { get; set; }
+        public string Logo { get; set; }
+        public string LogoPath { get; set; }
+    }
 }

@@ -58,11 +58,13 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
-           
-            var languages = _languageRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+            var languages = _languageRepository.GetLanguageList(isDeleted);
+            return Ok(languages);
+            //var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
 
-            var languagesDto = _mapper.Map<IEnumerable<LanguageDto>>(languages);
+            //var languages = _languageRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+
+            //var languagesDto = _mapper.Map<IEnumerable<LanguageDto>>(languages);
 
             //languagesDto.ForEach(b =>
             //{
@@ -74,7 +76,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(languagesDto);
+            //return Ok(languagesDto);
         }
 
         [HttpGet("{id}")]

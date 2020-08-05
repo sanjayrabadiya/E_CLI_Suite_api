@@ -42,10 +42,12 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var testGroups = _testGroupRepository
-                .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                ).OrderByDescending(x => x.Id).ToList();
-            var testGroupsDto = _mapper.Map<IEnumerable<TestGroupDto>>(testGroups);
+            var testGroups = _testGroupRepository.GetTestGroupList(isDeleted);
+            return Ok(testGroups);
+            //var testGroups = _testGroupRepository
+            //    .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //    ).OrderByDescending(x => x.Id).ToList();
+            //var testGroupsDto = _mapper.Map<IEnumerable<TestGroupDto>>(testGroups);
 
             //testGroupsDto.ForEach(b =>
             //{
@@ -57,7 +59,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(testGroupsDto);
+            //return Ok(testGroupsDto);
         }
 
         [HttpGet("{id}")]

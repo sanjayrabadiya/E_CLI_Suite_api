@@ -42,9 +42,11 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var trialTypes = _trialTypeRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var trialTypesDto = _mapper.Map<IEnumerable<TrialTypeDto>>(trialTypes);
+            var trialTypes = _trialTypeRepository.GetTrialTypeList(isDeleted);
+            return Ok(trialTypes);
+            //var trialTypes = _trialTypeRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).OrderByDescending(x => x.Id).ToList();
+            //var trialTypesDto = _mapper.Map<IEnumerable<TrialTypeDto>>(trialTypes);
 
             //trialTypesDto.ForEach(b =>
             //{
@@ -56,7 +58,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(trialTypesDto);
+            //return Ok(trialTypesDto);
         }
 
         [HttpGet("{id}")]

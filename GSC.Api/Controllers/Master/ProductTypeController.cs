@@ -43,10 +43,12 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var productTypes = _productTypeRepository
-                .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                ).OrderByDescending(x => x.Id).ToList();
-            var productTypesDto = _mapper.Map<IEnumerable<ProductTypeDto>>(productTypes);
+            var productTypes = _productTypeRepository.GetProductTypeList(isDeleted);
+            return Ok(productTypes);
+            //var productTypes = _productTypeRepository
+            //    .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //    ).OrderByDescending(x => x.Id).ToList();
+            //var productTypesDto = _mapper.Map<IEnumerable<ProductTypeDto>>(productTypes);
 
             //productTypesDto.ForEach(b =>
             //{
@@ -58,7 +60,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(productTypesDto);
+            //return Ok(productTypesDto);
         }
 
 

@@ -43,8 +43,10 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var documents = _documentRepository.FindBy(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-            var documentsDto = _mapper.Map<IEnumerable<DocumentTypeDto>>(documents).ToList();
+            var documents = _documentRepository.GetDocumentTypeList(isDeleted);
+            return Ok(documents);
+            //var documents = _documentRepository.FindBy(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+            //var documentsDto = _mapper.Map<IEnumerable<DocumentTypeDto>>(documents).ToList();
 
             //documentsDto.ForEach(b =>
             //{
@@ -57,7 +59,7 @@ namespace GSC.Api.Controllers.Master
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
 
-            return Ok(documentsDto);
+            //return Ok(documentsDto);
         }
 
 

@@ -46,9 +46,11 @@ namespace GSC.Api.Controllers.Location
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var countries = _countryRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+            var countries = _countryRepository.GetCountryList(isDeleted);
+            return Ok(countries);
+            //var countries = _countryRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
 
-            var countriesDto = _mapper.Map<IEnumerable<CountryDto>>(countries).ToList();
+            //var countriesDto = _mapper.Map<IEnumerable<CountryDto>>(countries).ToList();
 
             //countriesDto.ForEach(b =>
             //{
@@ -61,7 +63,7 @@ namespace GSC.Api.Controllers.Location
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(countriesDto);
+            //return Ok(countriesDto);
         }
 
         [HttpGet("{id}")]

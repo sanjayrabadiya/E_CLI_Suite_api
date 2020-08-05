@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetContactTypeDropDown();
         string Duplicate(ContactType objSave);
+        List<ContactTypeGridDto> GetContactTypeList(bool isDeleted);
     }
 }

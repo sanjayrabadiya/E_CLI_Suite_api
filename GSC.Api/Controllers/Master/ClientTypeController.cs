@@ -43,11 +43,12 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-          
-            var clientTypess = _clientTypeRepository.FindByInclude(x =>  isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+            var clientTypes = _clientTypeRepository.GetClientTypeList(isDeleted);
+            return Ok(clientTypes);
+            //var clientTypess = _clientTypeRepository.FindByInclude(x =>  isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
 
 
-            var clientTypessDto = _mapper.Map<IEnumerable<ClientTypeDto>>(clientTypess).ToList();
+            //var clientTypessDto = _mapper.Map<IEnumerable<ClientTypeDto>>(clientTypess).ToList();
 
             //clientTypessDto.ForEach(b =>
             //{
@@ -59,7 +60,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(clientTypessDto);
+            //return Ok(clientTypessDto);
         }
 
         [HttpGet("{id}")]

@@ -42,11 +42,15 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var auditReasons = _auditReasonRepository
-                .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                ).OrderByDescending(x => x.Id).ToList();
-            var auditReasonsDto = _mapper.Map<IEnumerable<AuditReasonDto>>(auditReasons);
-            auditReasonsDto.ForEach(t => t.ModuleName = t.ModuleId.GetDescription());
+
+            var auditreason = _auditReasonRepository.GetAuditReasonList(isDeleted);
+            auditreason.ForEach(t => t.ModuleName = t.ModuleId.GetDescription());
+            return Ok(auditreason);
+            //var auditReasons = _auditReasonRepository
+            //    .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //    ).OrderByDescending(x => x.Id).ToList();
+            //var auditReasonsDto = _mapper.Map<IEnumerable<AuditReasonDto>>(auditReasons);
+            //auditReasonsDto.ForEach(t => t.ModuleName = t.ModuleId.GetDescription());
 
             //auditReasonsDto.ForEach(b =>
             //{
@@ -58,7 +62,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(auditReasonsDto);
+            //return Ok(auditReasonsDto);
         }
 
         [HttpGet("{id}")]

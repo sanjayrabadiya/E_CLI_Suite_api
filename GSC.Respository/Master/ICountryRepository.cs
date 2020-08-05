@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Location;
 
@@ -12,5 +13,6 @@ namespace GSC.Respository.Master
         string DuplicateCountry(Country objSave);
         List<DropDownDto> GetCountryByParentProjectIdDropDown(int ParentProjectId);
         List<DropDownDto> GetCountryByProjectIdDropDown(int ParentProjectId);
+        List<CountryGridDto> GetCountryList(bool isDeleted);
     }
 }

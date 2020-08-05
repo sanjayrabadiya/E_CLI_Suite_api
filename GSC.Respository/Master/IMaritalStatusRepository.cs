@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetMaritalStatusDropDown();
         string Duplicate(MaritalStatus objSave);
+        List<MaritalStatusGridDto> GetMaritalStatusList(bool isDeleted);
     }
 }

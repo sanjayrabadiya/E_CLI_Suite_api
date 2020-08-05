@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetTrialTypeDropDown();
         string Duplicate(TrialType objSave);
+        List<TrialTypeGridDto> GetTrialTypeList(bool isDeleted);
     }
 }

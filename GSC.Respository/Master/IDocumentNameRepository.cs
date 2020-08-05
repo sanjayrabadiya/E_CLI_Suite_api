@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         List<DropDownDto> GetDocumentDropDown(int documentId);
         string Duplicate(DocumentName objSave);
+        List<DocumentNameGridDto> GetDocumentNameList(bool isDeleted);
     }
 }

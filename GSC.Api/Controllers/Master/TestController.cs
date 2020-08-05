@@ -23,13 +23,15 @@ namespace GSC.Api.Controllers.Master
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly ITestRepository _testRepository;
+        private readonly ITestGroupRepository _testGroupRepository;
         private readonly IUnitOfWork _uow;
 
         public TestController(ITestRepository testRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            ITestGroupRepository testGroupRepository)
         {
             _testRepository = testRepository;
             _userRepository = userRepository;
@@ -37,15 +39,23 @@ namespace GSC.Api.Controllers.Master
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _testGroupRepository = testGroupRepository;
         }
 
         [HttpGet]
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var tests = _testRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.TestGroup)
-                .OrderByDescending(x => x.Id).ToList();
-            var testsDto = _mapper.Map<IEnumerable<TestDto>>(tests);
+            var tests = _testRepository.GetTestList(isDeleted);
+            tests.ForEach(b =>
+            {
+                b.TestGroup = _testGroupRepository.Find((int)b.TestGroupId);
+            });
+            return Ok(tests);
+            
+            //var tests = _testRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.TestGroup)
+            //    .OrderByDescending(x => x.Id).ToList();
+            //var testsDto = _mapper.Map<IEnumerable<TestDto>>(tests);
             //testsDto.ForEach(b =>
             //{                
             //    if (b.CreatedBy != null)
@@ -57,7 +67,7 @@ namespace GSC.Api.Controllers.Master
             //    if (b.CompanyId != null)
             //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             //});
-            return Ok(testsDto);
+            //return Ok(testsDto);
         }
 
         [HttpGet("{id}")]
