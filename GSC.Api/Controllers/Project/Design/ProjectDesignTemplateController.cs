@@ -147,7 +147,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             for (var i = 0; i < noOfClones; i++)
             {
-                var temp = _projectDesignTemplateRepository.GetTemplate(projectDesignTempateId);
+                var temp = _projectDesignTemplateRepository.GetTemplateClone(projectDesignTempateId);
 
                 var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(temp);
                 projectDesignTemplate.Id = 0;
@@ -247,10 +247,10 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
-        [Route("GetTemplateDropDownForProjectSchedule/{projectDesignVisitId}")]
-        public IActionResult GetTemplateDropDownForProjectSchedule(int projectDesignVisitId)
+        [Route("GetTemplateDropDownForProjectSchedule/{projectDesignVisitId}/{collectionSource:int?}/{refVariable:int?}")]
+        public IActionResult GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource = null, int? refVariable = null)
         {
-            return Ok(_projectDesignTemplateRepository.GetTemplateDropDownForProjectSchedule(projectDesignVisitId));
+            return Ok(_projectDesignTemplateRepository.GetTemplateDropDownForProjectSchedule(projectDesignVisitId, collectionSource, refVariable));
         }
 
         [HttpGet]
