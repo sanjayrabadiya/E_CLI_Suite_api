@@ -36,5 +36,6 @@ namespace GSC.Data.Dto.UserMgt
         public bool CanExport { get; set; }
 
         public bool CanAll { get; set; }
+        public bool hasChild { get; set; }
     }
 }

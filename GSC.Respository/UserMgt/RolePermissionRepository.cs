@@ -69,7 +69,8 @@ namespace GSC.Respository.UserMgt
                     AppScreenId = t.Id,
                     ScreenCode = t.ScreenCode,
                     ScreenName = t.ScreenName,
-                    ParentAppScreenId = t.ParentAppScreenId
+                    ParentAppScreenId = t.ParentAppScreenId,
+                    hasChild = t.ParentAppScreenId != null ? false : true
                 }).ToList();
 
             permissions.ForEach(t =>
