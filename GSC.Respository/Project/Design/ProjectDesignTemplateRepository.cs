@@ -153,23 +153,31 @@ namespace GSC.Respository.Project.Design
             return templates;
         }
 
-        public IList<DropDownDto> GetTemplateDropDownForProjectSchedule(int projectDesignVisitId)
+        public IList<DropDownDto> GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource, int? refVariable)
         {
             var templates = All.Where(x => x.DeletedDate == null
                                            && x.ProjectDesignVisitId == projectDesignVisitId
-                                           && x.Variables.Where(y =>
+                                           && !x.Variables.Any(c => c.Id == refVariable)
+                                           && x.Variables.Where(y => collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
                                                y.CollectionSource == CollectionSources.Date ||
                                                y.CollectionSource == CollectionSources.Time ||
-                                               y.CollectionSource == CollectionSources.DateTime).Any()).OrderBy(t => t.Id)
+                                               y.CollectionSource == CollectionSources.DateTime).Any()
+                                               && (refVariable.Value > 0 ? !x.Variables.Any(v => Context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Any(s => s.ProjectDesignVariableId == v.Id)) : true)
+                                               && x.Variables != null).OrderBy(t => t.Id)
                 .Select(t => new DropDownDto
                 {
                     Id = t.Id,
                     Value = t.TemplateName,
-                    Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
+                    Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : "",
+                    ExtraData = t.Variables.Where(y => collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
+                                               y.CollectionSource == CollectionSources.Date ||
+                                               y.CollectionSource == CollectionSources.Time ||
+                                               y.CollectionSource == CollectionSources.DateTime).ToList()
                 }).ToList();
 
             return templates;
         }
+
 
         public IList<DropDownDto> GetClonnedTemplateDropDown(int id)
         {

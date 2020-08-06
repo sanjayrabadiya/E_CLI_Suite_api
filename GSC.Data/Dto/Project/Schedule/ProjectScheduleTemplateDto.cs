@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
@@ -33,5 +34,7 @@ namespace GSC.Data.Dto.Project.Schedule
 
         public string Message { get; set; }
         public string OperatorName { get; set; }
+
+        public DateTime? DeletedDate { get; set; }
     }
 }

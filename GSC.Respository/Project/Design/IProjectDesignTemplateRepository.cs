@@ -13,7 +13,7 @@ namespace GSC.Respository.Project.Design
         ProjectDesignTemplate GetTemplateClone(int id);
         IList<DropDownDto> GetTemplateDropDown(int projectDesignVisitId);
 
-        IList<DropDownDto> GetTemplateDropDownForProjectSchedule(int projectDesignVisitId);
+        IList<DropDownDto> GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource, int? refVariable);
         IList<DropDownDto> GetClonnedTemplateDropDown(int id);
         IList<ProjectDesignTemplate> GetTemplateIdsByPeriordId(int projectDesignPeriodId);
 

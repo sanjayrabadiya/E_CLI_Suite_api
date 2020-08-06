@@ -115,7 +115,7 @@ namespace GSC.Api.Controllers.Project.Schedule
                     t.VisitName = _projectDesignVisitRepository.Find(t.ProjectDesignVisitId).DisplayName;
                     t.IsVariablLoaded = true;
                 });
-            projectScheduleDto.Templates = projectScheduleDto.Templates.Where(x => x.IsDeleted == false).ToList();
+            projectScheduleDto.Templates = projectScheduleDto.Templates.Where(x => (x.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null)).ToList();
             projectScheduleDto.IsLock = !projectSchedule.ProjectDesign.IsUnderTesting;
             return Ok(projectScheduleDto);
         }
@@ -183,11 +183,15 @@ namespace GSC.Api.Controllers.Project.Schedule
 
         private void UpdateTemplates(ProjectSchedule projectSchedule)
         {
-            var deleteTemplates = _projectScheduleTemplateRepository.FindBy(x =>
+            var data = _projectScheduleTemplateRepository.FindBy(x =>
                 x.ProjectScheduleId == projectSchedule.Id
-                && !projectSchedule.Templates.Any(c => c.Id == x.Id)).ToList();
+                // && !projectSchedule.Templates.Any(c => c.Id == x.Id)
+                ).ToList();
+            var deleteTemplates = data.Where(x => !projectSchedule.Templates.Any(c => c.Id == x.Id)).ToList();
+
             foreach (var template in deleteTemplates)
             {
+                template.DeletedBy = _jwtTokenAccesser.UserId;
                 template.DeletedDate = DateTime.Now;
                 _projectScheduleTemplateRepository.Update(template);
             }
@@ -283,7 +287,7 @@ namespace GSC.Api.Controllers.Project.Schedule
                     //ModifiedDate = x.ModifiedDate,
                     IsLock = !x.ProjectDesign.IsUnderTesting,
                 }).OrderByDescending(x => x.Id).ToList();
-            
+
             //projectSchedules.ForEach(b =>
             //{
             //    //  b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
