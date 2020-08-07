@@ -372,7 +372,7 @@ namespace GSC.Domain.Context
 
             foreach (var dbEntry in changedEntityEntries)
             {
-                var tableName = dbEntry.Metadata.Name;
+                var tableName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString();//dbEntry.Metadata.Name;
                 if (_tablesToSkip.Contains(tableName)) continue;
 
                 var action = Enum.GetName(typeof(EntityState), dbEntry.State);

@@ -56,7 +56,7 @@ namespace GSC.Api.Helpers
             CreateMap<Unit, UnitGridDto>().ReverseMap();
             CreateMap<State, StateGridDto>().ReverseMap();
             CreateMap<TrialType, TrialTypeGridDto>().ReverseMap();
-            CreateMap<ScopeName, ScopeNameGridDto>().ReverseMap();
+            CreateMap<ScopeName, ScopeNameGridDto>().ForMember(x => x.ScopeName, y => y.MapFrom(a => a.Name)).ReverseMap();
             CreateMap<Client, ClientGridDto>().ReverseMap();
             CreateMap<DesignTrial, DesignTrialGridDto>().ReverseMap();
             CreateMap<VariableCategory, VariableCategoryGridDto>().ReverseMap();

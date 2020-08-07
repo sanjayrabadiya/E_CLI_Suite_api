@@ -131,9 +131,10 @@ namespace GSC.Api.Controllers.Project.Workflow
 
         private void UpdateIndependents(ProjectWorkflow projectWorkflow)
         {
-            var deleteIndependents = _projectWorkflowIndependentRepository.FindBy(x =>
-                x.ProjectWorkflowId == projectWorkflow.Id
-                && !projectWorkflow.Independents.Any(c => c.Id == x.Id)).ToList();
+            var data = _projectWorkflowIndependentRepository.FindBy(x =>
+                x.ProjectWorkflowId == projectWorkflow.Id).ToList();
+                //&& !projectWorkflow.Independents.Any(c => c.Id == x.Id)).ToList();
+                var deleteIndependents = data.Where(t => projectWorkflow.Independents.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             foreach (var item in deleteIndependents)
             {
                 item.DeletedDate = DateTime.Now;
@@ -143,9 +144,9 @@ namespace GSC.Api.Controllers.Project.Workflow
 
         private void UpdateLevels(ProjectWorkflow projectWorkflow)
         {
-            var deleteLevels = _projectWorkflowLevelRepository.FindBy(x => x.ProjectWorkflowId == projectWorkflow.Id
-                                                                           && !projectWorkflow.Levels.Any(c =>
-                                                                               c.Id == x.Id)).ToList();
+            var data = _projectWorkflowLevelRepository.FindBy(x => x.ProjectWorkflowId == projectWorkflow.Id).ToList();
+            //&& !projectWorkflow.Levels.Any(c => c.Id == x.Id)).ToList();
+            var deleteLevels = data.Where(t => projectWorkflow.Levels.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             foreach (var level in deleteLevels)
             {
                 level.DeletedDate = DateTime.Now;
