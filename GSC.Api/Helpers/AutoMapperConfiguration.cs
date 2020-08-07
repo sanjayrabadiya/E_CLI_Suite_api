@@ -6,6 +6,7 @@ using GSC.Data.Dto.Barcode.Generate;
 using GSC.Data.Dto.Client;
 using GSC.Data.Dto.Common;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.Custom;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
@@ -26,6 +27,7 @@ using GSC.Data.Entities.Barcode.Generate;
 using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
@@ -36,6 +38,7 @@ using GSC.Data.Entities.Project.EditCheck;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
+using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
@@ -245,6 +248,8 @@ namespace GSC.Api.Helpers
             CreateMap<Holiday, HolidayDto>().ReverseMap();
             CreateMap<ManageSite, ManageSiteDto>().ReverseMap();
             CreateMap<Iecirb, IecirbDto>().ReverseMap();
+            CreateMap<JobMonitoring, JobMonitoringDto>().ReverseMap();
+            CreateMap<CompanyData, CompanyDataDto>().ReverseMap();
         }
     }
 }

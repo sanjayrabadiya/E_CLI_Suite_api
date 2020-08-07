@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GSC.Data\GSC.Data.csproj" />
     <ProjectReference Include="..\GSC.Helper\GSC.Helper.csproj" />
+    <ProjectReference Include="..\GSC.Respository\GSC.Respository.csproj" />
   </ItemGroup>
 
 </Project>

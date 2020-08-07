@@ -1,16 +1,22 @@
-﻿using GSC.Api.Controllers.Common;
+﻿using AutoMapper;
+using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.Workflow;
+using GSC.Data.Entities.Report;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Report;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,21 +27,29 @@ namespace GSC.Api.Controllers.Report
     {
         private readonly IGscReport _gscReport;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWork<GscContext> _uow;
         private readonly IProjectDesignReportSettingRepository _projectDesignReportSettingRepository;
+        private readonly IJobMonitoringRepository _jobMonitoringRepository;
+        private readonly IProjectDesignRepository _projectDesignRepository;
+        private readonly IMapper _mapper;
         public ReportController(IProjectDesignReportSettingRepository projectDesignReportSettingRepository, IGscReport gscReport
-            , IUnitOfWork uow, IJwtTokenAccesser jwtTokenAccesser)
+            , IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository,
+            IProjectDesignRepository projectDesignRepository,
+            IMapper mapper)
         {
             _uow = uow;
             _gscReport = gscReport;
             _projectDesignReportSettingRepository = projectDesignReportSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _jobMonitoringRepository = jobMonitoringRepository;
+            _mapper = mapper;
+            _projectDesignRepository = projectDesignRepository;
         }
 
         [HttpGet]
-        [Route("GetProjectDesign/{projectDesignId}")]
+        [Route("GetProjectDesign/{projectDesignId}/{periodId}/{visitId}/{templateId}/{annotation}")]
         [AllowAnonymous]
-        public IActionResult GetProjectDesign(int projectDesignId)
+        public IActionResult GetProjectDesign(int projectDesignId, int periodId, int visitId, int templateId, bool annotation)
         {
             var abc = _gscReport.GetProjectDesign(projectDesignId);
             return abc;
@@ -52,34 +66,11 @@ namespace GSC.Api.Controllers.Report
 
         [HttpPost]
         [Route("GetProjectDesignWithFliter")]
-
-        public IActionResult GetProjectDesignWithFliter([FromBody]ReportSettingNew reportSetting)
+        //public IActionResult GetProjectDesignWithFliter([FromBody]ReportSettingNew reportSetting)
+        public async Task<string> GetProjectDesignWithFliter([FromBody] ReportSettingNew reportSetting)
         {
-            var WorkFlowQuery = @"SELECT TOP 1 PWL.* FROM [ProjectWorkflow] PW 
-                                    INNER JOIN [ProjectWorkflowLevel] PWL ON PW.Id = PWL.[ProjectWorkflowId] 
-                                    WHERE PW.[ProjectDesignId] =" + reportSetting.ProjectId + " AND PWL.[SecurityRoleId] =" + _jwtTokenAccesser.RoleId;
-
-            var WorkFlowData = _uow.FromSql<ProjectWorkflowLevel>(WorkFlowQuery).ToList();
-            bool issig = WorkFlowData != null && WorkFlowData.Count > 0 ? WorkFlowData.FirstOrDefault().IsElectricSignature : false;
-            var sqlquery = @"SELECT Company.Id AS Id, '" + issig + "' AS IsSignature, " +
-                            "'" + _jwtTokenAccesser.UserName + "' AS Username ," +
-                            "'" + reportSetting.IsCompanyLogo.ToString().ToLower() + "' AS IsComLogo," +
-                            "'" + reportSetting.IsClientLogo.ToString().ToLower() + "' AS IsClientLogo," +
-                            "Company.CompanyName,Company.Phone1,Company.Phone2,Location.Address, " +
-                            "State.StateName,City.CityName,Country.CountryName," +
-                            "CASE WHEN ISNULL(Company.Logo,'')<>'' THEN + UploadSetting.ImageUrl + Company.Logo END Logo," +
-                            "CASE WHEN ISNULL(Client.Logo,'')<>'' THEN + UploadSetting.ImageUrl + Client.Logo  END ClientLogo " +
-                            "FROM Company " +
-                            "LEFT OUTER JOIN Location ON Location.Id = Company.LocationId " +
-                            "LEFT OUTER JOIN State ON State.Id = Location.StateId " +
-                            "LEFT OUTER JOIN City ON City.Id = Location.CityId " +
-                            "LEFT OUTER JOIN Country ON Country.Id = Location.CountryId " +
-                            "LEFT OUTER JOIN UploadSetting ON UploadSetting.CompanyId = Company.Id " +
-                            "LEFT OUTER JOIN Client ON Client.CompanyId = Company.Id " +
-                              "WHERE Company.Id=" + Convert.ToString(_jwtTokenAccesser.CompanyId == 0 ? 1 : _jwtTokenAccesser.CompanyId);
-
-            var companyData = _uow.FromSql<CompanyData>(sqlquery).ToList();
-            var result = _gscReport.GetProjectDesignWithFliter(reportSetting, companyData.FirstOrDefault());
+            var projectId = _projectDesignRepository.Find(reportSetting.ProjectId).ProjectId;
+            #region Report Setting Save
             var reportSettingForm = _projectDesignReportSettingRepository.All.Where(x => x.ProjectDesignId == reportSetting.ProjectId && x.CompanyId == reportSetting.CompanyId && x.DeletedBy == null).FirstOrDefault();
             if (reportSettingForm == null)
             {
@@ -114,12 +105,36 @@ namespace GSC.Api.Controllers.Report
 
                 _projectDesignReportSettingRepository.Update(reportSettingForm);
             }
-            if (_uow.Save() <= 0)
+            if (_uow.Context.SaveChanges(_jwtTokenAccesser) <= 0)
             {
                 throw new Exception($"Creating Report Setting failed on save.");
             }
+            #endregion
 
-            return result;
+            #region Job Monitoring Save - Inprocess Status
+            JobMonitoringDto jobMonitoringDto = new JobMonitoringDto();
+            jobMonitoringDto.JobName = JobNameType.DossierReport;
+            jobMonitoringDto.JobDescription = projectId;
+            jobMonitoringDto.JobType = JobTypeEnum.Report;
+            jobMonitoringDto.JobStatus = JobStatusType.InProcess;
+            jobMonitoringDto.SubmittedBy = _jwtTokenAccesser.UserId;
+            jobMonitoringDto.SubmittedTime = DateTime.Now.UtcDateTime();
+            jobMonitoringDto.JobDetails = (DossierPdfStatus)reportSetting.PdfStatus;
+            var jobMonitoring = _mapper.Map<JobMonitoring>(jobMonitoringDto);
+            _jobMonitoringRepository.Add(jobMonitoring);
+
+            if (_uow.Save() <= 0) throw new Exception("Creating Job Monitoring failed on save.");
+            #endregion
+
+            #region Get Data for Company
+            var sqlquery = _projectDesignReportSettingRepository.GetProjectDesignWithFliter(reportSetting);
+            #endregion
+
+            #region Print Report
+            var result = _gscReport.GetProjectDesignWithFliter(reportSetting, sqlquery.FirstOrDefault(), jobMonitoring);
+            #endregion
+
+            return result.FileDownloadName.ToString();
         }
     }
 }

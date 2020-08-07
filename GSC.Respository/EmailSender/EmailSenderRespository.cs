@@ -48,6 +48,26 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendPdfGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf)
+        {
+            var emailMessage = ConfigureEmail("pdfcompleted", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPDF(emailMessage.MessageBody, userName, projectName, linkOfPdf);
+            _emailService.SendMail(emailMessage);
+        }
+        private string ReplaceBodyForPDF(string body, string userName, string project, string linkOfPdf)
+        {
+            body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##projectname##", project, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>project</strong>##", "<strong>" + project + "</strong>",
+                RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##link##", linkOfPdf, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>linkOfPdf</strong>##", "<strong>" + linkOfPdf + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
         private EmailMessage ConfigureEmail(string keyName, string userName)
         {
             var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();

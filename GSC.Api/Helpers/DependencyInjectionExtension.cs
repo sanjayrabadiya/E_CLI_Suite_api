@@ -24,6 +24,7 @@ using GSC.Respository.Project.Schedule;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.PropertyMapping;
+using GSC.Respository.Reports;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
@@ -225,6 +226,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IHolidayRepository, HolidayRepository>();
             services.AddScoped<IManageSiteRepository, ManageSiteRepository>();
             services.AddScoped<IIecirbRepository, IecirbRepository>();
+            services.AddScoped<IJobMonitoringRepository, JobMonitoringRepository>();
+
+
         }
     }
 }

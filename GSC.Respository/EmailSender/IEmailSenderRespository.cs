@@ -8,5 +8,7 @@ namespace GSC.Respository.EmailSender
         void SendRegisterEMail(string toMail, string password, string userName);
         void SendChangePasswordEMail(string toMail, string password, string userName);
         void SendForgotPasswordEMail(string toMail, string password, string userName);
+
+        void SendPdfGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf);
     }
 }

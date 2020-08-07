@@ -11,6 +11,7 @@ using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -446,7 +447,8 @@ namespace GSC.Respository.Master
                     Id = c.Id,
                     Value = c.ProjectCode + " - " + c.ProjectName,
                     CountryId = c.CountryId,
-                    IsStatic = c.IsStatic
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId != null || c.ParentProjectId > 0 ? (int)c.ParentProjectId : 0,
                 }).OrderBy(o => o.Value).ToList();
         }
 

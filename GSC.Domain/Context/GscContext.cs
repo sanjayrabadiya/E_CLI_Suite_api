@@ -23,6 +23,7 @@ using GSC.Data.Entities.Project.EditCheck;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
+using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
@@ -240,6 +241,7 @@ namespace GSC.Domain.Context
         public DbSet<Holiday> Holiday { get; set; }
         public DbSet<ManageSite> ManageSite { get; set; }
         public DbSet<Iecirb> Iecirb { get; set; }
+        public DbSet<JobMonitoring> JobMonitoring { get; set; }
         private List<string> ColumnsToSkip
         {
             get

@@ -434,4 +434,24 @@ namespace GSC.Helper
         [Description("Public")] Public = 1,
         [Description("Week Off")] WeekOff = 2
     }
+
+    public enum JobNameType : short
+    {
+        [Description("Dossier Report")] DossierReport = 1,
+        [Description("Medra")] Medra = 2
+    }
+
+    public enum JobTypeEnum : short
+    {
+        [Description("Report")] Report = 1,
+        [Description("Excel")] Excel = 2
+    }
+
+    public enum JobStatusType : short
+    {
+        [Description("Completed")] Completed = 1,
+        [Description("In Process")] InProcess = 2,
+        [Description("Log")] Log = 3,
+    }
+
 }
