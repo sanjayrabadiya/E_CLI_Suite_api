@@ -50,7 +50,7 @@ namespace GSC.Respository.Project.EditCheck
 
             return All.Where(t => (t.CompanyId == null
                                    || t.CompanyId == _jwtTokenAccesser.CompanyId)
-                                  && isDeleted ? t.DeletedDate != null : t.DeletedDate == null
+                                  && (isDeleted ? t.DeletedDate != null : t.DeletedDate == null)
                                   && t.ProjectDesignId == projectDesignId
                                   && projectList.Any(c => c == t.ProjectDesign.ProjectId)
             ).Select(r => new EditCheckDto
