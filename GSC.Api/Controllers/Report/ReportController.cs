@@ -47,9 +47,9 @@ namespace GSC.Api.Controllers.Report
         }
 
         [HttpGet]
-        [Route("GetProjectDesign/{projectDesignId}/{periodId}/{visitId}/{templateId}/{annotation}")]
+        [Route("GetProjectDesign/{projectDesignId}")]
         [AllowAnonymous]
-        public IActionResult GetProjectDesign(int projectDesignId, int periodId, int visitId, int templateId, bool annotation)
+        public IActionResult GetProjectDesign(int projectDesignId)
         {
             var abc = _gscReport.GetProjectDesign(projectDesignId);
             return abc;
