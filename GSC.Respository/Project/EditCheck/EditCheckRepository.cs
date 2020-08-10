@@ -50,7 +50,7 @@ namespace GSC.Respository.Project.EditCheck
 
             return All.Where(t => (t.CompanyId == null
                                    || t.CompanyId == _jwtTokenAccesser.CompanyId)
-                                  && (isDeleted ? t.DeletedDate != null : t.DeletedDate == null)
+                                  && isDeleted ? t.DeletedDate != null : t.DeletedDate == null
                                   && t.ProjectDesignId == projectDesignId
                                   && projectList.Any(c => c == t.ProjectDesign.ProjectId)
             ).Select(r => new EditCheckDto
@@ -298,9 +298,10 @@ namespace GSC.Respository.Project.EditCheck
 
             var result = Context.EditCheckDetail.Where(x => x.EditCheckId == id
                                                             && x.IsTarget == isTarget
-                                                            && x.DeletedDate == null).
-                OrderByDescending(v => v.LogicalOperator).Select(r => new EditCheckDetailDto
+                                                            && x.DeletedDate == null)
+                .Select(r => new EditCheckDetailDto
                 {
+                    Id=r.Id,
                     PeriodName = r.ProjectDesignVariable != null
                          ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
                              .DisplayName
@@ -322,7 +323,7 @@ namespace GSC.Respository.Project.EditCheck
                     ProjectDesignId = r.EditCheck.ProjectDesignId,
                     CollectionValue2 = r.CollectionValue2,
                     CollectionSource = r.ProjectDesignVariable.CollectionSource
-                }).OrderBy(r => r.Id).ToList();
+                }).ToList().OrderByDescending(v => v.LogicalOperator).OrderBy(r => r.Id).ToList();
 
             var last = result.LastOrDefault();
             result.ForEach(x =>
