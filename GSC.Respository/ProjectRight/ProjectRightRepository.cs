@@ -53,7 +53,25 @@ namespace GSC.Respository.ProjectRight
 
         public List<ProjectRightDto> GetProjectRightByProjectId(int projectId)
         {
-            var projects = FindBy(x => x.ProjectId == projectId && x.DeletedDate == null).ToList();
+            //var projects = FindBy(x => x.ProjectId == projectId && x.DeletedDate == null).ToList();
+            //var roles = Context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectRightDto
+            //{
+            //    RoleId = c.Id,
+            //    Name = c.RoleName,
+            //    users = Context.UserRole.Where(a => a.UserRoleId == c.Id && a.User.DeletedDate == null
+            //                                                             && a.DeletedDate == null).Select(r =>
+            //        new ProjectRightDto
+            //        {
+            //            RoleId = c.Id,
+            //            UserId = r.UserId,
+            //            Name = r.User.UserName,
+            //            IsSelected = projects.Any(b => b.RoleId == c.Id && b.UserId == r.UserId)
+            //        }).Where(x => x.IsSelected == false).ToList()
+            //}).ToList();
+
+            //roles = roles.Where(x => x.users.Count() > 0).ToList();
+
+
             var roles = Context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectRightDto
             {
                 RoleId = c.Id,
@@ -65,12 +83,9 @@ namespace GSC.Respository.ProjectRight
                         RoleId = c.Id,
                         UserId = r.UserId,
                         Name = r.User.UserName,
-                        //  Name = r.User.FirstName +' '+r.User.LastName,
-                        IsSelected = projects.Any(b => b.RoleId == c.Id && b.UserId == r.UserId)
+                        IsSelected = All.Any(b => b.ProjectId == projectId && b.RoleId == c.Id && b.UserId == r.UserId && b.DeletedDate == null)
                     }).Where(x => x.IsSelected == false).ToList()
             }).ToList();
-
-            roles = roles.Where(x => x.users.Count() > 0).ToList();
 
             return roles;
         }
@@ -296,26 +311,24 @@ namespace GSC.Respository.ProjectRight
                 RoleName = Context.ProjectRight.Where(c => c.ProjectId == x.ProjectId
                                                            && c.UserId == x.UserId && c.RoleId == x.RoleId)
                         .Select(a => a.role.RoleName).FirstOrDefault(),
+                TotalReview = null,
+                //TotalReview = Context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
+                //                          && a.UserId == x.UserId && a.IsReview).Select(b => new ReviewDeteail
+                //                          {
+                //                              DocumentPath = b.ProjectDocument.FileName,
+                //                              ReviewDate = b.ReviewDate,
+                //                              ReviewNote = b.ReviewNote,
+                //                              TrainingDuration = b.TrainingDuration,
+                //                              TrainingType = b.TrainingType == null ? "" : ((TrainigType)b.TrainingType).GetDescription(),
+                //                              TrainerName = Context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
+                //                          }).OrderByDescending(k => k.AssignedDate).ToList(),
+                PendingReview = null,
+                //PendingReview = Context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
+                //                          && a.UserId == x.UserId && !a.IsReview).Select(b => new ReviewDeteail
+                //                          {
+                //                              DocumentPath = b.ProjectDocument.FileName
+                //                          }).OrderByDescending(y => y.AssignedDate).ToList(),
 
-                TotalReview = Context.ProjectDocumentReview.Where(a =>
-                    a.DeletedDate == null && a.ProjectId == x.ProjectId
-                                          && a.UserId == x.UserId && a.IsReview).Select(b => new ReviewDeteail
-                                          {
-                                              DocumentPath = b.ProjectDocument.FileName,
-                                              ReviewDate = b.ReviewDate,
-                                              ReviewNote = b.ReviewNote,
-                                              TrainingDuration = b.TrainingDuration,
-                                              TrainingType = b.TrainingType == null ? "" : ((TrainigType)b.TrainingType).GetDescription(),
-                                              TrainerName = Context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName)
-                        .FirstOrDefault()
-                                          }).OrderByDescending(k => k.AssignedDate).ToList(),
-
-                PendingReview = Context.ProjectDocumentReview.Where(a =>
-                    a.DeletedDate == null && a.ProjectId == x.ProjectId
-                                          && a.UserId == x.UserId && !a.IsReview).Select(b => new ReviewDeteail
-                                          {
-                                              DocumentPath = b.ProjectDocument.FileName
-                                          }).OrderByDescending(y => y.AssignedDate).ToList(),
                 ProjectCreatedBy = x.CreatedBy
                 //RollbackReason = x.Key.RollbackReason,
                 //TrainerId = x.Key.DeletedBy,
@@ -333,36 +346,44 @@ namespace GSC.Respository.ProjectRight
 
             result.ForEach(r =>
             {
-                r.TotalReviewName = r.TotalReview.Count() == 0 ? "" : "Complete (" + r.TotalReview.Count() + ")";
+                r.TotalReviewName = r.TotalReview == null ? "" : "Complete (" + r.TotalReview.Count() + ")";
                 if (r.AccessType == "Grant" && r.ProjectCreatedBy == r.UserId) r.TotalReviewName = "N/AP";
-                r.TotalReview.ForEach(collection =>
+
+                if (r.TotalReview != null)
                 {
-                    var projectRights = Context.ProjectRight.Where(a => a.ProjectId == r.ProjectId
-                                                                                 && a.UserId == r.UserId).FirstOrDefault();
-                    if (projectRights != null)
+                    r.TotalReview.ForEach(collection =>
                     {
-                        collection.AssignedDate = projectRights.CreatedDate;
-                        var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
-                        if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
-                    }
-                });
+                        var projectRights = Context.ProjectRight.Where(a => a.ProjectId == r.ProjectId
+                                                                                     && a.UserId == r.UserId).FirstOrDefault();
+                        if (projectRights != null)
+                        {
+                            collection.AssignedDate = projectRights.CreatedDate;
+                            var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
+                            if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
+                        }
+                    });
+                }
             });
 
             result.ForEach(r =>
             {
-                r.PendingReviewName = r.PendingReview.Count() == 0 ? "" : "Pending (" + r.PendingReview.Count() + ")";
+                r.PendingReviewName = r.PendingReview == null ? "" : "Pending (" + r.PendingReview.Count() + ")";
                 if (r.AccessType == "Grant" && r.ProjectCreatedBy == r.UserId) r.PendingReviewName = "N/AP";
-                r.PendingReview.ForEach(collection =>
+
+                if (r.PendingReview != null)
                 {
-                    var projectRights = Context.ProjectRight.Where(a => a.ProjectId == r.ProjectId
-                                                                                 && a.UserId == r.UserId).FirstOrDefault();
-                    if (projectRights != null)
+                    r.PendingReview.ForEach(collection =>
                     {
-                        collection.AssignedDate = projectRights.CreatedDate;
-                        var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
-                        if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
-                    }
-                });
+                        var projectRights = Context.ProjectRight.Where(a => a.ProjectId == r.ProjectId
+                                                                                     && a.UserId == r.UserId).FirstOrDefault();
+                        if (projectRights != null)
+                        {
+                            collection.AssignedDate = projectRights.CreatedDate;
+                            var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
+                            if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
+                        }
+                    });
+                }
             });
 
             return result;
@@ -371,19 +392,18 @@ namespace GSC.Respository.ProjectRight
         public ProjectDocumentHistory GetProjectRightHistory(int projectId, int userId, int roleId)
         {
             var objdochistory = new ProjectDocumentHistory();
-            var projectList = All.Where(x => x.ProjectId == projectId && x.UserId == userId && x.RoleId == roleId)
-                .GroupBy(c => new
-                {
-                    c.ProjectId,
-                    c.project.ProjectName,
-                    c.project.ProjectCode,
-                    c.User.UserName,
-                    c.UserId,
-                    c.IsReviewDone,
-                    c.DeletedDate,
-                    c.RollbackReason,
-                    c.DeletedBy
-                }).ToList();
+            //var projectList = All.Where(x => x.ProjectId == projectId && x.UserId == userId && x.RoleId == roleId).GroupBy(c => new
+            //{
+            //    c.ProjectId,
+            //    c.project.ProjectName,
+            //    c.project.ProjectCode,
+            //    c.User.UserName,
+            //    c.UserId,
+            //    c.IsReviewDone,
+            //    c.DeletedDate,
+            //    c.RollbackReason,
+            //    c.DeletedBy
+            //}).ToList();
 
             var projectrightlist = All.Where(x => x.ProjectId == projectId && x.UserId == userId && x.RoleId == roleId)
                 .ToList();
@@ -446,50 +466,50 @@ namespace GSC.Respository.ProjectRight
             result.AddRange(grantresult);
 
             objdochistory.RollbackRights = result;
-            objdochistory.TotalReview = Context.ProjectDocumentReview.Where(a => a.ProjectId == projectId
-                                                                                 && a.UserId == userId).Select(b =>
-                new ReviewDeteail
-                {
-                    DocumentPath = b.ProjectDocument.FileName,
-                    ReviewDate = b.ReviewDate,
-                    ReviewNote = b.ReviewNote,
-                    TrainingDuration = b.TrainingDuration,
-                    TrainingType = b.TrainingType == null ? "" : ((TrainigType)b.TrainingType).GetDescription(),
-                    TrainerName = Context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
-                }).OrderByDescending(k => k.AssignedDate).ToList();
+            //objdochistory.TotalReview = Context.ProjectDocumentReview.Where(a => a.ProjectId == projectId
+            //                                                                     && a.UserId == userId).Select(b =>
+            //    new ReviewDeteail
+            //    {
+            //        DocumentPath = b.ProjectDocument.FileName,
+            //        ReviewDate = b.ReviewDate,
+            //        ReviewNote = b.ReviewNote,
+            //        TrainingDuration = b.TrainingDuration,
+            //        TrainingType = b.TrainingType == null ? "" : ((TrainigType)b.TrainingType).GetDescription(),
+            //        TrainerName = Context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
+            //    }).OrderByDescending(k => k.AssignedDate).ToList();
 
-            objdochistory.TotalReview.ForEach(collection =>
-            {
-                var projectRights = Context.ProjectRight.Where(a => a.ProjectId == projectId
-                                                                             && a.UserId == userId).FirstOrDefault();
-                if (projectRights != null)
-                {
-                    collection.AssignedDate = projectRights.CreatedDate;
-                    var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
-                    if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
-                }
-            });
+            //objdochistory.TotalReview.ForEach(collection =>
+            //{
+            //    var projectRights = Context.ProjectRight.Where(a => a.ProjectId == projectId
+            //                                                                 && a.UserId == userId).FirstOrDefault();
+            //    if (projectRights != null)
+            //    {
+            //        collection.AssignedDate = projectRights.CreatedDate;
+            //        var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
+            //        if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
+            //    }
+            //});
 
 
-            objdochistory.PendingReview = Context.ProjectDocumentReview.Where(a => a.ProjectId == projectId
-                                                                                   && a.UserId == userId && !a.IsReview)
-                .Select(b => new ReviewDeteail
-                {
-                    DocumentPath = b.ProjectDocument.FileName,
-                    IsDeleted = b.ProjectDocument.DeletedDate.HasValue ? "Yes" : "No"
-                }).OrderByDescending(y => y.AssignedDate).ToList();
+            //objdochistory.PendingReview = Context.ProjectDocumentReview.Where(a => a.ProjectId == projectId
+            //                                                                       && a.UserId == userId && !a.IsReview)
+            //    .Select(b => new ReviewDeteail
+            //    {
+            //        DocumentPath = b.ProjectDocument.FileName,
+            //        IsDeleted = b.ProjectDocument.DeletedDate.HasValue ? "Yes" : "No"
+            //    }).OrderByDescending(y => y.AssignedDate).ToList();
 
-            objdochistory.PendingReview.ForEach(collection =>
-            {
-                var projectRights = Context.ProjectRight.FirstOrDefault(a => a.ProjectId == projectId
-                                                                             && a.UserId == userId);
-                if (projectRights != null)
-                {
-                    collection.AssignedDate = projectRights.CreatedDate;
-                    var createdByUser = Context.Users.FirstOrDefault(user => user.Id == projectRights.CreatedBy);
-                    if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
-                }
-            });
+            //objdochistory.PendingReview.ForEach(collection =>
+            //{
+            //    var projectRights = Context.ProjectRight.FirstOrDefault(a => a.ProjectId == projectId
+            //                                                                 && a.UserId == userId);
+            //    if (projectRights != null)
+            //    {
+            //        collection.AssignedDate = projectRights.CreatedDate;
+            //        var createdByUser = Context.Users.FirstOrDefault(user => user.Id == projectRights.CreatedBy);
+            //        if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
+            //    }
+            //});
 
             return objdochistory;
         }

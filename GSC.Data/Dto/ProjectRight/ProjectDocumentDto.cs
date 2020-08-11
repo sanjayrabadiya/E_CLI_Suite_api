@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
 using GSC.Helper.DocumentService;
 
@@ -9,6 +10,8 @@ namespace GSC.Data.Dto.ProjectRight
     {
         [Required(ErrorMessage = "Project Name is required.")]
         public int ProjectId { get; set; }
+
+        public ProjectDto Project { get; set; }
 
         public string FileName { get; set; }
         public string PathName { get; set; }

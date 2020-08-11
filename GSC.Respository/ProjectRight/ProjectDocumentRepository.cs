@@ -26,8 +26,7 @@ namespace GSC.Respository.ProjectRight
         public List<ProjectDocumentDto> GetDocument(int id)
         {
             var document =
-                (from projectdoc in Context.ProjectDocument.Where(t => t.ProjectId == id && t.DeletedDate == null)
-                    //join user in Context.Users.Where(t => t.DeletedDate == null) on projectdoc.CreatedBy equals user.Id
+                (from projectdoc in Context.ProjectDocument.Where(t => (t.ProjectId == id || t.Project.ParentProjectId == id) && t.DeletedDate == null)
                     join usermodified in Context.Users.Where(t => t.DeletedDate == null) on projectdoc.ModifiedBy equals
                         usermodified.Id
                     select new ProjectDocumentDto

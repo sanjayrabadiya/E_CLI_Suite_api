@@ -9,6 +9,7 @@ namespace GSC.Data.Entities.ProjectRight
         public string FileName { get; set; }
         public string PathName { get; set; }
         public string MimeType { get; set; }
+        public Master.Project Project { get; set; }
 
         [NotMapped] public bool IsReview { get; set; }
     }
