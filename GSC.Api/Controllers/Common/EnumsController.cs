@@ -427,5 +427,17 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
         }
+
+        [HttpGet]
+        [Route("GetRelationship")]
+        public IList<DropDownEnum> GetRelationship()
+        {
+            return Enum.GetValues(typeof(Relationship))
+                .Cast<Relationship>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

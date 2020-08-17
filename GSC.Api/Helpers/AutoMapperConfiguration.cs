@@ -250,6 +250,8 @@ namespace GSC.Api.Helpers
             CreateMap<Iecirb, IecirbDto>().ReverseMap();
             CreateMap<JobMonitoring, JobMonitoringDto>().ReverseMap();
             CreateMap<CompanyData, CompanyDataDto>().ReverseMap();
+            CreateMap<PatientStatus, PatientStatusDto>().ReverseMap();
+            CreateMap<VisitStatus, VisitStatusDto>().ReverseMap();
         }
     }
 }

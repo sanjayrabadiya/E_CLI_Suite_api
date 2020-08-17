@@ -227,6 +227,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IManageSiteRepository, ManageSiteRepository>();
             services.AddScoped<IIecirbRepository, IecirbRepository>();
             services.AddScoped<IJobMonitoringRepository, JobMonitoringRepository>();
+            services.AddScoped<IPatientStatusRepository, PatientStatusRepository>();
+            services.AddScoped<IVisitStatusRepository, VisitStatusRepository>();
 
 
         }

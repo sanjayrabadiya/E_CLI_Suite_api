@@ -108,10 +108,10 @@ namespace GSC.Respository.Attendance
 
         public string Duplicate(NoneRegister objSave, int projectId)
         {
-            if (All.Any(x =>
-                x.Id != objSave.Id && x.ScreeningNumber == objSave.ScreeningNumber &&
-                x.Attendance.ProjectId == projectId && x.DeletedDate == null))
-                return "Duplicate Screening number : " + objSave.ScreeningNumber;
+            //if (All.Any(x =>
+            //    x.Id != objSave.Id && x.ScreeningNumber == objSave.ScreeningNumber &&
+            //    x.Attendance.ProjectId == projectId && x.DeletedDate == null))
+            //    return "Duplicate Screening number : " + objSave.ScreeningNumber;
 
             if (All.Any(x =>
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&

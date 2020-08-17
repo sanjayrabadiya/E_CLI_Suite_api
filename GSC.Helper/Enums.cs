@@ -454,4 +454,16 @@ namespace GSC.Helper
         [Description("Log")] Log = 3,
     }
 
+    public enum Relationship : short
+    {
+        [Description("Husband")] Husband = 1,
+        [Description("Wife")] Wife = 2,
+        [Description("Partner")] Partner = 3,
+        [Description("Friend")] Friend = 4,
+        [Description("Father")] Father = 5,
+        [Description("Mother")] Mother = 6,
+        [Description("Brother")] Brother = 7,
+        [Description("Sister")] Sister = 8,
+        [Description("Other")] Other = 9
+    }
 }

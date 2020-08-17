@@ -30,5 +30,7 @@ namespace GSC.Respository.Master
         string GetAutoNumber();
         string GetAutoNumberForSites();
         int? GetParentProjectId(int id);
+
+        List<ProjectDropDown> GetChildProjectRightsDropDown();
     }
 }

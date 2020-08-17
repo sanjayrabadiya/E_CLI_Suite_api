@@ -10,6 +10,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Attendance
@@ -23,12 +24,18 @@ namespace GSC.Api.Controllers.Attendance
         private readonly INoneRegisterRepository _noneRegisterRepository;
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IUnitOfWork _uow;
+        private readonly ICityRepository _cityRepository;
+        private readonly IStateRepository _stateRepository;
+        private readonly ICountryRepository _countryRepository;
 
         public NoneRegisterController(INoneRegisterRepository noneRegisterterRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IJwtTokenAccesser jwtTokenAccesser,
-            IAttendanceRepository attendanceRepository)
+            IAttendanceRepository attendanceRepository,
+            ICityRepository cityRepository,
+            IStateRepository stateRepository,
+            ICountryRepository countryRepository)
         {
             _noneRegisterRepository = noneRegisterterRepository;
             _uow = uow;
@@ -36,16 +43,24 @@ namespace GSC.Api.Controllers.Attendance
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _attendanceRepository = attendanceRepository;
+            _cityRepository = cityRepository;
+            _stateRepository = stateRepository;
+            _countryRepository = countryRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
             var volunteerNonregisters = _noneRegisterRepository.All.Where(x =>
-                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(t => t.Id).ToList();
+             (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+             && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+         ).OrderByDescending(t => t.Id).ToList();
+
             var volunteerNonregisterDto = _mapper.Map<IEnumerable<NoneRegisterDto>>(volunteerNonregisters);
+            //volunteerNonregisterDto.ForEach(b =>
+            //{
+            //    b.Gender = _noneRegisterRepository.Find((int)b.Gender).Gender;
+            //});
             return Ok(volunteerNonregisterDto);
         }
 
@@ -59,8 +74,32 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var volunteerNonregister = _noneRegisterRepository.Find(id);
+            //var volunteerNonregister = _noneRegisterRepository.Find(id);
+
+            var volunteerNonregister = _noneRegisterRepository.FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
+                .SingleOrDefault();
+            if (volunteerNonregister == null)
+                return BadRequest();
+
             var volunteerNonregisterDto = _mapper.Map<NoneRegisterDto>(volunteerNonregister);
+            if (volunteerNonregister.City != null)
+            {
+                volunteerNonregisterDto.CityId = volunteerNonregister.City.Id;
+                volunteerNonregisterDto.CityName = volunteerNonregister.City.CityName;
+            }
+
+            if (volunteerNonregister.City?.State != null)
+            {
+                volunteerNonregisterDto.StateId = volunteerNonregister.City.State.Id;
+                volunteerNonregisterDto.StateName = volunteerNonregister.City.State.StateName;
+            }
+
+            if (volunteerNonregister.City?.State?.Country != null)
+            {
+                volunteerNonregisterDto.CountryId = volunteerNonregister.City.State.Country.Id;
+                volunteerNonregisterDto.CountryName = volunteerNonregister.City.State.Country.CountryName;
+            }
+
             return Ok(volunteerNonregisterDto);
         }
 
@@ -70,7 +109,7 @@ namespace GSC.Api.Controllers.Attendance
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var projectDesignPeriod = _projectDesignPeriodRepository.FindBy(x =>
                 x.DeletedDate == null && x.ProjectDesign.DeletedDate == null &&
-                x.ProjectDesign.ProjectId == noneRegisterDto.ParentProjectId).FirstOrDefault();
+                x.ProjectDesign.ProjectId == noneRegisterDto.ProjectId).FirstOrDefault();
 
             if (projectDesignPeriod == null)
             {

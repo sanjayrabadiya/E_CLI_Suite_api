@@ -712,5 +712,25 @@ namespace GSC.Respository.Master
 
             return projectCode.ToUpper();
         }
+
+        public List<ProjectDropDown> GetChildProjectRightsDropDown()
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+
+            return All.Where(x =>
+                    ((x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.DeletedDate == null)
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode + " - " + c.ProjectName,
+                    CountryId = c.CountryId,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId != null || c.ParentProjectId > 0 ? (int)c.ParentProjectId : 0,
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

@@ -306,5 +306,12 @@ namespace GSC.Api.Controllers.Master
             ModelState.AddModelError("AutoNumber", autoNumber);
             return Ok(ModelState);
         }
+
+        [HttpGet]
+        [Route("GetChildProjectRightsDropDown")]
+        public IActionResult GetChildProjectRightsDropDown()
+        {
+            return Ok(_projectRepository.GetChildProjectRightsDropDown());
+        }
     }
 }

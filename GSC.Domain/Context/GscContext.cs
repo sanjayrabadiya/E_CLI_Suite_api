@@ -242,6 +242,8 @@ namespace GSC.Domain.Context
         public DbSet<ManageSite> ManageSite { get; set; }
         public DbSet<Iecirb> Iecirb { get; set; }
         public DbSet<JobMonitoring> JobMonitoring { get; set; }
+        public DbSet<PatientStatus> PatientStatus { get; set; }
+        public DbSet<VisitStatus> VisitStatus { get; set; }
         private List<string> ColumnsToSkip
         {
             get

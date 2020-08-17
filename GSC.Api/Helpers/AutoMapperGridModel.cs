@@ -63,7 +63,8 @@ namespace GSC.Api.Helpers
             CreateMap<MedraVersion, MedraVersionGridDto>().ReverseMap();
             CreateMap<MedraLanguage, MedraLanguageGridDto>().ReverseMap();
             CreateMap<Variable, VariableGridDto>().ReverseMap();
-
+            CreateMap<PatientStatus, PatientStatusGridDto>().ReverseMap();
+            CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
         }
     }
 }
