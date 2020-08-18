@@ -157,5 +157,11 @@ namespace GSC.Api.Controllers.Screening
         {
             return Ok(_screeningTemplateValueRepository.GetQueryStatusCount(id));
         }
+
+        [HttpGet("GetQueryStatusBySubject/{id}")]
+        public IActionResult GetQueryStatusBySubject(int id)
+        {
+            return Ok(_screeningTemplateValueRepository.GetQueryStatusBySubject(id));
+        }
     }
 }
