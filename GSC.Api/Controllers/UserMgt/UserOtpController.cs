@@ -47,7 +47,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             _uow.Save();
-            return Ok(new { message = "User varified successfullly!", StatusCode = 200 });
+            return Ok(new { message = "User verified successfullly!", StatusCode = 200 });
         }
 
         [HttpPost]
@@ -64,7 +64,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             _uow.Save();
-            return Ok(new{message="OTP varified successfullly!",StatusCode = 200});
+            return Ok(new{message="OTP verified successfullly!",StatusCode = 200});
         }
 
         [HttpPost]
