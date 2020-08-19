@@ -20,6 +20,7 @@ namespace GSC.Data.Dto.Master
 
         [Required(ErrorMessage = "Site Name is required.")]
         public int ManageSiteId { get; set; }
+        public string SiteName { get; set; }
 
         [Required(ErrorMessage = "Site Address is required.")]
         public string Address { get; set; }
@@ -27,6 +28,7 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "ContactNumber is required.")]
         public string ContactNumber { get; set; }
         public int IecirbId { get; set; }
+        public string IECIRBName { get; set; }
         public string IECIRBContactNo { get; set; }
         public string IECIRBContactName { get; set; }
         public string IECIRBContactEmail { get; set; }
