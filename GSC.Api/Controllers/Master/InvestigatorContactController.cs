@@ -18,6 +18,8 @@ namespace GSC.Api.Controllers.Master
     public class InvestigatorContactController : BaseController
     {
         private readonly IInvestigatorContactRepository _investigatorContactRepository;
+        private readonly IManageSiteRepository _manageSiteRepository;
+        private readonly IIecirbRepository _iecirbRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly ICityRepository _cityRepository;
@@ -32,6 +34,8 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
+            IManageSiteRepository manageSiteRepository,
+            IIecirbRepository iecirbRepository,
             IUnitOfWork uow, IMapper mapper)
         {
             _investigatorContactRepository = investigatorContactRepository;
@@ -39,6 +43,8 @@ namespace GSC.Api.Controllers.Master
             _stateRepository = stateRepository;
             _userRepository = userRepository;
             _countryRepository = countryRepository;
+            _manageSiteRepository = manageSiteRepository;
+            _iecirbRepository = iecirbRepository;
             _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
@@ -58,6 +64,8 @@ namespace GSC.Api.Controllers.Master
                 b.CityName = _cityRepository.Find((int)b.CityId).CityName;
                 b.StateName = _stateRepository.Find(b.City.StateId).StateName;
                 b.CountryName = _countryRepository.Find(b.City.State.CountryId).CountryName;
+                b.SiteName = _manageSiteRepository.Find((int)b.ManageSiteId).SiteName;
+                b.IECIRBName = _iecirbRepository.Find((int)b.IecirbId).IECIRBName;
                 //if (b.ModifiedBy != null)
                 //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
                 //if (b.DeletedBy != null)
