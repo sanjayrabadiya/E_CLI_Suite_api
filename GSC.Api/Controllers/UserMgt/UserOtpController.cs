@@ -64,7 +64,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             _uow.Save();
-            return Ok();
+            return Ok(new{message="OTP varified successfullly!",StatusCode = 200});
         }
 
         [HttpPost]
@@ -93,9 +93,9 @@ namespace GSC.Api.Controllers.UserMgt
                 ModelState.AddModelError("Message", validateMessage);
                 return BadRequest(ModelState);
             }
-
+           
             _uow.Save();
-            return Ok();
+            return Ok(new { message = "Password reset successfullly!", StatusCode = 200 });
         }
     }
 }
