@@ -47,7 +47,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             _uow.Save();
-            return Ok();
+            return Ok(new { message = "User varified successfullly!", StatusCode = 200 });
         }
 
         [HttpPost]
