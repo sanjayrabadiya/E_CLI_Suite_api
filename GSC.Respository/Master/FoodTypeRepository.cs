@@ -44,11 +44,6 @@ namespace GSC.Respository.Master
             throw new System.NotImplementedException();
         }
 
-        string IFoodTypeRepository.Duplicate(FoodType objSave)
-        {
-            throw new System.NotImplementedException();
-        }
-
         List<FoodTypeGridDto> IFoodTypeRepository.GetFoodTypeList(bool isDeleted)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
