@@ -130,9 +130,12 @@ namespace GSC.Api.Controllers.Master
 
         private void UpdateVariableValues(Variable variable)
         {
-            var deleteValues = _variableValueRepository.FindBy(x => x.VariableId == variable.Id
-                                                                    && !variable.Values.Any(c => c.Id == x.Id))
-                .ToList();
+            var data = _variableValueRepository.FindBy(x =>
+                x.VariableId == variable.Id).ToList();
+            var deleteValues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+            //var deleteValues = _variableValueRepository.FindBy(x => x.VariableId == variable.Id
+            //                                                        && !variable.Values.Any(c => c.Id == x.Id))
+                //.ToList();
             foreach (var value in deleteValues)
                 _variableValueRepository.Remove(value);
 
