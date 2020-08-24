@@ -229,6 +229,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IJobMonitoringRepository, JobMonitoringRepository>();
             services.AddScoped<IPatientStatusRepository, PatientStatusRepository>();
             services.AddScoped<IVisitStatusRepository, VisitStatusRepository>();
+            services.AddScoped<IReportFavouriteScreenRepository, ReportFavouriteScreenRepository>();
+            services.AddScoped<IReportScreenRepository, ReportScreenRepository>();
 
 
         }

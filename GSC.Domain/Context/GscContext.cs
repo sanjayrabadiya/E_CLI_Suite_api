@@ -244,6 +244,8 @@ namespace GSC.Domain.Context
         public DbSet<JobMonitoring> JobMonitoring { get; set; }
         public DbSet<PatientStatus> PatientStatus { get; set; }
         public DbSet<VisitStatus> VisitStatus { get; set; }
+        public DbSet<ReportScreen> ReportScreen { get; set; }
+        public DbSet<ReportFavouriteScreen> ReportFavouriteScreen { get; set; }
         private List<string> ColumnsToSkip
         {
             get
