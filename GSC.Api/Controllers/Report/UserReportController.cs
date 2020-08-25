@@ -29,7 +29,7 @@ namespace GSC.Api.Controllers.Report
             _mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetUserReport")]
         public IActionResult GetUserReport([FromQuery]UserReportSearchDto filters)
         {
