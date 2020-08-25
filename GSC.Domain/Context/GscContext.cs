@@ -122,6 +122,7 @@ namespace GSC.Domain.Context
         public DbSet<UserOtp> UserOtp { get; set; }
         public DbSet<VariableCategory> VariableCategory { get; set; }
         public DbSet<VariableValue> VariableValue { get; set; }
+        public DbSet<VariableRemarks> VariableRemarks { get; set; }
         public DbSet<CityArea> CityArea { get; set; }
         public DbSet<AnnotationType> AnnotationType { get; set; }
         public DbSet<Unit> Unit { get; set; }
@@ -139,6 +140,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectDesignTemplate> ProjectDesignTemplate { get; set; }
         public DbSet<ProjectDesignVariable> ProjectDesignVariable { get; set; }
         public DbSet<ProjectDesignVariableValue> ProjectDesignVariableValue { get; set; }
+        public DbSet<ProjectDesignVariableRemarks> ProjectDesignVariableRemarks { get; set; }
         public DbSet<ProjectRight> ProjectRight { get; set; }
         public DbSet<ProjectDocument> ProjectDocument { get; set; }
         public DbSet<ProjectDocumentReview> ProjectDocumentReview { get; set; }
@@ -158,6 +160,7 @@ namespace GSC.Domain.Context
         public DbSet<ScreeningTemplateValueAudit> ScreeningTemplateValueAudit { get; set; }
         public DbSet<ScreeningTemplateValueComment> ScreeningTemplateValueComment { get; set; }
         public DbSet<ScreeningTemplateValueChild> ScreeningTemplateValueChild { get; set; }
+        public DbSet<ScreeningTemplateRemarksChild> ScreeningTemplateRemarksChild { get; set; }
         public DbSet<ScreeningTemplateValueQuery> ScreeningTemplateValueQuery { get; set; }
 
         public DbSet<VolunteerBlockHistory> VolunteerBlockHistory { get; set; }

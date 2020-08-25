@@ -26,18 +26,21 @@ namespace GSC.Api.Controllers.Master
         private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IVariableValueRepository _variableValueRepository;
+        private readonly IVariableRemarksRepository _variableRemarksRepository;
 
         public VariableController(IVariableRepository variableRepository,
             IVariableValueRepository variableValueRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IVariableRemarksRepository variableRemarksRepository)
         {
             _variableRepository = variableRepository;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _variableValueRepository = variableValueRepository;
+            _variableRemarksRepository = variableRemarksRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -71,7 +74,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values).FirstOrDefault();
+            var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values,t=>t.Remarks).FirstOrDefault();
 
             //if (variable.Values != null)
             //    variable.Values = variable.Values.Where(x => x.DeletedDate == null).ToList();
@@ -122,6 +125,7 @@ namespace GSC.Api.Controllers.Master
             }
 
             UpdateVariableValues(variable);
+            UpdateVariableRemarks(variable);
             _variableRepository.Update(variable);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
@@ -130,14 +134,23 @@ namespace GSC.Api.Controllers.Master
 
         private void UpdateVariableValues(Variable variable)
         {
-            var data = _variableValueRepository.FindBy(x =>
-                x.VariableId == variable.Id).ToList();
+            var data = _variableValueRepository.FindBy(x => x.VariableId == variable.Id).ToList();
             var deleteValues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             //var deleteValues = _variableValueRepository.FindBy(x => x.VariableId == variable.Id
             //                                                        && !variable.Values.Any(c => c.Id == x.Id))
-                //.ToList();
+            //.ToList();
             foreach (var value in deleteValues)
                 _variableValueRepository.Remove(value);
+
+        }
+
+        private void UpdateVariableRemarks(Variable variable)
+        {
+            var data = _variableRemarksRepository.FindBy(x => x.VariableId == variable.Id).ToList();
+            var deleteRemarks = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+          
+            foreach (var value in deleteRemarks)
+                _variableRemarksRepository.Remove(value);
 
         }
 

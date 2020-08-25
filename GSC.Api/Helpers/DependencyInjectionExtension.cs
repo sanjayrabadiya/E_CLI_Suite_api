@@ -68,6 +68,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IScopeNameRepository, ScopeNameRepository>();
             services.AddScoped<IVariableRepository, VariableRepository>();
             services.AddScoped<IVariableValueRepository, VariableValueRepository>();
+            services.AddScoped<IVariableRemarksRepository, VariableRemarksRepository>();
             services.AddScoped<IVolunteerAddressRepository, VolunteerAddressRepository>();
             services.AddScoped<IVolunteerBiometricRepository, VolunteerBiometricRepository>();
             services.AddScoped<IVolunteerContactRepository, VolunteerContactRepository>();
@@ -125,6 +126,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectDesignTemplateRepository, ProjectDesignTemplateRepository>();
             services.AddScoped<IProjectDesignVariableRepository, ProjectDesignVariableRepository>();
             services.AddScoped<IProjectDesignVariableValueRepository, ProjectDesignVariableValueRepository>();
+            services.AddScoped<IProjectDesignVariableRemarksRepository, ProjectDesignVariableRemarksRepository>();
             services.AddScoped<IProjectRightRepository, ProjectRightRepository>();
             services.AddScoped<IProjectDocumentRepository, ProjectDocumentRepository>();
             services.AddScoped<IProjectDocumentReviewRepository, ProjectDocumentReviewRepository>();
@@ -152,6 +154,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IScreeningTemplateValueAuditRepository, ScreeningTemplateValueAuditRepository>();
             services.AddScoped<IScreeningTemplateValueQueryRepository, ScreeningTemplateValueQueryRepository>();
             services.AddScoped<IScreeningTemplateValueChildRepository, ScreeningTemplateValueChildRepository>();
+            services.AddScoped<IScreeningTemplateRemarksChildRepository, ScreeningTemplateRemarksChildRepository>();
             services.AddScoped<IUserGridSettingRepository, UserGridSettingRepository>();
             services.AddScoped<IVariableTemplateRightRepository, VariableTemplateRightRepository>();
             services.AddScoped<IScreeningTemplateReviewRepository, ScreeningTemplateReviewRepository>();

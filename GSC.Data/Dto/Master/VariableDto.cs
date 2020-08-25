@@ -67,6 +67,8 @@ namespace GSC.Data.Dto.Master
         public string CreatedByUser { get; set; }
         public string DeletedByUser { get; set; }
         public string ModifiedByUser { get; set; }
+
+        public IList<VariableRemarks> Remarks { get; set; } = null;
     }
 
     public class VariableGridDto : BaseAuditDto

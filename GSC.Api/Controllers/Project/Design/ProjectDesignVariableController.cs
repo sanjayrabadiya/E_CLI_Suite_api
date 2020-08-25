@@ -18,16 +18,19 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IMapper _mapper;
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+        private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly IUnitOfWork<GscContext> _uow;
         private readonly IVariableRepository _variableRepository;
 
         public ProjectDesignVariableController(IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+            IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
             IUnitOfWork<GscContext> uow, IMapper mapper,
             IVariableRepository variableRepository)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
+            _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
             _uow = uow;
             _mapper = mapper;
             _variableRepository = variableRepository;
@@ -37,7 +40,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values)
+            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values,t=>t.Remarks)
                 .FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             return Ok(variableDto);
@@ -234,6 +237,15 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult GetTargetVariabeAnnotationForScheduleDropDown(int projectDesignTemplateId)
         {
             return Ok(_projectDesignVariableRepository.GetTargetVariabeAnnotationForScheduleDropDown(projectDesignTemplateId));
+        }
+
+        //For Remarks DDL
+        [HttpGet]
+        [Route("GetProjectDesignVariableRemarksDropDown/{projectDesignVariableId}")]
+        public IActionResult GetProjectDesignVariableRemarksDropDown(int projectDesignVariableId)
+        {
+            return Ok(
+                _projectDesignVariableRemarksRepository.GetProjectDesignVariableRemarksDropDown(projectDesignVariableId));
         }
     }
 }

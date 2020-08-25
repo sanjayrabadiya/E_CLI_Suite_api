@@ -122,6 +122,7 @@ namespace GSC.Api.Helpers
             CreateMap<Test, TestDto>().ReverseMap();
             CreateMap<MProductForm, ProductFormDto>().ReverseMap();
             CreateMap<VariableValue, VariableValueDto>().ReverseMap();
+            CreateMap<VariableRemarks, VariableRemarksDto>().ReverseMap();
             CreateMap<CityArea, CityAreaDto>().ReverseMap();
             CreateMap<AnnotationType, AnnotationTypeDto>().ReverseMap();
             CreateMap<VariableCategory, VariableCategoryDto>().ReverseMap();
@@ -139,12 +140,17 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.ProjectDesignVariableId, opt => opt.MapFrom(y => y.Id))
            .ForMember(x => x.VariableCategoryName, opt => opt.MapFrom(y => y.VariableCategory.CategoryName ?? ""));
             CreateMap<ProjectDesignVariableValue, ScreeningVariableValueDto>().ReverseMap();
+            CreateMap<ProjectDesignVariableRemarks, ScreeningVariableRemarksDto>().ReverseMap();
             CreateMap<ProjectDesignVariable, ProjectDesignVariableDto>().ReverseMap();
             CreateMap<ProjectDesignVariableValue, ProjectDesignVariableValueDto>().ReverseMap();
+            CreateMap<ProjectDesignVariableRemarks, ProjectDesignVariableRemarksDto>().ReverseMap();
             CreateMap<ProjectDesignVariableValue, ProjectDesignVariableValueDropDown>().ReverseMap();
+            CreateMap<ProjectDesignVariableRemarks, ProjectDesignVariableRemarksDropDown>().ReverseMap();
+
             CreateMap<VariableTemplate, ProjectDesignTemplate>().ReverseMap();
             CreateMap<Variable, ProjectDesignVariable>().ReverseMap();
             CreateMap<VariableValue, ProjectDesignVariableValue>().ReverseMap();
+            CreateMap<VariableRemarks, ProjectDesignVariableRemarks>().ReverseMap();
             CreateMap<ProjectRight, ProjectRightListDto>().ReverseMap();
             CreateMap<ProjectDocument, ProjectDocumentDto>().ReverseMap();
             CreateMap<ProjectWorkflow, ProjectWorkflowDto>().ReverseMap();
@@ -183,6 +189,7 @@ namespace GSC.Api.Helpers
             CreateMap<ScreeningTemplateValueAudit, ScreeningTemplateValueAuditDto>().ReverseMap();
             CreateMap<ScreeningTemplateValueComment, ScreeningTemplateValueCommentDto>().ReverseMap();
             CreateMap<ScreeningTemplateValueChild, ScreeningTemplateValueChildDto>().ReverseMap();
+            CreateMap<ScreeningTemplateRemarksChild, ScreeningTemplateRemarksChildDto>().ReverseMap();
             CreateMap<ScreeningTemplateValueQuery, ScreeningTemplateValueQueryDto>().ReverseMap();
             CreateMap<ScreeningTemplateReview, MyReviewDto>().ReverseMap();
             CreateMap<ReportSetting, ReportSettingDto>().ReverseMap();

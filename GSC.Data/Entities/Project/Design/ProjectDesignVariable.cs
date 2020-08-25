@@ -34,6 +34,7 @@ namespace GSC.Data.Entities.Project.Design
         public PrintType PrintType { get; set; }
         public bool IsDocument { get; set; }
         public IList<ProjectDesignVariableValue> Values { get; set; } = null;
+        public IList<ProjectDesignVariableRemarks> Remarks { get; set; } = null;
         public Unit Unit { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public int DesignOrder { get; set; }

@@ -41,6 +41,7 @@ namespace GSC.Data.Dto.Project.Design
         public string UnitAnnotation { get; set; }
         public PrintType? PrintType { get; set; }
         public IList<ProjectDesignVariableValueDto> Values { get; set; } = null;
+        public IList<ProjectDesignVariableRemarksDto> Remarks { get; set; } = null;
         public UnitDto Unit { get; set; }
         public int DesignOrder { get; set; }
         public bool? IsDocument { get; set; }
