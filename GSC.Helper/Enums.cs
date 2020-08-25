@@ -110,8 +110,8 @@ namespace GSC.Helper
         [Description("Multi Check Box")] MultiCheckBox = 9,
         [Description("Multiline Text Box")] MultilineTextBox = 10,
         [Description("PartialDate")] PartialDate = 11,
-        [Description("Horizontal Scale")] HorizontalScale = 12,
-        [Description("Vertical Scale")] VerticalScale = 13
+        [Description("Scale Horizontal")] HorizontalScale = 12,
+        [Description("Scale Vertical")] VerticalScale = 13
     }
 
     public enum VolunteerStatus : short
