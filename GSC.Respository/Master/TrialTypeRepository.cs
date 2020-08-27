@@ -28,7 +28,7 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetTrialTypeDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
                 .Select(c => new DropDownDto {Id = c.Id, Value = c.TrialTypeName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
