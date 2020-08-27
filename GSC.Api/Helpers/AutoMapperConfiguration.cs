@@ -259,6 +259,8 @@ namespace GSC.Api.Helpers
             CreateMap<CompanyData, CompanyDataDto>().ReverseMap();
             CreateMap<PatientStatus, PatientStatusDto>().ReverseMap();
             CreateMap<VisitStatus, VisitStatusDto>().ReverseMap();
+            CreateMap<ProjectArtificateDocumentReview, ProjectArtificateDocumentReviewDto>().ReverseMap();
+            CreateMap<ProjectArtificateDocumentComment, ProjectArtificateDocumentCommentDto>().ReverseMap();
         }
     }
 }

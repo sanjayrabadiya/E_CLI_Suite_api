@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using GSC.Helper.DocumentService;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,8 @@ namespace GSC.Data.Dto.Etmf
         public int ProjectId { get; set; }
         public int CompanyId { get; set; }
         public string FileName { get; set; }
+        public ArtifactDocStatusType Status { get; set; }
+        public string Version { get; set; }
         public string CompanyName { get; set; }
 
         public string CreatedByUser { get; set; }

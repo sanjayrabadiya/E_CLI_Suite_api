@@ -468,4 +468,10 @@ namespace GSC.Helper
         [Description("Sister")] Sister = 8,
         [Description("Other")] Other = 9
     }
+
+    public enum ArtifactDocStatusType : short
+    {
+        [Description("Draft")] Draft = 1,
+        [Description("Final")] Final = 2,
+    }
 }

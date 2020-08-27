@@ -249,6 +249,8 @@ namespace GSC.Domain.Context
         public DbSet<VisitStatus> VisitStatus { get; set; }
         public DbSet<ReportScreen> ReportScreen { get; set; }
         public DbSet<ReportFavouriteScreen> ReportFavouriteScreen { get; set; }
+        public DbSet<ProjectArtificateDocumentReview> ProjectArtificateDocumentReview { get; set; }
+        public DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
         private List<string> ColumnsToSkip
         {
             get

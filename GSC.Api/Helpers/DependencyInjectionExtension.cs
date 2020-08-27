@@ -234,8 +234,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVisitStatusRepository, VisitStatusRepository>();
             services.AddScoped<IReportFavouriteScreenRepository, ReportFavouriteScreenRepository>();
             services.AddScoped<IReportScreenRepository, ReportScreenRepository>();
-
-
+            services.AddScoped<IProjectWorkplaceArtificateDocumentReviewRepository, ProjectWorkplaceArtificateDocumentReviewRepository>();
+            services.AddScoped<IProjectArtificateDocumentCommentRepository, ProjectArtificateDocumentCommentRepository>();
         }
     }
 }

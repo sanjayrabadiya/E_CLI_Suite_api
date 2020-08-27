@@ -42,11 +42,16 @@ namespace GSC.Data.Dto.Etmf
         public int Id{ get; set; }
         public int ProjectWorkplaceSubSectionArtifactId { get; set; }
         public string DocumentName { get; set; }
+        public string ExtendedName { get; set; }
         public FileModel FileModel { get; set; }
         public string DocPath { get; set; }
         public string Artificatename { get; set; }
+        public string Reviewer { get; set; }
+        public string Status { get; set; }
+        public string Version { get; set; }
         public string CreatedByUser { get; set; }
         public double  Level{ get; set; }
         public DateTime? CreatedDate { get; set; }
+        public bool SendBy { get; set; }
     }
 }

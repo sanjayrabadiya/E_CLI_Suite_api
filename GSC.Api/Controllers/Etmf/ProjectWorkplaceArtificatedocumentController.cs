@@ -32,6 +32,8 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ProjectWorkplaceArtificatedocumentController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
@@ -40,8 +42,9 @@ namespace GSC.Api.Controllers.Etmf
             ICompanyRepository companyRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
               IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository
-            )
+              IUploadSettingRepository uploadSettingRepository,
+              IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
+               IJwtTokenAccesser jwtTokenAccesser)
         {
             _userRepository = userRepository;
             _companyRepository = companyRepository;
@@ -52,6 +55,8 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
+            _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [Route("GetTreeview")]
@@ -66,20 +71,37 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public IActionResult Get(int id)
         {
-            var documentList = _projectWorkplaceArtificatedocumentRepository.FindByInclude(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null, x => x.ProjectWorkplaceArtificate).ToList();
-            
+            var reviewDocumentList = _projectWorkplaceArtificateDocumentReviewRepository.GetProjectArtificateDocumentReviewList();
+            if (reviewDocumentList == null || reviewDocumentList.Count == 0) return Ok();
+
+            var documentList = _projectWorkplaceArtificatedocumentRepository.FindByInclude(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null && reviewDocumentList.Any(c =>
+                                                                                           c == x.Id), x => x.ProjectWorkplaceArtificate).ToList();
+
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
             foreach (var item in documentList)
             {
+                var reviewerList = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy).Select(z => z.UserId).Distinct().ToList();
+                var users = new List<string>();
+                reviewerList.ForEach(r =>
+                {
+                    var username = _userRepository.FindByInclude(x => x.Id == r).Select(y => y.UserName);
+                    users.AddRange(username);
+                });
+
                 CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
                 obj.Id = item.Id;
                 obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
                 obj.Artificatename = _etmfArtificateMasterLbraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId).ArtificateName;
-                obj.DocumentName = item.DocumentName;
+                obj.ExtendedName = item.DocumentName;
+                obj.DocumentName = item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_'));
                 obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
+                obj.Reviewer = string.Join(", ", users);
                 obj.CreatedDate = item.CreatedDate;
+                obj.Version = item.Version;
+                obj.Status = item.Status.GetDescription();
                 obj.Level = 6;
+                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 dataList.Add(obj);
             }
             return Ok(dataList);
@@ -113,9 +135,13 @@ namespace GSC.Api.Controllers.Etmf
             var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
             projectWorkplaceArtificatedocument.DocumentName = FileName;
             projectWorkplaceArtificatedocument.DocPath = path;
+            projectWorkplaceArtificatedocument.Status = ArtifactDocStatusType.Draft;
+            projectWorkplaceArtificatedocument.Version = "0.1";
 
             _projectWorkplaceArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
+
+            _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
             return Ok(projectWorkplaceArtificatedocument.Id);
 
         }
