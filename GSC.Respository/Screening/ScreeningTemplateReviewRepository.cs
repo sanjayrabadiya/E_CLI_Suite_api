@@ -33,22 +33,23 @@ namespace GSC.Respository.Screening
 
         public IList<ReviewDto> GetReviewLevel(int projectId)
         {
-            var reviewdto = (from screening in Context.ScreeningEntry.Where(t => t.ProjectId == projectId)
-                join workflow in Context.ProjectWorkflow on screening.ProjectDesignId equals workflow.ProjectDesignId
-                join workflowlevel in Context.ProjectWorkflowLevel.Where(x => x.DeletedDate == null) on workflow.Id
-                    equals workflowlevel.ProjectWorkflowId
-                group workflowlevel by new
-                {
-                    ReviewLevel = workflowlevel.LevelNo,
-                    // Value = "Reviewed " + workflowlevel.LevelNo.ToString()
-                    Value = workflowlevel.SecurityRole.RoleShortName
-                }
-                into level
-                select new ReviewDto
-                {
-                    ReviewLevel = level.Key.ReviewLevel,
-                    Value = level.Key.Value
-                }).ToList();
+            var ParentProjectId = Context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId ?? projectId;
+            var ProjectDesignId = Context.ProjectDesign.Where(x => x.ProjectId == ParentProjectId).FirstOrDefault().Id;
+
+            var reviewdto = (from workflow in Context.ProjectWorkflow.Where(t => t.ProjectDesignId == ProjectDesignId)
+                             join workflowlevel in Context.ProjectWorkflowLevel.Where(x => x.DeletedDate == null) on workflow.Id equals workflowlevel.ProjectWorkflowId
+                             group workflowlevel by new
+                             {
+                                 ReviewLevel = workflowlevel.LevelNo,
+                                 // Value = "Reviewed " + workflowlevel.LevelNo.ToString()
+                                 Value = workflowlevel.SecurityRole.RoleShortName
+                             }
+                             into level
+                             select new ReviewDto
+                             {
+                                 ReviewLevel = level.Key.ReviewLevel,
+                                 Value = level.Key.Value
+                             }).ToList();
 
             return reviewdto.OrderBy(x => x.ReviewLevel).ToList();
         }

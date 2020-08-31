@@ -534,8 +534,19 @@ namespace GSC.Respository.Screening
 
         public IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
+            var parentId = Context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            var parentIds = new List<int>();
+            if (parentId == null)
+            {
+                parentIds = Context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+            }
+            else
+            {
+                parentIds.Add(filters.ProjectId);
+            }
+
             var queryDtos = (from screening in Context.ScreeningEntry.Where(t =>
-                        t.ProjectId == filters.ProjectId && t.DeletedDate == null &&
+                        parentIds.Contains(t.ProjectId) && t.DeletedDate == null &&
                         (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId)) && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.AttendanceId)))
                              join template in Context.ScreeningTemplate.Where(u =>
                                      (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
@@ -585,13 +596,32 @@ namespace GSC.Respository.Screening
                                  //ReviewLevelName = "Reviewed " + review.ReviewLevel,
                                  ReviewLevelName = review.ReviewLevel == 0
                                      ? ""
-                                     : workflow.Levels.Where(x => x.LevelNo == review.ReviewLevel).FirstOrDefault().SecurityRole
+                                     : workflow.Levels.Where(x => x.LevelNo == review.ReviewLevel && x.DeletedDate == null).FirstOrDefault().SecurityRole
                                          .RoleShortName
                              }).OrderBy(x => x.Id).ToList();
 
             if (filters.ReviewStatus != null) queryDtos = queryDtos.Where(x => x.ReviewLevelName != null).ToList();
 
-            return queryDtos.Where(x => x.VolunteerDelete == null).ToList();
+            var groupByTemp = queryDtos.GroupBy(x => x.Id).Select(y => new ReviewDto
+            {
+                Id = y.LastOrDefault().Id,
+                SiteName = y.LastOrDefault().SiteName,
+                ScreeningEntryId = y.LastOrDefault().ScreeningEntryId,
+                ScreeningNo = y.LastOrDefault().ScreeningNo,
+                StatusName = y.LastOrDefault().StatusName,
+                ScreeningTemplateId = y.LastOrDefault().ScreeningTemplateId,
+                ProjectCode = y.LastOrDefault().ProjectCode,
+                ScreeningTemplateValue = y.LastOrDefault().ScreeningTemplateValue,
+                Visit = y.LastOrDefault().Visit,
+                VolunteerDelete = y.LastOrDefault().VolunteerDelete,
+                VolunteerName = y.LastOrDefault().VolunteerName,
+                SubjectNo = y.LastOrDefault().SubjectNo,
+                RandomizationNumber = y.LastOrDefault().RandomizationNumber,
+                //ReviewLevelName = "Reviewed " + review.ReviewLevel,
+                ReviewLevelName = y.LastOrDefault().ReviewLevelName,
+            }).Where(x => x.VolunteerDelete == null).ToList();
+
+            return groupByTemp;
         }
 
         private WorkFlowButton SetWorkFlowButton(Data.Dto.Screening.ScreeningTemplateValueBasic screeningValue,
