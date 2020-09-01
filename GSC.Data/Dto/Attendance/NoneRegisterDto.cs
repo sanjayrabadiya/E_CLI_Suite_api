@@ -44,7 +44,7 @@ namespace GSC.Data.Dto.Attendance
         public string LegalLastName { get; set; }
         public string LegalEmergencyCoNumber { get; set; }
         public string LegalEmail { get; set; }
-        public int LegalRelationship { get; set; }
+        public int? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
 
         public string CityName { get; set; }
