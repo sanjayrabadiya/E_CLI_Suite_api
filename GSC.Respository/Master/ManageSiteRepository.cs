@@ -39,8 +39,8 @@ IJwtTokenAccesser jwtTokenAccesser)
 
         public string Duplicate(ManageSite objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.SiteName == objSave.SiteName && x.ContactName == objSave.ContactName && x.DeletedDate == null))
-                return "Duplicate Site : " + objSave.SiteName;
+            if (All.Any(x => x.Id != objSave.Id && x.SiteAddress == objSave.SiteAddress && x.DeletedDate == null))
+                return "Duplicate Site Address: " + objSave.SiteAddress;
 
             return "";
         }

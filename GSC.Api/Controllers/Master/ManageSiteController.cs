@@ -57,6 +57,7 @@ namespace GSC.Api.Controllers.Master
                 b.CityName = _cityRepository.Find((int)b.CityId).CityName;
                 b.StateName = _stateRepository.Find(b.City.StateId).StateName;
                 b.CountryName = _countryRepository.Find(b.City.State.CountryId).CountryName;
+                b.IsDeleted = isDeleted;
                 //if (b.ModifiedBy != null)
                 //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
                 //if (b.DeletedBy != null)
