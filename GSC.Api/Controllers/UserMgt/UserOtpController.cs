@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using FluentValidation.Resources;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -64,7 +67,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             _uow.Save();
-            return Ok(new{message="OTP verified successfullly!",StatusCode = 200});
+            return Ok(new { message = "OTP verified successfullly!", StatusCode = 200 });
         }
 
         [HttpPost]
@@ -93,9 +96,67 @@ namespace GSC.Api.Controllers.UserMgt
                 ModelState.AddModelError("Message", validateMessage);
                 return BadRequest(ModelState);
             }
-           
+
             _uow.Save();
             return Ok(new { message = "Password reset successfullly!", StatusCode = 200 });
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("VerifyingUser/{userName}")]
+        public IActionResult VerifyingUser(string userName)
+        {
+            var userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
+            if (userExists == null)
+            {
+                ModelState.AddModelError("Message", "UserName not valid");
+                return BadRequest(ModelState);
+            }
+
+            var userDto = _mapper.Map<UserDto>(userExists);
+            if (userDto.Language == null)
+                userDto.LanguageShortName = PrefLanguage.en.ToString();
+            else
+                userDto.LanguageShortName = userDto.Language.ToString();
+
+            if (userExists.IsFirstTime)
+            {
+                var validateMessage = _userOtpRepository.InsertOtp(userName);
+
+                if (!string.IsNullOrEmpty(validateMessage))
+                {
+                    ModelState.AddModelError("Message", validateMessage);
+                    return BadRequest(ModelState);
+                }
+                _uow.Save();
+                return Ok(userDto);
+            }
+            else
+                return Ok(userDto);
+        }
+
+        [HttpPut]
+        [AllowAnonymous]
+        [Route("UserDeleteTempForMobile/{userName}")]
+        public IActionResult UserDeleteTempForMobile(string userName)
+        {
+            var userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
+            if (userExists == null)
+            {
+                ModelState.AddModelError("Message", "UserName not valid");
+                return BadRequest(ModelState);
+            }
+
+            var user = _mapper.Map<User>(userExists);
+            user.IsFirstTime = true;
+
+            _userRepository.Update(user);
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "User not deleted");
+                return BadRequest(ModelState);
+            }
+            return Ok(new { message = "User deleted successfullly!", StatusCode = 200 });
         }
     }
 }

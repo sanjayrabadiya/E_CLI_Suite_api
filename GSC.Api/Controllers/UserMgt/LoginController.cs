@@ -164,6 +164,8 @@ namespace GSC.Api.Controllers.UserMgt
         private LoginResponseDto BuildUserAuthObject(User authUser, int roleId)
         {
             var roleTokenId = new Guid().ToString();
+            if (authUser.Language == null)
+                authUser.Language = PrefLanguage.en;
             var login = new LoginResponseDto
             {
                 UserName = authUser.UserName,
@@ -176,7 +178,9 @@ namespace GSC.Api.Controllers.UserMgt
                 FirstName = authUser.FirstName,
                 LastName = authUser.LastName,
                 Email = authUser.Email,
-                RoleId = roleId
+                RoleId = roleId,
+                Language = authUser.Language,
+                LanguageShortName = authUser.Language.ToString()
             };
 
 

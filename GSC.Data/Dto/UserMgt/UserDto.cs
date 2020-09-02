@@ -82,5 +82,7 @@ namespace GSC.Data.Dto.UserMgt
         public string Note { get; set; }
         public int? ProjectId { get; set; }
         public string ProjectName { get; set; }
+        public PrefLanguage? Language { get; set; }
+        public string LanguageShortName { get; set; }
     }
 }

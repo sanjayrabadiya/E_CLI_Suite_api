@@ -474,4 +474,10 @@ namespace GSC.Helper
         [Description("Draft")] Draft = 1,
         [Description("Final")] Final = 2,
     }
+
+    public enum PrefLanguage : short
+    {
+        [Description("English")] en = 1,
+        [Description("Germany")] ge = 2
+    }
 }

@@ -88,6 +88,8 @@ namespace GSC.Data.Entities.UserMgt
 
         public string Note { get; set; }
 
-       
+        public PrefLanguage? Language { get; set; }
+
+
     }
 }
