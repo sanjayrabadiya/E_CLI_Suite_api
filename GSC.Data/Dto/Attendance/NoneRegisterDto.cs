@@ -19,25 +19,25 @@ namespace GSC.Data.Dto.Attendance
         public string Initial { get; set; }
         [Required(ErrorMessage = "Initial Name is required.")]
         public DateTime? DateOfBirth { get; set; }
-        [Required(ErrorMessage = "Gender is required.")]
-        public int Gender { get; set; }
+        
+        public int? Gender { get; set; }
 
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
-        [Required(ErrorMessage = "Email is required.")]
+        
         public string Email { get; set; }
-        [Required(ErrorMessage = "Initial Name is required.")]
+       
         public string Qualification { get; set; }
-        [Required(ErrorMessage = "Occupation is required.")]
+        
         public string Occupation { get; set; }
-        [Required(ErrorMessage = "Language is required.")]
-        public int LanguageId { get; set; }
-        [Required(ErrorMessage = "Address is required.")]
+       
+        public int? LanguageId { get; set; }
+        
         public string AddressLine1 { get; set; }
         public string AddressLine2 { get; set; }
-        [Required(ErrorMessage = "City is required.")]
-        public int CityId { get; set; }
-        public int ZipCode { get; set; }
+        
+        public int? CityId { get; set; }
+        public int? ZipCode { get; set; }
         public string LegalFirstName { get; set; }
         public string LegalMiddleName { get; set; }
         public string LegalLastName { get; set; }

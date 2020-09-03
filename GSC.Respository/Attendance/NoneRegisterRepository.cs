@@ -101,21 +101,14 @@ namespace GSC.Respository.Attendance
                      IsDeleted = x.DeletedDate == null ? false : true,
                      LanguageId = x.LanguageId,
                      CityId = x.CityId,
-                     // StateId = _cityRepository.Find(x.CityId).StateId,
-                     // DeletedByUser = _userRepository.Find((int)x.DeletedBy).UserName
                  }).OrderByDescending(x => x.Id).ToList();
 
             result.ForEach(b =>
             {
-                b.StateId = _cityRepository.Find(b.CityId).StateId;
-                b.CountryId = _stateRepository.Find(b.StateId).CountryId;
-                //b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-                //if (b.ModifiedBy != null)
-                //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                //if (b.DeletedBy != null)
-                //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                //if (b.CompanyId != null)
-                //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+                b.StateId = b.CityId != null ? _cityRepository.Find((int)b.CityId).StateId : 0;
+                b.CountryId = b.StateId == 0 ? 0 : _stateRepository.Find(b.StateId).CountryId;
+                if (b.DeletedBy != null)
+                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
             });
 
             foreach (var item in result)

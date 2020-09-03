@@ -18,17 +18,17 @@ namespace GSC.Data.Entities.Attendance
         public string LastName { get; set; }
         public string Initial { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public int Gender { get; set; }
+        public int? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
         public string Email { get; set; }
         public string Qualification { get; set; }
         public string Occupation { get; set; }
-        public int LanguageId { get; set; }
+        public int? LanguageId { get; set; }
         public string AddressLine1 { get; set; }
         public string AddressLine2 { get; set; }
-        public int CityId { get; set; }
-        public int ZipCode { get; set; }
+        public int? CityId { get; set; }
+        public int? ZipCode { get; set; }
         public string LegalFirstName { get; set; }
         public string LegalMiddleName { get; set; }
         public string LegalLastName { get; set; }
