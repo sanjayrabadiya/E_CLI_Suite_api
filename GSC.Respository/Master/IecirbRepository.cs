@@ -39,8 +39,8 @@ IJwtTokenAccesser jwtTokenAccesser)
 
         public string Duplicate(Iecirb objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.IECIRBContactName == objSave.IECIRBContactName && x.RegistrationNumber == objSave.RegistrationNumber && x.DeletedDate == null))
-                return "Duplicate IRB/IEC : " + objSave.IECIRBName;
+            if (All.Any(x => x.Id != objSave.Id && x.ManageSiteId == objSave.ManageSiteId && x.RegistrationNumber == objSave.RegistrationNumber && x.DeletedDate == null))
+                return "Duplicate registration number : " + objSave.RegistrationNumber;
 
             return "";
         }

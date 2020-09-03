@@ -66,6 +66,9 @@ namespace GSC.Api.Controllers.Master
                 b.CountryName = _countryRepository.Find(b.City.State.CountryId).CountryName;
                 b.SiteName = _manageSiteRepository.Find((int)b.ManageSiteId).SiteName;
                 b.IECIRBName = _iecirbRepository.Find((int)b.IecirbId).IECIRBName;
+                b.IECIRBContactNo = _iecirbRepository.Find((int)b.IecirbId).IECIRBContactNumber;
+                b.IECIRBContactName = _iecirbRepository.Find((int)b.IecirbId).IECIRBContactName;
+                b.IECIRBContactEmail = _iecirbRepository.Find((int)b.IecirbId).IECIRBContactEmail;
                 b.IsDeleted = isDeleted;
                 //if (b.ModifiedBy != null)
                 //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
