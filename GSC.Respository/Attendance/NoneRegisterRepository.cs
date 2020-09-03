@@ -5,6 +5,7 @@ using GSC.Data.Entities.Attendance;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
@@ -20,7 +21,9 @@ namespace GSC.Respository.Attendance
         private readonly ICompanyRepository _companyRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
-
+        private readonly IStateRepository _stateRepository;
+        private readonly ICountryRepository _countryRepository;
+        private readonly ICityRepository _cityRepository;
 
         public NoneRegisterRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
@@ -28,7 +31,10 @@ namespace GSC.Respository.Attendance
             IJwtTokenAccesser jwtTokenAccesser,
             IAttendanceRepository attendanceRepository,
             IProjectDesignRepository projectDesignRepository,
-            IScreeningTemplateRepository screeningTemplateRepository)
+            IScreeningTemplateRepository screeningTemplateRepository,
+            IStateRepository stateRepository,
+            ICountryRepository countryRepository,
+            ICityRepository cityRepository)
             : base(uow, jwtTokenAccesser)
         {
             _attendanceRepository = attendanceRepository;
@@ -36,6 +42,9 @@ namespace GSC.Respository.Attendance
             _companyRepository = companyRepository;
             _projectDesignRepository = projectDesignRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
+            _stateRepository = stateRepository;
+            _countryRepository = countryRepository;
+            _cityRepository = cityRepository;
         }
 
         public void SaveNonRegister(NoneRegister noneRegister, NoneRegisterDto noneRegisterDto)
@@ -52,18 +61,17 @@ namespace GSC.Respository.Attendance
             _attendanceRepository.SaveAttendance(attendance);
         }
 
-        public List<NoneRegisterDto> GetNonRegisterList(int projectId)
+        public List<NoneRegisterDto> GetNonRegisterList(int projectId, bool isDeleted)
         {
-            //  var result = Context.Attendance.ProjectId == projectId && r.DeletedDate == null)
-
-            var result = All.Where(r => r.Attendance.ProjectId == projectId && r.DeletedDate == null).Select(x =>
+            var result = All.Where(r => r.ProjectId == projectId && (isDeleted ? r.DeletedDate != null : r.DeletedDate == null)).Select(x =>
                  new NoneRegisterDto
                  {
                      Id = x.Id,
                      AttendanceId = x.AttendanceId,
-                     ProjectCode = x.Attendance.Project.ProjectCode,
-                     ProjectId = x.Attendance.ProjectId,
-                     ProjectName = x.Attendance.Project.ProjectName,
+                     ProjectCode = x.Project.ProjectCode,
+                     ProjectId = x.ProjectId,
+                     ParentProjectId = x.Project.ParentProjectId,
+                     ProjectName = x.Project.ProjectName,
                      Initial = x.Initial,
                      ScreeningNumber = x.ScreeningNumber,
                      DateOfScreening = x.DateOfScreening,
@@ -77,16 +85,37 @@ namespace GSC.Respository.Attendance
                      ModifiedDate = x.ModifiedDate,
                      DeletedDate = x.ModifiedDate,
                      CompanyId = x.CompanyId,
-                 }).OrderBy(x => x.ScreeningNumber).ToList();
+                     FirstName = x.FirstName,
+                     LastName = x.LastName,
+                     MiddleName = x.MiddleName,
+                     DateOfBirth = x.DateOfBirth,
+                     Gender = x.Gender,
+                     PrimaryContactNumber = x.PrimaryContactNumber,
+                     EmergencyContactNumber = x.EmergencyContactNumber,
+                     Email = x.Email,
+                     Qualification = x.Qualification,
+                     Occupation = x.Occupation,
+                     ZipCode = x.ZipCode,
+                     AddressLine1 = x.AddressLine1,
+                     AddressLine2 = x.AddressLine2,
+                     IsDeleted = x.DeletedDate == null ? false : true,
+                     LanguageId = x.LanguageId,
+                     CityId = x.CityId,
+                     // StateId = _cityRepository.Find(x.CityId).StateId,
+                     // DeletedByUser = _userRepository.Find((int)x.DeletedBy).UserName
+                 }).OrderByDescending(x => x.Id).ToList();
+
             result.ForEach(b =>
             {
-                b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
+                b.StateId = _cityRepository.Find(b.CityId).StateId;
+                b.CountryId = _stateRepository.Find(b.StateId).CountryId;
+                //b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
+                //if (b.ModifiedBy != null)
+                //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
+                //if (b.DeletedBy != null)
+                //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
+                //if (b.CompanyId != null)
+                //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             });
 
             foreach (var item in result)

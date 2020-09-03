@@ -64,10 +64,10 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(volunteerNonregisterDto);
         }
 
-        [HttpGet("GetNonRegisterList/{projectId}")]
-        public IActionResult GetNonRegisterList(int projectId)
+        [HttpGet("GetNonRegisterList/{projectId}/{isDeleted:bool?}")]
+        public IActionResult GetNonRegisterList(int projectId, bool isDeleted)
         {
-            return Ok(_noneRegisterRepository.GetNonRegisterList(projectId));
+            return Ok(_noneRegisterRepository.GetNonRegisterList(projectId, isDeleted));
         }
 
         [HttpGet("{id}")]
@@ -109,7 +109,7 @@ namespace GSC.Api.Controllers.Attendance
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var projectDesignPeriod = _projectDesignPeriodRepository.FindBy(x =>
                 x.DeletedDate == null && x.ProjectDesign.DeletedDate == null &&
-                x.ProjectDesign.ProjectId == noneRegisterDto.ProjectId).FirstOrDefault();
+                x.ProjectDesign.ProjectId == noneRegisterDto.ParentProjectId).FirstOrDefault();
 
             if (projectDesignPeriod == null)
             {
@@ -177,7 +177,7 @@ namespace GSC.Api.Controllers.Attendance
         public ActionResult Active(int id)
         {
             var record = _noneRegisterRepository
-                .FindByInclude(x => x.Id == id && x.DeletedDate == null, x => x.Attendance).FirstOrDefault();
+                .FindByInclude(x => x.Id == id, x => x.Attendance).FirstOrDefault();
 
             if (record == null)
                 return NotFound();
@@ -185,6 +185,32 @@ namespace GSC.Api.Controllers.Attendance
             _attendanceRepository.Active(record.Attendance);
             _uow.Save();
             return Ok();
+        }
+
+
+        [HttpPut]
+        [Route("SaveRandomization")]
+        public IActionResult SaveRandomization([FromBody] RandomizationDto randomizationDto)
+        {
+            if (randomizationDto.Id <= 0) return BadRequest();
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            var nonregister = _noneRegisterRepository.Find(randomizationDto.Id);
+
+            nonregister.ScreeningNumber = randomizationDto.ScreeningNumber;
+            nonregister.DateOfScreening = randomizationDto.DateOfScreening;
+            nonregister.DateOfRandomization = randomizationDto.DateOfRandomization;
+            nonregister.RandomizationNumber = randomizationDto.RandomizationNumber;
+
+            var validate = _noneRegisterRepository.Duplicate(nonregister, randomizationDto.ProjectId);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            _noneRegisterRepository.Update(nonregister);
+            if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
+            return Ok(nonregister.Id);
         }
     }
 }

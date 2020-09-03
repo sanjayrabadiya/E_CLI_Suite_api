@@ -722,11 +722,11 @@ namespace GSC.Respository.Master
             return All.Where(x =>
                     ((x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                     && x.DeletedDate == null)
-                    && projectList.Any(c => c == x.Id))
+                    && projectList.Any(c => c == x.Id) && x.ParentProjectId != null)
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
-                    Value = c.ProjectCode + " - " + c.ProjectName,
+                    Value = c.ProjectCode,
                     CountryId = c.CountryId,
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId != null || c.ParentProjectId > 0 ? (int)c.ParentProjectId : 0,
