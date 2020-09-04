@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using GSC.Helper.DocumentService;
 using System;
 using System.Collections.Generic;
@@ -41,17 +42,22 @@ namespace GSC.Data.Dto.Etmf
     {
         public int Id{ get; set; }
         public int ProjectWorkplaceSubSectionArtifactId { get; set; }
+
+        public int ProjectWorkplaceArtificateId { get; set; }
         public string DocumentName { get; set; }
         public string ExtendedName { get; set; }
         public FileModel FileModel { get; set; }
         public string DocPath { get; set; }
         public string Artificatename { get; set; }
         public string Reviewer { get; set; }
-        public string Status { get; set; }
+        public ArtifactDocStatusType Status { get; set; }
+        public string StatusName { get; set; }
         public string Version { get; set; }
         public string CreatedByUser { get; set; }
         public double  Level{ get; set; }
         public DateTime? CreatedDate { get; set; }
         public bool SendBy { get; set; }
+        public bool IsSendBack { get; set; }
+        public string ReviewStatus { get; set; }
     }
 }

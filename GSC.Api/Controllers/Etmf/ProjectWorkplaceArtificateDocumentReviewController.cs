@@ -33,6 +33,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ProjectWorkplaceArtificateDocumentReviewController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
@@ -42,7 +43,7 @@ namespace GSC.Api.Controllers.Etmf
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
               IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository
+              IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser
             )
         {
             _userRepository = userRepository;
@@ -55,6 +56,7 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -75,6 +77,25 @@ namespace GSC.Api.Controllers.Etmf
 
             if (_uow.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route("SendBackDocument/{id}")]
+        public IActionResult SendBackDocument(int id)
+        {
+            var projectArtificateDocumentReviewList = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x=>x.ProjectWorkplaceArtificatedDocumentId == id 
+            && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.DeletedDate == null);
+
+            foreach (var item in projectArtificateDocumentReviewList)
+            {
+                item.IsSendBack = true;
+                item.SendBackDate = DateTime.UtcNow;
+                var projectArtificateDocumentReview = _mapper.Map<ProjectArtificateDocumentReview>(item);
+                _projectWorkplaceArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);
+            }
+
+            if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
             return Ok();
         }
     }

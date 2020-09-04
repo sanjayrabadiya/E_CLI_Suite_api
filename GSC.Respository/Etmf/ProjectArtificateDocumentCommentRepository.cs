@@ -43,9 +43,12 @@ namespace GSC.Respository.Etmf
                     CreatedDate = t.CreatedDate,
                     CreatedByName = t.CreatedByUser.UserName,
                     Response = t.Response,
-                    ResponseByName = !string.IsNullOrEmpty(t.Response) ? Context.Users.Where(x=>x.Id == t.ResponseBy).FirstOrDefault().UserName : "",
+                    ResponseByName = !string.IsNullOrEmpty(t.Response) ? Context.Users.Where(x => x.Id == t.ResponseBy).FirstOrDefault().UserName : "",
                     ResponseBy = t.ResponseBy,
-                    ResponseDate = t.ResponseDate
+                    ResponseDate = t.ResponseDate,
+                    ViewDelete = t.CreatedBy == _jwtTokenAccesser.UserId && string.IsNullOrEmpty(t.Response),
+                    ViewClose = t.CreatedBy == _jwtTokenAccesser.UserId && !string.IsNullOrEmpty(t.Response),
+                    IsClose = t.IsClose
                 }).ToList();
 
             return comments;

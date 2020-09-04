@@ -10,9 +10,9 @@ namespace GSC.Data.Entities.Etmf
         public int ProjectWorkplaceArtificatedDocumentId { get; set; }
         public int UserId { get; set; }
         public int RoleId { get; set; }
-        public bool IsReview { get; set; }
+        public bool IsSendBack { get; set; }
         public int CompanyId { get; set; }
-
+        public DateTime? SendBackDate { get; set; }
         public ProjectWorkplaceArtificatedocument ProjectWorkplaceArtificatedDocument { get; set; }
     }
 }

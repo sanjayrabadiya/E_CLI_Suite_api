@@ -93,10 +93,15 @@ namespace GSC.Api.Controllers.Etmf
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            if (!string.IsNullOrEmpty(projectArtificateDocumentCommentDto.Response))
+            if (!string.IsNullOrEmpty(projectArtificateDocumentCommentDto.Response) && projectArtificateDocumentCommentDto.ResponseDate == null)
             {
                 projectArtificateDocumentCommentDto.ResponseBy = _jwtTokenAccesser.UserId;
                 projectArtificateDocumentCommentDto.ResponseDate = DateTime.Now;
+            }
+
+            if (projectArtificateDocumentCommentDto.IsClose) {
+                projectArtificateDocumentCommentDto.CloseBy = _jwtTokenAccesser.UserId;
+                projectArtificateDocumentCommentDto.CloseDate = DateTime.Now;
             }
 
             var projectArtificateDocumentComment = _mapper.Map<ProjectArtificateDocumentComment>(projectArtificateDocumentCommentDto);
