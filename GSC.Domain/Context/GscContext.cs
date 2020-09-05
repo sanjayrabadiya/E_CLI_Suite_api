@@ -208,7 +208,7 @@ namespace GSC.Domain.Context
         public DbSet<ScreeningTemplateLockUnlockAudit> ScreeningTemplateLockUnlockAudit { get; set; }
 
         public DbSet<Dictionary> Dictionary { get; set; }
-        public DbSet<ProjectDesignReportSetting> ProjectDesignReportSetting { get; set; }        
+        public DbSet<ProjectDesignReportSetting> ProjectDesignReportSetting { get; set; }
         public DbSet<StudyScoping> StudyScoping { get; set; }
         public DbSet<MedraLanguage> MedraLanguage { get; set; }
         public DbSet<MeddraHlgtHltComp> MeddraHlgtHltComp { get; set; }
@@ -251,6 +251,7 @@ namespace GSC.Domain.Context
         public DbSet<ReportFavouriteScreen> ReportFavouriteScreen { get; set; }
         public DbSet<ProjectArtificateDocumentReview> ProjectArtificateDocumentReview { get; set; }
         public DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
+        public DbSet<AuditValue> AuditValue { get; set; }
         private List<string> ColumnsToSkip
         {
             get
@@ -262,6 +263,12 @@ namespace GSC.Domain.Context
 
                 return props;
             }
+        }
+
+        public IList<EntityEntry> GetAuditTracker()
+        {
+            return ChangeTracker.Entries().ToList();
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -401,7 +408,7 @@ namespace GSC.Domain.Context
                         UserId = userId,
                         UserRoleId = roleId,
                         CreatedDate = createdDate,
-                        ReasonId = reasonId > 0 ? reasonId : (int?) null,
+                        ReasonId = reasonId > 0 ? reasonId : (int?)null,
                         ReasonOth = reasonOth,
                         IpAddress = jwtTokenAccesser.IpAddress,
                         TimeZone = jwtTokenAccesser.GetHeader("timeZone")
@@ -438,7 +445,7 @@ namespace GSC.Domain.Context
                             UserRoleId = roleId,
                             CreatedDate = createdDate,
                             IpAddress = jwtTokenAccesser.IpAddress,
-                            ReasonId = reasonId > 0 ? reasonId : (int?) null,
+                            ReasonId = reasonId > 0 ? reasonId : (int?)null,
                             ReasonOth = reasonOth,
                             TimeZone = jwtTokenAccesser.GetHeader("timeZone")
                         }));

@@ -1,4 +1,5 @@
-﻿using GSC.Common;
+﻿using GSC.Audit;
+using GSC.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -236,6 +237,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<IReportScreenRepository, ReportScreenRepository>();
             services.AddScoped<IProjectWorkplaceArtificateDocumentReviewRepository, ProjectWorkplaceArtificateDocumentReviewRepository>();
             services.AddScoped<IProjectArtificateDocumentCommentRepository, ProjectArtificateDocumentCommentRepository>();
+
+
+            services.AddScoped<IAuditTracker, AuditTracker>();
+            services.AddSingleton<IDictionaryCollection, DictionaryCollection>();
         }
     }
 }

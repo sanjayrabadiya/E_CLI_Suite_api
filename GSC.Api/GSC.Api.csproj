@@ -35,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GSC.Audit\GSC.Audit.csproj" />
     <ProjectReference Include="..\GSC.Common\GSC.Common.csproj" />
     <ProjectReference Include="..\GSC.Data\GSC.Data.csproj" />
     <ProjectReference Include="..\GSC.Domain\GSC.Domain.csproj" />

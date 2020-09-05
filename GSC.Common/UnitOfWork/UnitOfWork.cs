@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using GSC.Domain.Context;
 using GSC.Helper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace GSC.Common.UnitOfWork
 {
@@ -12,15 +14,17 @@ namespace GSC.Common.UnitOfWork
         where TContext : GscContext
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public UnitOfWork(TContext context, IJwtTokenAccesser jwtTokenAccesser)
+        private readonly IAuditTracker _auditTracker;
+        public UnitOfWork(TContext context, IJwtTokenAccesser jwtTokenAccesser, IAuditTracker auditTracker)
         {
             Context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _auditTracker = auditTracker;
         }
 
         public int Save()
         {
+            var aduitResult = _auditTracker.GetAuditTracker();
             return Context.SaveChanges(_jwtTokenAccesser);
         }
 
@@ -53,6 +57,12 @@ namespace GSC.Common.UnitOfWork
         public void Rollback()
         {
             Context.Rollback();
+        }
+
+        public IList<EntityEntry> GetAuditTracker()
+        {
+            return Context.GetAuditTracker();
+
         }
     }
 }
