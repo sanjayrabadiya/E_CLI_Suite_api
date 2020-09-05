@@ -27,10 +27,6 @@ namespace GSC.Data.Dto.Etmf
         public ArtifactDocStatusType Status { get; set; }
         public string Version { get; set; }
         public string CompanyName { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int CreatedBy { get; set; }
         public int? DeletedBy { get; set; }
         public int? ModifiedBy { get; set; }

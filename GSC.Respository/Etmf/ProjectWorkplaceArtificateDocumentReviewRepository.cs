@@ -64,7 +64,7 @@ namespace GSC.Respository.Etmf
                         ProjectWorkplaceArtificatedDocumentId = userDto.ProjectWorkplaceArtificatedDocumentId,
                         UserId = userDto.UserId,
                         RoleId = userDto.RoleId,
-                        IsReview = false,
+                        IsSendBack = false,
                     });
                 }
         }

@@ -11,7 +11,7 @@ namespace GSC.Data.Dto.Etmf
         public int ProjectWorkplaceArtificatedDocumentId { get; set; }
         public int UserId { get; set; }
         public int RoleId { get; set; }
-        public bool IsReview { get; set; }
+        public bool IsSendBack { get; set; }
         public string Name { get; set; }
         public bool IsSelected { get; set; }
         public string CompanyName { get; set; }
@@ -24,6 +24,7 @@ namespace GSC.Data.Dto.Etmf
         public DateTime? CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
         public DateTime? DeletedDate { get; set; }
+        public DateTime? SendBackDate { get; set; }
         public List<ProjectArtificateDocumentReviewDto> users { get; set; }
     }
 }

@@ -14,6 +14,11 @@ namespace GSC.Data.Dto.Etmf
         public int? ResponseBy { get; set; }
         public string ResponseByName { get; set; }
         public DateTime? ResponseDate { get; set; }
+        public bool ViewDelete { get; set; }
+        public bool ViewClose { get; set; }
+        public bool IsClose { get; set; }
+        public int? CloseBy { get; set; }
+        public DateTime? CloseDate { get; set; }
         public int CreatedBy { get; set; }
         public int? DeletedBy { get; set; }
         public int? ModifiedBy { get; set; }

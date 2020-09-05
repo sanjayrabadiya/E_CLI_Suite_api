@@ -61,10 +61,14 @@ namespace GSC.Api.Controllers.Client
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var clientAddress = _mapper.Map<ClientAddress>(clientAddressDto);
+
             clientAddress.Location = _locationRepository.SaveLocation(clientAddress.Location);
 
+            //if (clientAddress.LocationId == 0)
+            //    _locationRepository.Add(clientAddress.Location);
+            
             /* Added by swati for effective Date on 02-06-2019 */
-            _clientAddressRepository.AddOrUpdate(clientAddress);
+            _clientAddressRepository.Update(clientAddress);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Client address failed on save.");
             return Ok(clientAddress.Id);
