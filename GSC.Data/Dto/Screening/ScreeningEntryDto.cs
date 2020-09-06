@@ -24,7 +24,7 @@ namespace GSC.Data.Dto.Screening
             set => _screeningDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
 
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public int ProjectId { get; set; }
         public bool IsTesting { get; set; }
         public bool? IsFitnessFit { get; set; }

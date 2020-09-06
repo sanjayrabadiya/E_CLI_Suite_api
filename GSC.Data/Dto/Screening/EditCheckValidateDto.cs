@@ -37,7 +37,7 @@ namespace GSC.Data.Dto.Screening
     }
     public class ScheduleTemplateDto
     {
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public int ScreeningTemplateId { get; set; }
     }
     public class ScheduleCheckValidateDto
@@ -65,7 +65,7 @@ namespace GSC.Data.Dto.Screening
         public ProjectScheduleOperator? Operator { get; set; }
         public bool IsTarget { get; set; }
         public bool HasQueries { get; set; }
-        public ScreeningStatus? Status { get; set; }
+        public ScreeningTemplateStatus? Status { get; set; }
         public int ScreeningTemplateValueId { get; set; }
         public EditCheckValidateType ValidateType { get; set; }
     }

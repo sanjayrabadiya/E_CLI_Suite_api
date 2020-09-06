@@ -25,7 +25,7 @@ namespace GSC.Respository.Screening
         bool IsDiscontinued(int screeningTemplateId);
         List<PeriodQueryStatusDto> GetQueryStatusByPeridId(int projectDesignPeriodId);
 
-        int GetQueryCountByVisitId(int projectDesignVisitId, int screeningEntryid);
+        int GetQueryCountByVisitId(int screeningVisitId);
 
         List<DashboardQueryStatusDto> GetQueryByProjectDesignId(int projectDesignId);
         CommonDto GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters);

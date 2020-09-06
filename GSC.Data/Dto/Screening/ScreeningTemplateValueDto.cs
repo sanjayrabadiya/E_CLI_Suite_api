@@ -28,7 +28,7 @@ namespace GSC.Data.Dto.Screening
         public bool IsSystem { get; set; }
         public List<EditCheckIds> EditCheckIds { get; set; }
         public CollectionSources? CollectionSource { get; set; }
-        public ScreeningStatus ScreeningStatus { get; set; }
+        public ScreeningTemplateStatus ScreeningStatus { get; set; }
         public int ScreeningEntryId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
     }

@@ -155,7 +155,7 @@ namespace GSC.Data.Dto.Project.Design
             get => _scheduleDate?.UtcDateTime();
             set => _scheduleDate = value?.UtcDateTime();
         }
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
     }
 
     public class WorkFlowButton

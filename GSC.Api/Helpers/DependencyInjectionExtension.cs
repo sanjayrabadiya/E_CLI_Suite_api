@@ -151,6 +151,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IScreeningHistoryRepository, ScreeningHistoryRepository>();
             services.AddScoped<IScreeningTemplateValueEditCheckRepository, ScreeningTemplateValueEditCheckRepository>();
             services.AddScoped<IScreeningTemplateValueScheduleRepository, ScreeningTemplateValueScheduleRepository>();
+            services.AddScoped<IScreeningVisitRepository, ScreeningVisitRepository>();
             services.AddScoped<IScreeningTemplateValueCommentRepository, ScreeningTemplateValueCommentRepository>();
             services.AddScoped<IScreeningTemplateValueAuditRepository, ScreeningTemplateValueAuditRepository>();
             services.AddScoped<IScreeningTemplateValueQueryRepository, ScreeningTemplateValueQueryRepository>();

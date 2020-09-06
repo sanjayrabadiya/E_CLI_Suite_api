@@ -209,7 +209,7 @@ namespace GSC.Helper
         [Description("None Register")] NoneRegister = 3
     }
 
-    public enum ScreeningStatus : short
+    public enum ScreeningTemplateStatus : short
     {
         [Description("Not Started")] Pending = 1,
         [Description("In Progress")] InProcess = 2,
@@ -479,5 +479,16 @@ namespace GSC.Helper
     {
         [Description("English")] en = 1,
         [Description("Germany")] ge = 2
+    }
+
+    public enum ScreeningVisitStatus : short
+    {
+        [Description("Not Started")] NotStarted = 1,
+        [Description("In Progress")] InProgress = 2,
+        [Description("Missed")] Missed = 3,
+        [Description("Scheduled")] Scheduled = 4,
+        [Description("Re-Schedule")] ReSchedule = 5,
+        [Description("OnHold")] OnHold = 6,
+        [Description("Completed")] Completed = 7
     }
 }

@@ -15,7 +15,6 @@ namespace GSC.Respository.Project.Design
 
         IList<DropDownDto> GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource, int? refVariable);
         IList<DropDownDto> GetClonnedTemplateDropDown(int id);
-        IList<ProjectDesignTemplate> GetTemplateIdsByPeriordId(int projectDesignPeriodId);
 
         IList<DropDownDto> GetTemplateDropDownByPeriodId(int projectDesignPeriodId,
             VariableCategoryType variableCategoryType);

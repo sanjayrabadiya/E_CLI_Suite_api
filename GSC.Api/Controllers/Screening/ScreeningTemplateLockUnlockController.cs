@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.Screening
         [HttpPut]
         [Route("LockUnlockTemplateList/{status}")]
         [TransactionRequired]
-        public IActionResult LockUnlockTemplateList([FromBody] ScreeningTemplateLockUnlockAuditDto item, ScreeningStatus status)
+        public IActionResult LockUnlockTemplateList([FromBody] ScreeningTemplateLockUnlockAuditDto item, ScreeningTemplateStatus status)
         {
             var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.Id == item.ScreeningTemplateId && x.DeletedDate == null).FirstOrDefault();
 

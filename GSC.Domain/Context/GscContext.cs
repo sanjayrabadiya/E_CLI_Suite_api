@@ -154,6 +154,7 @@ namespace GSC.Domain.Context
         public DbSet<UserFavoriteScreen> UserFavoriteScreen { get; set; }
         public DbSet<ScreeningEntry> ScreeningEntry { get; set; }
         public DbSet<ScreeningTemplate> ScreeningTemplate { get; set; }
+        public DbSet<ScreeningVisit> ScreeningVisit { get; set; }
         public DbSet<ScreeningTemplateValue> ScreeningTemplateValue { get; set; }
         public DbSet<ScreeningTemplateValueEditCheck> ScreeningTemplateValueEditCheck { get; set; }
         public DbSet<ScreeningTemplateValueSchedule> ScreeningTemplateValueSchedule { get; set; }

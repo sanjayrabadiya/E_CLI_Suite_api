@@ -11,7 +11,7 @@ namespace GSC.Respository.Attendance
     public interface INoneRegisterRepository : IGenericRepository<NoneRegister>
     {
         void SaveNonRegister(NoneRegister noneRegister, NoneRegisterDto noneRegisterDto);
-        List<NoneRegisterDto> GetNonRegisterList(int projectId, bool isDeleted);
+        List<NoneRegisterGridDto> GetNonRegisterList(int projectId, bool isDeleted);
 
         string Duplicate(NoneRegister objSave, int projectId);
     }

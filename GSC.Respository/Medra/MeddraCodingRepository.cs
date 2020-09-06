@@ -76,15 +76,16 @@ namespace GSC.Respository.Medra
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
 
-            var Exists = All.Where(x => x.ScreeningTemplateValue.ProjectDesignVariableId == meddraCodingDto.ProjectDesignVariableId && projectList.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.ProjectId) && x.DeletedDate == null && x.MeddraSocTermId != null);
+            var Exists = All.Where(x => x.ScreeningTemplateValue.ProjectDesignVariableId == meddraCodingDto.ProjectDesignVariableId 
+            && projectList.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) && x.DeletedDate == null && x.MeddraSocTermId != null);
 
             if (meddraCodingDto.ProjectId != 0)
             {
-                Exists = Exists.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.ProjectId == meddraCodingDto.ProjectId);
+                Exists = Exists.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == meddraCodingDto.ProjectId);
             }
             if (meddraCodingDto.CountryId != 0)
             {
-                Exists = Exists.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Project.CountryId == meddraCodingDto.CountryId);
+                Exists = Exists.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.CountryId == meddraCodingDto.CountryId);
             }
 
             var result = Exists.ToList();
@@ -94,11 +95,11 @@ namespace GSC.Respository.Medra
             var variable = (from st in Context.ScreeningTemplate
                             join pt in Context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
                             join pdv in Context.ProjectDesignVariable on pt.Id equals pdv.ProjectDesignTemplateId
-                            join se in Context.ScreeningEntry on st.ScreeningEntryId equals se.Id
+                            join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id
                             join attendance in Context.Attendance on se.AttendanceId equals attendance.Id
                             join project in Context.Project.Where(x => projectList.Contains(x.Id)) on se.ProjectId equals project.Id
                             join counry in Context.Country on project.CountryId equals counry.Id
-                            where pdv.DeletedDate == null && pdv.Id == meddraCodingDto.ProjectDesignVariableId && st.Status != ScreeningStatus.Pending && st.Status != ScreeningStatus.InProcess
+                            where pdv.DeletedDate == null && pdv.Id == meddraCodingDto.ProjectDesignVariableId && st.Status != ScreeningTemplateStatus.Pending && st.Status != ScreeningTemplateStatus.InProcess
                             && (meddraCodingDto.ProjectId != 0 ? se.ProjectId == meddraCodingDto.ProjectId : true)
                             && (meddraCodingDto.CountryId != 0 ? project.CountryId == meddraCodingDto.CountryId : true)
                             && attendance.NoneRegister.RandomizationNumber != null
@@ -111,14 +112,14 @@ namespace GSC.Respository.Medra
             objList.All = variable == null ? 0 : variable.All;
 
 
-            if (result.Count > 0)
+            if (result.Count() > 0)
             {
-                objList.CodedData = result.Count;
+                objList.CodedData = result.Count();
                 objList.ApprovalData = result.FindAll(t => t.IsApproved == true).Count();
-                objList.ModifiedDate = result[result.Count - 1].ModifiedDate;
-                int updated = (int)result[result.Count - 1].ModifiedBy;
+                objList.ModifiedDate = result[result.Count() - 1].ModifiedDate;
+                int updated = (int)result[result.Count() - 1].ModifiedBy;
                 objList.ModifiedBy = _userRepository.Find(updated).UserName;
-                objList.ModifiedByRole = _roleRepository.Find((int)result[result.Count - 1].CreatedRole).RoleName;
+                objList.ModifiedByRole = _roleRepository.Find((int)result[result.Count() - 1].CreatedRole).RoleName;
             }
             else
             {
@@ -216,8 +217,8 @@ namespace GSC.Respository.Medra
 
             var result = (from se in Context.ScreeningEntry
                           join project in Context.Project.Where(x => projectList.Contains(x.Id)) on se.ProjectId equals project.Id
-                          join st in Context.ScreeningTemplate.Where(t => t.DeletedDate == null && ((filters.TemplateStatus != null && filters.ExtraData == false) ? t.Status == ScreeningStatus.Completed
-                          : true) && ((filters.TemplateStatus != null && filters.ExtraData == true) ? t.ReviewLevel == filters.TemplateStatus : true) && t.Status != ScreeningStatus.Pending && t.Status != ScreeningStatus.InProcess) on se.Id equals st.ScreeningEntryId
+                          join st in Context.ScreeningTemplate.Where(t => t.DeletedDate == null && ((filters.TemplateStatus != null && filters.ExtraData == false) ? t.Status == ScreeningTemplateStatus.Completed
+                          : true) && ((filters.TemplateStatus != null && filters.ExtraData == true) ? t.ReviewLevel == filters.TemplateStatus : true) && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on se.Id equals st.ScreeningVisit.ScreeningEntryId
                           join pt in Context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
                           join visit in Context.ProjectDesignVisit on pt.ProjectDesignVisitId equals visit.Id
                           join pdv in Context.ProjectDesignVariable.Where(val => val.DeletedDate == null && val.Id == filters.ProjectDesignVariableId)
@@ -322,10 +323,10 @@ namespace GSC.Respository.Medra
 
             var r1 = (from stv in Context.ScreeningTemplateValue
                       join pdvv in Context.ProjectDesignVariableValue on stv.Value equals pdvv.ValueName
-                      join st in Context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningStatus.Pending && t.Status != ScreeningStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
-                      join visit in Context.ProjectDesignVisit on st.ProjectDesignVisitId equals visit.Id
+                      join st in Context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
+                      join visit in Context.ProjectDesignVisit on st.ScreeningVisitId equals visit.Id
                       join pt in Context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
-                      join se in Context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningEntryId equals se.Id
+                      join se in Context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningVisit.ScreeningEntryId equals se.Id
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()
@@ -362,11 +363,11 @@ namespace GSC.Respository.Medra
 
             var r2 = (from stv in Context.ScreeningTemplateValue
                       join mllt in Context.MeddraLowLevelTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on stv.Value equals mllt.llt_name
-                      join st in Context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningStatus.Pending && t.Status != ScreeningStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
+                      join st in Context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
                       join pdv in Context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
-                      join visit in Context.ProjectDesignVisit on st.ProjectDesignVisitId equals visit.Id
+                      join visit in Context.ProjectDesignVisit on st.ScreeningVisitId equals visit.Id
                       join pt in Context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
-                      join se in Context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningEntryId equals se.Id
+                      join se in Context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningVisit.ScreeningEntryId equals se.Id
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()
@@ -404,10 +405,10 @@ namespace GSC.Respository.Medra
             var r3 = (from stv in Context.ScreeningTemplateValue
                       join stvc in Context.ScreeningTemplateValueChild on stv.Id equals stvc.ScreeningTemplateValueId
                       join pdvv in Context.ProjectDesignVariableValue on stvc.ProjectDesignVariableValueId equals pdvv.Id
-                      join st in Context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningStatus.Pending && t.Status != ScreeningStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
-                      join visit in Context.ProjectDesignVisit on st.ProjectDesignVisitId equals visit.Id
+                      join st in Context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
+                      join visit in Context.ProjectDesignVisit on st.ScreeningVisitId equals visit.Id
                       join pt in Context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
-                      join se in Context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningEntryId equals se.Id
+                      join se in Context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningVisit.ScreeningEntryId equals se.Id
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()

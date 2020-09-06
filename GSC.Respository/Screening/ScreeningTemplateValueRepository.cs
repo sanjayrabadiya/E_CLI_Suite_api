@@ -105,7 +105,7 @@ namespace GSC.Respository.Screening
 
         public List<QueryStatusDto> GetQueryStatusBySubject(int screeningEntryId)
         {
-            var result = All.Where(x => x.ScreeningTemplate.ScreeningEntryId == screeningEntryId &&
+            var result = All.Where(x => x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId &&
                                                            x.QueryStatus != QueryStatus.Closed && x.QueryStatus != null)
                 .Select(r => new { r.ScreeningTemplateId, r.QueryStatus, r.AcknowledgeLevel }).ToList();
 
@@ -134,25 +134,22 @@ namespace GSC.Respository.Screening
         public List<PeriodQueryStatusDto> GetQueryStatusByPeridId(int projectDesignPeriodId)
         {
             return All.Where(x => x.DeletedDate == null &&
-                                  x.ScreeningTemplate.ScreeningEntry.ProjectDesignPeriodId == projectDesignPeriodId
-                                  && x.QueryStatus != null
-                                  && x.ScreeningTemplate.ProjectDesignVisitId != null).Select(r =>
-                new PeriodQueryStatusDto
-                {
-                    ScreeningEntryId = r.ScreeningTemplate.ScreeningEntryId,
-                    AcknowledgeLevel = r.AcknowledgeLevel,
-                    QueryStatus = r.QueryStatus
-                }).ToList();
+                                  x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId == projectDesignPeriodId
+                                  && x.QueryStatus != null).Select(r =>
+            new PeriodQueryStatusDto
+            {
+                ScreeningEntryId = r.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
+                AcknowledgeLevel = r.AcknowledgeLevel,
+                QueryStatus = r.QueryStatus
+            }).ToList();
         }
 
-        //Chnages by Vipul 09/03/2020 get extra param screeningEntryId
-        public int GetQueryCountByVisitId(int projectDesignVisitId, int screeningEntryid)
+
+        public int GetQueryCountByVisitId(int screeningVisitId)
         {
             return All.Count(x => x.DeletedDate == null &&
-                                  x.ScreeningTemplate.ProjectDesignVisitId == projectDesignVisitId
-                                  && x.ScreeningTemplate.ScreeningEntryId == screeningEntryid
-                                  && x.QueryStatus != null && x.QueryStatus != QueryStatus.Closed
-                                  && x.ScreeningTemplate.ProjectDesignVisitId != null);
+                                  x.ScreeningTemplate.ScreeningVisitId == screeningVisitId
+                                  && x.QueryStatus != null && x.QueryStatus != QueryStatus.Closed);
         }
 
         public void DeleteChild(int screeningTemplateValueId)
@@ -227,30 +224,13 @@ namespace GSC.Respository.Screening
         }
 
         public List<DashboardQueryStatusDto> GetQueryByProjectDesignId(int projectDesignId)
-        // public List<DashboardQueryStatusDto> GetQueryByProjectDesignId(int projectDesignId,int screeningEntryId)
         {
-            //return All.Where(x => x.DeletedDate == null &&
-            // x.ScreeningTemplate.ScreeningEntry.ProjectDesignId == projectDesignId
-            // && x.ScreeningTemplate.ScreeningEntryId == screeningEntryId
-            //  && x.QueryStatus != null).
-            // GroupBy(c => new { c.ScreeningTemplate.ScreeningEntryId,c.QueryStatus }).
-            // Select(g => new DashboardQueryStatusDto
-            // {
-            //     ScreeningEntryId = g.Key.ScreeningEntryId,
-            //     Open = g.Count(x => x.QueryStatus == QueryStatus.Open),
-            //     Answered = g.Count(x => x.QueryStatus == QueryStatus.Answered),
-            //     Resolved = g.Count(x => x.QueryStatus == QueryStatus.Resolved),
-            //     ReOpened = g.Count(x => x.QueryStatus == QueryStatus.Reopened),
-            //     Closed = g.Count(x => x.QueryStatus == QueryStatus.Closed),
-            //     SelfCorrection = g.Count(x => x.QueryStatus == QueryStatus.SelfCorrection),
-            //     Acknowledge = g.Count(x => x.QueryStatus == QueryStatus.Acknowledge)
-            // }).ToList();
+
 
             return All.Where(x => x.DeletedDate == null &&
-                                  x.ScreeningTemplate.ScreeningEntry.ProjectDesignId == projectDesignId
-                                  //&& x.ScreeningTemplate.ScreeningEntryId == screeningEntryId
+                                  x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignId == projectDesignId
                                   && x.QueryStatus != null)
-                .GroupBy(c => new { c.ScreeningTemplate.ScreeningEntryId, c.QueryStatus }).Select(r =>
+                .GroupBy(c => new { c.ScreeningTemplate.ScreeningVisit.ScreeningEntryId, c.QueryStatus }).Select(r =>
                       new DashboardQueryStatusDto
                       {
                           ScreeningEntryId = r.Key.ScreeningEntryId,
@@ -273,10 +253,10 @@ namespace GSC.Respository.Screening
                                  join template in Context.ScreeningTemplate.Where(u =>
                                          (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
                                          && (filters.VisitIds == null ||
-                                             filters.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId)) &&
+                                             filters.VisitIds.Contains(u.ScreeningVisit.ProjectDesignVisitId)) &&
                                          (filters.DomainIds == null ||
                                           filters.DomainIds.Contains(u.ProjectDesignTemplate.DomainId)) && u.DeletedDate == null)
-                                     on screening.Id equals template.ScreeningEntryId
+                                     on screening.Id equals template.ScreeningVisit.ScreeningEntryId
                                  //join value in Context.ScreeningTemplateValue.Where(val => val.DeletedDate == null
                                  //                                                                      && val.ProjectDesignVariable
                                  //                                                                          .DeletedDate == null) on new
@@ -316,10 +296,10 @@ namespace GSC.Respository.Screening
                                      TemplateName = template.ProjectDesignTemplate.TemplateName,
                                      DomainName = template.ProjectDesignTemplate.Domain.DomainName,
                                      DomainId = template.ProjectDesignTemplate.DomainId,
-                                     VisitId = template.ProjectDesignVisitId,
-                                     RepeatedVisit = template.RepeatedVisit,
-                                     Visit = template.ProjectDesignVisit.DisplayName +
-                                             Convert.ToString(template.RepeatedVisit == null ? "" : "_" + template.RepeatedVisit),
+                                     VisitId = template.ScreeningVisitId,
+                                     RepeatedVisit = template.ScreeningVisit.RepeatedVisitNumber,
+                                     Visit = template.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                                             Convert.ToString(template.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + template.ScreeningVisit.RepeatedVisitNumber),
                                      VariableName = value == null ? null : value.ProjectDesignVariable.VariableName,
                                      VariableId = value == null ? 0 : value.ProjectDesignVariableId,
                                      Annotation = value == null ? null : value.ProjectDesignVariable.Annotation,
@@ -417,8 +397,8 @@ namespace GSC.Respository.Screening
                                      join pdv in Context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
                                      join D in Context.Domain on pdv.DomainId equals D.Id
                                      join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id
-                                     join visit in Context.ProjectDesignVisit on st.ProjectDesignVisitId equals visit.Id
-                                     join se in Context.ScreeningEntry on st.ScreeningEntryId equals se.Id
+                                     join visit in Context.ProjectDesignVisit on st.ScreeningVisitId equals visit.Id
+                                     join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id
                                      join p in Context.Project on se.ProjectId equals p.Id
                                      join A in Context.Attendance on se.AttendanceId equals A.Id
                                      join lltDto in Context.MeddraLowLevelTerm on meddra.MeddraLowLevelTermId equals lltDto.Id into Mllt
@@ -442,8 +422,8 @@ namespace GSC.Respository.Screening
                                          ScreeningNumber = se.ScreeningNo,
                                          RandomizationNumber = nonregister.RandomizationNumber,
                                          Initial = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
-                                         RepeatedVisit = st.RepeatedVisit,
-                                         Visit = st.ProjectDesignVisit.DisplayName + Convert.ToString(st.RepeatedVisit == null ? "" : "_" + st.RepeatedVisit),
+                                         RepeatedVisit = st.ScreeningVisit.RepeatedVisitNumber,
+                                         Visit = st.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(st.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + st.ScreeningVisit .RepeatedVisitNumber),
                                          TemplateName = st.RepeatSeqNo == null && st.ParentId == null ? st.ProjectDesignTemplate.DesignOrder + " " + st.ProjectDesignTemplate.TemplateName
                                             : st.ProjectDesignTemplate.DesignOrder + "." + st.RepeatSeqNo + " " + st.ProjectDesignTemplate.TemplateName,
                                          VariableAnnotation = pdv.Annotation,

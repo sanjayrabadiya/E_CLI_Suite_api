@@ -13,7 +13,7 @@ namespace GSC.Data.Dto.Screening
         public int? VolunteerId { get; set; }
         public bool IsLock { get; set; }
         public List<int> Ids { get; set; }
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
     }
 
     public class ScreeningTemplateLockUnlockDto
@@ -24,7 +24,7 @@ namespace GSC.Data.Dto.Screening
         public string ProjectName { get; set; }
         public string VisitName { get; set; }
         public string TemplateName { get; set; }
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public string StatusName { get; set; }
     }
 
@@ -97,7 +97,7 @@ namespace GSC.Data.Dto.Screening
         public int ProjectDesignId { get; set; }
         public int ProjectId { get; set; }
         public int? ParentProjectId { get; set; }
-        public ScreeningStatus ScreeningStatusNo { get; set; }
+        public ScreeningTemplateStatus ScreeningStatusNo { get; set; }
         public short? ReviewLevel { get; set; }
         public string DesignOrder { get; set; }
         public int SeqNo { get; set; }

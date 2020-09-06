@@ -6,7 +6,7 @@ using GSC.Data.Entities.Location;
 
 namespace GSC.Data.Dto.Attendance
 {
-    public class NoneRegisterDto : BaseAuditDto
+    public class NoneRegisterDto : BaseDto
     {
         [Required(ErrorMessage = "Project is required.")]
         public int ProjectId { get; set; }
@@ -45,14 +45,73 @@ namespace GSC.Data.Dto.Attendance
         public string LegalEmail { get; set; }
         public int? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
-
-        public string CityName { get; set; }
-        // public int? CompanyId { get; set; }
-        public City City { get; set; }
-
         public int StateId { get; set; }
 
         public int CountryId { get; set; }
+
+        public string ScreeningNumber { get; set; }
+        public DateTime? _DateOfScreening { get; set; }
+        public DateTime? DateOfScreening
+        {
+            get => _DateOfScreening.UtcDate();
+            set => _DateOfScreening = value.UtcDate();
+        }
+        public string RandomizationNumber { get; set; }
+        public DateTime? _DateOfRandomization { get; set; }
+        public DateTime? DateOfRandomization
+        {
+            get => _DateOfRandomization.UtcDate();
+            set => _DateOfRandomization = value.UtcDate();
+        }
+        public int AttendanceId { get; set; }
+
+        public int? ParentProjectId { get; set; }
+
+        public int ProjectDesignPeriodId { get; set; }
+        public int? CompanyId { get; set; }
+
+        public bool IsLocked { get; set; }
+    }
+
+
+
+    public class NoneRegisterGridDto : BaseAuditDto
+    {
+
+        public int ProjectId { get; set; }
+
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+
+        public string LastName { get; set; }
+
+        public string Initial { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+
+        public int? Gender { get; set; }
+
+        public string PrimaryContactNumber { get; set; }
+        public string EmergencyContactNumber { get; set; }
+
+        public string Email { get; set; }
+
+        public string Qualification { get; set; }
+
+        public string Occupation { get; set; }
+
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
+
+        public string LegalFirstName { get; set; }
+        public string LegalMiddleName { get; set; }
+        public string LegalLastName { get; set; }
+        public string LegalEmergencyCoNumber { get; set; }
+        public string LegalEmail { get; set; }
+        public int? LegalRelationship { get; set; }
+        public bool LegalStatus { get; set; }
+
+        public string CityName { get; set; }
+
 
         public string StateName { get; set; }
 
@@ -72,28 +131,12 @@ namespace GSC.Data.Dto.Attendance
             set => _DateOfRandomization = value.UtcDate();
         }
         public int AttendanceId { get; set; }
-        //public int ProjectId { get; set; }
-        public int? ParentProjectId { get; set; }
+
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
-        public int ProjectDesignPeriodId { get; set; }
-        // public int? CompanyId { get; set; }
 
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
-        public int CreatedBy { get; set; }
-        public int? DeletedBy { get; set; }
-        public int? ModifiedBy { get; set; }
-
-        public DateTime? CreatedDate { get; set; }
-        public DateTime? ModifiedDate { get; set; }
-        public DateTime? DeletedDate { get; set; }
-        public int? CompanyId { get; set; }
-        public string CompanyName { get; set; }
         public bool IsLocked { get; set; }
     }
-
 
     public class RandomizationDto : BaseDto
     {

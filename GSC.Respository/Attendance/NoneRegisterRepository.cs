@@ -61,30 +61,24 @@ namespace GSC.Respository.Attendance
             _attendanceRepository.SaveAttendance(attendance);
         }
 
-        public List<NoneRegisterDto> GetNonRegisterList(int projectId, bool isDeleted)
+        public List<NoneRegisterGridDto> GetNonRegisterList(int projectId, bool isDeleted)
         {
             var result = All.Where(r => r.ProjectId == projectId && (isDeleted ? r.DeletedDate != null : r.DeletedDate == null)).Select(x =>
-                 new NoneRegisterDto
+                 new NoneRegisterGridDto
                  {
                      Id = x.Id,
                      AttendanceId = x.AttendanceId,
                      ProjectCode = x.Project.ProjectCode,
                      ProjectId = x.ProjectId,
-                     ParentProjectId = x.Project.ParentProjectId,
                      ProjectName = x.Project.ProjectName,
                      Initial = x.Initial,
                      ScreeningNumber = x.ScreeningNumber,
                      DateOfScreening = x.DateOfScreening,
                      RandomizationNumber = x.RandomizationNumber,
                      DateOfRandomization = x.DateOfRandomization,
-                     ProjectDesignPeriodId = x.Attendance.ProjectDesignPeriodId,
-                     CreatedBy = (int)x.CreatedBy,
-                     ModifiedBy = x.ModifiedBy,
-                     DeletedBy = x.DeletedBy,
                      CreatedDate = x.CreatedDate,
                      ModifiedDate = x.ModifiedDate,
                      DeletedDate = x.ModifiedDate,
-                     CompanyId = x.CompanyId,
                      FirstName = x.FirstName,
                      LastName = x.LastName,
                      MiddleName = x.MiddleName,
@@ -95,34 +89,14 @@ namespace GSC.Respository.Attendance
                      Email = x.Email,
                      Qualification = x.Qualification,
                      Occupation = x.Occupation,
-                     ZipCode = x.ZipCode,
                      AddressLine1 = x.AddressLine1,
                      AddressLine2 = x.AddressLine2,
                      IsDeleted = x.DeletedDate == null ? false : true,
-                     LanguageId = x.LanguageId,
-                     CityId = x.CityId,
+
                  }).OrderByDescending(x => x.Id).ToList();
 
-            result.ForEach(b =>
-            {
-                b.StateId = b.CityId != null ? _cityRepository.Find((int)b.CityId).StateId : 0;
-                b.CountryId = b.StateId == 0 ? 0 : _stateRepository.Find(b.StateId).CountryId;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-            });
-
-            foreach (var item in result)
-            {
-                var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningEntry.AttendanceId == item.AttendanceId && x.DeletedDate == null).ToList();
-                if (screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false))
-                {
-                    item.IsLocked = false;
-                }
-                else
-                {
-                    item.IsLocked = true;
-                }
-            }
+           
+            
 
             return result;
 

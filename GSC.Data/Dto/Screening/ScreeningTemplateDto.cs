@@ -15,7 +15,7 @@ namespace GSC.Data.Dto.Screening
         [Required(ErrorMessage = "Template is required.")]
         public int ProjectDesignTemplateId { get; set; }
 
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public int? ParentId { get; set; }
         public int ProjectDesignVisitId { get; set; }
         public int? RepeatedVisit { get; set; }
@@ -45,7 +45,7 @@ namespace GSC.Data.Dto.Screening
         public int Id { get; set; }
         public int ScreeningEntryId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public int? ParentId { get; set; }
         public int? DomainId { get; set; }
         public int? RepeatedVisit { get; set; }

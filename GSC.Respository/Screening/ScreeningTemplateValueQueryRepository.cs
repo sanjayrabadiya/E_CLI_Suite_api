@@ -266,14 +266,14 @@ namespace GSC.Respository.Screening
             var result = All.Where(x => x.DeletedDate == null && x.QueryStatus != QueryStatus.Closed
             ).Select(a => new ScreeningQueryReviewDto
             {
-                ScreeningEntryId = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Id,
-                ScreeningDate = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.ScreeningDate,
-                ProjectName = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Project.ProjectName,
-                VolunteerName = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Attendance.Volunteer == null
-                    ? a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Attendance.NoneRegister.Initial
-                    : a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Attendance.Volunteer.FullName,
+                ScreeningEntryId = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Id,
+                ScreeningDate = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ScreeningDate,
+                ProjectName = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectName,
+                VolunteerName = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                    ? a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+                    : a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.FullName,
                 TemplateName = a.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
-                VistName = a.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.ProjectDesignVisit
+                VistName = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit
                     .DisplayName,
                 VariableName = a.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
                 ScreeningTemplateId = a.ScreeningTemplateValue.ScreeningTemplateId,
@@ -283,14 +283,14 @@ namespace GSC.Respository.Screening
                 Comments = a.Note,
                 SubmittedDate = a.CreatedDate,
                 SubmittedBy = a.CreatedByUser.UserName,
-                ScreeningNo = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.ScreeningNo +
-                              " |Project Name: " + a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Project
+                ScreeningNo = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ScreeningNo +
+                              " |Project Name: " + a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project
                                   .ProjectName
                               + " |Volunteer Name: " +
-                              a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Attendance.Volunteer == null
-                    ? a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Attendance.NoneRegister.Initial
-                    : a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.Attendance.Volunteer.FullName +
-                      " |Screening Date: " + a.ScreeningTemplateValue.ScreeningTemplate.ScreeningEntry.ScreeningDate
+                              a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                    ? a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+                    : a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.FullName +
+                      " |Screening Date: " + a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ScreeningDate
             }).ToList();
 
             return result;
@@ -305,7 +305,7 @@ namespace GSC.Respository.Screening
                                from stv in templatevalue.DefaultIfEmpty()
                                join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
                                from st in stemplate.DefaultIfEmpty()
-                               join se in Context.ScreeningEntry on st.ScreeningEntryId equals se.Id into entry
+                               join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
                                from sEntry in entry.DefaultIfEmpty()
                                join p in Context.Project on sEntry.ProjectId equals p.Id into project
                                from p in project.DefaultIfEmpty()
@@ -326,9 +326,9 @@ namespace GSC.Respository.Screening
             var queryStatus = (from p in Context.Project
                                join se in Context.ScreeningEntry on p.Id equals se.ProjectId into entry
                                from sEntry in entry.DefaultIfEmpty()
-                               join st in Context.ScreeningTemplate on sEntry.Id equals st.ScreeningEntryId into stemplate
+                               join st in Context.ScreeningTemplate on sEntry.Id equals st.ScreeningVisit.ScreeningEntryId into stemplate
                                from st in stemplate.DefaultIfEmpty()
-                               join pdv in Context.ProjectDesignVisit on st.ProjectDesignVisitId equals pdv.Id into design
+                               join pdv in Context.ProjectDesignVisit on st.ScreeningVisitId equals pdv.Id into design
                                from pdesign in design.DefaultIfEmpty()
                                join stv in Context.ScreeningTemplateValue on st.Id equals stv.ScreeningTemplateId into templatevalue
                                from stv in templatevalue.DefaultIfEmpty()
@@ -366,7 +366,7 @@ namespace GSC.Respository.Screening
                                from stv in templatevalue.DefaultIfEmpty()
                                join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
                                from st in stemplate.DefaultIfEmpty()
-                               join se in Context.ScreeningEntry on st.ScreeningEntryId equals se.Id into entry
+                               join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
                                from sEntry in entry.DefaultIfEmpty()
                                join p in Context.Project on sEntry.ProjectId equals p.Id into project
                                from p in project.DefaultIfEmpty()
@@ -393,15 +393,15 @@ namespace GSC.Respository.Screening
                                from stv in templatevalue.DefaultIfEmpty()
                                join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
                                from st in stemplate.DefaultIfEmpty()
-                               join pdv in Context.ProjectDesignVisit on st.ProjectDesignVisitId equals pdv.Id into design
+                               join pdv in Context.ProjectDesignVisit on st.ScreeningVisitId equals pdv.Id into design
                                from pdesign in design.DefaultIfEmpty()
-                               join se in Context.ScreeningEntry on st.ScreeningEntryId equals se.Id into entry
+                               join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
                                from sEntry in entry.DefaultIfEmpty()
                                join p in Context.Project on sEntry.ProjectId equals p.Id into project
                                from p in project.DefaultIfEmpty()
                                where p.Id == projectId || p.ParentProjectId == projectId
                                orderby pdesign.Id
-                               group new { stvq, pdesign, st } by new { pdesign.Description, st.ProjectDesignVisitId }
+                               group new { stvq, pdesign, st } by new { pdesign.Description, st.ScreeningVisitId }
                 into g
                                select new DashboardQueryStatusDto
                                {
@@ -431,9 +431,9 @@ namespace GSC.Respository.Screening
                              join template in Context.ScreeningTemplate.Where(u =>
                                      (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
                                      && (filters.VisitIds == null ||
-                                         filters.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId))) on screening.Id
+                                         filters.VisitIds.Contains(u.ScreeningVisit.ProjectDesignVisitId))) on screening.Id
                                  equals
-                                 template.ScreeningEntryId
+                                 template.ScreeningVisit.ScreeningEntryId
                              join value in Context.ScreeningTemplateValue.Where(val =>
                                  filters.DataEntryBy == null || val.CreatedBy == filters.DataEntryBy) on template.Id equals value
                                  .ScreeningTemplateId
@@ -489,8 +489,8 @@ namespace GSC.Respository.Screening
                                  OldValue = query.OldValue,
                                  CollectionSource = (int)value.ProjectDesignVariable.CollectionSource,
                                  ScreeningTemplateValue = template.ProjectDesignTemplate.TemplateName,
-                                 Visit = template.ProjectDesignVisit.DisplayName +
-                                         Convert.ToString(template.RepeatedVisit == null ? "" : "_" + template.RepeatedVisit),
+                                 Visit = template.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                                         Convert.ToString(template.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + template.ScreeningVisit.RepeatedVisitNumber),
                                  AcknowledgementStatus =
                                      query.QueryStatus.GetDescription() == QueryStatus.Acknowledge.GetDescription()
                                          ? "Acknowledge"
@@ -543,7 +543,7 @@ namespace GSC.Respository.Screening
         public IList<QueryManagementDto> GetGenerateQueryBy(int projectId)
         {
             var queryData = (from screening in Context.ScreeningEntry.Where(t => t.ProjectId == projectId)
-                             join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningEntryId
+                             join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
                              join value in Context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
                              join query in Context.ScreeningTemplateValueQuery.Where(q => q.QueryStatus == QueryStatus.Open) on
                                  value.Id equals query.ScreeningTemplateValueId
@@ -570,7 +570,7 @@ namespace GSC.Respository.Screening
         public IList<QueryManagementDto> GetDataEntryBy(int projectId)
         {
             var dataEntryData = (from screening in Context.ScreeningEntry.Where(t => t.ProjectId == projectId)
-                                 join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningEntryId
+                                 join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
                                  join value in Context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
                                  join audit in Context.ScreeningTemplateValueAudit on value.Id equals audit.ScreeningTemplateValueId
                                  join reasonTemp in Context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
@@ -596,14 +596,20 @@ namespace GSC.Respository.Screening
         {
             if (_workFlowLevelDto != null) return _workFlowLevelDto;
 
-            var screeningTemplate = Context.ScreeningTemplate.Find(screeningTemplateId);
-            if (screeningTemplate == null) return new WorkFlowLevelDto { IsWorkFlowBreak = false, LevelNo = -1 };
-            var screeningEntry = Context.ScreeningEntry.Find(screeningTemplate.ScreeningEntryId);
-            if (screeningEntry == null) return new WorkFlowLevelDto { IsWorkFlowBreak = false, LevelNo = -1 };
+            var templateData = Context.ScreeningTemplate.Where(x => x.Id == screeningTemplateId).Select(r => new
+            {
+                r.ScreeningVisit.ScreeningEntryId,
+                r.ScreeningVisit.ScreeningEntry.ProjectDesignId,
+                r.StartLevel
+            }).FirstOrDefault();
 
-            var workFlowLevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningEntry.ProjectDesignId);
-            if (screeningTemplate.StartLevel != null)
-                workFlowLevel.StartLevel = (short)screeningTemplate.StartLevel;
+            if (templateData == null) return new WorkFlowLevelDto { IsWorkFlowBreak = false, LevelNo = -1 };
+        
+            var workFlowLevel = _projectWorkflowRepository.GetProjectWorkLevel(templateData.ProjectDesignId);
+
+            if (templateData.StartLevel != null)
+                workFlowLevel.StartLevel = (short)templateData.StartLevel;
+
             _workFlowLevelDto = workFlowLevel;
 
             return _workFlowLevelDto;

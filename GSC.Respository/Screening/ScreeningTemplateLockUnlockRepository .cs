@@ -58,9 +58,9 @@ namespace GSC.Respository.Screening
                 VolunteerNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.NoneRegister.ScreeningNumber : x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
                 RandomizationNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.NoneRegister.RandomizationNumber : x.ScreeningEntry.Attendance.ProjectSubject.Number,
                 AttendanceId = x.ScreeningEntry.Attendance.Id,
-                ProjectDesignTemplateId = x.ScreeningTemplate.ProjectDesignTemplate.Id,
-                VisitId = x.ScreeningTemplate.ProjectDesignVisitId,
-                VisitName = x.ScreeningTemplate.ProjectDesignTemplate.ProjectDesignVisit.DisplayName + Convert.ToString(x.ScreeningTemplate.RepeatedVisit == null ? "" : "_" + x.ScreeningTemplate.RepeatedVisit),
+                ProjectDesignTemplateId = x.ScreeningTemplate.ScreeningVisit.Id,
+                VisitId = x.ScreeningTemplate.ScreeningVisitId,
+                VisitName = x.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
                 ProjectDesignTemplateName = x.ScreeningTemplate.RepeatSeqNo == null && x.ScreeningTemplate.ParentId == null ? x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + " " + x.ScreeningTemplate.ProjectDesignTemplate.TemplateName
                                             : x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder+ "." + x.ScreeningTemplate.RepeatSeqNo + " " + x.ScreeningTemplate.ProjectDesignTemplate.TemplateName,                
                 DesignOrder = x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder.ToString(),

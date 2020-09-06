@@ -74,7 +74,7 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            //var volunteerNonregister = _noneRegisterRepository.Find(id);
+
 
             var volunteerNonregister = _noneRegisterRepository.FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
                 .SingleOrDefault();
@@ -82,24 +82,7 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest();
 
             var volunteerNonregisterDto = _mapper.Map<NoneRegisterDto>(volunteerNonregister);
-            if (volunteerNonregister.City != null)
-            {
-                volunteerNonregisterDto.CityId = volunteerNonregister.City.Id;
-                volunteerNonregisterDto.CityName = volunteerNonregister.City.CityName;
-            }
-
-            if (volunteerNonregister.City?.State != null)
-            {
-                volunteerNonregisterDto.StateId = volunteerNonregister.City.State.Id;
-                volunteerNonregisterDto.StateName = volunteerNonregister.City.State.StateName;
-            }
-
-            if (volunteerNonregister.City?.State?.Country != null)
-            {
-                volunteerNonregisterDto.CountryId = volunteerNonregister.City.State.Country.Id;
-                volunteerNonregisterDto.CountryName = volunteerNonregister.City.State.Country.CountryName;
-            }
-
+           
             return Ok(volunteerNonregisterDto);
         }
 

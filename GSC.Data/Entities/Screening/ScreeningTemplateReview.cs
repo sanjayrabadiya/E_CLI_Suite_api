@@ -9,7 +9,7 @@ namespace GSC.Data.Entities.Screening
     {
         public int ScreeningTemplateId { get; set; }
         public int RoleId { get; set; }
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public short ReviewLevel { get; set; }
         public bool IsRepeat { get; set; }
 

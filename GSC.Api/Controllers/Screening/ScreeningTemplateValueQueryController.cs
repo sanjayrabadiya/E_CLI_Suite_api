@@ -174,14 +174,17 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateValueQueryRepository.SelfGenerate(screeningTemplateValueQuery,
                 screeningTemplateValueQueryDto, screeningTemplateValue, screeningTemplate);
 
-            //_meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
+            _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
+
             if (_uow.Save() <= 0)
                 throw new Exception("Creating Self Generate Screening Template Value Query failed on save.");
+
+            var screeningEntryId = _screeningTemplateRepository.GeScreeningEntryId(screeningTemplate.Id);
 
             if (screeningTemplateValue.Children != null && screeningTemplateValue.Children.Count > 0)
                 screeningTemplateValueQueryDto.Value = string.Join(",", _uow.Context.ScreeningTemplateValueChild.Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
 
-            var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningTemplate.ScreeningEntryId, screeningTemplate.Id,
+            var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningEntryId, screeningTemplate.Id,
                 screeningTemplateValueQueryDto.IsNa ? "NA" : screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
                 screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.RepeatSeqNo);
 
@@ -190,7 +193,7 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplateValueQueryDto.CollectionSource == CollectionSources.DateTime ||
                 screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Time)
             {
-                scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.Id,
+                scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id,
                    screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
                    screeningTemplateValue.ProjectDesignVariableId, true);
             }

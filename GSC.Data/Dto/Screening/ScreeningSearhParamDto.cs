@@ -22,7 +22,7 @@ namespace GSC.Data.Dto.Screening
             set => _ToDate = value.UtcDate();
         }
 
-        public ScreeningStatus? ScreeningStatus { get; set; }
+        public ScreeningTemplateStatus? ScreeningStatus { get; set; }
         public string TextSearch { get; set; }
         public bool? IsFitnessFit { get; set; }
         public AttendanceType AttendanceType { get; set; }

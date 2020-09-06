@@ -328,9 +328,7 @@ namespace GSC.Respository.ProjectRight
                                           }).ToList().OrderByDescending(y => y.AssignedDate).ToList(),
 
                 ProjectCreatedBy = x.CreatedBy
-                //RollbackReason = x.Key.RollbackReason,
-                //TrainerId = x.Key.DeletedBy,
-                //RollbackOn = x.Key.DeletedDate
+
             }
             ).ToList();
 

@@ -32,5 +32,8 @@ namespace GSC.Respository.Screening
         ScreeningTemplateValueSaveBasics ValidateVariableValue(ScreeningTemplateValue screeningTemplateValue, List<EditCheckIds> EditCheckIds, CollectionSources? collectionSource);
 
         void SubmitReviewTemplate(int screeningTemplateId,bool isLockUnLock);
+
+        int GetProjectDesignId(int screeningTemplateId);
+        int GeScreeningEntryId(int screeningTemplateId);
     }
 }
