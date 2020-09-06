@@ -298,11 +298,11 @@ namespace GSC.Domain.Context
         {
             SetModifiedInformation(jwtTokenAccesser);
 
-            var auditTrails = GetAuditTrailCommons(jwtTokenAccesser);
+            //var auditTrails = GetAuditTrailCommons(jwtTokenAccesser);
 
             var result = base.SaveChanges();
 
-            SaveAuditTrailCommons(auditTrails);
+            //SaveAuditTrailCommons(auditTrails);
 
             return result;
         }

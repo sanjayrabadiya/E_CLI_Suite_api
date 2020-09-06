@@ -24,7 +24,7 @@ namespace GSC.Common.UnitOfWork
 
         public int Save()
         {
-            var aduitResult = _auditTracker.GetAuditTracker();
+            _auditTracker.GetAuditTracker();
             return Context.SaveChanges(_jwtTokenAccesser);
         }
 

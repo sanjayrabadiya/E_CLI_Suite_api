@@ -15,11 +15,11 @@ namespace GSC.Audit
 
         List<Dictionary> LoadDictionaries()
         {
-            SetDictionariesForTenant();
+            SetDictionariesForMaster();
            
             return _dictionaries;
         }
-        void SetDictionariesForTenant()
+        void SetDictionariesForMaster()
         {
 
             _dictionaries.Add(new Dictionary { FieldName = "TitleId", DisplayName = "Title", SourceColumn = "Title", TableName = "LstTitle" });

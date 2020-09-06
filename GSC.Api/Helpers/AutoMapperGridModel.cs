@@ -30,12 +30,14 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.DomainClassName, x => x.MapFrom(a => a.DomainClass.DomainClassName)).ReverseMap();
 
             CreateMap<DomainClass, DomainClassGridDto>().ReverseMap();
-            
+
             CreateMap<Drug, DrugGridDto>().ReverseMap();
             CreateMap<AuditReason, AuditReasonGridDto>().ReverseMap();
             CreateMap<BlockCategory, BlockCategoryGridDto>().ReverseMap();
             CreateMap<CityArea, CityAreaGridDto>().ReverseMap();
-            CreateMap<City, CityGridDto>().ReverseMap();
+            CreateMap<City, CityGridDto>()
+                .ForMember(x => x.StateName, x => x.MapFrom(a => a.State.StateName))
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.State.Country.CountryName)).ReverseMap();
             CreateMap<Country, CountryGridDto>().ReverseMap();
             CreateMap<ContactType, ContactTypeGridDto>().ReverseMap();
             CreateMap<ClientType, ClientTypeGridDto>().ReverseMap();

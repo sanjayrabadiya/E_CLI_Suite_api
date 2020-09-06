@@ -7,6 +7,6 @@ namespace GSC.Common
 {
     public interface IAuditTracker
     {
-        List<TrackerResult> GetAuditTracker();
+        void GetAuditTracker();
     }
 }

@@ -40,10 +40,7 @@ namespace GSC.Data.Dto.Location
     {
         public string CityCode { get; set; }
         public string CityName { get; set; }
-        public int StateId { get; set; }
-        public int CountryId { get; set; }
         public string StateName { get; set; }
         public string CountryName { get; set; }
-        public State State { get; set; }
     }
 }
