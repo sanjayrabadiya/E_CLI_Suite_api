@@ -13,12 +13,13 @@ namespace GSC.Respository.Audit
     public class AuditTrailRepository : GenericRespository<AuditTrail, GscContext>, IAuditTrailRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
+        private readonly IUnitOfWork<GscContext> _uow;
         public AuditTrailRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uow = uow;
         }
 
         public void Save(AuditModule moduleId, AuditTable tableId, AuditAction action, int recordId,
@@ -57,7 +58,7 @@ namespace GSC.Respository.Audit
                 Add(t);
             });
 
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
         }
 
         public IList<AuditTrailDto> Search(AuditTrailDto search)

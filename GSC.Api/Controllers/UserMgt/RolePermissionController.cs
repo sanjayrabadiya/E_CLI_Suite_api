@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using GSC.Respository.UserMgt;
@@ -39,6 +40,7 @@ namespace GSC.Api.Controllers.UserMgt
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] List<RolePermission> rolePermissions)
         {
             if (!ModelState.IsValid || !rolePermissions.Any()) return new UnprocessableEntityObjectResult(ModelState);
@@ -48,6 +50,7 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok();
         }
         [HttpPut]
+        [TransactionRequired]
         public IActionResult Put([FromBody] List<RolePermission> rolePermissions)
         {
             if (!ModelState.IsValid || !rolePermissions.Any()) return new UnprocessableEntityObjectResult(ModelState);

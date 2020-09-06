@@ -18,7 +18,7 @@ namespace GSC.Respository.Attendance
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-
+        private readonly IUnitOfWork<GscContext> _uow;
         public ProjectSubjectRepository(IUnitOfWork<GscContext> uow,
             INumberFormatRepository numberFormatRepository,
             IProjectRepository projectRepository,
@@ -34,6 +34,7 @@ namespace GSC.Respository.Attendance
             _attendanceRepository = attendanceRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _attendanceHistoryRepository = attendanceHistoryRepository;
+            _uow = uow;
         }
 
         public void SaveSubjectForVolunteer(int attendanceId, int screeningTemplateId)
@@ -99,7 +100,7 @@ namespace GSC.Respository.Attendance
 
             projectSubject.Number = GetSubjectNumer(projectId, parentProjectId, numberType);
             Add(projectSubject);
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
 
             return projectSubject;
         }

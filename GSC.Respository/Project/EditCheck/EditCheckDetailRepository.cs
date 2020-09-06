@@ -16,12 +16,14 @@ namespace GSC.Respository.Project.EditCheck
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork<GscContext> _uow;
         public EditCheckDetailRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(uow,
             jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _uow = uow;
         }
 
         public EditCheckDetailDto GetDetailById(int id)
@@ -147,7 +149,7 @@ namespace GSC.Respository.Project.EditCheck
 
                 Update(x);
             });
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
         }
     }
 }

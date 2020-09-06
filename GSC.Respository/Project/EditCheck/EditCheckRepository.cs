@@ -26,6 +26,7 @@ namespace GSC.Respository.Project.EditCheck
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IMapper _mapper;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
+        private readonly IUnitOfWork<GscContext> _uow;
         public EditCheckRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository,
@@ -40,6 +41,7 @@ namespace GSC.Respository.Project.EditCheck
             _editCheckDetailRepository = editCheckDetailRepository;
             _editCheckRuleRepository = editCheckRuleRepository;
             _mapper = mapper;
+            _uow = uow;
         }
 
         public List<EditCheckDto> GetAll(int projectDesignId, bool isDeleted)
@@ -229,7 +231,7 @@ namespace GSC.Respository.Project.EditCheck
 
             Update(editCheck);
 
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
 
             return editCheck;
         }

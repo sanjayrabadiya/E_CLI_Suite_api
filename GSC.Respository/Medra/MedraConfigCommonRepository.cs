@@ -17,10 +17,12 @@ namespace GSC.Respository.Medra
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IUnitOfWork<GscContext> _uow;
         public MedraConfigCommonRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uow = uow;
         }
 
         public void AddDataInMedraTableUsingAsciiFile(int MedraConfigId, string path, FolderType folderType, string Language, string Version, string Rootname)
@@ -199,7 +201,7 @@ namespace GSC.Respository.Medra
                     //}
                 }
 
-                Context.SaveChanges(_jwtTokenAccesser);
+                _uow.Save();
             }
             // ProcessFile(fileName);
 

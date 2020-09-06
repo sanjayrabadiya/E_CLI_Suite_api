@@ -16,11 +16,13 @@ namespace GSC.Respository.ProjectRight
         IProjectDocumentReviewRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IUnitOfWork<GscContext> _uow;
 
         public ProjectDocumentReviewRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) : base(
             uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uow = uow;
         }
 
         public void SaveByUserId(int projectId, int userId)
@@ -152,7 +154,7 @@ namespace GSC.Respository.ProjectRight
                 }
             }
 
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
         }
 
 

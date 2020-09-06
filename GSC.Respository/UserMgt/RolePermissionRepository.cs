@@ -12,12 +12,13 @@ namespace GSC.Respository.UserMgt
     public class RolePermissionRepository : GenericRespository<RolePermission, GscContext>, IRolePermissionRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
+        private readonly IUnitOfWork<GscContext> _uow;
         public RolePermissionRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uow = uow;
         }
 
         public void Save(List<RolePermission> rolePermissions)
@@ -28,14 +29,14 @@ namespace GSC.Respository.UserMgt
             if (existing.Any())
             {
                 Context.RolePermission.RemoveRange(existing);
-                Context.SaveChanges(_jwtTokenAccesser);
+                _uow.Save();
             }
 
             rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
                 .ToList();
 
             Context.RolePermission.AddRange(rolePermissions);
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
         }
        
         public void updatePermission(List<RolePermission> rolePermissions)
@@ -46,13 +47,13 @@ namespace GSC.Respository.UserMgt
             if (existing.Any())
             {
                 Context.RolePermission.RemoveRange(existing);
-                Context.SaveChanges(_jwtTokenAccesser);
+                _uow.Save();
             }
 
             rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
                 .ToList();
             Context.RolePermission.UpdateRange(rolePermissions);
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
         }
 
         public List<RolePermissionDto> GetByRoleId(int roleId)

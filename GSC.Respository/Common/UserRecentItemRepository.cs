@@ -12,12 +12,13 @@ namespace GSC.Respository.Common
     public class UserRecentItemRepository : GenericRespository<UserRecentItem, GscContext>, IUserRecentItemRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
+        private readonly IUnitOfWork<GscContext> _uow;
         public UserRecentItemRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uow = uow;
         }
 
         public void SaveUserRecentItem(UserRecentItem userRecentItem)
@@ -30,7 +31,7 @@ namespace GSC.Respository.Common
                 userRecentItem.UserId = _jwtTokenAccesser.UserId;
                 userRecentItem.RoleId = _jwtTokenAccesser.RoleId;
                 Add(userRecentItem);
-                Context.SaveChanges(_jwtTokenAccesser);
+                _uow.Save();
             }
         }
 

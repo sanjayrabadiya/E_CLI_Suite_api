@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
@@ -133,6 +134,7 @@ namespace GSC.Api.Controllers.ProjectRight
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] ProjectDocumentDto projectDocumentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);

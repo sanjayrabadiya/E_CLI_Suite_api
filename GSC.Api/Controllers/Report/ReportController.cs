@@ -105,7 +105,7 @@ namespace GSC.Api.Controllers.Report
 
                 _projectDesignReportSettingRepository.Update(reportSettingForm);
             }
-            if (_uow.Context.SaveChanges(_jwtTokenAccesser) <= 0)
+            if (_uow.Save() <= 0)
             {
                 throw new Exception($"Creating Report Setting failed on save.");
             }

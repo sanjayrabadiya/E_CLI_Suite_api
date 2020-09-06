@@ -22,7 +22,6 @@ namespace GSC.Respository.Volunteer
         IVolunteerRepository
     {
         private readonly ICityRepository _cityRepository;
-        private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly INumberFormatRepository _numberFormatRepository;
@@ -31,10 +30,10 @@ namespace GSC.Respository.Volunteer
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        private readonly IUnitOfWork<GscContext> _uow;
 
         public VolunteerRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser,
-            IUserRepository userRepository,
             INumberFormatRepository numberFormatRepository,
             IUploadSettingRepository uploadSettingRepository,
             ICityRepository cityRepository,
@@ -47,7 +46,6 @@ namespace GSC.Respository.Volunteer
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _userRepository = userRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _numberFormatRepository = numberFormatRepository;
             _cityRepository = cityRepository;
@@ -56,6 +54,7 @@ namespace GSC.Respository.Volunteer
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
+            _uow = uow;
         }
 
         public IList<VolunteerGridDto> GetVolunteerList()
@@ -205,7 +204,7 @@ namespace GSC.Respository.Volunteer
                 volunteer.Status = VolunteerStatus.Completed;
                 volunteer.VolunteerNo = GetVolunteerNumber();
                 Update(volunteer);
-                Context.SaveChanges(_jwtTokenAccesser);
+                _uow.Save();
                 return new VolunteerStatusCheck
                 {
                     Id = id,

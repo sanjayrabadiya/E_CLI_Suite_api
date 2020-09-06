@@ -15,7 +15,6 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
-using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Workflow;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +32,7 @@ namespace GSC.Respository.Screening
         private readonly IEditCheckImpactRepository _editCheckImpactRepository;
         private readonly IMapper _mapper;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
+        private readonly IUnitOfWork<GscContext> _uow;
         public ScreeningTemplateRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository, IMapper mapper,
@@ -52,6 +52,7 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
             _editCheckImpactRepository = editCheckImpactRepository;
             _screeningTemplateValueEditCheckRepository = screeningTemplateValueEditCheckRepository;
+            _uow = uow;
         }
 
         private ScreeningTemplateBasic GetScreeningTemplateBasic(int screeningTemplateId)
@@ -156,7 +157,7 @@ namespace GSC.Respository.Screening
                 var template = Find(screeningTemplateBasic.Id);
                 template.IsDisable = false;
                 Update(template);
-                Context.SaveChanges(_jwtTokenAccesser);
+                _uow.Save();
             }
 
             return designTemplateDto;

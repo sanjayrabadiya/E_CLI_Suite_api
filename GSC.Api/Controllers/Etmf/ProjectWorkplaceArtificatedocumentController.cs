@@ -21,6 +21,7 @@ using Syncfusion.EJ2.DocumentEditor;
 using System.Net.Http;
 using GSC.Domain;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
+using GSC.Api.Helpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -121,6 +122,7 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
         {
             var Project = _projectRepository.Find(projectWorkplaceArtificatedocumentDto.ProjectId);
