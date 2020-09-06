@@ -35,11 +35,6 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            //var products = _productRepository
-            //    .All.Where(x =>
-            //        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-            //        && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
-            //    ).ToList();
 
             var products = _productRepository.FindByInclude(x => (x.CompanyId == null
                                                                   || x.CompanyId == _jwtTokenAccesser.CompanyId) &&

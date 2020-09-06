@@ -18,6 +18,7 @@ namespace GSC.Respository.Attendance
         IList<VolunteerAttendaceDto> GetAttendanceAnotherPeriod(VolunteerSearchDto search);
         void SaveAttendance(Data.Entities.Attendance.Attendance attendance);
 
+        List<AttendanceScreeningGridDto> GetAttendaceListByLock(ScreeningSearhParamDto attendanceSearch, bool isLock);
         List<AttendanceScreeningGridDto> GetAttendaceForProjectRightList(ScreeningSearhParamDto attendanceSearch);
         List<DropDownDto> GetAttendanceForMeddraCodingDropDown(MeddraCodingSearchDto filters);
     }

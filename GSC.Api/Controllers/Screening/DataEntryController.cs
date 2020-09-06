@@ -33,7 +33,14 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_dataEntryRespository.GetDataEntriesBySubject(projectDesignPeriodId, projectId));
         }
 
-     
+
+
+        [HttpGet]
+        [Route("GetDataEntriesBySubjectForGrid/{projectDesignPeriodId}/{projectId}")]
+        public IActionResult GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int projectId)
+        {
+            return Ok(_dataEntryRespository.GetDataEntriesBySubjectForGrid(projectDesignPeriodId, projectId));
+        }
 
         [HttpGet]
         [Route("GetVisitForDataEntry/{attendanceId}/{screeningEntryId}")]

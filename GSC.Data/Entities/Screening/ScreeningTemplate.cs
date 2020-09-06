@@ -25,8 +25,6 @@ namespace GSC.Data.Entities.Screening
         public bool IsLocked { get; set; }
         public bool IsCompleteReview { get; set; }
         public bool IsDisable { get; set; }
-        public int? EditCheckDetailId { get; set; }
-        public bool IsEditChecked { get; set; }
         public int? RepeatSeqNo { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
     }

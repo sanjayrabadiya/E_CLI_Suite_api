@@ -231,7 +231,13 @@ namespace GSC.Api.Controllers.Master
             return Ok(_projectRepository.GetProjectsForDataEntry());
         }
 
-      
+
+        [HttpGet]
+        [Route("GetProjectsByLock/{isLock}")]
+        public IActionResult GetProjectsByLock(bool isLock)
+        {
+            return Ok(_projectRepository.GetProjectsByLock(isLock));
+        }
 
         [HttpGet]
         [Route("GetChildProjectWithParentProjectDropDown/{parentProjectId}")]

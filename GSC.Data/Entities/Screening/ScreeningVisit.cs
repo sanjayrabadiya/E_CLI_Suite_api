@@ -14,6 +14,7 @@ namespace GSC.Data.Entities.Screening
         public int? RepeatedVisitNumber { get; set; }
         public int ProjectDesignVisitId { get; set; }
         public ScreeningVisitStatus Status { get; set; }
+        public int? Progress { get; set; }
         private DateTime? _visitStartDate { get; set; }
         public DateTime? VisitStartDate
         {
@@ -25,7 +26,7 @@ namespace GSC.Data.Entities.Screening
         public ScreeningEntry ScreeningEntry { get; set; }
         [ForeignKey("ParentId")]
         public ICollection<ScreeningVisit> Children { get; set; }
-        public int? Progress { get; set; }
+      
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public ICollection<ScreeningTemplate> ScreeningTemplates { get; set; }
     }

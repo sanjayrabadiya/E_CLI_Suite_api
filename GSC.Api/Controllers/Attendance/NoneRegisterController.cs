@@ -6,7 +6,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Entities.Attendance;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
@@ -90,6 +89,8 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Post([FromBody] NoneRegisterDto noneRegisterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+
             var projectDesignPeriod = _projectDesignPeriodRepository.FindBy(x =>
                 x.DeletedDate == null && x.ProjectDesign.DeletedDate == null &&
                 x.ProjectDesign.ProjectId == noneRegisterDto.ParentProjectId).FirstOrDefault();

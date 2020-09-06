@@ -322,6 +322,97 @@ namespace GSC.Respository.Master
             return projects;
         }
 
+        public IList<ProjectDropDown> GetProjectsByLock(bool isLock)
+        {
+            var projectIds = _projectRightRepository.GetProjectRightIdList();
+            if (!projectIds.Any()) return new List<ProjectDropDown>();
+            var projects = new List<ProjectDropDown>();
+
+            var screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.ToList();
+            if (isLock)
+            {
+                projects = All.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                        && x.DeletedDate == null
+                        && projectIds.Any(c => c == x.Id))
+                    .Select(c => new ProjectDropDown
+                    {
+                        Id = c.Id,
+                        IsStatic = c.IsStatic,
+                        Value = c.ProjectCode + " - " + c.ProjectName,
+                        ParentProjectId = c.ParentProjectId ?? c.Id
+                    }).OrderBy(o => o.Value).ToList();
+
+                var lstproject = All.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                        && x.DeletedDate == null
+                        && projectIds.Any(c => c == x.Id))
+                    .Select(c => new ProjectDropDown
+                    {
+                        Id = c.Id,
+                        IsStatic = c.IsStatic,
+                        Value = c.ProjectCode + " - " + c.ProjectName,
+                        ParentProjectId = c.ParentProjectId ?? c.Id
+                    }).OrderBy(o => o.Value).ToList();
+
+                try
+                {
+                    foreach (var item in lstproject)
+                    {
+                        if (!item.IsStatic)
+                        {
+                            var attendanceSearch = new ScreeningSearhParamDto();
+                            attendanceSearch.ProjectId = item.Id;
+                            attendanceSearch.AttendanceType = AttendanceType.Project;
+                            attendanceSearch.PeriodNo = 0;
+                            var volunteers = _attendanceRepository.GetAttendaceListByLock(attendanceSearch, isLock);
+                            if (volunteers.Count == 0)
+                            {
+                                projects.RemoveAll(x => x.Id == item.Id);
+                            }
+                        }
+                        else
+                        {
+                            var projectDesignPeriod = Context.ProjectDesign.Where(x => x.ProjectId == item.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
+                            var projectDesignPeriodId = projectDesignPeriod != null ? Context.ProjectDesignPeriod.Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignPeriod.Id).FirstOrDefault() != null ? Context.ProjectDesignPeriod.Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignPeriod.Id).FirstOrDefault().Id : 0 : 0;
+                            var volunteers = _volunteerRepository.getVolunteersForDataEntryByPeriodIdLocked(projectDesignPeriodId, item.Id, isLock);
+                            if (volunteers == null || volunteers.Count == 0)
+                            {
+                                projects.RemoveAll(x => x.Id == item.Id);
+                            }
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    throw ex;
+                }
+            }
+            else
+            {
+                projects = (from project in Context.Project.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && projectIds.Any(c => c == x.Id))
+                            join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
+                            .Select(y => new LockUnlockListDto
+                            {
+                                Id = y.LastOrDefault().Id,
+                                screeningEntryId = y.Key.ScreeningEntryId,
+                                ProjectId = y.LastOrDefault().ProjectId,
+                                ScreeningTemplateId = y.LastOrDefault().ScreeningTemplateId,
+                                IsLocked = y.LastOrDefault().IsLocked
+                            }).Where(x => x.IsLocked).ToList()
+                          on project.Id equals locktemplate.ProjectId
+                            group project by project.Id into gcs
+                            select new ProjectDropDown
+                            {
+                                Id = gcs.Key,
+                                Value = gcs.FirstOrDefault().ProjectCode + " - " + gcs.FirstOrDefault().ProjectName,
+                                IsStatic = gcs.FirstOrDefault().IsStatic,
+                                ParentProjectId = gcs.FirstOrDefault().ParentProjectId ?? gcs.FirstOrDefault().Id
+                            }).OrderBy(o => o.Value).ToList();
+            }
+            return projects;
+        }
+
 
         public List<ProjectDropDown> GetChildProjectDropDown(int parentProjectId)
         {

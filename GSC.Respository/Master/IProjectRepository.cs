@@ -18,6 +18,8 @@ namespace GSC.Respository.Master
         IList<ProjectDropDown> GetProjectForAttendance(bool isStatic);
         IList<ProjectDropDown> GetProjectsForDataEntry();
         List<ProjectDropDown> GetChildProjectDropDown(int parentProjectId);
+
+        IList<ProjectDropDown> GetProjectsByLock(bool isLock);
         string CheckChildProjectExists(int id);
         string CheckParentProjectExists(int id);
         int GetNoOfSite(int id);

@@ -30,7 +30,7 @@ namespace GSC.Audit
             List<TrackerResult> trackers = new List<TrackerResult>();
             try
             {
-                
+
 
                 var changeTracker = _gscContext.GetAuditTracker()
                     .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted).ToList();
@@ -47,7 +47,7 @@ namespace GSC.Audit
                         if (dictionary == null) continue;
                         string newValue = Convert.ToString(prop.CurrentValue);
                         string oldValue = "";
-                        if (dbValueProps.GetValue<object>(prop.Metadata.Name) != null)
+                        if (dbValueProps != null && dbValueProps.GetValue<object>(prop.Metadata.Name) != null)
                             oldValue = Convert.ToString(dbValueProps.GetValue<object>(prop.Metadata.Name));
 
                         if (prop.Metadata.PropertyInfo != null)

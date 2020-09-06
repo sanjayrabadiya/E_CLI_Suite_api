@@ -246,6 +246,79 @@ namespace GSC.Respository.Attendance
             return items;
         }
 
+        public List<AttendanceScreeningGridDto> GetAttendaceListByLock(ScreeningSearhParamDto attendanceSearch, bool isLock)
+        {
+            var items = new List<AttendanceScreeningGridDto>();
+            if (isLock)
+            {
+                items = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
+                         select new AttendanceScreeningGridDto
+                         {
+                             Id = attendance.Id,
+                             ProjectId = attendance.ProjectId,
+                             VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
+                             VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
+                             SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
+                             AttendanceId = attendance.Id,
+                         }).ToList();
+
+                var lstsubject = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
+                                  select new AttendanceScreeningGridDto
+                                  {
+                                      Id = attendance.Id,
+                                      ProjectId = attendance.ProjectId,
+                                      VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
+                                      VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
+                                      SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
+                                      AttendanceId = attendance.Id,
+                                  }).ToList();
+
+                foreach (var item in lstsubject)
+                {
+                    var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningVisit.ScreeningEntry.AttendanceId == item.AttendanceId && x.DeletedDate == null).ToList();
+                    if (screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false))
+                    {
+                        var itemexist = items.Where(x => x.Id == item.Id).FirstOrDefault();
+                        if (itemexist == null)
+                        {
+                            items.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        items.RemoveAll(x => x.Id == item.Id);
+                    }
+                }
+            }
+            else
+            {
+                var result = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
+                              join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
+                              on attendance.Id equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
+                              select new AttendanceScreeningGridDto
+                              {
+                                  Id = attendance.Id,
+                                  ProjectId = attendance.ProjectId,
+                                  VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
+                                  VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
+                                  SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
+                                  AttendanceId = attendance.Id,
+                                  IsLocked = locktemplate.IsLocked,
+                              }).Distinct().ToList();
+
+                items = result.Where(r => r.IsLocked).GroupBy(x => x.VolunteerName).Select(z => new AttendanceScreeningGridDto
+                {
+                    Id = z.FirstOrDefault().Id,
+                    ProjectId = z.FirstOrDefault().ProjectId,
+                    VolunteerName = z.FirstOrDefault().VolunteerName,
+                    VolunteerNumber = z.FirstOrDefault().VolunteerNumber,
+                    SubjectNumber = z.FirstOrDefault().SubjectNumber,
+                    AttendanceId = z.FirstOrDefault().AttendanceId,
+                }).ToList();
+
+            }
+            return items;
+        }
 
         public string CheckVolunteer(AttendanceDto attendanceDto)
         {

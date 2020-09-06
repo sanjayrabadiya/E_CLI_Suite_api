@@ -386,10 +386,8 @@ namespace GSC.Respository.Screening
             screeningTemplate.Id = 0;
             screeningTemplate.RepeatSeqNo = All.Count(x => x.ParentId == originalTemplate.Id) + 1;
             screeningTemplate.ScreeningVisitId = originalTemplate.ScreeningVisitId;
-            screeningTemplate.EditCheckDetailId = originalTemplate.EditCheckDetailId;
             screeningTemplate.IsDisable = originalTemplate.IsDisable;
             screeningTemplate.ProjectDesignTemplateId = originalTemplate.ProjectDesignTemplateId;
-            screeningTemplate.IsEditChecked = false;
             screeningTemplate.Status = ScreeningTemplateStatus.Pending;
             screeningTemplate.Children = null;
             screeningTemplate.IsDisable = false;

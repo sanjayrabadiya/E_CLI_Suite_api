@@ -8,8 +8,10 @@ namespace GSC.Data.Dto.Attendance
 {
     public class NoneRegisterDto : BaseDto
     {
+
         [Required(ErrorMessage = "Project is required.")]
         public int ProjectId { get; set; }
+        public int ProjectDesignPeriodId { get; set; }
         [Required(ErrorMessage = "First Name is required.")]
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
@@ -65,9 +67,7 @@ namespace GSC.Data.Dto.Attendance
         }
         public int AttendanceId { get; set; }
 
-        public int? ParentProjectId { get; set; }
-
-        public int ProjectDesignPeriodId { get; set; }
+        public int ParentProjectId { get; set; }
         public int? CompanyId { get; set; }
 
         public bool IsLocked { get; set; }
@@ -77,8 +77,6 @@ namespace GSC.Data.Dto.Attendance
 
     public class NoneRegisterGridDto : BaseAuditDto
     {
-
-        public int ProjectId { get; set; }
 
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
@@ -130,8 +128,6 @@ namespace GSC.Data.Dto.Attendance
             get => _DateOfRandomization.UtcDate();
             set => _DateOfRandomization = value.UtcDate();
         }
-        public int AttendanceId { get; set; }
-
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
 

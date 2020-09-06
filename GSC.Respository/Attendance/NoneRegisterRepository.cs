@@ -63,14 +63,12 @@ namespace GSC.Respository.Attendance
 
         public List<NoneRegisterGridDto> GetNonRegisterList(int projectId, bool isDeleted)
         {
-            var result = All.Where(r => r.ProjectId == projectId && (isDeleted ? r.DeletedDate != null : r.DeletedDate == null)).Select(x =>
+            var result = All.Where(r => r.Attendance.ProjectId == projectId && (isDeleted ? r.DeletedDate != null : r.DeletedDate == null)).Select(x =>
                  new NoneRegisterGridDto
                  {
                      Id = x.Id,
-                     AttendanceId = x.AttendanceId,
-                     ProjectCode = x.Project.ProjectCode,
-                     ProjectId = x.ProjectId,
-                     ProjectName = x.Project.ProjectName,
+                     ProjectCode = x.Attendance.Project.ProjectCode,
+                     ProjectName = x.Attendance.Project.ProjectName,
                      Initial = x.Initial,
                      ScreeningNumber = x.ScreeningNumber,
                      DateOfScreening = x.DateOfScreening,

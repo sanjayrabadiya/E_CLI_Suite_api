@@ -41,7 +41,13 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(volunteers);
         }
 
-      
+        [HttpPost]
+        [Route("GetAttendaceListByLock/{isLock}")]
+        public IActionResult GetAttendaceListByLock([FromBody] ScreeningSearhParamDto attendanceSearch, bool isLock)
+        {
+            var volunteers = _attendanceRepository.GetAttendaceListByLock(attendanceSearch, isLock);
+            return Ok(volunteers);
+        }
 
         [HttpPost]
         [Route("GetAttendaceForProjectRightList")]
