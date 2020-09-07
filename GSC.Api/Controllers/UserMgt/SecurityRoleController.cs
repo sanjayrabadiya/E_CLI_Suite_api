@@ -49,7 +49,6 @@ namespace GSC.Api.Controllers.UserMgt
             var securityRolesDto = _mapper.Map<IEnumerable<SecurityRoleDto>>(securityRoles);
             securityRolesDto.ForEach(b =>
             {
-               // b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
                 if (b.CreatedBy != null)
                     b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
                 if (b.ModifiedBy != null)
