@@ -55,18 +55,6 @@ namespace GSC.Api.Controllers.Master
             
             //var tests = _testRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.TestGroup)
             //    .OrderByDescending(x => x.Id).ToList();
-            //var testsDto = _mapper.Map<IEnumerable<TestDto>>(tests);
-            //testsDto.ForEach(b =>
-            //{                
-            //    if (b.CreatedBy != null)
-            //        b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-            //    if (b.ModifiedBy != null)
-            //        b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-            //    if (b.DeletedBy != null)
-            //        b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-            //    if (b.CompanyId != null)
-            //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            //});
             //return Ok(testsDto);
         }
 
