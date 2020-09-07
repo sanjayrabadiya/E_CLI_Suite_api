@@ -228,12 +228,12 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
-            screeningTemplate.Status = ScreeningTemplateStatus.Completed;
+            screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
 
             screeningTemplate.ScreeningTemplateReview = new List<ScreeningTemplateReview>();
             screeningTemplate.ScreeningTemplateReview.Add(new ScreeningTemplateReview
             {
-                Status = ScreeningTemplateStatus.Completed,
+                Status = ScreeningTemplateStatus.Reviewed,
                 ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel),
                 RoleId = _jwtTokenAccesser.RoleId
             });
@@ -242,7 +242,10 @@ namespace GSC.Api.Controllers.Screening
             var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(screeningTemplate.Id);
 
             if (screeningTemplate.ReviewLevel > _projectWorkflowRepository.GetMaxWorkFlowLevel(projectDesignId))
+            {
                 screeningTemplate.IsCompleteReview = true;
+                screeningTemplate.Status = ScreeningTemplateStatus.Completed;
+            }
 
             _screeningTemplateRepository.Update(screeningTemplate);
 
