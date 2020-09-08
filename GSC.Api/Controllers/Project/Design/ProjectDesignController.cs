@@ -48,44 +48,6 @@ namespace GSC.Api.Controllers.Project.Design
             _projectRightRepository = projectRightRepository;
         }
 
-        [HttpGet("{isDeleted:bool?}")]
-        public IList<ProjectDesignDto> Get(bool isDeleted)
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return new List<ProjectDesignDto>();
-
-            var projectDesigns = _projectDesignRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                    && projectList.Any(c => c == x.ProjectId), x => x.Project)
-                .Select(x => new ProjectDesignDto
-                {
-                    Id = x.Id,
-                    Period = x.Period,
-                    ProjectId = x.ProjectId,
-                    ProjectName = x.Project.ProjectName,
-                    IsStatic = x.Project.IsStatic,
-                    ProjectNumber = x.Project.ProjectCode,
-                    IsDeleted = x.DeletedDate != null,
-                    CreatedBy = x.CreatedBy,
-                    ModifiedBy = x.ModifiedBy,
-                    DeletedBy = x.DeletedBy,
-                    CreatedDate = x.CreatedDate,
-                    ModifiedDate = x.ModifiedDate,
-                    DeletedDate = x.DeletedDate,
-                }).OrderByDescending(x => x.Id).ToList();
-            foreach (var b in projectDesigns)
-            {
-                b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            }
-
-            return projectDesigns;
-        }
-
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -93,7 +55,6 @@ namespace GSC.Api.Controllers.Project.Design
             var projectDesign = _projectDesignRepository.FindByInclude(x => x.Id == id, x => x.Project)
                 .FirstOrDefault();
             var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
-            //projectDesignDto.Locked = !projectDesignDto.IsUnderTesting && _projectDesignRepository.IsScreeningStarted(projectDesignDto.Id);
             projectDesignDto.Locked = !projectDesignDto.IsUnderTesting;
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {

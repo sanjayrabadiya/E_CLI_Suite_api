@@ -171,8 +171,6 @@ namespace GSC.Respository.ProjectRight
 
         public void DeleteByDocumentId(int documnetId, int projectId)
         {
-            //var result = this.FindBy(x => x.ProjectId == projectId && x.ProjectDocumentId == documnetId)
-            //    .ToList();
             var result = FindBy(x => x.ProjectDocumentId == documnetId)
                 .ToList();
             foreach (var item in result)
@@ -230,26 +228,6 @@ namespace GSC.Respository.ProjectRight
         {
             var projectDashBoardDto = new ProjectDashBoardDto();
 
-            //projectDashBoardDto.ProjectList = this.All.Where(x => x.UserId == _jwtTokenAccesser.UserId
-            //&& !x.IsReview && this.Context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
-            //&& a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId
-            //&& x.DeletedDate == null) && this.Context.ProjectDocument.Any(a => a.ProjectId == x.ProjectId
-            //&& x.DeletedDate == null) &&
-            //x.DeletedDate == null).
-            //    Select(c => new ProjectDocumentReviewDto
-            //    {
-            //        Id = c.Id,
-            //        ProjectDocumentId = c.ProjectDocumentId,
-            //        ProjectId = c.ProjectId,
-            //        IsReview = c.IsReview,
-            //        UserId = c.UserId,                    
-            //        ProjectName = c.Project.ProjectName,
-            //        ProjectNumber = c.Project.ProjectCode,
-            //        DocumentPath = c.ProjectDocument.PathName,
-            //        FileName = c.ProjectDocument.FileName,
-            //        MimeType = c.ProjectDocument.MimeType
-            //    }).ToList();
-
             projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
                                                              && !x.IsReview && Context.ProjectRight.Any(a =>
                                                                  a.ProjectId == x.ProjectId
@@ -303,18 +281,6 @@ namespace GSC.Respository.ProjectRight
 
         public List<DropDownDto> GetProjectDropDownProjectRight()
         {
-            //var projectList = this.All.Where(x => x.UserId == _jwtTokenAccesser.UserId
-            //&& !x.IsReview && this.Context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
-            //&& a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId
-            //&& x.DeletedDate == null) && this.Context.ProjectDocument.Any(a => a.ProjectId == x.ProjectId
-            //&& x.DeletedDate == null) && x.DeletedDate == null).
-            //    Select(c => new DropDownDto
-            //    {
-            //        Id = c.ProjectId,
-            //        Value = c.Project.ProjectCode + " - " + c.Project.ProjectName,
-            //        Code = c.Project.ProjectCode
-            //    }).OrderBy(o => o.Value).Distinct().ToList();
-
             // changes by swati for child project
             var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
                                              && Context.ProjectRight.Any(a => a.ProjectId == x.ProjectId

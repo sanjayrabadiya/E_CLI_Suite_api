@@ -1,3 +1,5 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -29,7 +31,7 @@ namespace GSC.Respository.Master
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IVolunteerRepository _volunteerRepository;
-
+        private readonly IMapper _mapper;
 
         public ProjectRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
@@ -40,7 +42,8 @@ namespace GSC.Respository.Master
             IDesignTrialRepository designTrialRepository,
             IProjectRightRepository projectRightRepository,
             IAttendanceRepository attendanceRepository,
-            IVolunteerRepository volunteerRepository)
+            IVolunteerRepository volunteerRepository,
+            IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _numberFormatRepository = numberFormatRepository;
@@ -52,64 +55,17 @@ namespace GSC.Respository.Master
             _projectRightRepository = projectRightRepository;
             _attendanceRepository = attendanceRepository;
             _volunteerRepository = volunteerRepository;
+            _mapper = mapper;
         }
 
-        public IList<ProjectDto> GetProjectList(bool isDeleted)
+        public IList<ProjectGridDto> GetProjectList(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return new List<ProjectDto>();
+            if (projectList == null || projectList.Count == 0) return new List<ProjectGridDto>();
 
-            var projects = FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ParentProjectId == null
-                && projectList.Any(c => c == x.Id)
-            ).Select(x => new ProjectDto
-            {
-                Id = x.Id,
-                ProjectCode = x.ProjectCode,
-                ProjectName = x.ProjectName,
-                ProjectNumber = x.ProjectNumber,
-                ParentProjectId = x.ParentProjectId,
-                DesignTrialId = x.DesignTrialId,
-                CountryId = x.CountryId,
-                ClientId = x.ClientId,
-                DrugId = x.DrugId,
-                Period = x.Period,
-                RegulatoryType = x.RegulatoryType,
-                FromDate = x.FromDate,
-                ToDate = x.ToDate,
-                CompanyId = x.CompanyId,
-                ParentProjectName =
-                    x.ParentProjectId == null ? "" : Context.Project.Find(x.ParentProjectId).ProjectName,
-                DesignTrialName = Context.DesignTrial.Find(x.DesignTrialId).DesignTrialName,
-                TrialTypeId = Context.DesignTrial.Find(x.DesignTrialId).TrialTypeId,
-                CountryName = Context.Country.Find(x.CountryId).CountryName,
-                ClientName = Context.Client.Find(x.ClientId).ClientName,
-                DrugName = Context.Drug.Find(x.DrugId).DrugName,
-                RegulatoryTypeName = x.RegulatoryType.GetDescription(),
-                StateName = x.StateId == null ? "" : Context.State.Find(x.StateId).StateName,
-                CityName = x.CityId == null ? "" : Context.City.Find(x.CityId).CityName,
-                AreaName = x.CityAreaId == null ? "" : Context.CityArea.Find(x.CityAreaId).AreaName,
-                SiteName = x.SiteName,
-                PinCode = x.PinCode,
-                CreatedBy = x.CreatedBy,
-                CreatedDate = x.CreatedDate,
-                ModifiedDate = x.ModifiedDate,
-                DeletedDate = x.DeletedDate,
-                ModifiedBy = x.ModifiedBy,
-                DeletedBy = x.DeletedBy,
-                IsDeleted = x.DeletedDate != null,
-                AttendanceLimit = x.AttendanceLimit,
-                NoofSite = GetNoOfSite(x.Id),
-            }).OrderByDescending(x => x.Id).ToList();
-            foreach (var b in projects)
-            {
-                b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            }
+            var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ParentProjectId == null).
+                 ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
             projects.ForEach(x =>
             {
                 var design = Context.ProjectDesign.Where(t =>
@@ -322,98 +278,6 @@ namespace GSC.Respository.Master
             return projects;
         }
 
-        public IList<ProjectDropDown> GetProjectsByLock(bool isLock)
-        {
-            var projectIds = _projectRightRepository.GetProjectRightIdList();
-            if (!projectIds.Any()) return new List<ProjectDropDown>();
-            var projects = new List<ProjectDropDown>();
-
-            var screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.ToList();
-            if (isLock)
-            {
-                projects = All.Where(x =>
-                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                        && x.DeletedDate == null
-                        && projectIds.Any(c => c == x.Id))
-                    .Select(c => new ProjectDropDown
-                    {
-                        Id = c.Id,
-                        IsStatic = c.IsStatic,
-                        Value = c.ProjectCode + " - " + c.ProjectName,
-                        ParentProjectId = c.ParentProjectId ?? c.Id
-                    }).OrderBy(o => o.Value).ToList();
-
-                var lstproject = All.Where(x =>
-                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                        && x.DeletedDate == null
-                        && projectIds.Any(c => c == x.Id))
-                    .Select(c => new ProjectDropDown
-                    {
-                        Id = c.Id,
-                        IsStatic = c.IsStatic,
-                        Value = c.ProjectCode + " - " + c.ProjectName,
-                        ParentProjectId = c.ParentProjectId ?? c.Id
-                    }).OrderBy(o => o.Value).ToList();
-
-                try
-                {
-                    foreach (var item in lstproject)
-                    {
-                        if (!item.IsStatic)
-                        {
-                            var attendanceSearch = new ScreeningSearhParamDto();
-                            attendanceSearch.ProjectId = item.Id;
-                            attendanceSearch.AttendanceType = AttendanceType.Project;
-                            attendanceSearch.PeriodNo = 0;
-                            var volunteers = _attendanceRepository.GetAttendaceListByLock(attendanceSearch, isLock);
-                            if (volunteers.Count == 0)
-                            {
-                                projects.RemoveAll(x => x.Id == item.Id);
-                            }
-                        }
-                        else
-                        {
-                            var projectDesignPeriod = Context.ProjectDesign.Where(x => x.ProjectId == item.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
-                            var projectDesignPeriodId = projectDesignPeriod != null ? Context.ProjectDesignPeriod.Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignPeriod.Id).FirstOrDefault() != null ? Context.ProjectDesignPeriod.Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignPeriod.Id).FirstOrDefault().Id : 0 : 0;
-                            var volunteers = _volunteerRepository.getVolunteersForDataEntryByPeriodIdLocked(projectDesignPeriodId, item.Id, isLock);
-                            if (volunteers == null || volunteers.Count == 0)
-                            {
-                                projects.RemoveAll(x => x.Id == item.Id);
-                            }
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    throw ex;
-                }
-            }
-            else
-            {
-                projects = (from project in Context.Project.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && projectIds.Any(c => c == x.Id))
-                            join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
-                            .Select(y => new LockUnlockListDto
-                            {
-                                Id = y.LastOrDefault().Id,
-                                screeningEntryId = y.Key.ScreeningEntryId,
-                                ProjectId = y.LastOrDefault().ProjectId,
-                                ScreeningTemplateId = y.LastOrDefault().ScreeningTemplateId,
-                                IsLocked = y.LastOrDefault().IsLocked
-                            }).Where(x => x.IsLocked).ToList()
-                          on project.Id equals locktemplate.ProjectId
-                            group project by project.Id into gcs
-                            select new ProjectDropDown
-                            {
-                                Id = gcs.Key,
-                                Value = gcs.FirstOrDefault().ProjectCode + " - " + gcs.FirstOrDefault().ProjectName,
-                                IsStatic = gcs.FirstOrDefault().IsStatic,
-                                ParentProjectId = gcs.FirstOrDefault().ParentProjectId ?? gcs.FirstOrDefault().Id
-                            }).OrderBy(o => o.Value).ToList();
-            }
-            return projects;
-        }
-
-
         public List<ProjectDropDown> GetChildProjectDropDown(int parentProjectId)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
@@ -624,61 +488,13 @@ namespace GSC.Respository.Master
             return formulasCount;
         }
 
-        public IList<ProjectDto> GetSitesList(int projectId, bool isDeleted)
+        public IList<ProjectGridDto> GetSitesList(int projectId, bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return new List<ProjectDto>();
+            if (projectList == null || projectList.Count == 0) return new List<ProjectGridDto>();
 
-            var projects = FindBy(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ParentProjectId == projectId
-                && projectList.Any(c => c == x.Id)
-            ).Select(x => new ProjectDto
-            {
-                Id = x.Id,
-                ProjectCode = x.ProjectCode,
-                ProjectName = x.ProjectName,
-                ProjectNumber = x.ProjectNumber,
-                ParentProjectId = x.ParentProjectId,
-                DesignTrialId = x.DesignTrialId,
-                CountryId = x.CountryId,
-                ClientId = x.ClientId,
-                DrugId = x.DrugId,
-                Period = x.Period,
-                RegulatoryType = x.RegulatoryType,
-                FromDate = x.FromDate,
-                ToDate = x.ToDate,
-                CompanyId = x.CompanyId,
-                ParentProjectName =
-                    x.ParentProjectId == null ? "" : Context.Project.Find(x.ParentProjectId).ProjectName,
-                DesignTrialName = Context.DesignTrial.Find(x.DesignTrialId).DesignTrialName,
-                TrialTypeId = Context.DesignTrial.Find(x.DesignTrialId).TrialTypeId,
-                CountryName = Context.Country.Find(x.CountryId).CountryName,
-                ClientName = Context.Client.Find(x.ClientId).ClientName,
-                DrugName = Context.Drug.Find(x.DrugId).DrugName,
-                RegulatoryTypeName = x.RegulatoryType.GetDescription(),
-                StateName = x.StateId == null ? "" : Context.State.Find(x.StateId).StateName,
-                CityName = x.CityId == null ? "" : Context.City.Find(x.CityId).CityName,
-                AreaName = x.CityAreaId == null ? "" : Context.CityArea.Find(x.CityAreaId).AreaName,
-                SiteName = x.SiteName,
-                PinCode = x.PinCode,
-                CreatedBy = x.CreatedBy,
-                CreatedDate = x.CreatedDate,
-                ModifiedDate = x.ModifiedDate,
-                DeletedDate = x.DeletedDate,
-                ModifiedBy = x.ModifiedBy,
-                DeletedBy = x.DeletedBy,
-                IsDeleted = isDeleted,
-                AttendanceLimit = x.AttendanceLimit
-            }).OrderByDescending(x => x.Id).ToList();
-            foreach (var b in projects)
-            {
-                b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            }
+            var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ParentProjectId == projectId).
+                ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             projects.ForEach(x =>
             {
                 var design = Context.ProjectDesign.Where(t =>

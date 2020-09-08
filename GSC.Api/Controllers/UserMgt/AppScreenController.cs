@@ -42,17 +42,7 @@ namespace GSC.Api.Controllers.UserMgt
                 isDeleted ? x.DeletedDate != null : x.DeletedDate == null 
             ).OrderByDescending(x => x.Id).ToList();
             var appScreensDto = _mapper.Map<IEnumerable<AppScreenDto>>(appScreens);
-            appScreensDto.ForEach(b =>
-            {
-                if (b.CreatedBy != null)
-                    b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
+            
             foreach (var item in appScreensDto)
             {
                 var name = _appScreenRepository.All.Where(x => x.Id == item.ParentAppScreenId).Select(c => c.ScreenName)

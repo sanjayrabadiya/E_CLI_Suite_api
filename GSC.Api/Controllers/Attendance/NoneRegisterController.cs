@@ -56,10 +56,7 @@ namespace GSC.Api.Controllers.Attendance
          ).OrderByDescending(t => t.Id).ToList();
 
             var volunteerNonregisterDto = _mapper.Map<IEnumerable<NoneRegisterDto>>(volunteerNonregisters);
-            //volunteerNonregisterDto.ForEach(b =>
-            //{
-            //    b.Gender = _noneRegisterRepository.Find((int)b.Gender).Gender;
-            //});
+          
             return Ok(volunteerNonregisterDto);
         }
 
@@ -73,7 +70,6 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-
 
             var volunteerNonregister = _noneRegisterRepository.FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
                 .SingleOrDefault();

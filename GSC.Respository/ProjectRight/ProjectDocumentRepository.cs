@@ -44,24 +44,6 @@ namespace GSC.Respository.ProjectRight
                 CreatedDate = x.ModifiedDate,
                 IsReview = x.IsReview
             }).ToList();
-
-            //var document =
-            //    (from projectdoc in Context.ProjectDocument.Where(t => (t.ProjectId == id || t.Project.ParentProjectId == id) && t.DeletedDate == null)
-            //        join usermodified in Context.Users.Where(t => t.DeletedDate == null) on projectdoc.ModifiedBy equals
-            //            usermodified.Id
-            //        select new ProjectDocumentDto
-            //        {
-            //            Id = projectdoc.Id,
-            //            ProjectId = projectdoc.ProjectId,
-            //            FileName = projectdoc.FileName,
-            //            PathName = projectdoc.PathName,
-            //            MimeType = projectdoc.MimeType,
-            //            CreatedBy = projectdoc.ModifiedBy,
-            //            CreatedByName = usermodified.UserName,
-            //            CreatedDate = projectdoc.ModifiedDate,
-            //            IsReview = projectdoc.IsReview
-            //        }).OrderByDescending(t => t.Id).ToList();
-
         }
     }
 }

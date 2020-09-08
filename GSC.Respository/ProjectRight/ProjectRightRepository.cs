@@ -53,25 +53,6 @@ namespace GSC.Respository.ProjectRight
 
         public List<ProjectRightDto> GetProjectRightByProjectId(int projectId)
         {
-            //var projects = FindBy(x => x.ProjectId == projectId && x.DeletedDate == null).ToList();
-            //var roles = Context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectRightDto
-            //{
-            //    RoleId = c.Id,
-            //    Name = c.RoleName,
-            //    users = Context.UserRole.Where(a => a.UserRoleId == c.Id && a.User.DeletedDate == null
-            //                                                             && a.DeletedDate == null).Select(r =>
-            //        new ProjectRightDto
-            //        {
-            //            RoleId = c.Id,
-            //            UserId = r.UserId,
-            //            Name = r.User.UserName,
-            //            IsSelected = projects.Any(b => b.RoleId == c.Id && b.UserId == r.UserId)
-            //        }).Where(x => x.IsSelected == false).ToList()
-            //}).ToList();
-
-            //roles = roles.Where(x => x.users.Count() > 0).ToList();
-
-
             var roles = Context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectRightDto
             {
                 RoleId = c.Id,
@@ -190,10 +171,6 @@ namespace GSC.Respository.ProjectRight
                     if (projectRightuser != null)
                         _documentReviewRepository.DeleteByUserId(projectId, projectRightuser.UserId);
             }
-            //foreach (var userDto in userlist)
-            //{
-            //    _documentReviewRepository.DeleteByUserId(projectId, userDto.UserId);
-            //}
 
             foreach (var itemDto in ids)
             {
@@ -388,19 +365,7 @@ namespace GSC.Respository.ProjectRight
         public ProjectDocumentHistory GetProjectRightHistory(int projectId, int userId, int roleId)
         {
             var objdochistory = new ProjectDocumentHistory();
-            //var projectList = All.Where(x => x.ProjectId == projectId && x.UserId == userId && x.RoleId == roleId).GroupBy(c => new
-            //{
-            //    c.ProjectId,
-            //    c.project.ProjectName,
-            //    c.project.ProjectCode,
-            //    c.User.UserName,
-            //    c.UserId,
-            //    c.IsReviewDone,
-            //    c.DeletedDate,
-            //    c.RollbackReason,
-            //    c.DeletedBy
-            //}).ToList();
-
+           
             var projectrightlist = All.Where(x => x.ProjectId == projectId && x.UserId == userId && x.RoleId == roleId)
                 .ToList();
 
@@ -693,10 +658,8 @@ namespace GSC.Respository.ProjectRight
                 if (filters.UserId == 1)
                 {
                     r.RoleName = this.Context.SecurityRole.FirstOrDefault(a => a.Id == _jwtTokenAccesser.RoleId).RoleName;
-
                 }
             });
-
 
             return results;
         }

@@ -1,4 +1,6 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Entities.Attendance;
@@ -24,7 +26,7 @@ namespace GSC.Respository.Attendance
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly ICityRepository _cityRepository;
-
+        private readonly IMapper _mapper;
         public NoneRegisterRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -34,7 +36,8 @@ namespace GSC.Respository.Attendance
             IScreeningTemplateRepository screeningTemplateRepository,
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
-            ICityRepository cityRepository)
+            ICityRepository cityRepository,
+             IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _attendanceRepository = attendanceRepository;
@@ -45,6 +48,7 @@ namespace GSC.Respository.Attendance
             _stateRepository = stateRepository;
             _countryRepository = countryRepository;
             _cityRepository = cityRepository;
+            _mapper = mapper;
         }
 
         public void SaveNonRegister(NoneRegister noneRegister, NoneRegisterDto noneRegisterDto)
@@ -63,38 +67,8 @@ namespace GSC.Respository.Attendance
 
         public List<NoneRegisterGridDto> GetNonRegisterList(int projectId, bool isDeleted)
         {
-            var result = All.Where(r => r.Attendance.ProjectId == projectId && (isDeleted ? r.DeletedDate != null : r.DeletedDate == null)).Select(x =>
-                 new NoneRegisterGridDto
-                 {
-                     Id = x.Id,
-                     ProjectCode = x.Attendance.Project.ProjectCode,
-                     ProjectName = x.Attendance.Project.ProjectName,
-                     Initial = x.Initial,
-                     ScreeningNumber = x.ScreeningNumber,
-                     DateOfScreening = x.DateOfScreening,
-                     RandomizationNumber = x.RandomizationNumber,
-                     DateOfRandomization = x.DateOfRandomization,
-                     CreatedDate = x.CreatedDate,
-                     ModifiedDate = x.ModifiedDate,
-                     DeletedDate = x.ModifiedDate,
-                     FirstName = x.FirstName,
-                     LastName = x.LastName,
-                     MiddleName = x.MiddleName,
-                     DateOfBirth = x.DateOfBirth,
-                     Gender = x.Gender,
-                     PrimaryContactNumber = x.PrimaryContactNumber,
-                     EmergencyContactNumber = x.EmergencyContactNumber,
-                     Email = x.Email,
-                     Qualification = x.Qualification,
-                     Occupation = x.Occupation,
-                     AddressLine1 = x.AddressLine1,
-                     AddressLine2 = x.AddressLine2,
-                     IsDeleted = x.DeletedDate == null ? false : true,
-
-                 }).OrderByDescending(x => x.Id).ToList();
-
-           
-            
+            var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+                   ProjectTo<NoneRegisterGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             return result;
 
@@ -102,11 +76,6 @@ namespace GSC.Respository.Attendance
 
         public string Duplicate(NoneRegister objSave, int projectId)
         {
-            //if (All.Any(x =>
-            //    x.Id != objSave.Id && x.ScreeningNumber == objSave.ScreeningNumber &&
-            //    x.Attendance.ProjectId == projectId && x.DeletedDate == null))
-            //    return "Duplicate Screening number : " + objSave.ScreeningNumber;
-
             if (All.Any(x =>
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&
                 x.Attendance.ProjectId == projectId && !string.IsNullOrEmpty(x.RandomizationNumber) &&

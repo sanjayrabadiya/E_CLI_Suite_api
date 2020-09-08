@@ -21,7 +21,6 @@ namespace GSC.Data.Dto.ProjectRight
         public int? CreatedBy { get; set; }
         public string CreatedByName { get; set; }
         public DateTime? CreatedDate { get; set; }
-        public int? ModifiedBy { get; set; }
-        public DateTime? ModifiedDate { get; set; }
+       
     }
 }

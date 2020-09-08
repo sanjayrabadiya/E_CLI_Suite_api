@@ -21,7 +21,6 @@ namespace GSC.Data.Dto.Medra
         public string DictionaryName { get; set; }
         public int? CompanyId { get; set; }
         public bool IsActive { get; set; }
-        public DateTime? CreatedDate { get; set; }
         public int CreatedBy { get; set; }
         public int CreatedRole { get; set; }
         public string UserName { get; set; }

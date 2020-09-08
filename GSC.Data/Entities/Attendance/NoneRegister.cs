@@ -53,7 +53,9 @@ namespace GSC.Data.Entities.Attendance
         }
 
         public Attendance Attendance { get; set; }
+        public GSC.Data.Entities.Master.Project Project{ get; set; }
         public int? CompanyId { get; set; }
-       
+        public int ProjectId { get; set; }
+
     }
 }
