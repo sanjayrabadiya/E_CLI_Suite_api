@@ -169,7 +169,7 @@ namespace GSC.Helper
 
     public enum ActivityMode : short
     {
-        [Description("Generic")] Generic = 1,
+        [Description("Non CRF Form")] Generic = 1,
         [Description("Subject Specific")] SubjectSpecific = 2
     }
 
