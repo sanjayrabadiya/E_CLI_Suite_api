@@ -13,10 +13,6 @@ namespace GSC.Data.Dto.Medra
         public string Description { get; set; }
         public string DictionaryName { get; set; }
         public Dictionary Dictionary { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
 
     }

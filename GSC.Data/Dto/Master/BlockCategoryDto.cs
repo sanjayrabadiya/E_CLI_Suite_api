@@ -11,10 +11,6 @@ namespace GSC.Data.Dto.Master
 
         [Required(ErrorMessage = "Block Name is required.")]
         public string BlockCategoryName { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

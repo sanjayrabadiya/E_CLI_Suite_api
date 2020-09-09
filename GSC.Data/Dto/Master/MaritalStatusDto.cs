@@ -8,9 +8,6 @@ namespace GSC.Data.Dto.Master
     {
         [Required(ErrorMessage = "Marital Status Name is required.")]
         public string MaritalStatusName { get; set; }
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

@@ -398,56 +398,56 @@ namespace GSC.Respository.Screening
         }
 
 
-        public List<ScreeningTemplateLockUnlockDto> GetTemplatesLockUnlock(
-            ScreeningTemplateLockUnlockParams lockUnlockParams)
-        {
-            var query = All.Where(t => t.DeletedDate == null);
+        //public List<ScreeningTemplateLockUnlockDto> GetTemplatesLockUnlock(
+        //    ScreeningTemplateLockUnlockParams lockUnlockParams)
+        //{
+        //    var query = All.Where(t => t.DeletedDate == null);
 
-            if (lockUnlockParams.ProjectDesignVisitId > 0)
-                query = query.Where(x =>
-                    x.ScreeningVisit.ProjectDesignVisitId == lockUnlockParams.ProjectDesignVisitId);
+        //    if (lockUnlockParams.ProjectDesignVisitId > 0)
+        //        query = query.Where(x =>
+        //            x.ScreeningVisit.ProjectDesignVisitId == lockUnlockParams.ProjectDesignVisitId);
 
-            if (lockUnlockParams.ProjectDesingId > 0)
-                query = query.Where(x =>
-                    x.ScreeningVisit.ProjectDesignVisit.ProjectDesignPeriodId ==
-                    lockUnlockParams.ProjectDesingId);
+        //    if (lockUnlockParams.ProjectDesingId > 0)
+        //        query = query.Where(x =>
+        //            x.ScreeningVisit.ProjectDesignVisit.ProjectDesignPeriodId ==
+        //            lockUnlockParams.ProjectDesingId);
 
-            if (lockUnlockParams.ProjectId > 0)
-                query = query.Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == lockUnlockParams.ProjectId);
+        //    if (lockUnlockParams.ProjectId > 0)
+        //        query = query.Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == lockUnlockParams.ProjectId);
 
-            if (lockUnlockParams.VolunteerId > 0)
-                query = query.Where(x => x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == lockUnlockParams.VolunteerId);
+        //    if (lockUnlockParams.VolunteerId > 0)
+        //        query = query.Where(x => x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == lockUnlockParams.VolunteerId);
 
-            if (lockUnlockParams.IsLock)
-                query = query.Where(t => t.Status == ScreeningTemplateStatus.Pending || t.IsCompleteReview);
-            else
-                query = query.Where(t => t.Status == ScreeningTemplateStatus.Completed);
+        //    if (lockUnlockParams.IsLock)
+        //        query = query.Where(t => t.Status == ScreeningTemplateStatus.Pending || t.IsCompleteReview);
+        //    else
+        //        query = query.Where(t => t.Status == ScreeningTemplateStatus.Completed);
 
-            query = query.Where(x => Context.ProjectWorkflowLevel.Any(t => t.DeletedDate == null && t.IsLock
-                                                                                                 && t.ProjectWorkflow
-                                                                                                     .ProjectDesignId ==
-                                                                                                 x.ScreeningVisit.ScreeningEntry
-                                                                                                     .ProjectDesignId
-                                                                                                 && t.SecurityRoleId ==
-                                                                                                 _jwtTokenAccesser
-                                                                                                     .RoleId));
+        //    query = query.Where(x => Context.ProjectWorkflowLevel.Any(t => t.DeletedDate == null && t.IsLock
+        //                                                                                         && t.ProjectWorkflow
+        //                                                                                             .ProjectDesignId ==
+        //                                                                                         x.ScreeningVisit.ScreeningEntry
+        //                                                                                             .ProjectDesignId
+        //                                                                                         && t.SecurityRoleId ==
+        //                                                                                         _jwtTokenAccesser
+        //                                                                                             .RoleId));
 
-            var result = query.Select(t => new ScreeningTemplateLockUnlockDto
-            {
-                Id = t.Id,
-                ProjectName = t.ScreeningVisit.ScreeningEntry.Project.ProjectName,
-                Status = t.Status,
-                ScreeningNo = t.ScreeningVisit.ScreeningEntry.ScreeningNo,
-                StatusName = t.Status.GetDescription(),
-                TemplateName = t.ProjectDesignTemplate.DesignOrder + " " + t.ProjectDesignTemplate.TemplateName,
-                VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                VolunteerName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                    ? t.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
-                    : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.FullName
-            }).OrderByDescending(c => c.Id).ToList();
+        //    var result = query.Select(t => new ScreeningTemplateLockUnlockDto
+        //    {
+        //        Id = t.Id,
+        //        ProjectName = t.ScreeningVisit.ScreeningEntry.Project.ProjectName,
+        //        Status = t.Status,
+        //        ScreeningNo = t.ScreeningVisit.ScreeningEntry.ScreeningNo,
+        //        StatusName = t.Status.GetDescription(),
+        //        TemplateName = t.ProjectDesignTemplate.DesignOrder + " " + t.ProjectDesignTemplate.TemplateName,
+        //        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+        //        VolunteerName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+        //            ? t.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+        //            : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.FullName
+        //    }).OrderByDescending(c => c.Id).ToList();
 
-            return result;
-        }
+        //    return result;
+        //}
 
         public void VisitRepeat(int projectDesignVisitId, int screeningEntryId)
         {
@@ -477,68 +477,68 @@ namespace GSC.Respository.Screening
             //});
         }
 
-        public List<DashboardStudyStatusDto> GetDashboardStudyStatusByVisit(int projectId)
-        {
-            var projectDesign = Context.ProjectDesign.Where(x => x.ProjectId == projectId).FirstOrDefault();
-            var workFlowLevel = new WorkFlowLevelDto();
-            if (projectDesign != null) workFlowLevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesign.Id);
+        //public List<DashboardStudyStatusDto> GetDashboardStudyStatusByVisit(int projectId)
+        //{
+        //    var projectDesign = Context.ProjectDesign.Where(x => x.ProjectId == projectId).FirstOrDefault();
+        //    var workFlowLevel = new WorkFlowLevelDto();
+        //    if (projectDesign != null) workFlowLevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesign.Id);
 
-            var queryStatus = (from st in Context.ScreeningTemplate
-                               join pdv in Context.ProjectDesignVisit on st.ScreeningVisitId equals pdv.Id into design
-                               from pdesign in design.DefaultIfEmpty()
-                               join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
-                               from sEntry in entry.DefaultIfEmpty()
-                               join p in Context.Project on sEntry.ProjectId equals p.Id into project
-                               from p in project.DefaultIfEmpty()
-                               where p.Id == projectId || p.ParentProjectId == projectId
-                               group new { st, pdesign } by new { st.ScreeningVisitId, pdesign.DisplayName }
-                into g
-                               select new DashboardStudyStatusDto
-                               {
-                                   WorkflowDetail = workFlowLevel,
-                                   DisplayName = g.Key.DisplayName,
-                                   NotStarted = g.Where(x => (int?)x.st.Status == 1).Count(),
-                                   InProcess = g.Where(x => (int?)x.st.Status == 2).Count(),
-                                   Submitted = g.Where(x => (int?)x.st.Status == 3).Count(),
-                                   Reviewed = g.Where(x => (int?)x.st.Status == 4).Count(),
-                                   Completed = g.Where(x => (int?)x.st.Status == 5).Count(),
-                                   Review1 = g.Where(x => (int?)x.st.ReviewLevel == 1).Count(),
-                                   Review2 = g.Where(x => (int?)x.st.ReviewLevel == 2).Count(),
-                                   Review3 = g.Where(x => (int?)x.st.ReviewLevel == 3).Count(),
-                                   Review4 = g.Where(x => (int?)x.st.ReviewLevel == 4).Count(),
-                                   Review5 = g.Where(x => (int?)x.st.ReviewLevel == 5).Count()
-                               }).ToList();
-            return queryStatus;
-        }
+        //    var queryStatus = (from st in Context.ScreeningTemplate
+        //                       join pdv in Context.ProjectDesignVisit on st.ScreeningVisitId equals pdv.Id into design
+        //                       from pdesign in design.DefaultIfEmpty()
+        //                       join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
+        //                       from sEntry in entry.DefaultIfEmpty()
+        //                       join p in Context.Project on sEntry.ProjectId equals p.Id into project
+        //                       from p in project.DefaultIfEmpty()
+        //                       where p.Id == projectId || p.ParentProjectId == projectId
+        //                       group new { st, pdesign } by new { st.ScreeningVisitId, pdesign.DisplayName }
+        //        into g
+        //                       select new DashboardStudyStatusDto
+        //                       {
+        //                           WorkflowDetail = workFlowLevel,
+        //                           DisplayName = g.Key.DisplayName,
+        //                           NotStarted = g.Where(x => (int?)x.st.Status == 1).Count(),
+        //                           InProcess = g.Where(x => (int?)x.st.Status == 2).Count(),
+        //                           Submitted = g.Where(x => (int?)x.st.Status == 3).Count(),
+        //                           Reviewed = g.Where(x => (int?)x.st.Status == 4).Count(),
+        //                           Completed = g.Where(x => (int?)x.st.Status == 5).Count(),
+        //                           Review1 = g.Where(x => (int?)x.st.ReviewLevel == 1).Count(),
+        //                           Review2 = g.Where(x => (int?)x.st.ReviewLevel == 2).Count(),
+        //                           Review3 = g.Where(x => (int?)x.st.ReviewLevel == 3).Count(),
+        //                           Review4 = g.Where(x => (int?)x.st.ReviewLevel == 4).Count(),
+        //                           Review5 = g.Where(x => (int?)x.st.ReviewLevel == 5).Count()
+        //                       }).ToList();
+        //    return queryStatus;
+        //}
 
-        public List<DashboardStudyStatusDto> GetDashboardStudyStatusBySite(int projectId)
-        {
-            var queryStatus = (from p in Context.Project
-                               join se in Context.ScreeningEntry on p.Id equals se.ProjectId into entry
-                               from sEntry in entry.DefaultIfEmpty()
-                               join st in Context.ScreeningTemplate on sEntry.Id equals st.ScreeningVisit.ScreeningEntryId into sTemplate
-                               from template in sTemplate.DefaultIfEmpty()
-                               join pdv in Context.ProjectDesignVisit on template.ScreeningVisitId equals pdv.Id into design
-                               from pDesign in design.DefaultIfEmpty()
-                               where p.Id == projectId || p.ParentProjectId == projectId
-                               group new { p, template } by new { template.Status, p.ProjectCode }
-                into g
-                               select new DashboardStudyStatusDto
-                               {
-                                   DisplayName = g.Key.ProjectCode,
-                                   NotStarted = g.Where(x => (int?)x.template.Status == 1).Count(),
-                                   InProcess = g.Where(x => (int?)x.template.Status == 2).Count(),
-                                   Submitted = g.Where(x => (int?)x.template.Status == 3).Count(),
-                                   Reviewed = g.Where(x => (int?)x.template.Status == 4).Count(),
-                                   Completed = g.Where(x => (int?)x.template.Status == 5).Count(),
-                                   Review1 = g.Where(x => (int?)x.template.ReviewLevel == 1).Count(),
-                                   Review2 = g.Where(x => (int?)x.template.ReviewLevel == 2).Count(),
-                                   Review3 = g.Where(x => (int?)x.template.ReviewLevel == 3).Count(),
-                                   Review4 = g.Where(x => (int?)x.template.ReviewLevel == 4).Count(),
-                                   Review5 = g.Where(x => (int?)x.template.ReviewLevel == 5).Count()
-                               }).ToList();
-            return queryStatus;
-        }
+        //public List<DashboardStudyStatusDto> GetDashboardStudyStatusBySite(int projectId)
+        //{
+        //    var queryStatus = (from p in Context.Project
+        //                       join se in Context.ScreeningEntry on p.Id equals se.ProjectId into entry
+        //                       from sEntry in entry.DefaultIfEmpty()
+        //                       join st in Context.ScreeningTemplate on sEntry.Id equals st.ScreeningVisit.ScreeningEntryId into sTemplate
+        //                       from template in sTemplate.DefaultIfEmpty()
+        //                       join pdv in Context.ProjectDesignVisit on template.ScreeningVisitId equals pdv.Id into design
+        //                       from pDesign in design.DefaultIfEmpty()
+        //                       where p.Id == projectId || p.ParentProjectId == projectId
+        //                       group new { p, template } by new { template.Status, p.ProjectCode }
+        //        into g
+        //                       select new DashboardStudyStatusDto
+        //                       {
+        //                           DisplayName = g.Key.ProjectCode,
+        //                           NotStarted = g.Where(x => (int?)x.template.Status == 1).Count(),
+        //                           InProcess = g.Where(x => (int?)x.template.Status == 2).Count(),
+        //                           Submitted = g.Where(x => (int?)x.template.Status == 3).Count(),
+        //                           Reviewed = g.Where(x => (int?)x.template.Status == 4).Count(),
+        //                           Completed = g.Where(x => (int?)x.template.Status == 5).Count(),
+        //                           Review1 = g.Where(x => (int?)x.template.ReviewLevel == 1).Count(),
+        //                           Review2 = g.Where(x => (int?)x.template.ReviewLevel == 2).Count(),
+        //                           Review3 = g.Where(x => (int?)x.template.ReviewLevel == 3).Count(),
+        //                           Review4 = g.Where(x => (int?)x.template.ReviewLevel == 4).Count(),
+        //                           Review5 = g.Where(x => (int?)x.template.ReviewLevel == 5).Count()
+        //                       }).ToList();
+        //    return queryStatus;
+        //}
 
         public IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
@@ -553,83 +553,41 @@ namespace GSC.Respository.Screening
                 parentIds.Add(filters.ProjectId);
             }
 
-            var queryDtos = (from screening in Context.ScreeningEntry.Where(t =>
-                        parentIds.Contains(t.ProjectId) && t.DeletedDate == null &&
-                        (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId)) && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.AttendanceId)))
-                             join template in Context.ScreeningTemplate.Where(u =>
-                                     (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
-                                     && (filters.VisitIds == null ||
-                                         filters.VisitIds.Contains(u.ScreeningVisit.ProjectDesignVisitId)) &&
-                                     (filters.StatusIds == null || filters.StatusIds.Contains((int)u.Status)) && u.DeletedDate == null && u.ScreeningVisit.DeletedDate == null
-                                     && u.ScreeningVisit.ProjectDesignVisit.DeletedDate == null) on screening.Id
-                                 equals template.ScreeningVisit.ScreeningEntryId
-                             join reviewTemp in Context.ScreeningTemplateReview.Where(review =>
-                                     (filters.ReviewStatus == null || filters.ReviewStatus.Contains(review.ReviewLevel)) && review.DeletedDate == null)
-                                 on template.Id equals reviewTemp.ScreeningTemplateId into reviewDto
-                             from review in reviewDto.DefaultIfEmpty()
-                             join workflow in Context.ProjectWorkflow.Where(x => x.DeletedDate == null) on screening.ProjectDesignId equals workflow
-                                 .ProjectDesignId
-                             join project in Context.Project on screening.ProjectId equals project.Id
-                             join attendance in Context.Attendance.Where(t =>
-                                     t.DeletedDate == null)
-                                 on screening.AttendanceId equals attendance.Id
-                             join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
-                                 volunteerDto
-                             from volunteer in volunteerDto.DefaultIfEmpty()
-                             join noneregisterTemp in Context.NoneRegister on attendance.Id equals noneregisterTemp.AttendanceId
-                                 into noneregisterDto
-                             from nonregister in noneregisterDto.DefaultIfEmpty()
-                             join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals
-                                 projectSubjectTemp.Id into projectsubjectDto
-                             from projectsubject in projectsubjectDto.DefaultIfEmpty()
-                             select new ReviewDto
-                             {
-                                 Id = template.Id,
-                                 AttendanceId = screening.AttendanceId,
-                                 SiteName = string.IsNullOrEmpty(project.SiteName) ? project.ProjectName : project.SiteName,
-                                 ScreeningEntryId = screening.Id,
-                                 ScreeningNo = screening.ScreeningNo,
-                                 StatusName = template.Status.GetDescription(),
-                                 ScreeningTemplateId = template.Id,
-                                 ProjectCode = screening.Project.ProjectCode,
-                                 ScreeningTemplateValue = template.ProjectDesignTemplate.TemplateName,
-                                 Visit = template.ScreeningVisit.ProjectDesignVisit.DisplayName +
-                                         Convert.ToString(template.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + template.ScreeningVisit.RepeatedVisitNumber),
-                                 VolunteerDelete = volunteer.DeletedDate,
-                                 VolunteerName = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
-                                 SubjectNo = volunteer.FullName == null ? nonregister.ScreeningNumber : volunteer.VolunteerNo,
-                                 RandomizationNumber = volunteer.FullName == null
-                                     ? nonregister.RandomizationNumber
-                                     : projectsubject.Number,
-                                 //ReviewLevelName = "Reviewed " + review.ReviewLevel,
-                                 ReviewLevelName = review.ReviewLevel == 0
-                                     ? ""
-                                     : workflow.Levels.Where(x => x.LevelNo == review.ReviewLevel && x.DeletedDate == null).FirstOrDefault().SecurityRole
-                                         .RoleShortName
-                             }).OrderBy(x => x.Id).ToList();
-
-            if (filters.ReviewStatus != null) queryDtos = queryDtos.Where(x => x.ReviewLevelName != null).ToList();
-
-            var groupByTemp = queryDtos.GroupBy(x => x.Id).Select(y => new ReviewDto
+            var result = All.Where(x => x.DeletedDate == null);
+            if (filters.ReviewStatus != null)
             {
-                Id = y.LastOrDefault().Id,
-                SiteName = y.LastOrDefault().SiteName,
-                ScreeningEntryId = y.LastOrDefault().ScreeningEntryId,
-                ScreeningNo = y.LastOrDefault().ScreeningNo,
-                StatusName = y.LastOrDefault().StatusName,
-                ScreeningTemplateId = y.LastOrDefault().ScreeningTemplateId,
-                ProjectCode = y.LastOrDefault().ProjectCode,
-                ScreeningTemplateValue = y.LastOrDefault().ScreeningTemplateValue,
-                Visit = y.LastOrDefault().Visit,
-                VolunteerDelete = y.LastOrDefault().VolunteerDelete,
-                VolunteerName = y.LastOrDefault().VolunteerName,
-                SubjectNo = y.LastOrDefault().SubjectNo,
-                RandomizationNumber = y.LastOrDefault().RandomizationNumber,
-                //ReviewLevelName = "Reviewed " + review.ReviewLevel,
-                ReviewLevelName = y.LastOrDefault().ReviewLevelName,
-            }).Where(x => x.VolunteerDelete == null).ToList();
+                result = result.Where(y => y.Status != ScreeningTemplateStatus.Pending && y.Status != ScreeningTemplateStatus.InProcess);
+            }
 
-            return groupByTemp;
+            if (filters.ReviewStatus != null) result = result.Where(x => x.ReviewLevel != null);
+            if (parentIds != null) result = result.Where(x => parentIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId));
+            if (filters.PeriodIds != null) result = result.Where(x => filters.PeriodIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId));
+            if (filters.VisitIds != null) result = result.Where(x => filters.VisitIds.Contains(x.ScreeningVisit.ProjectDesignVisitId));
+            if (filters.SubjectIds != null) result = result.Where(x => filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.AttendanceId));
+            if (filters.TemplateIds != null) result = result.Where(x => filters.TemplateIds.Contains(x.ProjectDesignTemplateId));
+            if (filters.StatusIds != null) result = result.Where(x => filters.StatusIds.Contains((int)x.Status));
+            if (filters.ReviewStatus != null) result = result.Where(x => filters.ReviewStatus.Contains(x.ReviewLevel));
+            result = result.Where(x => x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.DeletedDate == null);
+
+            return result.Select(r => new ReviewDto
+            {
+                Id = r.Id,
+                SiteName = string.IsNullOrEmpty(r.ScreeningVisit.ScreeningEntry.Project.SiteName) ? r.ScreeningVisit.ScreeningEntry.Project.ProjectName : r.ScreeningVisit.ScreeningEntry.Project.SiteName,
+                ScreeningEntryId = r.ScreeningVisit.ScreeningEntryId,
+                ScreeningNo = r.ScreeningVisit.ScreeningEntry.ScreeningNo,
+                ReviewLevel = r.ReviewLevel,
+                StatusName = r.Status.GetDescription(),
+                ScreeningTemplateId = r.Id,
+                ProjectCode = r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                ScreeningTemplateValue = r.ProjectDesignTemplate.TemplateName,
+                Visit = r.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                VolunteerName = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName : r.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial,
+                SubjectNo = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.ScreeningNumber,
+                RandomizationNumber = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.RandomizationNumber,
+                ReviewLevelName = Context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId
+                && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault()
+
+            }).ToList();
         }
 
         private WorkFlowButton SetWorkFlowButton(Data.Dto.Screening.ScreeningTemplateValueBasic screeningValue,

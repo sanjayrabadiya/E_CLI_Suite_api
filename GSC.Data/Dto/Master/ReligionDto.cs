@@ -8,9 +8,6 @@ namespace GSC.Data.Dto.Master
     {
         [Required(ErrorMessage = "Religion Name is required.")]
         public string ReligionName { get; set; }
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

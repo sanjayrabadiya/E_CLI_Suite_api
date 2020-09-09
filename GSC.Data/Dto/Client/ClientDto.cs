@@ -27,10 +27,6 @@ namespace GSC.Data.Dto.Client
         public string LogoPath { get; set; }
         public ClientType ClientType { get; set; }
         public FileModel FileModel { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

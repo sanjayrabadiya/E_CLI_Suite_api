@@ -253,32 +253,32 @@ namespace GSC.Api.Controllers.Screening
             return Ok();
         }
 
-        [HttpGet]
-        [Route("GetDashboardQueryStatusByVisit/{projectId}")]
-        public IActionResult GetDashboardQueryStatusByVisit(int projectId)
-        {
-            return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByVisit(projectId));
-        }
+        //[HttpGet]
+        //[Route("GetDashboardQueryStatusByVisit/{projectId}")]
+        //public IActionResult GetDashboardQueryStatusByVisit(int projectId)
+        //{
+        //    return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByVisit(projectId));
+        //}
 
-        [HttpGet]
-        [Route("GetDashboardQueryStatusBySite/{projectId}")]
-        public IActionResult GetDashboardQueryStatusBySite(int projectId)
-        {
-            return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusBySite(projectId));
-        }
+        //[HttpGet]
+        //[Route("GetDashboardQueryStatusBySite/{projectId}")]
+        //public IActionResult GetDashboardQueryStatusBySite(int projectId)
+        //{
+        //    return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusBySite(projectId));
+        //}
 
-        [HttpGet]
-        [Route("GetDashboardQueryStatusByRolewise/{projectId}")]
-        public IActionResult GetDashboardQueryStatusByRolewise(int projectId)
-        {
-            return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByRolewise(projectId));
-        }
+        //[HttpGet]
+        //[Route("GetDashboardQueryStatusByRolewise/{projectId}")]
+        //public IActionResult GetDashboardQueryStatusByRolewise(int projectId)
+        //{
+        //    return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByRolewise(projectId));
+        //}
 
-        [HttpGet]
-        [Route("GetDashboardQueryStatusByVisitwise/{projectId}")]
-        public IActionResult GetDashboardQueryStatusByVisitwise(int projectId)
-        {
-            return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByVisitwise(projectId));
-        }
+        //[HttpGet]
+        //[Route("GetDashboardQueryStatusByVisitwise/{projectId}")]
+        //public IActionResult GetDashboardQueryStatusByVisitwise(int projectId)
+        //{
+        //    return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByVisitwise(projectId));
+        //}
     }
 }

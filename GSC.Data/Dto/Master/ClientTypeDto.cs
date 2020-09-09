@@ -8,10 +8,6 @@ namespace GSC.Data.Dto.Master
     {
         [Required(ErrorMessage = "Client Type Name is required.")]
         public string ClientTypeName { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

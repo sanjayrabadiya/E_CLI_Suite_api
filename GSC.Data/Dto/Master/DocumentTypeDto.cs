@@ -10,9 +10,6 @@ namespace GSC.Data.Dto.Master
         public string TypeName { get; set; }
 
         public string Note { get; set; }
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

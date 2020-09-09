@@ -48,7 +48,6 @@ namespace GSC.Data.Dto.Master
         public int? ProjectDesignId { get; set; }
         public bool IsStatic { get; set; }
         public int? AttendanceLimit { get; set; }
-
         public int? InvestigatorContactId { get; set; }
         public int? NoofSite { get; set; }
         public int? CompanyId { get; set; }

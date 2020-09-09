@@ -9,9 +9,6 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Scope Name is required.")]
         public string ScopeName { get; set; }
         public string Notes { get; set; }
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

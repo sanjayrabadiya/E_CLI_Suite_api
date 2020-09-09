@@ -9,7 +9,6 @@ namespace GSC.Respository.Master
     public interface ICityAreaRepository : IGenericRepository<CityArea>
     {
         List<DropDownDto> GetCityAreaDropDown(int cityId);
-        List<CityAreaDto> GetCitiesArea(bool isDeleted);
         IList<DropDownDto> AutoCompleteSearch(string searchText, bool isAutoSearch = false);
         List<CityAreaGridDto> GetCityAreaList(bool isDeleted);
     }

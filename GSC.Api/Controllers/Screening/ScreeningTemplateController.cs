@@ -273,15 +273,15 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningTemplateReviewRepository.GetTemplateReviewHistory(id));
         }
 
-        [HttpPost("GetTemplatesLockUnlock")]
-        public IActionResult GetTemplatesLockUnlock([FromBody] ScreeningTemplateLockUnlockParams lockUnlockParams)
-        {
-            if (lockUnlockParams.ProjectId <= 0 || lockUnlockParams.VolunteerId <= 0) return BadRequest();
+        //[HttpPost("GetTemplatesLockUnlock")]
+        //public IActionResult GetTemplatesLockUnlock([FromBody] ScreeningTemplateLockUnlockParams lockUnlockParams)
+        //{
+        //    if (lockUnlockParams.ProjectId <= 0 || lockUnlockParams.VolunteerId <= 0) return BadRequest();
 
-            var lockUnlockTemplates = _screeningTemplateRepository.GetTemplatesLockUnlock(lockUnlockParams);
+        //    var lockUnlockTemplates = _screeningTemplateRepository.GetTemplatesLockUnlock(lockUnlockParams);
 
-            return Ok(lockUnlockTemplates);
-        }
+        //    return Ok(lockUnlockTemplates);
+        //}
 
 
         [HttpPut]
@@ -319,18 +319,18 @@ namespace GSC.Api.Controllers.Screening
         }
 
 
-        [HttpGet]
-        [Route("GetDashboardStudyStatusByVisit/{projectId}")]
-        public IActionResult GetDashboardStudyStatusByVisit(int projectId)
-        {
-            return Ok(_screeningTemplateRepository.GetDashboardStudyStatusByVisit(projectId));
-        }
+        //[HttpGet]
+        //[Route("GetDashboardStudyStatusByVisit/{projectId}")]
+        //public IActionResult GetDashboardStudyStatusByVisit(int projectId)
+        //{
+        //    return Ok(_screeningTemplateRepository.GetDashboardStudyStatusByVisit(projectId));
+        //}
 
-        [HttpGet]
-        [Route("GetDashboardStudyStatusBySite/{projectId}")]
-        public IActionResult GetDashboardStudyStatusBySite(int projectId)
-        {
-            return Ok(_screeningTemplateRepository.GetDashboardStudyStatusBySite(projectId));
-        }
+        //[HttpGet]
+        //[Route("GetDashboardStudyStatusBySite/{projectId}")]
+        //public IActionResult GetDashboardStudyStatusBySite(int projectId)
+        //{
+        //    return Ok(_screeningTemplateRepository.GetDashboardStudyStatusBySite(projectId));
+        //}
     }
 }

@@ -38,12 +38,6 @@ namespace GSC.Api.Controllers.Project.Workflow
             _projectDesignRepository = projectDesignRepository;
         }
 
-        [HttpGet("{isDeleted:bool?}")]
-        public IList<ProjectWorkflowDto> Get(bool isDeleted)
-        {
-            return _projectWorkflowRepository.GetProjectWorkFlowList(isDeleted);
-        }
-
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {

@@ -297,131 +297,131 @@ namespace GSC.Respository.Screening
         }
 
 
-        public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisit(int projectId)
-        {
-            var queryStatus = (from stvq in Context.ScreeningTemplateValueQuery
-                               join stv in Context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
-                                   templatevalue
-                               from stv in templatevalue.DefaultIfEmpty()
-                               join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
-                               from st in stemplate.DefaultIfEmpty()
-                               join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
-                               from sEntry in entry.DefaultIfEmpty()
-                               join p in Context.Project on sEntry.ProjectId equals p.Id into project
-                               from p in project.DefaultIfEmpty()
-                               where p.Id == projectId || p.ParentProjectId == projectId
-                               group new { stvq } by new { stvq.QueryStatus }
-                    into g
-                               select new DashboardQueryStatusDto
-                               {
-                                   DisplayName = g.Key.QueryStatus.GetDescription(),
-                                   Total = g.Count()
-                               }
-                ).ToList();
-            return queryStatus;
-        }
+        //public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisit(int projectId)
+        //{
+        //    var queryStatus = (from stvq in Context.ScreeningTemplateValueQuery
+        //                       join stv in Context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
+        //                           templatevalue
+        //                       from stv in templatevalue.DefaultIfEmpty()
+        //                       join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
+        //                       from st in stemplate.DefaultIfEmpty()
+        //                       join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
+        //                       from sEntry in entry.DefaultIfEmpty()
+        //                       join p in Context.Project on sEntry.ProjectId equals p.Id into project
+        //                       from p in project.DefaultIfEmpty()
+        //                       where p.Id == projectId || p.ParentProjectId == projectId
+        //                       group new { stvq } by new { stvq.QueryStatus }
+        //            into g
+        //                       select new DashboardQueryStatusDto
+        //                       {
+        //                           DisplayName = g.Key.QueryStatus.GetDescription(),
+        //                           Total = g.Count()
+        //                       }
+        //        ).ToList();
+        //    return queryStatus;
+        //}
 
-        public List<DashboardQueryStatusDto> GetDashboardQueryStatusBySite(int projectId)
-        {
-            var queryStatus = (from p in Context.Project
-                               join se in Context.ScreeningEntry on p.Id equals se.ProjectId into entry
-                               from sEntry in entry.DefaultIfEmpty()
-                               join st in Context.ScreeningTemplate on sEntry.Id equals st.ScreeningVisit.ScreeningEntryId into stemplate
-                               from st in stemplate.DefaultIfEmpty()
-                               join pdv in Context.ProjectDesignVisit on st.ScreeningVisitId equals pdv.Id into design
-                               from pdesign in design.DefaultIfEmpty()
-                               join stv in Context.ScreeningTemplateValue on st.Id equals stv.ScreeningTemplateId into templatevalue
-                               from stv in templatevalue.DefaultIfEmpty()
-                               join stvq in Context.ScreeningTemplateValueQuery on stv.Id equals stvq.ScreeningTemplateValueId into
-                                   templatevaluequery
-                               from stemplatevaluequery in templatevaluequery.DefaultIfEmpty()
-                               where p.Id == projectId || p.ParentProjectId == projectId
-                               group new { stemplatevaluequery, p } by new { stemplatevaluequery.QueryStatus, p.ProjectCode }
-                into g
-                               select new DashboardQueryStatusDto
-                               {
-                                   DisplayName = g.Key.ProjectCode,
-                                   Open = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 1).Count(),
-                                   Answered = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 2).Count(),
-                                   Resolved = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 3).Count(),
-                                   ReOpened = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 4).Count(),
-                                   Closed = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 5).Count(),
-                                   SelfCorrection = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 6).Count(),
-                                   Acknowledge = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 7).Count(),
-                                   Total = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 1).Count() +
-                                           g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 2).Count() +
-                                           g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 3).Count()
-                                           + g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 4).Count() +
-                                           g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 5).Count() +
-                                           g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 6).Count()
-                               }).ToList();
-            return queryStatus;
-        }
+        //public List<DashboardQueryStatusDto> GetDashboardQueryStatusBySite(int projectId)
+        //{
+        //    var queryStatus = (from p in Context.Project
+        //                       join se in Context.ScreeningEntry on p.Id equals se.ProjectId into entry
+        //                       from sEntry in entry.DefaultIfEmpty()
+        //                       join st in Context.ScreeningTemplate on sEntry.Id equals st.ScreeningVisit.ScreeningEntryId into stemplate
+        //                       from st in stemplate.DefaultIfEmpty()
+        //                       join pdv in Context.ProjectDesignVisit on st.ScreeningVisitId equals pdv.Id into design
+        //                       from pdesign in design.DefaultIfEmpty()
+        //                       join stv in Context.ScreeningTemplateValue on st.Id equals stv.ScreeningTemplateId into templatevalue
+        //                       from stv in templatevalue.DefaultIfEmpty()
+        //                       join stvq in Context.ScreeningTemplateValueQuery on stv.Id equals stvq.ScreeningTemplateValueId into
+        //                           templatevaluequery
+        //                       from stemplatevaluequery in templatevaluequery.DefaultIfEmpty()
+        //                       where p.Id == projectId || p.ParentProjectId == projectId
+        //                       group new { stemplatevaluequery, p } by new { stemplatevaluequery.QueryStatus, p.ProjectCode }
+        //        into g
+        //                       select new DashboardQueryStatusDto
+        //                       {
+        //                           DisplayName = g.Key.ProjectCode,
+        //                           Open = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 1).Count(),
+        //                           Answered = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 2).Count(),
+        //                           Resolved = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 3).Count(),
+        //                           ReOpened = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 4).Count(),
+        //                           Closed = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 5).Count(),
+        //                           SelfCorrection = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 6).Count(),
+        //                           Acknowledge = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 7).Count(),
+        //                           Total = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 1).Count() +
+        //                                   g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 2).Count() +
+        //                                   g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 3).Count()
+        //                                   + g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 4).Count() +
+        //                                   g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 5).Count() +
+        //                                   g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 6).Count()
+        //                       }).ToList();
+        //    return queryStatus;
+        //}
 
-        public List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId)
-        {
-            var queryStatus = (from stvq in Context.ScreeningTemplateValueQuery
-                               join stv in Context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
-                                   templatevalue
-                               from stv in templatevalue.DefaultIfEmpty()
-                               join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
-                               from st in stemplate.DefaultIfEmpty()
-                               join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
-                               from sEntry in entry.DefaultIfEmpty()
-                               join p in Context.Project on sEntry.ProjectId equals p.Id into project
-                               from p in project.DefaultIfEmpty()
-                               join sr in Context.SecurityRole on stvq.UserRoleId equals sr.Id into role
-                               from sr in role.DefaultIfEmpty()
-                               where p.Id == projectId || p.ParentProjectId == projectId
-                               group new { stvq } by new { stvq.UserRoleId, sr.RoleShortName, stvq.QueryStatus }
-                    into g
-                               select new DashboardQueryStatusDto
-                               {
-                                   DisplayName = g.Key.RoleShortName,
-                                   QueryStatus = g.Key.QueryStatus.GetDescription(),
-                                   Total = g.Count()
-                               }
-                ).ToList();
-            return queryStatus;
-        }
+        //public List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId)
+        //{
+        //    var queryStatus = (from stvq in Context.ScreeningTemplateValueQuery
+        //                       join stv in Context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
+        //                           templatevalue
+        //                       from stv in templatevalue.DefaultIfEmpty()
+        //                       join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
+        //                       from st in stemplate.DefaultIfEmpty()
+        //                       join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
+        //                       from sEntry in entry.DefaultIfEmpty()
+        //                       join p in Context.Project on sEntry.ProjectId equals p.Id into project
+        //                       from p in project.DefaultIfEmpty()
+        //                       join sr in Context.SecurityRole on stvq.UserRoleId equals sr.Id into role
+        //                       from sr in role.DefaultIfEmpty()
+        //                       where p.Id == projectId || p.ParentProjectId == projectId
+        //                       group new { stvq } by new { stvq.UserRoleId, sr.RoleShortName, stvq.QueryStatus }
+        //            into g
+        //                       select new DashboardQueryStatusDto
+        //                       {
+        //                           DisplayName = g.Key.RoleShortName,
+        //                           QueryStatus = g.Key.QueryStatus.GetDescription(),
+        //                           Total = g.Count()
+        //                       }
+        //        ).ToList();
+        //    return queryStatus;
+        //}
 
-        public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisitwise(int projectId)
-        {
-            var queryStatus = (from stvq in Context.ScreeningTemplateValueQuery
-                               join stv in Context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
-                                   templatevalue
-                               from stv in templatevalue.DefaultIfEmpty()
-                               join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
-                               from st in stemplate.DefaultIfEmpty()
-                               join pdv in Context.ProjectDesignVisit on st.ScreeningVisitId equals pdv.Id into design
-                               from pdesign in design.DefaultIfEmpty()
-                               join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
-                               from sEntry in entry.DefaultIfEmpty()
-                               join p in Context.Project on sEntry.ProjectId equals p.Id into project
-                               from p in project.DefaultIfEmpty()
-                               where p.Id == projectId || p.ParentProjectId == projectId
-                               orderby pdesign.Id
-                               group new { stvq, pdesign, st } by new { pdesign.Description, st.ScreeningVisitId }
-                into g
-                               select new DashboardQueryStatusDto
-                               {
-                                   DisplayName = g.Key.Description,
-                                   Open = g.Where(x => (int)x.stvq.QueryStatus == 1).Count(),
-                                   Answered = g.Where(x => (int)x.stvq.QueryStatus == 2).Count(),
-                                   Resolved = g.Where(x => (int)x.stvq.QueryStatus == 3).Count(),
-                                   ReOpened = g.Where(x => (int)x.stvq.QueryStatus == 4).Count(),
-                                   Closed = g.Where(x => (int)x.stvq.QueryStatus == 5).Count(),
-                                   SelfCorrection = g.Where(x => (int)x.stvq.QueryStatus == 6).Count(),
-                                   Acknowledge = g.Where(x => (int)x.stvq.QueryStatus == 7).Count(),
-                                   Total = g.Where(x => (int)x.stvq.QueryStatus == 1).Count() +
-                                           g.Where(x => (int)x.stvq.QueryStatus == 2).Count() +
-                                           g.Where(x => (int)x.stvq.QueryStatus == 3).Count()
-                                           + g.Where(x => (int)x.stvq.QueryStatus == 4).Count() +
-                                           g.Where(x => (int)x.stvq.QueryStatus == 5).Count() +
-                                           g.Where(x => (int)x.stvq.QueryStatus == 6).Count()
-                               }).ToList();
-            return queryStatus;
-        }
+        //public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisitwise(int projectId)
+        //{
+        //    var queryStatus = (from stvq in Context.ScreeningTemplateValueQuery
+        //                       join stv in Context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
+        //                           templatevalue
+        //                       from stv in templatevalue.DefaultIfEmpty()
+        //                       join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
+        //                       from st in stemplate.DefaultIfEmpty()
+        //                       join pdv in Context.ProjectDesignVisit on st.ScreeningVisitId equals pdv.Id into design
+        //                       from pdesign in design.DefaultIfEmpty()
+        //                       join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
+        //                       from sEntry in entry.DefaultIfEmpty()
+        //                       join p in Context.Project on sEntry.ProjectId equals p.Id into project
+        //                       from p in project.DefaultIfEmpty()
+        //                       where p.Id == projectId || p.ParentProjectId == projectId
+        //                       orderby pdesign.Id
+        //                       group new { stvq, pdesign, st } by new { pdesign.Description, st.ScreeningVisitId }
+        //        into g
+        //                       select new DashboardQueryStatusDto
+        //                       {
+        //                           DisplayName = g.Key.Description,
+        //                           Open = g.Where(x => (int)x.stvq.QueryStatus == 1).Count(),
+        //                           Answered = g.Where(x => (int)x.stvq.QueryStatus == 2).Count(),
+        //                           Resolved = g.Where(x => (int)x.stvq.QueryStatus == 3).Count(),
+        //                           ReOpened = g.Where(x => (int)x.stvq.QueryStatus == 4).Count(),
+        //                           Closed = g.Where(x => (int)x.stvq.QueryStatus == 5).Count(),
+        //                           SelfCorrection = g.Where(x => (int)x.stvq.QueryStatus == 6).Count(),
+        //                           Acknowledge = g.Where(x => (int)x.stvq.QueryStatus == 7).Count(),
+        //                           Total = g.Where(x => (int)x.stvq.QueryStatus == 1).Count() +
+        //                                   g.Where(x => (int)x.stvq.QueryStatus == 2).Count() +
+        //                                   g.Where(x => (int)x.stvq.QueryStatus == 3).Count()
+        //                                   + g.Where(x => (int)x.stvq.QueryStatus == 4).Count() +
+        //                                   g.Where(x => (int)x.stvq.QueryStatus == 5).Count() +
+        //                                   g.Where(x => (int)x.stvq.QueryStatus == 6).Count()
+        //                       }).ToList();
+        //    return queryStatus;
+        //}
 
         public IList<QueryManagementDto> GetQueryEntries(QuerySearchDto filters)
         {

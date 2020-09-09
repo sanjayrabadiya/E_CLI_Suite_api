@@ -35,28 +35,6 @@ namespace GSC.Respository.Master
                 .OrderBy(o => o.Value).ToList();
         }
 
-        public List<CityAreaDto> GetCitiesArea(bool isDeleted)
-        {
-            var cityAreas = All.Where(x =>
-                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new CityAreaDto
-            {
-                AreaName = c.AreaName,
-                CityName = c.City.CityName,
-                IsDeleted = c.DeletedDate != null,
-                CountryName = c.City.State.Country.CountryName,
-                StateName = c.City.State.StateName,
-                City = c.City,
-                CityId = c.CityId,
-                Id = c.Id,
-                CountryId = c.City.State.Country.Id,
-                StateId = c.City.State.Id,
-                CompanyId = c.CompanyId
-            }).OrderByDescending(x => x.Id).ToList();
-
-            return cityAreas;
-        }
-
         public IList<DropDownDto> AutoCompleteSearch(string searchText, bool isAutoSearch = false)
         {
             if (string.IsNullOrWhiteSpace(searchText)) return new List<DropDownDto>();
@@ -76,22 +54,6 @@ namespace GSC.Respository.Master
                 Id = t.Id,
                 Value = t.AreaName
             }).ToList();
-        }
-
-        public List<CityAreaDto> GetCityAreaAll(bool isDeleted)
-        {
-            var cityareas = All.Where(x =>
-                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).Select(c => new CityAreaDto
-            {
-                Id = c.Id,
-                AreaName = c.AreaName,
-                CityName = c.City.CityName,
-                IsDeleted = c.DeletedDate != null
-            }).ToList();
-
-            return cityareas;
         }
 
         public List<CityAreaGridDto> GetCityAreaList(bool isDeleted)

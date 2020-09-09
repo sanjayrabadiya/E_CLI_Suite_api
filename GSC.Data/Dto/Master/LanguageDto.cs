@@ -8,9 +8,6 @@ namespace GSC.Data.Dto.Master
         public string LanguageName { get; set; }
         public string Culture { get; set; }
         public bool IsDefault { get; set; }
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

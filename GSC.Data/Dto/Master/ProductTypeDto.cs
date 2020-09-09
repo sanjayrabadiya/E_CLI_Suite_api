@@ -10,9 +10,6 @@ namespace GSC.Data.Dto.Master
         public string ProductTypeCode { get; set; }
         [Required(ErrorMessage = "Product Type name is required.")]
         public string ProductTypeName { get; set; }
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 

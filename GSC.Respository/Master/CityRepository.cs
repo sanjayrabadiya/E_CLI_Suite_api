@@ -45,24 +45,10 @@ namespace GSC.Respository.Master
                 .ToList();
         }
 
-        public List<CityDto> GetCities(bool isDeleted)
+        public List<CityGridDto> GetCities(bool isDeleted)
         {
-            var cities = All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new CityDto
-                    {
-                        CityCode = c.CityCode,
-                        CityName = c.CityName,
-                        IsDeleted = c.DeletedDate != null,
-                        CountryName = c.State.Country.CountryName,
-                        State = c.State,
-                        Id = c.Id,
-                        CountryId = c.State.Country.Id,
-                        StateId = c.State.Id
-                    }
-                )
-                .ToList();
-            return cities;
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<CityGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public IList<DropDownDto> AutoCompleteSearch(string searchText, bool isAutoSearch = false)

@@ -7,10 +7,6 @@ namespace GSC.Data.Dto.Medra
         public string LanguageName { get; set; }
 
         public string Culture { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
         public int? CompanyId { get; set; }
     }
 
