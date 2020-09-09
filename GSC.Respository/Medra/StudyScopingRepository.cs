@@ -37,50 +37,43 @@ namespace GSC.Respository.Medra
 
         public List<StudyScopingDto> GetStudyScopingList(int projectId)
         {
-            try
-            {
-                var result = All.Where(r => r.ProjectId == projectId && r.DeletedDate == null).Select(x =>
-                        new StudyScopingDto
-                        {
-                            Id = x.Id,
-                            ProjectId = x.ProjectId,
-                            ProjectName = x.Project.ProjectName,
-                            ProjectCode = x.Project.ProjectCode,
-                            TemplateId = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplateId,
-                            TemplateName = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplate.TemplateName,
-                            VisitId = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisitId,
-                            VisitName = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
-                            ProjectDesignPeriodId = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId,
-                            ProjectDesignPeriodName = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
-                            IsByAnnotation = x.IsByAnnotation,
-                            ScopingBy = x.IsByAnnotation ? 2 : 1,
-                            ProjectDesignVariableId = x.ProjectDesignVariableId,
-                            VariableAnnotation = x.IsByAnnotation ? x.ProjectDesignVariableId : 0,
-                            VariableName = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariableId).FirstOrDefault().VariableName,
-                            DomainId = x.DomainId,
-                            DomainName = x.Domain.DomainName,
-                            MedraConfigId = x.MedraConfigId,
-                            VersionName = x.MedraConfig.MedraVersion.Dictionary.DictionaryName + "-" + x.MedraConfig.Language.LanguageName + "-" + x.MedraConfig.MedraVersion.Version,
-                            CoderProfile = x.CoderProfile,
-                            CoderApprover = x.CoderApprover,
-                            CoderProfileName = Context.SecurityRole.Where(s => s.Id == x.CoderProfile && s.DeletedDate == null).FirstOrDefault().RoleName,
-                            CoderApproverName = Context.SecurityRole.Where(s => s.Id == x.CoderApprover && s.DeletedDate == null).FirstOrDefault().RoleName,
-                            FieldName = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName + "." +
-                                x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName + "." +
-                                x.ProjectDesignVariable.ProjectDesignTemplate.TemplateName + "." + x.ProjectDesignVariable.VariableName
-                        }).OrderBy(x => x.Id).ToList();
+            var result = All.Where(r => r.ProjectId == projectId && r.DeletedDate == null).Select(x =>
+                    new StudyScopingDto
+                    {
+                        Id = x.Id,
+                        ProjectId = x.ProjectId,
+                        ProjectName = x.Project.ProjectName,
+                        ProjectCode = x.Project.ProjectCode,
+                        TemplateId = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplateId,
+                        TemplateName = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplate.TemplateName,
+                        VisitId = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariable.Id).FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisitId,
+                        VisitName = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                        ProjectDesignPeriodId = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId,
+                        ProjectDesignPeriodName = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
+                        IsByAnnotation = x.IsByAnnotation,
+                        ScopingBy = x.IsByAnnotation ? 2 : 1,
+                        ProjectDesignVariableId = x.ProjectDesignVariableId,
+                        VariableAnnotation = x.IsByAnnotation ? x.ProjectDesignVariableId : 0,
+                        VariableName = Context.ProjectDesignVariable.Where(p => p.Id == x.ProjectDesignVariableId).FirstOrDefault().VariableName,
+                        DomainId = x.DomainId,
+                        DomainName = x.Domain.DomainName,
+                        MedraConfigId = x.MedraConfigId,
+                        VersionName = x.MedraConfig.MedraVersion.Dictionary.DictionaryName + "-" + x.MedraConfig.Language.LanguageName + "-" + x.MedraConfig.MedraVersion.Version,
+                        CoderProfile = x.CoderProfile,
+                        CoderApprover = x.CoderApprover,
+                        CoderProfileName = Context.SecurityRole.Where(s => s.Id == x.CoderProfile && s.DeletedDate == null).FirstOrDefault().RoleName,
+                        CoderApproverName = Context.SecurityRole.Where(s => s.Id == x.CoderApprover && s.DeletedDate == null).FirstOrDefault().RoleName,
+                        FieldName = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName + "." +
+                            x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName + "." +
+                            x.ProjectDesignVariable.ProjectDesignTemplate.TemplateName + "." + x.ProjectDesignVariable.VariableName
+                    }).OrderBy(x => x.Id).ToList();
 
-                foreach (var item in result)
-                {
-                    item.IsEnable = checkForScopingEdit((int)item.ProjectDesignVariableId);
-                }
-
-                return result;
-            }
-            catch (Exception ex)
+            foreach (var item in result)
             {
-                throw ex;
+                item.IsEnable = checkForScopingEdit((int)item.ProjectDesignVariableId);
             }
+
+            return result;
         }
 
         public bool checkForScopingEdit(int ProjectDesignVariableId)

@@ -345,7 +345,8 @@ namespace GSC.Respository.Volunteer
                                                                && !a.IsProcessed &&
                                                                a.ProjectDesignPeriodId == PeriodId
                                                                && a.ProjectId == projectId
-                                                               && a.AttendanceType != AttendanceType.Screening).Select(x =>
+                                                               && a.AttendanceType != AttendanceType.Screening
+                                                              ).Select(x =>
                     new DropDownDto
                     {
                         Id = x.Id,
