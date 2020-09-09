@@ -99,8 +99,8 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
 
             CreateMap<ManageSite, ManageSiteGridDto>()
-                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
-                .ForMember(x => x.StateName, x => x.MapFrom(a => a.State.StateName))
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
+                .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
                 .ReverseMap();
 

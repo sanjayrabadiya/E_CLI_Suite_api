@@ -14,7 +14,5 @@ namespace GSC.Data.Entities.Master
         public int CityId { get; set; }
         public int? CompanyId { get; set; }
         public City City { get; set; }
-        public Country Country { get; set; }
-        public State State { get; set; }
     }
 }
