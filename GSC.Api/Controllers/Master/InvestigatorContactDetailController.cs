@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -31,15 +33,17 @@ namespace GSC.Api.Controllers.Master
         {
             if (id <= 0) return BadRequest();
 
-            var investigatorContactDetail = _investigatorContactDetailRepository.GetContactList(id);
+            var investigatorContactDetail = _investigatorContactDetailRepository.All.Where(x => x.InvestigatorContactId == id).
+                   ProjectTo<InvestigatorContactDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
             return Ok(investigatorContactDetail);
         }
 
         [HttpGet]
-        [Route("GetContact/{projectId}/{isDeleted:bool?}")]
-        public IActionResult GetContact(int projectId, bool isDeleted)
+        [Route("GetContact/{investigatorContactId}/{isDeleted:bool?}")]
+        public IActionResult GetContact(int investigatorContactId, bool isDeleted)
         {
-            var investigatorContactDetail = _investigatorContactDetailRepository.GetContactList(projectId, isDeleted);
+            var investigatorContactDetail = _investigatorContactDetailRepository.GetContactList(investigatorContactId, isDeleted);
             return Ok(investigatorContactDetail);
         }
 

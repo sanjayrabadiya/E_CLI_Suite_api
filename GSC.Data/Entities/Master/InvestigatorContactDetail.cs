@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.UserMgt;
 
 namespace GSC.Data.Entities.Master
 {
@@ -11,5 +12,7 @@ namespace GSC.Data.Entities.Master
         public string ContactName { get; set; }
         public string ContactNo { get; set; }
         public int? CompanyId { get; set; }
+        public SecurityRole SecurityRole { get; set; }
+        public ContactType ContactType { get; set; }
     }
 }

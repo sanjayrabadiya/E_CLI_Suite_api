@@ -5,11 +5,9 @@ using GSC.Data.Entities.Master;
 
 namespace GSC.Respository.Master
 {
-    public interface IInvestigatorContactDetailRepository :  IGenericRepository<InvestigatorContactDetail>
+    public interface IInvestigatorContactDetailRepository : IGenericRepository<InvestigatorContactDetail>
     {
-        IList<InvestigatorContactDetailDto> GetContactList(int clientId);
-
-        IList<InvestigatorContactDetailDto> GetContactList(int projectId, bool isDeleted);
+        IList<InvestigatorContactDetailGridDto> GetContactList(int InvestigatorContactId, bool isDeleted);
 
         string DuplicateContact(InvestigatorContactDetail objSave);
 

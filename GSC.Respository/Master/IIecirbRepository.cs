@@ -9,6 +9,5 @@ namespace GSC.Respository.Master
     {
         string Duplicate(Iecirb objSave);
         List<DropDownDto> GetIecirbDropDown();
-        IList<IecirbDto> GetIecirbList(int ManageSiteId, bool isDeleted);
     }
 }

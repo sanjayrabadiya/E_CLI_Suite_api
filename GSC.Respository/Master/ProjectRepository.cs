@@ -495,8 +495,10 @@ namespace GSC.Respository.Master
 
             var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ParentProjectId == projectId).
                 ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
             projects.ForEach(x =>
             {
+                x.ParentProjectName = Context.Project.Find(x.ParentProjectId).ProjectName;
                 var design = Context.ProjectDesign.Where(t =>
                     t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null).FirstOrDefault();
                 if (design != null)

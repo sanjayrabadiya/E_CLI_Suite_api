@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -13,28 +15,14 @@ namespace GSC.Respository.Master
     public class InvestigatorContactDetailRepository : GenericRespository<InvestigatorContactDetail, GscContext>, IInvestigatorContactDetailRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
 
-        public InvestigatorContactDetailRepository(IUnitOfWork<GscContext> uow,IJwtTokenAccesser jwtTokenAccesser)
+        public InvestigatorContactDetailRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+             IMapper mapper)
     : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-        }
-
-
-        public IList<InvestigatorContactDetailDto> GetContactList(int InvestigatorContactId)
-        {
-            return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId).Select(c =>
-                new InvestigatorContactDetailDto
-                {
-                    Id = c.Id,
-                    InvestigatorContactId = c.InvestigatorContactId,
-                    ContactTypeId = c.ContactTypeId,
-                    SecurityRoleId = c.SecurityRoleId,
-                    ContactEmail = c.ContactEmail,
-                    ContactName = c.ContactName,
-                    ContactNo = c.ContactNo,
-                    CompanyId = c.CompanyId
-                }).OrderByDescending(t => t.Id).ToList();
+            _mapper = mapper;
         }
 
         public string DuplicateContact(InvestigatorContactDetail objSave)
@@ -45,21 +33,10 @@ namespace GSC.Respository.Master
             return "";
         }
 
-        public IList<InvestigatorContactDetailDto> GetContactList(int projectId, bool isDeleted)
+        public IList<InvestigatorContactDetailGridDto> GetContactList(int InvestigatorContactId, bool isDeleted)
         {
-            return FindByInclude(t => (isDeleted ? t.DeletedDate != null : t.DeletedDate == null) && t.InvestigatorContactId == projectId).Select(c =>
-     new InvestigatorContactDetailDto
-     {
-         Id = c.Id,
-         InvestigatorContactId = c.InvestigatorContactId,
-         ContactTypeId = c.ContactTypeId,
-         SecurityRoleId = c.SecurityRoleId,
-         ContactEmail = c.ContactEmail,
-         ContactName = c.ContactName,
-         ContactNo = c.ContactNo,
-         CompanyId = c.CompanyId,
-         IsDeleted = c.DeletedDate != null
-     }).OrderByDescending(t => t.Id).ToList();
+            return All.Where(x => x.InvestigatorContactId == InvestigatorContactId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+                     ProjectTo<InvestigatorContactDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public List<DropDownDto> GetInvestigatorContactDetailDropDown()

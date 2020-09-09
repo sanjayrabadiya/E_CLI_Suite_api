@@ -5,7 +5,6 @@ namespace GSC.Data.Entities.Master
 {
     public class ManageSite : BaseEntity
     {
-        //public int? InvestigatorContactId { get; set; }
         public string SiteName { get; set; }
         public string ContactName { get; set; }
         public string SiteEmail { get; set; }
@@ -15,5 +14,7 @@ namespace GSC.Data.Entities.Master
         public int CityId { get; set; }
         public int? CompanyId { get; set; }
         public City City { get; set; }
+        public Country Country { get; set; }
+        public State State { get; set; }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -13,11 +15,20 @@ namespace GSC.Respository.Master
     public class ManageSiteRepository : GenericRespository<ManageSite, GscContext>, IManageSiteRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
         public ManageSiteRepository(IUnitOfWork<GscContext> uow,
-IJwtTokenAccesser jwtTokenAccesser)
-: base(uow, jwtTokenAccesser)
+        IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
+        }
+
+        public List<ManageSiteGridDto> GetManageSites(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<ManageSiteGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
         }
 
         public IList<ManageSiteDto> GetManageSiteList(int Id)
@@ -26,7 +37,6 @@ IJwtTokenAccesser jwtTokenAccesser)
                 new ManageSiteDto
                 {
                     Id = c.Id,
-                    //InvestigatorContactId = c.InvestigatorContactId,
                     SiteName = c.SiteName,
                     ContactName = c.ContactName,
                     SiteEmail = c.SiteEmail,

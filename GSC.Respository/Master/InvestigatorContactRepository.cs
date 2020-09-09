@@ -30,39 +30,6 @@ namespace GSC.Respository.Master
                 .OrderBy(o => o.Value).ToList();
         }
 
-
-        public List<InvestigatorContactDto> GetInvestigatorContact(bool isDeleted)
-        {
-            var investigatorContact = All.Where(x =>
-                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new InvestigatorContactDto
-                {
-                    NameOfInvestigator = c.NameOfInvestigator,
-                    EmailOfInvestigator = c.EmailOfInvestigator,
-                    Specialization = c.Specialization,
-                    RegistrationNumber = c.RegistrationNumber,
-                    ManageSiteId = c.ManageSiteId,
-                    Address = c.Address,
-                    ContactNumber = c.ContactNumber,
-                    IecirbId = c.IecirbId,
-                    IECIRBContactNo = c.IECIRBContactNo,
-                    IECIRBContactName = c.IECIRBContactName,
-                    IECIRBContactEmail = c.IECIRBContactEmail,
-                    CityName = c.City.CityName,
-                    IsDeleted = c.DeletedDate != null,
-                    CountryName = c.City.State.Country.CountryName,
-                    StateName = c.City.State.StateName,
-                    City = c.City,
-                    CityId = c.CityId,
-                    Id = c.Id,
-                    CountryId = c.City.State.Country.Id,
-                    StateId = c.City.State.Id,
-                    CompanyId = c.CompanyId
-                }).OrderByDescending(x => x.Id).ToList();
-
-            return investigatorContact;
-        }
-
         public string Duplicate(InvestigatorContact objSave)
         {
             if (All.Any(x =>

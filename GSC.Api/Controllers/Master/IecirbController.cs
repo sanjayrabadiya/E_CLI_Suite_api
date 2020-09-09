@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -19,7 +20,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IUnitOfWork<GscContext> _uow;
 
         public IecirbController(IIecirbRepository iecirbRepository,
-IUnitOfWork<GscContext> uow, IMapper mapper)
+        IUnitOfWork<GscContext> uow, IMapper mapper)
         {
             _iecirbRepository = iecirbRepository;
             _uow = uow;
@@ -32,7 +33,9 @@ IUnitOfWork<GscContext> uow, IMapper mapper)
         {
             if (id <= 0) return BadRequest();
 
-            var iecirb = _iecirbRepository.GetIecirbList(id, isDeleted);
+            var iecirb = _iecirbRepository.All.Where(x => x.ManageSiteId == id && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+                    ProjectTo<IecirbGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
             return Ok(iecirb);
         }
 
@@ -62,7 +65,6 @@ IUnitOfWork<GscContext> uow, IMapper mapper)
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
 
             _iecirbRepository.Add(iecirb);
             if (_uow.Save() <= 0) throw new Exception("Creating IEC/IRB failed on save.");

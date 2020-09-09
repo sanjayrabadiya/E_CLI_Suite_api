@@ -28,35 +28,30 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "ContactNumber is required.")]
         public string ContactNumber { get; set; }
         public int IecirbId { get; set; }
+       
+        [Required(ErrorMessage = "City is required.")]
+        public int CityId { get; set; }
+        public int StateId { get; set; }
+        public int CountryId { get; set; }
+        public int? CompanyId { get; set; }
+    }
+
+    public class InvestigatorContactGridDto : BaseAuditDto
+    {
+        public string NameOfInvestigator { get; set; }
+        public string EmailOfInvestigator { get; set; }
+        public string Specialization { get; set; }
+        public string SiteName { get; set; }
+        public string Address { get; set; }
+        public string ContactNumber { get; set; }
         public string IECIRBName { get; set; }
         public string IECIRBContactNo { get; set; }
         public string IECIRBContactName { get; set; }
         public string IECIRBContactEmail { get; set; }
-        [Required(ErrorMessage = "City is required.")]
-        public int CityId { get; set; }
-
-        public string CityName { get; set; }
-       // public int? CompanyId { get; set; }
-        public City City { get; set; }
-
-        public int StateId { get; set; }
-
-        public int CountryId { get; set; }
-
+        public string RegistrationNumber { get; set; }
         public string StateName { get; set; }
-
+        public string CityName { get; set; }
         public string CountryName { get; set; }
 
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
-        //public int? CreatedBy { get; set; }
-        //public int? DeletedBy { get; set; }
-        //public int? ModifiedBy { get; set; }
-        //public DateTime? CreatedDate { get; set; }
-        //public DateTime? ModifiedDate { get; set; }
-        //public DateTime? DeletedDate { get; set; }
-        public int? CompanyId { get; set; }
-        //public string CompanyName { get; set; }
     }
 }

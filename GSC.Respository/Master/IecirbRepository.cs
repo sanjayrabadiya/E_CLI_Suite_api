@@ -14,27 +14,10 @@ namespace GSC.Respository.Master
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public IecirbRepository(IUnitOfWork<GscContext> uow,
-IJwtTokenAccesser jwtTokenAccesser)
-: base(uow, jwtTokenAccesser)
+        IJwtTokenAccesser jwtTokenAccesser)
+        : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-        }
-
-        public IList<IecirbDto> GetIecirbList(int manageSiteId, bool isDeleted)
-        {
-            return FindByInclude(t => (isDeleted ? t.DeletedDate != null : t.DeletedDate == null) && t.ManageSiteId == manageSiteId).Select(c =>
-                new IecirbDto
-                {
-                    Id = c.Id,
-                    ManageSiteId = c.ManageSiteId,
-                    IECIRBName = c.IECIRBName,
-                    RegistrationNumber = c.RegistrationNumber,
-                    IECIRBContactName = c.IECIRBContactName,
-                    IECIRBContactEmail = c.IECIRBContactEmail,
-                    IECIRBContactNumber = c.IECIRBContactNumber,
-                    CompanyId = c.CompanyId,
-                    IsDeleted = c.DeletedDate != null
-                }).OrderByDescending(t => t.Id).ToList();
         }
 
         public string Duplicate(Iecirb objSave)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -45,10 +46,10 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var variableTemplates = _variableTemplateRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).OrderByDescending(x => x.Id).ToList();
-            var variableTemplatesDto = _mapper.Map<IEnumerable<VariableTemplateDto>>(variableTemplates);
-            return Ok(variableTemplatesDto);
+            var variableTemplates = _variableTemplateRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<VariableTemplateGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            return Ok(variableTemplates);
         }
 
         [HttpGet("{id}")]
