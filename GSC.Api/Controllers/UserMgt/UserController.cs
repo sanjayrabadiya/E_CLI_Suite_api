@@ -66,7 +66,7 @@ namespace GSC.Api.Controllers.UserMgt
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var user = _userRepository.FindByInclude(x => x.Id == id, x => x.UserRoles, x => x.Location)
+            var user = _userRepository.FindByInclude(x => x.Id == id, x => x.UserRoles)
                 .FirstOrDefault();
 
             if (user != null && user.UserRoles != null)
