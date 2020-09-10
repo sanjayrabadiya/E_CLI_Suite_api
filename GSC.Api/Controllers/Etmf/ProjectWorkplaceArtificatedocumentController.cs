@@ -219,8 +219,8 @@ namespace GSC.Api.Controllers.Etmf
         {
             var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
             var upload = _context.UploadSetting.OrderByDescending(x=>x.Id).FirstOrDefault();
-            var dfdf = System.IO.Path.Combine(upload.DocumentPath, document.DocPath, document.DocumentName);
-            string path = dfdf;
+            var FullPath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            string path = FullPath;
             if (!System.IO.File.Exists(path))
                 return null;
             Stream stream = System.IO.File.OpenRead(path);
