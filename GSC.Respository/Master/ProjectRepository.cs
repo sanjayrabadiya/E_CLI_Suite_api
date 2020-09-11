@@ -290,7 +290,7 @@ namespace GSC.Respository.Master
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
-                    Value = c.ProjectCode + " - " + c.ProjectName,
+                    Value = c.ProjectCode,
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic
                 }).OrderBy(o => o.Value).ToList();
