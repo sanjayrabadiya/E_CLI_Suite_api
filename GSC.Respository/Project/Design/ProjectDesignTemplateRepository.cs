@@ -57,7 +57,8 @@ namespace GSC.Respository.Project.Design
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     DesignOrder = r.DesignOrder,
-                    VariableTemplateId = r.VariableTemplateId
+                    VariableTemplateId = r.VariableTemplateId,
+                    DomainName = r.Domain.DomainName
                 }
             ).FirstOrDefault();
 
