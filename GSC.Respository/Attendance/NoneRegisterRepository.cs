@@ -11,6 +11,7 @@ using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -67,7 +68,7 @@ namespace GSC.Respository.Attendance
 
         public List<NoneRegisterGridDto> GetNonRegisterList(int projectId, bool isDeleted)
         {
-            var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+            var result = All.Where(x => x.Attendance.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                    ProjectTo<NoneRegisterGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             return result;

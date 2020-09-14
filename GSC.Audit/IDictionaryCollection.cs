@@ -7,5 +7,6 @@ namespace GSC.Audit
     public interface IDictionaryCollection
     {
         IList<Dictionary> Dictionaries { get; }
+        IList<string> SkipEntityForAudit { get; }
     }
 }

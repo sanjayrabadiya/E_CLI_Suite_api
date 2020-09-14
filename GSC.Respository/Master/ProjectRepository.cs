@@ -63,19 +63,10 @@ namespace GSC.Respository.Master
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<ProjectGridDto>();
 
-            var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ParentProjectId == null).
+            var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && projectList.Contains(x.Id) && x.ParentProjectId == null).
                  ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
-            projects.ForEach(x =>
-            {
-                var design = Context.ProjectDesign.Where(t =>
-                    t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null).FirstOrDefault();
-                if (design != null)
-                {
-                    x.ProjectDesignId = design.Id;
-                    x.Locked = !design.IsUnderTesting;
-                }
-            });
+          
             return projects;
         }
 

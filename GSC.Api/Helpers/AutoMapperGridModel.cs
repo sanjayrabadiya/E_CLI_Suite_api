@@ -74,12 +74,12 @@ namespace GSC.Api.Helpers
             CreateMap<Variable, VariableGridDto>().ReverseMap();
             CreateMap<PatientStatus, PatientStatusGridDto>().ReverseMap();
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
-            CreateMap<SecurityRole, SecurityRoleGridDto> ().ReverseMap();
+            CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
             CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
 
             CreateMap<NoneRegister, NoneRegisterGridDto>()
-                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
-                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Attendance.Project.ProjectName))
+                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Attendance.Project.ProjectCode))
                  .ReverseMap();
             CreateMap<ProjectWorkplace, ETMFWorkplaceGridDto>()
                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
@@ -96,6 +96,8 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.ClientName, x => x.MapFrom(a => a.Client.ClientName))
                 .ForMember(x => x.DrugName, x => x.MapFrom(a => a.Drug.DrugName))
                 .ForMember(x => x.RegulatoryTypeName, x => x.MapFrom(a => a.RegulatoryType.GetDescription()))
+                .ForMember(x => x.ProjectDesignId, x => x.MapFrom(a => a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.Id).FirstOrDefault()))
+                .ForMember(x => x.Locked, x => x.MapFrom(a => !a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.IsUnderTesting).FirstOrDefault()))
                 .ReverseMap();
 
             CreateMap<ManageSite, ManageSiteGridDto>()
@@ -104,7 +106,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
                 .ReverseMap();
 
-            CreateMap< VariableTemplate, VariableTemplateGridDto>()
+            CreateMap<VariableTemplate, VariableTemplateGridDto>()
                .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
                .ForMember(x => x.ActivityMode, x => x.MapFrom(a => a.ActivityMode.GetDescription()))
                .ReverseMap();
