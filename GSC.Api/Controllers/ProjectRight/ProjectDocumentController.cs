@@ -69,6 +69,7 @@ namespace GSC.Api.Controllers.ProjectRight
                     var projectCreatedBy = _projectRepository.FindByInclude(project => project.Id == item.ProjectId).FirstOrDefault();
                     var isExists = _documentReviewRepository.FindByInclude(t => t.ProjectDocumentId == item.Id && t.IsReview && t.UserId != projectCreatedBy.CreatedBy);
                     if (isExists.Count() > 0) item.IsReview = true; else item.IsReview = false;
+                    item.StudyCode = projectCreatedBy.ProjectCode;
                 }
 
             return Ok(projectDocuments);

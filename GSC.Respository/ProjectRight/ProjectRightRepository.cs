@@ -6,6 +6,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
+using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Helper;
 using Microsoft.EntityFrameworkCore;
@@ -274,20 +275,19 @@ namespace GSC.Respository.ProjectRight
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId, c.RoleId }, (key, group) => group.First());
 
-
             var result = latestProjectRight.Select(x => new ProjectDocumentReviewDto
             {
                 Id = x.Id,
+                Project = Context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault(),
                 ProjectName = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectName).FirstOrDefault(),
                 ProjectNumber = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
+                ParentProjectName = Context.Project.Where(p=>p.ParentProjectId == projectId).Select(r=>r.ProjectName).FirstOrDefault(),
                 ProjectId = x.ProjectId,
                 UserId = x.UserId,
                 UserName = Context.Users.Where(p => p.Id == x.UserId).Select(r => r.UserName).FirstOrDefault(),
                 AccessType = x.AuditReasonId != null ? "Revoke" : "Grant",
                 RoleId = x.RoleId,
-                RoleName = Context.ProjectRight.Where(c => c.ProjectId == x.ProjectId
-                                                           && c.UserId == x.UserId && c.RoleId == x.RoleId)
-                        .Select(a => a.role.RoleName).FirstOrDefault(),
+                RoleName = Context.ProjectRight.Where(c => c.ProjectId == x.ProjectId && c.UserId == x.UserId && c.RoleId == x.RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
                 TotalReview = Context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
                                           && a.UserId == x.UserId && a.IsReview).Select(b => new ReviewDeteail
                                           {
@@ -303,9 +303,7 @@ namespace GSC.Respository.ProjectRight
                                           {
                                               DocumentPath = b.ProjectDocument.FileName
                                           }).ToList().OrderByDescending(y => y.AssignedDate).ToList(),
-
                 ProjectCreatedBy = x.CreatedBy
-
             }
             ).ToList();
 

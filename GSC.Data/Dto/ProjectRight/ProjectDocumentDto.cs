@@ -11,7 +11,7 @@ namespace GSC.Data.Dto.ProjectRight
         [Required(ErrorMessage = "Project Name is required.")]
         public int ProjectId { get; set; }
 
-        public ProjectDto Project { get; set; }
+       // public ProjectDto Project { get; set; }
 
         public string FileName { get; set; }
         public string PathName { get; set; }
@@ -21,6 +21,7 @@ namespace GSC.Data.Dto.ProjectRight
         public int? CreatedBy { get; set; }
         public string CreatedByName { get; set; }
         public DateTime? CreatedDate { get; set; }
-       
+        public string StudyCode { get; set; }
+
     }
 }
