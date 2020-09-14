@@ -104,7 +104,7 @@ namespace GSC.Audit
 
         void GetOldAndNewValues(EntityEntry dbEntry, ref List<TrackerResult> trackers)
         {
-            var dbValueProps = dbEntry.GetDatabaseValues();
+            var dbValueProps =  dbEntry.GetDatabaseValues();
 
             foreach (var prop in dbEntry.Properties)
             {
@@ -177,7 +177,7 @@ namespace GSC.Audit
                     if (string.IsNullOrEmpty(oldValue)) oldValue = "Empty";
                     if (string.IsNullOrEmpty(newValue)) newValue = "Empty";
 
-                    if (trackers.Any(x => x.EntityName == dbEntry.CurrentValues.EntityType.ClrType.Name.ToString() && x.FieldName == displayName))
+                    if (!trackers.Any(x => x.EntityName == dbEntry.CurrentValues.EntityType.ClrType.Name.ToString() && x.FieldName == displayName))
                         trackers.Add(new TrackerResult
                         {
                             EntityName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString(),
