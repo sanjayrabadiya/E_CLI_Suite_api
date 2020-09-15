@@ -24,7 +24,7 @@ namespace GSC.Data.Dto.ProjectRight
         public DateTime? ReviewDate { get; set; }
         public string ReviewNote { get; set; }
         public string ProjectName { get; set; }
-        public string ParentProjectName { get; set; }
+        public string ParentProjectCode { get; set; }
         public int? AssignedById { get; set; }
         public string AssignedBy { get; set; }
         public DateTime? AssignedDate { get; set; }

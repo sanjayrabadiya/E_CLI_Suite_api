@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
-using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Helper;
 using Microsoft.EntityFrameworkCore;
@@ -16,16 +14,15 @@ namespace GSC.Respository.ProjectRight
     public class ProjectRightRepository : GenericRespository<Data.Entities.ProjectRight.ProjectRight, GscContext>,
         IProjectRightRepository
     {
-        //private readonly GscContext _context;
         private readonly IProjectDocumentReviewRepository _documentReviewRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUnitOfWork<GscContext> _uow;
 
         public ProjectRightRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
-            IProjectDocumentReviewRepository documentReviewRepository) : base(uow, jwtTokenAccesser)
+            IProjectDocumentReviewRepository documentReviewRepository
+            ) : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            //_context = uow.Context;
             _uow = uow;
             _documentReviewRepository = documentReviewRepository;
         }
@@ -280,8 +277,11 @@ namespace GSC.Respository.ProjectRight
                 Id = x.Id,
                 Project = Context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault(),
                 ProjectName = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectName).FirstOrDefault(),
-                ProjectNumber = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
-                ParentProjectName = Context.Project.Where(p=>p.ParentProjectId == projectId).Select(r=>r.ProjectName).FirstOrDefault(),
+                //Add By vipul on 14092020 for get study and site display on grid project access
+                ProjectNumber = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? "" : Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
+                ParentProjectCode = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault() 
+                : Context.Project.Where(p => p.Id == x.project.ParentProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
+
                 ProjectId = x.ProjectId,
                 UserId = x.UserId,
                 UserName = Context.Users.Where(p => p.Id == x.UserId).Select(r => r.UserName).FirstOrDefault(),
@@ -363,7 +363,7 @@ namespace GSC.Respository.ProjectRight
         public ProjectDocumentHistory GetProjectRightHistory(int projectId, int userId, int roleId)
         {
             var objdochistory = new ProjectDocumentHistory();
-           
+
             var projectrightlist = All.Where(x => x.ProjectId == projectId && x.UserId == userId && x.RoleId == roleId)
                 .ToList();
 
