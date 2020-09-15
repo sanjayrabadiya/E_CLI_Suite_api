@@ -54,25 +54,28 @@ namespace GSC.Respository.Attendance
 
         public void SaveNonRegister(NoneRegister noneRegister, NoneRegisterDto noneRegisterDto)
         {
-            noneRegister.Id = 0;
-            noneRegister.Initial = noneRegister.Initial.PadRight(3, '-');
-
-            Add(noneRegister);
-            var attendance = new Data.Entities.Attendance.Attendance();
-            attendance.ProjectId = noneRegisterDto.ProjectId;
-            attendance.ProjectDesignPeriodId = noneRegisterDto.ProjectDesignPeriodId;
-            attendance.NoneRegister = noneRegister;
-            attendance.AttendanceType = AttendanceType.NoneRegister;
-            _attendanceRepository.SaveAttendance(attendance);
+            //Update By Vipul None register not save in Data entry on 15092020
+            noneRegister.ScreeningNumber = noneRegisterDto.ScreeningNumber;
+            noneRegister.DateOfScreening = noneRegisterDto.DateOfScreening;
+            noneRegister.DateOfRandomization = noneRegisterDto.DateOfRandomization;
+            noneRegister.RandomizationNumber = noneRegisterDto.RandomizationNumber;
+            Update(noneRegister);
+            if (noneRegister.AttendanceId == null)
+            {
+                var attendance = new Data.Entities.Attendance.Attendance();
+                attendance.ProjectId = noneRegisterDto.ProjectId;
+                attendance.ProjectDesignPeriodId = noneRegisterDto.ProjectDesignPeriodId;
+                attendance.NoneRegister = noneRegister;
+                attendance.AttendanceType = AttendanceType.NoneRegister;
+                _attendanceRepository.SaveAttendance(attendance);
+            }
         }
 
         public List<NoneRegisterGridDto> GetNonRegisterList(int projectId, bool isDeleted)
         {
-            var result = All.Where(x => x.Attendance.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+            var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                    ProjectTo<NoneRegisterGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-
             return result;
-
         }
 
         public string Duplicate(NoneRegister objSave, int projectId)

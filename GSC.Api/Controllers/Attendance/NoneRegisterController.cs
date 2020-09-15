@@ -50,14 +50,14 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var volunteerNonregisters = _noneRegisterRepository.All.Where(x =>
+            var Noneregisters = _noneRegisterRepository.All.Where(x =>
              (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
              && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
          ).OrderByDescending(t => t.Id).ToList();
 
-            var volunteerNonregisterDto = _mapper.Map<IEnumerable<NoneRegisterDto>>(volunteerNonregisters);
-          
-            return Ok(volunteerNonregisterDto);
+            var NonregisterDto = _mapper.Map<IEnumerable<NoneRegisterDto>>(Noneregisters);
+
+            return Ok(NonregisterDto);
         }
 
         [HttpGet("GetNonRegisterList/{projectId}/{isDeleted:bool?}")]
@@ -77,7 +77,7 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest();
 
             var volunteerNonregisterDto = _mapper.Map<NoneRegisterDto>(volunteerNonregister);
-           
+
             return Ok(volunteerNonregisterDto);
         }
 
@@ -85,47 +85,36 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Post([FromBody] NoneRegisterDto noneRegisterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-
-            var projectDesignPeriod = _projectDesignPeriodRepository.FindBy(x =>
-                x.DeletedDate == null && x.ProjectDesign.DeletedDate == null &&
-                x.ProjectDesign.ProjectId == noneRegisterDto.ParentProjectId).FirstOrDefault();
-
-            if (projectDesignPeriod == null)
-            {
-                ModelState.AddModelError("Message", "Design is not complete");
-                return BadRequest(ModelState);
-            }
-
-            noneRegisterDto.ProjectDesignPeriodId = projectDesignPeriod.Id;
             var noneRegister = _mapper.Map<NoneRegister>(noneRegisterDto);
 
-            var validate = _noneRegisterRepository.Duplicate(noneRegister, noneRegisterDto.ProjectId);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+            //var validate = _noneRegisterRepository.Duplicate(noneRegister, noneRegisterDto.ProjectId);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
 
-            _noneRegisterRepository.SaveNonRegister(noneRegister, noneRegisterDto);
+            //Create By Vipul Attendance not save while subject profile save modify on 15092020
+            _noneRegisterRepository.Add(noneRegister);
+            //_noneRegisterRepository.SaveNonRegister(noneRegister, noneRegisterDto);
             if (_uow.Save() <= 0) throw new Exception("Creating None register failed on save.");
             return Ok();
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] NoneRegisterDto volunteerNonregisterDto)
+        public IActionResult Put([FromBody] NoneRegisterDto NonregisterDto)
         {
-            if (volunteerNonregisterDto.Id <= 0) return BadRequest();
+            if (NonregisterDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            volunteerNonregisterDto.Initial = volunteerNonregisterDto.Initial.PadRight(3, '-');
-            var nonregister = _mapper.Map<NoneRegister>(volunteerNonregisterDto);
+            NonregisterDto.Initial = NonregisterDto.Initial.PadRight(3, '-');
+            var nonregister = _mapper.Map<NoneRegister>(NonregisterDto);
 
-            var validate = _noneRegisterRepository.Duplicate(nonregister, volunteerNonregisterDto.ProjectId);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+            //var validate = _noneRegisterRepository.Duplicate(nonregister, volunteerNonregisterDto.ProjectId);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
 
             _noneRegisterRepository.Update(nonregister);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
@@ -167,26 +156,33 @@ namespace GSC.Api.Controllers.Attendance
             return Ok();
         }
 
-
         [HttpPut]
         [Route("SaveRandomization")]
-        public IActionResult SaveRandomization([FromBody] RandomizationDto randomizationDto)
+        public IActionResult SaveRandomization([FromBody] NoneRegisterDto noneRegisterDto)
         {
-            if (randomizationDto.Id <= 0) return BadRequest();
+            if (noneRegisterDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var nonregister = _noneRegisterRepository.Find(randomizationDto.Id);
+            //Change by vipul on 15092020 for Attendance add only when screening number and randomization number add
+            var projectDesignPeriod = _projectDesignPeriodRepository.FindBy(x => x.DeletedDate == null && x.ProjectDesign.DeletedDate == null &&
+                                    x.ProjectDesign.ProjectId == noneRegisterDto.ParentProjectId).FirstOrDefault();
 
-            nonregister.ScreeningNumber = randomizationDto.ScreeningNumber;
-            nonregister.DateOfScreening = randomizationDto.DateOfScreening;
-            nonregister.DateOfRandomization = randomizationDto.DateOfRandomization;
-            nonregister.RandomizationNumber = randomizationDto.RandomizationNumber;
+            if (projectDesignPeriod == null)
+            {
+                ModelState.AddModelError("Message", "Design is not complete");
+                return BadRequest(ModelState);
+            }
 
-            var validate = _noneRegisterRepository.Duplicate(nonregister, randomizationDto.ProjectId);
+            noneRegisterDto.ProjectDesignPeriodId = projectDesignPeriod.Id;
+            var nonregister = _noneRegisterRepository.Find(noneRegisterDto.Id);
+
+            var validate = _noneRegisterRepository.Duplicate(nonregister, noneRegisterDto.ProjectId);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+
+            _noneRegisterRepository.SaveNonRegister(nonregister, noneRegisterDto);
 
             _noneRegisterRepository.Update(nonregister);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");

@@ -8,36 +8,22 @@ namespace GSC.Data.Dto.Attendance
 {
     public class NoneRegisterDto : BaseDto
     {
-
-        [Required(ErrorMessage = "Project is required.")]
         public int ProjectId { get; set; }
         public int ProjectDesignPeriodId { get; set; }
-        [Required(ErrorMessage = "First Name is required.")]
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
-        [Required(ErrorMessage = "Last Name is required.")]
         public string LastName { get; set; }
-        [Required(ErrorMessage = "Initial Name is required.")]
         public string Initial { get; set; }
-        [Required(ErrorMessage = "Initial Name is required.")]
         public DateTime? DateOfBirth { get; set; }
-        
         public int? Gender { get; set; }
-
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
-        
         public string Email { get; set; }
-       
         public string Qualification { get; set; }
-        
         public string Occupation { get; set; }
-       
         public int? LanguageId { get; set; }
-        
         public string AddressLine1 { get; set; }
         public string AddressLine2 { get; set; }
-        
         public int? CityId { get; set; }
         public int? ZipCode { get; set; }
         public string LegalFirstName { get; set; }
@@ -48,9 +34,7 @@ namespace GSC.Data.Dto.Attendance
         public int? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
         public int StateId { get; set; }
-
         public int CountryId { get; set; }
-
         public string ScreeningNumber { get; set; }
         public DateTime? _DateOfScreening { get; set; }
         public DateTime? DateOfScreening
@@ -65,41 +49,27 @@ namespace GSC.Data.Dto.Attendance
             get => _DateOfRandomization.UtcDate();
             set => _DateOfRandomization = value.UtcDate();
         }
-        public int AttendanceId { get; set; }
-
+        public int? AttendanceId { get; set; }
         public int ParentProjectId { get; set; }
         public int? CompanyId { get; set; }
-
         public bool IsLocked { get; set; }
     }
 
-
-
     public class NoneRegisterGridDto : BaseAuditDto
     {
-
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
-
         public string LastName { get; set; }
-
         public string Initial { get; set; }
         public DateTime? DateOfBirth { get; set; }
-
         public int? Gender { get; set; }
-
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
-
         public string Email { get; set; }
-
         public string Qualification { get; set; }
-
         public string Occupation { get; set; }
-
         public string AddressLine1 { get; set; }
         public string AddressLine2 { get; set; }
-
         public string LegalFirstName { get; set; }
         public string LegalMiddleName { get; set; }
         public string LegalLastName { get; set; }
@@ -107,12 +77,8 @@ namespace GSC.Data.Dto.Attendance
         public string LegalEmail { get; set; }
         public int? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
-
         public string CityName { get; set; }
-
-
         public string StateName { get; set; }
-
         public string CountryName { get; set; }
         public string ScreeningNumber { get; set; }
         public DateTime? _DateOfScreening { get; set; }
@@ -130,28 +96,6 @@ namespace GSC.Data.Dto.Attendance
         }
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
-
         public bool IsLocked { get; set; }
     }
-
-    public class RandomizationDto : BaseDto
-    {
-        public string ScreeningNumber { get; set; }
-        public DateTime? _DateOfScreening { get; set; }
-        public DateTime? DateOfScreening
-        {
-            get => _DateOfScreening.UtcDate();
-            set => _DateOfScreening = value.UtcDate();
-        }
-        public string RandomizationNumber { get; set; }
-        public DateTime? _DateOfRandomization { get; set; }
-        public DateTime? DateOfRandomization
-        {
-            get => _DateOfRandomization.UtcDate();
-            set => _DateOfRandomization = value.UtcDate();
-        }
-        public int ProjectId { get; set; }
-        public int ParentProjectId { get; set; }
-    }
-
 }

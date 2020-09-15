@@ -11,7 +11,7 @@ namespace GSC.Data.Entities.Attendance
 
         private DateTime? _dateOfScreening;
 
-        public int AttendanceId { get; set; }
+        public int? AttendanceId { get; set; }
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
@@ -51,8 +51,8 @@ namespace GSC.Data.Entities.Attendance
             get => _dateOfRandomization?.UtcDate();
             set => _dateOfRandomization = value?.UtcDate();
         }
-
-        public Attendance Attendance { get; set; }
+        public int ProjectId { get; set; }
+        public Attendance? Attendance { get; set; }
         public int? CompanyId { get; set; }
 
     }
