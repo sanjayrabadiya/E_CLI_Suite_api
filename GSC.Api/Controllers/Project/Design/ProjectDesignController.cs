@@ -167,10 +167,11 @@ namespace GSC.Api.Controllers.Project.Design
             if (!string.IsNullOrEmpty(validateMessage))
             {
                 ModelState.AddModelError("Message", validateMessage);
-                return BadRequest(ModelState);
+                return Ok(ModelState);
             }
 
-            return Ok();
+            ModelState.AddModelError("Message", "");
+            return Ok(ModelState);
         }
 
         [HttpPut("UpdateCompleteDesign/{id}")]
