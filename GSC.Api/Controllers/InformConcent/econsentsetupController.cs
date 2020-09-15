@@ -66,6 +66,7 @@ namespace GSC.Api.Controllers.InformConcent
                 item.ProjectName = _projectRepository.Find(item.ProjectId).ProjectName;
                 item.DocumentTypeName = _documentTypeRepository.Find(item.DocumentTypeId).TypeName;
                 item.PatientStatusName = _patientStatusRepository.Find(item.PatientStatusId).StatusName;
+                item.IsDeleted = isDeleted;
             }
             return Ok(econsentSetupsdto);
         }
@@ -92,6 +93,32 @@ namespace GSC.Api.Controllers.InformConcent
                 return NotFound();
 
             _econsentSetupRepository.Delete(record);
+            _uow.Save();
+
+            return Ok();
+        }
+
+        [HttpPatch("{id}")]
+        public ActionResult Active(int id)
+        {
+            var record = _econsentSetupRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+
+            EconsentSetupDto econsentSetupDto = new EconsentSetupDto();
+            econsentSetupDto.Id = record.Id;
+            econsentSetupDto.LanguageId = record.LanguageId;
+            econsentSetupDto.Version = record.Version;
+            
+            var validate = _econsentSetupRepository.Duplicate(econsentSetupDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            _econsentSetupRepository.Active(record);
             _uow.Save();
 
             return Ok();
