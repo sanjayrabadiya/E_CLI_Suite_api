@@ -21,6 +21,13 @@ using Syncfusion.EJ2.DocumentEditor;
 using System.Net.Http;
 using GSC.Domain;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
+using Syncfusion.DocIO;
+using Syncfusion.DocIO.DLS;
+using System.Text.Json;
+using ServiceStack.Text;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Telerik.Reporting.Barcodes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -204,7 +211,7 @@ namespace GSC.Api.Controllers.Etmf
             file.CopyTo(stream);
             stream.Position = 0;
 
-            WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
+            Syncfusion.EJ2.DocumentEditor.WordDocument document = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, GetFormatType(type.ToLower()));
             string sfdt = Newtonsoft.Json.JsonConvert.SerializeObject(document);
             document.Dispose();
             return sfdt;
@@ -228,6 +235,75 @@ namespace GSC.Api.Controllers.Etmf
             return json;
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("ImportSectionData/{id}/{sectionno}")]
+        public string ImportSectionData(int id,int sectionno)
+        {
+            //var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
+            //var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            //var dfdf = System.IO.Path.Combine(upload.DocumentPath, document.DocPath, document.DocumentName);
+            //string path = dfdf;
+            string path = "E:\\Neel Doc\\TestingDoc.docx";
+            if (!System.IO.File.Exists(path))
+                return null;
+            Stream stream = System.IO.File.OpenRead(path);
+            string json = ImportWordDocument(stream);
+            stream.Position = 0;
+            stream.Close();
+            JObject jsonstr = JObject.Parse(json);
+            Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
+            List<Block> blocks = new List<Block>();
+            int headercount = 0;
+            foreach (var e1 in jsonobj.sections)
+            {
+                foreach (var e2 in e1.blocks)
+                {
+                    if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
+                    {
+                        headercount++;
+                    }
+                    if (sectionno == headercount)
+                    {
+                        blocks.Add(e2);
+                    }
+                }
+            }
+
+            for (int i = 0; i<= jsonobj.sections.Count -1; i++)
+            {
+                jsonobj.sections[i].blocks = new List<Block>();
+                if (i ==0)
+                {
+                    jsonobj.sections[0].blocks = blocks;
+                }
+            }
+
+            
+                string jsonnew = JsonConvert.SerializeObject(jsonobj);
+                //Syncfusion.DocIO.DLS.WordDocument documentold = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                //Syncfusion.DocIO.DLS.WordDocument documentnew = new Syncfusion.DocIO.DLS.WordDocument();
+                //documentnew.Sections.Clear();
+                //documentnew.Sections.Add(documentold.Sections[sectionno].Clone());
+                //string filePath = "E:\\Neel Doc";//System.IO.Path.Combine(upload.DocumentPath, document.DocPath);
+                //string fileName = id + "_" + sectionno + "_" + DateTime.Now.ToFileTime().ToString() + ".docx"; //+ "_"  + document.DocumentName;
+                //DirectoryInfo info = new DirectoryInfo(filePath);
+                //if (!info.Exists)
+                //{
+                //    info.Create();
+                //}
+                //string pathnew = Path.Combine(filePath, fileName);
+                //FileStream streamnew = new FileStream(pathnew, FileMode.Create);
+                //documentnew.Save(streamnew, Syncfusion.DocIO.FormatType.Docx);
+                //documentold.Close();
+                //documentnew.Close();
+                //streamnew.Position = 0;
+                //streamnew.Close();
+                //System.IO.File.Delete(pathnew);
+                // return new HttpResponseMessage() { Content = new System.Net.Http.StringContent(json) };
+                return jsonnew;
+        }
+
         public string ImportWordDocument(Stream stream)
         {
             string sfdtText = "";
@@ -237,7 +313,7 @@ namespace GSC.Api.Controllers.Etmf
             return sfdtText;
         }
 
-        internal static FormatType GetFormatType(string format)
+        internal static Syncfusion.EJ2.DocumentEditor.FormatType GetFormatType(string format)
         {
             if (string.IsNullOrEmpty(format))
                 throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
@@ -247,16 +323,16 @@ namespace GSC.Api.Controllers.Etmf
                 case ".docx":
                 case ".docm":
                 case ".dotm":
-                    return FormatType.Docx;
+                    return Syncfusion.EJ2.DocumentEditor.FormatType.Docx;
                 case ".dot":
                 case ".doc":
-                    return FormatType.Doc;
+                    return Syncfusion.EJ2.DocumentEditor.FormatType.Doc;
                 case ".rtf":
-                    return FormatType.Rtf;
+                    return Syncfusion.EJ2.DocumentEditor.FormatType.Rtf;
                 case ".txt":
-                    return FormatType.Txt;
+                    return Syncfusion.EJ2.DocumentEditor.FormatType.Txt;
                 case ".xml":
-                    return FormatType.WordML;
+                    return Syncfusion.EJ2.DocumentEditor.FormatType.WordML;
                 default:
                     throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
             }

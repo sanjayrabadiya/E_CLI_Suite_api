@@ -688,7 +688,8 @@ namespace GSC.Respository.ProjectRight
                                LoginTime = user.LastLoginDate.UtcDateTime(),
                                LastIpAddress = user.LastIpAddress,
                                RoleName = string.Join(" ,", this.Context.Users.FirstOrDefault(b => b.Id == user.Id).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
-                           }).OrderBy(x => x.Id).ToList();
+                           }).ToList();//OrderBy(x => x.Id).ToList();
+            results = results.OrderBy(x => x.Id).ToList();
 
             results.ForEach(r =>
             {
@@ -718,7 +719,9 @@ namespace GSC.Respository.ProjectRight
                                  LoginTime = this.Context.UserLoginReport.FirstOrDefault(a => a.UserId == projectRight.UserId).LoginTime.UtcDateTime(),
                                  LogOutTime = user.LoginTime.UtcDateTime(),
                                  RoleName = string.Join(" ,", this.Context.Users.FirstOrDefault(b => b.Id == user.UserId).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
-                             }).OrderBy(x => x.Id).ToList();
+                             }).ToList();//OrderBy(x => x.Id).ToList();
+
+            queryDtos = queryDtos.OrderBy(x => x.Id).ToList();
 
             queryDtos.ForEach(r =>
             {

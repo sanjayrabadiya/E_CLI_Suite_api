@@ -19,10 +19,12 @@ namespace GSC.Data.Dto.Master
         //public DateTime? DeletedDate { get; set; }
         public int? CompanyId { get; set; }
         //public string CompanyName { get; set; }
+        public string shortName { get; set; }
     }
 
     public class LanguageGridDto : BaseAuditDto
     {
         public string LanguageName { get; set; }
+        public string shortName { get; set; }
     }
 }

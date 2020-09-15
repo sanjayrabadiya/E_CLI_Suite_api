@@ -8,6 +8,7 @@ using GSC.Data.Dto.Common;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Custom;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Medra;
@@ -29,6 +30,7 @@ using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
@@ -261,6 +263,7 @@ namespace GSC.Api.Helpers
             CreateMap<VisitStatus, VisitStatusDto>().ReverseMap();
             CreateMap<ProjectArtificateDocumentReview, ProjectArtificateDocumentReviewDto>().ReverseMap();
             CreateMap<ProjectArtificateDocumentComment, ProjectArtificateDocumentCommentDto>().ReverseMap();
+            CreateMap<EconsentSetup, EconsentSetupDto>().ReverseMap();
         }
     }
 }

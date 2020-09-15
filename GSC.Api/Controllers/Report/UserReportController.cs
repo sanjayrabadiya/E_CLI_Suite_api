@@ -31,7 +31,7 @@ namespace GSC.Api.Controllers.Report
 
         [HttpPost]
         [Route("GetUserReport")]
-        public IActionResult GetUserReport([FromQuery]UserReportSearchDto filters)
+        public IActionResult GetUserReport([FromBody]UserReportSearchDto filters)
         {
             if (filters.UserId <= 0)
             {

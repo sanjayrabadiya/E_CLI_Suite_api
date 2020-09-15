@@ -13,6 +13,7 @@ using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
 using GSC.Data.Entities.Master;
@@ -251,6 +252,7 @@ namespace GSC.Domain.Context
         public DbSet<ReportFavouriteScreen> ReportFavouriteScreen { get; set; }
         public DbSet<ProjectArtificateDocumentReview> ProjectArtificateDocumentReview { get; set; }
         public DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
+        public DbSet<EconsentSetup> EconsentSetup { get; set; }
         private List<string> ColumnsToSkip
         {
             get

@@ -132,6 +132,7 @@ namespace GSC.Helper
         [Description("DossierReport")] DossierReport = 7,
         [Description("ExcleTemplate")] ExcleTemplate = 8,
         [Description("Project Worksplace")] ProjectWorksplace = 9,
+        [Description("Inform Consent")] InformConcent = 10
 
     }
 
