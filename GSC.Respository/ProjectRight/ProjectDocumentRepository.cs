@@ -28,7 +28,7 @@ namespace GSC.Respository.ProjectRight
             var parentId = Context.Project.Where(p => p.Id == id).Select(p => p.ParentProjectId).FirstOrDefault();
             var result = All.Where(t => t.DeletedDate == null);
             if (parentId > 0)
-                result = result.Where(r => r.ProjectId == id || r.Project.ParentProjectId == id);
+                result = result.Where(r => r.ProjectId == id || r.ProjectId == parentId);
             else 
                 result = result.Where(r => r.ProjectId == id);
 
