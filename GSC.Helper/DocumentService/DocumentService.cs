@@ -166,65 +166,60 @@ namespace GSC.Helper.DocumentService
         private static void UnZipFile(string fullpath)
         {
             ArrayList pathList = new ArrayList();
-            try
+
+            if (File.Exists(fullpath))
             {
-                if (File.Exists(fullpath))
+                string baseDirectory = Path.GetDirectoryName(fullpath) + "\\Unzip\\MedAscii";
+                string baseDirectorySeq = Path.GetDirectoryName(fullpath) + "\\Unzip\\SeqAscii";
+
+                if (Directory.Exists(Path.GetDirectoryName(fullpath) + "\\Unzip"))
+                    Directory.Delete(Path.GetDirectoryName(fullpath) + "\\Unzip", true);
+
+                Directory.CreateDirectory(baseDirectory);
+                Directory.CreateDirectory(baseDirectorySeq);
+
+                using (ZipInputStream ZipStream = new ZipInputStream(File.OpenRead(fullpath)))
                 {
-                    string baseDirectory = Path.GetDirectoryName(fullpath) + "\\Unzip\\MedAscii";
-                    string baseDirectorySeq = Path.GetDirectoryName(fullpath) + "\\Unzip\\SeqAscii";
-
-                    if (Directory.Exists(Path.GetDirectoryName(fullpath) + "\\Unzip"))
-                        Directory.Delete(Path.GetDirectoryName(fullpath) + "\\Unzip", true);
-
-                    Directory.CreateDirectory(baseDirectory);
-                    Directory.CreateDirectory(baseDirectorySeq);
-
-                    using (ZipInputStream ZipStream = new ZipInputStream(File.OpenRead(fullpath)))
+                    ZipEntry theEntry;
+                    while ((theEntry = ZipStream.GetNextEntry()) != null)
                     {
-                        ZipEntry theEntry;
-                        while ((theEntry = ZipStream.GetNextEntry()) != null)
+                        if (theEntry.IsFile)
                         {
-                            if (theEntry.IsFile)
+                            if (theEntry.Name != "")
                             {
-                                if (theEntry.Name != "")
+                                string strNewFile = "";
+                                if (Convert.ToString(theEntry.Name).Split(".").Last() == "asc")
+                                    strNewFile = @"" + baseDirectory + "/" + theEntry.Name.Split("/")[1];
+                                else
+                                    strNewFile = @"" + baseDirectorySeq + "/" + theEntry.Name.Split("/")[1];
+
+                                if (File.Exists(strNewFile))
                                 {
-                                    string strNewFile = "";
-                                    if (Convert.ToString(theEntry.Name).Split(".").Last() == "asc")
-                                        strNewFile = @"" + baseDirectory + "/" + theEntry.Name.Split("/")[1];
-                                    else
-                                        strNewFile = @"" + baseDirectorySeq + "/" + theEntry.Name.Split("/")[1];
+                                    //continue;
+                                }
 
-                                    if (File.Exists(strNewFile))
+                                using (FileStream streamWriter = File.Create(strNewFile))
+                                {
+                                    pathList.Add(strNewFile);
+                                    int size = 2048;
+                                    byte[] data = new byte[2048];
+                                    while (true)
                                     {
-                                        //continue;
+                                        size = ZipStream.Read(data, 0, data.Length);
+                                        if (size > 0)
+                                            streamWriter.Write(data, 0, size);
+                                        else
+                                            break;
                                     }
-
-                                    using (FileStream streamWriter = File.Create(strNewFile))
-                                    {
-                                        pathList.Add(strNewFile);
-                                        int size = 2048;
-                                        byte[] data = new byte[2048];
-                                        while (true)
-                                        {
-                                            size = ZipStream.Read(data, 0, data.Length);
-                                            if (size > 0)
-                                                streamWriter.Write(data, 0, size);
-                                            else
-                                                break;
-                                        }
-                                        streamWriter.Close();
-                                    }
+                                    streamWriter.Close();
                                 }
                             }
                         }
-                        ZipStream.Close();
                     }
+                    ZipStream.Close();
                 }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+
         }
     }
 }

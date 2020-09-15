@@ -295,14 +295,14 @@ namespace GSC.Respository.EditCheckImpact
             if (projectDesignTemplateId > 0)
                 screeningTemplates = All.AsNoTracking().
                     Where(r => r.ProjectDesignTemplateId == projectDesignTemplateId &&
-                    r.ScreeningEntryId == screeningEntryId
-                    && r.Status > ScreeningStatus.Pending
+                    r.ScreeningVisit.ScreeningEntryId == screeningEntryId
+                    && r.Status > ScreeningTemplateStatus.Pending
                     && !r.IsDisable).ToList();
             else
                 screeningTemplates = All.AsNoTracking().
                     Where(r => r.ProjectDesignTemplate.DomainId == domainId
-                    && r.ScreeningEntryId == screeningEntryId
-                    && r.Status > ScreeningStatus.Pending
+                    && r.ScreeningVisit.ScreeningEntryId == screeningEntryId
+                    && r.Status > ScreeningTemplateStatus.Pending
                     && !r.IsDisable
                     ).ToList();
 
@@ -318,21 +318,21 @@ namespace GSC.Respository.EditCheckImpact
                     _screeningTemplateReviewRepository.Update(c);
                 });
 
-                if (r.Status == ScreeningStatus.Submitted || r.Status == ScreeningStatus.InProcess)
+                if (r.Status == ScreeningTemplateStatus.Submitted || r.Status == ScreeningTemplateStatus.InProcess)
                     TemplateValueAduit(r.Id, editCheckValidateDto);
                 else
                     isTemplateQuery = TemplateQuery(r.Id, editCheckValidateDto);
 
-                if (r.Status == ScreeningStatus.InProcess || r.Status == ScreeningStatus.Submitted)
+                if (r.Status == ScreeningTemplateStatus.InProcess || r.Status == ScreeningTemplateStatus.Submitted)
                 {
                     r.ReviewLevel = null;
                     r.Progress = 0;
-                    r.Status = ScreeningStatus.Pending;
+                    r.Status = ScreeningTemplateStatus.Pending;
                 }
                 else
                 {
                     r.ReviewLevel = 1;
-                    r.Status = ScreeningStatus.Submitted;
+                    r.Status = ScreeningTemplateStatus.Submitted;
                 }
                 editCheckTarget.Add(new EditCheckTargetValidationList
                 {
@@ -565,7 +565,7 @@ namespace GSC.Respository.EditCheckImpact
             return screeningTemplateValue.Id;
         }
 
-         bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message, string sampleResult)
+        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message, string sampleResult)
         {
             var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where
             (t => t.ScreeningTemplateId == screeningTemplateId
@@ -626,15 +626,15 @@ namespace GSC.Respository.EditCheckImpact
             var isUnLock = false;
             if (screeningTemplate != null && screeningTemplate.IsLocked)
             {
-                var projectId = All.AsNoTracking().Where(x => x.ScreeningEntryId == screeningTemplate.ScreeningEntryId).Select(t => t.ScreeningEntry.ProjectId).FirstOrDefault();
+                var screeningVisit = All.AsNoTracking().Where(x => x.Id == screeningTemplate.Id).Select(t => new { t.ScreeningVisit.ScreeningEntry.ProjectId, t.ScreeningVisit.ScreeningEntryId }).FirstOrDefault();
                 var auditReasonId = Context.AuditReason.Where(x => x.ModuleId == AuditModule.Common && x.IsOther && x.DeletedDate == null).Select(t => t.Id).FirstOrDefault();
                 screeningTemplate.IsLocked = false;
                 Update(screeningTemplate);
                 var lockAudit = new ScreeningTemplateLockUnlockAudit
                 {
                     ScreeningTemplateId = screeningTemplate.Id,
-                    ScreeningEntryId = screeningTemplate.ScreeningEntryId,
-                    ProjectId = projectId,
+                    ScreeningEntryId = screeningVisit.ScreeningEntryId,
+                    ProjectId = screeningVisit.ProjectId,
                     AuditReasonId = auditReasonId,
                     AuditReasonComment = "Automatically unlock due to edit check"
                 };

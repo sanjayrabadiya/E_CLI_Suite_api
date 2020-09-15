@@ -60,40 +60,33 @@ namespace GSC.Respository.Project.Design
 
         public IList<DropDownVaribleAnnotationDto> GetVariabeAnnotationByDomainDropDown(int domainId, int projectId)
         {
-            try
+            var result = All.Where(x => x.DeletedDate == null
+                                      && x.DomainId == domainId
+                                      && x.ProjectDesignTemplate.DeletedDate == null &&
+                                    x.ProjectDesignTemplate.ProjectDesignVisit.DeletedDate == null &&
+                                    x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null &&
+                                    x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+                                      ).OrderBy(o => o.DesignOrder)
+                    .Select(c => new DropDownVaribleAnnotationDto
+                    {
+                        Id = c.Id,
+                        Value = c.Annotation,
+                        Code = c.Annotation,
+                        DataType = c.DataType,
+                        CollectionSources = c.CollectionSource,
+                        ExtraData = c.Values.Where(x => x.DeletedDate == null).ToList(),
+                    }).Where(x => !String.IsNullOrEmpty(x.Value)).ToList();
+            var grpresult = result.GroupBy(x => new { x.Value, x.Code, x.DataType, x.CollectionSources }).Select(s => new DropDownVaribleAnnotationDto
             {
-                var result = All.Where(x => x.DeletedDate == null
-                                          && x.DomainId == domainId
-                                          && x.ProjectDesignTemplate.DeletedDate == null &&
-                                        x.ProjectDesignTemplate.ProjectDesignVisit.DeletedDate == null &&
-                                        x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null &&
-                                        x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
-                                          ).OrderBy(o => o.DesignOrder)
-                        .Select(c => new DropDownVaribleAnnotationDto
-                        {
-                            Id = c.Id,
-                            Value = c.Annotation,
-                            Code = c.Annotation,
-                            DataType = c.DataType,
-                            CollectionSources = c.CollectionSource,
-                            ExtraData = c.Values.Where(x => x.DeletedDate == null).ToList(),
-                        }).Where(x => !String.IsNullOrEmpty(x.Value)).ToList();
-                var grpresult = result.GroupBy(x => new { x.Value, x.Code, x.DataType, x.CollectionSources }).Select(s => new DropDownVaribleAnnotationDto
-                {
-                    Id = s.FirstOrDefault().Id,
-                    Value = s.Key.Value,
-                    Code = s.Key.Code,
-                    DataType = s.Key.DataType,
-                    CollectionSources = s.Key.CollectionSources,
-                    ListOfVariable = result.Where(x => x.Value == s.Key.Value).ToList(),
-                }).ToList();
+                Id = s.FirstOrDefault().Id,
+                Value = s.Key.Value,
+                Code = s.Key.Code,
+                DataType = s.Key.DataType,
+                CollectionSources = s.Key.CollectionSources,
+                ListOfVariable = result.Where(x => x.Value == s.Key.Value).ToList(),
+            }).ToList();
 
-                return grpresult;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return grpresult;
         }
 
         public IList<DropDownVaribleDto> GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId)

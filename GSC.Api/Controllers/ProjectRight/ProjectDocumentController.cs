@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
@@ -58,14 +59,9 @@ namespace GSC.Api.Controllers.ProjectRight
         {
             if (id <= 0) return BadRequest();
 
-            //var childProjectIds = _projectRepository.GetChildProjectDropDown(id);
-
-          //  List<ProjectDocumentDto> termsList = new List<ProjectDocumentDto>();
-
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var projectDocuments = _projectDocumentRepository.GetDocument(id);
             projectDocuments.ForEach(t => t.PathName = documentUrl + t.PathName);
-            //projectDocuments.ForEach(t => t.IsReview = false);
 
             if (projectDocuments.Count() > 0)
                 foreach (var item in projectDocuments)
@@ -73,66 +69,16 @@ namespace GSC.Api.Controllers.ProjectRight
                     var projectCreatedBy = _projectRepository.FindByInclude(project => project.Id == item.ProjectId).FirstOrDefault();
                     var isExists = _documentReviewRepository.FindByInclude(t => t.ProjectDocumentId == item.Id && t.IsReview && t.UserId != projectCreatedBy.CreatedBy);
                     if (isExists.Count() > 0) item.IsReview = true; else item.IsReview = false;
+
+                    //Add study code in access training grid *Create Date : 14092020 *Create By: Vipul
+                    item.SiteCode = projectCreatedBy.ParentProjectId != null ? projectCreatedBy.ProjectCode : "";
+                    item.StudyCode = projectCreatedBy.ParentProjectId != null ? _projectRepository.Find((int)projectCreatedBy.ParentProjectId).ProjectCode : projectCreatedBy.ProjectCode;
                 }
-
             return Ok(projectDocuments);
-
-            #region Comment
-            //if (childProjectIds.Count != 0)
-            //{
-            //    for (var i = 0; i < childProjectIds.Count; i++)
-            //    {
-            //        var i1 = i;
-
-            //        projectDocuments = _projectDocumentRepository.GetDocument(childProjectIds[i1].Id);
-
-            //        //if (i1 < 1)
-            //        {
-
-            //            projectDocuments.ForEach(t => t.PathName = documentUrl + t.PathName);
-            //            projectDocuments.ForEach(t => t.IsReview = false);
-
-
-            //            if (projectDocuments.Count() > 0)
-            //                foreach (var item in projectDocuments)
-            //                {
-            //                    var projectCreatedBy = _projectRepository.FindByInclude(project => project.Id == item.ProjectId)
-            //                        .FirstOrDefault();
-            //                    var isExists = _documentReviewRepository.FindByInclude(t =>
-            //                        t.ProjectDocumentId == item.Id && t.IsReview && t.UserId != projectCreatedBy.CreatedBy);
-            //                    if (isExists.Count() > 0) item.IsReview = true;
-            //                }
-            //        }
-            //        termsList.AddRange(projectDocuments);
-
-
-            //    }
-            //    return Ok(termsList);
-            //}
-            //else
-            //{
-            //    var projectDocument = _projectDocumentRepository.GetDocument(id);
-
-            //    projectDocument.ForEach(t => t.PathName = documentUrl + t.PathName);
-            //    projectDocument.ForEach(t => t.IsReview = false);
-
-            //    if (projectDocument.Count() > 0)
-            //        foreach (var item in projectDocument)
-            //        {
-            //            var projectCreatedBy = _projectRepository.FindByInclude(project => project.Id == item.ProjectId)
-            //                .FirstOrDefault();
-            //            var isExists = _documentReviewRepository.FindByInclude(t =>
-            //                t.ProjectDocumentId == item.Id && t.IsReview && t.UserId != projectCreatedBy.CreatedBy);
-            //            if (isExists.Count() > 0) item.IsReview = true;
-            //        }
-
-            //    return Ok(projectDocument);
-            //}
-            //return Ok(id);
-            #endregion
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] ProjectDocumentDto projectDocumentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -155,12 +101,9 @@ namespace GSC.Api.Controllers.ProjectRight
             //set file path and extension
             if (projectDocumentDto.FileModel?.Base64?.Length > 0)
             {
-                projectDocumentDto.PathName = DocumentService.SaveProjectDocument(projectDocumentDto.FileModel,_uploadSettingRepository.GetDocumentPath(), FolderType.Project);
+                projectDocumentDto.PathName = DocumentService.SaveProjectDocument(projectDocumentDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.Project);
                 projectDocumentDto.MimeType = projectDocumentDto.FileModel.Extension;
             }
-
-            projectDocumentDto.ModifiedBy = _jwtTokenAccesser.UserId;
-            projectDocumentDto.ModifiedDate = DateTime.Now.ToUniversalTime();
 
             var projectDocument = _mapper.Map<ProjectDocument>(projectDocumentDto);
 
@@ -171,7 +114,8 @@ namespace GSC.Api.Controllers.ProjectRight
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+            projectDocument.ModifiedBy = _jwtTokenAccesser.UserId;
+            projectDocument.ModifiedDate = DateTime.Now.ToUniversalTime();
             _projectDocumentRepository.Add(projectDocument);
 
             if (_uow.Save() <= 0) throw new Exception("Creating project document failed on save.");
@@ -179,85 +123,6 @@ namespace GSC.Api.Controllers.ProjectRight
             _documentReviewRepository.SaveByDocumentId(projectDocument.Id, projectDocument.ProjectId);
             _projectRightRepository.UpdateIsReviewDone(projectDocumentDto.ProjectId);
             return Ok(projectDocument.Id);
-
-
-            #region Comment
-            //if (parentProject != null)
-            //{
-            //    var projectDesign = _projectDesignRepository
-            //    .FindBy(t => t.ProjectId == parentProject && t.DeletedDate == null).FirstOrDefault();
-
-            //    if (projectDesign == null || !projectDesign.IsCompleteDesign)
-            //    {
-            //        ModelState.AddModelError("Message", "Design not completed for this project");
-            //        return BadRequest(ModelState);
-            //    }
-
-            //    projectDocumentDto.Id = 0;
-            //    if (projectDocumentDto.FileModel?.Base64?.Length > 0)
-            //    {
-            //        projectDocumentDto.PathName = DocumentService.SaveProjectDocument(projectDocumentDto.FileModel,
-            //            _uploadSettingRepository.GetDocumentPath(), FolderType.Project);
-            //        projectDocumentDto.MimeType = projectDocumentDto.FileModel.Extension;
-            //    }
-
-            //    projectDocumentDto.ModifiedBy = _jwtTokenAccesser.UserId;
-            //    projectDocumentDto.ModifiedDate = DateTime.Now.ToUniversalTime();
-            //    var projectDocument = _mapper.Map<ProjectDocument>(projectDocumentDto);
-            //    /* Added by Vipul for effective Date on 16-10-2019 */
-            //    var validate = _projectDocumentRepository.Duplicate(projectDocument);
-            //    if (!string.IsNullOrEmpty(validate))
-            //    {
-            //        ModelState.AddModelError("Message", validate);
-            //        return BadRequest(ModelState);
-            //    }
-            //    _projectDocumentRepository.Add(projectDocument);
-            //    if (_uow.Save() <= 0) throw new Exception("Creating project document failed on save.");
-            //    _documentReviewRepository.SaveByDocumentId(projectDocument.Id, projectDocument.ProjectId);
-            //}
-            //else
-            //{
-            //    var projectDesign = _projectDesignRepository
-            //    .FindBy(t => t.ProjectId == projectDocumentDto.ProjectId && t.DeletedDate == null).FirstOrDefault();
-            //    if (projectDesign == null || !projectDesign.IsCompleteDesign)
-            //    {
-            //        ModelState.AddModelError("Message", "Design not completed for this project");
-            //        return BadRequest(ModelState);
-            //    }
-            //    var childProjectIds = _projectRepository.GetChildProjectDropDown(projectDocumentDto.ProjectId);
-            //    for (var i = 0; i < childProjectIds.Count; i++)
-            //    {
-            //        var i1 = i;
-            //        projectDocumentDto.ProjectId = childProjectIds[i1].Id;
-            //        var projectDocuments = _mapper.Map<ProjectDocument>(projectDocumentDto);
-            //        projectDocumentDto.Id = 0;
-            //        if (i1 < 1)
-            //        {
-            //            if (projectDocumentDto.FileModel?.Base64?.Length > 0)
-            //            {
-            //                projectDocumentDto.PathName = DocumentService.SaveProjectDocument(projectDocumentDto.FileModel,
-            //                    _uploadSettingRepository.GetDocumentPath(), FolderType.Project);
-            //                projectDocumentDto.MimeType = projectDocumentDto.FileModel.Extension;
-            //            }
-            //            projectDocumentDto.ModifiedBy = _jwtTokenAccesser.UserId;
-            //            projectDocumentDto.ModifiedDate = DateTime.Now.ToUniversalTime();
-            //            projectDocuments = _mapper.Map<ProjectDocument>(projectDocumentDto);
-            //            var validates = _projectDocumentRepository.Duplicate(projectDocuments);
-            //            if (!string.IsNullOrEmpty(validates))
-            //            {
-            //                ModelState.AddModelError("Message", validates);
-            //                return BadRequest(ModelState);
-            //            }
-            //        }
-            //        _projectDocumentRepository.Add(projectDocuments);
-            //        if (_uow.Save() <= 0) throw new Exception("Creating project document failed on save.");
-
-            //        _documentReviewRepository.SaveByDocumentId(projectDocuments.Id, projectDocuments.ProjectId);
-            //    }
-            //}
-            //_projectRightRepository.UpdateIsReviewDone(projectDocumentDto.ProjectId);
-            //return Ok(projectDocumentDto.Id);
-            #endregion Comment
         }
 
         [HttpPut]
@@ -273,15 +138,12 @@ namespace GSC.Api.Controllers.ProjectRight
             document.FileName = projectDocumentDto.FileName;
             if (projectDocumentDto.FileModel?.Base64?.Length > 0)
             {
-                //document = new ProjectDocument();
-                // var documentCategory = _documentTypeRepository.Find(1).TypeName;
                 var documentCategory = "";
                 document.PathName = DocumentService.SaveDocument(projectDocumentDto.FileModel,
                     _uploadSettingRepository.GetDocumentPath(), FolderType.Project, documentCategory);
                 document.MimeType = projectDocumentDto.FileModel.Extension;
                 document.FileName = projectDocumentDto.FileName;
             }
-            //var projectDocument = _mapper.Map<ProjectDocument>(projectDocumentDto);
 
             /* Added by Vipul for effective Date on 16-10-2019 */
             var validate = _projectDocumentRepository.Duplicate(document);

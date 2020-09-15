@@ -21,6 +21,7 @@ using Syncfusion.EJ2.DocumentEditor;
 using System.Net.Http;
 using GSC.Domain;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
+using GSC.Api.Helpers;
 using Syncfusion.DocIO;
 using Syncfusion.DocIO.DLS;
 using System.Text.Json;
@@ -128,6 +129,7 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
         {
             var Project = _projectRepository.Find(projectWorkplaceArtificatedocumentDto.ProjectId);
@@ -224,8 +226,8 @@ namespace GSC.Api.Controllers.Etmf
         {
             var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
             var upload = _context.UploadSetting.OrderByDescending(x=>x.Id).FirstOrDefault();
-            var dfdf = System.IO.Path.Combine(upload.DocumentPath, document.DocPath, document.DocumentName);
-            string path = dfdf;
+            var FullPath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            string path = FullPath;
             if (!System.IO.File.Exists(path))
                 return null;
             Stream stream = System.IO.File.OpenRead(path);

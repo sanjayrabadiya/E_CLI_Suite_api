@@ -133,6 +133,12 @@ namespace GSC.Respository.Project.Design
             return visits;
         }
 
+        public IList<ProjectDesignVisit> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId)
+        {
+            return All.Include(r => r.Templates).Where(x => x.DeletedDate == null && x.DeletedDate == null
+                                                       && x.ProjectDesignPeriodId == projectDesignPeriodId).ToList();
+        }
+
         public string Duplicate(ProjectDesignVisit objSave)
         {
             if (All.Any(x =>

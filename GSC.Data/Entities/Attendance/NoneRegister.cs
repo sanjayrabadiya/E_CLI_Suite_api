@@ -12,7 +12,6 @@ namespace GSC.Data.Entities.Attendance
         private DateTime? _dateOfScreening;
 
         public int AttendanceId { get; set; }
-        public int ProjectId { get; set; }
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
@@ -37,16 +36,7 @@ namespace GSC.Data.Entities.Attendance
         public int? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
         public City City { get; set; }
-        //public string CityName { get; set; }
-        //public City City { get; set; }
 
-        //public int StateId { get; set; }
-
-        //public int CountryId { get; set; }
-
-        //public string StateName { get; set; }
-
-        //public string CountryName { get; set; }
         public string ScreeningNumber { get; set; }
         public DateTime? DateOfScreening
         {
@@ -64,6 +54,6 @@ namespace GSC.Data.Entities.Attendance
 
         public Attendance Attendance { get; set; }
         public int? CompanyId { get; set; }
-        public Data.Entities.Master.Project Project { get; set; }
+
     }
 }

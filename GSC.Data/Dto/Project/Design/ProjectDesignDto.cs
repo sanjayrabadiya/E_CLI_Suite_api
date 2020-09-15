@@ -12,8 +12,6 @@ namespace GSC.Data.Dto.Project.Design
 
         [Required(ErrorMessage = "Period is required.")]
         public int Period { get; set; }
-
-      //  public int? CompanyId { get; set; }
         public string Version { get; set; }
         public bool IsActiveVersion { get; set; }
         public bool IsCompleteDesign { get; set; }
@@ -23,17 +21,6 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsStatic { get; set; }
         public bool Locked { get; set; }
         public ProjectDto Project { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
-        public int? CreatedBy { get; set; }
-        public int? DeletedBy { get; set; }
-        public int? ModifiedBy { get; set; }
-        public DateTime? CreatedDate { get; set; }
-        public DateTime? ModifiedDate { get; set; }
-        public DateTime? DeletedDate { get; set; }
         public int? CompanyId { get; set; }
-        public string CompanyName { get; set; }
     }
 }

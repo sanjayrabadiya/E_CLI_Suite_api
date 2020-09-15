@@ -49,18 +49,6 @@ namespace GSC.Api.Controllers.Master
             //    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
             //    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             //).OrderByDescending(x => x.Id).ToList();
-            //var maritalStatussDto = _mapper.Map<IEnumerable<MaritalStatusDto>>(maritalStatuss);
-
-            //maritalStatussDto.ForEach(b =>
-            //{
-            //    b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-            //    if (b.ModifiedBy != null)
-            //        b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-            //    if (b.DeletedBy != null)
-            //        b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-            //    if (b.CompanyId != null)
-            //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            //});
             //return Ok(maritalStatussDto);
         }
 

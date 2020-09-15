@@ -80,8 +80,6 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplate = _mapper.Map<ScreeningTemplate>(screeningTemplateDto);
 
-            _screeningEntryRepository.Find(screeningTemplate.ScreeningEntryId);
-
             _screeningTemplateRepository.Update(screeningTemplate);
             if (_uow.Save() <= 0) throw new Exception("Updating Screening Template failed on save.");
             return Ok(screeningTemplate.Id);
@@ -167,7 +165,7 @@ namespace GSC.Api.Controllers.Screening
         private void SubmittedTemplate(int id)
         {
             if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id
-                                                                && x.Status == ScreeningStatus.Submitted && !x.IsRepeat))
+                                                                && x.Status == ScreeningTemplateStatus.Submitted && !x.IsRepeat))
             {
                 ModelState.AddModelError("Message", "Template already submitted!");
                 BadRequest(ModelState);
@@ -175,8 +173,8 @@ namespace GSC.Api.Controllers.Screening
             }
 
             var screeningTemplate = _screeningTemplateRepository.Find(id);
-            var projectDesignId = _screeningEntryRepository.Find(screeningTemplate.ScreeningEntryId).ProjectDesignId;
-            screeningTemplate.Status = ScreeningStatus.Submitted;
+            var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(id);
+            screeningTemplate.Status = ScreeningTemplateStatus.Submitted;
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
             if (workflowlevel.IsWorkFlowBreak)
             {
@@ -192,7 +190,7 @@ namespace GSC.Api.Controllers.Screening
             screeningTemplate.ScreeningTemplateReview = new List<ScreeningTemplateReview>();
             screeningTemplate.ScreeningTemplateReview.Add(new ScreeningTemplateReview
             {
-                Status = ScreeningStatus.Submitted,
+                Status = ScreeningTemplateStatus.Submitted,
                 ReviewLevel = 0,
                 RoleId = _jwtTokenAccesser.RoleId
             });
@@ -202,13 +200,6 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateRepository.Update(screeningTemplate);
 
-            if (_screeningTemplateRepository.All.Any(x =>
-                x.DeletedDate == null && x.ScreeningEntryId == screeningTemplate.ScreeningEntryId && x.Id != id &&
-                x.Status > ScreeningStatus.InProcess))
-            {
-                var screeningEntry = _screeningEntryRepository.Find(screeningTemplate.ScreeningEntryId);
-                screeningEntry.Status = ScreeningStatus.Submitted;
-            }
 
             Ok();
         }
@@ -230,26 +221,31 @@ namespace GSC.Api.Controllers.Screening
 
             if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id
                                                                 && x.CreatedBy == _jwtTokenAccesser.UserId &&
-                                                                x.Status == ScreeningStatus.Reviewed
+                                                                x.Status == ScreeningTemplateStatus.Reviewed
                                                                 && x.RoleId == _jwtTokenAccesser.RoleId && !x.IsRepeat))
             {
                 ModelState.AddModelError("Message", "Template already review!");
                 return BadRequest(ModelState);
             }
 
-            screeningTemplate.Status = ScreeningStatus.Completed;
+            screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
 
             screeningTemplate.ScreeningTemplateReview = new List<ScreeningTemplateReview>();
             screeningTemplate.ScreeningTemplateReview.Add(new ScreeningTemplateReview
             {
-                Status = ScreeningStatus.Completed,
+                Status = ScreeningTemplateStatus.Reviewed,
                 ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel),
                 RoleId = _jwtTokenAccesser.RoleId
             });
             screeningTemplate.ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel + 1);
-            var projectDesignId = _screeningEntryRepository.Find(screeningTemplate.ScreeningEntryId).ProjectDesignId;
+
+            var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(screeningTemplate.Id);
+
             if (screeningTemplate.ReviewLevel > _projectWorkflowRepository.GetMaxWorkFlowLevel(projectDesignId))
+            {
                 screeningTemplate.IsCompleteReview = true;
+                screeningTemplate.Status = ScreeningTemplateStatus.Completed;
+            }
 
             _screeningTemplateRepository.Update(screeningTemplate);
 
@@ -277,15 +273,15 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningTemplateReviewRepository.GetTemplateReviewHistory(id));
         }
 
-        [HttpPost("GetTemplatesLockUnlock")]
-        public IActionResult GetTemplatesLockUnlock([FromBody] ScreeningTemplateLockUnlockParams lockUnlockParams)
-        {
-            if (lockUnlockParams.ProjectId <= 0 || lockUnlockParams.VolunteerId <= 0) return BadRequest();
+        //[HttpPost("GetTemplatesLockUnlock")]
+        //public IActionResult GetTemplatesLockUnlock([FromBody] ScreeningTemplateLockUnlockParams lockUnlockParams)
+        //{
+        //    if (lockUnlockParams.ProjectId <= 0 || lockUnlockParams.VolunteerId <= 0) return BadRequest();
 
-            var lockUnlockTemplates = _screeningTemplateRepository.GetTemplatesLockUnlock(lockUnlockParams);
+        //    var lockUnlockTemplates = _screeningTemplateRepository.GetTemplatesLockUnlock(lockUnlockParams);
 
-            return Ok(lockUnlockTemplates);
-        }
+        //    return Ok(lockUnlockTemplates);
+        //}
 
 
         [HttpPut]
@@ -293,16 +289,15 @@ namespace GSC.Api.Controllers.Screening
         [TransactionRequired]
         public IActionResult SubmitAttendanceTemplate(int id)
         {
-            var screeningTemplate = _screeningTemplateRepository.Find(id);
+            var attendanceId = _screeningTemplateRepository.All.Where(x => x.Id == id).Select(r => r.ScreeningVisit.ScreeningEntry.AttendanceId).FirstOrDefault();
 
             SubmittedTemplate(id);
 
-            var screeningEntry = _screeningEntryRepository.Find(screeningTemplate.ScreeningEntryId);
-            _projectSubjectRepository.SaveSubjectForVolunteer(screeningEntry.AttendanceId, id);
+            _projectSubjectRepository.SaveSubjectForVolunteer(attendanceId, id);
 
             if (_uow.Save() <= 0) throw new Exception("Submit Attendance Template failed.");
 
-            _screeningTemplateRepository.SubmitReviewTemplate(screeningTemplate.Id, false);
+            _screeningTemplateRepository.SubmitReviewTemplate(id, false);
 
             _uow.Save();
 
@@ -313,11 +308,10 @@ namespace GSC.Api.Controllers.Screening
         [Route("SubmitDiscontinueTemplate/{id}")]
         public IActionResult SubmitDiscontinueTemplate(int id)
         {
-            var screeningTemplate = _screeningTemplateRepository.Find(id);
+            var attendanceId = _screeningTemplateRepository.All.Where(x => x.Id == id).Select(r => r.ScreeningVisit.ScreeningEntry.AttendanceId).FirstOrDefault();
             SubmitTemplate(id);
 
-            var screeningEntry = _screeningEntryRepository.Find(screeningTemplate.ScreeningEntryId);
-            _projectSubjectRepository.DiscontinueProjectSubject(screeningEntry.AttendanceId, id);
+            _projectSubjectRepository.DiscontinueProjectSubject(attendanceId, id);
 
             if (_uow.Save() <= 0) throw new Exception("Submit Discontinue Template failed.");
 
@@ -325,18 +319,18 @@ namespace GSC.Api.Controllers.Screening
         }
 
 
-        [HttpGet]
-        [Route("GetDashboardStudyStatusByVisit/{projectId}")]
-        public IActionResult GetDashboardStudyStatusByVisit(int projectId)
-        {
-            return Ok(_screeningTemplateRepository.GetDashboardStudyStatusByVisit(projectId));
-        }
+        //[HttpGet]
+        //[Route("GetDashboardStudyStatusByVisit/{projectId}")]
+        //public IActionResult GetDashboardStudyStatusByVisit(int projectId)
+        //{
+        //    return Ok(_screeningTemplateRepository.GetDashboardStudyStatusByVisit(projectId));
+        //}
 
-        [HttpGet]
-        [Route("GetDashboardStudyStatusBySite/{projectId}")]
-        public IActionResult GetDashboardStudyStatusBySite(int projectId)
-        {
-            return Ok(_screeningTemplateRepository.GetDashboardStudyStatusBySite(projectId));
-        }
+        //[HttpGet]
+        //[Route("GetDashboardStudyStatusBySite/{projectId}")]
+        //public IActionResult GetDashboardStudyStatusBySite(int projectId)
+        //{
+        //    return Ok(_screeningTemplateRepository.GetDashboardStudyStatusBySite(projectId));
+        //}
     }
 }

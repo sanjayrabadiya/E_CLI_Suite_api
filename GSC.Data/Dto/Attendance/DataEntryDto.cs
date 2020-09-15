@@ -35,7 +35,7 @@ namespace GSC.Data.Dto.Attendance
     public class DataEntryVisitSummaryDto
     {
         public string VisitName { get; set; }
-        public int ProjectDesignVisitId { get; set; }
+        public int ScreeningVisitId { get; set; }
         public int RecordId { get; set; }
         public int PendingCount { get; set; }
         public int InProcess { get; set; }
@@ -57,7 +57,7 @@ namespace GSC.Data.Dto.Attendance
 
     public class DataEntryTemplateCountDto
     {
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public string StatusName { get; set; }
         public int Count { get; set; }
         public List<DataEntryTemplateDto> Templates { get; set; }

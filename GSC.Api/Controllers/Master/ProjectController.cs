@@ -63,8 +63,8 @@ namespace GSC.Api.Controllers.Master
             var project = _projectRepository.Find(id);
             var projectDto = _mapper.Map<ProjectDto>(project);
             projectDto.TrialTypeId = _designTrialRepository.Find(projectDto.DesignTrialId).TrialTypeId;
-            projectDto.TrialTypeName = _trialTypeRepository.Find(projectDto.TrialTypeId).TrialTypeName;
-            projectDto.DrugName = _drugRepository.Find(projectDto.DrugId).DrugName;
+            //projectDto.TrialTypeName = _trialTypeRepository.Find(projectDto.TrialTypeId).TrialTypeName;
+            //projectDto.DrugName = _drugRepository.Find(projectDto.DrugId).DrugName;
             projectDto.NoofSite = _projectRepository.GetNoOfSite(id);
 
             var projectDesign = _projectDesignRepository.All.Where(t => t.ProjectId == id && t.DeletedDate == null).FirstOrDefault();
@@ -229,13 +229,6 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetProjectsForDataEntry()
         {
             return Ok(_projectRepository.GetProjectsForDataEntry());
-        }
-
-        [HttpGet]
-        [Route("GetProjectsByLock/{isLock}")]
-        public IActionResult GetProjectsByLock(bool isLock)
-        {
-            return Ok(_projectRepository.GetProjectsByLock(isLock));
         }
 
         [HttpGet]

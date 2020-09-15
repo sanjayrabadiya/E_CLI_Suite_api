@@ -176,14 +176,14 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpPost("ModifyClonnedTemplates")]
-        public IActionResult ModifyClonnedTemplates([FromBody] ProjectDesignTemplateDto projectDesignTemplateDto)
+        public IActionResult ModifyClonnedTemplates([FromBody] CloneTemplateDto cloneTemplateDto)
         {
-            if (projectDesignTemplateDto.Id <= 0 || projectDesignTemplateDto.ClonnedTemplateIds == null ||
-                projectDesignTemplateDto.ClonnedTemplateIds.Count == 0) return BadRequest();
+            if (cloneTemplateDto.Id <= 0 || cloneTemplateDto.ClonnedTemplateIds == null ||
+                cloneTemplateDto.ClonnedTemplateIds.Count == 0) return BadRequest();
 
-            projectDesignTemplateDto.ClonnedTemplateIds.ForEach(t =>
+            cloneTemplateDto.ClonnedTemplateIds.ForEach(t =>
             {
-                var parent = _projectDesignTemplateRepository.GetTemplateClone(projectDesignTemplateDto.Id);
+                var parent = _projectDesignTemplateRepository.GetTemplateClone(cloneTemplateDto.Id);
 
                 var clonnedTemplate = _projectDesignTemplateRepository.GetTemplateClone(t);
                 foreach (var variable in clonnedTemplate.Variables)

@@ -249,8 +249,8 @@ namespace GSC.Api.Controllers.Common
         [Route("ScreeningStatus")]
         public IList<DropDownEnum> ScreeningStatus()
         {
-            return Enum.GetValues(typeof(ScreeningStatus))
-                .Cast<ScreeningStatus>().Select(e => new DropDownEnum
+            return Enum.GetValues(typeof(ScreeningTemplateStatus))
+                .Cast<ScreeningTemplateStatus>().Select(e => new DropDownEnum
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()

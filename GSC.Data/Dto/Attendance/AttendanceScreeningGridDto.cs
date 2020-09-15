@@ -1,9 +1,10 @@
 ﻿using System;
+using GSC.Data.Entities.Common;
 using GSC.Helper;
 
 namespace GSC.Data.Dto.Attendance
 {
-    public class AttendanceScreeningGridDto
+    public class AttendanceScreeningGridDto : BaseAuditDto
     {
         private DateTime _AttendanceDate;
         private DateTime? _ScreeningDate;
@@ -51,20 +52,6 @@ namespace GSC.Data.Dto.Attendance
         public string AttendaceStatusName { get; set; }
         public bool IsReplaced { get; set; }
         public string IsStandby { get; set; }
-        public int ProjectDesignPeriodId { get; set; }
-
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
-        public int? CreatedBy { get; set; }
-        public int? DeletedBy { get; set; }
-        public int? ModifiedBy { get; set; }
-        public DateTime? CreatedDate { get; set; }
-        public DateTime? ModifiedDate { get; set; }
-        public DateTime? DeletedDate { get; set; }
-        public int? CompanyId { get; set; }
-        public string CompanyName { get; set; }
         public bool IsLocked { get; set; }
     }
 }

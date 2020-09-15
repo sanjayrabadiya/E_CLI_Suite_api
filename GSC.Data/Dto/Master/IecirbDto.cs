@@ -18,4 +18,13 @@ namespace GSC.Data.Dto.Master
         public string IECIRBContactNumber { get; set; }
         public int? CompanyId { get; set; }
     }
+
+    public class IecirbGridDto : BaseAuditDto
+    {
+        public string IECIRBName { get; set; }
+        public string RegistrationNumber { get; set; }
+        public string IECIRBContactName { get; set; }
+        public string IECIRBContactEmail { get; set; }
+        public string IECIRBContactNumber { get; set; }
+    }
 }

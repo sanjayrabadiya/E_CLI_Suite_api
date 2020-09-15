@@ -11,13 +11,14 @@ namespace GSC.Respository.UserMgt
     public class UserPasswordRepository : GenericRespository<UserPassword, GscContext>, IUserPasswordRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
+        private readonly IUnitOfWork<GscContext> _uow;
         public UserPasswordRepository(
             IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uow = uow;
         }
 
         public void CreatePassword(string password, int userId)
@@ -28,7 +29,7 @@ namespace GSC.Respository.UserMgt
             userPassword.Salt = saltKey;
             userPassword.Password = Cryptography.CreatePasswordHash(password, saltKey);
             Add(userPassword);
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
         }
 
         public string VaidatePassword(string password, int userId)

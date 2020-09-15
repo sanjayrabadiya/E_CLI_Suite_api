@@ -19,12 +19,14 @@ namespace GSC.Respository.Etmf
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IUnitOfWork<GscContext> _uow;
         public ProjectWorkplaceArtificateDocumentReviewRepository(IUnitOfWork<GscContext> uow,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository)
            : base(uow, jwtTokenAccesser)
         {
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uow = uow;
         }
 
         public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id)
@@ -85,7 +87,7 @@ namespace GSC.Respository.Etmf
                 RoleId = _jwtTokenAccesser.RoleId
             });
 
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
         }
     }
 }

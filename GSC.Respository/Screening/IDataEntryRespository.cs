@@ -11,8 +11,9 @@ namespace GSC.Respository.Screening
         List<DataEntryVisitSummaryDto> GetVisitForDataEntry(int attendanceId, int screeningEntryId);
 
         List<DataEntryVisitTemplateDto> GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId,
-            ScreeningStatus screeningStatus, bool isQuery);
+            ScreeningTemplateStatus screeningStatus, bool isQuery);
 
         IList<DataEntryDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int projectId);
+
     }
 }

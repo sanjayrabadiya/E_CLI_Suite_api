@@ -6,7 +6,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Entities.Attendance;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
@@ -57,10 +56,7 @@ namespace GSC.Api.Controllers.Attendance
          ).OrderByDescending(t => t.Id).ToList();
 
             var volunteerNonregisterDto = _mapper.Map<IEnumerable<NoneRegisterDto>>(volunteerNonregisters);
-            //volunteerNonregisterDto.ForEach(b =>
-            //{
-            //    b.Gender = _noneRegisterRepository.Find((int)b.Gender).Gender;
-            //});
+          
             return Ok(volunteerNonregisterDto);
         }
 
@@ -74,7 +70,6 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            //var volunteerNonregister = _noneRegisterRepository.Find(id);
 
             var volunteerNonregister = _noneRegisterRepository.FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
                 .SingleOrDefault();
@@ -82,24 +77,7 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest();
 
             var volunteerNonregisterDto = _mapper.Map<NoneRegisterDto>(volunteerNonregister);
-            if (volunteerNonregister.City != null)
-            {
-                volunteerNonregisterDto.CityId = volunteerNonregister.City.Id;
-                volunteerNonregisterDto.CityName = volunteerNonregister.City.CityName;
-            }
-
-            if (volunteerNonregister.City?.State != null)
-            {
-                volunteerNonregisterDto.StateId = volunteerNonregister.City.State.Id;
-                volunteerNonregisterDto.StateName = volunteerNonregister.City.State.StateName;
-            }
-
-            if (volunteerNonregister.City?.State?.Country != null)
-            {
-                volunteerNonregisterDto.CountryId = volunteerNonregister.City.State.Country.Id;
-                volunteerNonregisterDto.CountryName = volunteerNonregister.City.State.Country.CountryName;
-            }
-
+           
             return Ok(volunteerNonregisterDto);
         }
 
@@ -107,6 +85,8 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Post([FromBody] NoneRegisterDto noneRegisterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+
             var projectDesignPeriod = _projectDesignPeriodRepository.FindBy(x =>
                 x.DeletedDate == null && x.ProjectDesign.DeletedDate == null &&
                 x.ProjectDesign.ProjectId == noneRegisterDto.ParentProjectId).FirstOrDefault();

@@ -48,57 +48,23 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var manageSite = _manageSiteRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-               , t => t.City, t => t.City.State, t => t.City.State.Country).OrderByDescending(x => x.Id).ToList();
-            var manageSiteDto = _mapper.Map<IEnumerable<ManageSiteDto>>(manageSite);
-            manageSiteDto.ForEach(b =>
-            {
-                //b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                b.CityName = _cityRepository.Find((int)b.CityId).CityName;
-                b.StateName = _stateRepository.Find(b.City.StateId).StateName;
-                b.CountryName = _countryRepository.Find(b.City.State.CountryId).CountryName;
-                b.IsDeleted = isDeleted;
-                //if (b.ModifiedBy != null)
-                //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                //if (b.DeletedBy != null)
-                //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                //if (b.CompanyId != null)
-                //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
-            return Ok(manageSiteDto);
+            var manageSite = _manageSiteRepository.GetManageSites(isDeleted);
+            return Ok(manageSite);
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             var manageSite = _manageSiteRepository
-    .FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
-    .SingleOrDefault();
+                    .FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
+                    .SingleOrDefault();
             if (manageSite == null)
                 return BadRequest();
 
             var manageSiteDto = _mapper.Map<ManageSiteDto>(manageSite);
+            manageSiteDto.StateId = manageSite.City.State.Id;
+            manageSiteDto.CountryId = manageSite.City.State.Country.Id;
 
-            if (manageSite.City != null)
-            {
-                manageSiteDto.CityId = manageSite.City.Id;
-                manageSiteDto.CityName = manageSite.City.CityName;
-            }
-
-            if (manageSite.City?.State != null)
-            {
-                manageSiteDto.StateId = manageSite.City.State.Id;
-                manageSiteDto.StateName = manageSite.City.State.StateName;
-            }
-
-            if (manageSite.City?.State?.Country != null)
-            {
-                manageSiteDto.CountryId = manageSite.City.State.Country.Id;
-                manageSiteDto.CountryName = manageSite.City.State.Country.CountryName;
-            }
-            //if (id <= 0) return BadRequest();
-
-            //var manageSite = _manageSiteRepository.GetManageSiteList(id);
             return Ok(manageSiteDto);
         }
 

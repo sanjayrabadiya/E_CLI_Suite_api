@@ -8,7 +8,6 @@ namespace GSC.Respository.Project.Workflow
     public interface IProjectWorkflowRepository : IGenericRepository<ProjectWorkflow>
     {
         WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId);
-        IList<ProjectWorkflowDto> GetProjectWorkFlowList(bool isDeleted);
         int GetMaxWorkFlowLevel(int projectDesignId);
         bool IsElectronicsSignatureComplete(int ProjectDesignId);
     }

@@ -21,20 +21,19 @@ namespace GSC.Data.Dto.Master
 
         public bool IsRepeated { get; set; }
         public ActivityMode ActivityMode { get; set; }
-        //public int? CompanyId { get; set; }
         public List<VariableTemplateDetailDto> VariableTemplateDetails { get; set; }
         public IList<VariableTemplateNoteDto> Notes { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
-        //public int CreatedBy { get; set; }
-        //public int? DeletedBy { get; set; }
-        //public int? ModifiedBy { get; set; }
-        //public DateTime? CreatedDate { get; set; }
-        //public DateTime? ModifiedDate { get; set; }
-        //public DateTime? DeletedDate { get; set; }
         public int? CompanyId { get; set; }
-        //public string CompanyName { get; set; }
+    }
+
+    public class VariableTemplateGridDto : BaseAuditDto
+    {
+        public string TemplateCode { get; set; }
+        public string ActivityName { get; set; }
+        public string DomainName { get; set; }
+        public string ActivityMode { get; set; }
+        public string TemplateName { get; set; }
+        public bool IsRepeated { get; set; }
+
     }
 }

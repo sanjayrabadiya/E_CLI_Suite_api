@@ -60,13 +60,6 @@ namespace GSC.Api.Controllers.Client
                 b.LastName = _userRepository.Find((int)b.UserId).LastName;
                 b.RoleName = _securityRoleRepository.Find((int)b.RoleId).RoleName;
                 b.ClientTypeName = _clientTypeRepository.Find(b.ClientTypeId).ClientTypeName;
-                //b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-                //if (b.ModifiedBy != null)
-                //    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                //if (b.DeletedBy != null)
-                //    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                //if (b.CompanyId != null)
-                //    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
             });
             return Ok(clients);
         }

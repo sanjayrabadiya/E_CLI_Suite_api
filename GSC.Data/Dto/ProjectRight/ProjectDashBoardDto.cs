@@ -15,6 +15,7 @@ namespace GSC.Data.Dto.ProjectRight
 
     public class ProjectDocumentReviewDto
     {
+        public Entities.Master.Project Project { get; set; }
         public int Id { get; set; }
         public int ProjectDocumentId { get; set; }
         public int ProjectId { get; set; }
@@ -23,6 +24,7 @@ namespace GSC.Data.Dto.ProjectRight
         public DateTime? ReviewDate { get; set; }
         public string ReviewNote { get; set; }
         public string ProjectName { get; set; }
+        public string ParentProjectCode { get; set; }
         public int? AssignedById { get; set; }
         public string AssignedBy { get; set; }
         public DateTime? AssignedDate { get; set; }

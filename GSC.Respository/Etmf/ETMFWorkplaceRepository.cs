@@ -1,4 +1,6 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
@@ -18,11 +20,14 @@ namespace GSC.Respository.Etmf
     {
         ProjectWorkplace projectWorkplace = new ProjectWorkplace();
         ProjectWorkplaceDto projectWorkplaceDto = new ProjectWorkplaceDto();
+        private readonly IMapper _mapper;
         List<ProjectWorkplaceDetail> ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
         public ETMFWorkplaceRepository(IUnitOfWork<GscContext> uow,
-           IJwtTokenAccesser jwtTokenAccesser)
+           IJwtTokenAccesser jwtTokenAccesser,
+           IMapper mapper)
            : base(uow, jwtTokenAccesser)
         {
+            _mapper = mapper;
         }
 
         public string Duplicate(int id)
@@ -585,6 +590,14 @@ namespace GSC.Respository.Etmf
             }
 
             return zoneLibraryList;
+        }
+
+        public List<ETMFWorkplaceGridDto> GetETMFWorkplaceList(bool isDeleted)
+        {
+
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
         }
     }
     public class TreeValue

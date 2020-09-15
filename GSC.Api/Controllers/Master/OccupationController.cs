@@ -48,18 +48,6 @@ namespace GSC.Api.Controllers.Master
             //var occupations = _occupationRepository.All.Where(x =>
             //     isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             //).OrderByDescending(x => x.Id).ToList();
-            //var occupationsDto = _mapper.Map<IEnumerable<OccupationDto>>(occupations);
-
-            //occupationsDto.ForEach(b =>
-            //{
-            //    b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-            //    if (b.ModifiedBy != null)
-            //        b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-            //    if (b.DeletedBy != null)
-            //        b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-            //    if (b.CompanyId != null)
-            //        b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            //});
             //return Ok(occupationsDto);
         }
 

@@ -22,7 +22,7 @@ namespace GSC.Data.Entities.Screening
             set => _screeningDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
 
-        public ScreeningStatus Status { get; set; }
+  
         public int? CompanyId { get; set; }
         public bool? IsFitnessFit { get; set; }
         public bool? IsEnrolled { get; set; }
@@ -33,7 +33,7 @@ namespace GSC.Data.Entities.Screening
         public string FitnessReason { get; set; }
         public string FitnessNotes { get; set; }
         public int Progress { get; set; }
-        public ICollection<ScreeningTemplate> ScreeningTemplates { get; set; }
+        public ICollection<ScreeningVisit> ScreeningVisit { get; set; }
         public Master.Project Project { get; set; }
         public ScreeningHistory ScreeningHistory { get; set; }
 

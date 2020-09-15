@@ -10,7 +10,7 @@ namespace GSC.Respository.Master
     {
         string DuplicateCity(City objSave);
         List<DropDownDto> GetCityDropDown();
-        List<CityDto> GetCities(bool isDeleted);
+        List<CityGridDto> GetCities(bool isDeleted);
         IList<DropDownDto> AutoCompleteSearch(string searchText, bool isAutoSearch = false);
         List<DropDownDto> GetCityByStateDropDown(int StateId);
         List<CityGridDto> GetCityList(bool isDeleted);

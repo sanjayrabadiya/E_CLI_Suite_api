@@ -9,25 +9,13 @@ namespace GSC.Data.Dto.Project.Workflow
     {
         [Required(ErrorMessage = "Project Name is required.")]
         public int ProjectDesignId { get; set; }
-
         public bool IsIndependent { get; set; }
-       // public int? CompanyId { get; set; }
         public string ProjectName { get; set; }
         public bool IsLock { get; set; }
         public IList<ProjectWorkflowLevelDto> Levels { get; set; }
         public IList<ProjectWorkflowIndependentDto> Independents { get; set; }
-
-        public string CreatedByUser { get; set; }
-        public string DeletedByUser { get; set; }
-        public string ModifiedByUser { get; set; }
-        public int? CreatedBy { get; set; }
-        public int? DeletedBy { get; set; }
-        public int? ModifiedBy { get; set; }
-        public DateTime? CreatedDate { get; set; }
-        public DateTime? ModifiedDate { get; set; }
-        public DateTime? DeletedDate { get; set; }
+        
         public int? CompanyId { get; set; }
-        public string CompanyName { get; set; }
         public bool? IsCompleteWorkflow { get; set; }
     }
 

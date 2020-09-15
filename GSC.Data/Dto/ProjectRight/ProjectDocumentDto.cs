@@ -10,9 +10,6 @@ namespace GSC.Data.Dto.ProjectRight
     {
         [Required(ErrorMessage = "Project Name is required.")]
         public int ProjectId { get; set; }
-
-        public ProjectDto Project { get; set; }
-
         public string FileName { get; set; }
         public string PathName { get; set; }
         public string MimeType { get; set; }
@@ -21,7 +18,9 @@ namespace GSC.Data.Dto.ProjectRight
         public int? CreatedBy { get; set; }
         public string CreatedByName { get; set; }
         public DateTime? CreatedDate { get; set; }
-        public int? ModifiedBy { get; set; }
-        public DateTime? ModifiedDate { get; set; }
+        public string StudyCode { get; set; }
+        //Added by Vipul for Acceess training grid display site and study code
+        public string SiteCode { get; set; }
+
     }
 }

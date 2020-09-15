@@ -2,6 +2,7 @@
 using System.Reflection;
 using AutoMapper;
 using GSC.Api.Helpers;
+using GSC.Audit;
 using GSC.Data.Dto.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;

@@ -8,7 +8,7 @@ namespace GSC.Data.Dto.Screening
         public int ScreeningEntryId { get; set; }
         public int RoleId { get; set; }
         public int ScreeningTemplateId { get; set; }
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public string ScreeningNo { get; set; }
         private DateTime _screeningDate { get; set; }
 

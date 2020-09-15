@@ -76,10 +76,10 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateValueRepository.Add(screeningTemplateValue);
 
-            if (screeningTemplateValueDto.ScreeningStatus== ScreeningStatus.Pending)
+            if (screeningTemplateValueDto.ScreeningStatus== ScreeningTemplateStatus.Pending)
             {
                 var screeningTemplate = _screeningTemplateRepository.Find(screeningTemplateValue.ScreeningTemplateId);
-                screeningTemplate.Status = ScreeningStatus.InProcess;
+                screeningTemplate.Status = ScreeningTemplateStatus.InProcess;
                 _screeningTemplateRepository.Update(screeningTemplate);
             }
 

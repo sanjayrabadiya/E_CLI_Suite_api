@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
 
@@ -59,5 +60,12 @@ namespace GSC.Data.Entities.Master
         public int? AttendanceLimit { get; set; }
 
         public ICollection<Attendance.Attendance> Attendances { get; set; }
+        public City City { get; set; }
+        public Country Country { get; set; }
+        public State State { get; set; }
+        public CityArea CityArea { get; set; }
+        public GSC.Data.Entities.Client.Client Client { get; set; }
+        public Drug Drug { get; set; }
+        public DesignTrial DesignTrial { get; set; }
     }
 }

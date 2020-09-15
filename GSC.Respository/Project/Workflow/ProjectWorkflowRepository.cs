@@ -39,43 +39,6 @@ namespace GSC.Respository.Project.Workflow
                                                             && x.DeletedDate == null).Max(t => t.LevelNo);
         }
 
-        public IList<ProjectWorkflowDto> GetProjectWorkFlowList(bool isDeleted)
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return new List<ProjectWorkflowDto>();
-
-            var projectWorkflows = FindByInclude(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                    && projectList.Any(c => c == x.ProjectDesign.ProjectId), x => x.ProjectDesign.Project)
-                .Select(x => new ProjectWorkflowDto
-                {
-                    Id = x.Id,
-                    ProjectName = x.ProjectDesign.Project.ProjectName,
-                    IsDeleted = x.DeletedDate != null,
-                    IsIndependent = x.IsIndependent,
-                    CreatedBy = x.CreatedBy,
-                    ModifiedBy = x.ModifiedBy,
-                    DeletedBy = x.DeletedBy,
-                    CreatedDate = x.CreatedDate,
-                    ModifiedDate = x.ModifiedDate,
-                    DeletedDate = x.DeletedDate,
-                    IsLock = !x.ProjectDesign.IsUnderTesting,
-                 }).OrderByDescending(x => x.Id).ToList();
-           
-            foreach (var b in projectWorkflows)
-            {
-                b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            }
-            return projectWorkflows;
-        }
-
         public WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId)
         {
             short levelNo = -1;

@@ -474,7 +474,7 @@ namespace GSC.Report.Common
         {
             #region Update JobMonitoring            
             _jobMonitoringRepository.Update(jobMonitoring);
-            if (_uow.Context.SaveChanges(_jwtTokenAccesser) <= 0) throw new Exception("updating Job Monitoring failed on save.");
+            if (_uow.Save() <= 0) throw new Exception("updating Job Monitoring failed on save.");
             #endregion
             return "";
         }

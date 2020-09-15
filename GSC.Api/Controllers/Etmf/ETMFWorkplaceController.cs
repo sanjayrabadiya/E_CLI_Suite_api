@@ -58,22 +58,8 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public IActionResult Get(bool isDeleted)
         {
-            //var projectworkplace = _eTMFWorkplaceRepository.Get(1);
-
-            var projects = _eTMFWorkplaceRepository.FindByInclude(x => x.DeletedBy == null, x => x.Project);
-            var projectsDto = _mapper.Map<IEnumerable<ETMFWorkplaceDto>>(projects).ToList();
-
-            projectsDto.ForEach(b =>
-            {
-                b.CreatedByUser = _userRepository.Find(b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
-            return Ok(projectsDto);
+            var projects = _eTMFWorkplaceRepository.GetETMFWorkplaceList(isDeleted);
+            return Ok(projects);
         }
 
         [HttpGet("{id}")]

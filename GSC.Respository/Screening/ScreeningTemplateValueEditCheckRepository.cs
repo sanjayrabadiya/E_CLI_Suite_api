@@ -51,7 +51,7 @@ namespace GSC.Respository.Screening
             if (objSave.ScreeningTemplateId == 0)
             {
                 var screeningTemplate = Context.ScreeningTemplate.FirstOrDefault(c =>
-                    c.ScreeningEntryId == objSave.ScreeningEntryId
+                    c.ScreeningVisit.ScreeningEntryId == objSave.ScreeningEntryId
                     && c.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId);
                 if (screeningTemplate == null) return;
                 objSave.ScreeningTemplateId = screeningTemplate.Id;

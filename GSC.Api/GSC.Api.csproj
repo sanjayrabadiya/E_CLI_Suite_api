@@ -34,10 +34,12 @@
 	  <PackageReference Include="ServiceStack.Text" Version="5.9.2" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
+    <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="18.2.0.56" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GSC.Audit\GSC.Audit.csproj" />
     <ProjectReference Include="..\GSC.Common\GSC.Common.csproj" />
     <ProjectReference Include="..\GSC.Data\GSC.Data.csproj" />
     <ProjectReference Include="..\GSC.Domain\GSC.Domain.csproj" />

@@ -18,4 +18,13 @@ namespace GSC.Data.Dto.Master
         public string ContactNo { get; set; }
         public int? CompanyId { get; set; }
     }
+
+    public class InvestigatorContactDetailGridDto : BaseAuditDto
+    {
+        public string ContactEmail { get; set; }
+        public string ContactName { get; set; }
+        public string ContactNo { get; set; }
+        public string ContactType { get; set; }
+        public string SecurityRole { get; set; }
+    }
 }

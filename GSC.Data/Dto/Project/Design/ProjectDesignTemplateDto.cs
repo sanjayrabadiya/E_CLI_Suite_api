@@ -54,17 +54,24 @@ namespace GSC.Data.Dto.Project.Design
         public string ProjectDesignVisitName { get; set; }
         public int DesignOrder { get; set; }
         public int? DomainId { get; set; }
+        public string DomainName { get; set; }
         public bool IsRepeated { get; set; }
         public IList<DesignScreeningVariableDto> Variables { get; set; }
         public bool MyReview { get; set; }
         public string StatusName { get; set; }
         public bool IsSubmittedButton { get; set; }
         public int ScreeningTemplateId { get; set; }
-        public ScreeningStatus Status { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public string EditCheckMessage { get; set; }
         public bool IsWarning { get; set; }
         public bool IsLocked { get; set; }
         public List<string> Notes { get; set; }
         public int VariableTemplateId { get; set; }
+    }
+
+    public class CloneTemplateDto
+    {
+        public int Id { get; set; }
+        public List<int> ClonnedTemplateIds { get; set; }
     }
 }

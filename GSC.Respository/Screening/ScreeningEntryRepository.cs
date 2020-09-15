@@ -26,7 +26,7 @@ namespace GSC.Respository.Screening
     {
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly INumberFormatRepository _numberFormatRepository;
-        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IRolePermissionRepository _rolePermissionRepository;
@@ -35,7 +35,7 @@ namespace GSC.Respository.Screening
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IUnitOfWork<GscContext> _uow;
         public ScreeningEntryRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository,
+            IProjectDesignVisitRepository projectDesignVisitRepository,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
             IAttendanceRepository attendanceRepository,
@@ -46,7 +46,7 @@ namespace GSC.Respository.Screening
             IRolePermissionRepository rolePermissionRepository)
             : base(uow, jwtTokenAccesser)
         {
-            _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _projectDesignVisitRepository = projectDesignVisitRepository;
             _volunteerRepository = volunteerRepository;
             _projectRightRepository = projectRightRepository;
             _attendanceRepository = attendanceRepository;
@@ -62,7 +62,7 @@ namespace GSC.Respository.Screening
         {
             var screeningTemplateValue = _screeningTemplateValueRepository
                 .FindBy(x => x.DeletedDate == null
-                && x.ScreeningTemplate.ScreeningEntryId == id).
+                && x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == id).
                 Select(r => new Data.Dto.Screening.ScreeningTemplateValueBasic
                 {
                     ScreeningTemplateId = r.ScreeningTemplateId,
@@ -76,7 +76,6 @@ namespace GSC.Respository.Screening
                     AttendanceId = t.AttendanceId,
                     ScreeningNo = t.ScreeningNo,
                     ScreeningDate = t.ScreeningDate,
-                    Status = t.Status,
                     VolunteerName = t.Attendance.Volunteer == null
                         ? t.Attendance.NoneRegister.Initial
                         : t.Attendance.Volunteer.AliasName,
@@ -137,25 +136,36 @@ namespace GSC.Respository.Screening
         public void SaveScreening(ScreeningEntry screeningEntry, List<int> projectAttendanceTemplateIds)
         {
             var attendace = Context.Attendance.Find(screeningEntry.AttendanceId);
+
             screeningEntry.Id = 0;
             screeningEntry.ScreeningNo =
                 _numberFormatRepository.GenerateNumber(attendace.IsTesting ? "TestingScreening" : "Screening");
-            screeningEntry.Status = ScreeningStatus.InProcess;
             screeningEntry.EntryType = attendace.AttendanceType;
             screeningEntry.ProjectDesignPeriodId = attendace.ProjectDesignPeriodId;
-            screeningEntry.ScreeningTemplates = new List<ScreeningTemplate>();
-            var templates = _projectDesignTemplateRepository.GetTemplateIdsByPeriordId(attendace.ProjectDesignPeriodId);
+            screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
-            templates.ForEach(t =>
+            var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(attendace.ProjectDesignPeriodId);
+
+            designVisits.ForEach(r =>
             {
-                screeningEntry.ScreeningTemplates.Add(new ScreeningTemplate
+                var screeningVisit = new ScreeningVisit
                 {
-                    ProjectDesignTemplateId = t.Id,
-                    ProjectDesignVisitId = t.ProjectDesignVisitId,
-                    Status = ScreeningStatus.Pending
-                });
-            });
 
+                    ProjectDesignVisitId = r.Id,
+                    Status = ScreeningVisitStatus.NotStarted
+                };
+
+                r.Templates.ForEach(t =>
+                {
+                    screeningVisit.ScreeningTemplates.Add(new ScreeningTemplate
+                    {
+                        ProjectDesignTemplateId = t.Id,
+                        Status = ScreeningTemplateStatus.Pending
+                    });
+                });
+
+                screeningEntry.ScreeningVisit.Add(screeningVisit);
+            });
 
             attendace.IsProcessed = true;
             _attendanceRepository.Update(attendace);
@@ -177,14 +187,14 @@ namespace GSC.Respository.Screening
             if (searchParam.ScreeningStatus != null) status = (int)searchParam.ScreeningStatus;
 
             var attendanceResult = new List<AttendanceScreeningGridDto>();
-            if (searchParam.ScreeningStatus == ScreeningStatus.Pending || status == 0)
+            if (searchParam.ScreeningStatus == ScreeningTemplateStatus.Pending || status == 0)
             {
                 searchParam.AttendanceType = AttendanceType.Screening;
                 searchParam.IsFromScreening = true;
                 attendanceResult.AddRange(_attendanceRepository.GetAttendaceList(searchParam));
             }
 
-            if (searchParam.ScreeningStatus == ScreeningStatus.Pending) return attendanceResult;
+            if (searchParam.ScreeningStatus == ScreeningTemplateStatus.Pending) return attendanceResult;
 
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<AttendanceScreeningGridDto>();
@@ -215,8 +225,8 @@ namespace GSC.Respository.Screening
                     screeningEntries =
                         screeningEntries.Where(x => x.ScreeningDate.Date == searchParam.FromDate.Value.Date);
 
-                if (status > 0)
-                    screeningEntries = screeningEntries.Where(x => x.Status == searchParam.ScreeningStatus);
+                //if (status > 0)
+                //    screeningEntries = screeningEntries.Where(x => x.Status == searchParam.ScreeningStatus);
 
                 if (searchParam.IsFitnessFit.HasValue)
                     screeningEntries = screeningEntries.Where(x => x.IsFitnessFit == searchParam.IsFitnessFit);
@@ -244,8 +254,7 @@ namespace GSC.Respository.Screening
                 ScreeningDate = x.ScreeningDate,
                 AttendanceDate = x.Attendance.AttendanceDate,
                 AttendedBy = x.Attendance.User.UserName,
-                IsFitnessFit = x.IsFitnessFit == null ? "" : x.IsFitnessFit == true ? "Yes" : "No",
-                ScreeningStatusName = x.Status.GetDescription()
+                IsFitnessFit = x.IsFitnessFit == null ? "" : x.IsFitnessFit == true ? "Yes" : "No"
             }).ToList();
 
             items.AddRange(attendanceResult);
@@ -276,7 +285,7 @@ namespace GSC.Respository.Screening
         public IList<ScreeningAuditDto> GetAuditHistory(int id)
         {
             var auditDtos = (from screening in Context.ScreeningEntry.Where(t => t.Id == id)
-                             join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningEntryId
+                             join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
                              join value in Context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
                              join audit in Context.ScreeningTemplateValueAudit on value.Id equals audit.ScreeningTemplateValueId
                              join reasonTemp in Context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
@@ -317,7 +326,7 @@ namespace GSC.Respository.Screening
         public ScreeningSummaryDto GetSummary(int id)
         {
             var values = (from screening in Context.ScreeningEntry.Where(t => t.Id == id)
-                          join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningEntryId
+                          join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
                           join value in Context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
                           select new ScreeningSummaryValue
                           {
@@ -437,8 +446,8 @@ namespace GSC.Respository.Screening
         {
             var result = new List<DropDownDto>();
 
-            result.Add(new DropDownDto { Id = (int)ScreeningStatus.Pending, Value = ScreeningStatus.Pending.GetDescription(), ExtraData = false });
-            result.Add(new DropDownDto { Id = (int)ScreeningStatus.InProcess, Value = ScreeningStatus.InProcess.GetDescription(), ExtraData = false });
+            result.Add(new DropDownDto { Id = (int)ScreeningTemplateStatus.Pending, Value = ScreeningTemplateStatus.Pending.GetDescription(), ExtraData = false });
+            result.Add(new DropDownDto { Id = (int)ScreeningTemplateStatus.InProcess, Value = ScreeningTemplateStatus.InProcess.GetDescription(), ExtraData = false });
             //result.Add(new DropDownDto { Id = (int)ScreeningStatus.Pending, Value = ScreeningStatus.Pending.GetDescription(), ExtraData = false });
 
             var projectDesign = Context.ProjectDesign.FirstOrDefault(x => x.ProjectId == parentProjectId);
@@ -451,7 +460,7 @@ namespace GSC.Respository.Screening
                     result.Add(new DropDownDto { Id = (int)x.LevelNo, Value = x.RoleName, ExtraData = true });
                 });
             }
-            result.Add(new DropDownDto { Id = (int)ScreeningStatus.Completed, Value = ScreeningStatus.Completed.GetDescription(), ExtraData = false });
+            result.Add(new DropDownDto { Id = (int)ScreeningTemplateStatus.Completed, Value = ScreeningTemplateStatus.Completed.GetDescription(), ExtraData = false });
 
             return result;
         }

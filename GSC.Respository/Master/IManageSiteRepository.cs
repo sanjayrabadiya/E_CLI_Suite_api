@@ -7,6 +7,7 @@ namespace GSC.Respository.Master
 {
     public interface IManageSiteRepository : IGenericRepository<ManageSite>
     {
+        List<ManageSiteGridDto> GetManageSites(bool isDeleted);
         string Duplicate(ManageSite objSave);
         List<DropDownDto> GetManageSiteDropDown();
         IList<ManageSiteDto> GetManageSiteList(int Id);

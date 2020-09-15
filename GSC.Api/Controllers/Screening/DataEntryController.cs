@@ -33,6 +33,8 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_dataEntryRespository.GetDataEntriesBySubject(projectDesignPeriodId, projectId));
         }
 
+
+
         [HttpGet]
         [Route("GetDataEntriesBySubjectForGrid/{projectDesignPeriodId}/{projectId}")]
         public IActionResult GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int projectId)
@@ -50,7 +52,7 @@ namespace GSC.Api.Controllers.Screening
         [HttpGet]
         [Route("GetTemplateForVisit/{screeningEntryId}/{projectDesignVisitId}/{screeningStatus}/{isQuery}")]
         public IActionResult GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId,
-            ScreeningStatus screeningStatus, bool isQuery)
+            ScreeningTemplateStatus screeningStatus, bool isQuery)
         {
             return Ok(_dataEntryRespository.GetTemplateForVisit(screeningEntryId, projectDesignVisitId, screeningStatus,
                 isQuery));

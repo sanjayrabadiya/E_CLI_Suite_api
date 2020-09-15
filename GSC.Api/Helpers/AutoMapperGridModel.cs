@@ -1,13 +1,20 @@
 ﻿using AutoMapper;
+using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Client;
+using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Medra;
+using GSC.Data.Dto.UserMgt;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
+using GSC.Data.Entities.UserMgt;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,12 +37,14 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.DomainClassName, x => x.MapFrom(a => a.DomainClass.DomainClassName)).ReverseMap();
 
             CreateMap<DomainClass, DomainClassGridDto>().ReverseMap();
-            
+
             CreateMap<Drug, DrugGridDto>().ReverseMap();
             CreateMap<AuditReason, AuditReasonGridDto>().ReverseMap();
             CreateMap<BlockCategory, BlockCategoryGridDto>().ReverseMap();
             CreateMap<CityArea, CityAreaGridDto>().ReverseMap();
-            CreateMap<City, CityGridDto>().ReverseMap();
+            CreateMap<City, CityGridDto>()
+                .ForMember(x => x.StateName, x => x.MapFrom(a => a.State.StateName))
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.State.Country.CountryName)).ReverseMap();
             CreateMap<Country, CountryGridDto>().ReverseMap();
             CreateMap<ContactType, ContactTypeGridDto>().ReverseMap();
             CreateMap<ClientType, ClientTypeGridDto>().ReverseMap();
@@ -65,6 +74,58 @@ namespace GSC.Api.Helpers
             CreateMap<Variable, VariableGridDto>().ReverseMap();
             CreateMap<PatientStatus, PatientStatusGridDto>().ReverseMap();
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
+            CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
+            CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
+
+            CreateMap<NoneRegister, NoneRegisterGridDto>()
+                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Attendance.Project.ProjectName))
+                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Attendance.Project.ProjectCode))
+                 .ReverseMap();
+            CreateMap<ProjectWorkplace, ETMFWorkplaceGridDto>()
+                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
+                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ReverseMap();
+
+            CreateMap<Data.Entities.Master.Project, ProjectGridDto>()
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
+                .ForMember(x => x.AreaName, x => x.MapFrom(a => a.CityArea.AreaName))
+                .ForMember(x => x.StateName, x => x.MapFrom(a => a.State.StateName))
+                .ForMember(x => x.ClientName, x => x.MapFrom(a => a.Client.ClientName))
+                .ForMember(x => x.DesignTrialName, x => x.MapFrom(a => a.DesignTrial.DesignTrialName))
+                .ForMember(x => x.ClientName, x => x.MapFrom(a => a.Client.ClientName))
+                .ForMember(x => x.DrugName, x => x.MapFrom(a => a.Drug.DrugName))
+                .ForMember(x => x.RegulatoryTypeName, x => x.MapFrom(a => a.RegulatoryType.GetDescription()))
+                .ForMember(x => x.ProjectDesignId, x => x.MapFrom(a => a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.Id).FirstOrDefault()))
+                .ForMember(x => x.Locked, x => x.MapFrom(a => !a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.IsUnderTesting).FirstOrDefault()))
+                .ReverseMap();
+
+            CreateMap<ManageSite, ManageSiteGridDto>()
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
+                .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
+                .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
+                .ReverseMap();
+
+            CreateMap<VariableTemplate, VariableTemplateGridDto>()
+               .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
+               .ForMember(x => x.ActivityMode, x => x.MapFrom(a => a.ActivityMode.GetDescription()))
+               .ReverseMap();
+
+            CreateMap<InvestigatorContact, InvestigatorContactGridDto>()
+               .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
+               .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
+               .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
+               .ForMember(x => x.SiteName, x => x.MapFrom(a => a.ManageSite.SiteName))
+               .ForMember(x => x.IECIRBName, x => x.MapFrom(a => a.Iecirb.IECIRBName))
+               .ForMember(x => x.IECIRBContactNo, x => x.MapFrom(a => a.Iecirb.IECIRBContactNumber))
+               .ForMember(x => x.IECIRBContactName, x => x.MapFrom(a => a.Iecirb.IECIRBContactName))
+               .ForMember(x => x.IECIRBContactEmail, x => x.MapFrom(a => a.Iecirb.IECIRBContactEmail))
+               .ReverseMap();
+
+            CreateMap<InvestigatorContactDetail, InvestigatorContactDetailGridDto>()
+               .ForMember(x => x.SecurityRole, x => x.MapFrom(a => a.SecurityRole.RoleShortName))
+               .ForMember(x => x.ContactType, x => x.MapFrom(a => a.ContactType.TypeName))
+               .ReverseMap();
         }
     }
 }

@@ -27,10 +27,10 @@ namespace GSC.Respository.Screening
         void UpdateQuery(ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto,
             ScreeningTemplateValueQuery screeningTemplateValueQuery, ScreeningTemplateValue screeningTemplateValue);
 
-        List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisit(int projectId);
-        List<DashboardQueryStatusDto> GetDashboardQueryStatusBySite(int projectId);
-        List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId);
-        List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisitwise(int projectId);
+        //List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisit(int projectId);
+        //List<DashboardQueryStatusDto> GetDashboardQueryStatusBySite(int projectId);
+        //List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId);
+        //List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisitwise(int projectId);
 
         IList<QueryManagementDto> GetQueryEntries(QuerySearchDto filters);
         IList<QueryManagementDto> GetGenerateQueryBy(int projectId);

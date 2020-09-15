@@ -8,23 +8,17 @@ namespace GSC.Data.Dto.Report
     {
         private DateTime? _createdDate;
         public int ScreeningEntryId { get; set; }
-        public int AttendanceId { get; set; }
         public int ScreeningTemplateValueId { get; set; }
         public int ScreeningTemplateId { get; set; }
         public string ScreeningTemplateValue { get; set; }
         public string ScreeningNo { get; set; }
+        public string VolunteerName { get; set; }
         public string Visit { get; set; }
         public string Value { get; set; }
-        public int? ReasonId { get; set; }
-        public string ReasonOth { get; set; }
-        public bool IsSubmitted { get; set; }
-        public string ReasonName { get; set; }
         public QueryStatus? QueryStatus { get; set; }
         public string CreatedByName { get; set; }
-        public short ReviewLevel { get; set; }
+        public int? ReviewLevel { get; set; }
         public string ReviewLevelName { get; set; }
-
-        public string Note { get; set; }
 
         public DateTime? CreatedDate
         {
@@ -33,9 +27,6 @@ namespace GSC.Data.Dto.Report
         }
 
         public string StatusName { get; set; }
-        public short QueryLevel { get; set; }
-        public string VolunteerName { get; set; }
-        public DateTime? VolunteerDelete { get; set; }
         public string SubjectNo { get; set; }
         public string RandomizationNumber { get; set; }
         public int ProjectId { get; set; }

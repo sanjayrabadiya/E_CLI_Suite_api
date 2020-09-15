@@ -36,14 +36,7 @@ namespace GSC.Data.Entities.UserMgt
             set => _DateOfBirth = value?.UtcDate();
         }
 
-
-        public Location.Location Location { get; set; }
-
-        public int? ScopeNameId { get; set; }
-
         public string Phone { get; set; }
-
-        public int DepartmentId { get; set; }
 
         public DateTime? ValidFrom
         {
@@ -58,9 +51,7 @@ namespace GSC.Data.Entities.UserMgt
         }
 
         public int FailedLoginAttempts { get; set; }
-
         public bool IsLocked { get; set; }
-
         public DateTime? LastLoginDate
         {
             get => _LastLoginDate?.UtcDate();
@@ -85,8 +76,6 @@ namespace GSC.Data.Entities.UserMgt
         public string RoleTokenId { get; set; }
 
         public bool IsPowerAdmin { get; set; }
-
-        public string Note { get; set; }
 
         public PrefLanguage? Language { get; set; }
 

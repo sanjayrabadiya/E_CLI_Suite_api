@@ -57,7 +57,8 @@ namespace GSC.Respository.Project.Design
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     DesignOrder = r.DesignOrder,
-                    VariableTemplateId = r.VariableTemplateId
+                    VariableTemplateId = r.VariableTemplateId,
+                    DomainName = r.Domain.DomainName
                 }
             ).FirstOrDefault();
 
@@ -191,12 +192,6 @@ namespace GSC.Respository.Project.Design
             return templates;
         }
 
-        public IList<ProjectDesignTemplate> GetTemplateIdsByPeriordId(int projectDesignPeriodId)
-        {
-            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null
-                                                        && x.ProjectDesignVisit.ProjectDesignPeriodId ==
-                                                        projectDesignPeriodId).ToList();
-        }
 
         public IList<DropDownDto> GetTemplateDropDownByPeriodId(int projectDesignPeriodId,
             VariableCategoryType variableCategoryType)

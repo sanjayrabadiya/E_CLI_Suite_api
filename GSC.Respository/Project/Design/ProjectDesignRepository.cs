@@ -18,13 +18,14 @@ namespace GSC.Respository.Project.Design
         private readonly GscContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
-
+        private readonly IUnitOfWork<GscContext> _uow;
         public ProjectDesignRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository) : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = uow.Context;
             _projectRightRepository = projectRightRepository;
+            _uow = uow;
         }
 
         public IList<DropDownDto> GetProjectByDesignDropDown()
@@ -176,7 +177,7 @@ namespace GSC.Respository.Project.Design
             {
                 Context.ElectronicSignature.Update(exist);
             }
-            Context.SaveChanges(_jwtTokenAccesser);
+            _uow.Save();
             return true;
         }
 

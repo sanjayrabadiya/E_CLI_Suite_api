@@ -5,7 +5,6 @@ namespace GSC.Data.Entities.Master
 {
     public class ManageSite : BaseEntity
     {
-        //public int? InvestigatorContactId { get; set; }
         public string SiteName { get; set; }
         public string ContactName { get; set; }
         public string SiteEmail { get; set; }

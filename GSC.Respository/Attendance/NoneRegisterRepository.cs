@@ -1,4 +1,6 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Entities.Attendance;
@@ -9,6 +11,7 @@ using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,7 +27,7 @@ namespace GSC.Respository.Attendance
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly ICityRepository _cityRepository;
-
+        private readonly IMapper _mapper;
         public NoneRegisterRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -34,7 +37,8 @@ namespace GSC.Respository.Attendance
             IScreeningTemplateRepository screeningTemplateRepository,
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
-            ICityRepository cityRepository)
+            ICityRepository cityRepository,
+             IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _attendanceRepository = attendanceRepository;
@@ -45,6 +49,7 @@ namespace GSC.Respository.Attendance
             _stateRepository = stateRepository;
             _countryRepository = countryRepository;
             _cityRepository = cityRepository;
+            _mapper = mapper;
         }
 
         public void SaveNonRegister(NoneRegister noneRegister, NoneRegisterDto noneRegisterDto)
@@ -61,68 +66,10 @@ namespace GSC.Respository.Attendance
             _attendanceRepository.SaveAttendance(attendance);
         }
 
-        public List<NoneRegisterDto> GetNonRegisterList(int projectId, bool isDeleted)
+        public List<NoneRegisterGridDto> GetNonRegisterList(int projectId, bool isDeleted)
         {
-            var result = All.Where(r => r.ProjectId == projectId && (isDeleted ? r.DeletedDate != null : r.DeletedDate == null)).Select(x =>
-                 new NoneRegisterDto
-                 {
-                     Id = x.Id,
-                     AttendanceId = x.AttendanceId,
-                     ProjectCode = x.Project.ProjectCode,
-                     ProjectId = x.ProjectId,
-                     ParentProjectId = x.Project.ParentProjectId,
-                     ProjectName = x.Project.ProjectName,
-                     Initial = x.Initial,
-                     ScreeningNumber = x.ScreeningNumber,
-                     DateOfScreening = x.DateOfScreening,
-                     RandomizationNumber = x.RandomizationNumber,
-                     DateOfRandomization = x.DateOfRandomization,
-                     ProjectDesignPeriodId = x.Attendance.ProjectDesignPeriodId,
-                     CreatedBy = (int)x.CreatedBy,
-                     ModifiedBy = x.ModifiedBy,
-                     DeletedBy = x.DeletedBy,
-                     CreatedDate = x.CreatedDate,
-                     ModifiedDate = x.ModifiedDate,
-                     DeletedDate = x.ModifiedDate,
-                     CompanyId = x.CompanyId,
-                     FirstName = x.FirstName,
-                     LastName = x.LastName,
-                     MiddleName = x.MiddleName,
-                     DateOfBirth = x.DateOfBirth,
-                     Gender = x.Gender,
-                     PrimaryContactNumber = x.PrimaryContactNumber,
-                     EmergencyContactNumber = x.EmergencyContactNumber,
-                     Email = x.Email,
-                     Qualification = x.Qualification,
-                     Occupation = x.Occupation,
-                     ZipCode = x.ZipCode,
-                     AddressLine1 = x.AddressLine1,
-                     AddressLine2 = x.AddressLine2,
-                     IsDeleted = x.DeletedDate == null ? false : true,
-                     LanguageId = x.LanguageId,
-                     CityId = x.CityId,
-                 }).OrderByDescending(x => x.Id).ToList();
-
-            result.ForEach(b =>
-            {
-                b.StateId = b.CityId != null ? _cityRepository.Find((int)b.CityId).StateId : 0;
-                b.CountryId = b.StateId == 0 ? 0 : _stateRepository.Find(b.StateId).CountryId;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-            });
-
-            foreach (var item in result)
-            {
-                var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningEntry.AttendanceId == item.AttendanceId && x.DeletedDate == null).ToList();
-                if (screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false))
-                {
-                    item.IsLocked = false;
-                }
-                else
-                {
-                    item.IsLocked = true;
-                }
-            }
+            var result = All.Where(x => x.Attendance.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+                   ProjectTo<NoneRegisterGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             return result;
 
@@ -130,11 +77,6 @@ namespace GSC.Respository.Attendance
 
         public string Duplicate(NoneRegister objSave, int projectId)
         {
-            //if (All.Any(x =>
-            //    x.Id != objSave.Id && x.ScreeningNumber == objSave.ScreeningNumber &&
-            //    x.Attendance.ProjectId == projectId && x.DeletedDate == null))
-            //    return "Duplicate Screening number : " + objSave.ScreeningNumber;
-
             if (All.Any(x =>
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&
                 x.Attendance.ProjectId == projectId && !string.IsNullOrEmpty(x.RandomizationNumber) &&

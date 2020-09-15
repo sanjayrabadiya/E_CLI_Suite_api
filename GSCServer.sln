@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GSC.Respository", "GSC.Resp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GSC.Report", "GSC.Report\GSC.Report.csproj", "{1751525B-52E4-4D79-AAB5-AB7685D8B475}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSC.Audit", "GSC.Audit\GSC.Audit.csproj", "{73D3FDB8-EED1-4620-A14F-70632B830F85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{1751525B-52E4-4D79-AAB5-AB7685D8B475}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1751525B-52E4-4D79-AAB5-AB7685D8B475}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1751525B-52E4-4D79-AAB5-AB7685D8B475}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73D3FDB8-EED1-4620-A14F-70632B830F85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73D3FDB8-EED1-4620-A14F-70632B830F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73D3FDB8-EED1-4620-A14F-70632B830F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73D3FDB8-EED1-4620-A14F-70632B830F85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

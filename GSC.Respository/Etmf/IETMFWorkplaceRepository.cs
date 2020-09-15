@@ -10,7 +10,7 @@ namespace GSC.Respository.Etmf
 {
     public interface IETMFWorkplaceRepository : IGenericRepository<ProjectWorkplace>
     {
-
+        List<ETMFWorkplaceGridDto> GetETMFWorkplaceList(bool isDeleted);
         string Duplicate(int id);
         //List<TreeValue> Get(int id);
         List<TreeValue> GetTreeview(int id);

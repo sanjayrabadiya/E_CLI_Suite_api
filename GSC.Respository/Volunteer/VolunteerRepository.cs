@@ -22,7 +22,6 @@ namespace GSC.Respository.Volunteer
         IVolunteerRepository
     {
         private readonly ICityRepository _cityRepository;
-        private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly INumberFormatRepository _numberFormatRepository;
@@ -31,10 +30,10 @@ namespace GSC.Respository.Volunteer
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        private readonly IUnitOfWork<GscContext> _uow;
 
         public VolunteerRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser,
-            IUserRepository userRepository,
             INumberFormatRepository numberFormatRepository,
             IUploadSettingRepository uploadSettingRepository,
             ICityRepository cityRepository,
@@ -47,7 +46,6 @@ namespace GSC.Respository.Volunteer
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _userRepository = userRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _numberFormatRepository = numberFormatRepository;
             _cityRepository = cityRepository;
@@ -56,6 +54,7 @@ namespace GSC.Respository.Volunteer
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
+            _uow = uow;
         }
 
         public IList<VolunteerGridDto> GetVolunteerList()
@@ -205,7 +204,7 @@ namespace GSC.Respository.Volunteer
                 volunteer.Status = VolunteerStatus.Completed;
                 volunteer.VolunteerNo = GetVolunteerNumber();
                 Update(volunteer);
-                Context.SaveChanges(_jwtTokenAccesser);
+                _uow.Save();
                 return new VolunteerStatusCheck
                 {
                     Id = id,
@@ -346,7 +345,8 @@ namespace GSC.Respository.Volunteer
                                                                && !a.IsProcessed &&
                                                                a.ProjectDesignPeriodId == PeriodId
                                                                && a.ProjectId == projectId
-                                                               && a.AttendanceType != AttendanceType.Screening).Select(x =>
+                                                               && a.AttendanceType != AttendanceType.Screening
+                                                              ).Select(x =>
                     new DropDownDto
                     {
                         Id = x.Id,
@@ -390,7 +390,7 @@ namespace GSC.Respository.Volunteer
 
                 foreach (var item in lstsubjects)
                 {
-                    var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningEntry.AttendanceId == (int)item.ExtraData && x.DeletedDate == null).ToList();
+                    var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningVisit.ScreeningEntry.AttendanceId == (int)item.ExtraData && x.DeletedDate == null).ToList();
                     if (screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false))
                     {
                         var itemexist = subjects.Where(x => x.Id == item.Id).FirstOrDefault();
@@ -413,7 +413,7 @@ namespace GSC.Respository.Volunteer
                                                               && a.ProjectId == projectId
                                                               && a.AttendanceType != AttendanceType.Screening)
                                   join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
-                                  on atten.Id equals locktemplate.ScreeningEntry.AttendanceId
+                                  on atten.Id equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
                                   select new DropDownDto
                                   {
                                       Id = atten.Id,
@@ -433,7 +433,7 @@ namespace GSC.Respository.Volunteer
                                                                        && a.ProjectId == projectId
                                                                        && a.EntryType != AttendanceType.Screening)
                                       join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
-                                      on screening.AttendanceId equals locktemplate.ScreeningEntry.AttendanceId
+                                      on screening.AttendanceId equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
                                       select new DropDownDto
                                       {
                                           Id = screening.Id,
@@ -510,26 +510,9 @@ namespace GSC.Respository.Volunteer
                 IsScreeningHisotry = roleScreening.IsView,
                 IsDeleteRole = roleVolunteer.IsDelete,
                 IsScreening = x.IsScreening,
-                CreatedDate = x.CreatedDate,
-                ModifiedDate = x.ModifiedDate,
-                DeletedDate = x.DeletedDate,
-                CreatedBy = x.CreatedBy,
-                ModifiedBy = x.ModifiedBy,
-                DeletedBy = x.DeletedBy,
-            }).OrderByDescending(x => x.Id).ToList();
+               }).OrderByDescending(x => x.Id).ToList();
 
-            result.ForEach(b =>
-            {
-                //  b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.CreatedBy != null)
-                    b.CreatedByUser = _userRepository.Find((int)b.CreatedBy).UserName;
-                if (b.ModifiedBy != null)
-                    b.ModifiedByUser = _userRepository.Find((int)b.ModifiedBy).UserName;
-                if (b.DeletedBy != null)
-                    b.DeletedByUser = _userRepository.Find((int)b.DeletedBy).UserName;
-                if (b.CompanyId != null)
-                    b.CompanyName = _companyRepository.Find((int)b.CompanyId).CompanyName;
-            });
+         
 
             return result;
         }

@@ -19,12 +19,7 @@ namespace GSC.Data.Dto.Etmf
         public bool IsClose { get; set; }
         public int? CloseBy { get; set; }
         public DateTime? CloseDate { get; set; }
-        public int CreatedBy { get; set; }
-        public int? DeletedBy { get; set; }
-        public int? ModifiedBy { get; set; }
         public string CreatedByName { get; set; }
         public DateTime? CreatedDate { get; set; }
-        public DateTime? ModifiedDate { get; set; }
-        public DateTime? DeletedDate { get; set; }
     }
 }
