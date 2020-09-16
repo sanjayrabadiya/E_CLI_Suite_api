@@ -10,6 +10,7 @@ namespace GSC.Data.Entities.Master
         public string VariableCode { get; set; }
         public string VariableAlias { get; set; }
         public int? DomainId { get; set; }
+        public Domain Domain { get; set; }
         public string CDISCValue { get; set; }
         public string CDISCSubValue { get; set; }
         public CoreVariableType CoreVariableType { get; set; }
@@ -17,6 +18,7 @@ namespace GSC.Data.Entities.Master
         public CollectionSources CollectionSource { get; set; }
         public string CollectionAnnotation { get; set; }
         public int? VariableCategoryId { get; set; }
+        public AnnotationType AnnotationType { get; set; }
         public int? AnnotationTypeId { get; set; }
         public string Annotation { get; set; }
         public int? CompanyId { get; set; }

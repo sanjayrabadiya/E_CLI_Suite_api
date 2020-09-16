@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -13,29 +15,34 @@ namespace GSC.Respository.Master
     public class HolidayRepository : GenericRespository<Holiday, GscContext>, IHolidayRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
         public HolidayRepository(IUnitOfWork<GscContext> uow,
-IJwtTokenAccesser jwtTokenAccesser)
-: base(uow, jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper)
+            : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
 
-        public IList<HolidayDto> GetHolidayList(int InvestigatorContactId, bool isDeleted)
+        public IList<HolidayGridDto> GetHolidayList(int InvestigatorContactId, bool isDeleted)
         {
-            return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId && (isDeleted ? t.DeletedDate != null : t.DeletedDate == null)).Select(c =>
-                new HolidayDto
-                {
-                    Id = c.Id,
-                    InvestigatorContactId = c.InvestigatorContactId,
-                    HolidayType = c.HolidayType,
-                    HolidayTypeName = ((HolidayType)c.HolidayType).GetDescription(),
-                    HolidayName = c.HolidayName,
-                    HolidayDate = c.HolidayDate,
-                    Description = c.Description,
-                    CompanyId = c.CompanyId,
-                    IsDeleted = c.DeletedDate != null
-                }).OrderByDescending(t => t.Id).ToList();
+            return All.Where(x => x.InvestigatorContactId == InvestigatorContactId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+ProjectTo<HolidayGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            //return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId && (isDeleted ? t.DeletedDate != null : t.DeletedDate == null)).Select(c =>
+            //    new HolidayDto
+            //    {
+            //        Id = c.Id,
+            //        InvestigatorContactId = c.InvestigatorContactId,
+            //        HolidayType = c.HolidayType,
+            //        HolidayTypeName = ((HolidayType)c.HolidayType).GetDescription(),
+            //        HolidayName = c.HolidayName,
+            //        HolidayDate = c.HolidayDate,
+            //        Description = c.Description,
+            //        CompanyId = c.CompanyId,
+            //        IsDeleted = c.DeletedDate != null
+            //    }).OrderByDescending(t => t.Id).ToList();
         }
 
         public string DuplicateHoliday(Holiday objSave)

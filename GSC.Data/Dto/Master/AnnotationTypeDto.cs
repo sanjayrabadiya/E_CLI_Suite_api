@@ -13,4 +13,9 @@ namespace GSC.Data.Dto.Master
 
         public int? CompanyId { get; set; }
     }
+    public class AnnotationTypeGridDto : BaseDto
+    {
+        public string AnnotationeCode { get; set; }
+        public string AnnotationeName { get; set; }
+    }
 }

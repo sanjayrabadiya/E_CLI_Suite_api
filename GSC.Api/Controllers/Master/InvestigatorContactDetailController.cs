@@ -28,22 +28,14 @@ namespace GSC.Api.Controllers.Master
         }
 
         // GET: api/<controller>
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{id}/{isDeleted:bool?}")]
+        public IActionResult Get(int id, bool isDeleted)
         {
             if (id <= 0) return BadRequest();
 
-            var investigatorContactDetail = _investigatorContactDetailRepository.All.Where(x => x.InvestigatorContactId == id).
+            var investigatorContactDetail = _investigatorContactDetailRepository.All.Where(x => x.InvestigatorContactId == id && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                    ProjectTo<InvestigatorContactDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
-            return Ok(investigatorContactDetail);
-        }
-
-        [HttpGet]
-        [Route("GetContact/{investigatorContactId}/{isDeleted:bool?}")]
-        public IActionResult GetContact(int investigatorContactId, bool isDeleted)
-        {
-            var investigatorContactDetail = _investigatorContactDetailRepository.GetContactList(investigatorContactId, isDeleted);
             return Ok(investigatorContactDetail);
         }
 

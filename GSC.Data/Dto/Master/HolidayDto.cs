@@ -25,4 +25,17 @@ namespace GSC.Data.Dto.Master
         public string HolidayTypeName { get; set; }
 
     }
+    public class HolidayGridDto : BaseAuditDto
+    {
+        public string HolidayType { get; set; }
+        public string HolidayName { get; set; }
+        private DateTime? _approveDate;
+        public DateTime? HolidayDate
+        {
+            get => _approveDate?.UtcDateTime();
+            set => _approveDate = value?.UtcDateTime();
+        }
+        public string Description { get; set; }
+
+    }
 }

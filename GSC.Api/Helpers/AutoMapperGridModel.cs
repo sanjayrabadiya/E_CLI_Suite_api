@@ -15,10 +15,7 @@ using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GSC.Api.Helpers
 {
@@ -26,6 +23,9 @@ namespace GSC.Api.Helpers
     {
         public AutoMapperGridModel()
         {
+            CreateMap<AnnotationType, AnnotationTypeGridDto>()
+                 .ForMember(x => x.AnnotationeName, y => y.MapFrom(a => a.AnnotationeName)).ReverseMap();
+
             CreateMap<BaseEntity, BaseAuditDto>()
             .ForMember(x => x.CreatedByUser, y => y.MapFrom(a => a.CreatedByUser.UserName))
             .ForMember(x => x.IsDeleted, y => y.MapFrom(a => a.DeletedDate != null))
@@ -68,10 +68,14 @@ namespace GSC.Api.Helpers
             CreateMap<ScopeName, ScopeNameGridDto>().ForMember(x => x.ScopeName, y => y.MapFrom(a => a.Name)).ReverseMap();
             CreateMap<Client, ClientGridDto>().ReverseMap();
             CreateMap<DesignTrial, DesignTrialGridDto>().ReverseMap();
-            CreateMap<VariableCategory, VariableCategoryGridDto>().ReverseMap();
+            CreateMap<VariableCategory, VariableCategoryGridDto>()
+                 .ForMember(x => x.CategoryName, y => y.MapFrom(a => a.CategoryName)).ReverseMap();
             CreateMap<MedraVersion, MedraVersionGridDto>().ReverseMap();
             CreateMap<MedraLanguage, MedraLanguageGridDto>().ReverseMap();
-            CreateMap<Variable, VariableGridDto>().ReverseMap();
+            CreateMap<Variable, VariableGridDto>()
+                 .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
+                 .ForMember(x => x.AnnotationType, x => x.MapFrom(a => a.AnnotationType.AnnotationeName))
+                 .ForMember(x => x.RoleVariableType, x => x.MapFrom(a => a.RoleVariableType)).ReverseMap();
             CreateMap<PatientStatus, PatientStatusGridDto>().ReverseMap();
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
             CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
@@ -122,10 +126,12 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.IECIRBContactEmail, x => x.MapFrom(a => a.Iecirb.IECIRBContactEmail))
                .ReverseMap();
 
-            CreateMap<InvestigatorContactDetail, InvestigatorContactDetailGridDto>()
-               .ForMember(x => x.SecurityRole, x => x.MapFrom(a => a.SecurityRole.RoleShortName))
-               .ForMember(x => x.ContactType, x => x.MapFrom(a => a.ContactType.TypeName))
-               .ReverseMap();
+            CreateMap<InvestigatorContactDetail, InvestigatorContactDetailGridDto>().ReverseMap();
+            //.ForMember(x => x.SecurityRole, x => x.MapFrom(a => a.SecurityRole.RoleShortName))
+            //.ForMember(x => x.ContactType, x => x.MapFrom(a => a.ContactType.TypeName))
+
+            CreateMap<Holiday, HolidayGridDto>()
+                .ForMember(x => x.HolidayType, x => x.MapFrom(a => a.HolidayType)).ReverseMap();
         }
     }
 }

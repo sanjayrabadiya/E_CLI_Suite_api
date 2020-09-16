@@ -7,7 +7,7 @@ namespace GSC.Respository.Master
 {
     public interface IHolidayRepository : IGenericRepository<Holiday>
     {
-        IList<HolidayDto> GetHolidayList(int Id, bool isDeleted);
+        IList<HolidayGridDto> GetHolidayList(int Id, bool isDeleted);
 
         string DuplicateHoliday(Holiday objSave);
 

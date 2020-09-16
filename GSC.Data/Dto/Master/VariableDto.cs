@@ -65,7 +65,11 @@ namespace GSC.Data.Dto.Master
     {
         public string VariableName { get; set; }
         public string VariableCode { get; set; }
+        public string DomainName { get; set; }
+        public string CategoryName { get; set; }
         public string VariableAlias { get; set; }
+        public string AnnotationType { get; set; }
+        public string RoleVariableType { get; set; }
         public int? AnnotationTypeId { get; set; }
         public string Annotation { get; set; }
         public string CollectionAnnotation { get; set; }

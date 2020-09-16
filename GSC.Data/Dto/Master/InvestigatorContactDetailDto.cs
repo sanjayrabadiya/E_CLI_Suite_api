@@ -24,7 +24,7 @@ namespace GSC.Data.Dto.Master
         public string ContactEmail { get; set; }
         public string ContactName { get; set; }
         public string ContactNo { get; set; }
-        public string ContactType { get; set; }
-        public string SecurityRole { get; set; }
+        public int? ContactTypeId { get; set; }
+        public int? SecurityRoleId { get; set; }
     }
 }
