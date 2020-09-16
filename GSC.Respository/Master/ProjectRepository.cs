@@ -489,7 +489,7 @@ namespace GSC.Respository.Master
 
             projects.ForEach(x =>
             {
-                x.ParentProjectName = Context.Project.Find(x.ParentProjectId).ProjectName;
+                x.ParentProjectCode = Context.Project.Find(x.ParentProjectId).ProjectCode;
                 var design = Context.ProjectDesign.Where(t =>
                     t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null).FirstOrDefault();
                 if (design != null)

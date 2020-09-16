@@ -65,7 +65,7 @@ namespace GSC.Data.Dto.Master
         public string SiteName { get; set; }
         public string PinCode { get; set; }
         public int Period { get; set; }
-        public string ParentProjectName { get; set; }
+        public string ParentProjectCode { get; set; }
         public string RegulatoryTypeName { get; set; }
         public bool IsStatic { get; set; }
         public int? AttendanceLimit { get; set; }
