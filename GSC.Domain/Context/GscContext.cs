@@ -51,7 +51,8 @@ namespace GSC.Domain.Context
             nameof(VolunteerImage),
             nameof(VolunteerLanguage),
             nameof(ScreeningTemplateValue),
-            nameof(ScreeningTemplateValueAudit)
+            nameof(ScreeningTemplateValueAudit),
+            nameof(ProjectArtificateDocumentHistory)
         };
 
         public GscContext(DbContextOptions options) : base(options)
@@ -253,6 +254,8 @@ namespace GSC.Domain.Context
         public DbSet<ReportFavouriteScreen> ReportFavouriteScreen { get; set; }
         public DbSet<ProjectArtificateDocumentReview> ProjectArtificateDocumentReview { get; set; }
         public DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
+
+        public DbSet<ProjectArtificateDocumentHistory> ProjectArtificateDocumentHistory { get; set; }
         public DbSet<AuditValue> AuditValue { get; set; }
         public DbSet<EconsentSetup> EconsentSetup { get; set; }
         private List<string> ColumnsToSkip

@@ -18,17 +18,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Syncfusion.EJ2.DocumentEditor;
-using System.Net.Http;
-using GSC.Domain;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using GSC.Api.Helpers;
-using Syncfusion.DocIO;
-using Syncfusion.DocIO.DLS;
-using System.Text.Json;
-using ServiceStack.Text;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using Telerik.Reporting.Barcodes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -50,6 +43,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly GscContext _context;
+        private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
         public ProjectWorkplaceArtificatedocumentController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
@@ -60,7 +54,8 @@ namespace GSC.Api.Controllers.Etmf
               IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
               IUploadSettingRepository uploadSettingRepository,
               IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
-               IJwtTokenAccesser jwtTokenAccesser)
+               IJwtTokenAccesser jwtTokenAccesser,
+               IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository)
         {
             _userRepository = userRepository;
             _companyRepository = companyRepository;
@@ -74,6 +69,7 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _context = uow.Context;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
         }
 
         [Route("GetTreeview")]
@@ -121,7 +117,7 @@ namespace GSC.Api.Controllers.Etmf
                 obj.Status = item.Status;
                 obj.Level = 6;
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
-                obj.ReviewStatus = "Send";
+                obj.ReviewStatus = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != _jwtTokenAccesser.UserId && x.DeletedDate == null).All(z => z.IsSendBack) ? "Send Back" : "Send";
                 obj.IsSendBack = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).Select(z => z.IsSendBack).LastOrDefault();
                 dataList.Add(obj);
             }
@@ -164,6 +160,7 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
 
             _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
+            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
             return Ok(projectWorkplaceArtificatedocument.Id);
 
         }
@@ -219,13 +216,12 @@ namespace GSC.Api.Controllers.Etmf
             return sfdt;
         }
 
-        [AllowAnonymous]
         [HttpPost]
         [Route("ImportData/{id}")]
-        public string ImportData(int id)
+        public IActionResult ImportData(int id)
         {
             var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
-            var upload = _context.UploadSetting.OrderByDescending(x=>x.Id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
@@ -234,7 +230,7 @@ namespace GSC.Api.Controllers.Etmf
             string json = ImportWordDocument(stream);
             stream.Close();
             // return new HttpResponseMessage() { Content = new System.Net.Http.StringContent(json) };
-            return json;
+            return Ok(json);
         }
 
         [AllowAnonymous]
@@ -315,7 +311,7 @@ namespace GSC.Api.Controllers.Etmf
             return sfdtText;
         }
 
-        internal static Syncfusion.EJ2.DocumentEditor.FormatType GetFormatType(string format)
+        internal static FormatType GetFormatType(string format)
         {
             if (string.IsNullOrEmpty(format))
                 throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
@@ -325,19 +321,48 @@ namespace GSC.Api.Controllers.Etmf
                 case ".docx":
                 case ".docm":
                 case ".dotm":
-                    return Syncfusion.EJ2.DocumentEditor.FormatType.Docx;
+                    return FormatType.Docx;
                 case ".dot":
                 case ".doc":
-                    return Syncfusion.EJ2.DocumentEditor.FormatType.Doc;
+                    return FormatType.Doc;
                 case ".rtf":
-                    return Syncfusion.EJ2.DocumentEditor.FormatType.Rtf;
+                    return FormatType.Rtf;
                 case ".txt":
-                    return Syncfusion.EJ2.DocumentEditor.FormatType.Txt;
+                    return FormatType.Txt;
                 case ".xml":
-                    return Syncfusion.EJ2.DocumentEditor.FormatType.WordML;
+                    return FormatType.WordML;
                 default:
                     throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
             }
+        }
+
+        [HttpPost]
+        [Route("ExportSFDT")]
+        public IActionResult ExportSFDT([FromBody] SaveParameter data)
+        {
+            string filePath = string.Empty;
+            string path = string.Empty;
+
+            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(data.id);
+
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var fileName = projectWorkplaceArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceArtificatedocument.DocumentName.Substring(0, projectWorkplaceArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceArtificatedocument.DocumentName;
+            var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
+            filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceArtificatedocument.DocPath, docName);
+
+            Stream document = WordDocument.Save(data.content, FormatType.Docx);
+            FileStream file = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            document.CopyTo(file);
+            file.Close();
+            document.Close();
+
+            projectWorkplaceArtificatedocument.DocumentName = docName;
+            _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+
+            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
+
+            return Ok();
         }
     }
 }

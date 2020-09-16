@@ -49,4 +49,10 @@ namespace GSC.Data.Dto.Etmf
         public bool IsSendBack { get; set; }
         public string ReviewStatus { get; set; }
     }
+
+    public class SaveParameter
+    {
+        public int id { get; set; }
+        public string content { get; set; }
+    }
 }
