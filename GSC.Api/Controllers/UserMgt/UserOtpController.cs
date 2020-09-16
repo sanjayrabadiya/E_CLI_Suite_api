@@ -135,6 +135,40 @@ namespace GSC.Api.Controllers.UserMgt
                 return Ok(userDto);
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("VerifyingMobileUser/{userName}")]
+        public IActionResult VerifyingMobileUser(string userName)
+        {
+            var userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
+            if (userExists == null)
+            {
+                ModelState.AddModelError("Message", "UserName not valid");
+                return BadRequest(ModelState);
+            }
+
+            var userDto = _mapper.Map<UserMobileDto>(userExists);
+            if (userDto.Language == null)
+                userDto.LanguageShortName = PrefLanguage.en.ToString();
+            else
+                userDto.LanguageShortName = userDto.Language.ToString();
+
+            if (userExists.IsFirstTime)
+            {
+                var validateMessage = _userOtpRepository.InsertOtp(userName);
+
+                if (!string.IsNullOrEmpty(validateMessage))
+                {
+                    ModelState.AddModelError("Message", validateMessage);
+                    return BadRequest(ModelState);
+                }
+                _uow.Save();
+                return Ok(userDto);
+            }
+            else
+                return Ok(userDto);
+        }
+
         [HttpPut]
         [AllowAnonymous]
         [Route("UserDeleteTempForMobile/{userName}")]

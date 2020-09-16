@@ -98,6 +98,7 @@ namespace GSC.Api.Helpers
             CreateMap<VolunteerHistory, VolunteerHistoryDto>().ReverseMap();
             CreateMap<VolunteerLanguage, VolunteerLanguageDto>().ReverseMap();
             CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<User, UserMobileDto>().ReverseMap();
             CreateMap<Client, ClientDto>().ReverseMap();
             CreateMap<ClientAddress, ClientAddressDto>().ReverseMap();
             CreateMap<ClientContact, ClientContactDto>().ReverseMap();

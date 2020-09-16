@@ -110,9 +110,11 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 dto.Roles = roles;
                 dto.AskToSelectRole = true;
+                //dto
+                dto.IsFirstTime = user.IsFirstTime;
                 return Ok(dto);
             }
-
+            
             //var loginUser = await CheckifAlreadyLogin(user);
             //if (!dto.IsAnotherDevice && loginUser.IsLogin)
             //{
@@ -125,6 +127,42 @@ namespace GSC.Api.Controllers.UserMgt
 
             var validatedUser = BuildUserAuthObject(user, dto.RoleId);
 
+            return Ok(validatedUser);
+        }
+
+        [Route("MobileLogIn")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginMobile([FromBody] LoginDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+            if (user == null)
+            {
+                ModelState.AddModelError("UserName", "Invalid username or password");
+                return BadRequest(ModelState);
+            }
+
+            if (user.IsLocked)
+            {
+                ModelState.AddModelError("UserName", "User is locked, Please contact your administrator");
+                _userLoginReportRepository.SaveLog("User is locked, Please contact your administrator", user.Id,
+                    dto.UserName);
+                return BadRequest(ModelState);
+            }
+
+            if (user.ValidFrom.HasValue && user.ValidFrom.Value > DateTime.Now ||
+                user.ValidTo.HasValue && user.ValidTo.Value < DateTime.Now)
+            {
+                ModelState.AddModelError("UserName", "User not active, Please contact your administrator");
+                _userLoginReportRepository.SaveLog("User not active, Please contact your administrator", user.Id,
+                    dto.UserName);
+                return BadRequest(ModelState);
+            }
+
+            var validatedUser = BuildUserAuthObjectMobile(user);
             return Ok(validatedUser);
         }
 
@@ -159,6 +197,52 @@ namespace GSC.Api.Controllers.UserMgt
         public IActionResult GetRoleByUserName(string userName)
         {
             return Ok(_userRoleRepository.GetRoleByUserName(userName));
+        }
+
+        private LogInResponseMobileDto BuildUserAuthObjectMobile(User authUser)
+        {
+            if (authUser.Language == null)
+                authUser.Language = PrefLanguage.en;
+            var login = new LogInResponseMobileDto
+            {
+                UserName = authUser.UserName,
+                Token = BuildJwtToken(authUser, 0),
+                RefreshToken = _userRepository.GenerateRefreshToken(),
+                IsFirstTime = authUser.IsFirstTime,
+                UserId = authUser.Id,
+                FirstName = authUser.FirstName,
+                LastName = authUser.LastName,
+                Email = authUser.Email,
+                LanguageShortName = authUser.Language.ToString()
+            };
+
+
+            var imageUrl = _uploadSettingRepository
+                .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
+
+            var company = _companyRepository.Find((int)authUser.CompanyId);
+            if (company != null)
+            {
+                login.CompanyName = company.CompanyName;
+                login.CompanyLogo = imageUrl + company.Logo;
+                login.UserPicUrl = imageUrl +
+                                   (authUser.ProfilePic ?? DocumentService.DefulatProfilePic);
+            }
+
+            authUser.FailedLoginAttempts = 0;
+            authUser.IsLogin = true;
+            authUser.RoleTokenId = null;
+            authUser.LastLoginDate = DateTime.Now;
+            _userLoginReportRepository.SaveLog("Successfully Login", authUser.Id, authUser.UserName);
+            
+            if (!string.IsNullOrEmpty(login.Token))
+            {
+                _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
+                _userRepository.Update(authUser);
+            }
+
+            _uow.Save();
+            return login;
         }
 
         private LoginResponseDto BuildUserAuthObject(User authUser, int roleId)
