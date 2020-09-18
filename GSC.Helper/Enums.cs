@@ -498,7 +498,7 @@ namespace GSC.Helper
         [Description("Completed")] Completed = 7
     }
 
-    public enum PatientStatus : short
+    public enum ScreeningPatientStatus : short
     {
         [Description("Pre-Screening")] PreScreening = 1,
         [Description("Screening")] Screening = 2,
