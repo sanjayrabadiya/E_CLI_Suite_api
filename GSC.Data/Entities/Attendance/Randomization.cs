@@ -55,5 +55,7 @@ namespace GSC.Data.Entities.Attendance
         public Attendance? Attendance { get; set; }
         public int? CompanyId { get; set; }
 
+        public PatientStatus PatientStatus { get; set; }
+
     }
 }

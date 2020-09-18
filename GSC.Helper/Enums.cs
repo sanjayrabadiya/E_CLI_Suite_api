@@ -497,4 +497,19 @@ namespace GSC.Helper
         [Description("OnHold")] OnHold = 6,
         [Description("Completed")] Completed = 7
     }
+
+    public enum PatientStatus : short
+    {
+        [Description("Pre-Screening")] PreScreening = 1,
+        [Description("Screening")] Screening = 2,
+        [Description("Screening Failure")] ScreeningFailure = 3,
+        [Description("OnTrial")] OnTrial = 4,
+        [Description("Withdrawn On Medical Ground")] WithdrawnOnMedicalGround = 5,
+        [Description("Withdrawn On Protocol Deviation")] WithdrawnOnProtocolDeviation = 6,
+        [Description("OnHold")] OnHold = 7,
+        [Description("Completed")] Completed = 8,
+        [Description("Self Withdrawal")] SelfWithdrawal = 7,
+        [Description("Consent In Process")] ConsentInProcess = 7,
+    }
+
 }
