@@ -77,7 +77,7 @@ namespace GSC.Respository.Screening
                     ScreeningNo = t.ScreeningNo,
                     ScreeningDate = t.ScreeningDate,
                     VolunteerName = t.Attendance.Volunteer == null
-                        ? t.Attendance.NoneRegister.Initial
+                        ? t.Attendance.Randomization.Initial
                         : t.Attendance.Volunteer.AliasName,
                     IsFitnessFit = t.IsFitnessFit,
                     IsEnrolled = t.IsEnrolled,

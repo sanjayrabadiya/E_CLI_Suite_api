@@ -90,7 +90,7 @@ namespace GSC.Api.Helpers
             CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
             CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
 
-            CreateMap<NoneRegister, NoneRegisterGridDto>()
+            CreateMap<Randomization, RandomizationGridDto>()
                  .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Attendance.Project.ProjectName))
                  .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Attendance.Project.ProjectCode))
                  .ReverseMap();

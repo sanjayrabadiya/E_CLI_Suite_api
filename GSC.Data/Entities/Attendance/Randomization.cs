@@ -5,7 +5,7 @@ using GSC.Data.Entities.Location;
 
 namespace GSC.Data.Entities.Attendance
 {
-    public class NoneRegister : BaseEntity
+    public class Randomization : BaseEntity
     {
         private DateTime? _dateOfRandomization;
 

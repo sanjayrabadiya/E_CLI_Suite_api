@@ -54,9 +54,9 @@ namespace GSC.Respository.Screening
             {
                 Id = x.Id,
                 ScreeningEntryId = x.ScreeningEntryId,
-                VolunteerName = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.NoneRegister.Initial : x.ScreeningEntry.Attendance.Volunteer.FullName,
-                VolunteerNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.NoneRegister.ScreeningNumber : x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
-                RandomizationNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.NoneRegister.RandomizationNumber : x.ScreeningEntry.Attendance.ProjectSubject.Number,
+                VolunteerName = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.Randomization.Initial : x.ScreeningEntry.Attendance.Volunteer.FullName,
+                VolunteerNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.Randomization.ScreeningNumber : x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
+                RandomizationNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.Randomization.RandomizationNumber : x.ScreeningEntry.Attendance.ProjectSubject.Number,
                 AttendanceId = x.ScreeningEntry.Attendance.Id,
                 ProjectDesignTemplateId = x.ScreeningTemplate.ScreeningVisit.Id,
                 VisitId = x.ScreeningTemplate.ScreeningVisitId,

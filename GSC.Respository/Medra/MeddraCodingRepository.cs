@@ -102,7 +102,7 @@ namespace GSC.Respository.Medra
                             where pdv.DeletedDate == null && pdv.Id == meddraCodingDto.ProjectDesignVariableId && st.Status != ScreeningTemplateStatus.Pending && st.Status != ScreeningTemplateStatus.InProcess
                             && (meddraCodingDto.ProjectId != 0 ? se.ProjectId == meddraCodingDto.ProjectId : true)
                             && (meddraCodingDto.CountryId != 0 ? project.CountryId == meddraCodingDto.CountryId : true)
-                            && attendance.NoneRegister.RandomizationNumber != null
+                            && attendance.Randomization.RandomizationNumber != null
                             group new { pdv } by new { pdv.Id } into g
                             select new MeddraCodingMainDto
                             {
@@ -230,8 +230,8 @@ namespace GSC.Respository.Medra
                           on se.AttendanceId equals attendance.Id
                           join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                           from volunteer in volunteerDto.DefaultIfEmpty()
-                          join noneregisterTemp in Context.NoneRegister.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals noneregisterTemp.AttendanceId into noneregisterDto
-                          from nonregister in noneregisterDto.DefaultIfEmpty()
+                          join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.AttendanceId into randomizationDto
+                          from randomization in randomizationDto.DefaultIfEmpty()
                           join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
                           from projectsubject in projectsubjectDto.DefaultIfEmpty()
                           join medraCoding in Context.MeddraCoding.Where(t => t.DeletedDate == null) on value.Id equals medraCoding.ScreeningTemplateValueId into medraDto
@@ -258,11 +258,11 @@ namespace GSC.Respository.Medra
                                    (from o in Exists where o.IsApproved == filters.IsApproved select o.ScreeningTemplateValueId).Contains(value.Id)) : true)
                                    && ((filters.FromDate.HasValue ? meddraCoding.CreatedDate >= filters.FromDate : true))
                              && ((filters.ToDate.HasValue ? meddraCoding.CreatedDate <= filters.ToDate : true))
-                             && nonregister.RandomizationNumber != null
+                             && randomization.RandomizationNumber != null
                           select new MeddraCodingSearchDetails
                           {
                               MeddraCodingId = meddraCoding.Id,
-                              SubjectId = volunteer.FullName == null ? nonregister.RandomizationNumber : volunteer.VolunteerNo,
+                              SubjectId = volunteer.FullName == null ? randomization.RandomizationNumber : volunteer.VolunteerNo,
                               VisitName = visit.DisplayName,
                               TemplateName = pt.TemplateName,
                               Value = value.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox ? string.Join(";",
@@ -330,8 +330,8 @@ namespace GSC.Respository.Medra
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()
-                      join noneregisterTemp in Context.NoneRegister.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals noneregisterTemp.AttendanceId into noneregisterDto
-                      from nonregister in noneregisterDto.DefaultIfEmpty()
+                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.AttendanceId into randomizationDto
+                      from randomization in randomizationDto.DefaultIfEmpty()
                       join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
                       from projectsubject in projectsubjectDto.DefaultIfEmpty()
                       join mllt in Context.MeddraLowLevelTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on pdvv.ValueName equals mllt.llt_name
@@ -339,10 +339,10 @@ namespace GSC.Respository.Medra
                       join md in Context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId && t.primary_soc_fg == "Y") on mllt.pt_code equals md.pt_code
                       join soc in Context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on md.soc_code equals soc.soc_code
                       where pdv.Id == meddraCodingSearchDto.ProjectDesignVariableId && !(from o in Exists select o.ScreeningTemplateValueId).Contains(stv.Id)
-                      && nonregister.RandomizationNumber != null
+                      && randomization.RandomizationNumber != null
                       select new MeddraCodingSearchDetails
                       {
-                          SubjectId = volunteer.FullName == null ? nonregister.RandomizationNumber : volunteer.VolunteerNo,
+                          SubjectId = volunteer.FullName == null ? randomization.RandomizationNumber : volunteer.VolunteerNo,
                           VisitName = visit.DisplayName,
                           TemplateName = pt.TemplateName,
                           LLTValue = mllt.llt_name,
@@ -371,18 +371,18 @@ namespace GSC.Respository.Medra
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()
-                      join noneregisterTemp in Context.NoneRegister.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals noneregisterTemp.AttendanceId into noneregisterDto
-                      from nonregister in noneregisterDto.DefaultIfEmpty()
+                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.AttendanceId into randomizationDto
+                      from randomization in randomizationDto.DefaultIfEmpty()
                       join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
                       from projectsubject in projectsubjectDto.DefaultIfEmpty()
                       join md in Context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId && t.primary_soc_fg == "Y") on mllt.pt_code equals md.pt_code
                       join soc in Context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on md.soc_code equals soc.soc_code
 
                       where pdv.Id == meddraCodingSearchDto.ProjectDesignVariableId && !(from o in Exists select o.ScreeningTemplateValueId).Contains(stv.Id)
-                      && nonregister.RandomizationNumber != null
+                      && randomization.RandomizationNumber != null
                       select new MeddraCodingSearchDetails
                       {
-                          SubjectId = volunteer.FullName == null ? nonregister.RandomizationNumber : volunteer.VolunteerNo,
+                          SubjectId = volunteer.FullName == null ? randomization.RandomizationNumber : volunteer.VolunteerNo,
                           VisitName = visit.DisplayName,
                           TemplateName = pt.TemplateName,
                           LLTValue = mllt.llt_name,
@@ -412,8 +412,8 @@ namespace GSC.Respository.Medra
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()
-                      join noneregisterTemp in Context.NoneRegister.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals noneregisterTemp.AttendanceId into noneregisterDto
-                      from nonregister in noneregisterDto.DefaultIfEmpty()
+                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.AttendanceId into randomizationDto
+                      from randomization in randomizationDto.DefaultIfEmpty()
                       join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
                       from projectsubject in projectsubjectDto.DefaultIfEmpty()
                       join mllt in Context.MeddraLowLevelTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId)
@@ -422,10 +422,10 @@ namespace GSC.Respository.Medra
                       join md in Context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId && t.primary_soc_fg == "Y") on mllt.pt_code equals md.pt_code
                       join soc in Context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on md.soc_code equals soc.soc_code
                       where stvc.Value == "True" && pdv.Id == meddraCodingSearchDto.ProjectDesignVariableId && !(from o in Exists select o.ScreeningTemplateValueId).Contains(stv.Id)
-                      && nonregister.RandomizationNumber != null
+                      && randomization.RandomizationNumber != null
                       select new MeddraCodingSearchDetails
                       {
-                          SubjectId = volunteer.FullName == null ? nonregister.RandomizationNumber : volunteer.VolunteerNo,
+                          SubjectId = volunteer.FullName == null ? randomization.RandomizationNumber : volunteer.VolunteerNo,
                           VisitName = visit.DisplayName,
                           TemplateName = pt.TemplateName,
                           LLTValue = mllt.llt_name,

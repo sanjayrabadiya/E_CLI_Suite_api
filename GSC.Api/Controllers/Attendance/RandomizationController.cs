@@ -15,19 +15,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace GSC.Api.Controllers.Attendance
 {
     [Route("api/[controller]")]
-    public class NoneRegisterController : BaseController
+    public class RandomizationController : BaseController
     {
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly INoneRegisterRepository _noneRegisterRepository;
+        private readonly IRandomizationRepository _randomizationRepository;
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IUnitOfWork _uow;
         private readonly ICityRepository _cityRepository;
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
 
-        public NoneRegisterController(INoneRegisterRepository noneRegisterterRepository,
+        public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -36,7 +36,7 @@ namespace GSC.Api.Controllers.Attendance
             IStateRepository stateRepository,
             ICountryRepository countryRepository)
         {
-            _noneRegisterRepository = noneRegisterterRepository;
+            _randomizationRepository = randomizationRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -50,20 +50,20 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var Noneregisters = _noneRegisterRepository.All.Where(x =>
+            var randomizations = _randomizationRepository.All.Where(x =>
              (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
              && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
          ).OrderByDescending(t => t.Id).ToList();
 
-            var NonregisterDto = _mapper.Map<IEnumerable<NoneRegisterDto>>(Noneregisters);
+            var RandomizationDto = _mapper.Map<IEnumerable<RandomizationDto>>(randomizations);
 
-            return Ok(NonregisterDto);
+            return Ok(RandomizationDto);
         }
 
-        [HttpGet("GetNonRegisterList/{projectId}/{isDeleted:bool?}")]
-        public IActionResult GetNonRegisterList(int projectId, bool isDeleted)
+        [HttpGet("GetRandomizationList/{projectId}/{isDeleted:bool?}")]
+        public IActionResult GetRandomizationList(int projectId, bool isDeleted)
         {
-            return Ok(_noneRegisterRepository.GetNonRegisterList(projectId, isDeleted));
+            return Ok(_randomizationRepository.GetRandomizationList(projectId, isDeleted));
         }
 
         [HttpGet("{id}")]
@@ -71,60 +71,43 @@ namespace GSC.Api.Controllers.Attendance
         {
             if (id <= 0) return BadRequest();
 
-            var volunteerNonregister = _noneRegisterRepository.FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
+            var randomization = _randomizationRepository.FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
                 .SingleOrDefault();
-            if (volunteerNonregister == null)
+            if (randomization == null)
                 return BadRequest();
 
-            var volunteerNonregisterDto = _mapper.Map<NoneRegisterDto>(volunteerNonregister);
+            var randomizationDto = _mapper.Map<RandomizationDto>(randomization);
 
-            return Ok(volunteerNonregisterDto);
+            return Ok(randomizationDto);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] NoneRegisterDto noneRegisterDto)
+        public IActionResult Post([FromBody] RandomizationDto randomizationDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var noneRegister = _mapper.Map<NoneRegister>(noneRegisterDto);
-
-            //var validate = _noneRegisterRepository.Duplicate(noneRegister, noneRegisterDto.ProjectId);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-
+            var randomization = _mapper.Map<Randomization>(randomizationDto);
             //Create By Vipul Attendance not save while subject profile save modify on 15092020
-            _noneRegisterRepository.Add(noneRegister);
-            //_noneRegisterRepository.SaveNonRegister(noneRegister, noneRegisterDto);
-            if (_uow.Save() <= 0) throw new Exception("Creating None register failed on save.");
+            _randomizationRepository.Add(randomization);
+            if (_uow.Save() <= 0) throw new Exception("Creating randomization failed on save.");
             return Ok();
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] NoneRegisterDto NonregisterDto)
+        public IActionResult Put([FromBody] RandomizationDto RandomizationDto)
         {
-            if (NonregisterDto.Id <= 0) return BadRequest();
+            if (RandomizationDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            NonregisterDto.Initial = NonregisterDto.Initial.PadRight(3, '-');
-            var nonregister = _mapper.Map<NoneRegister>(NonregisterDto);
-
-            //var validate = _noneRegisterRepository.Duplicate(nonregister, volunteerNonregisterDto.ProjectId);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-
-            _noneRegisterRepository.Update(nonregister);
+            RandomizationDto.Initial = RandomizationDto.Initial.PadRight(3, '-');
+            var randomization = _mapper.Map<Randomization>(RandomizationDto);
+            _randomizationRepository.Update(randomization);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
-            return Ok(nonregister.Id);
+            return Ok(randomization.Id);
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var record = _noneRegisterRepository
+            var record = _randomizationRepository
                 .FindByInclude(x => x.Id == id && x.DeletedDate == null, x => x.Attendance).FirstOrDefault();
 
             if (record == null)
@@ -137,7 +120,7 @@ namespace GSC.Api.Controllers.Attendance
             }
 
             _attendanceRepository.Delete(record.Attendance);
-            _noneRegisterRepository.Delete(record);
+            _randomizationRepository.Delete(record);
             _uow.Save();
             return Ok();
         }
@@ -145,12 +128,12 @@ namespace GSC.Api.Controllers.Attendance
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
-            var record = _noneRegisterRepository
+            var record = _randomizationRepository
                 .FindByInclude(x => x.Id == id, x => x.Attendance).FirstOrDefault();
 
             if (record == null)
                 return NotFound();
-            _noneRegisterRepository.Active(record);
+            _randomizationRepository.Active(record);
             _attendanceRepository.Active(record.Attendance);
             _uow.Save();
             return Ok();
@@ -158,13 +141,13 @@ namespace GSC.Api.Controllers.Attendance
 
         [HttpPut]
         [Route("SaveRandomization")]
-        public IActionResult SaveRandomization([FromBody] NoneRegisterDto noneRegisterDto)
+        public IActionResult SaveRandomization([FromBody] RandomizationDto randomizationDto)
         {
-            if (noneRegisterDto.Id <= 0) return BadRequest();
+            if (randomizationDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             //Change by vipul on 15092020 for Attendance add only when screening number and randomization number add
             var projectDesignPeriod = _projectDesignPeriodRepository.FindBy(x => x.DeletedDate == null && x.ProjectDesign.DeletedDate == null &&
-                                    x.ProjectDesign.ProjectId == noneRegisterDto.ParentProjectId).FirstOrDefault();
+                                    x.ProjectDesign.ProjectId == randomizationDto.ParentProjectId).FirstOrDefault();
 
             if (projectDesignPeriod == null)
             {
@@ -172,21 +155,21 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest(ModelState);
             }
 
-            noneRegisterDto.ProjectDesignPeriodId = projectDesignPeriod.Id;
-            var nonregister = _noneRegisterRepository.Find(noneRegisterDto.Id);
+            randomizationDto.ProjectDesignPeriodId = projectDesignPeriod.Id;
+            var randomization = _randomizationRepository.Find(randomizationDto.Id);
 
-            var validate = _noneRegisterRepository.Duplicate(nonregister, noneRegisterDto.ProjectId);
+            var validate = _randomizationRepository.Duplicate(randomization, randomizationDto.ProjectId);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
 
-            _noneRegisterRepository.SaveNonRegister(nonregister, noneRegisterDto);
+            _randomizationRepository.SaveRandomization(randomization, randomizationDto);
 
-            _noneRegisterRepository.Update(nonregister);
+            _randomizationRepository.Update(randomization);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
-            return Ok(nonregister.Id);
+            return Ok(randomization.Id);
         }
     }
 }

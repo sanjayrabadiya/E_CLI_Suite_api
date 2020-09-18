@@ -270,7 +270,7 @@ namespace GSC.Respository.Screening
                 ScreeningDate = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ScreeningDate,
                 ProjectName = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectName,
                 VolunteerName = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                    ? a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+                    ? a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Randomization.Initial
                     : a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.FullName,
                 TemplateName = a.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
                 VistName = a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit
@@ -288,7 +288,7 @@ namespace GSC.Respository.Screening
                                   .ProjectName
                               + " |Volunteer Name: " +
                               a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                    ? a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+                    ? a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Randomization.Initial
                     : a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.FullName +
                       " |Screening Date: " + a.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ScreeningDate
             }).ToList();
@@ -456,9 +456,9 @@ namespace GSC.Respository.Screening
                              join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
                                  volunteerDto
                              from volunteer in volunteerDto.DefaultIfEmpty()
-                             join noneregisterTemp in Context.NoneRegister on attendance.Id equals noneregisterTemp.AttendanceId into
-                                 noneregisterDto
-                             from nonregister in noneregisterDto.DefaultIfEmpty()
+                             join randomizationTemp in Context.Randomization on attendance.Id equals randomizationTemp.AttendanceId into
+                                 randomizationDto
+                             from randomization in randomizationDto.DefaultIfEmpty()
                              join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals
                                  projectSubjectTemp.Id into projectsubjectDto
                              from projectsubject in projectsubjectDto.DefaultIfEmpty()
@@ -496,10 +496,10 @@ namespace GSC.Respository.Screening
                                          ? "Acknowledge"
                                          : "",
                                  FieldName = value.ProjectDesignVariable.VariableName,
-                                 VolunteerName = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
-                                 SubjectNo = volunteer.FullName == null ? nonregister.ScreeningNumber : volunteer.VolunteerNo,
+                                 VolunteerName = volunteer.FullName == null ? randomization.Initial : volunteer.AliasName,
+                                 SubjectNo = volunteer.FullName == null ? randomization.ScreeningNumber : volunteer.VolunteerNo,
                                  RandomizationNumber = volunteer.FullName == null
-                                     ? nonregister.RandomizationNumber
+                                     ? randomization.RandomizationNumber
                                      : projectsubject.Number,
                                  //AuditId = audit.Id
                                  ScreeningTemplateValueId = query.ScreeningTemplateValueId

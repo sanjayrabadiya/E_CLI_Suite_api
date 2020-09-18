@@ -265,9 +265,9 @@ namespace GSC.Respository.Screening
                              join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
                                  volunteerDto
                              from volunteer in volunteerDto.DefaultIfEmpty()
-                             join noneregisterTemp in Context.NoneRegister on attendance.Id equals noneregisterTemp.AttendanceId
-                                 into noneregisterDto
-                             from nonregister in noneregisterDto.DefaultIfEmpty()
+                             join randomizationTemp in Context.Randomization  on attendance.Id equals randomizationTemp.AttendanceId
+                                 into randomizationDto
+                             from randomization in randomizationDto.DefaultIfEmpty()
                              join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals
                                  projectSubjectTemp.Id into projectsubjectDto
                              from projectsubject in projectsubjectDto.DefaultIfEmpty()
@@ -323,10 +323,10 @@ namespace GSC.Respository.Screening
                                                          b.ProjectDesignVariableId == value.ProjectDesignVariable.Id &&
                                                          b.Id == Convert.ToInt32(value.Value)).ValueName
                                                      : value.Value,
-                                 Initial = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
-                                 SubjectNo = volunteer.FullName == null ? nonregister.ScreeningNumber : volunteer.VolunteerNo,
+                                 Initial = volunteer.FullName == null ? randomization.Initial : volunteer.AliasName,
+                                 SubjectNo = volunteer.FullName == null ? randomization.ScreeningNumber : volunteer.VolunteerNo,
                                  RandomizationNumber = volunteer.FullName == null
-                                     ? nonregister.RandomizationNumber
+                                     ? randomization.RandomizationNumber
                                      : projectsubject.Number,
                              }).ToList();
             var grpquery = queryDtos.OrderBy(d => d.VisitId).ThenBy(x => x.DesignOrder).GroupBy(x => new { x.DomainName, x.DomainId }).Select(y => new ProjectDatabaseDto
@@ -399,8 +399,8 @@ namespace GSC.Respository.Screening
                                  from md in meddraMd.DefaultIfEmpty()
                                  join volunteerTemp in Context.Volunteer on A.VolunteerId equals volunteerTemp.Id into volunteerDto
                                  from volunteer in volunteerDto.DefaultIfEmpty()
-                                 join noneregisterTemp in Context.NoneRegister on A.Id equals noneregisterTemp.AttendanceId into noneregisterDto
-                                 from nonregister in noneregisterDto.DefaultIfEmpty()
+                                 join randomizationTemp in Context.Randomization on A.Id equals randomizationTemp.AttendanceId into randomizationDto
+                                 from randomization in randomizationDto.DefaultIfEmpty()
                                  join userTemp in Context.Users on meddra.ModifiedBy equals userTemp.Id into userDto
                                  from user in userDto.DefaultIfEmpty()
                                  where llt.pt_code == md.pt_code && filters.ProjectId.Contains(se.ProjectId)
@@ -410,8 +410,8 @@ namespace GSC.Respository.Screening
                                      SiteCode = se.Project.ParentProjectId != null ? se.Project.ProjectCode : "",
                                      DomainCode = D.DomainCode,
                                      ScreeningNumber = se.ScreeningNo,
-                                     RandomizationNumber = nonregister.RandomizationNumber,
-                                     Initial = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
+                                     RandomizationNumber = randomization.RandomizationNumber,
+                                     Initial = volunteer.FullName == null ? randomization.Initial : volunteer.AliasName,
                                      RepeatedVisit = st.ScreeningVisit.RepeatedVisitNumber,
                                      Visit = st.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(st.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + st.ScreeningVisit.RepeatedVisitNumber),
                                      TemplateName = st.RepeatSeqNo == null && st.ParentId == null ? st.ProjectDesignTemplate.DesignOrder + " " + st.ProjectDesignTemplate.TemplateName

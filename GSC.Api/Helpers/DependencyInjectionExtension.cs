@@ -15,7 +15,6 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Etmf;
-using GSC.Respository.InformConcent;
 using GSC.Respository.LogReport;
 using GSC.Respository.Master;
 using GSC.Respository.Medra;
@@ -173,7 +172,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectSubjectRepository, ProjectSubjectRepository>();
             services.AddScoped<IBarcodeGenerateRepository, BarcodeGenerateRepository>();
             services.AddScoped<IBarcodeSubjectDetailRepository, BarcodeSubjectDetailRepository>();
-            services.AddScoped<INoneRegisterRepository, NoneRegisterRepository>();
+            services.AddScoped<IRandomizationRepository, RandomizationRepository>();
             services.AddScoped<IEditCheckRepository, EditCheckRepository>();
             services.AddScoped<IEditCheckImpactRepository, EditCheckImpactRepository>();
             services.AddScoped<IEditCheckRuleRepository, EditCheckRuleRepository>();
@@ -239,11 +238,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<IReportScreenRepository, ReportScreenRepository>();
             services.AddScoped<IProjectWorkplaceArtificateDocumentReviewRepository, ProjectWorkplaceArtificateDocumentReviewRepository>();
             services.AddScoped<IProjectArtificateDocumentCommentRepository, ProjectArtificateDocumentCommentRepository>();
-            services.AddScoped<IProjectArtificateDocumentHistoryRepository, ProjectArtificateDocumentHistoryRepository>();
+
 
             services.AddScoped<IAuditTracker, AuditTracker>();
             services.AddSingleton<IDictionaryCollection, DictionaryCollection>();
-            services.AddScoped<IEconsentSetupRepository, EconsentSetupRepository>();
         }
     }
 }

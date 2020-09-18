@@ -127,8 +127,8 @@ namespace GSC.Respository.Attendance
                 AttendanceId = x.Id,
                 VolunteerId = x.VolunteerId,
                 ProjectDesignId = x.ProjectDesignPeriod.ProjectDesignId,
-                VolunteerName = x.Volunteer == null ? x.NoneRegister.Initial : x.Volunteer.FullName,
-                VolunteerNumber = x.Volunteer == null ? x.NoneRegister.RandomizationNumber : x.Volunteer.VolunteerNo,
+                VolunteerName = x.Volunteer == null ? x.Randomization.Initial : x.Volunteer.FullName,
+                VolunteerNumber = x.Volunteer == null ? x.Randomization.RandomizationNumber : x.Volunteer.VolunteerNo,
                 Gender = x.Volunteer == null || x.Volunteer.GenderId == null ? "" : x.Volunteer.GenderId.ToString(),
                 ProjectCode = x.Project.ProjectCode,
                 ProjectId = x.ProjectId,
@@ -198,8 +198,8 @@ namespace GSC.Respository.Attendance
                 AttendanceId = x.Id,
                 VolunteerId = x.VolunteerId,
                 ProjectDesignId = x.ProjectDesignPeriod.ProjectDesignId,
-                VolunteerName = x.Volunteer == null ? x.NoneRegister.Initial : x.Volunteer.FullName,
-                VolunteerNumber = x.Volunteer == null ? x.NoneRegister.RandomizationNumber : x.Volunteer.VolunteerNo,
+                VolunteerName = x.Volunteer == null ? x.Randomization.Initial : x.Volunteer.FullName,
+                VolunteerNumber = x.Volunteer == null ? x.Randomization.RandomizationNumber : x.Volunteer.VolunteerNo,
                 Gender = x.Volunteer == null || x.Volunteer.GenderId == null ? "" : x.Volunteer.GenderId.ToString(),
                 ProjectCode = x.Project.ProjectCode,
                 ProjectId = x.ProjectId,
@@ -256,8 +256,8 @@ namespace GSC.Respository.Attendance
                          {
                              Id = attendance.Id,
                              ProjectId = attendance.ProjectId,
-                             VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
-                             VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
+                             VolunteerName = attendance.Volunteer == null ? attendance.Randomization.Initial : attendance.Volunteer.FullName,
+                             VolunteerNumber = attendance.Volunteer == null ? attendance.Randomization.RandomizationNumber : attendance.Volunteer.VolunteerNo,
                              SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
                              AttendanceId = attendance.Id,
                          }).ToList();
@@ -267,8 +267,8 @@ namespace GSC.Respository.Attendance
                                   {
                                       Id = attendance.Id,
                                       ProjectId = attendance.ProjectId,
-                                      VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
-                                      VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
+                                      VolunteerName = attendance.Volunteer == null ? attendance.Randomization.Initial : attendance.Volunteer.FullName,
+                                      VolunteerNumber = attendance.Volunteer == null ? attendance.Randomization.RandomizationNumber : attendance.Volunteer.VolunteerNo,
                                       SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
                                       AttendanceId = attendance.Id,
                                   }).ToList();
@@ -299,8 +299,8 @@ namespace GSC.Respository.Attendance
                               {
                                   Id = attendance.Id,
                                   ProjectId = attendance.ProjectId,
-                                  VolunteerName = attendance.Volunteer == null ? attendance.NoneRegister.Initial : attendance.Volunteer.FullName,
-                                  VolunteerNumber = attendance.Volunteer == null ? attendance.NoneRegister.RandomizationNumber : attendance.Volunteer.VolunteerNo,
+                                  VolunteerName = attendance.Volunteer == null ? attendance.Randomization.Initial : attendance.Volunteer.FullName,
+                                  VolunteerNumber = attendance.Volunteer == null ? attendance.Randomization.RandomizationNumber : attendance.Volunteer.VolunteerNo,
                                   SubjectNumber = attendance.ProjectSubject != null ? attendance.ProjectSubject.Number : "",
                                   AttendanceId = attendance.Id,
                                   IsLocked = locktemplate.IsLocked,
@@ -454,11 +454,11 @@ namespace GSC.Respository.Attendance
                 return All.Where(t => (t.CompanyId == null
                                || t.CompanyId == _jwtTokenAccesser.CompanyId)
                               && projectList.Any(c => c == t.ProjectId)
-                              && t.NoneRegister.RandomizationNumber != null
+                              && t.Randomization.RandomizationNumber != null
                                ).Select(r => new DropDownDto
                                {
                                    Id = r.Id,
-                                   Value = r.NoneRegister.ScreeningNumber + "-" + r.NoneRegister.Initial + "-" + r.NoneRegister.RandomizationNumber
+                                   Value = r.Randomization.ScreeningNumber + "-" + r.Randomization.Initial + "-" + r.Randomization.RandomizationNumber
                                }).ToList();
             }
             else

@@ -298,10 +298,10 @@ namespace GSC.Respository.Volunteer
                 {
                     Id = x.Id,
                     Value = x.Volunteer == null
-                        ? Convert.ToString(x.NoneRegister.ScreeningNumber + " - " + x.NoneRegister.Initial +
-                                           (x.NoneRegister.RandomizationNumber == null
+                        ? Convert.ToString(x.Randomization.ScreeningNumber + " - " + x.Randomization.Initial +
+                                           (x.Randomization.RandomizationNumber == null
                                                ? ""
-                                               : " - " + x.NoneRegister.RandomizationNumber))
+                                               : " - " + x.Randomization.RandomizationNumber))
                         : Convert.ToString(Convert.ToString(x.ProjectSubject != null ? x.ProjectSubject.Number : "") +
                                            " - " + x.Volunteer.FullName),
                     Code = "Attendance",
@@ -316,11 +316,11 @@ namespace GSC.Respository.Volunteer
                 {
                     Id = x.Id,
                     Value = x.Attendance.Volunteer == null
-                        ? Convert.ToString(x.Attendance.NoneRegister.ScreeningNumber + " - " +
-                                           x.Attendance.NoneRegister.Initial +
-                                           (x.Attendance.NoneRegister.RandomizationNumber == null
+                        ? Convert.ToString(x.Attendance.Randomization.ScreeningNumber + " - " +
+                                           x.Attendance.Randomization.Initial +
+                                           (x.Attendance.Randomization.RandomizationNumber == null
                                                ? ""
-                                               : " - " + x.Attendance.NoneRegister.RandomizationNumber))
+                                               : " - " + x.Attendance.Randomization.RandomizationNumber))
                         : Convert.ToString(
                             Convert.ToString(x.Attendance.ProjectSubject != null
                                 ? x.Attendance.ProjectSubject.Number
@@ -351,10 +351,10 @@ namespace GSC.Respository.Volunteer
                     {
                         Id = x.Id,
                         Value = x.Volunteer == null
-                            ? Convert.ToString(x.NoneRegister.ScreeningNumber + " - " + x.NoneRegister.Initial +
-                                               (x.NoneRegister.RandomizationNumber == null
+                            ? Convert.ToString(x.Randomization.ScreeningNumber + " - " + x.Randomization.Initial +
+                                               (x.Randomization.RandomizationNumber == null
                                                    ? ""
-                                                   : " - " + x.NoneRegister.RandomizationNumber))
+                                                   : " - " + x.Randomization.RandomizationNumber))
                             : Convert.ToString(Convert.ToString(x.ProjectSubject != null ? x.ProjectSubject.Number : "") +
                                                " - " + x.Volunteer.FullName),
                         Code = "Attendance",
@@ -369,11 +369,11 @@ namespace GSC.Respository.Volunteer
                     {
                         Id = x.Id,
                         Value = x.Attendance.Volunteer == null
-                            ? Convert.ToString(x.Attendance.NoneRegister.ScreeningNumber + " - " +
-                                               x.Attendance.NoneRegister.Initial +
-                                               (x.Attendance.NoneRegister.RandomizationNumber == null
+                            ? Convert.ToString(x.Attendance.Randomization.ScreeningNumber + " - " +
+                                               x.Attendance.Randomization.Initial +
+                                               (x.Attendance.Randomization.RandomizationNumber == null
                                                    ? ""
-                                                   : " - " + x.Attendance.NoneRegister.RandomizationNumber))
+                                                   : " - " + x.Attendance.Randomization.RandomizationNumber))
                             : Convert.ToString(
                                 Convert.ToString(x.Attendance.ProjectSubject != null
                                     ? x.Attendance.ProjectSubject.Number
@@ -418,10 +418,10 @@ namespace GSC.Respository.Volunteer
                                   {
                                       Id = atten.Id,
                                       Value = atten.Volunteer == null
-                                          ? Convert.ToString(atten.NoneRegister.ScreeningNumber + " - " + atten.NoneRegister.Initial +
-                                                             (atten.NoneRegister.RandomizationNumber == null
+                                          ? Convert.ToString(atten.Randomization.ScreeningNumber + " - " + atten.Randomization.Initial +
+                                                             (atten.Randomization.RandomizationNumber == null
                                                                  ? ""
-                                                                 : " - " + atten.NoneRegister.RandomizationNumber))
+                                                                 : " - " + atten.Randomization.RandomizationNumber))
                                           : Convert.ToString(Convert.ToString(atten.ProjectSubject != null ? atten.ProjectSubject.Number : "") +
                                                              " - " + atten.Volunteer.FullName),
                                       Code = "Attendance",
@@ -438,11 +438,11 @@ namespace GSC.Respository.Volunteer
                                       {
                                           Id = screening.Id,
                                           Value = screening.Attendance.Volunteer == null
-                                            ? Convert.ToString(screening.Attendance.NoneRegister.ScreeningNumber + " - " +
-                                                               screening.Attendance.NoneRegister.Initial +
-                                                               (screening.Attendance.NoneRegister.RandomizationNumber == null
+                                            ? Convert.ToString(screening.Attendance.Randomization.ScreeningNumber + " - " +
+                                                               screening.Attendance.Randomization.Initial +
+                                                               (screening.Attendance.Randomization.RandomizationNumber == null
                                                                    ? ""
-                                                                   : " - " + screening.Attendance.NoneRegister.RandomizationNumber))
+                                                                   : " - " + screening.Attendance.Randomization.RandomizationNumber))
                                             : Convert.ToString(
                                                 Convert.ToString(screening.Attendance.ProjectSubject != null
                                                     ? screening.Attendance.ProjectSubject.Number

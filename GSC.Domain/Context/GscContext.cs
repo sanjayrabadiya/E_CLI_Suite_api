@@ -193,7 +193,7 @@ namespace GSC.Domain.Context
         public DbSet<EditCheckDetail> EditCheckDetail { get; set; }
 
 
-        public DbSet<NoneRegister> NoneRegister { get; set; }
+        public DbSet<Randomization> Randomization { get; set; }
         public DbSet<ReportSetting> ReportSetting { get; set; }
 
 

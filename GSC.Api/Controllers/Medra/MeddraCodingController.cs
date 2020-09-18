@@ -29,7 +29,7 @@ namespace GSC.Api.Controllers.Medra
         private readonly IUnitOfWork _uow;
         private readonly IAttendanceHistoryRepository _attendanceHistoryRepository;
         private readonly IProjectSubjectRepository _projectSubjectRepository;
-        private readonly INoneRegisterRepository _noneRegisterRepository;
+        private readonly IRandomizationRepository _randomizationRepository;
         private readonly IStudyScopingRepository _studyScopingRepository;
         private readonly IMeddraLowLevelTermRepository _meddraLowLevelTermRepository;
         private readonly IScreeningEntryRepository _screeningEntryRepository;
@@ -41,7 +41,7 @@ namespace GSC.Api.Controllers.Medra
             IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-            INoneRegisterRepository noneRegisterterRepository,
+            IRandomizationRepository randomizationRepository,
             IProjectSubjectRepository projectSubjectRepository,
             IAttendanceHistoryRepository attendanceHistoryRepository,
             IStudyScopingRepository studyScopingRepository,
@@ -55,7 +55,7 @@ namespace GSC.Api.Controllers.Medra
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _noneRegisterRepository = noneRegisterterRepository;
+            _randomizationRepository = randomizationRepository;
             _projectSubjectRepository = projectSubjectRepository;
             _attendanceHistoryRepository = attendanceHistoryRepository;
             _studyScopingRepository = studyScopingRepository;

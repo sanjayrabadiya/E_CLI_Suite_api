@@ -17,7 +17,7 @@ using System.Linq;
 
 namespace GSC.Respository.Attendance
 {
-    public class NoneRegisterRepository : GenericRespository<NoneRegister, GscContext>, INoneRegisterRepository
+    public class RandomizationRepository : GenericRespository<Randomization, GscContext>, IRandomizationRepository
     {
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IUserRepository _userRepository;
@@ -28,7 +28,7 @@ namespace GSC.Respository.Attendance
         private readonly ICountryRepository _countryRepository;
         private readonly ICityRepository _cityRepository;
         private readonly IMapper _mapper;
-        public NoneRegisterRepository(IUnitOfWork<GscContext> uow,
+        public RandomizationRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -52,33 +52,33 @@ namespace GSC.Respository.Attendance
             _mapper = mapper;
         }
 
-        public void SaveNonRegister(NoneRegister noneRegister, NoneRegisterDto noneRegisterDto)
+        public void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto)
         {
             //Update By Vipul None register not save in Data entry on 15092020
-            noneRegister.ScreeningNumber = noneRegisterDto.ScreeningNumber;
-            noneRegister.DateOfScreening = noneRegisterDto.DateOfScreening;
-            noneRegister.DateOfRandomization = noneRegisterDto.DateOfRandomization;
-            noneRegister.RandomizationNumber = noneRegisterDto.RandomizationNumber;
-            Update(noneRegister);
-            if (noneRegister.AttendanceId == null)
+            randomization.ScreeningNumber = randomizationDto.ScreeningNumber;
+            randomization.DateOfScreening = randomizationDto.DateOfScreening;
+            randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
+            randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
+            Update(randomization);
+            if (randomization.AttendanceId == null)
             {
                 var attendance = new Data.Entities.Attendance.Attendance();
-                attendance.ProjectId = noneRegisterDto.ProjectId;
-                attendance.ProjectDesignPeriodId = noneRegisterDto.ProjectDesignPeriodId;
-                attendance.NoneRegister = noneRegister;
-                attendance.AttendanceType = AttendanceType.NoneRegister;
+                attendance.ProjectId = randomizationDto.ProjectId;
+                attendance.ProjectDesignPeriodId = randomizationDto.ProjectDesignPeriodId;
+                attendance.Randomization = randomization;
+                attendance.AttendanceType = AttendanceType.Randomization;
                 _attendanceRepository.SaveAttendance(attendance);
             }
         }
 
-        public List<NoneRegisterGridDto> GetNonRegisterList(int projectId, bool isDeleted)
+        public List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted)
         {
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
-                   ProjectTo<NoneRegisterGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                   ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return result;
         }
 
-        public string Duplicate(NoneRegister objSave, int projectId)
+        public string Duplicate(Randomization objSave, int projectId)
         {
             if (All.Any(x =>
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&

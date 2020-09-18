@@ -320,10 +320,10 @@ namespace GSC.Report
                 WHEN ProjectDesignVariable.DataType=7 THEN '*Numeric with 4 decimal'
                 WHEN ProjectDesignVariable.DataType=8 THEN '*Numeric with 5 decimal' END AS DataTypeName,
  	 
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.Initial ELSE  Volunteer.AliasName END AS Initial,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.ScreeningNumber ELSE  Volunteer.VolunteerNo END AS SubjectNo,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.RandomizationNumber ELSE  ProjectSubject.Number END AS RandomizationNumber,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.Initial + '-'+ NoneRegister.ScreeningNumber +'-'+NoneRegister.RandomizationNumber
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.Initial ELSE  Volunteer.AliasName END AS Initial,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.ScreeningNumber ELSE  Volunteer.VolunteerNo END AS SubjectNo,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.RandomizationNumber ELSE  ProjectSubject.Number END AS RandomizationNumber,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.Initial + '-'+ Randomization.ScreeningNumber +'-'+Randomization.RandomizationNumber
 						  ELSE  (Volunteer.AliasName + '-' + Volunteer.VolunteerNo  + '-' + Volunteer.FirstName+ ' ' + Volunteer.LastName + ISNULL('-' +ProjectSubject.Number,'')) END AS SubjectFullName
                 FROM ScreeningEntry SE
                 INNER JOIN ProjectDesignPeriod ON ProjectDesignPeriod.Id = SE.ProjectDesignPeriodId AND ProjectDesignPeriod.DeletedDate IS NULL
@@ -335,7 +335,7 @@ namespace GSC.Report
                 INNER JOIN Project tempP ON tempP.Id = ProjectDesign.ProjectId AND tempP.DeletedDate IS NULL    
                 LEFT OUTER JOIN Attendance ON Attendance.Id = SE.AttendanceId AND Attendance.DeletedDate IS NULL
                 LEFT OUTER JOIN Volunteer ON Volunteer.Id = Attendance.VolunteerId AND Volunteer.DeletedDate IS NULL
-                LEFT OUTER JOIN NoneRegister ON Attendance.Id = NoneRegister.AttendanceId AND NoneRegister.DeletedDate IS NULL
+                LEFT OUTER JOIN Randomization ON Attendance.Id = Randomization.AttendanceId AND Randomization.DeletedDate IS NULL
                 LEFT OUTER JOIN ProjectSubject ON ProjectSubject.Id = Attendance.ProjectSubjectId AND ProjectSubject.DeletedDate IS NULL
                 LEFT JOIN Domain ON ProjectDesignTemplate.DomainId = Domain.Id
                 LEFT OUTER JOIN Unit ON Unit.Id = ProjectDesignVariable.UnitId AND Unit.DeletedDate IS NULL
@@ -424,10 +424,10 @@ namespace GSC.Report
                 WHEN ProjectDesignVariable.DataType=7 THEN '*Numeric with 4 decimal'
                 WHEN ProjectDesignVariable.DataType=8 THEN '*Numeric with 5 decimal' END AS DataTypeName,
  	 
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.Initial ELSE  Volunteer.AliasName END AS Initial,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.ScreeningNumber ELSE  Volunteer.VolunteerNo END AS SubjectNo,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.RandomizationNumber ELSE  ProjectSubject.Number END AS RandomizationNumber,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.Initial + '-'+ NoneRegister.ScreeningNumber +'-'+NoneRegister.RandomizationNumber
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.Initial ELSE  Volunteer.AliasName END AS Initial,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.ScreeningNumber ELSE  Volunteer.VolunteerNo END AS SubjectNo,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.RandomizationNumber ELSE  ProjectSubject.Number END AS RandomizationNumber,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.Initial + '-'+ Randomization.ScreeningNumber +'-'+Randomization.RandomizationNumber
 						  ELSE  (Volunteer.AliasName + '-' + Volunteer.VolunteerNo  + '-' + Volunteer.FirstName+ ' ' + Volunteer.LastName + ISNULL('-' +ProjectSubject.Number,'')) END AS SubjectFullName
                 FROM ScreeningEntry SE
                 INNER JOIN ProjectDesignPeriod ON ProjectDesignPeriod.Id = SE.ProjectDesignPeriodId AND ProjectDesignPeriod.DeletedDate IS NULL
@@ -439,7 +439,7 @@ namespace GSC.Report
                 INNER JOIN Project tempP ON tempP.Id = ProjectDesign.ProjectId AND tempP.DeletedDate IS NULL
                 LEFT OUTER JOIN Attendance ON Attendance.Id = SE.AttendanceId AND Attendance.DeletedDate IS NULL
                 LEFT OUTER JOIN Volunteer ON Volunteer.Id = Attendance.VolunteerId AND Volunteer.DeletedDate IS NULL
-                LEFT OUTER JOIN NoneRegister ON Attendance.Id = NoneRegister.AttendanceId AND NoneRegister.DeletedDate IS NULL
+                LEFT OUTER JOIN Randomization ON Attendance.Id = Randomization.AttendanceId AND Randomization.DeletedDate IS NULL
                 LEFT OUTER JOIN ProjectSubject ON ProjectSubject.Id = Attendance.ProjectSubjectId AND ProjectSubject.DeletedDate IS NULL
                 LEFT JOIN Domain ON ProjectDesignTemplate.DomainId = Domain.Id
                 LEFT OUTER JOIN Unit ON Unit.Id = ProjectDesignVariable.UnitId AND Unit.DeletedDate IS NULL
@@ -579,10 +579,10 @@ namespace GSC.Report
                 WHEN ProjectDesignVariable.DataType=7 THEN '*Numeric with 4 decimal'
                 WHEN ProjectDesignVariable.DataType=8 THEN '*Numeric with 5 decimal' END AS DataTypeName,
  	 
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.Initial ELSE  Volunteer.AliasName END AS Initial,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.ScreeningNumber ELSE  Volunteer.VolunteerNo END AS SubjectNo,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.RandomizationNumber ELSE  ProjectSubject.Number END AS RandomizationNumber,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.Initial + '-'+ NoneRegister.ScreeningNumber +'-'+NoneRegister.RandomizationNumber
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.Initial ELSE  Volunteer.AliasName END AS Initial,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.ScreeningNumber ELSE  Volunteer.VolunteerNo END AS SubjectNo,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.RandomizationNumber ELSE  ProjectSubject.Number END AS RandomizationNumber,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.Initial + '-'+ Randomization.ScreeningNumber +'-'+Randomization.RandomizationNumber
 						  ELSE  (Volunteer.AliasName + '-' + Volunteer.VolunteerNo  + '-' + Volunteer.FirstName+ ' ' + Volunteer.LastName + ISNULL('-' +ProjectSubject.Number,'')) END AS SubjectFullName
                 FROM ScreeningEntry SE
                 INNER JOIN ProjectDesignPeriod ON ProjectDesignPeriod.Id = SE.ProjectDesignPeriodId AND ProjectDesignPeriod.DeletedDate IS NULL
@@ -594,7 +594,7 @@ namespace GSC.Report
                 INNER JOIN Project tempP ON tempP.Id = ProjectDesign.ProjectId AND tempP.DeletedDate IS NULL
                 LEFT OUTER JOIN Attendance ON Attendance.Id = SE.AttendanceId AND Attendance.DeletedDate IS NULL
                 LEFT OUTER JOIN Volunteer ON Volunteer.Id = Attendance.VolunteerId AND Volunteer.DeletedDate IS NULL
-                LEFT OUTER JOIN NoneRegister ON Attendance.Id = NoneRegister.AttendanceId AND NoneRegister.DeletedDate IS NULL
+                LEFT OUTER JOIN Randomization ON Attendance.Id = Randomization.AttendanceId AND Randomization.DeletedDate IS NULL
                 LEFT OUTER JOIN ProjectSubject ON ProjectSubject.Id = Attendance.ProjectSubjectId AND ProjectSubject.DeletedDate IS NULL
                 LEFT JOIN Domain ON ProjectDesignTemplate.DomainId = Domain.Id
                 LEFT OUTER JOIN Unit ON Unit.Id = ProjectDesignVariable.UnitId AND Unit.DeletedDate IS NULL
@@ -683,10 +683,10 @@ namespace GSC.Report
                 WHEN ProjectDesignVariable.DataType=7 THEN '*Numeric with 4 decimal'
                 WHEN ProjectDesignVariable.DataType=8 THEN '*Numeric with 5 decimal' END AS DataTypeName,
  	 
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.Initial ELSE  Volunteer.AliasName END AS Initial,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.ScreeningNumber ELSE  Volunteer.VolunteerNo END AS SubjectNo,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.RandomizationNumber ELSE  ProjectSubject.Number END AS RandomizationNumber,
-                CASE WHEN Project.IsStatic = 1 THEN NoneRegister.Initial + '-'+ NoneRegister.ScreeningNumber +'-'+NoneRegister.RandomizationNumber
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.Initial ELSE  Volunteer.AliasName END AS Initial,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.ScreeningNumber ELSE  Volunteer.VolunteerNo END AS SubjectNo,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.RandomizationNumber ELSE  ProjectSubject.Number END AS RandomizationNumber,
+                CASE WHEN Project.IsStatic = 1 THEN Randomization.Initial + '-'+ Randomization.ScreeningNumber +'-'+Randomization.RandomizationNumber
 						  ELSE  (Volunteer.AliasName + '-' + Volunteer.VolunteerNo  + '-' + Volunteer.FirstName+ ' ' + Volunteer.LastName + ISNULL('-' +ProjectSubject.Number,'')) END AS SubjectFullName
                 FROM ScreeningEntry SE
                 INNER JOIN ProjectDesignPeriod ON ProjectDesignPeriod.Id = SE.ProjectDesignPeriodId AND ProjectDesignPeriod.DeletedDate IS NULL
@@ -698,7 +698,7 @@ namespace GSC.Report
                 INNER JOIN Project tempP ON tempP.Id = ProjectDesign.ProjectId AND tempP.DeletedDate IS NULL
                 LEFT OUTER JOIN Attendance ON Attendance.Id = SE.AttendanceId AND Attendance.DeletedDate IS NULL
                 LEFT OUTER JOIN Volunteer ON Volunteer.Id = Attendance.VolunteerId AND Volunteer.DeletedDate IS NULL
-                LEFT OUTER JOIN NoneRegister ON Attendance.Id = NoneRegister.AttendanceId AND NoneRegister.DeletedDate IS NULL
+                LEFT OUTER JOIN Randomization ON Attendance.Id = Randomization.AttendanceId AND Randomization.DeletedDate IS NULL
                 LEFT OUTER JOIN ProjectSubject ON ProjectSubject.Id = Attendance.ProjectSubjectId AND ProjectSubject.DeletedDate IS NULL
                 LEFT JOIN Domain ON ProjectDesignTemplate.DomainId = Domain.Id
                 LEFT OUTER JOIN Unit ON Unit.Id = ProjectDesignVariable.UnitId AND Unit.DeletedDate IS NULL

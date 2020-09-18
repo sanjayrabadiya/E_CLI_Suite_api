@@ -212,7 +212,7 @@ namespace GSC.Helper
     {
         [Description("Screening")] Screening = 1,
         [Description("Project")] Project = 2,
-        [Description("None Register")] NoneRegister = 3
+        [Description("Randomization")] Randomization = 3
     }
 
     public enum ScreeningTemplateStatus : short

@@ -359,7 +359,7 @@ namespace GSC.Respository.Screening
                 ScreeningNo = a.ScreeningVisit.ScreeningEntry.ScreeningNo,
                 ProjectName = a.ScreeningVisit.ScreeningEntry.Project.ProjectName,
                 VolunteerName = a.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                    ? a.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+                    ? a.ScreeningVisit.ScreeningEntry.Attendance.Randomization.Initial
                     : a.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                 TemplateName = a.ProjectDesignTemplate.TemplateName,
                 VistName = a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
@@ -442,7 +442,7 @@ namespace GSC.Respository.Screening
         //        TemplateName = t.ProjectDesignTemplate.DesignOrder + " " + t.ProjectDesignTemplate.TemplateName,
         //        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
         //        VolunteerName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-        //            ? t.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+        //            ? t.ScreeningVisit.ScreeningEntry.Attendance.Randomization.Initial
         //            : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.FullName
         //    }).OrderByDescending(c => c.Id).ToList();
 
@@ -581,9 +581,9 @@ namespace GSC.Respository.Screening
                 ProjectCode = r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
                 ScreeningTemplateValue = r.ProjectDesignTemplate.TemplateName,
                 Visit = r.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                VolunteerName = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName : r.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial,
-                SubjectNo = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.ScreeningNumber,
-                RandomizationNumber = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.RandomizationNumber,
+                VolunteerName = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName : r.ScreeningVisit.ScreeningEntry.Attendance.Randomization.Initial,
+                SubjectNo = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Attendance.Randomization.ScreeningNumber,
+                RandomizationNumber = r.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Attendance.Randomization.RandomizationNumber,
                 ReviewLevelName = Context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId
                 && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault()
 
@@ -701,9 +701,9 @@ namespace GSC.Respository.Screening
                 ProjectName = x.Project.ProjectCode,
                 PeriodName = x.ProjectDesignPeriod.DisplayName,
                 ScreeningNo = x.ScreeningNo,
-                Initial = x.Attendance.Volunteer == null ? x.Attendance.NoneRegister.Initial : x.Attendance.Volunteer.AliasName,
-                SubjectNo = x.Attendance.Volunteer == null ? x.Attendance.NoneRegister.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
-                RandomizationNumber = x.Attendance.Volunteer == null ? x.Attendance.NoneRegister.RandomizationNumber : x.Attendance.Volunteer.VolunteerNo,
+                Initial = x.Attendance.Volunteer == null ? x.Attendance.Randomization.Initial : x.Attendance.Volunteer.AliasName,
+                SubjectNo = x.Attendance.Volunteer == null ? x.Attendance.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
+                RandomizationNumber = x.Attendance.Volunteer == null ? x.Attendance.Randomization.RandomizationNumber : x.Attendance.Volunteer.VolunteerNo,
                 IsElectronicSignature = workflowlevel.IsElectricSignature,
                 PeriodCount = All.Where(g => g.ScreeningVisit.ScreeningEntryId == x.Id && (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
                                 && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))

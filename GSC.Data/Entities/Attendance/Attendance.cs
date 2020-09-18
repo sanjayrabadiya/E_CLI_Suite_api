@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using GSC.Data.Dto.Attendance;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
@@ -46,6 +47,6 @@ namespace GSC.Data.Entities.Attendance
         public AttendaceStatus? Status { get; set; }
         public AttendanceHistory AttendanceHistory { get; set; }
         public virtual ScreeningEntry ScreeningEntry { get; set; }
-        public NoneRegister NoneRegister { get; set; }
+        public Randomization Randomization { get; set; }
     }
 }

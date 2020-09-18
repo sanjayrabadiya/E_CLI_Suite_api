@@ -46,7 +46,7 @@ namespace GSC.Respository.Screening
                     && t.AttendanceType != AttendanceType.Screening
                     && projectIds.Any(p => p == t.ProjectId))
                 .Include(t => t.Volunteer)
-                .Include(t => t.NoneRegister)
+                .Include(t => t.Randomization)
                 .Include(t => t.ProjectSubject)
                 .Include(t => t.ProjectDesignPeriod)
                 .ToList();
@@ -60,10 +60,10 @@ namespace GSC.Respository.Screening
                     ProjectDesignId = t.ProjectDesignPeriod.ProjectDesignId,
                     ProjectId = t.ProjectId,
                     ProjectDesignPeriodId = t.ProjectDesignPeriodId,
-                    VolunteerName = t.Volunteer == null ? t.NoneRegister.Initial : t.Volunteer.AliasName,
-                    SubjectNo = t.Volunteer == null ? t.NoneRegister.ScreeningNumber : t.Volunteer.VolunteerNo,
+                    VolunteerName = t.Volunteer == null ? t.Randomization.Initial : t.Volunteer.AliasName,
+                    SubjectNo = t.Volunteer == null ? t.Randomization.ScreeningNumber : t.Volunteer.VolunteerNo,
                     RandomizationNumber = t.Volunteer == null
-                        ? t.NoneRegister.RandomizationNumber
+                        ? t.Randomization.RandomizationNumber
                         : t.ProjectSubject?.Number
                 };
 
@@ -81,7 +81,7 @@ namespace GSC.Respository.Screening
                 .Include(t => t.Attendance)
                 .ThenInclude(t => t.Volunteer)
                 .Include(t => t.Attendance)
-                .ThenInclude(t => t.NoneRegister)
+                .ThenInclude(t => t.Randomization)
                 .Include(t => t.Attendance)
                 .ToList();
 
@@ -95,13 +95,13 @@ namespace GSC.Respository.Screening
                         ProjectId = screening.ProjectId,
                         ProjectDesignPeriodId = screening.ProjectDesignPeriodId,
                         VolunteerName = screening.Attendance.Volunteer == null
-                            ? screening.Attendance.NoneRegister.Initial
+                            ? screening.Attendance.Randomization.Initial
                             : screening.Attendance.Volunteer.AliasName,
                         SubjectNo = screening.Attendance.Volunteer == null
-                            ? screening.Attendance.NoneRegister.ScreeningNumber
+                            ? screening.Attendance.Randomization.ScreeningNumber
                             : screening.Attendance.Volunteer.VolunteerNo,
                         RandomizationNumber = screening.Attendance.Volunteer == null
-                            ? screening.Attendance.NoneRegister.RandomizationNumber
+                            ? screening.Attendance.Randomization.RandomizationNumber
                             : screening.Attendance.ProjectSubject?.Number,
                         ScreeningEntryId = screening.Id
                     };
@@ -124,7 +124,7 @@ namespace GSC.Respository.Screening
                     && t.AttendanceType != AttendanceType.Screening
                     && projectIds.Any(p => p == t.ProjectId))
                 .Include(t => t.Volunteer)
-                .Include(t => t.NoneRegister)
+                .Include(t => t.Randomization)
                 .Include(t => t.ProjectSubject)
                 .Include(t => t.ProjectDesignPeriod)
                 .ThenInclude(t => t.VisitList)
@@ -140,10 +140,10 @@ namespace GSC.Respository.Screening
                     ProjectDesignId = t.ProjectDesignPeriod.ProjectDesignId,
                     ProjectId = t.ProjectId,
                     ProjectDesignPeriodId = t.ProjectDesignPeriodId,
-                    VolunteerName = t.Volunteer == null ? t.NoneRegister.Initial : t.Volunteer.AliasName,
-                    SubjectNo = t.Volunteer == null ? t.NoneRegister.ScreeningNumber : t.Volunteer.VolunteerNo,
+                    VolunteerName = t.Volunteer == null ? t.Randomization.Initial : t.Volunteer.AliasName,
+                    SubjectNo = t.Volunteer == null ? t.Randomization.ScreeningNumber : t.Volunteer.VolunteerNo,
                     RandomizationNumber =
-                        t.Volunteer == null ? t.NoneRegister.RandomizationNumber : t.ProjectSubject?.Number,
+                        t.Volunteer == null ? t.Randomization.RandomizationNumber : t.ProjectSubject?.Number,
 
                     VisitSummary = new DashboardStudyStatusDto
                     {
@@ -183,7 +183,7 @@ namespace GSC.Respository.Screening
                 .Include(t => t.Attendance)
                 .ThenInclude(t => t.Volunteer)
                 .Include(t => t.Attendance)
-                .ThenInclude(t => t.NoneRegister)
+                .ThenInclude(t => t.Randomization)
                 .Include(t => t.Attendance)
                 .ThenInclude(t => t.ProjectSubject)
                 .Include(t => t.ScreeningVisit)
@@ -208,13 +208,13 @@ namespace GSC.Respository.Screening
                         ProjectId = screening.ProjectId,
                         ProjectDesignPeriodId = screening.ProjectDesignPeriodId,
                         VolunteerName = screening.Attendance.Volunteer == null
-                            ? screening.Attendance.NoneRegister.Initial
+                            ? screening.Attendance.Randomization.Initial
                             : screening.Attendance.Volunteer.AliasName,
                         SubjectNo = screening.Attendance.Volunteer == null
-                            ? screening.Attendance.NoneRegister.ScreeningNumber
+                            ? screening.Attendance.Randomization.ScreeningNumber
                             : screening.Attendance.Volunteer.VolunteerNo,
                         RandomizationNumber = screening.Attendance.Volunteer == null
-                            ? screening.Attendance.NoneRegister.RandomizationNumber
+                            ? screening.Attendance.Randomization.RandomizationNumber
                             : screening.Attendance.ProjectSubject?.Number,
                         ScreeningEntryId = screening.Id,
                         
@@ -337,7 +337,7 @@ namespace GSC.Respository.Screening
                         TemplateName = x.ProjectDesignTemplate.TemplateName,
                         VisitName = x.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                         SubjectName = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                            ? x.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+                            ? x.ScreeningVisit.ScreeningEntry.Attendance.Randomization.Initial
                             : x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
                     }
                 ).ToList();
@@ -353,7 +353,7 @@ namespace GSC.Respository.Screening
                     TemplateName = x.ProjectDesignTemplate.TemplateName,
                     VisitName = x.ScreeningVisit.ProjectDesignVisit.DisplayName,
                     SubjectName = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                        ? x.ScreeningVisit.ScreeningEntry.Attendance.NoneRegister.Initial
+                        ? x.ScreeningVisit.ScreeningEntry.Attendance.Randomization.Initial
                         : x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
                 }
             ).ToList();

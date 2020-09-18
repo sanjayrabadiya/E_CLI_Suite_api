@@ -6,7 +6,7 @@ using GSC.Data.Entities.Location;
 
 namespace GSC.Data.Dto.Attendance
 {
-    public class NoneRegisterDto : BaseDto
+    public class RandomizationDto : BaseDto
     {
         public int ProjectId { get; set; }
         public int ProjectDesignPeriodId { get; set; }
@@ -55,7 +55,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsLocked { get; set; }
     }
 
-    public class NoneRegisterGridDto : BaseAuditDto
+    public class RandomizationGridDto : BaseAuditDto
     {
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
