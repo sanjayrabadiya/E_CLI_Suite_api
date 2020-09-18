@@ -29,7 +29,7 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetVariableCategoryDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
                 .Select(c => new DropDownDto {Id = c.Id, Value = c.CategoryName, Code = c.CategoryCode, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }

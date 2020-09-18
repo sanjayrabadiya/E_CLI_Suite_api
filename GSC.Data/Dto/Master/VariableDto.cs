@@ -70,9 +70,17 @@ namespace GSC.Data.Dto.Master
         public string VariableAlias { get; set; }
         public string AnnotationType { get; set; }
         public string RoleVariableType { get; set; }
+        public string CoreVariableType { get; set; }
+        public string Unit { get; set; }
+        public string UnitAnnotation { get; set; }
+        public string DataType { get; set; }
+        public string CollectionSource { get; set; }
+        public int? Length { get; set; }
         public int? AnnotationTypeId { get; set; }
         public string Annotation { get; set; }
         public string CollectionAnnotation { get; set; }
+        public string ValidationType { get; set; }
+        public string DateValidate { get; set; }
         public string DefaultValue { get; set; }
         public string LowRangeValue { get; set; }
         public string HighRangeValue { get; set; }

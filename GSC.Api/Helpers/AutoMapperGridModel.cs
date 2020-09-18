@@ -75,7 +75,16 @@ namespace GSC.Api.Helpers
             CreateMap<Variable, VariableGridDto>()
                  .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
                  .ForMember(x => x.AnnotationType, x => x.MapFrom(a => a.AnnotationType.AnnotationeName))
-                 .ForMember(x => x.RoleVariableType, x => x.MapFrom(a => a.RoleVariableType)).ReverseMap();
+                 //.ForMember(x => x.VariableCategory, x => x.MapFrom(a => a.Values))
+                 .ForMember(x => x.RoleVariableType, x => x.MapFrom(a => a.RoleVariableType))
+                 .ForMember(x => x.CoreVariableType, x => x.MapFrom(a => a.CoreVariableType))
+                 .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
+                 .ForMember(x => x.UnitAnnotation, x => x.MapFrom(a => a.UnitAnnotation))
+                 .ForMember(x => x.CollectionSource, x => x.MapFrom(a => a.CollectionSource))
+                 .ForMember(x => x.DataType, x => x.MapFrom(a => a.DataType))
+                 .ForMember(x => x.Length, x => x.MapFrom(a => a.Length))
+                 .ForMember(x => x.ValidationType, x => x.MapFrom(a => a.ValidationType))
+                 .ForMember(x => x.DateValidate, x => x.MapFrom(a => a.DateValidate)).ReverseMap();
             CreateMap<PatientStatus, PatientStatusGridDto>().ReverseMap();
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
             CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
