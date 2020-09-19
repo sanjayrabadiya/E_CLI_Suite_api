@@ -53,9 +53,8 @@ namespace GSC.Data.Entities.Attendance
             set => _dateOfRandomization = value?.UtcDate();
         }
         public int ProjectId { get; set; }
-        public Attendance? Attendance { get; set; }
         public int? CompanyId { get; set; }
-
+        public Data.Entities.Master.Project Project { get; set; }
         public virtual ScreeningEntry ScreeningEntry { get; set; }
 
     }

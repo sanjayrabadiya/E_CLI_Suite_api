@@ -1,9 +1,5 @@
 ﻿using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Screening;
-using GSC.Domain.Context;
-using GSC.Helper;
-using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,12 +25,6 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_dataEntryRespository.GetDataEntriesBySubjectForGrid(projectDesignPeriodId, projectId));
         }
 
-        [HttpGet]
-        [Route("GetVisitForDataEntry/{attendanceId}/{screeningEntryId}")]
-        public IActionResult GetVisitForDataEntry(int attendanceId, int screeningEntryId)
-        {
-            return Ok(_dataEntryRespository.GetVisitForDataEntry(attendanceId, screeningEntryId));
-        }
-
+       
     }
 }

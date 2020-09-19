@@ -203,44 +203,6 @@ namespace GSC.Respository.Screening
 
         }
 
-        public List<DataEntryVisitSummaryDto> GetVisitForDataEntry(int attendanceId, int screeningEntryId)
-        {
-            if (screeningEntryId == 0)
-            {
-                var projectDesignPeriodId = Context.Attendance.Where(x => x.Id == attendanceId).Select(r => r.ProjectDesignPeriodId).FirstOrDefault();
-                return Context.ProjectDesignVisit.Where(t =>
-                        t.ProjectDesignPeriodId == projectDesignPeriodId
-                        && t.DeletedDate == null).Select(x => new DataEntryVisitSummaryDto
-                        {
-                            VisitName = x.DisplayName,
-                            ScreeningVisitId = x.Id,
-                            RecordId = attendanceId,
-                            PendingCount = x.Templates.Where(v => v.DeletedDate == null).Count()
-                        }).OrderBy(x => x.ScreeningVisitId).ToList();
-            }
-            else
-            {
-                return Context.ScreeningTemplate.Where(t =>
-                        t.ScreeningVisit.ScreeningEntryId == screeningEntryId
-                        && t.DeletedDate == null).GroupBy(r => new
-                        {
-                            r.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                            ScreeningVisitId = r.Id,
-                            r.ScreeningVisit.RepeatedVisitNumber
-                        }).Select(x => new DataEntryVisitSummaryDto
-                        {
-                            VisitName = x.Key.DisplayName + Convert.ToString(x.Key.RepeatedVisitNumber == null ? "" : "_" + x.Key.RepeatedVisitNumber),
-                            ScreeningVisitId = x.Key.ScreeningVisitId,
-                            RecordId = screeningEntryId,
-                            PendingCount = x.Count(r => r.Status == ScreeningTemplateStatus.Pending),
-                            InProcess = x.Count(r => r.Status == ScreeningTemplateStatus.InProcess),
-                            Submitted = x.Count(r => r.Status == ScreeningTemplateStatus.Submitted),
-                            Reviewed = x.Count(r => r.Status == ScreeningTemplateStatus.Reviewed),
-                            Completed = x.Count(r => r.Status == ScreeningTemplateStatus.Completed),
-                            TotalQueries = _screeningTemplateValueRepository.GetQueryCountByVisitId(x.Key.ScreeningVisitId)
-                        }).OrderBy(x => x.VisitName).ToList();
-            }
-        }
 
     }
 }

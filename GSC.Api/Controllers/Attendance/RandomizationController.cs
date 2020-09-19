@@ -17,11 +17,10 @@ namespace GSC.Api.Controllers.Attendance
     [Route("api/[controller]")]
     public class RandomizationController : BaseController
     {
-        private readonly IAttendanceRepository _attendanceRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IRandomizationRepository _randomizationRepository;
-        private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
+        private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IUnitOfWork _uow;
         private readonly ICityRepository _cityRepository;
         private readonly IStateRepository _stateRepository;
@@ -29,9 +28,8 @@ namespace GSC.Api.Controllers.Attendance
 
         public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
-            IProjectDesignPeriodRepository projectDesignPeriodRepository,
+            IProjectDesignRepository projectDesignRepository,
             IJwtTokenAccesser jwtTokenAccesser,
-            IAttendanceRepository attendanceRepository,
             ICityRepository cityRepository,
             IStateRepository stateRepository,
             ICountryRepository countryRepository)
@@ -40,8 +38,7 @@ namespace GSC.Api.Controllers.Attendance
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _projectDesignPeriodRepository = projectDesignPeriodRepository;
-            _attendanceRepository = attendanceRepository;
+            _projectDesignRepository = projectDesignRepository;
             _cityRepository = cityRepository;
             _stateRepository = stateRepository;
             _countryRepository = countryRepository;
@@ -85,9 +82,11 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Post([FromBody] RandomizationDto randomizationDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
             var randomization = _mapper.Map<Randomization>(randomizationDto);
-            //Create By Vipul Attendance not save while subject profile save modify on 15092020
+   
             _randomizationRepository.Add(randomization);
+
             if (_uow.Save() <= 0) throw new Exception("Creating randomization failed on save.");
             return Ok();
         }
@@ -107,20 +106,14 @@ namespace GSC.Api.Controllers.Attendance
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var record = _randomizationRepository
-                .FindByInclude(x => x.Id == id && x.DeletedDate == null, x => x.Attendance).FirstOrDefault();
 
-            if (record == null)
-                return NotFound();
-
-            if (record.Attendance.IsProcessed)
+            if (!_randomizationRepository.All.Any(x => x.Id == id && (x.PatientStatusId == ScreeningPatientStatus.PreScreening || x.PatientStatusId == null)))
             {
                 ModelState.AddModelError("Message", "Can not delete , because this record in under process.");
                 return BadRequest(ModelState);
             }
 
-            _attendanceRepository.Delete(record.Attendance);
-            _randomizationRepository.Delete(record);
+            _randomizationRepository.Delete(id);
             _uow.Save();
             return Ok();
         }
@@ -128,13 +121,11 @@ namespace GSC.Api.Controllers.Attendance
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
-            var record = _randomizationRepository
-                .FindByInclude(x => x.Id == id, x => x.Attendance).FirstOrDefault();
+            var record = _randomizationRepository.Find(id);
 
             if (record == null)
                 return NotFound();
             _randomizationRepository.Active(record);
-            _attendanceRepository.Active(record.Attendance);
             _uow.Save();
             return Ok();
         }
@@ -144,18 +135,17 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult SaveRandomization([FromBody] RandomizationDto randomizationDto)
         {
             if (randomizationDto.Id <= 0) return BadRequest();
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            //Change by vipul on 15092020 for Attendance add only when screening number and randomization number add
-            var projectDesignPeriod = _projectDesignPeriodRepository.FindBy(x => x.DeletedDate == null && x.ProjectDesign.DeletedDate == null &&
-                                    x.ProjectDesign.ProjectId == randomizationDto.ParentProjectId).FirstOrDefault();
 
-            if (projectDesignPeriod == null)
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+
+            if (_projectDesignRepository.All.Any(x => x.DeletedDate  == null && x.ProjectId == randomizationDto.ParentProjectId &&! x.IsCompleteDesign))
             {
                 ModelState.AddModelError("Message", "Design is not complete");
                 return BadRequest(ModelState);
             }
 
-            randomizationDto.ProjectDesignPeriodId = projectDesignPeriod.Id;
+      
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
 
             var validate = _randomizationRepository.Duplicate(randomization, randomizationDto.ProjectId);
@@ -168,7 +158,9 @@ namespace GSC.Api.Controllers.Attendance
             _randomizationRepository.SaveRandomization(randomization, randomizationDto);
 
             _randomizationRepository.Update(randomization);
+
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
+
             return Ok(randomization.Id);
         }
     }

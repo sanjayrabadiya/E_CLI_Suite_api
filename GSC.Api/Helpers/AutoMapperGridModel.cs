@@ -91,8 +91,8 @@ namespace GSC.Api.Helpers
             CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
 
             CreateMap<Randomization, RandomizationGridDto>()
-                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Attendance.Project.ProjectName))
-                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Attendance.Project.ProjectCode))
+                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
+                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                  .ReverseMap();
             CreateMap<ProjectWorkplace, ETMFWorkplaceGridDto>()
                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))

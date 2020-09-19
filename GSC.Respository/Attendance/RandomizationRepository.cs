@@ -56,6 +56,7 @@ namespace GSC.Respository.Attendance
             randomization.DateOfScreening = randomizationDto.DateOfScreening;
             randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
             randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
+            randomization.PatientStatusId = ScreeningPatientStatus.Screening;
             Update(randomization);
         }
 
@@ -70,7 +71,7 @@ namespace GSC.Respository.Attendance
         {
             if (All.Any(x =>
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&
-                x.Attendance.ProjectId == projectId && !string.IsNullOrEmpty(x.RandomizationNumber) &&
+                x.ProjectId == projectId && !string.IsNullOrEmpty(x.RandomizationNumber) &&
                 x.DeletedDate == null)) return "Duplicate Randomization Number : " + objSave.RandomizationNumber;
 
             return "";

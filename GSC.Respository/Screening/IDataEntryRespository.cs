@@ -6,7 +6,6 @@ namespace GSC.Respository.Screening
 {
     public interface IDataEntryRespository
     {
-        List<DataEntryVisitSummaryDto> GetVisitForDataEntry(int attendanceId, int screeningEntryId);
 
         IList<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int projectId);
 

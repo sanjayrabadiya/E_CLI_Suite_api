@@ -498,7 +498,7 @@ namespace GSC.Helper
         [Description("Completed")] Completed = 7
     }
 
-    public enum ScreeningPatientStatus : short
+    public enum ScreeningPatientStatus : int
     {
         [Description("Pre-Screening")] PreScreening = 1,
         [Description("Screening")] Screening = 2,
@@ -508,8 +508,8 @@ namespace GSC.Helper
         [Description("Withdrawn On Protocol Deviation")] WithdrawnOnProtocolDeviation = 6,
         [Description("OnHold")] OnHold = 7,
         [Description("Completed")] Completed = 8,
-        [Description("Self Withdrawal")] SelfWithdrawal = 7,
-        [Description("Consent In Process")] ConsentInProcess = 7,
+        [Description("Self Withdrawal")] SelfWithdrawal = 9,
+        [Description("Consent In Process")] ConsentInProcess = 10,
     }
 
 }
