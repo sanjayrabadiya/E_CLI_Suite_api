@@ -19,7 +19,7 @@ namespace GSC.Respository.Attendance
 {
     public class RandomizationRepository : GenericRespository<Randomization, GscContext>, IRandomizationRepository
     {
-        private readonly IAttendanceRepository _attendanceRepository;
+
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
@@ -32,7 +32,6 @@ namespace GSC.Respository.Attendance
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
-            IAttendanceRepository attendanceRepository,
             IProjectDesignRepository projectDesignRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IStateRepository stateRepository,
@@ -41,7 +40,6 @@ namespace GSC.Respository.Attendance
              IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
-            _attendanceRepository = attendanceRepository;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _projectDesignRepository = projectDesignRepository;
@@ -54,21 +52,11 @@ namespace GSC.Respository.Attendance
 
         public void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto)
         {
-            //Update By Vipul None register not save in Data entry on 15092020
             randomization.ScreeningNumber = randomizationDto.ScreeningNumber;
             randomization.DateOfScreening = randomizationDto.DateOfScreening;
             randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
             randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
             Update(randomization);
-            if (randomization.AttendanceId == null)
-            {
-                var attendance = new Data.Entities.Attendance.Attendance();
-                attendance.ProjectId = randomizationDto.ProjectId;
-                attendance.ProjectDesignPeriodId = randomizationDto.ProjectDesignPeriodId;
-                attendance.Randomization = randomization;
-                attendance.AttendanceType = AttendanceType.Randomization;
-                _attendanceRepository.SaveAttendance(attendance);
-            }
         }
 
         public List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted)

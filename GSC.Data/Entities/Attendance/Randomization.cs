@@ -2,6 +2,7 @@ using System;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Data.Entities.Location;
+using GSC.Data.Entities.Screening;
 
 namespace GSC.Data.Entities.Attendance
 {
@@ -11,7 +12,7 @@ namespace GSC.Data.Entities.Attendance
 
         private DateTime? _dateOfScreening;
 
-        public int? AttendanceId { get; set; }
+        public ScreeningPatientStatus? PatientStatusId { get; set; }
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
@@ -55,7 +56,7 @@ namespace GSC.Data.Entities.Attendance
         public Attendance? Attendance { get; set; }
         public int? CompanyId { get; set; }
 
-        public ScreeningPatientStatus PatientStatus { get; set; }
+        public virtual ScreeningEntry ScreeningEntry { get; set; }
 
     }
 }

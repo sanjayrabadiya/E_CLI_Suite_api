@@ -5,17 +5,14 @@ using GSC.Helper;
 
 namespace GSC.Data.Dto.Attendance
 {
-    public class DataEntryDto
+    public class DataCaptureGridDto
     {
         public int AttendanceId { get; set; }
-        public int ProjectDesignId { get; set; }
         public int? ScreeningEntryId { get; set; }
         public int ProjectId { get; set; }
         public int ProjectDesignPeriodId { get; set; }
-        public int? VolunteerId { get; set; }
         public string VolunteerName { get; set; }
         public string SubjectNo { get; set; }
-
         public string RandomizationNumber { get; set; }
         public List<DataEntryVisitDto> Visits { get; set; }
         public DashboardQueryStatusDto QueryStatus { get; set; }

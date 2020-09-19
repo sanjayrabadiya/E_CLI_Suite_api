@@ -223,13 +223,7 @@ namespace GSC.Api.Controllers.Screening
         }
 
 
-        [HttpGet]
-        [Route("GetScreeningQueryReview")]
-        public IActionResult GetScreeningQueryReview()
-        {
-            return Ok(_screeningTemplateValueQueryRepository.GetScreeningQueryReview());
-        }
-
+     
         [HttpPost("delete-query")]
         public IActionResult DeleteQuery([FromBody] ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto)
         {

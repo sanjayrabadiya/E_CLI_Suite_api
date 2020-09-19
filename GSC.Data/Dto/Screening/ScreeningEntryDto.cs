@@ -9,8 +9,9 @@ namespace GSC.Data.Dto.Screening
 {
     public class ScreeningEntryDto : BaseDto
     {
-        [Required(ErrorMessage = "Attendance is required.")]
-        public int AttendanceId { get; set; }
+       
+        public int? AttendanceId { get; set; }
+        public int? RandomizationId { get; set; }
 
         public AttendanceType EntryType { get; set; }
         public int ProjectDesignPeriodId { get; set; }

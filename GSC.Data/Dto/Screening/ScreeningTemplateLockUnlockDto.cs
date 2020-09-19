@@ -65,7 +65,6 @@ namespace GSC.Data.Dto.Screening
     public class LockUnlockListDto
     {
         public int Id { get; set; }
-        public int AttendanceId { get; set; }
         public int ScreeningTemplateValueId { get; set; }
         public int? ScreeningTemplateParentId { get; set; }
         public string VolunteerName { get; set; }

@@ -19,13 +19,11 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IScreeningTemplateValueEditCheckRepository _screeningTemplateValueEditCheckRepository;
         public ScreeningTemplateLockUnlockRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
-            IProjectWorkflowRepository projectWorkflowRepository,
-            IScreeningTemplateValueEditCheckRepository screeningTemplateValueEditCheckRepository)
+            IProjectWorkflowRepository projectWorkflowRepository)
             : base(uow, jwtTokenAccesser)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -33,7 +31,6 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _screeningTemplateValueEditCheckRepository = screeningTemplateValueEditCheckRepository;
         }
 
         public void Insert(ScreeningTemplateLockUnlockAudit screeningTemplateLockUnlock)
@@ -54,9 +51,9 @@ namespace GSC.Respository.Screening
             {
                 Id = x.Id,
                 ScreeningEntryId = x.ScreeningEntryId,
-                VolunteerName = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.Randomization.Initial : x.ScreeningEntry.Attendance.Volunteer.FullName,
-                VolunteerNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.Randomization.ScreeningNumber : x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
-                RandomizationNumber = x.ScreeningEntry.Attendance.Volunteer == null ? x.ScreeningEntry.Attendance.Randomization.RandomizationNumber : x.ScreeningEntry.Attendance.ProjectSubject.Number,
+                VolunteerName = x.ScreeningEntry.RandomizationId != null ? x.ScreeningEntry.Randomization.Initial : x.ScreeningEntry.Attendance.Volunteer.FullName,
+                VolunteerNumber = x.ScreeningEntry.RandomizationId != null ? x.ScreeningEntry.Randomization.ScreeningNumber : x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
+                RandomizationNumber = x.ScreeningEntry.RandomizationId != null ? x.ScreeningEntry.Randomization.RandomizationNumber : x.ScreeningEntry.Attendance.ProjectSubject.Number,
                 AttendanceId = x.ScreeningEntry.Attendance.Id,
                 ProjectDesignTemplateId = x.ScreeningTemplate.ScreeningVisit.Id,
                 VisitId = x.ScreeningTemplate.ScreeningVisitId,

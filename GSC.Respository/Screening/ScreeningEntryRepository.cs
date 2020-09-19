@@ -74,10 +74,11 @@ namespace GSC.Respository.Screening
                 {
                     Id = t.Id,
                     AttendanceId = t.AttendanceId,
+                    RandomizationId = t.RandomizationId,
                     ScreeningNo = t.ScreeningNo,
                     ScreeningDate = t.ScreeningDate,
-                    VolunteerName = t.Attendance.Volunteer == null
-                        ? t.Attendance.Randomization.Initial
+                    VolunteerName = t.RandomizationId != null
+                        ? t.Randomization.Initial
                         : t.Attendance.Volunteer.AliasName,
                     IsFitnessFit = t.IsFitnessFit,
                     IsEnrolled = t.IsEnrolled,

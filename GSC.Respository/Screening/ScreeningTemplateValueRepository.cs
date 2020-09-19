@@ -265,7 +265,7 @@ namespace GSC.Respository.Screening
                              join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
                                  volunteerDto
                              from volunteer in volunteerDto.DefaultIfEmpty()
-                             join randomizationTemp in Context.Randomization  on attendance.Id equals randomizationTemp.AttendanceId
+                             join randomizationTemp in Context.Randomization  on screening.RandomizationId equals randomizationTemp.Id
                                  into randomizationDto
                              from randomization in randomizationDto.DefaultIfEmpty()
                              join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals
@@ -399,7 +399,7 @@ namespace GSC.Respository.Screening
                                  from md in meddraMd.DefaultIfEmpty()
                                  join volunteerTemp in Context.Volunteer on A.VolunteerId equals volunteerTemp.Id into volunteerDto
                                  from volunteer in volunteerDto.DefaultIfEmpty()
-                                 join randomizationTemp in Context.Randomization on A.Id equals randomizationTemp.AttendanceId into randomizationDto
+                                 join randomizationTemp in Context.Randomization on se.RandomizationId equals randomizationTemp.Id into randomizationDto
                                  from randomization in randomizationDto.DefaultIfEmpty()
                                  join userTemp in Context.Users on meddra.ModifiedBy equals userTemp.Id into userDto
                                  from user in userDto.DefaultIfEmpty()

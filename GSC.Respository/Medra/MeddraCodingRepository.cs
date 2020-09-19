@@ -96,13 +96,11 @@ namespace GSC.Respository.Medra
                             join pt in Context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
                             join pdv in Context.ProjectDesignVariable on pt.Id equals pdv.ProjectDesignTemplateId
                             join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id
-                            join attendance in Context.Attendance on se.AttendanceId equals attendance.Id
                             join project in Context.Project.Where(x => projectList.Contains(x.Id)) on se.ProjectId equals project.Id
                             join counry in Context.Country on project.CountryId equals counry.Id
                             where pdv.DeletedDate == null && pdv.Id == meddraCodingDto.ProjectDesignVariableId && st.Status != ScreeningTemplateStatus.Pending && st.Status != ScreeningTemplateStatus.InProcess
                             && (meddraCodingDto.ProjectId != 0 ? se.ProjectId == meddraCodingDto.ProjectId : true)
                             && (meddraCodingDto.CountryId != 0 ? project.CountryId == meddraCodingDto.CountryId : true)
-                            && attendance.Randomization.RandomizationNumber != null
                             group new { pdv } by new { pdv.Id } into g
                             select new MeddraCodingMainDto
                             {
@@ -230,7 +228,7 @@ namespace GSC.Respository.Medra
                           on se.AttendanceId equals attendance.Id
                           join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                           from volunteer in volunteerDto.DefaultIfEmpty()
-                          join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.AttendanceId into randomizationDto
+                          join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.Id into randomizationDto
                           from randomization in randomizationDto.DefaultIfEmpty()
                           join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
                           from projectsubject in projectsubjectDto.DefaultIfEmpty()
@@ -330,7 +328,7 @@ namespace GSC.Respository.Medra
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()
-                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.AttendanceId into randomizationDto
+                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.Id into randomizationDto
                       from randomization in randomizationDto.DefaultIfEmpty()
                       join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
                       from projectsubject in projectsubjectDto.DefaultIfEmpty()
@@ -371,7 +369,7 @@ namespace GSC.Respository.Medra
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()
-                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.AttendanceId into randomizationDto
+                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on se.RandomizationId equals randomizationTemp.Id into randomizationDto
                       from randomization in randomizationDto.DefaultIfEmpty()
                       join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
                       from projectsubject in projectsubjectDto.DefaultIfEmpty()
@@ -412,7 +410,7 @@ namespace GSC.Respository.Medra
                       join attendance in Context.Attendance.Where(t => t.DeletedDate == null) on se.AttendanceId equals attendance.Id
                       join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
                       from volunteer in volunteerDto.DefaultIfEmpty()
-                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals randomizationTemp.AttendanceId into randomizationDto
+                      join randomizationTemp in Context.Randomization.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on se.RandomizationId equals randomizationTemp.Id into randomizationDto
                       from randomization in randomizationDto.DefaultIfEmpty()
                       join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
                       from projectsubject in projectsubjectDto.DefaultIfEmpty()

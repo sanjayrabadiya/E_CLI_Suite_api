@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
@@ -9,7 +10,8 @@ namespace GSC.Data.Entities.Screening
 {
     public class ScreeningEntry : BaseEntity
     {
-        public int AttendanceId { get; set; }
+        public int? AttendanceId { get; set; }
+        public int? RandomizationId { get; set; }
         public AttendanceType EntryType { get; set; }
         public int ProjectDesignPeriodId { get; set; }
 
@@ -40,5 +42,6 @@ namespace GSC.Data.Entities.Screening
         [ForeignKey("AttendanceId")] public Attendance.Attendance Attendance { get; set; }
 
         public ProjectDesignPeriod ProjectDesignPeriod { get; set; }
+        public Randomization Randomization { get; set; }
     }
 }

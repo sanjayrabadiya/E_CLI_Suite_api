@@ -13,7 +13,6 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.Screening;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Screening
@@ -273,16 +272,7 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningTemplateReviewRepository.GetTemplateReviewHistory(id));
         }
 
-        //[HttpPost("GetTemplatesLockUnlock")]
-        //public IActionResult GetTemplatesLockUnlock([FromBody] ScreeningTemplateLockUnlockParams lockUnlockParams)
-        //{
-        //    if (lockUnlockParams.ProjectId <= 0 || lockUnlockParams.VolunteerId <= 0) return BadRequest();
-
-        //    var lockUnlockTemplates = _screeningTemplateRepository.GetTemplatesLockUnlock(lockUnlockParams);
-
-        //    return Ok(lockUnlockTemplates);
-        //}
-
+    
 
         [HttpPut]
         [Route("SubmitAttendanceTemplate/{id}")]
@@ -293,7 +283,7 @@ namespace GSC.Api.Controllers.Screening
 
             SubmittedTemplate(id);
 
-            _projectSubjectRepository.SaveSubjectForVolunteer(attendanceId, id);
+            _projectSubjectRepository.SaveSubjectForVolunteer((int)attendanceId, id);
 
             if (_uow.Save() <= 0) throw new Exception("Submit Attendance Template failed.");
 
@@ -311,7 +301,7 @@ namespace GSC.Api.Controllers.Screening
             var attendanceId = _screeningTemplateRepository.All.Where(x => x.Id == id).Select(r => r.ScreeningVisit.ScreeningEntry.AttendanceId).FirstOrDefault();
             SubmitTemplate(id);
 
-            _projectSubjectRepository.DiscontinueProjectSubject(attendanceId, id);
+            _projectSubjectRepository.DiscontinueProjectSubject((int)attendanceId, id);
 
             if (_uow.Save() <= 0) throw new Exception("Submit Discontinue Template failed.");
 
@@ -319,18 +309,5 @@ namespace GSC.Api.Controllers.Screening
         }
 
 
-        //[HttpGet]
-        //[Route("GetDashboardStudyStatusByVisit/{projectId}")]
-        //public IActionResult GetDashboardStudyStatusByVisit(int projectId)
-        //{
-        //    return Ok(_screeningTemplateRepository.GetDashboardStudyStatusByVisit(projectId));
-        //}
-
-        //[HttpGet]
-        //[Route("GetDashboardStudyStatusBySite/{projectId}")]
-        //public IActionResult GetDashboardStudyStatusBySite(int projectId)
-        //{
-        //    return Ok(_screeningTemplateRepository.GetDashboardStudyStatusBySite(projectId));
-        //}
     }
 }

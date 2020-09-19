@@ -288,39 +288,19 @@ namespace GSC.Respository.Volunteer
 
         public IList<DropDownDto> GetVolunteersForDataEntryByPeriodId(int projectDesignPeriodId, int projectId)
         {
-            var subjects = new List<DropDownDto>();
-            var attendance = Context.Attendance.Where(a => a.DeletedDate == null
-                                                           && !a.IsProcessed &&
-                                                           a.ProjectDesignPeriodId == projectDesignPeriodId
-                                                           && a.ProjectId == projectId
-                                                           && a.AttendanceType != AttendanceType.Screening).Select(x =>
-                new DropDownDto
-                {
-                    Id = x.Id,
-                    Value = x.Volunteer == null
-                        ? Convert.ToString(x.Randomization.ScreeningNumber + " - " + x.Randomization.Initial +
-                                           (x.Randomization.RandomizationNumber == null
-                                               ? ""
-                                               : " - " + x.Randomization.RandomizationNumber))
-                        : Convert.ToString(Convert.ToString(x.ProjectSubject != null ? x.ProjectSubject.Number : "") +
-                                           " - " + x.Volunteer.FullName),
-                    Code = "Attendance",
-                    ExtraData = x.Id
-                }).ToList();
 
-            var screeningEntry = Context.ScreeningEntry.Where(a => a.DeletedDate == null
+            return Context.ScreeningEntry.Where(a => a.DeletedDate == null
                                                                    && a.ProjectDesignPeriodId == projectDesignPeriodId
-                                                                   && a.ProjectId == projectId
-                                                                   && a.EntryType != AttendanceType.Screening).Select(
+                                                                   && a.ProjectId == projectId).Select(
                 x => new DropDownDto
                 {
                     Id = x.Id,
-                    Value = x.Attendance.Volunteer == null
-                        ? Convert.ToString(x.Attendance.Randomization.ScreeningNumber + " - " +
-                                           x.Attendance.Randomization.Initial +
-                                           (x.Attendance.Randomization.RandomizationNumber == null
+                    Value = x.RandomizationId != null
+                        ? Convert.ToString(x.Randomization.ScreeningNumber + " - " +
+                                           x.Randomization.Initial +
+                                           (x.Randomization.RandomizationNumber == null
                                                ? ""
-                                               : " - " + x.Attendance.Randomization.RandomizationNumber))
+                                               : " - " + x.Randomization.RandomizationNumber))
                         : Convert.ToString(
                             Convert.ToString(x.Attendance.ProjectSubject != null
                                 ? x.Attendance.ProjectSubject.Number
@@ -328,9 +308,7 @@ namespace GSC.Respository.Volunteer
                     Code = "Screening",
                     ExtraData = x.AttendanceId
                 }).Distinct().ToList();
-            subjects.AddRange(attendance);
-            subjects.AddRange(screeningEntry);
-            return subjects;
+
         }
 
         public IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock)
@@ -339,129 +317,131 @@ namespace GSC.Respository.Volunteer
             var projectdesignId = Context.ProjectDesign.Where(x => x.ProjectId == proId && x.DeletedDate == null).FirstOrDefault().Id;
             var PeriodId = Context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectdesignId && x.DeletedDate == null).FirstOrDefault().Id;
             var subjects = new List<DropDownDto>();
-            if (isLock)
-            {
-                var attendance = Context.Attendance.Where(a => a.DeletedDate == null
-                                                               && !a.IsProcessed &&
-                                                               a.ProjectDesignPeriodId == PeriodId
-                                                               && a.ProjectId == projectId
-                                                               && a.AttendanceType != AttendanceType.Screening
-                                                              ).Select(x =>
-                    new DropDownDto
-                    {
-                        Id = x.Id,
-                        Value = x.Volunteer == null
-                            ? Convert.ToString(x.Randomization.ScreeningNumber + " - " + x.Randomization.Initial +
-                                               (x.Randomization.RandomizationNumber == null
-                                                   ? ""
-                                                   : " - " + x.Randomization.RandomizationNumber))
-                            : Convert.ToString(Convert.ToString(x.ProjectSubject != null ? x.ProjectSubject.Number : "") +
-                                               " - " + x.Volunteer.FullName),
-                        Code = "Attendance",
-                        ExtraData = x.Id
-                    }).ToList();
+            //if (isLock)
+            //{
+            //    var attendance = Context.Attendance.Where(a => a.DeletedDate == null
+            //                                                   && !a.IsProcessed &&
+            //                                                   a.ProjectDesignPeriodId == PeriodId
+            //                                                   && a.ProjectId == projectId
+            //                                                   && a.AttendanceType != AttendanceType.Screening
+            //                                                  ).Select(x =>
+            //        new DropDownDto
+            //        {
+            //            Id = x.Id,
+            //            Value = x.Volunteer == null
+            //                ? Convert.ToString(x.Randomization.ScreeningNumber + " - " + x.Randomization.Initial +
+            //                                   (x.Randomization.RandomizationNumber == null
+            //                                       ? ""
+            //                                       : " - " + x.Randomization.RandomizationNumber))
+            //                : Convert.ToString(Convert.ToString(x.ProjectSubject != null ? x.ProjectSubject.Number : "") +
+            //                                   " - " + x.Volunteer.FullName),
+            //            Code = "Attendance",
+            //            ExtraData = x.Id
+            //        }).ToList();
 
-                var screeningEntry = Context.ScreeningEntry.Where(a => a.DeletedDate == null
-                                                                       && a.ProjectDesignPeriodId == PeriodId
-                                                                       && a.ProjectId == projectId
-                                                                       && a.EntryType != AttendanceType.Screening).Select(
-                    x => new DropDownDto
-                    {
-                        Id = x.Id,
-                        Value = x.Attendance.Volunteer == null
-                            ? Convert.ToString(x.Attendance.Randomization.ScreeningNumber + " - " +
-                                               x.Attendance.Randomization.Initial +
-                                               (x.Attendance.Randomization.RandomizationNumber == null
-                                                   ? ""
-                                                   : " - " + x.Attendance.Randomization.RandomizationNumber))
-                            : Convert.ToString(
-                                Convert.ToString(x.Attendance.ProjectSubject != null
-                                    ? x.Attendance.ProjectSubject.Number
-                                    : "") + " - " + x.Attendance.Volunteer.FullName),
-                        Code = "Screening",
-                        ExtraData = x.AttendanceId
-                    }).Distinct().ToList();
-                subjects.AddRange(attendance);
-                subjects.AddRange(screeningEntry);
+            //    var screeningEntry = Context.ScreeningEntry.Where(a => a.DeletedDate == null
+            //                                                           && a.ProjectDesignPeriodId == PeriodId
+            //                                                           && a.ProjectId == projectId
+            //                                                           && a.EntryType != AttendanceType.Screening).Select(
+            //        x => new DropDownDto
+            //        {
+            //            Id = x.Id,
+            //            Value = x.Attendance.Volunteer == null
+            //                ? Convert.ToString(x.Attendance.Randomization.ScreeningNumber + " - " +
+            //                                   x.Attendance.Randomization.Initial +
+            //                                   (x.Attendance.Randomization.RandomizationNumber == null
+            //                                       ? ""
+            //                                       : " - " + x.Attendance.Randomization.RandomizationNumber))
+            //                : Convert.ToString(
+            //                    Convert.ToString(x.Attendance.ProjectSubject != null
+            //                        ? x.Attendance.ProjectSubject.Number
+            //                        : "") + " - " + x.Attendance.Volunteer.FullName),
+            //            Code = "Screening",
+            //            ExtraData = x.AttendanceId
+            //        }).Distinct().ToList();
+            //    subjects.AddRange(attendance);
+            //    subjects.AddRange(screeningEntry);
 
-                var lstsubjects = new List<DropDownDto>();
-                lstsubjects.AddRange(attendance);
-                lstsubjects.AddRange(screeningEntry);
+            //    var lstsubjects = new List<DropDownDto>();
+            //    lstsubjects.AddRange(attendance);
+            //    lstsubjects.AddRange(screeningEntry);
 
-                foreach (var item in lstsubjects)
-                {
-                    var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningVisit.ScreeningEntry.AttendanceId == (int)item.ExtraData && x.DeletedDate == null).ToList();
-                    if (screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false))
-                    {
-                        var itemexist = subjects.Where(x => x.Id == item.Id).FirstOrDefault();
-                        if (itemexist == null)
-                        {
-                            subjects.Add(item);
-                        }
-                    }
-                    else
-                    {
-                        subjects.RemoveAll(x => x.Id == item.Id);
-                    }
-                }
-            }
-            else
-            {
-                var attendance = (from atten in Context.Attendance.Where(a => a.DeletedDate == null
-                                                              && !a.IsProcessed &&
-                                                              a.ProjectDesignPeriodId == PeriodId
-                                                              && a.ProjectId == projectId
-                                                              && a.AttendanceType != AttendanceType.Screening)
-                                  join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
-                                  on atten.Id equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
-                                  select new DropDownDto
-                                  {
-                                      Id = atten.Id,
-                                      Value = atten.Volunteer == null
-                                          ? Convert.ToString(atten.Randomization.ScreeningNumber + " - " + atten.Randomization.Initial +
-                                                             (atten.Randomization.RandomizationNumber == null
-                                                                 ? ""
-                                                                 : " - " + atten.Randomization.RandomizationNumber))
-                                          : Convert.ToString(Convert.ToString(atten.ProjectSubject != null ? atten.ProjectSubject.Number : "") +
-                                                             " - " + atten.Volunteer.FullName),
-                                      Code = "Attendance",
-                                      ExtraData = atten.Id
-                                  }).ToList();
+            //    foreach (var item in lstsubjects)
+            //    {
+            //        var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningVisit.ScreeningEntry.AttendanceId == (int)item.ExtraData && x.DeletedDate == null).ToList();
+            //        if (screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false))
+            //        {
+            //            var itemexist = subjects.Where(x => x.Id == item.Id).FirstOrDefault();
+            //            if (itemexist == null)
+            //            {
+            //                subjects.Add(item);
+            //            }
+            //        }
+            //        else
+            //        {
+            //            subjects.RemoveAll(x => x.Id == item.Id);
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    var attendance = (from atten in Context.Attendance.Where(a => a.DeletedDate == null
+            //                                                  && !a.IsProcessed &&
+            //                                                  a.ProjectDesignPeriodId == PeriodId
+            //                                                  && a.ProjectId == projectId
+            //                                                  && a.AttendanceType != AttendanceType.Screening)
+            //                      join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
+            //                      on atten.Id equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
+            //                      select new DropDownDto
+            //                      {
+            //                          Id = atten.Id,
+            //                          Value = atten.Volunteer == null
+            //                              ? Convert.ToString(atten.Randomization.ScreeningNumber + " - " + atten.Randomization.Initial +
+            //                                                 (atten.Randomization.RandomizationNumber == null
+            //                                                     ? ""
+            //                                                     : " - " + atten.Randomization.RandomizationNumber))
+            //                              : Convert.ToString(Convert.ToString(atten.ProjectSubject != null ? atten.ProjectSubject.Number : "") +
+            //                                                 " - " + atten.Volunteer.FullName),
+            //                          Code = "Attendance",
+            //                          ExtraData = atten.Id
+            //                      }).ToList();
 
-                var screeningEntry = (from screening in Context.ScreeningEntry.Where(a => a.DeletedDate == null
-                                                                       && a.ProjectDesignPeriodId == PeriodId
-                                                                       && a.ProjectId == projectId
-                                                                       && a.EntryType != AttendanceType.Screening)
-                                      join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
-                                      on screening.AttendanceId equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
-                                      select new DropDownDto
-                                      {
-                                          Id = screening.Id,
-                                          Value = screening.Attendance.Volunteer == null
-                                            ? Convert.ToString(screening.Attendance.Randomization.ScreeningNumber + " - " +
-                                                               screening.Attendance.Randomization.Initial +
-                                                               (screening.Attendance.Randomization.RandomizationNumber == null
-                                                                   ? ""
-                                                                   : " - " + screening.Attendance.Randomization.RandomizationNumber))
-                                            : Convert.ToString(
-                                                Convert.ToString(screening.Attendance.ProjectSubject != null
-                                                    ? screening.Attendance.ProjectSubject.Number
-                                                    : "") + " - " + screening.Attendance.Volunteer.FullName),
-                                          Code = "Screening",
-                                          ExtraData = screening.AttendanceId
-                                      }).Distinct().ToList();
-                subjects.AddRange(attendance);
-                subjects.AddRange(screeningEntry);
-            }
+            //    var screeningEntry = (from screening in Context.ScreeningEntry.Where(a => a.DeletedDate == null
+            //                                                           && a.ProjectDesignPeriodId == PeriodId
+            //                                                           && a.ProjectId == projectId
+            //                                                           && a.EntryType != AttendanceType.Screening)
+            //                          join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
+            //                          on screening.AttendanceId equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
+            //                          select new DropDownDto
+            //                          {
+            //                              Id = screening.Id,
+            //                              Value = screening.Attendance.Volunteer == null
+            //                                ? Convert.ToString(screening.Attendance.Randomization.ScreeningNumber + " - " +
+            //                                                   screening.Attendance.Randomization.Initial +
+            //                                                   (screening.Attendance.Randomization.RandomizationNumber == null
+            //                                                       ? ""
+            //                                                       : " - " + screening.Attendance.Randomization.RandomizationNumber))
+            //                                : Convert.ToString(
+            //                                    Convert.ToString(screening.Attendance.ProjectSubject != null
+            //                                        ? screening.Attendance.ProjectSubject.Number
+            //                                        : "") + " - " + screening.Attendance.Volunteer.FullName),
+            //                              Code = "Screening",
+            //                              ExtraData = screening.AttendanceId
+            //                          }).Distinct().ToList();
+            //    subjects.AddRange(attendance);
+            //    subjects.AddRange(screeningEntry);
+            //}
 
-            var volunteer = subjects.GroupBy(x => x.Id).Select(s => new DropDownDto()
-            {
-                Id = s.Key,
-                Value = s.FirstOrDefault().Value,
-                ExtraData = s.FirstOrDefault().ExtraData
-            }).ToList();
+            //var volunteer = subjects.GroupBy(x => x.Id).Select(s => new DropDownDto()
+            //{
+            //    Id = s.Key,
+            //    Value = s.FirstOrDefault().Value,
+            //    ExtraData = s.FirstOrDefault().ExtraData
+            //}).ToList();
 
-            return volunteer;
+            //return volunteer;
+
+            return null;
         }
 
         private IList<VolunteerGridDto> GetItems(IQueryable<Data.Entities.Volunteer.Volunteer> query,
@@ -510,9 +490,9 @@ namespace GSC.Respository.Volunteer
                 IsScreeningHisotry = roleScreening.IsView,
                 IsDeleteRole = roleVolunteer.IsDelete,
                 IsScreening = x.IsScreening,
-               }).OrderByDescending(x => x.Id).ToList();
+            }).OrderByDescending(x => x.Id).ToList();
 
-         
+
 
             return result;
         }

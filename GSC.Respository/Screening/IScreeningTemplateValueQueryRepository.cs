@@ -10,7 +10,6 @@ namespace GSC.Respository.Screening
     public interface IScreeningTemplateValueQueryRepository : IGenericRepository<ScreeningTemplateValueQuery>
     {
         IList<ScreeningTemplateValueQueryDto> GetQueries(int screeningTemplateValueId);
-        List<ScreeningQueryReviewDto> GetScreeningQueryReview();
         void AcknowledgeQuery(ScreeningTemplateValueQuery screeningTemplateValueQuery);
 
         void SelfGenerate(ScreeningTemplateValueQuery screeningTemplateValueQuery,

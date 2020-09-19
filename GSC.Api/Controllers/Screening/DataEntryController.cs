@@ -13,26 +13,13 @@ namespace GSC.Api.Controllers.Screening
     public class DataEntryController : BaseController
     {
         private readonly IDataEntryRespository _dataEntryRespository;
-        private readonly IScreeningTemplateValueEditCheckRepository _screeningTemplateValueEditCheckRepository;
         private readonly IUnitOfWork _uow;
 
-        public DataEntryController(IDataEntryRespository dataEntryRespository,
-            IScreeningTemplateValueEditCheckRepository screeningTemplateValueEditCheckRepository,
-            IUnitOfWork uow)
+        public DataEntryController(IDataEntryRespository dataEntryRespository,            IUnitOfWork uow)
         {
             _dataEntryRespository = dataEntryRespository;
-            _screeningTemplateValueEditCheckRepository = screeningTemplateValueEditCheckRepository;
             _uow = uow;
         }
-
-
-        [HttpGet]
-        [Route("GetDataEntriesBySubject/{projectDesignPeriodId}/{projectId}")]
-        public IActionResult GetDataEntriesBySubject(int projectDesignPeriodId, int projectId)
-        {
-            return Ok(_dataEntryRespository.GetDataEntriesBySubject(projectDesignPeriodId, projectId));
-        }
-
 
 
         [HttpGet]
@@ -49,22 +36,5 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_dataEntryRespository.GetVisitForDataEntry(attendanceId, screeningEntryId));
         }
 
-        [HttpGet]
-        [Route("GetTemplateForVisit/{screeningEntryId}/{projectDesignVisitId}/{screeningStatus}/{isQuery}")]
-        public IActionResult GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId,
-            ScreeningTemplateStatus screeningStatus, bool isQuery)
-        {
-            return Ok(_dataEntryRespository.GetTemplateForVisit(screeningEntryId, projectDesignVisitId, screeningStatus,
-                isQuery));
-        }
-
-        [HttpPost("ValidateRuleByEditCheckDetailId")]
-        public IActionResult ValidateRuleByEditCheckDetailId([FromBody] VariableEditCheckDto variableEditCheckDto)
-        {
-            //_ruleRepository.ValidateRuleByEditCheckDetailId(variableEditCheckDto);
-            //_uow.Save();
-            return Ok(_screeningTemplateValueEditCheckRepository.EditCheckSet(variableEditCheckDto.ScreeningTemplateId,
-                true));
-        }
     }
 }
