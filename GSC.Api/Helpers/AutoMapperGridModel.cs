@@ -140,7 +140,7 @@ namespace GSC.Api.Helpers
             //.ForMember(x => x.ContactType, x => x.MapFrom(a => a.ContactType.TypeName))
 
             CreateMap<Holiday, HolidayGridDto>()
-                .ForMember(x => x.HolidayType, x => x.MapFrom(a => a.HolidayType)).ReverseMap();
+                .ForMember(x => x.HolidayType, x => x.MapFrom(a => a.HolidayType.GetDescription())).ReverseMap();
         }
     }
 }
