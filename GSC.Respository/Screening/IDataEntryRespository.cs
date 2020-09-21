@@ -7,7 +7,7 @@ namespace GSC.Respository.Screening
     public interface IDataEntryRespository
     {
 
-        IList<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int projectId);
+        DataCaptureGridDto GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId);
 
     }
 }

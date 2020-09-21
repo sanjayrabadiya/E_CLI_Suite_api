@@ -7,76 +7,53 @@ namespace GSC.Data.Dto.Attendance
 {
     public class DataCaptureGridDto
     {
-        public int AttendanceId { get; set; }
+        public List<WorkFlowText> WorkFlowText { get; set; }
+        public List<DataCaptureGridData> Data { get; set; }
+
+    }
+
+    public class DataCaptureGridData
+    {
+        public int? AttendanceId { get; set; }
         public int? ScreeningEntryId { get; set; }
-        public int ProjectId { get; set; }
-        public int ProjectDesignPeriodId { get; set; }
+        public int? RandomizationId { get; set; }
         public string VolunteerName { get; set; }
+        public bool IsRandomization { get; set; }
         public string SubjectNo { get; set; }
+        public string PatientStatus { get; set; }
         public string RandomizationNumber { get; set; }
-        public List<DataEntryVisitDto> Visits { get; set; }
-        public DashboardQueryStatusDto QueryStatus { get; set; }
-        public DashboardStudyStatusDto VisitSummary { get; set; }
-        public WorkFlowLevelDto WorkflowDetail { get; set; }
+        public DataEntryTemplateQueryStatus Count { get; set; }
+        public List<DataEntryVisitTemplateDto> Visit { get; set; }
     }
 
-    public class DataEntryVisitDto
+    public class DataEntryTemplateQueryStatus
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public List<DataEntryTemplateCountDto> TemplateCounts { get; set; }
-        public int TotalQueries { get; set; }
-        public List<DataEntryTemplateQueryCountDto> TemplateQueries { get; set; }
+        public int NotStarted { get; set; }
+        public int InProgress { get; set; }
+        public int MyQuery { get; set; }
+        public int Open { get; set; }
+        public int Answered { get; set; }
+        public int Resolved { get; set; }
+        public int Closed { get; set; }
+        public int SelfCorrection { get; set; }
+        public int Acknowledge { get; set; }
+        public List<WorkFlowTemplateCount> TemplateCount { get; set; }
     }
 
-    public class DataEntryVisitSummaryDto
+    public class WorkFlowTemplateCount
     {
-        public string VisitName { get; set; }
-        public int ScreeningVisitId { get; set; }
-        public int RecordId { get; set; }
-        public int PendingCount { get; set; }
-        public int InProcess { get; set; }
-        public int Submitted { get; set; }
-        public int Reviewed { get; set; }
-        public int Completed { get; set; }
-        public int TotalQueries { get; set; }
+        public short LevelNo { get; set; }
+        public int Count { get; set; }
     }
 
+    
     public class DataEntryVisitTemplateDto
     {
-        public int ScreeningEntryId { get; set; }
-        public int ScreeningTemplateId { get; set; }
-        public int ProjectDesignTemplateId { get; set; }
-        public string TemplateName { get; set; }
+        public int ScreeningVisitId { get; set; }
         public string VisitName { get; set; }
-        public string SubjectName { get; set; }
+        public DataEntryTemplateQueryStatus Count { get; set; }
+
     }
 
-    public class DataEntryTemplateCountDto
-    {
-        public ScreeningTemplateStatus Status { get; set; }
-        public string StatusName { get; set; }
-        public int Count { get; set; }
-        public List<DataEntryTemplateDto> Templates { get; set; }
-    }
-
-    public class DataEntryTemplateDto
-    {
-        public int Id { get; set; }
-        public string TemplateName { get; set; }
-    }
-
-    public class DataEntryTemplateQueryCountDto
-    {
-        public int Id { get; set; }
-        public string TemplateName { get; set; }
-        public List<DataEntryQueryDto> Queries { get; set; }
-    }
-
-    public class DataEntryQueryDto
-    {
-        public QueryStatus? Status { get; set; }
-        public string StatusName { get; set; }
-        public int Count { get; set; }
-    }
+   
 }

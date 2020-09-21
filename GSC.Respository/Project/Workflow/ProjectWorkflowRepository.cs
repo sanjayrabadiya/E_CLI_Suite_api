@@ -42,10 +42,10 @@ namespace GSC.Respository.Project.Workflow
         public WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId)
         {
             short levelNo = -1;
-            var project = FindBy(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
+            var projectWorkId = FindBy(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).Select(t => t.Id).FirstOrDefault();
             var workFlowText = new List<WorkFlowText>();
-            if (project != null)
-                workFlowText = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == project.Id
+            if (projectWorkId > 0)
+                workFlowText = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
                                                                         && x.DeletedDate == null).Select(r =>
                     new WorkFlowText
                     {
@@ -53,7 +53,7 @@ namespace GSC.Respository.Project.Workflow
                         RoleName = r.SecurityRole.RoleShortName
                     }).ToList();
 
-            if (project == null)
+            if (projectWorkId == 0)
                 return new WorkFlowLevelDto
                 {
                     IsLock = false,
@@ -64,7 +64,7 @@ namespace GSC.Respository.Project.Workflow
                     SelfCorrection = false
                 };
 
-            var independent = _context.ProjectWorkflowIndependent.Where(x => x.ProjectWorkflowId == project.Id
+            var independent = _context.ProjectWorkflowIndependent.Where(x => x.ProjectWorkflowId == projectWorkId
                                                                                       && x.SecurityRoleId ==
                                                                                       _jwtTokenAccesser.RoleId
                                                                                       && x.DeletedDate == null).FirstOrDefault();
@@ -82,12 +82,12 @@ namespace GSC.Respository.Project.Workflow
                     IsGenerateQuery = independent.IsGenerateQuery
                 };
 
-            var level = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == project.Id
+            var level = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
                                                                           && x.SecurityRoleId ==
                                                                           _jwtTokenAccesser.RoleId
                                                                           && x.DeletedDate == null).FirstOrDefault();
 
-            int totalLevel = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == project.Id
+            int totalLevel = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
                                                                       && x.DeletedDate == null).Max(x => x.LevelNo);
 
             if (level != null)

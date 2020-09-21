@@ -4,10 +4,13 @@ using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
+using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Attendance;
+using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
 using Microsoft.EntityFrameworkCore;
@@ -18,25 +21,58 @@ namespace GSC.Respository.Screening
     {
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
-
+        private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
+        private readonly IProjectWorkflowLevelRepository _projectWorkflowLevelRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-
+        private readonly IRandomizationRepository _randomizationRepository;
         public DataEntryRespository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
-            IProjectWorkflowRepository projectWorkflowRepository
+            IProjectWorkflowRepository projectWorkflowRepository,
+            IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
+            IRandomizationRepository randomizationRepository,
+            IProjectDesignVisitRepository projectDesignVisitRepository
         )
             : base(uow, jwtTokenAccesser)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectRightRepository = projectRightRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
+            _projectWorkflowLevelRepository = projectWorkflowLevelRepository;
+            _randomizationRepository = randomizationRepository;
+            _projectDesignVisitRepository = projectDesignVisitRepository;
         }
 
 
 
-        public IList<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int projectId)
+        public DataCaptureGridDto GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
         {
+            var result = new DataCaptureGridDto();
+            result.WorkFlowText = _projectWorkflowLevelRepository.All.
+                Where(x => x.ProjectWorkflow.ProjectDesign.ProjectId == parentProjectId
+                        && x.DeletedDate == null && x.ProjectWorkflow.DeletedDate == null).Select(r => new WorkFlowText
+                        {
+                            LevelNo = r.LevelNo,
+                            RoleName = r.SecurityRole.RoleShortName
+                        }).ToList();
+
+            var projectDesignVisit = _projectDesignVisitRepository.All.Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId).
+            Select(t => new DataEntryVisitTemplateDto
+            {
+                VisitName = t.DisplayName
+            }).ToList();
+
+            _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
+            && x.PatientStatusId == ScreeningPatientStatus.Screening).Select(t => new DataCaptureGridData
+            {
+                RandomizationId = t.Id,
+                ScreeningEntryId = t.ScreeningEntry.Id,
+                VolunteerName = t.Initial,
+                IsRandomization = true,
+                SubjectNo = t.ScreeningNumber,
+                RandomizationNumber = t.RandomizationNumber,
+                Visit= projectDesignVisit
+            }).ToList();
             //var projectIds = _projectRightRepository.GetProjectRightIdList();
             //if (!projectIds.Any()) return new List<DataEntryDto>();
             //var attendances = Context.Attendance.Where(t =>
@@ -197,7 +233,7 @@ namespace GSC.Respository.Screening
             //    });
             //}
 
-            return null;
+            return result;
 
 
 

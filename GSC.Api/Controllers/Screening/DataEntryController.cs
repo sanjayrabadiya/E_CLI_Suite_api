@@ -19,10 +19,10 @@ namespace GSC.Api.Controllers.Screening
 
 
         [HttpGet]
-        [Route("GetDataEntriesBySubjectForGrid/{projectDesignPeriodId}/{projectId}")]
-        public IActionResult GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int projectId)
+        [Route("GetDataEntriesBySubjectForGrid/{projectDesignPeriodId}/{parentProjectId}/{projectId}")]
+        public IActionResult GetDataEntriesBySubjectForGrid(int projectDesignPeriodId,int parentProjectId, int projectId)
         {
-            return Ok(_dataEntryRespository.GetDataEntriesBySubjectForGrid(projectDesignPeriodId, projectId));
+            return Ok(_dataEntryRespository.GetDataEntriesBySubjectForGrid(projectDesignPeriodId, parentProjectId, projectId));
         }
 
        
