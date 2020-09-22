@@ -50,9 +50,10 @@ namespace GSC.Data.Dto.Etmf
         public string ReviewStatus { get; set; }
     }
 
-    public class SaveParameter
+    public class CustomParameter
     {
         public int id { get; set; }
-        public string content { get; set; }
+        public string fileName { get; set; }
+        public string documentData { get; set; }
     }
 }

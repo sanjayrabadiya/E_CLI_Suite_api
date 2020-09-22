@@ -195,27 +195,6 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(projectWorkplaceArtificatedocument.Id);
         }
 
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("Import")]
-        public string Import(IFormCollection data)
-        {
-            if (data.Files.Count == 0)
-                return null;
-            Stream stream = new MemoryStream();
-            IFormFile file = data.Files[0];
-            int index = file.FileName.LastIndexOf('.');
-            string type = index > -1 && index < file.FileName.Length - 1 ?
-                file.FileName.Substring(index) : ".docx";
-            file.CopyTo(stream);
-            stream.Position = 0;
-
-            Syncfusion.EJ2.DocumentEditor.WordDocument document = Syncfusion.EJ2.DocumentEditor.WordDocument.Load(stream, GetFormatType(type.ToLower()));
-            string sfdt = Newtonsoft.Json.JsonConvert.SerializeObject(document);
-            document.Dispose();
-            return sfdt;
-        }
-
         [HttpPost]
         [Route("ImportData/{id}")]
         public IActionResult ImportData(int id)
@@ -236,7 +215,7 @@ namespace GSC.Api.Controllers.Etmf
         [AllowAnonymous]
         [HttpPost]
         [Route("ImportSectionData/{id}/{sectionno}")]
-        public string ImportSectionData(int id,int sectionno)
+        public string ImportSectionData(int id, int sectionno)
         {
             //var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
             //var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
@@ -268,38 +247,38 @@ namespace GSC.Api.Controllers.Etmf
                 }
             }
 
-            for (int i = 0; i<= jsonobj.sections.Count -1; i++)
+            for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
             {
                 jsonobj.sections[i].blocks = new List<Block>();
-                if (i ==0)
+                if (i == 0)
                 {
                     jsonobj.sections[0].blocks = blocks;
                 }
             }
 
-            
-                string jsonnew = JsonConvert.SerializeObject(jsonobj);
-                //Syncfusion.DocIO.DLS.WordDocument documentold = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-                //Syncfusion.DocIO.DLS.WordDocument documentnew = new Syncfusion.DocIO.DLS.WordDocument();
-                //documentnew.Sections.Clear();
-                //documentnew.Sections.Add(documentold.Sections[sectionno].Clone());
-                //string filePath = "E:\\Neel Doc";//System.IO.Path.Combine(upload.DocumentPath, document.DocPath);
-                //string fileName = id + "_" + sectionno + "_" + DateTime.Now.ToFileTime().ToString() + ".docx"; //+ "_"  + document.DocumentName;
-                //DirectoryInfo info = new DirectoryInfo(filePath);
-                //if (!info.Exists)
-                //{
-                //    info.Create();
-                //}
-                //string pathnew = Path.Combine(filePath, fileName);
-                //FileStream streamnew = new FileStream(pathnew, FileMode.Create);
-                //documentnew.Save(streamnew, Syncfusion.DocIO.FormatType.Docx);
-                //documentold.Close();
-                //documentnew.Close();
-                //streamnew.Position = 0;
-                //streamnew.Close();
-                //System.IO.File.Delete(pathnew);
-                // return new HttpResponseMessage() { Content = new System.Net.Http.StringContent(json) };
-                return jsonnew;
+
+            string jsonnew = JsonConvert.SerializeObject(jsonobj);
+            //Syncfusion.DocIO.DLS.WordDocument documentold = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+            //Syncfusion.DocIO.DLS.WordDocument documentnew = new Syncfusion.DocIO.DLS.WordDocument();
+            //documentnew.Sections.Clear();
+            //documentnew.Sections.Add(documentold.Sections[sectionno].Clone());
+            //string filePath = "E:\\Neel Doc";//System.IO.Path.Combine(upload.DocumentPath, document.DocPath);
+            //string fileName = id + "_" + sectionno + "_" + DateTime.Now.ToFileTime().ToString() + ".docx"; //+ "_"  + document.DocumentName;
+            //DirectoryInfo info = new DirectoryInfo(filePath);
+            //if (!info.Exists)
+            //{
+            //    info.Create();
+            //}
+            //string pathnew = Path.Combine(filePath, fileName);
+            //FileStream streamnew = new FileStream(pathnew, FileMode.Create);
+            //documentnew.Save(streamnew, Syncfusion.DocIO.FormatType.Docx);
+            //documentold.Close();
+            //documentnew.Close();
+            //streamnew.Position = 0;
+            //streamnew.Close();
+            //System.IO.File.Delete(pathnew);
+            // return new HttpResponseMessage() { Content = new System.Net.Http.StringContent(json) };
+            return jsonnew;
         }
 
         public string ImportWordDocument(Stream stream)
@@ -311,50 +290,37 @@ namespace GSC.Api.Controllers.Etmf
             return sfdtText;
         }
 
-        internal static FormatType GetFormatType(string format)
-        {
-            if (string.IsNullOrEmpty(format))
-                throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
-            switch (format.ToLower())
-            {
-                case ".dotx":
-                case ".docx":
-                case ".docm":
-                case ".dotm":
-                    return FormatType.Docx;
-                case ".dot":
-                case ".doc":
-                    return FormatType.Doc;
-                case ".rtf":
-                    return FormatType.Rtf;
-                case ".txt":
-                    return FormatType.Txt;
-                case ".xml":
-                    return FormatType.WordML;
-                default:
-                    throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
-            }
-        }
-
         [HttpPost]
-        [Route("ExportSFDT")]
-        public IActionResult ExportSFDT([FromBody] SaveParameter data)
+        [Route("Save")]
+        public IActionResult Save([FromBody] CustomParameter param)
         {
             string filePath = string.Empty;
-            string path = string.Empty;
-
-            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(data.id);
+            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(param.id);
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var fileName = projectWorkplaceArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceArtificatedocument.DocumentName.Substring(0, projectWorkplaceArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceArtificatedocument.DocumentName;
             var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
             filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceArtificatedocument.DocPath, docName);
 
-            Stream document = WordDocument.Save(data.content, FormatType.Docx);
-            FileStream file = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            document.CopyTo(file);
-            file.Close();
-            document.Close();
+            Byte[] byteArray = Convert.FromBase64String(param.documentData);
+            Stream stream = new MemoryStream(byteArray);
+            FormatType type = GetFormatTypeExport(filePath);
+
+            FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+
+            if (type != FormatType.Docx)
+            {
+                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                document.Save(fileStream, GetDocIOFomatType(type));
+                document.Close();
+            }
+            else
+            {
+                stream.Position = 0;
+                stream.CopyTo(fileStream);
+            }
+            stream.Dispose();
+            fileStream.Dispose();
 
             projectWorkplaceArtificatedocument.DocumentName = docName;
             _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
@@ -363,6 +329,53 @@ namespace GSC.Api.Controllers.Etmf
             _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
 
             return Ok();
+        }
+
+        internal static Syncfusion.DocIO.FormatType GetDocIOFomatType(FormatType type)
+        {
+            switch (type)
+            {
+                case FormatType.Docx:
+                    return (Syncfusion.DocIO.FormatType)FormatType.Docx;
+                case FormatType.Doc:
+                    return (Syncfusion.DocIO.FormatType)FormatType.Doc;
+                case FormatType.Rtf:
+                    return (Syncfusion.DocIO.FormatType)FormatType.Rtf;
+                case FormatType.Txt:
+                    return (Syncfusion.DocIO.FormatType)FormatType.Txt;
+                case FormatType.WordML:
+                    return (Syncfusion.DocIO.FormatType)FormatType.WordML;
+                default:
+                    throw new NotSupportedException("DocIO does not support this file format.");
+            }
+        }
+
+        internal static FormatType GetFormatTypeExport(string fileName)
+        {
+            int index = fileName.LastIndexOf('.');
+            string format = index > -1 && index < fileName.Length - 1 ? fileName.Substring(index + 1) : "";
+
+            if (string.IsNullOrEmpty(format))
+                throw new NotSupportedException("EJ2 Document editor does not support this file format.");
+            switch (format.ToLower())
+            {
+                case "dotx":
+                case "docx":
+                case "docm":
+                case "dotm":
+                    return FormatType.Docx;
+                case "dot":
+                case "doc":
+                    return FormatType.Doc;
+                case "rtf":
+                    return FormatType.Rtf;
+                case "txt":
+                    return FormatType.Txt;
+                case "xml":
+                    return FormatType.WordML;
+                default:
+                    throw new NotSupportedException("EJ2 Document editor does not support this file format.");
+            }
         }
     }
 }
