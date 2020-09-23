@@ -153,7 +153,7 @@ namespace GSC.Helper
         [Description("ETMF")] ETMF = 15,
         [Description("Report")] Report = 16,
         [Description("Site Management")] SiteManagement = 17,
-        [Description("Study Output")] StudyOutput = 18
+        //[Description("Study Output")] StudyOutput = 18
     }
 
     public enum AuditAction : short
