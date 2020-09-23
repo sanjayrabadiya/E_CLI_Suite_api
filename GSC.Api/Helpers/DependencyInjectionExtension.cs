@@ -238,8 +238,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectWorkplaceArtificateDocumentReviewRepository, ProjectWorkplaceArtificateDocumentReviewRepository>();
             services.AddScoped<IProjectArtificateDocumentCommentRepository, ProjectArtificateDocumentCommentRepository>();
             services.AddScoped<IProjectArtificateDocumentHistoryRepository, ProjectArtificateDocumentHistoryRepository>();
-
-
+            services.AddScoped<IProjectDesignVisitStatusRepository, ProjectDesignVisitStatusRepository>();
             services.AddScoped<IAuditTracker, AuditTracker>();
             services.AddSingleton<IDictionaryCollection, DictionaryCollection>();
         }

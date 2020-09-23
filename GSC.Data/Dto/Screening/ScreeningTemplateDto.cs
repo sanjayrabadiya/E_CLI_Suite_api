@@ -37,6 +37,7 @@ namespace GSC.Data.Dto.Screening
         public bool IsDisable { get; set; }
         public bool IsLocked { get; set; }
         public int? RepeatSeqNo { get; set; }
+        public bool IsParticipantView { get; set; }
     }
 
 
@@ -53,6 +54,7 @@ namespace GSC.Data.Dto.Screening
         public short? ReviewLevel { get; set; }
         public bool IsLocked { get; set; }
         public bool IsDisable { get; set; }
+        public bool IsParticipantView { get; set; }
 
     }
 

@@ -123,6 +123,17 @@ namespace GSC.Api.Controllers.Project.Design
 
                         projectDesignVariable.Values.Add(projectDesignVariableValue);
                     }
+
+                    //Added for Remarks
+                    projectDesignVariable.Remarks = new List<ProjectDesignVariableRemarks>();
+
+                    foreach (var variableRemark in variableDetail.Variable.Remarks)
+                    {
+                        var projectDesignVariableRemark = _mapper.Map<ProjectDesignVariableRemarks>(variableRemark);
+                        projectDesignVariableRemark.Id = 0;
+                        projectDesignVariable.Remarks.Add(projectDesignVariableRemark);
+                    }
+
                 }
 
                 _projectDesignTemplateRepository.Add(projectDesignTemplate);
@@ -251,6 +262,14 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource = null, int? refVariable = null)
         {
             return Ok(_projectDesignTemplateRepository.GetTemplateDropDownForProjectSchedule(projectDesignVisitId, collectionSource, refVariable));
+        }
+
+        //added by vipul for get only date time variable template in project design visit on 22092020
+        [HttpGet]
+        [Route("GetTemplateDropDownForVisitStatus/{projectDesignVisitId}")]
+        public IActionResult GetTemplateDropDownForVisitStatus(int projectDesignVisitId)
+        {
+            return Ok(_projectDesignTemplateRepository.GetTemplateDropDownForVisitStatus(projectDesignVisitId));
         }
 
         [HttpGet]

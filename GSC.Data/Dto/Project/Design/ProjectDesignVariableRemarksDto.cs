@@ -22,7 +22,8 @@ namespace GSC.Data.Dto.Project.Design
     {
         public int Id { get; set; }
         public int ProjectDesignVariableId { get; set; }
-        public string ValueName { get; set; }
+        public int Range { get; set; }
+        public string Remarks { get; set; }
         public string ScreeningValue { get; set; }
         public int ScreeningTemplateValueChildId { get; set; }
         public string ScreeningValueOld { get; set; }

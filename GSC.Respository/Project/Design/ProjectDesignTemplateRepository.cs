@@ -225,5 +225,13 @@ namespace GSC.Respository.Project.Design
 
             return templates;
         }
+
+        //added by vipul for get only date time variable template in project design visit on 22092020
+        public IList<DropDownDto> GetTemplateDropDownForVisitStatus(int projectDesignVisitId)
+        {
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == projectDesignVisitId
+            && x.Variables.Where(y => (y.CollectionSource == CollectionSources.Date || y.CollectionSource == CollectionSources.DateTime) && y.DeletedDate == null).Any()).OrderBy(t => t.Id)
+                .Select(t => new DropDownDto { Id = t.Id, Value = t.TemplateName }).ToList();
+        }
     }
 }

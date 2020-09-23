@@ -35,7 +35,7 @@ namespace GSC.Data.Dto.Project.Design
 
         public int DomainId { get; set; }
         public bool IsRepeated { get; set; }
-
+        public bool IsParticipantView { get; set; }
         public VariableTemplateDto VariableTemplate { get; set; }
         public DomainDto Domain { get; set; }
         public IList<ProjectDesignVariableDto> Variables { get; set; }

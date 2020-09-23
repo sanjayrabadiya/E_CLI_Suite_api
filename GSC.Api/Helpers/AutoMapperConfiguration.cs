@@ -260,6 +260,8 @@ namespace GSC.Api.Helpers
             CreateMap<VisitStatus, VisitStatusDto>().ReverseMap();
             CreateMap<ProjectArtificateDocumentReview, ProjectArtificateDocumentReviewDto>().ReverseMap();
             CreateMap<ProjectArtificateDocumentComment, ProjectArtificateDocumentCommentDto>().ReverseMap();
+
+            CreateMap<ProjectDesignVisitStatus, ProjectDesignVisitStatusDto>().ReverseMap();
         }
     }
 }

@@ -39,10 +39,16 @@ namespace GSC.Respository.Master
             return "";
         }
 
-        public List<VisitStatusDto> GetVisitStatusList(bool isDeleted)
+        public List<VisitStatusGridDto> GetVisitStatusList(bool isDeleted)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-                   ProjectTo<VisitStatusDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                   ProjectTo<VisitStatusGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        }
+
+        public List<DropDownDto> GetAutoVisitStatusDropDown()
+        {
+            return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.IsAuto)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.DisplayName }).OrderBy(o => o.Value).ToList();
         }
     }
 }

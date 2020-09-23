@@ -27,5 +27,6 @@ namespace GSC.Data.Entities.Screening
         public bool IsDisable { get; set; }
         public int? RepeatSeqNo { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
+        public bool IsParticipantView { get; set; }
     }
 }

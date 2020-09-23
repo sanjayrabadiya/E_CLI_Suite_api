@@ -223,5 +223,23 @@ namespace GSC.Respository.Project.Design
                     ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList())
                 }).ToList();
         }
+
+        //Added method By Vipul 22092020 for visit status in project design get only date and datetime variable
+        public IList<DropDownVaribleDto> GetVariabeAnnotationDropDownForVisitStatus(int projectDesignTemplateId)
+        {
+            var result = All.Where(x => x.DeletedDate == null
+                                  && x.ProjectDesignTemplateId == projectDesignTemplateId && 
+                                  (x.CollectionSource == CollectionSources.Date || x.CollectionSource == CollectionSources.DateTime));
+
+            return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownVaribleDto
+            {
+                Id = c.Id,
+                Value = c.VariableName +
+                                         Convert.ToString(string.IsNullOrEmpty(c.Annotation) ? "" : " [" + c.Annotation + "]"),
+                Code = c.Annotation,
+                DataType = c.DataType,
+                CollectionSources = c.CollectionSource
+            }).ToList();
+        }
     }
 }

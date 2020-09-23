@@ -9,6 +9,7 @@ namespace GSC.Respository.Master
     {
         string Duplicate(VisitStatus objSave);
         List<DropDownDto> GetVisitStatusDropDown();
-        List<VisitStatusDto> GetVisitStatusList(bool isDeleted);
+        List<VisitStatusGridDto> GetVisitStatusList(bool isDeleted);
+        List<DropDownDto> GetAutoVisitStatusDropDown();
     }
 }

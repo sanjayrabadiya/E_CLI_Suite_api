@@ -22,5 +22,9 @@ namespace GSC.Respository.Project.Design
         IList<DropDownVaribleAnnotationDto> GetVariabeAnnotationByDomainDropDown(int domainId, int projectId);
 
         IList<DropDownVaribleDto> GetTargetVariabeAnnotationForScheduleDropDown(int projectDesignTemplateId);
+
+        //Added method By Vipul 22092020 for visit status in project design get only date and datetime variable
+        IList<DropDownVaribleDto> GetVariabeAnnotationDropDownForVisitStatus(int projectDesignTemplateId);
+
     }
 }

@@ -7,6 +7,7 @@ namespace GSC.Data.Entities.Screening
     {
         public int ScreeningTemplateValueId { get; set; }
         public int ProjectDesignVariableRemarksId { get; set; }
+        public int Range { get; set; }
         public string Remarks { get; set; }
         public ProjectDesignVariableRemarks ProjectDesignVariableRemarks { get; set; }
     }

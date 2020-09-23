@@ -16,6 +16,7 @@ namespace GSC.Data.Entities.Project.Design
         public int DesignOrder { get; set; }
         public int? DomainId { get; set; }
         public bool IsRepeated { get; set; }
+        public bool IsParticipantView { get; set; }
         public Domain Domain { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public VariableTemplate VariableTemplate { get; set; }

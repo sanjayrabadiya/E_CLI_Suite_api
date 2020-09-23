@@ -185,6 +185,14 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_projectDesignVariableRepository.GetVariabeAnnotationDropDown(projectDesignTemplateId, false));
         }
 
+        //Added method By Vipul 22092020 for visit status in project design get only date and datetime variable
+        [HttpGet]
+        [Route("GetVariabeAnnotationDropDownForVisitStatus/{projectDesignTemplateId}")]
+        public IActionResult GetVariabeAnnotationDropDownForVisitStatus(int projectDesignTemplateId)
+        {
+            return Ok(_projectDesignVariableRepository.GetVariabeAnnotationDropDownForVisitStatus(projectDesignTemplateId));
+        }
+
         [HttpGet]
         [Route("GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula}")]
         public IActionResult GetVariabeAnnotationDropDown(int projectDesignTemplateId, bool isFormula)

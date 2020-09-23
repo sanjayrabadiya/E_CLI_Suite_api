@@ -24,5 +24,6 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetTemplateDropDownAnnotation(int projectDesignVisitId);
 
         IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
+        IList<DropDownDto> GetTemplateDropDownForVisitStatus(int projectDesignVisitId);
     }
 }
