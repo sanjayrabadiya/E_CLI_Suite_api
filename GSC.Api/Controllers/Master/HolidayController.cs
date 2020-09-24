@@ -35,6 +35,15 @@ IUnitOfWork<GscContext> uow, IMapper mapper)
             return Ok(holiday);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var holiday = _holidayRepository.Find(id);
+            var holidayDto = _mapper.Map<HolidayDto>(holiday);
+            return Ok(holidayDto);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] HolidayDto holidayDto)
         {
