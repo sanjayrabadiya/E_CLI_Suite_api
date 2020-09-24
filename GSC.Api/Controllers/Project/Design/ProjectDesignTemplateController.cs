@@ -26,12 +26,14 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IDomainRepository _domainRepository;
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
+        private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
 
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IVariableTemplateRepository variableTemplateRepository,
             IDomainRepository domainRepository,
             IProjectScheduleTemplateRepository projectScheduleTemplateRepository,
+            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
             IUnitOfWork uow, IMapper mapper)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
@@ -40,6 +42,7 @@ namespace GSC.Api.Controllers.Project.Design
             _uow = uow;
             _mapper = mapper;
             _projectScheduleTemplateRepository = projectScheduleTemplateRepository;
+            _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _domainRepository = domainRepository;
         }
 
@@ -224,23 +227,32 @@ namespace GSC.Api.Controllers.Project.Design
 
             if (record == null)
                 return NotFound();
-
-            _projectDesignTemplateRepository.Delete(record);
-            _uow.Save();
-
-            if (_projectDesignTemplateRepository.FindBy(t =>
-                t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null).Any())
+            // added by vipul validation if template variable use in visit status than it's not deleted on 24092020
+            var Exists = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null).Any();
+            if (Exists)
             {
-                var minOrder = _projectDesignTemplateRepository
-                    .FindBy(t => t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null)
-                    .Min(t => t.DesignOrder);
-                var firstId = _projectDesignTemplateRepository.FindBy(t =>
-                    t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null &&
-                    t.DesignOrder == minOrder).First().Id;
-                ChangeTemplateDesignOrder(firstId, 0);
+                ModelState.AddModelError("Message", "Template variable use in visit status.");
+                return BadRequest(ModelState);
             }
+            else
+            {
+                _projectDesignTemplateRepository.Delete(record);
+                _uow.Save();
 
-            return Ok();
+                if (_projectDesignTemplateRepository.FindBy(t =>
+                    t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null).Any())
+                {
+                    var minOrder = _projectDesignTemplateRepository
+                        .FindBy(t => t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null)
+                        .Min(t => t.DesignOrder);
+                    var firstId = _projectDesignTemplateRepository.FindBy(t =>
+                        t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null &&
+                        t.DesignOrder == minOrder).First().Id;
+                    ChangeTemplateDesignOrder(firstId, 0);
+                }
+
+                return Ok();
+            }
         }
 
         [HttpGet]

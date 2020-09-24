@@ -21,16 +21,19 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly IUnitOfWork<GscContext> _uow;
         private readonly IVariableRepository _variableRepository;
+        private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
 
         public ProjectDesignVariableController(IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
+            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
             IUnitOfWork<GscContext> uow, IMapper mapper,
             IVariableRepository variableRepository)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
+            _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _uow = uow;
             _mapper = mapper;
             _variableRepository = variableRepository;
@@ -113,6 +116,14 @@ namespace GSC.Api.Controllers.Project.Design
                     ModelState.AddModelError("Message", "Can't delete record!");
                     return BadRequest(ModelState);
                 }
+            }
+
+            // added by vipul validation if variable use in visit status than it's not deleted on 24092020
+            var Exists = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVariableId == id && x.DeletedDate == null).Any();
+            if (Exists)
+            {
+                ModelState.AddModelError("Message", "Variable use in visit status.");
+                return BadRequest(ModelState);
             }
 
             _projectDesignVariableRepository.Delete(record);
