@@ -6,6 +6,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
@@ -90,6 +91,17 @@ namespace GSC.Api.Controllers.Project.Design
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
+            }
+
+            // added by vipul validation if variable use in visit status than data type not except date or datetime deleted on 25092020
+            var Exists = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVariableId == variableDto.Id && x.DeletedDate == null).Any();
+            if (Exists)
+            {
+                if (variableDto.CollectionSource != CollectionSources.Date && variableDto.CollectionSource != CollectionSources.DateTime)
+                {
+                    ModelState.AddModelError("Message", "Variable collection source must be date or date time.");
+                    return BadRequest(ModelState);
+                }
             }
 
             UpdateVariableValues(variable);
