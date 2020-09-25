@@ -112,15 +112,27 @@ namespace GSC.Respository.EditCheckImpact
         private EditCheckResult TargetAndReference(List<EditCheckValidate> editCheck, bool isFromValidate)
         {
             var result = ValidateRuleReference(editCheck.Where(x => !x.IsTarget).ToList(), isFromValidate);
+            //Added by vipul for display failed message in target grid on 25092020
+            result.Target = new List<EditCheckResult>();
             if (!result.IsValid)
             {
                 if (isFromValidate && string.IsNullOrEmpty(result.ErrorMessage))
+                {
                     result.ErrorMessage = "Reference Value not verifed.";
+                    //Added by vipul for display failed message in target grid on 25092020
+                    editCheck.Where(x => x.IsTarget).ToList().ForEach(r =>
+                    {
+                        var editCheckResult = new EditCheckResult();
+                        editCheckResult.Result = "failed";
+                        editCheckResult.Id =r.Id;
+                        result.Target.Add(editCheckResult);
+                    });
+                }
                 return result;
             }
 
-            result.Target = new List<EditCheckResult>();
-
+            //Added by vipul for display failed message in target grid on 25092020
+            //result.Target = new List<EditCheckResult>();
             editCheck.Where(x => x.IsTarget).ToList().ForEach(r =>
             {
                 if (!isFromValidate)
