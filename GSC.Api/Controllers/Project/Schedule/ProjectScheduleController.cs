@@ -273,7 +273,7 @@ namespace GSC.Api.Controllers.Project.Schedule
                     Id = x.Id,
                     AutoNumber = x.AutoNumber,
                     ProjectId = x.ProjectId,
-                    ProjectName = x.Project.ProjectName,
+                    ProjectName = x.Project.ProjectCode,
                     PeriodName = x.ProjectDesignPeriod.DisplayName,
                     VisitName = x.ProjectDesignVisit.DisplayName,
                     TemplateName = x.ProjectDesignTemplate.TemplateName,
