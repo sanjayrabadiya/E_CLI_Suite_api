@@ -266,6 +266,7 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectDesignVisitStatus, ProjectDesignVisitStatusDto>().ReverseMap();
             CreateMap<EconsentSetup, EconsentSetupDto>().ReverseMap();
             CreateMap<EconsentReviewDetails, EconsentReviewDetailsDto>().ReverseMap();
+            CreateMap<RegulatoryType, RegulatoryTypeDto>().ReverseMap();
         }
     }
 }

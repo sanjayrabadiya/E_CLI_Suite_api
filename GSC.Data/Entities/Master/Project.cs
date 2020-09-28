@@ -36,6 +36,7 @@ namespace GSC.Data.Entities.Master
 
         public int Period { get; set; }
         public bool IsStatic { get; set; }
+        public int? RegulatoryTypeId { get; set; }
         public RegulatoryType? RegulatoryType { get; set; }
 
         public DateTime? FromDate
@@ -52,7 +53,6 @@ namespace GSC.Data.Entities.Master
 
         public int? CompanyId { get; set; }
         public int? InvestigatorContactId { get; set; }
-
         public IList<ProjectRight.ProjectRight> ProjectRight { get; set; }
 
         public ICollection<ProjectDesign> ProjectDesigns { get; set; }
@@ -67,5 +67,6 @@ namespace GSC.Data.Entities.Master
         public GSC.Data.Entities.Client.Client Client { get; set; }
         public Drug Drug { get; set; }
         public DesignTrial DesignTrial { get; set; }
+        public InvestigatorContact InvestigatorContact { get; set; }
     }
 }

@@ -28,9 +28,13 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "ContactNumber is required.")]
         public string ContactNumber { get; set; }
         public int IecirbId { get; set; }
-       
+        public string IecirbName { get; set; }
+
         [Required(ErrorMessage = "City is required.")]
         public int CityId { get; set; }
+        public string StateName { get; set; }
+        public string CityName { get; set; }
+        public string CountryName { get; set; }
         public int StateId { get; set; }
         public int CountryId { get; set; }
         public int? CompanyId { get; set; }

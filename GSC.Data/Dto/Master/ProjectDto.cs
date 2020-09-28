@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Master;
 using GSC.Helper;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -37,6 +38,7 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Period is required.")]
         public int Period { get; set; }
 
+        public int? RegulatoryTypeId { get; set; }
         public RegulatoryType? RegulatoryType { get; set; }
 
         public DateTime? FromDate { get; set; }
@@ -77,6 +79,7 @@ namespace GSC.Data.Dto.Master
         public string AreaName { get; set; }
         public string ClientName { get; set; }
         public string DrugName { get; set; }
+        public string InvestigatorContactName { get; set; }
     }
 
     public class ProjectDetailsDto 
