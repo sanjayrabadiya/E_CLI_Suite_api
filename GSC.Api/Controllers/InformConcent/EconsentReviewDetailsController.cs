@@ -27,13 +27,13 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IMapper _mapper;
         private readonly IUnitOfWork<GscContext> _uow;
         private readonly IEconsentSetupRepository _econsentSetupRepository;
-        private readonly INoneRegisterRepository _noneRegisterRepository;
+        private readonly IRandomizationRepository _noneRegisterRepository;
         private readonly GscContext _context;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         public EconsentReviewDetailsController(IUnitOfWork<GscContext> uow,
             IMapper mapper,
             IEconsentSetupRepository econsentSetupRepository,
-            INoneRegisterRepository noneRegisterRepository,
+            IRandomizationRepository noneRegisterRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository)
         {
             _uow = uow;
@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("GetEconsentDocumentHeaders/{patientId}")]
         public IActionResult GetEconsentDocumentHeaders(int patientId)
         {
-            //var noneregister = _noneRegisterRepository.Find(patientId);
+            var noneregister = _noneRegisterRepository.Find(patientId);
             var languageId = 7;//noneregister.LanguageId;
             var ProjectId = 4;//noneregister.ProjectId;
             var Econsentdocuments = _econsentSetupRepository.FindByInclude(x => x.ProjectId == ProjectId && x.LanguageId == languageId && x.DeletedBy == null && x.DeletedDate == null).ToList();
