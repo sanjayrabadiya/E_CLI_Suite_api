@@ -8,9 +8,7 @@ namespace GSC.Data.Dto.Master
     {
         [Required(ErrorMessage = "Drug Name is required.")]
         public string DrugName { get; set; }
-
         public string Strength { get; set; }
-
         public string DosageForm { get; set; }
         public int? CompanyId { get; set; }
     }
@@ -21,9 +19,4 @@ namespace GSC.Data.Dto.Master
         public string Strength { get; set; }
         public string DosageForm { get; set; }
     }
-
-
-
-
-
 }

@@ -108,7 +108,8 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.DesignTrialName, x => x.MapFrom(a => a.DesignTrial.DesignTrialName))
                 .ForMember(x => x.ClientName, x => x.MapFrom(a => a.Client.ClientName))
                 .ForMember(x => x.DrugName, x => x.MapFrom(a => a.Drug.DrugName))
-                .ForMember(x => x.RegulatoryTypeName, x => x.MapFrom(a => a.RegulatoryType.GetDescription()))
+                .ForMember(x => x.InvestigatorContactName, x => x.MapFrom(a => a.InvestigatorContact.NameOfInvestigator))
+                .ForMember(x => x.RegulatoryTypeName, x => x.MapFrom(a => a.RegulatoryType.RegulatoryTypeName))
                 .ForMember(x => x.ProjectDesignId, x => x.MapFrom(a => a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.Id).FirstOrDefault()))
                 .ForMember(x => x.Locked, x => x.MapFrom(a => !a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.IsUnderTesting).FirstOrDefault()))
                 .ReverseMap();
@@ -143,6 +144,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.HolidayType, x => x.MapFrom(a => a.HolidayType.GetDescription())).ReverseMap();
 
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
+            CreateMap<RegulatoryType, RegulatoryTypeGridDto>().ReverseMap();
         }
     }
 }

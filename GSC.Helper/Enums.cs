@@ -25,13 +25,13 @@ namespace GSC.Helper
         [Description("Login/Logout users")] LoginLogoutUsers = 4,
     }
 
-    public enum RegulatoryType : short
-    {
-        [Description("IEC/IRB")] Iecirb = 1,
-        [Description("T-License")] License = 2,
-        [Description("NOC")] Noc = 3,
-        [Description("Others")] Others = 4
-    }
+    //public enum RegulatoryType : short
+    //{
+    //    [Description("IEC/IRB")] Iecirb = 1,
+    //    [Description("T-License")] License = 2,
+    //    [Description("NOC")] Noc = 3,
+    //    [Description("Others")] Others = 4
+    //}
 
     public enum FreezerType : short
     {

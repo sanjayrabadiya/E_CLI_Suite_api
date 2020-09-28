@@ -243,6 +243,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IAuditTracker, AuditTracker>();
             services.AddSingleton<IDictionaryCollection, DictionaryCollection>();
             services.AddScoped<IEconsentReviewDetailsRepository, EconsentReviewDetailsRepository>();
+            services.AddScoped<IRegulatoryTypeRepository, RegulatoryTypeRepository>();
         }
     }
 }
