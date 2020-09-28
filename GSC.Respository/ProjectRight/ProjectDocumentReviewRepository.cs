@@ -291,7 +291,7 @@ namespace GSC.Respository.ProjectRight
                                              x.DeletedDate == null).Select(c => new DropDownDto
             {
                 Id = c.ProjectId,
-                Value = c.Project.ProjectCode + " - " + c.Project.ProjectName,
+                Value = c.Project.ProjectCode,
                 Code = c.Project.ProjectCode,
                 ExtraData = c.Project.ParentProjectId
             }).OrderBy(o => o.Value).Distinct().ToList();
