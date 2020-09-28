@@ -25,13 +25,15 @@ namespace GSC.Respository.Screening
         private readonly IProjectWorkflowLevelRepository _projectWorkflowLevelRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IRandomizationRepository _randomizationRepository;
+        private readonly IScreeningVisitRepository _screeningVisitRepository;
         public DataEntryRespository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
             IRandomizationRepository randomizationRepository,
-            IProjectDesignVisitRepository projectDesignVisitRepository
+            IProjectDesignVisitRepository projectDesignVisitRepository,
+            IScreeningVisitRepository screeningVisitRepository
         )
             : base(uow, jwtTokenAccesser)
         {
@@ -41,6 +43,7 @@ namespace GSC.Respository.Screening
             _projectWorkflowLevelRepository = projectWorkflowLevelRepository;
             _randomizationRepository = randomizationRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
+            _screeningVisitRepository= screeningVisitRepository;
         }
 
 
@@ -56,23 +59,46 @@ namespace GSC.Respository.Screening
                             RoleName = r.SecurityRole.RoleShortName
                         }).ToList();
 
+
             var projectDesignVisit = _projectDesignVisitRepository.All.Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId).
             Select(t => new DataEntryVisitTemplateDto
             {
                 VisitName = t.DisplayName
             }).ToList();
 
-            _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
-            && x.PatientStatusId == ScreeningPatientStatus.Screening).Select(t => new DataCaptureGridData
-            {
-                RandomizationId = t.Id,
-                ScreeningEntryId = t.ScreeningEntry.Id,
-                VolunteerName = t.Initial,
-                IsRandomization = true,
-                SubjectNo = t.ScreeningNumber,
-                RandomizationNumber = t.RandomizationNumber,
-                Visit= projectDesignVisit
-            }).ToList();
+            var queryList = _screeningTemplateValueRepository.GetQueryStatusByPeridId(projectDesignPeriodId);
+
+            var data = _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
+             && x.PatientStatusId == ScreeningPatientStatus.Screening).Select(t => new DataCaptureGridData
+             {
+                 RandomizationId = t.Id,
+                 ScreeningEntryId = t.ScreeningEntry.Id,
+                 VolunteerName = t.Initial,
+                 IsRandomization = true,
+                 SubjectNo = t.ScreeningNumber,
+                 RandomizationNumber = t.RandomizationNumber,
+                 Visit = _screeningVisitRepository.FindByInclude(x => x.DeletedDate == null, x => x.ProjectDesignVisit).Select(t => new DataEntryVisitTemplateDto
+                 {
+                     VisitName = t.ProjectDesignVisit.DisplayName,
+                     ScreeningVisitId = t.Id,
+                     VisitStatus = t.Status,
+                     ScheduleDate = t.VisitStartDate,
+                     ActualDate = t.VisitStartDate,
+                     Count = queryList.Select(q=> new DataEntryTemplateQueryStatus {
+                         Open = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Open),
+                         Answered = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Answered),
+                         Resolved = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Resolved),
+                         ReOpen = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Reopened),
+                         Closed = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Closed),
+                         SelfCorrection = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.SelfCorrection),
+                         Acknowledge = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Resolved),
+                         MyQuery = 0 ,//queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.AcknowledgeLevel == workflowlevel.LevelNo)
+                        // TemplateCount = 
+                     }).FirstOrDefault()
+                 }).ToList()
+             }).ToList();
+
+            #region comment old code
             //var projectIds = _projectRightRepository.GetProjectRightIdList();
             //if (!projectIds.Any()) return new List<DataEntryDto>();
             //var attendances = Context.Attendance.Where(t =>
@@ -232,10 +258,9 @@ namespace GSC.Respository.Screening
             //        dataEntries.Add(dataEntry);
             //    });
             //}
+            #endregion
 
             return result;
-
-
 
         }
 
