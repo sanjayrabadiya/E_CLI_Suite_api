@@ -258,6 +258,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectArtificateDocumentHistory> ProjectArtificateDocumentHistory { get; set; }
         public DbSet<AuditValue> AuditValue { get; set; }
         public DbSet<EconsentSetup> EconsentSetup { get; set; }
+        public DbSet<EconsentReviewDetails> EconsentReviewDetails { get; set; }
         private List<string> ColumnsToSkip
         {
             get

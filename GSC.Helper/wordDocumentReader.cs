@@ -8,9 +8,13 @@ namespace GSC.Helper
 
     public class SectionsHeader
     {
+        public int documentId { get; set; }
+        public int seqNo { get; set; }
+        public string documentName { get; set; }
         public int sectionNo { get; set; }
         public string sectionName { get; set; }
         public string header { get; set; }
+        public bool isReadCompelete { get; set; }
     }
 
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 

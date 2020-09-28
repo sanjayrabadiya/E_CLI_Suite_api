@@ -15,6 +15,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Etmf;
+using GSC.Respository.InformConcent;
 using GSC.Respository.LogReport;
 using GSC.Respository.Master;
 using GSC.Respository.Medra;
@@ -241,6 +242,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectDesignVisitStatusRepository, ProjectDesignVisitStatusRepository>();
             services.AddScoped<IAuditTracker, AuditTracker>();
             services.AddSingleton<IDictionaryCollection, DictionaryCollection>();
+            services.AddScoped<IEconsentReviewDetailsRepository, EconsentReviewDetailsRepository>();
         }
     }
 }

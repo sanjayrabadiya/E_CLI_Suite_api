@@ -22,13 +22,13 @@ namespace GSC.Api.Controllers.InformConcent
         [AllowAnonymous]
         [HttpGet]
         [Route("GetDocumentHeaders")]
-        public IActionResult GetDocumentHeaders()
+        public IActionResult GetDocumentHeaders(int PatientId)
         {
             //var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
             //var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             //var dfdf = System.IO.Path.Combine(upload.DocumentPath, document.DocPath, document.DocumentName);
             //string path = dfdf;
-            string path = "E:\\Neel Doc\\TestingDoc.docx";
+            string path = "C:\\Users\\Shree\\Documents\\ICF_English_A.N.Pharamcia-chlor.docx";
             if (!System.IO.File.Exists(path))
                 return null;
             Stream stream = System.IO.File.OpenRead(path);
