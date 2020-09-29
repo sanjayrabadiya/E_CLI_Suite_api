@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Client;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
@@ -9,12 +10,14 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
+using GSC.Helper.DocumentService;
 using System.Linq;
 
 namespace GSC.Api.Helpers
@@ -145,6 +148,13 @@ namespace GSC.Api.Helpers
 
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
             CreateMap<RegulatoryType, RegulatoryTypeGridDto>().ReverseMap();
+
+            CreateMap<Company, CompanyGridDto>()
+              .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Location.Country.CountryName))
+              .ForMember(x => x.StateName, x => x.MapFrom(a => a.Location.State.StateName))
+              .ForMember(x => x.CityName, x => x.MapFrom(a => a.Location.City.CityName))
+              .ForMember(x => x.Address, x => x.MapFrom(a => a.Location.Address))
+              .ReverseMap();
         }
     }
 }

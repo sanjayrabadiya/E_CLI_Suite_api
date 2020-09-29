@@ -41,8 +41,8 @@ namespace GSC.Api.Controllers.Configuration
         public IActionResult Get(bool isDeleted)
         {
             var companys = _companyRepository.GetCompanies(isDeleted);
-            var companysDto = _mapper.Map<IEnumerable<CompanyDto>>(companys);
-            return Ok(companysDto);
+            //var companysDto = _mapper.Map<IEnumerable<CompanyDto>>(companys);
+            return Ok(companys);
         }
 
         [HttpGet("{id}")]

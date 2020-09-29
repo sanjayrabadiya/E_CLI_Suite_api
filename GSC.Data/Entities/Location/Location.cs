@@ -11,7 +11,9 @@ namespace GSC.Data.Entities.Location
         public int? CityId { get; set; }
         public int? CityAreaId { get; set; }
         public string Zip { get; set; }
-
+        public Country Country { get; set; }
+        public State State { get; set; }
+        public City City { get; set; }
         [NotMapped] public string CityAreaName { get; set; }
 
         [NotMapped] public string CityName { get; set; }

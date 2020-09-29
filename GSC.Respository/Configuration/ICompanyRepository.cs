@@ -9,6 +9,6 @@ namespace GSC.Respository.Configuration
     public interface ICompanyRepository : IGenericRepository<Company>
     {
         List<DropDownDto> GetCompanyDropDown();
-        IList<CompanyDto> GetCompanies(bool isDeleted);
+        IList<CompanyGridDto> GetCompanies(bool isDeleted);
     }
 }
