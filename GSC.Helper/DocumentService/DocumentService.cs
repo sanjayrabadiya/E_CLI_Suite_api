@@ -221,5 +221,24 @@ namespace GSC.Helper.DocumentService
             }
 
         }
+
+        public static string ConvertBase64Image(string imagepath) {
+
+            if (File.Exists(imagepath))
+            {
+                using (var fs = File.Open(imagepath, FileMode.Open))
+                {
+                    //FileStream fs = new FileStream(imagepath, FileMode.Open);
+                    byte[] byData = new byte[fs.Length];
+                    fs.Read(byData, 0, byData.Length);
+                    string extension = Path.GetExtension(fs.Name).Replace(".","");
+                    fs.Close();
+                    var base64 = Convert.ToBase64String(byData);
+                    string imgSrc = String.Format("data:image/{0};base64,{1}", extension, base64);
+                    return imgSrc;
+                }
+            }
+            return "";
+        }
     }
 }

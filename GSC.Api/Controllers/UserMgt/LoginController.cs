@@ -276,8 +276,9 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 login.CompanyName = company.CompanyName;
                 login.CompanyLogo = imageUrl + company.Logo;
-                login.UserPicUrl = imageUrl +
-                                   (authUser.ProfilePic ?? DocumentService.DefulatProfilePic);
+                //login.UserPicUrl = imageUrl +
+                //                   (authUser.ProfilePic ?? DocumentService.DefulatProfilePic);
+                login.UserPicUrl = DocumentService.ConvertBase64Image(imageUrl +(authUser.ProfilePic ?? DocumentService.DefulatProfilePic));
             }
 
             login.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(authUser.CompanyId);
