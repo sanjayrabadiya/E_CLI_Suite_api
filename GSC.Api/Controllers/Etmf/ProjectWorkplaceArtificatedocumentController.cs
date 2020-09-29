@@ -22,7 +22,8 @@ using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using GSC.Api.Helpers;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-
+using Syncfusion.DocIORenderer;
+using Syncfusion.Pdf;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GSC.Api.Controllers.Etmf
@@ -222,46 +223,46 @@ namespace GSC.Api.Controllers.Etmf
             return sfdtText;
         }
 
-        //[HttpPost]
-        //[Route("Save")]
-        //public IActionResult Save([FromBody] CustomParameter param)
-        //{
-        //    string filePath = string.Empty;
-        //    var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(param.id);
+        [HttpPost]
+        [Route("Save")]
+        public IActionResult Save([FromBody] CustomParameter param)
+        {
+            string filePath = string.Empty;
+            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(param.id);
 
-        //    var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-        //    var fileName = projectWorkplaceArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceArtificatedocument.DocumentName.Substring(0, projectWorkplaceArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceArtificatedocument.DocumentName;
-        //    var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
-        //    filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceArtificatedocument.DocPath, docName);
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var fileName = projectWorkplaceArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceArtificatedocument.DocumentName.Substring(0, projectWorkplaceArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceArtificatedocument.DocumentName;
+            var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
+            filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceArtificatedocument.DocPath, docName);
 
-        //    Byte[] byteArray = Convert.FromBase64String(param.documentData);
-        //    Stream stream = new MemoryStream(byteArray);
-        //    FormatType type = GetFormatTypeExport(filePath);
+            Byte[] byteArray = Convert.FromBase64String(param.documentData);
+            Stream stream = new MemoryStream(byteArray);
+            FormatType type = GetFormatTypeExport(filePath);
 
-        //    FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
-        //    if (type != FormatType.Docx)
-        //    {
-        //        Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-        //        document.Save(fileStream, GetDocIOFomatType(type));
-        //        document.Close();
-        //    }
-        //    else
-        //    {
-        //        stream.Position = 0;
-        //        stream.CopyTo(fileStream);
-        //    }
-        //    stream.Dispose();
-        //    fileStream.Dispose();
+            if (type != FormatType.Docx)
+            {
+                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                document.Save(fileStream, GetDocIOFomatType(type));
+                document.Close();
+            }
+            else
+            {
+                stream.Position = 0;
+                stream.CopyTo(fileStream);
+            }
+            stream.Dispose();
+            fileStream.Dispose();
 
-        //    projectWorkplaceArtificatedocument.DocumentName = docName;
-        //    _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
-        //    if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            projectWorkplaceArtificatedocument.DocumentName = docName;
+            _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
 
-        //    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
+            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
 
-        //    return Ok();
-        //}
+            return Ok();
+        }
 
         internal static Syncfusion.DocIO.FormatType GetDocIOFomatType(FormatType type)
         {
@@ -308,6 +309,31 @@ namespace GSC.Api.Controllers.Etmf
                 default:
                     throw new NotSupportedException("EJ2 Document editor does not support this file format.");
             }
+        }
+
+        [HttpPost]
+        [Route("WordToPdf/{id}")]
+        public IActionResult WordToPdf(int id)
+        {
+            var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
+            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+            Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+            DocIORenderer render = new DocIORenderer();
+            render.Settings.PreserveFormFields = true;
+            PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+            render.Dispose();
+            wordDocument.Dispose();
+            MemoryStream outputStream = new MemoryStream();
+            pdfDocument.Save(outputStream);
+            pdfDocument.Close();
+
+            var outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
+            var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
+            FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+            outputStream.WriteTo(file);
+
+            return Ok();
         }
     }
 }
