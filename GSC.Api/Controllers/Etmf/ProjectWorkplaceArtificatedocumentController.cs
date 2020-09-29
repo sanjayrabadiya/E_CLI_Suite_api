@@ -222,46 +222,46 @@ namespace GSC.Api.Controllers.Etmf
             return sfdtText;
         }
 
-        [HttpPost]
-        [Route("Save")]
-        public IActionResult Save([FromBody] CustomParameter param)
-        {
-            string filePath = string.Empty;
-            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(param.id);
+        //[HttpPost]
+        //[Route("Save")]
+        //public IActionResult Save([FromBody] CustomParameter param)
+        //{
+        //    string filePath = string.Empty;
+        //    var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(param.id);
 
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var fileName = projectWorkplaceArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceArtificatedocument.DocumentName.Substring(0, projectWorkplaceArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceArtificatedocument.DocumentName;
-            var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
-            filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceArtificatedocument.DocPath, docName);
+        //    var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+        //    var fileName = projectWorkplaceArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceArtificatedocument.DocumentName.Substring(0, projectWorkplaceArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceArtificatedocument.DocumentName;
+        //    var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
+        //    filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceArtificatedocument.DocPath, docName);
 
-            Byte[] byteArray = Convert.FromBase64String(param.documentData);
-            Stream stream = new MemoryStream(byteArray);
-            FormatType type = GetFormatTypeExport(filePath);
+        //    Byte[] byteArray = Convert.FromBase64String(param.documentData);
+        //    Stream stream = new MemoryStream(byteArray);
+        //    FormatType type = GetFormatTypeExport(filePath);
 
-            FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+        //    FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
-            if (type != FormatType.Docx)
-            {
-                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-                document.Save(fileStream, GetDocIOFomatType(type));
-                document.Close();
-            }
-            else
-            {
-                stream.Position = 0;
-                stream.CopyTo(fileStream);
-            }
-            stream.Dispose();
-            fileStream.Dispose();
+        //    if (type != FormatType.Docx)
+        //    {
+        //        Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+        //        document.Save(fileStream, GetDocIOFomatType(type));
+        //        document.Close();
+        //    }
+        //    else
+        //    {
+        //        stream.Position = 0;
+        //        stream.CopyTo(fileStream);
+        //    }
+        //    stream.Dispose();
+        //    fileStream.Dispose();
 
-            projectWorkplaceArtificatedocument.DocumentName = docName;
-            _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+        //    projectWorkplaceArtificatedocument.DocumentName = docName;
+        //    _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
+        //    if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
 
-            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
+        //    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
         internal static Syncfusion.DocIO.FormatType GetDocIOFomatType(FormatType type)
         {

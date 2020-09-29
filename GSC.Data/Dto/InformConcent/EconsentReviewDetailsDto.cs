@@ -17,5 +17,9 @@ namespace GSC.Data.Dto.InformConcent
         public int TotalNoSection { get; set; }
         public DateTime? investigatorapproveddatetime { get; set; }
         public DateTime? patientapproveddatetime { get; set; }
+        public string? patientdigitalSignBase64 { get; set; }
+        public string? investigatordigitalSignBase64 { get; set; }
+        public string? patientdigitalSignImagepath { get; set; }
+        public string? investigatordigitalSignImagepath { get; set; }
     }
 }

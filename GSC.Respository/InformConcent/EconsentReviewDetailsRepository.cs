@@ -46,7 +46,7 @@ namespace GSC.Respository.InformConcent
             var data = (from econsentsetups in Context.EconsentSetup.Where(x => x.ProjectId == projectid)
                         join EconsentReviewDetails in Context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsApprovedByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentDocumentId
                         join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
-                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null) on attendance.Id equals 91//nonregister.AttendanceId
+                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null) on 91 equals nonregister.Id //attendance.Id equals nonregister.AttendanceId
                         select new DropDownDto
                         {
                             Id = attendance.Id,
@@ -72,7 +72,7 @@ namespace GSC.Respository.InformConcent
             var data = (from econsentsetups in Context.EconsentSetup.Where(x => x.ProjectId == projectid)
                         join EconsentReviewDetails in Context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsApprovedByInvestigator == true) on econsentsetups.Id equals EconsentReviewDetails.EconsentDocumentId
                         join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
-                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null) on attendance.Id equals 91//nonregister.AttendanceId
+                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null) on 91 equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
                         select new EconsentReviewDetailsDto
                         {
                             Id = EconsentReviewDetails.Id,

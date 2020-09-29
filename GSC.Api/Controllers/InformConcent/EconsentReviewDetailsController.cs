@@ -9,7 +9,9 @@ using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Helper.DocumentService;
 using GSC.Respository.Attendance;
+using GSC.Respository.Configuration;
 using GSC.Respository.InformConcent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -30,11 +32,13 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IRandomizationRepository _noneRegisterRepository;
         private readonly GscContext _context;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         public EconsentReviewDetailsController(IUnitOfWork<GscContext> uow,
             IMapper mapper,
             IEconsentSetupRepository econsentSetupRepository,
             IRandomizationRepository noneRegisterRepository,
-            IEconsentReviewDetailsRepository econsentReviewDetailsRepository)
+            IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
+            IUploadSettingRepository uploadSettingRepository)
         {
             _uow = uow;
             _mapper = mapper;
@@ -42,13 +46,14 @@ namespace GSC.Api.Controllers.InformConcent
             _noneRegisterRepository = noneRegisterRepository;
             _context = uow.Context;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         [HttpGet]
         [Route("GetEconsentDocumentHeaders/{patientId}")]
         public IActionResult GetEconsentDocumentHeaders(int patientId)
         {
-            var noneregister = _noneRegisterRepository.Find(patientId);
+            //var noneregister = _noneRegisterRepository.Find(patientId);
             var languageId = 7;//noneregister.LanguageId;
             var ProjectId = 4;//noneregister.ProjectId;
             var Econsentdocuments = _econsentSetupRepository.FindByInclude(x => x.ProjectId == ProjectId && x.LanguageId == languageId && x.DeletedBy == null && x.DeletedDate == null).ToList();
@@ -201,6 +206,16 @@ namespace GSC.Api.Controllers.InformConcent
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+
+            if (econsentReviewDetailsDto.patientdigitalSignBase64?.Length > 0)
+            {
+                FileModel fileModel = new FileModel();
+                fileModel.Base64 = econsentReviewDetailsDto.patientdigitalSignBase64;
+                fileModel.Extension = "png";
+                econsentReviewDetail.patientdigitalSignImagepath = new ImageService().ImageSave(fileModel,
+                    _uploadSettingRepository.GetImagePath(), FolderType.InformConcent);
+            }
+
             _econsentReviewDetailsRepository.Add(econsentReviewDetail);
             
             if (_uow.Save() <= 0) throw new Exception("Creating Econsent review insert failed on save.");
@@ -251,15 +266,24 @@ namespace GSC.Api.Controllers.InformConcent
         }
 
         [HttpPut]
-        [Route("ApproveEconsentDocument/{id}")]
-        public IActionResult ApproveEconsentDocument(int id)
+        [Route("ApproveEconsentDocument")]
+        public IActionResult ApproveEconsentDocument([FromBody] EconsentReviewDetailsDto econsentReviewDetailsDto)
         {
-            if (id <= 0) return BadRequest();
+            if (econsentReviewDetailsDto.Id <= 0) return BadRequest();
 
-            var econsentReviewDetails = _econsentReviewDetailsRepository.Find(id);
+            var econsentReviewDetails = _econsentReviewDetailsRepository.Find(econsentReviewDetailsDto.Id);
             econsentReviewDetails.IsApprovedByInvestigator = true;
             econsentReviewDetails.investigatorapproveddatetime = DateTime.Now;
-            
+
+            if (econsentReviewDetailsDto.investigatordigitalSignBase64?.Length > 0)
+            {
+                FileModel fileModel = new FileModel();
+                fileModel.Base64 = econsentReviewDetailsDto.investigatordigitalSignBase64;
+                fileModel.Extension = "png";
+                econsentReviewDetails.investigatordigitalSignImagepath = new ImageService().ImageSave(fileModel,
+                    _uploadSettingRepository.GetImagePath(), FolderType.InformConcent);
+            }
+
             _econsentReviewDetailsRepository.Update(econsentReviewDetails);
 
             if (_uow.Save() <= 0) throw new Exception("Approving failed");

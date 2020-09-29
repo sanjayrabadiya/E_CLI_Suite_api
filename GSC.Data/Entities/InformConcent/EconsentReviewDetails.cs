@@ -15,6 +15,8 @@ namespace GSC.Data.Entities.InformConcent
         public int ApprovedByRoleId { get; set; }
         public DateTime? investigatorapproveddatetime { get; set; }
         public DateTime? patientapproveddatetime { get; set; }
+        public string? patientdigitalSignImagepath { get; set; }
+        public string? investigatordigitalSignImagepath { get; set; }
 
 
     }

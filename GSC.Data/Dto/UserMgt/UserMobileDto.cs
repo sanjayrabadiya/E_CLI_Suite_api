@@ -28,13 +28,13 @@ namespace GSC.Data.Dto.UserMgt
 
         public int? CompanyId { get; set; }
 
-        public int? FailedLoginAttempts { get; set; }
+        public int FailedLoginAttempts { get; set; }
 
-        public bool IsLocked { get; set; }
+        public string IsLocked { get; set; }
 
-        public bool IsActive { get; set; }
+        public string IsActive { get; set; }
 
-        public bool IsDeleted { get; set; }
+        public string IsDeleted { get; set; }
 
         public bool IsFirstTime { get; set; }
         public PrefLanguage? Language { get; set; }

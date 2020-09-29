@@ -148,6 +148,34 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             var userDto = _mapper.Map<UserMobileDto>(userExists);
+
+            if (Convert.ToBoolean(userDto.IsLocked) == true)
+            {
+                userDto.IsLocked = "User is locked, Please contact your administrator";
+            }
+            else
+            {
+                userDto.IsLocked = "false";
+            }
+
+            if (userExists.ValidFrom.HasValue && userExists.ValidFrom.Value > DateTime.Now ||
+            userExists.ValidTo.HasValue && userExists.ValidTo.Value < DateTime.Now)
+            {
+                userDto.IsActive = "User not active, Please contact your administrator";
+            }
+            else
+            {
+                userDto.IsActive = "false";
+            }
+
+            if (userExists.DeletedDate == null)
+            {
+                userDto.IsDeleted = "false";
+            }
+            else
+            {
+                userDto.IsDeleted = "User is deleted, Please contact your administrator";
+            }
             if (userDto.Language == null)
                 userDto.LanguageShortName = PrefLanguage.en.ToString();
             else
@@ -163,7 +191,7 @@ namespace GSC.Api.Controllers.UserMgt
                     return BadRequest(ModelState);
                 }
                 _uow.Save();
-                return Ok(userDto);
+                    return Ok(userDto);
             }
             else
                 return Ok(userDto);
