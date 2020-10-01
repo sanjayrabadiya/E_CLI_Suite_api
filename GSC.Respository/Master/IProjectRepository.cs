@@ -13,6 +13,8 @@ namespace GSC.Respository.Master
         IList<ProjectGridDto> GetProjectList(bool isDeleted);
         void Save(Data.Entities.Master.Project project);
         string Duplicate(Data.Entities.Master.Project objSave);
+        string CheckAttendanceLimitPost(Data.Entities.Master.Project objSave);
+        string CheckAttendanceLimitPut(Data.Entities.Master.Project objSave);
         List<DropDownDto> GetProjectNumberDropDown();
         Task<ProjectDetailDto> GetProjectDetailWithPeriod(int projectId);
         IList<ProjectDropDown> GetProjectForAttendance(bool isStatic);

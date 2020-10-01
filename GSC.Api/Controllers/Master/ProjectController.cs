@@ -68,7 +68,7 @@ namespace GSC.Api.Controllers.Master
             projectDto.NoofSite = _projectRepository.GetNoOfSite(id);
 
             var projectDesign = _projectDesignRepository.All.Where(t => t.ProjectId == id && t.DeletedDate == null).FirstOrDefault();
-            projectDto.ProjectDesignId = projectDesign == null ? (int?) null : projectDesign.Id;
+            projectDto.ProjectDesignId = projectDesign == null ? (int?)null : projectDesign.Id;
 
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
@@ -88,6 +88,17 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             projectDto.Id = 0;
             var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
+
+            if (projectDto.ParentProjectId > 0)
+            {
+                var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPost(project);
+                if (!string.IsNullOrEmpty(CheckAttendanceLimit))
+                {
+                    ModelState.AddModelError("Message", CheckAttendanceLimit);
+                    return BadRequest(ModelState);
+                }
+            }
+
             var validate = _projectRepository.Duplicate(project);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -120,6 +131,17 @@ namespace GSC.Api.Controllers.Master
 
             var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
             project.Id = projectDto.Id;
+
+            if (projectDto.ParentProjectId > 0)
+            {
+                var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPut(project);
+                if (!string.IsNullOrEmpty(CheckAttendanceLimit))
+                {
+                    ModelState.AddModelError("Message", CheckAttendanceLimit);
+                    return BadRequest(ModelState);
+                }
+            }
+
             var validate = _projectRepository.Duplicate(project);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -245,7 +267,7 @@ namespace GSC.Api.Controllers.Master
             var projectStatic = _projectRepository
                 .FindBy(t => t.Id == projectId && t.DeletedDate == null).FirstOrDefault();
 
-            var projectStaticDto = _mapper.Map<ProjectDto>(projectStatic);            
+            var projectStaticDto = _mapper.Map<ProjectDto>(projectStatic);
 
             return Ok(projectStaticDto);
         }
@@ -271,7 +293,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetAutoNumber()
         {
             var autoNumber = _projectRepository.GetAutoNumber();
-            ModelState.AddModelError("AutoNumber", autoNumber);            
+            ModelState.AddModelError("AutoNumber", autoNumber);
             return Ok(ModelState);
         }
 

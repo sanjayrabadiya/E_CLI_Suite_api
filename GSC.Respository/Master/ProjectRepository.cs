@@ -66,7 +66,7 @@ namespace GSC.Respository.Master
             var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && projectList.Contains(x.Id) && x.ParentProjectId == null).
                  ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
-          
+
             return projects;
         }
 
@@ -225,6 +225,36 @@ namespace GSC.Respository.Master
             return "";
         }
 
+        public string CheckAttendanceLimitPost(Data.Entities.Master.Project objSave)
+        {
+            int? sum = All.AsNoTracking().Where(t => t.ParentProjectId == objSave.ParentProjectId && t.DeletedDate == null)
+                        .Select(t => t.AttendanceLimit ?? 0).Sum() + objSave.AttendanceLimit;
+            int? subSum = All.AsNoTracking().Where(x => x.Id == objSave.ParentProjectId).FirstOrDefault().AttendanceLimit;
+
+            if (subSum < sum)
+            {
+                return "Subject Limit out of range";
+            }
+            return "";
+        }
+
+        public string CheckAttendanceLimitPut(Data.Entities.Master.Project objSave)
+        {
+            int? limit = All.AsNoTracking().Where(x => x.Id == objSave.Id).FirstOrDefault().AttendanceLimit;
+
+            int? sum = All.AsNoTracking().Where(t => t.ParentProjectId == objSave.ParentProjectId && t.DeletedDate == null)
+                        .Select(t => t.AttendanceLimit ?? 0).Sum() - limit + objSave.AttendanceLimit;
+
+            //int? total = sum + objSave.AttendanceLimit;
+
+            int? subSum = All.AsNoTracking().Where(x => x.Id == objSave.ParentProjectId).FirstOrDefault().AttendanceLimit;
+
+            if (subSum < sum)
+            {
+                return "Subject Limit out of range";
+            }
+            return "";
+        }
         public async Task<ProjectDetailDto> GetProjectDetailWithPeriod(int projectId)
         {
             return await All.Where(x => x.Id == projectId)
