@@ -193,17 +193,17 @@ namespace GSC.Respository.Master
             if (objSave.ParentProjectId != null || objSave.ParentProjectId <= 0)
             {
                 if (All.Any(x => x.Id != objSave.Id && x.ParentProjectId == objSave.ParentProjectId && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
-                    return "Duplicate Project Code : " + objSave.ProjectCode;
+                    return "Duplicate Site Code : " + objSave.ProjectCode;
             }
 
             if (objSave.ParentProjectId == null || objSave.ParentProjectId <= 0)
             {
                 if (All.AsNoTracking().Any(x =>
                     x.Id != objSave.Id && x.ProjectName == objSave.ProjectName && x.DeletedDate == null))
-                    return "Duplicate Project name : " + objSave.ProjectName;
+                    return "Duplicate Site name : " + objSave.ProjectName;
 
                 if (All.Any(x => x.Id != objSave.Id && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
-                    return "Duplicate Project Code : " + objSave.ProjectCode;
+                    return "Duplicate Site Code : " + objSave.ProjectCode;
             }
 
             if (objSave.Id > 0 && objSave.AttendanceLimit != null && !objSave.IsStatic)
