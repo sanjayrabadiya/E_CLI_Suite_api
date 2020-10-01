@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Syncfusion.DocIO.Utilities;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
-using Syncfusion.EJ2.PdfViewer;
 using Microsoft.AspNetCore.Cors;
 
 namespace GSC.Api.Controllers.InformConcent
@@ -195,15 +194,15 @@ namespace GSC.Api.Controllers.InformConcent
             } else if (extension == ".pdf")
             {
                 string sfdtText = "";
-                PdfRenderer pdfviewer = new PdfRenderer();
-                object jsonResult = new object();
-                Dictionary<string, string> jsonObject = new Dictionary<string, string>();
-                jsonObject.Add("isFileName", "true");
-                jsonObject.Add("document", path);
-                jsonResult = pdfviewer.Load(stream, jsonObject);
-                sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(jsonResult);
+                //PdfRenderer pdfviewer = new PdfRenderer();
+                //object jsonResult = new object();
+                //Dictionary<string, string> jsonObject = new Dictionary<string, string>();
+                //jsonObject.Add("isFileName", "true");
+                //jsonObject.Add("document", path);
+                //jsonResult = pdfviewer.Load(stream, jsonObject);
+                //sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(jsonResult);
                 string json = sfdtText;
-                stream.Close();
+                //stream.Close();
                 type = "pdf";
                 econsentSectionReferenceDocument.type = type;
                 econsentSectionReferenceDocument.data = json;

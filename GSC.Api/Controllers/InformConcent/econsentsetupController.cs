@@ -9,6 +9,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Medra;
 using GSC.Data.Entities.InformConcent;
+using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
 using GSC.Respository.Configuration;
@@ -21,26 +22,28 @@ namespace GSC.Api.Controllers.InformConcent
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class econsentsetupController : BaseController
+    public class econsentsetupController : ControllerBase
     {
         private readonly IEconsentSetupRepository _econsentSetupRepository;
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWork<GscContext> _uow;
         private readonly IMapper _mapper;
         private readonly ILanguageRepository _languageRepository;
         private readonly IDocumentTypeRepository _documentTypeRepository;
         private readonly IPatientStatusRepository _patientStatusRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IEconsentSetupPatientStatusRepository _econsentSetupPatientStatusRepository;
 
         public econsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
-            IUnitOfWork uow,
+            IUnitOfWork<GscContext> uow,
             IMapper mapper,
             ILanguageRepository languageRepository,
             IDocumentTypeRepository documentTypeRepository,
             IPatientStatusRepository patientStatusRepository,
             IProjectRepository projectRepository,
-            IUploadSettingRepository uploadSettingRepository)
+            IUploadSettingRepository uploadSettingRepository,
+            IEconsentSetupPatientStatusRepository econsentSetupPatientStatusRepository)
         {
             _econsentSetupRepository = econsentSetupRepository;
             _uow = uow;
@@ -50,6 +53,7 @@ namespace GSC.Api.Controllers.InformConcent
             _patientStatusRepository = patientStatusRepository;
             _projectRepository = projectRepository;
             _uploadSettingRepository = uploadSettingRepository;
+            _econsentSetupPatientStatusRepository = econsentSetupPatientStatusRepository;
         }
 
 
@@ -65,7 +69,7 @@ namespace GSC.Api.Controllers.InformConcent
                 item.LanguageName = _languageRepository.Find(item.LanguageId).LanguageName;
                 item.ProjectName = _projectRepository.Find(item.ProjectId).ProjectName;
                 item.DocumentTypeName = _documentTypeRepository.Find(item.DocumentTypeId).TypeName;
-                item.PatientStatusName = _patientStatusRepository.Find(item.PatientStatusId).StatusName;
+                //item.PatientStatusName = _patientStatusRepository.Find(item.PatientStatusId).StatusName;
                 item.IsDeleted = isDeleted;
             }
             return Ok(econsentSetupsdto);
@@ -79,8 +83,10 @@ namespace GSC.Api.Controllers.InformConcent
             {
                 return BadRequest();
             }
-            var econsentSetup = _econsentSetupRepository.Find(id);
+            var econsentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id, x => x.PatientStatus).FirstOrDefault();
             var econsentSetupDto = _mapper.Map<EconsentSetupDto>(econsentSetup);
+            if (econsentSetupDto != null && econsentSetupDto.PatientStatus != null)
+                econsentSetupDto.PatientStatus = econsentSetupDto.PatientStatus.Where(x => x.DeletedDate == null).ToList();
             return Ok(econsentSetupDto);
         }
 
@@ -106,11 +112,13 @@ namespace GSC.Api.Controllers.InformConcent
             if (record == null)
                 return NotFound();
 
+
             EconsentSetupDto econsentSetupDto = new EconsentSetupDto();
             econsentSetupDto.Id = record.Id;
             econsentSetupDto.LanguageId = record.LanguageId;
             econsentSetupDto.Version = record.Version;
-            
+            econsentSetupDto.PatientStatus = record.PatientStatus;
+
             var validate = _econsentSetupRepository.Duplicate(econsentSetupDto);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -155,7 +163,7 @@ namespace GSC.Api.Controllers.InformConcent
             }
 
             var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
-            
+
             _econsentSetupRepository.Add(econsent);
             string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.Language, obj.Version, obj.RootName);
             if (_uow.Save() <= 0)
@@ -189,7 +197,8 @@ namespace GSC.Api.Controllers.InformConcent
             document.DocumentName = econsentSetupDto.DocumentName;
             document.LanguageId = econsentSetupDto.LanguageId;
             document.Version = econsentSetupDto.Version;
-            document.PatientStatusId = econsentSetupDto.PatientStatusId;
+            document.PatientStatus = econsentSetupDto.PatientStatus;
+            //document.PatientStatusId = econsentSetupDto.PatientStatusId;
 
             var language = _languageRepository.Find(econsentSetupDto.LanguageId);
             var version = econsentSetupDto.Version;
@@ -198,20 +207,52 @@ namespace GSC.Api.Controllers.InformConcent
             {
                 if (econsentSetupDto.FileModel?.Base64?.Length > 0)
                 {
-                    document.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, language.LanguageName, econsentSetupDto.Version, "MedAscii");
+                    document.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, language.LanguageName, econsentSetupDto.Version, "EconsentSetup");
 
                 }
             }
-            
 
-            var econsent = _mapper.Map<EconsentSetup>(document);
-            _econsentSetupRepository.Update(econsent);
+
+            //var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
+            UpdatePatientStatus(document);
+            _econsentSetupRepository.Update(document);
 
             if (_uow.Save() <= 0)
             {
                 throw new Exception($"Updating Econsent file failed on save.");
             }
-            return Ok(econsent.Id);
+            return Ok(document.Id);
+        }
+
+        private void UpdatePatientStatus(EconsentSetup econsentSetup)
+        {
+            var patientstatusDelete = _econsentSetupPatientStatusRepository.FindBy(x => x.EconsentDocumentId == econsentSetup.Id).ToList();
+            foreach (var item in patientstatusDelete)
+            {
+                item.DeletedDate = DateTime.Now;
+                _econsentSetupPatientStatusRepository.Update(item);
+            }
+
+            for (var i = 0; i < econsentSetup.PatientStatus.Count; i++)
+            {
+                var i1 = i;
+                var patientstatus = _econsentSetupPatientStatusRepository.FindBy(x => x.PatientStatusId == econsentSetup.PatientStatus[i1].PatientStatusId
+                                                               && x.EconsentDocumentId == econsentSetup.PatientStatus[i1].EconsentDocumentId)
+                    .FirstOrDefault();
+                if (patientstatus != null)
+                {
+                    patientstatus.DeletedDate = null;
+                    patientstatus.DeletedBy = null;
+                    econsentSetup.PatientStatus[i] = patientstatus;
+                }
+            }
+        }
+
+        [HttpGet]
+        [Route("GetEconsentDocumentDropDown/{projectId}")]
+        public IActionResult GetEconsentDocumentDropDown(int projectId)
+        {
+            return Ok(_econsentSetupRepository.GetEconsentDocumentDropDown(projectId));
         }
     }
 }

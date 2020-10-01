@@ -142,6 +142,25 @@ namespace GSC.Helper.DocumentService
             return fileName;
         }
 
+        public static string SaveEconsentSectionReferenceFile(FileModel file, string path, FolderType folderType, string Rootname)
+        {
+            string[] paths = { path, folderType.ToString(), Rootname };
+            var fullPath = Path.Combine(paths);
+
+            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+
+            file.Base64 = file.Base64.Split("base64,")[1];
+
+            var strGuid = Guid.NewGuid() + "." + file.Extension;
+            var fileName = Path.Combine(folderType.ToString(), Rootname, strGuid);
+
+            var imageBytes = Convert.FromBase64String(file.Base64);
+            var documentPath = Path.Combine(path, fileName);
+            File.WriteAllBytes(documentPath, imageBytes);
+
+            return fileName;
+        }
+
 
         public static string SaveMedraFile(FileModel file, string path, FolderType folderType, string Language, string Version, string Rootname)
         {
