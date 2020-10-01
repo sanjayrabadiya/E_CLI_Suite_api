@@ -259,6 +259,8 @@ namespace GSC.Domain.Context
         public DbSet<AuditValue> AuditValue { get; set; }
         public DbSet<EconsentSetup> EconsentSetup { get; set; }
         public DbSet<EconsentReviewDetails> EconsentReviewDetails { get; set; }
+        public DbSet<EconsentSetupPatientStatus> EconsentSetupPatientStatus { get; set; }
+        public DbSet<EconsentSectionReference> EconsentSectionReference { get; set; }
         public DbSet<RegulatoryType> RegulatoryType { get; set; }
         public DbSet<ProjectArtificateDocumentApprover> ProjectArtificateDocumentApprover { get; set; }
         private List<string> ColumnsToSkip

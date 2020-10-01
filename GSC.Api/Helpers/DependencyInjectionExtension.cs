@@ -246,6 +246,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEconsentSetupRepository, EconsentSetupRepository>();
             services.AddScoped<IRegulatoryTypeRepository, RegulatoryTypeRepository>();
             services.AddScoped<IProjectArtificateDocumentApproverRepository, ProjectArtificateDocumentApproverRepository>();
+            services.AddScoped<IEconsentSetupPatientStatusRepository, EconsentSetupPatientStatusRepository>();
+            services.AddScoped<IEconsentSectionReferenceRepository, EconsentSectionReferenceRepository>();
         }
     }
 }

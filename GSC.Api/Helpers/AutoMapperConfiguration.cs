@@ -269,6 +269,8 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentReviewDetails, EconsentReviewDetailsDto>().ReverseMap();
             CreateMap<RegulatoryType, RegulatoryTypeDto>().ReverseMap();
             CreateMap<ProjectArtificateDocumentApprover, ProjectArtificateDocumentApproverDto>().ReverseMap();
+            CreateMap<EconsentSetupPatientStatus, EconsentSetupPatientStatusDto>().ReverseMap();
+            CreateMap<EconsentSectionReference, EconsentSectionReferenceDto>().ReverseMap();
         }
     }
 }

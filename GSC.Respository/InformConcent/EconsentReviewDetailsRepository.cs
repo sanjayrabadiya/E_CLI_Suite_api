@@ -45,11 +45,12 @@ namespace GSC.Respository.InformConcent
             //var econsentsetups = _econsentSetupRepository.All.Where(x => x.ProjectId == projectid).ToList();
             var data = (from econsentsetups in Context.EconsentSetup.Where(x => x.ProjectId == projectid)
                         join EconsentReviewDetails in Context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsApprovedByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentDocumentId
-                        join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
-                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null) on 91 equals nonregister.Id //attendance.Id equals nonregister.AttendanceId
+                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 91) on EconsentReviewDetails.AttendanceId equals nonregister.Id //attendance.Id equals nonregister.AttendanceId
+                        //join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
+
                         select new DropDownDto
                         {
-                            Id = attendance.Id,
+                            Id = nonregister.Id,
                             Value = nonregister.Initial + " " + nonregister.ScreeningNumber
                         }).Distinct().ToList();
 
@@ -71,8 +72,9 @@ namespace GSC.Respository.InformConcent
         {
             var data = (from econsentsetups in Context.EconsentSetup.Where(x => x.ProjectId == projectid)
                         join EconsentReviewDetails in Context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsApprovedByInvestigator == true) on econsentsetups.Id equals EconsentReviewDetails.EconsentDocumentId
-                        join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
-                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null) on 91 equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
+                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 91) on EconsentReviewDetails.AttendanceId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
+                        //join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
+
                         select new EconsentReviewDetailsDto
                         {
                             Id = EconsentReviewDetails.Id,

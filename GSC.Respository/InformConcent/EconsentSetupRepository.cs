@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -27,6 +28,14 @@ namespace GSC.Respository.InformConcent
                 return "Duplicate Dictionary";
             }
             return "";
+        }
+
+        public List<DropDownDto> GetEconsentDocumentDropDown(int projectId)
+        {
+            return All.Where(x =>
+                   x.ProjectId == projectId && x.DeletedDate == null)
+               .Select(c => new DropDownDto { Id = c.Id, Value = c.DocumentName, IsDeleted = false }).OrderBy(o => o.Value)
+               .ToList();
         }
     }
 }
