@@ -333,6 +333,10 @@ namespace GSC.Api.Controllers.Etmf
             FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
             outputStream.WriteTo(file);
 
+            document.DocumentName = outputname;
+            _projectWorkplaceArtificatedocumentRepository.Update(document);
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+
             return Ok();
         }
     }
