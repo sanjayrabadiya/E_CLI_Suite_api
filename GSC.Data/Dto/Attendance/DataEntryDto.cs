@@ -29,16 +29,16 @@ namespace GSC.Data.Dto.Attendance
 
     public class DataEntryTemplateQueryStatus
     {
-        public int NotStarted { get; set; }
-        public int InProgress { get; set; }
-        public int MyQuery { get; set; }
-        public int Open { get; set; }
-        public int ReOpen { get; set; }
-        public int Answered { get; set; }
-        public int Resolved { get; set; }
-        public int Closed { get; set; }
-        public int SelfCorrection { get; set; }
-        public int Acknowledge { get; set; }
+        public int? NotStarted { get; set; }
+        public int? InProgress { get; set; }
+        public int? MyQuery { get; set; }
+        public int? Open { get; set; }
+        public int? ReOpen { get; set; }
+        public int? Answered { get; set; }
+        public int? Resolved { get; set; }
+        public int? Closed { get; set; }
+        public int? SelfCorrection { get; set; }
+        public int? Acknowledge { get; set; }
         public List<WorkFlowTemplateCount> TemplateCount { get; set; }
     }
 
