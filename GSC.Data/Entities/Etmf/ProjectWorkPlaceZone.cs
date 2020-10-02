@@ -14,7 +14,7 @@ namespace GSC.Data.Entities.Etmf
         public List<ProjectWorkplaceSection> ProjectWorkplaceSection { get; set; }
 
         public EtmfZoneMasterLibrary EtmfZoneMasterLibrary { get; set; }
-
+        public ProjectWorkplaceDetail ProjectWorkplaceDetail { get; set; }
         public int? CompanyId { get; set; }
     }
 }

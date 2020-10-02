@@ -55,6 +55,15 @@ namespace GSC.Respository.EmailSender
             emailMessage.MessageBody = ReplaceBodyForPDF(emailMessage.MessageBody, userName, projectName, linkOfPdf);
             _emailService.SendMail(emailMessage);
         }
+
+        public void SendApproverEmailOfArtificate(string toMail, string userName, string documentName, string ArtificateName)
+        {
+            var emailMessage = ConfigureEmail("ArtificateApprover", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName);
+            _emailService.SendMail(emailMessage);
+        }
+
         private string ReplaceBodyForPDF(string body, string userName, string project, string linkOfPdf)
         {
             body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
@@ -101,6 +110,22 @@ namespace GSC.Respository.EmailSender
                 RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##password##", password, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>password</strong>##", "<strong>" + password + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceBodyForArtificate(string body, string userName, string documentName, string artificateName)
+        {
+            body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##artificateName##", artificateName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>artificateName</strong>##", "<strong>" + artificateName + "</strong>",
                 RegexOptions.IgnoreCase);
             return body;
         }
