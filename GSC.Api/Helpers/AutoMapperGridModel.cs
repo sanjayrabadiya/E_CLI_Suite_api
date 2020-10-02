@@ -75,6 +75,12 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.CategoryName, y => y.MapFrom(a => a.CategoryName)).ReverseMap();
             CreateMap<MedraVersion, MedraVersionGridDto>().ReverseMap();
             CreateMap<MedraLanguage, MedraLanguageGridDto>().ReverseMap();
+
+
+            //creator : Darshil
+            //date : 10/02/2020
+            //description : Add CollectionValue using comma separator
+            //end region : VariableGridDto
             CreateMap<Variable, VariableGridDto>()
                  .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
                  .ForMember(x => x.AnnotationType, x => x.MapFrom(a => a.AnnotationType.AnnotationeName))
@@ -87,6 +93,7 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.DataType, x => x.MapFrom(a => a.DataType))
                  .ForMember(x => x.Length, x => x.MapFrom(a => a.Length))
                  .ForMember(x => x.ValidationType, x => x.MapFrom(a => a.ValidationType))
+                 .ForMember(x => x.CollectionValue, x => x.MapFrom(a => string.Join(", ", a.Values.ToList().Select(x => x.ValueName))))
                  .ForMember(x => x.DateValidate, x => x.MapFrom(a => a.DateValidate)).ReverseMap();
             CreateMap<PatientStatus, PatientStatusGridDto>().ReverseMap();
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();

@@ -84,5 +84,6 @@ namespace GSC.Data.Dto.Master
         public string DefaultValue { get; set; }
         public string LowRangeValue { get; set; }
         public string HighRangeValue { get; set; }
+        public string CollectionValue { get; set; }
     }
 }

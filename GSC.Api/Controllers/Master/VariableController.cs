@@ -52,9 +52,6 @@ namespace GSC.Api.Controllers.Master
         {
             var variables = _variableRepository.GetVariableList(isDeleted);
             return Ok(variables);
-            //var variables = _variableRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(variablesDto);
         }
 
 
@@ -62,7 +59,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values,t=>t.Remarks).FirstOrDefault();
+            var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values, t => t.Remarks).FirstOrDefault();
 
             //if (variable.Values != null)
             //    variable.Values = variable.Values.Where(x => x.DeletedDate == null).ToList();
@@ -136,7 +133,7 @@ namespace GSC.Api.Controllers.Master
         {
             var data = _variableRemarksRepository.FindBy(x => x.VariableId == variable.Id).ToList();
             var deleteRemarks = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-          
+
             foreach (var value in deleteRemarks)
                 _variableRemarksRepository.Remove(value);
 
