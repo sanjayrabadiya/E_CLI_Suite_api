@@ -200,10 +200,10 @@ namespace GSC.Respository.Master
             {
                 if (All.AsNoTracking().Any(x =>
                     x.Id != objSave.Id && x.ProjectName == objSave.ProjectName && x.DeletedDate == null))
-                    return "Duplicate Site name : " + objSave.ProjectName;
+                    return "Duplicate Study name : " + objSave.ProjectName;
 
                 if (All.Any(x => x.Id != objSave.Id && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
-                    return "Duplicate Site Code : " + objSave.ProjectCode;
+                    return "Duplicate Study Code : " + objSave.ProjectCode;
             }
 
             if (objSave.Id > 0 && objSave.AttendanceLimit != null && !objSave.IsStatic)

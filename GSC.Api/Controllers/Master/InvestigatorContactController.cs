@@ -25,12 +25,14 @@ namespace GSC.Api.Controllers.Master
         private readonly ICityRepository _cityRepository;
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
+        private readonly IManageSiteRepository _manageSiteRepository;
 
         public InvestigatorContactController(IInvestigatorContactRepository investigatorContactRepository,
             IUnitOfWork uow, IMapper mapper, IIecirbRepository iecirbRepository,
             ICityRepository cityRepository,
             IStateRepository stateRepository,
-            ICountryRepository countryRepository)
+            ICountryRepository countryRepository,
+            IManageSiteRepository manageSiteRepository)
         {
             _investigatorContactRepository = investigatorContactRepository;
             _uow = uow;
@@ -39,6 +41,7 @@ namespace GSC.Api.Controllers.Master
             _cityRepository = cityRepository;
             _stateRepository = stateRepository;
             _countryRepository = countryRepository;
+            _manageSiteRepository = manageSiteRepository;
         }
 
         // GET: api/<controller>
@@ -68,6 +71,8 @@ namespace GSC.Api.Controllers.Master
             investigatorContactDto.CityName = _cityRepository.Find(investigatorContactDto.CityId).CityName;
             investigatorContactDto.StateName = _stateRepository.Find(investigatorContact.City.State.Id).StateName;
             investigatorContactDto.CountryName = _countryRepository.Find(investigatorContact.City.State.Country.Id).CountryName;
+            investigatorContactDto.SiteName = _manageSiteRepository.Find(investigatorContactDto.ManageSiteId).SiteName;
+            investigatorContactDto.SiteAddress = _manageSiteRepository.Find(investigatorContactDto.ManageSiteId).SiteAddress;
 
 
             return Ok(investigatorContactDto);

@@ -38,6 +38,7 @@ namespace GSC.Data.Dto.Master
         public int StateId { get; set; }
         public int CountryId { get; set; }
         public int? CompanyId { get; set; }
+        public string SiteAddress { get; set; }
     }
 
     public class InvestigatorContactGridDto : BaseAuditDto
