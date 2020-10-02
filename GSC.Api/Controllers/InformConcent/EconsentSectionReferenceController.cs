@@ -163,6 +163,14 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(_econsentSectionReferenceRepository.GetEconsentDocumentSectionDropDown(documentId));
         }
 
+        [HttpGet]
+        [Route("GetEconsentDocumentSectionReference/{documentId}/{sectionNo}")]
+        public IActionResult GetEconsentDocumentSectionReference(int documentId,int sectionNo)
+        {
+            var references = _econsentSectionReferenceRepository.FindBy(x => x.EconsentDocId == documentId && x.SectionNo == sectionNo).ToList();
+            return Ok(references);
+        }
+
         [HttpPost]
         [Route("GetEconsentSectionReferenceDocument/{id}")]
         public IActionResult GetEconsentDocument(int id)
@@ -193,19 +201,11 @@ namespace GSC.Api.Controllers.InformConcent
                 return Ok(econsentSectionReferenceDocument);
             } else if (extension == ".pdf")
             {
-                string sfdtText = "";
-                //PdfRenderer pdfviewer = new PdfRenderer();
-                //object jsonResult = new object();
-                //Dictionary<string, string> jsonObject = new Dictionary<string, string>();
-                //jsonObject.Add("isFileName", "true");
-                //jsonObject.Add("document", path);
-                //jsonResult = pdfviewer.Load(stream, jsonObject);
-                //sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(jsonResult);
-                string json = sfdtText;
-                //stream.Close();
+                var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
+                var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
                 type = "pdf";
                 econsentSectionReferenceDocument.type = type;
-                econsentSectionReferenceDocument.data = json;
+                econsentSectionReferenceDocument.data = pdfFullPath;
                 return Ok(econsentSectionReferenceDocument);
             } else
             {

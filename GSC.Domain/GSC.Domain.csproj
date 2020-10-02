@@ -13,6 +13,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="18.2.0.59" />
   </ItemGroup>
 
   <ItemGroup>
