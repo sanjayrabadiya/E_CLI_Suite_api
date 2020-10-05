@@ -65,7 +65,12 @@ namespace GSC.Respository.Configuration
         {
             if (string.IsNullOrEmpty(month)) return "";
 
-            return DateTime.Now.ToString("MM");
+            if (month.ToUpper() == "MM")
+                return DateTime.Now.ToString("MM");
+            if (month.ToUpper() == "MMM")                  // added by Neel for solve MMM display problem 
+                return DateTime.Now.ToString("MMM");
+
+            return "";
         }
 
         private string GetPrefix(string prefix, string separate)
