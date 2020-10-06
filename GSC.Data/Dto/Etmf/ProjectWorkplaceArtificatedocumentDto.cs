@@ -19,7 +19,7 @@ namespace GSC.Data.Dto.Etmf
         public string Zonename { get; set; }
         public string Sectionname { get; set; }
         public string Artificatename { get; set; }
-
+        public bool? IsAccepted { get; set; }
         public int FolderType { get; set; }
         public int ProjectId { get; set; }
         public int CompanyId { get; set; }

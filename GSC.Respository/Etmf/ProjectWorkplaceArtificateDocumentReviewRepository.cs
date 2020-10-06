@@ -42,7 +42,7 @@ namespace GSC.Respository.Etmf
                         RoleId = c.Id,
                         UserId = r.UserId,
                         Name = r.User.UserName,
-                        IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == r.UserId && b.DeletedDate == null)
+                        IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == r.UserId && b.DeletedDate == null && b.IsSendBack == false)
                     }).Where(x => x.IsSelected == false).ToList()
             }).ToList();
 

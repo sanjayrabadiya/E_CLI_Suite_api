@@ -14,7 +14,7 @@ namespace GSC.Data.Entities.Etmf
         public string Version { get; set; }
         public string DocPath { get; set; }
         public int CompanyId { get; set; }
-
+        public bool? IsAccepted { get; set; }
         public ProjectWorkplaceArtificate ProjectWorkplaceArtificate { get; set; }
     }
 }

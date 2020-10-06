@@ -101,6 +101,7 @@ namespace GSC.Api.Controllers.Etmf
                     var username = _userRepository.FindByInclude(x => x.Id == r).Select(y => y.UserName);
                     users.AddRange(username);
                 });
+                var Review = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != _jwtTokenAccesser.UserId && x.DeletedDate == null).ToList();
 
                 CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
                 obj.Id = item.Id;
@@ -118,9 +119,10 @@ namespace GSC.Api.Controllers.Etmf
                 obj.Status = item.Status;
                 obj.Level = 6;
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
-                obj.ReviewStatus = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != _jwtTokenAccesser.UserId && x.DeletedDate == null).All(z => z.IsSendBack) ? "Send Back" : "Send";
+                obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
                 obj.IsSendBack = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).Select(z => z.IsSendBack).LastOrDefault();
                 dataList.Add(obj);
+
             }
             return Ok(dataList);
         }

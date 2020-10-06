@@ -9,5 +9,7 @@ namespace GSC.Respository.Etmf
     public interface IProjectWorkplaceArtificatedocumentRepository : IGenericRepository<ProjectWorkplaceArtificatedocument>
     {
         int deleteFile(int id);
+
+        void UpdateApproveDocument(int documentId, bool IsAccepted);
     }
 }

@@ -17,12 +17,14 @@ namespace GSC.Respository.Etmf
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IUnitOfWork _uow;
         public ProjectWorkplaceArtificatedocumentRepository(IUnitOfWork<GscContext> uow,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository)
            : base(uow, jwtTokenAccesser)
         {
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uow = uow;
         }
 
         public int deleteFile(int id)
@@ -74,6 +76,13 @@ namespace GSC.Respository.Etmf
             System.IO.File.Delete(Path.Combine(filePath));
 
             return id;
+        }
+
+        public void UpdateApproveDocument(int documentId, bool IsAccepted) {
+            var document = All.Where(x => x.Id == documentId).FirstOrDefault();
+            document.IsAccepted = IsAccepted;
+            Update(document);
+            _uow.Save();
         }
     }
 }

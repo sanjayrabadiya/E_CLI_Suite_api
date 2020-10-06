@@ -58,7 +58,8 @@ namespace GSC.Respository.Etmf
             {
                 UserId = c.Id,
                 Name = c.UserName,
-                IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null),
+                IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null 
+                && (b.IsApproved == true || b.IsApproved == null)),
             }).Where(x => x.IsSelected == false).ToList();
 
             return users;
@@ -79,7 +80,7 @@ namespace GSC.Respository.Etmf
                 .ThenInclude(x => x.ProjectWorkplaceArtificate)
                 .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
                 .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
-                .Where(x => x.UserId == _jwtTokenAccesser.UserId && x.ApprovedDate == null && x.RejectedDate == null && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection
+                .Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection
                 .ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId)
                 .Select(s => new DashboardDto
                 {
