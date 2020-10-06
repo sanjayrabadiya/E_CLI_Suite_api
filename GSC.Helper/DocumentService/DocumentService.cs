@@ -123,9 +123,9 @@ namespace GSC.Helper.DocumentService
             return fileName;
         }
 
-        public static string SaveEconsentFile(FileModel file, string path, FolderType folderType, string Language, string Version, string Rootname)
+        public static string SaveEconsentFile(FileModel file, string path, FolderType folderType, string Rootname)
         {
-            string[] paths = { path, folderType.ToString(), Language, Version, Rootname };
+            string[] paths = { path, folderType.ToString(), Rootname };
             var fullPath = Path.Combine(paths);
 
             if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
@@ -133,7 +133,7 @@ namespace GSC.Helper.DocumentService
             file.Base64 = file.Base64.Split("base64,")[1];
 
             var strGuid = Guid.NewGuid() + "." + file.Extension;
-            var fileName = Path.Combine(folderType.ToString(), Language, Version, Rootname, strGuid);
+            var fileName = Path.Combine(folderType.ToString(), Rootname, strGuid);
 
             var imageBytes = Convert.FromBase64String(file.Base64);
             var documentPath = Path.Combine(path, fileName);

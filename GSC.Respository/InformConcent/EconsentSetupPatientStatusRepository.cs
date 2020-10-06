@@ -11,10 +11,10 @@ namespace GSC.Respository.InformConcent
 {
     public class EconsentSetupPatientStatusRepository : GenericRespository<EconsentSetupPatientStatus, GscContext>, IEconsentSetupPatientStatusRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        //private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public EconsentSetupPatientStatusRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) : base(uow, jwtTokenAccesser)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
+            //_jwtTokenAccesser = jwtTokenAccesser;
         }
     }
 }

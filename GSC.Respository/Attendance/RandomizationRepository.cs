@@ -28,6 +28,7 @@ namespace GSC.Respository.Attendance
         private readonly ICountryRepository _countryRepository;
         private readonly ICityRepository _cityRepository;
         private readonly IMapper _mapper;
+        private readonly IPatientStatusRepository _patientStatusRepository;
         public RandomizationRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -37,7 +38,8 @@ namespace GSC.Respository.Attendance
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
             ICityRepository cityRepository,
-             IMapper mapper)
+             IMapper mapper,
+             IPatientStatusRepository patientStatusRepository)
             : base(uow, jwtTokenAccesser)
         {
             _userRepository = userRepository;
@@ -48,6 +50,7 @@ namespace GSC.Respository.Attendance
             _countryRepository = countryRepository;
             _cityRepository = cityRepository;
             _mapper = mapper;
+            _patientStatusRepository = patientStatusRepository;
         }
 
         public void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto)
@@ -64,6 +67,8 @@ namespace GSC.Respository.Attendance
         {
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                    ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            //result.ForEach(x => x.PatientStatusName = x.PatientStatusId.GetDescription());
+            result.ForEach(x => x.PatientStatusName = _patientStatusRepository.Find((int)x.PatientStatusId).StatusName);
             return result;
         }
 

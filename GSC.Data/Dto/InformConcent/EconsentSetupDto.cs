@@ -39,8 +39,6 @@ namespace GSC.Data.Dto.InformConcent
     {
         public string Path { get; set; }
         public FolderType FolderType { get; set; }
-        public string Language { get; set; }
-        public string Version { get; set; }
         public string RootName { get; set; }
         public FileModel FileModel { get; set; }
 

@@ -8,7 +8,6 @@ namespace GSC.Data.Dto.InformConcent
         public int Id { get; set; }
         public int AttendanceId { get; set; }
         public int EconsentDocumentId { get; set; }
-        public int ApprovedSection { get; set; }
         public bool IsApprovedByInvestigator { get; set; }
         public int ApprovedByRoleId { get; set; }
         public string AttendanceName { get; set; }

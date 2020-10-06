@@ -108,13 +108,11 @@ namespace GSC.Api.Controllers.InformConcent
 
             var document = _econsentSectionReferenceRepository.Find(econsentSectionReferenceDto.Id);
 
-            if (document.FilePath == null || document.FilePath == "")
-            {
                 if (econsentSectionReferenceDto.FileModel?.Base64?.Length > 0)
                 {
-                    econsentSectionReferenceDto.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
+                    document.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
                 }
-            }
+            
             document.SectionNo = econsentSectionReferenceDto.SectionNo;
             document.ReferenceTitle = econsentSectionReferenceDto.ReferenceTitle;
             document.EconsentDocId = econsentSectionReferenceDto.EconsentDocId;

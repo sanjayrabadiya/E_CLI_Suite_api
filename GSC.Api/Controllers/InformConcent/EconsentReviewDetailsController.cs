@@ -28,8 +28,6 @@ namespace GSC.Api.Controllers.InformConcent
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork<GscContext> _uow;
-        private readonly IEconsentSetupRepository _econsentSetupRepository;
-        private readonly IRandomizationRepository _noneRegisterRepository;
         private readonly GscContext _context;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
@@ -42,8 +40,6 @@ namespace GSC.Api.Controllers.InformConcent
         {
             _uow = uow;
             _mapper = mapper;
-            _econsentSetupRepository = econsentSetupRepository;
-            _noneRegisterRepository = noneRegisterRepository;
             _context = uow.Context;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -53,68 +49,15 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("GetEconsentDocumentHeaders/{patientId}")]
         public IActionResult GetEconsentDocumentHeaders(int patientId)
         {
-            //var noneregister = _noneRegisterRepository.Find(patientId);
-            var languageId = 7;//noneregister.LanguageId;
-            var ProjectId = 4;//noneregister.ProjectId;
-            var Econsentdocuments = _econsentSetupRepository.FindByInclude(x => x.ProjectId == ProjectId && x.LanguageId == languageId && x.DeletedBy == null && x.DeletedDate == null).ToList();
-            var econsentReviewDetails = _econsentReviewDetailsRepository.FindByInclude(x => x.AttendanceId == patientId).ToList();
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
-            int seqNo = 0;
-            int documentid = 0;
-            foreach (var document in Econsentdocuments)
-            {
-                var FullPath = System.IO.Path.Combine(upload.DocumentPath, document.DocumentPath);
-                string path = FullPath;
-                if (System.IO.File.Exists(path))
-                {
-                    Stream stream = System.IO.File.OpenRead(path);
-                    EJ2WordDocument doc = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
-                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
-                    stream.Close();
-                    doc.Dispose();
-                    JObject jsonstr = JObject.Parse(json);
-                    Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
-                    int sectioncount = 1;
-                    bool isReadcompelete = false;
-                    if (econsentReviewDetails.Where(x => x.EconsentDocumentId == document.Id).ToList().Count > 0)
-                    {
-                        isReadcompelete = true;
-                    }
-                    foreach (var e1 in jsonobj.sections)
-                    {
-                        foreach (var e2 in e1.blocks)
-                        {
-                            if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
-                            {
-                                SectionsHeader sectionsHeader = new SectionsHeader();
-                                sectionsHeader.sectionNo = sectioncount;
-                                sectionsHeader.sectionName = "Section " + sectioncount.ToString();
-                                string headerstring = "";
-                                foreach (var e3 in e2.inlines)
-                                {
-                                    if (e3.text != null)
-                                    {
-                                        headerstring = headerstring + e3.text;
-                                    }
-                                }
-                                sectionsHeader.header = headerstring;
-                                sectionsHeader.documentId = document.Id;
-                                sectionsHeader.documentName = document.DocumentName;
-                                if (documentid != document.Id)
-                                {
-                                    seqNo++;
-                                }
-                                documentid = document.Id;
-                                sectionsHeader.seqNo = seqNo;
-                                sectionsHeader.isReadCompelete = isReadcompelete;
-                                sectionsHeaders.Add(sectionsHeader);
-                                sectioncount++;
-                            }
-                        }
-                    }
-                }
-            }
+            var sectionsHeaders = _econsentReviewDetailsRepository.GetEconsentDocumentHeaders(patientId);
+            return Ok(sectionsHeaders);
+        }
+
+        [HttpGet]
+        [Route("GetEconsentDocumentHeadersByDocumentId/{documentId}")]
+        public IActionResult GetEconsentDocumentHeadersByDocumentId(int documentId)
+        {
+            var sectionsHeaders = _econsentReviewDetailsRepository.GetEconsentDocumentHeadersByDocumentId(documentId);
             return Ok(sectionsHeaders);
         }
 
@@ -123,73 +66,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("ImportSectionData/{id}/{sectionno}")]
         public string ImportSectionData(int id, int sectionno)
         {
-            
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var Econsentdocument = _econsentSetupRepository.Find(id);
-            var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
-            string path = FullPath;
-            //string path = "C:\\Users\\Shree\\Documents\\ICF_English_A.N.Pharamcia-chlor.docx";
-            if (!System.IO.File.Exists(path))
-                return null;
-            Stream stream = System.IO.File.OpenRead(path);
-            //string json = ImportWordDocument(stream);
-            string sfdtText = "";
-            EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
-            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
-            wdocument.Dispose();
-            string json = sfdtText;
-            stream.Position = 0;
-            stream.Close();
-            JObject jsonstr = JObject.Parse(json);
-            Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
-            List<Block> blocks = new List<Block>();
-            int headercount = 0;
-            foreach (var e1 in jsonobj.sections)
-            {
-                foreach (var e2 in e1.blocks)
-                {
-                    if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
-                    {
-                        headercount++;
-                    }
-                    if (sectionno == headercount)
-                    {
-                        blocks.Add(e2);
-                    }
-                }
-            }
-
-            for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
-            {
-                jsonobj.sections[i].blocks = new List<Block>();
-                if (i == 0)
-                {
-                    jsonobj.sections[0].blocks = blocks;
-                }
-            }
-
-
-            string jsonnew = JsonConvert.SerializeObject(jsonobj);
-            //Syncfusion.DocIO.DLS.WordDocument documentold = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-            //Syncfusion.DocIO.DLS.WordDocument documentnew = new Syncfusion.DocIO.DLS.WordDocument();
-            //documentnew.Sections.Clear();
-            //documentnew.Sections.Add(documentold.Sections[sectionno].Clone());
-            //string filePath = "E:\\Neel Doc";//System.IO.Path.Combine(upload.DocumentPath, document.DocPath);
-            //string fileName = id + "_" + sectionno + "_" + DateTime.Now.ToFileTime().ToString() + ".docx"; //+ "_"  + document.DocumentName;
-            //DirectoryInfo info = new DirectoryInfo(filePath);
-            //if (!info.Exists)
-            //{
-            //    info.Create();
-            //}
-            //string pathnew = Path.Combine(filePath, fileName);
-            //FileStream streamnew = new FileStream(pathnew, FileMode.Create);
-            //documentnew.Save(streamnew, Syncfusion.DocIO.FormatType.Docx);
-            //documentold.Close();
-            //documentnew.Close();
-            //streamnew.Position = 0;
-            //streamnew.Close();
-            //System.IO.File.Delete(pathnew);
-            // return new HttpResponseMessage() { Content = new System.Net.Http.StringContent(json) };
+            var jsonnew = _econsentReviewDetailsRepository.ImportSectionData(id, sectionno);
             return jsonnew;
         }
 
@@ -248,20 +125,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("GetEconsentDocument/{id}")]
         public IActionResult GetEconsentDocument(int id)
         {
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var Econsentdocument = _econsentSetupRepository.Find(id);
-            var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
-            string path = FullPath;
-            if (!System.IO.File.Exists(path))
-                return null;
-            Stream stream = System.IO.File.OpenRead(path);
-            //string json = ImportWordDocument(stream);
-            string sfdtText = "";
-            EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
-            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
-            wdocument.Dispose();
-            string json = sfdtText;
-            stream.Close();
+            var json = _econsentReviewDetailsRepository.GetEconsentDocument(id);
             return Ok(json);
         }
 

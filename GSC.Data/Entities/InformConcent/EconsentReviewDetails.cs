@@ -10,7 +10,6 @@ namespace GSC.Data.Entities.InformConcent
         public int Id { get; set; }
         public int AttendanceId { get; set; }
         public int EconsentDocumentId { get; set; }
-        public int ApprovedSection { get; set; }
         public bool IsApprovedByInvestigator { get; set; }
         public int ApprovedByRoleId { get; set; }
         public DateTime? investigatorapproveddatetime { get; set; }
