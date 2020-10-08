@@ -11,5 +11,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetVisitStatusDropDown();
         List<VisitStatusGridDto> GetVisitStatusList(bool isDeleted);
         List<DropDownDto> GetAutoVisitStatusDropDown();
+        List<DropDownDto> GetManualVisitStatusDropDown();
     }
 }

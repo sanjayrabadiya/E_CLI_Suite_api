@@ -50,5 +50,12 @@ namespace GSC.Respository.Master
             return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.IsAuto)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.DisplayName }).OrderBy(o => o.Value).ToList();
         }
+
+        public List<DropDownDto> GetManualVisitStatusDropDown()
+        {
+            int[] id = { 6, 8 };
+            return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && id.Contains(x.Id))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.DisplayName }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

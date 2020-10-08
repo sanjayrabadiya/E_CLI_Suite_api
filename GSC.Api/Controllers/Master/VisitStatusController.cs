@@ -136,5 +136,12 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_visitStatusRepository.GetAutoVisitStatusDropDown());
         }
+
+        [HttpGet]
+        [Route("GetManualVisitStatusDropDown")]
+        public IActionResult GetManualVisitStatusDropDown()
+        {
+            return Ok(_visitStatusRepository.GetManualVisitStatusDropDown());
+        }
     }
 }
