@@ -5,6 +5,7 @@ using GSC.Data.Dto.Etmf;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using GSC.Data.Dto.Master;
 
 namespace GSC.Respository.Etmf
 {
@@ -13,8 +14,9 @@ namespace GSC.Respository.Etmf
         List<ProjectArtificateDocumentReviewDto> UserRoles(int Id);
         void SaveDocumentReview(List<ProjectArtificateDocumentReviewDto> pojectArtificateDocumentReviewDto);
         void SaveByDocumentIdInReview(int projectWorkplaceArtificateDocumentId);
-
         void SendMailToSendBack(ProjectArtificateDocumentReview ReviewDto);
         List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id);
+        List<DashboardDto> GetSendDocumentList(int ProjectId);
+        List<DashboardDto> GetSendBackDocumentList(int ProjectId);
     }
 }

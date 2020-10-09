@@ -100,7 +100,7 @@ namespace GSC.Respository.Etmf
                     + " Pending approve from your side",
                     //ExtraData = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), s.ProjectWorkplaceArtificatedDocument.DocPath, s.ProjectWorkplaceArtificatedDocument.DocumentName),
                     ExtraData = s.ProjectWorkplaceArtificatedDocumentId
-                }).ToList();
+                }).OrderByDescending(x => x.Id).ToList();
 
             return result;
         }

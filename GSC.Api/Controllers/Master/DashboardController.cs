@@ -27,12 +27,14 @@ namespace GSC.Api.Controllers.Master
         private readonly IUnitOfWork _uow;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
+        private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
 
         public DashboardController(IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
+            IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _userRepository = userRepository;
@@ -42,17 +44,18 @@ namespace GSC.Api.Controllers.Master
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
+            _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
         }
 
         [HttpGet]
         [Route("GetMyTaskList/{ProjectId}")]
         public IActionResult GetMyTaskList(int ProjectId)
         {
-            List<DashboardDto> objdashboard = new List<DashboardDto>();
-            var eTMFData = _projectArtificateDocumentApproverRepository.GetEtmfMyTaskList(ProjectId);
-            var eConsentData = _econsentReviewDetailsRepository.GetEconsentMyTaskList(ProjectId);
-            objdashboard.AddRange(eTMFData);
-            objdashboard.AddRange(eConsentData);
+            DashboardDetailsDto objdashboard = new DashboardDetailsDto();
+            objdashboard.eTMFApproveData = _projectArtificateDocumentApproverRepository.GetEtmfMyTaskList(ProjectId);
+            objdashboard.eTMFSendData = _projectWorkplaceArtificateDocumentReviewRepository.GetSendDocumentList(ProjectId);
+            objdashboard.eTMFSendBackData = _projectWorkplaceArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId);
+            //objdashboard.eConsentData = _econsentReviewDetailsRepository.GetEconsentMyTaskList(ProjectId);
             return Ok(objdashboard);
         }
     }

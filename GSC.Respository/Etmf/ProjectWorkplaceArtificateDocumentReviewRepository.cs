@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.UserMgt;
@@ -130,6 +131,54 @@ namespace GSC.Respository.Etmf
                     ModifiedDate = x.ModifiedDate,
                     ModifiedByUser = Context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
                     SendBackDate = x.SendBackDate,
+                }).OrderByDescending(x => x.Id).ToList();
+
+            return result;
+        }
+        
+        public List<DashboardDto> GetSendDocumentList(int ProjectId)
+        {
+            var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
+                .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
+                .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
+                .Where(x => (x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy && x.UserId == _jwtTokenAccesser.UserId)
+                && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection
+                .ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId && x.IsSendBack == false)
+                .Select(s => new DashboardDto
+                {
+                    Id = s.Id,
+                    TaskInformation = s.ProjectWorkplaceArtificatedDocument.DocumentName + " for " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + "_" +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + "_" +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + "_" +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName
+                    + " Pending Review from your side",
+                    ExtraData = s.ProjectWorkplaceArtificatedDocumentId
+                }).OrderByDescending(x=>x.Id).ToList();
+
+            return result;
+        }
+        
+        public List<DashboardDto> GetSendBackDocumentList(int ProjectId)
+        {
+            var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
+                .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
+                .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
+                .Where(x => (x.CreatedBy == x.ProjectWorkplaceArtificatedDocument.CreatedBy && x.CreatedBy == _jwtTokenAccesser.UserId)
+                && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection
+                .ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId && x.IsSendBack == true)
+                .Select(s => new DashboardDto
+                {
+                    Id = s.Id,
+                    TaskInformation = s.ProjectWorkplaceArtificatedDocument.DocumentName + " for " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + "_" +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + "_" +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + "_" +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName
+                    + " get send back document from reviewers ",
+                    ExtraData = s.ProjectWorkplaceArtificatedDocumentId
                 }).OrderByDescending(x => x.Id).ToList();
 
             return result;
