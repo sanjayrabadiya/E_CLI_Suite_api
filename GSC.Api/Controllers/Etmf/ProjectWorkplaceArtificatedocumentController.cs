@@ -81,22 +81,10 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(projectworkplace);
         }
 
-        //[HttpGet("{id}")]
-        //public IActionResult Get(int id)
-        //{
-        //    if (id <= 0) return BadRequest();
-        //    var ProjectWorkplaceArtificateDocument = _projectWorkplaceArtificatedocumentRepository.Find(id);
-        //    var ProjectWorkplaceArtificateDocumentDto = _mapper.Map<ProjectWorkplaceArtificatedocumentDto>(ProjectWorkplaceArtificateDocument);
-        //    return Ok(ProjectWorkplaceArtificateDocumentDto);
-        //}
-
         [Route("GetDocumentList/{id}")]
         [HttpGet]
         public IActionResult GetDocumentList(int id)
         {
-            //var reviewDocumentList = _projectWorkplaceArtificateDocumentReviewRepository.GetProjectArtificateDocumentReviewList();
-            //if (reviewDocumentList == null || reviewDocumentList.Count == 0) return Ok();
-
             var result = _projectWorkplaceArtificatedocumentRepository.GetDocumentList(id);
             return Ok(result);
         }

@@ -46,21 +46,6 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id)
         {
-            //var roles = Context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectArtificateDocumentReviewDto
-            //{
-            //    RoleId = c.Id,
-            //    Name = c.RoleName,
-            //    users = Context.UserRole.Where(a => a.UserRoleId == c.Id && a.User.DeletedDate == null
-            //                                                             && a.DeletedDate == null).Select(r =>
-            //        new ProjectArtificateDocumentReviewDto
-            //        {
-            //            RoleId = c.Id,
-            //            UserId = r.UserId,
-            //            Name = r.User.UserName,
-            //            IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == r.UserId && b.DeletedDate == null && b.IsSendBack == false)
-            //        }).Where(x => x.IsSelected == false).ToList()
-            //}).ToList();
-
             var users = Context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId).Select(c => new ProjectArtificateDocumentReviewDto
             {
                 UserId = c.Id,
@@ -73,13 +58,6 @@ namespace GSC.Respository.Etmf
 
         public void SaveDocumentReview(List<ProjectArtificateDocumentReviewDto> pojectArtificateDocumentReviewDto)
         {
-            //var send = pojectArtificateDocumentReviewDto.SelectMany(x =>
-            //    x.users.Select(c => new ProjectArtificateDocumentReviewDto
-            //    { UserId = c.UserId, IsSelected = c.IsSelected, ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId })).Distinct().ToList();
-
-            //send = send.Distinct().ToList();
-
-            //var userlist = send.Select(c => new { c.UserId, c.IsSelected, c.ProjectWorkplaceArtificatedDocumentId }).Distinct();
             foreach (var ReviewDto in pojectArtificateDocumentReviewDto)
                 if (ReviewDto.IsSelected)
                 {
@@ -122,13 +100,6 @@ namespace GSC.Respository.Etmf
             var user = _userRepository.Find((int)ReviewDto.CreatedBy);
             _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
         }
-
-        //public List<int> GetProjectArtificateDocumentReviewList()
-        //{
-        //    return All.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId
-        //                          //  && c.RoleId == _jwtTokenAccesser.RoleId
-        //                          ).Select(x => x.ProjectWorkplaceArtificatedDocumentId).ToList();
-        //}
 
         public void SaveByDocumentIdInReview(int projectWorkplaceArtificateDocumentId)
         {

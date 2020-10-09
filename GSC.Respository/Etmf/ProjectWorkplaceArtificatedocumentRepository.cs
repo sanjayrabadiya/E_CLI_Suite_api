@@ -22,15 +22,11 @@ namespace GSC.Respository.Etmf
         private readonly IUnitOfWork _uow;
 
         private readonly IUserRepository _userRepository;
-        //private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
-        //private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         public ProjectWorkplaceArtificatedocumentRepository(IUnitOfWork<GscContext> uow,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
            IUserRepository userRepository,
-           //IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository
-           //IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository
            )
            : base(uow, jwtTokenAccesser)
         {
@@ -38,9 +34,7 @@ namespace GSC.Respository.Etmf
             _jwtTokenAccesser = jwtTokenAccesser;
             _uow = uow;
             _userRepository = userRepository;
-            //_projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
-            //_projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
         }
 
         public int deleteFile(int id)
