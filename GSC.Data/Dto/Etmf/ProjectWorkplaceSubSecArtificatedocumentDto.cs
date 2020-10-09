@@ -44,10 +44,12 @@ namespace GSC.Data.Dto.Etmf
         public string Version { get; set; }
         public string CreatedByUser { get; set; }
         public double  Level{ get; set; }
+        public int CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public bool SendBy { get; set; }
         public bool IsSendBack { get; set; }
         public string ReviewStatus { get; set; }
+        public bool? IsAccepted { get; set; }
     }
 
     public class CustomParameter

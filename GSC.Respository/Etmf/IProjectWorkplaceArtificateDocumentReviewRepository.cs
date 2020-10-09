@@ -12,7 +12,10 @@ namespace GSC.Respository.Etmf
     {
         List<ProjectArtificateDocumentReviewDto> UserRoles(int Id);
         void SaveDocumentReview(List<ProjectArtificateDocumentReviewDto> pojectArtificateDocumentReviewDto);
-        List<int> GetProjectArtificateDocumentReviewList();
+        //List<int> GetProjectArtificateDocumentReviewList();
         void SaveByDocumentIdInReview(int projectWorkplaceArtificateDocumentId);
+
+        void SendMailToSendBack(ProjectArtificateDocumentReview ReviewDto);
+        List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id);
     }
 }

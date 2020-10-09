@@ -10,6 +10,8 @@ namespace GSC.Respository.EmailSender
         void SendForgotPasswordEMail(string toMail, string password, string userName);
 
         void SendPdfGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf);
-        void SendApproverEmailOfArtificate(string toMail, string userName, string documentName, string ArtificateName);
+        void SendApproverEmailOfArtificate(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
+        void SendEmailOfReview(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
+        void SendEmailOfSendBack(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
     }
 }

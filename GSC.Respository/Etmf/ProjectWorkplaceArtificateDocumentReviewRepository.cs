@@ -7,6 +7,9 @@ using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.EmailSender;
+using GSC.Respository.UserMgt;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,63 +23,112 @@ namespace GSC.Respository.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
+        private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
+        private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly IUserRepository _userRepository;
         public ProjectWorkplaceArtificateDocumentReviewRepository(IUnitOfWork<GscContext> uow,
-           IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository)
+           IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
+            IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
+            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
+            IEmailSenderRespository emailSenderRespository,
+            IUserRepository userRepository)
            : base(uow, jwtTokenAccesser)
         {
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _uow = uow;
+            _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
+            _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
+            _emailSenderRespository = emailSenderRespository;
+            _userRepository = userRepository;
         }
 
         public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id)
         {
-            var roles = Context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectArtificateDocumentReviewDto
-            {
-                RoleId = c.Id,
-                Name = c.RoleName,
-                users = Context.UserRole.Where(a => a.UserRoleId == c.Id && a.User.DeletedDate == null
-                                                                         && a.DeletedDate == null).Select(r =>
-                    new ProjectArtificateDocumentReviewDto
-                    {
-                        RoleId = c.Id,
-                        UserId = r.UserId,
-                        Name = r.User.UserName,
-                        IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == r.UserId && b.DeletedDate == null && b.IsSendBack == false)
-                    }).Where(x => x.IsSelected == false).ToList()
-            }).ToList();
+            //var roles = Context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectArtificateDocumentReviewDto
+            //{
+            //    RoleId = c.Id,
+            //    Name = c.RoleName,
+            //    users = Context.UserRole.Where(a => a.UserRoleId == c.Id && a.User.DeletedDate == null
+            //                                                             && a.DeletedDate == null).Select(r =>
+            //        new ProjectArtificateDocumentReviewDto
+            //        {
+            //            RoleId = c.Id,
+            //            UserId = r.UserId,
+            //            Name = r.User.UserName,
+            //            IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == r.UserId && b.DeletedDate == null && b.IsSendBack == false)
+            //        }).Where(x => x.IsSelected == false).ToList()
+            //}).ToList();
 
-            return roles;
+            var users = Context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId).Select(c => new ProjectArtificateDocumentReviewDto
+            {
+                UserId = c.Id,
+                Name = c.UserName,
+                IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
+            }).Where(x => x.IsSelected == false).ToList();
+
+            return users;
         }
 
         public void SaveDocumentReview(List<ProjectArtificateDocumentReviewDto> pojectArtificateDocumentReviewDto)
         {
-            var send = pojectArtificateDocumentReviewDto.SelectMany(x =>
-                x.users.Select(c => new ProjectArtificateDocumentReviewDto
-                { UserId = c.UserId, RoleId = c.RoleId, IsSelected = c.IsSelected, ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId })).Distinct().ToList();
+            //var send = pojectArtificateDocumentReviewDto.SelectMany(x =>
+            //    x.users.Select(c => new ProjectArtificateDocumentReviewDto
+            //    { UserId = c.UserId, IsSelected = c.IsSelected, ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId })).Distinct().ToList();
 
-            send = send.Distinct().ToList();
+            //send = send.Distinct().ToList();
 
-            var userlist = send.Select(c => new { c.UserId, c.IsSelected, c.RoleId, c.ProjectWorkplaceArtificatedDocumentId }).Distinct();
-            foreach (var userDto in userlist)
-                if (userDto.IsSelected)
+            //var userlist = send.Select(c => new { c.UserId, c.IsSelected, c.ProjectWorkplaceArtificatedDocumentId }).Distinct();
+            foreach (var ReviewDto in pojectArtificateDocumentReviewDto)
+                if (ReviewDto.IsSelected)
                 {
                     Add(new ProjectArtificateDocumentReview
                     {
-                        ProjectWorkplaceArtificatedDocumentId = userDto.ProjectWorkplaceArtificatedDocumentId,
-                        UserId = userDto.UserId,
-                        RoleId = userDto.RoleId,
+                        ProjectWorkplaceArtificatedDocumentId = ReviewDto.ProjectWorkplaceArtificatedDocumentId,
+                        UserId = ReviewDto.UserId,
                         IsSendBack = false,
                     });
+                    if (_uow.Save() < 0) throw new Exception("Artificate Send failed on save.");
+
+                    SendMailToReviewer(ReviewDto);
                 }
         }
 
-        public List<int> GetProjectArtificateDocumentReviewList()
+        public void SendMailToReviewer(ProjectArtificateDocumentReviewDto ReviewDto)
         {
-            return All.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId
-                                  //  && c.RoleId == _jwtTokenAccesser.RoleId
-                                  ).Select(x => x.ProjectWorkplaceArtificatedDocumentId).ToList();
+            var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
+                   .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                   .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
+                   .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace).ThenInclude(x => x.Project)
+                   .Where(x => x.ProjectWorkplaceArtificatedDocumentId == ReviewDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
+            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName;
+            var document = _projectWorkplaceArtificatedocumentRepository.Find(ReviewDto.ProjectWorkplaceArtificatedDocumentId);
+            var artificate = _projectWorkplaceArtificateRepository.FindByInclude(x => x.Id == document.ProjectWorkplaceArtificateId, x => x.EtmfArtificateMasterLbrary).FirstOrDefault();
+            var user = _userRepository.Find(ReviewDto.UserId);
+            _emailSenderRespository.SendEmailOfReview(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
         }
+
+        public void SendMailToSendBack(ProjectArtificateDocumentReview ReviewDto)
+        {
+            var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
+                   .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                   .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
+                   .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace).ThenInclude(x => x.Project)
+                   .Where(x => x.ProjectWorkplaceArtificatedDocumentId == ReviewDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
+            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName;
+            var document = _projectWorkplaceArtificatedocumentRepository.Find(ReviewDto.ProjectWorkplaceArtificatedDocumentId);
+            var artificate = _projectWorkplaceArtificateRepository.FindByInclude(x => x.Id == document.ProjectWorkplaceArtificateId, x => x.EtmfArtificateMasterLbrary).FirstOrDefault();
+            var user = _userRepository.Find((int)ReviewDto.CreatedBy);
+            _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
+        }
+
+        //public List<int> GetProjectArtificateDocumentReviewList()
+        //{
+        //    return All.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId
+        //                          //  && c.RoleId == _jwtTokenAccesser.RoleId
+        //                          ).Select(x => x.ProjectWorkplaceArtificatedDocumentId).ToList();
+        //}
 
         public void SaveByDocumentIdInReview(int projectWorkplaceArtificateDocumentId)
         {
@@ -88,6 +140,28 @@ namespace GSC.Respository.Etmf
             });
 
             _uow.Save();
+        }
+
+        public List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id)
+        {
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id).
+                Select(x => new ProjectArtificateDocumentReviewHistory
+                {
+                    Id = x.Id,
+                    DocumentName = x.ProjectWorkplaceArtificatedDocument.DocumentName,
+                    UserName = Context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+                    //UserName = _userRepository.Find(x.UserId).UserName,
+                    IsSendBack = x.IsSendBack,
+                    UserId = x.UserId,
+                    ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId,
+                    CreatedDate = x.CreatedDate,
+                    CreatedByUser = Context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    ModifiedDate = x.ModifiedDate,
+                    ModifiedByUser = Context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    SendBackDate = x.SendBackDate,
+                }).OrderByDescending(x => x.Id).ToList();
+
+            return result;
         }
     }
 }

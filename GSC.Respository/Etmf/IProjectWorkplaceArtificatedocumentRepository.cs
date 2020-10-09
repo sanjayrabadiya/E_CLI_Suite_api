@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,7 @@ namespace GSC.Respository.Etmf
         int deleteFile(int id);
 
         void UpdateApproveDocument(int documentId, bool IsAccepted);
+
+        List<CommonArtifactDocumentDto> GetDocumentList(int id);
     }
 }

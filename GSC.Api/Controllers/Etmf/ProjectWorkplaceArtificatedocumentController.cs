@@ -81,50 +81,24 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(projectworkplace);
         }
 
-        [Route("Get/{id}")]
+        //[HttpGet("{id}")]
+        //public IActionResult Get(int id)
+        //{
+        //    if (id <= 0) return BadRequest();
+        //    var ProjectWorkplaceArtificateDocument = _projectWorkplaceArtificatedocumentRepository.Find(id);
+        //    var ProjectWorkplaceArtificateDocumentDto = _mapper.Map<ProjectWorkplaceArtificatedocumentDto>(ProjectWorkplaceArtificateDocument);
+        //    return Ok(ProjectWorkplaceArtificateDocumentDto);
+        //}
+
+        [Route("GetDocumentList/{id}")]
         [HttpGet]
-        public IActionResult Get(int id)
+        public IActionResult GetDocumentList(int id)
         {
-            var reviewDocumentList = _projectWorkplaceArtificateDocumentReviewRepository.GetProjectArtificateDocumentReviewList();
-            if (reviewDocumentList == null || reviewDocumentList.Count == 0) return Ok();
+            //var reviewDocumentList = _projectWorkplaceArtificateDocumentReviewRepository.GetProjectArtificateDocumentReviewList();
+            //if (reviewDocumentList == null || reviewDocumentList.Count == 0) return Ok();
 
-            var documentList = _projectWorkplaceArtificatedocumentRepository.FindByInclude(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null && reviewDocumentList.Any(c =>
-                                                                                           c == x.Id), x => x.ProjectWorkplaceArtificate).ToList();
-
-            List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
-            foreach (var item in documentList)
-            {
-                var reviewerList = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy).Select(z => z.UserId).Distinct().ToList();
-                var users = new List<string>();
-                reviewerList.ForEach(r =>
-                {
-                    var username = _userRepository.FindByInclude(x => x.Id == r).Select(y => y.UserName);
-                    users.AddRange(username);
-                });
-                var Review = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != _jwtTokenAccesser.UserId && x.DeletedDate == null).ToList();
-
-                CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
-                obj.Id = item.Id;
-                obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
-                obj.ProjectWorkplaceArtificateId = item.ProjectWorkplaceArtificateId;
-                obj.Artificatename = _etmfArtificateMasterLbraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId).ArtificateName;
-                obj.DocumentName = item.DocumentName;
-                obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
-                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
-                obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
-                obj.Reviewer = string.Join(", ", users);
-                obj.CreatedDate = item.CreatedDate;
-                obj.Version = item.Version;
-                obj.StatusName = item.Status.GetDescription();
-                obj.Status = item.Status;
-                obj.Level = 6;
-                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
-                obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
-                obj.IsSendBack = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).Select(z => z.IsSendBack).LastOrDefault();
-                dataList.Add(obj);
-
-            }
-            return Ok(dataList);
+            var result = _projectWorkplaceArtificatedocumentRepository.GetDocumentList(id);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -182,16 +156,13 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
+        [Route("UpdateVersion/{id}")]
+        public IActionResult UpdateVersion(int id)
         {
-            if (projectWorkplaceArtificatedocumentDto.Id <= 0) return BadRequest();
-
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            // projectWorkplaceArtificatedocument.Version = (double.Parse(projectWorkplaceArtificatedocumentDto.Version) + 1).ToString("0.0");
-            // projectWorkplaceArtificatedocumentDto.Version = "a";
+            var projectWorkplaceArtificatedocumentDto = _projectWorkplaceArtificatedocumentRepository.Find(id);
+            projectWorkplaceArtificatedocumentDto.Version = (double.Parse(projectWorkplaceArtificatedocumentDto.Version) + 1).ToString("0.0");
+            
             var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
-
             _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
@@ -211,7 +182,6 @@ namespace GSC.Api.Controllers.Etmf
             Stream stream = System.IO.File.OpenRead(path);
             string json = ImportWordDocument(stream);
             stream.Close();
-            // return new HttpResponseMessage() { Content = new System.Net.Http.StringContent(json) };
             return Ok(json);
         }
 
@@ -340,6 +310,14 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
 
             return Ok();
+        }
+
+        [Route("GetArtificateDocumentHistory/{Id}")]
+        [HttpGet]
+        public IActionResult GetArtificateDocumentHistory(int Id)
+        {
+            var History = _projectWorkplaceArtificateDocumentReviewRepository.GetArtificateDocumentHistory(Id);
+            return Ok(History);
         }
     }
 }

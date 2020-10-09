@@ -5,6 +5,8 @@ using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.UserMgt;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,13 +20,27 @@ namespace GSC.Respository.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUnitOfWork _uow;
+
+        private readonly IUserRepository _userRepository;
+        //private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
+        private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
+        //private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         public ProjectWorkplaceArtificatedocumentRepository(IUnitOfWork<GscContext> uow,
-           IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository)
+           IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
+           IUserRepository userRepository,
+           //IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
+           IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository
+           //IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository
+           )
            : base(uow, jwtTokenAccesser)
         {
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _uow = uow;
+            _userRepository = userRepository;
+            //_projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
+            _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
+            //_projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
         }
 
         public int deleteFile(int id)
@@ -78,11 +94,60 @@ namespace GSC.Respository.Etmf
             return id;
         }
 
-        public void UpdateApproveDocument(int documentId, bool IsAccepted) {
+        public void UpdateApproveDocument(int documentId, bool IsAccepted)
+        {
             var document = All.Where(x => x.Id == documentId).FirstOrDefault();
             document.IsAccepted = IsAccepted;
             Update(document);
             _uow.Save();
+        }
+
+        public List<CommonArtifactDocumentDto> GetDocumentList(int id)
+        {
+            List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
+            var reviewdocument = Context.ProjectArtificateDocumentReview.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId
+                                  //  && c.RoleId == _jwtTokenAccesser.RoleId
+                                  ).Select(x => x.ProjectWorkplaceArtificatedDocumentId).ToList();
+            if (reviewdocument == null || reviewdocument.Count == 0) return dataList;
+
+            var documentList = All.Include(x => x.ProjectWorkplaceArtificate).Where(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null
+             && reviewdocument.Any(c => c == x.Id)
+            ).ToList();
+
+            foreach (var item in documentList)
+            {
+                var reviewerList = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy).Select(z => z.UserId).Distinct().ToList();
+                var users = new List<string>();
+                reviewerList.ForEach(r =>
+                {
+                    var username = _userRepository.FindByInclude(x => x.Id == r).Select(y => y.UserName);
+                    users.AddRange(username);
+                });
+                var Review = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id
+                && x.UserId != item.CreatedBy && x.DeletedDate == null).ToList();
+
+                CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
+                obj.Id = item.Id;
+                obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
+                obj.ProjectWorkplaceArtificateId = item.ProjectWorkplaceArtificateId;
+                obj.Artificatename = _etmfArtificateMasterLbraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId).ArtificateName;
+                obj.DocumentName = item.DocumentName;
+                obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
+                obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
+                obj.Reviewer = string.Join(", ", users);
+                obj.CreatedDate = item.CreatedDate;
+                obj.Version = item.Version;
+                obj.StatusName = item.Status.GetDescription();
+                obj.Status = item.Status;
+                obj.Level = 6;
+                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
+                obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
+                obj.IsSendBack = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
+                obj.IsAccepted = item.IsAccepted;
+                dataList.Add(obj);
+            }
+            return dataList;
         }
     }
 }

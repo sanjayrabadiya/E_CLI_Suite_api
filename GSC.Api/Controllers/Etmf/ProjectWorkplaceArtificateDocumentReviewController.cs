@@ -69,13 +69,11 @@ namespace GSC.Api.Controllers.Etmf
 
         [HttpPost]
         [Route("SaveDocumentReview")]
-        public IActionResult SaveDocumentReview([FromBody]List<ProjectArtificateDocumentReviewDto> projectArtificateDocumentReviewDto)
+        public IActionResult SaveDocumentReview([FromBody] List<ProjectArtificateDocumentReviewDto> projectArtificateDocumentReviewDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             _projectWorkplaceArtificateDocumentReviewRepository.SaveDocumentReview(projectArtificateDocumentReviewDto);
-
-            if (_uow.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
             return Ok();
         }
@@ -84,18 +82,19 @@ namespace GSC.Api.Controllers.Etmf
         [Route("SendBackDocument/{id}")]
         public IActionResult SendBackDocument(int id)
         {
-            var projectArtificateDocumentReviewList = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x=>x.ProjectWorkplaceArtificatedDocumentId == id 
-            && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.DeletedDate == null);
+            var projectArtificateDocumentReviewDto = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == id
+            && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.DeletedDate == null).FirstOrDefault();
 
-            foreach (var item in projectArtificateDocumentReviewList)
-            {
-                item.IsSendBack = true;
-                item.SendBackDate = DateTime.UtcNow;
-                var projectArtificateDocumentReview = _mapper.Map<ProjectArtificateDocumentReview>(item);
-                _projectWorkplaceArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);
-            }
+            //foreach (var item in projectArtificateDocumentReviewList)
+            //{
+            projectArtificateDocumentReviewDto.IsSendBack = true;
+            projectArtificateDocumentReviewDto.SendBackDate = DateTime.UtcNow;
+            var projectArtificateDocumentReview = _mapper.Map<ProjectArtificateDocumentReview>(projectArtificateDocumentReviewDto);
+            _projectWorkplaceArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);
+            //}
 
             if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
+            _projectWorkplaceArtificateDocumentReviewRepository.SendMailToSendBack(projectArtificateDocumentReview);
             return Ok();
         }
     }
