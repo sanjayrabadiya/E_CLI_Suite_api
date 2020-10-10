@@ -35,11 +35,9 @@ namespace GSC.Respository.Project.Design
             return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                                   && x.DeletedDate == null
                                   && projectList.Any(c => c == x.ProjectId)
-                ).Include(t => t.Project)
-                .Select(c => new DropDownDto
+                ).Select(c => new DropDownDto
                 {
                     Id = c.Id,
-                    //Value = c.Project.ProjectCode + " - " + c.Project.ProjectName
                     Value = c.Project.ProjectCode
                 }).OrderBy(o => o.Value).ToList();
         }

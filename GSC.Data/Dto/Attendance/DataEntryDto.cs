@@ -8,12 +8,16 @@ namespace GSC.Data.Dto.Attendance
 {
     public class DataCaptureGridDto
     {
+        public DataCaptureGridDto()
+        {
+            Data = new List<DataCaptureGridData>();
+        }
         public List<WorkFlowText> WorkFlowText { get; set; }
         public List<DataCaptureGridData> Data { get; set; }
 
     }
 
-    public class DataCaptureGridData
+    public class DataCaptureGridData : DataEntryTemplateQueryStatus
     {
         public int? AttendanceId { get; set; }
         public int? ScreeningEntryId { get; set; }
@@ -23,7 +27,6 @@ namespace GSC.Data.Dto.Attendance
         public string SubjectNo { get; set; }
         public string PatientStatus { get; set; }
         public string RandomizationNumber { get; set; }
-        public DataEntryTemplateQueryStatus Count { get; set; }
         public List<DataEntryVisitTemplateDto> Visit { get; set; }
     }
 
@@ -49,13 +52,10 @@ namespace GSC.Data.Dto.Attendance
     }
 
     
-    public class DataEntryVisitTemplateDto
+    public class DataEntryVisitTemplateDto : DataEntryTemplateQueryStatus
     {
         public int ScreeningVisitId { get; set; }
         public string VisitName { get; set; }
-        public DataEntryTemplateQueryStatus Count { get; set; }
-
-        //Added property by vipul on 28092020 
         public ScreeningVisitStatus VisitStatus { get; set; }
 
         private DateTime? _scheduleDate { get; set; }

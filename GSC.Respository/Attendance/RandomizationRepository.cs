@@ -67,8 +67,6 @@ namespace GSC.Respository.Attendance
         {
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                    ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            //result.ForEach(x => x.PatientStatusName = x.PatientStatusId.GetDescription());
-            result.ForEach(x => x.PatientStatusName = _patientStatusRepository.Find((int)x.PatientStatusId).StatusName);
             return result;
         }
 

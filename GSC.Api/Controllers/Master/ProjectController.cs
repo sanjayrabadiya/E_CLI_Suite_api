@@ -62,13 +62,6 @@ namespace GSC.Api.Controllers.Master
             if (id <= 0) return BadRequest();
             var project = _projectRepository.Find(id);
             var projectDto = _mapper.Map<ProjectDto>(project);
-            projectDto.TrialTypeId = _designTrialRepository.Find(projectDto.DesignTrialId).TrialTypeId;
-            //projectDto.TrialTypeName = _trialTypeRepository.Find(projectDto.TrialTypeId).TrialTypeName;
-            //projectDto.DrugName = _drugRepository.Find(projectDto.DrugId).DrugName;
-            projectDto.NoofSite = _projectRepository.GetNoOfSite(id);
-
-            var projectDesign = _projectDesignRepository.All.Where(t => t.ProjectId == id && t.DeletedDate == null).FirstOrDefault();
-            projectDto.ProjectDesignId = projectDesign == null ? (int?)null : projectDesign.Id;
 
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
@@ -203,19 +196,6 @@ namespace GSC.Api.Controllers.Master
             return Ok();
         }
 
-        [HttpGet]
-        [Route("GetProjectDropDown")]
-        public IActionResult GetProjectDropDown()
-        {
-            return Ok(_projectRepository.GetProjectDropDown());
-        }
-
-        [HttpGet]
-        [Route("GetProjectNumberDropDown")]
-        public IActionResult GetProjectNumberDropDown()
-        {
-            return Ok(_projectRepository.GetProjectNumberDropDown());
-        }
 
         [HttpGet]
         [Route("GetParentProjectDropDown")]
@@ -231,21 +211,7 @@ namespace GSC.Api.Controllers.Master
             return Ok(_projectRepository.GetChildProjectDropDown(parentProjectId));
         }
 
-        [HttpGet]
-        [Route("{projectId}/ProjectPeriodsDetail")]
-        public async Task<IActionResult> GetProjectDesignDetail(int projectId)
-        {
-            var projectDesignWithPeriod = await _projectRepository.GetProjectDetailWithPeriod(projectId);
-            return Ok(projectDesignWithPeriod);
-        }
-
-        [HttpGet]
-        [Route("GetProjectForAttendance/{isStatic}")]
-        public IActionResult GetProjectForAttendance(bool isStatic)
-        {
-            return Ok(_projectRepository.GetProjectForAttendance(isStatic));
-        }
-
+            
         [HttpGet]
         [Route("GetProjectsForDataEntry")]
         public IActionResult GetProjectsForDataEntry()

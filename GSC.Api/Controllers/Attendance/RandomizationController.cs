@@ -84,7 +84,9 @@ namespace GSC.Api.Controllers.Attendance
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var randomization = _mapper.Map<Randomization>(randomizationDto);
-   
+            randomization.PatientStatusId = ScreeningPatientStatus.PreScreening;
+
+
             _randomizationRepository.Add(randomization);
 
             if (_uow.Save() <= 0) throw new Exception("Creating randomization failed on save.");

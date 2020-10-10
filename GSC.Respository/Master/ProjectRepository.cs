@@ -71,97 +71,10 @@ namespace GSC.Respository.Master
         }
 
 
-        public List<DropDownDto> GetProjectDropDown()
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
 
-            return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null
-                                                                                        && projectList.Any(c =>
-                                                                                            c == x.Id))
-                .Select(c => new DropDownDto
-                {
-                    Id = c.Id,
-                    Value = c.ProjectCode + " - " + c.ProjectName,
-                    Code = c.ProjectCode,
-                    ExtraData = c.ParentProjectId
-                }).OrderBy(o => o.Value).ToList();
-        }
 
-        public List<ProjectDropDown> GetSiteByParentProjectIdDropDown(int parentProjectId)
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
 
-            return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.DeletedDate == null && x.ParentProjectId == null
-                    && projectList.Any(c => c == x.Id))
-                .Select(c => new ProjectDropDown
-                {
-                    Id = c.Id,
-                    Value = c.ProjectCode + " - " + c.ProjectName,
-                    Code = c.ProjectCode,
-                    IsStatic = c.IsStatic,
-                    ParentProjectId = c.ParentProjectId ?? c.Id
-                }).OrderBy(o => o.Value).ToList();
-        }
-        public List<ProjectDropDown> GetParentProjectDropDown()
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
 
-            return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.ParentProjectId == null
-                    && projectList.Any(c => c == x.Id))
-                .Select(c => new ProjectDropDown
-                {
-                    Id = c.Id,
-                    //Value = c.ProjectCode + " - " + c.ProjectName,
-                    Value = c.ProjectCode, //change by swati on 31-7-2020 for show only study code
-                    Code = c.ProjectCode,
-                    IsStatic = c.IsStatic,
-                    ParentProjectId = c.ParentProjectId ?? c.Id,
-                    IsDeleted = c.DeletedDate != null
-                }).OrderBy(o => o.Value).ToList();
-        }
-
-        public IList<ProjectDropDown> GetProjectForAttendance(bool isStatic)
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
-
-            var projects = All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.DeletedDate == null
-                    && x.IsStatic == isStatic
-                    && projectList.Any(c => c == x.Id))
-                .Select(c => new ProjectDropDown
-                {
-                    Id = c.Id,
-                    Value = c.ProjectCode + " - " + c.ProjectName,
-                    IsStatic = c.IsStatic,
-                    ParentProjectId = c.ParentProjectId ?? c.Id,
-                    AttendanceLimit = c.AttendanceLimit ?? 0
-                }).OrderBy(o => o.Value).ToList();
-
-            return projects;
-        }
-
-        public List<DropDownDto> GetProjectNumberDropDown()
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
-
-            return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null
-                                                                                        && projectList.Any(c =>
-                                                                                            c == x.Id))
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.ProjectNumber, Code = c.ProjectCode })
-                .OrderBy(o => o.Value).ToList();
-        }
 
         public void Save(Data.Entities.Master.Project project)
         {
@@ -255,28 +168,26 @@ namespace GSC.Respository.Master
             }
             return "";
         }
-        public async Task<ProjectDetailDto> GetProjectDetailWithPeriod(int projectId)
+
+        public List<ProjectDropDown> GetParentProjectDropDown()
         {
-            return await All.Where(x => x.Id == projectId)
-                .Include(t => t.ProjectDesigns)
-                .ThenInclude(th => th.ProjectDesignPeriods)
-                .Where(p => p.DeletedDate == null)
-                .Select(c => new ProjectDetailDto
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ParentProjectId == null
+                    && x.ProjectCode != null
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
                 {
-                    ProjectId = c.Id,
-                    ProjectName = c.ProjectName,
-                    ProjectCode = c.ProjectCode,
-                    ProjectNumber = c.ProjectNumber,
-                    ProjectDesignPeriod = c.ProjectDesigns
-                        .SelectMany(pd => pd.ProjectDesignPeriods)
-                        .Select(pp => new ProjectDesignPeriodDto
-                        {
-                            DisplayName = pp.DisplayName,
-                            Description = pp.Description,
-                            ProjectDesignId = pp.Id
-                        })
-                })
-                .FirstOrDefaultAsync();
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).OrderBy(o => o.Value).ToList();
         }
 
         public IList<ProjectDropDown> GetProjectsForDataEntry()
@@ -312,29 +223,37 @@ namespace GSC.Respository.Master
                 {
                     Id = c.Id,
                     Value = c.ProjectCode,
+                    CountryId = c.CountryId,
                     Code = c.ProjectCode,
-                    IsStatic = c.IsStatic
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? 0
                 }).OrderBy(o => o.Value).ToList();
         }
 
         public List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int ProjectDesignId)
         {
+            var ParentProjectId = Context.ProjectDesign.Where(x => x.Id == ProjectDesignId).Select(t => t.ProjectId).FirstOrDefault();
+
+            return GetChildProjectDropDown(ParentProjectId);
+        }
+
+        public List<ProjectDropDown> GetChildProjectRightsDropDown()
+        {
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
-            var ParentProjectId = Context.ProjectDesign.Find(ProjectDesignId).ProjectId;
 
             return All.Where(x =>
                     ((x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.DeletedDate == null && x.ParentProjectId == ParentProjectId)
-                    && projectList.Any(c => c == x.Id))
+                    && x.DeletedDate == null)
+                    && projectList.Any(c => c == x.Id) && x.ParentProjectId != null)
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
-                    Value = c.ProjectCode + " - " + c.ProjectName,
+                    Value = c.ProjectCode,
                     CountryId = c.CountryId,
                     IsStatic = c.IsStatic,
-                    ParentProjectId = c.ParentProjectId != null || c.ParentProjectId > 0 ? (int)c.ParentProjectId : 0,
+                    ParentProjectId = c.ParentProjectId ?? 0,
                 }).OrderBy(o => o.Value).ToList();
         }
 
@@ -370,11 +289,7 @@ namespace GSC.Respository.Master
 
         public int GetNoOfSite(int id)
         {
-            var childData = All.Where(x => x.ParentProjectId == id && x.DeletedDate == null).ToList();
-
-            if (childData.Count == 0)
-                return 0;
-            return childData.Count();
+            return All.Count(x => x.ParentProjectId == id && x.DeletedDate == null);
         }
 
         private string GetProjectCode(Data.Entities.Master.Project project)
@@ -427,32 +342,33 @@ namespace GSC.Respository.Master
             var userRightDetailsDto = new UserRightDetailsDto();
             var schedulesDetailsDto = new SchedulesDetailsDto();
             var editCheckDetailsDto = new EditCheckDetailsDto();
-            var a = GetNoOfSite(projectId);
 
             siteDetailsDto.NoofSite = GetNoOfSite(projectId);
-            siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(x => x.CountryId).Count();
-            siteDetailsDto.MarkAsCompleted = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).Any();
+            siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.CountryId).Select(t => t.Key).Count();
+            siteDetailsDto.MarkAsCompleted = All.Any(x => x.ParentProjectId == projectId && x.DeletedDate == null);
 
-            var projectDeisgnId = Context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault()?.Id;
-            designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : Context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
+            var projectDeisgn = Context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
+            var projectDeisgnId = projectDeisgn?.Id;
+
+            designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : Context.ProjectDesignPeriod.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null);
             designDetailsDto.NoofVisit = projectDeisgnId == null ? 0 : GetNoOfVisit(projectDeisgnId);
             designDetailsDto.NoofECrf = projectDeisgnId == null ? 0 : GetNoOfTemplate(projectDeisgnId);
-            designDetailsDto.MarkAsCompleted = projectDeisgnId == null ? false : Context.ProjectDesign.Where(x => x.ProjectId == projectId).FirstOrDefault()?.IsCompleteDesign;
+            designDetailsDto.MarkAsCompleted = projectDeisgn?.IsCompleteDesign;
 
             var projectWorkflowId = Context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.Id;
-            workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : Context.ProjectWorkflowIndependent.Where(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null).ToList().Count();
-            workflowDetailsDto.NoofLevels = projectWorkflowId == null ? 0 : Context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null).ToList().Count();
-            workflowDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
+            workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : Context.ProjectWorkflowIndependent.Count(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null);
+            workflowDetailsDto.NoofLevels = projectWorkflowId == null ? 0 : Context.ProjectWorkflowLevel.Count(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null);
+            workflowDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteWorkflow == true);
 
-            userRightDetailsDto.NoofUser = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(y => y.UserId).Count();
-            userRightDetailsDto.MarkAsCompleted = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).Any();
+            userRightDetailsDto.NoofUser = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.UserId).Select(t => t.Key).Count();
+            userRightDetailsDto.MarkAsCompleted = Context.ProjectRight.Any(x => x.ProjectId == projectId && x.DeletedDate == null);
 
-            schedulesDetailsDto.NoofVisit = Context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().GroupBy(y => y.ProjectDesignVisitId).Count();
-            schedulesDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteSchedule; ;
+            schedulesDetailsDto.NoofVisit = Context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignVisitId).Select(t => t.Key).Count();
+            schedulesDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteSchedule == true);
 
             editCheckDetailsDto.NoofFormulas = GetNoOfFormulas(projectDeisgnId);
             editCheckDetailsDto.NoofRules = projectDeisgnId == null ? 0 : Context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
-            editCheckDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteEditCheck; ;
+            editCheckDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteEditCheck == true);
 
             projectDetailsDto.siteDetails = siteDetailsDto;
             projectDetailsDto.designDetails = designDetailsDto;
@@ -465,34 +381,17 @@ namespace GSC.Respository.Master
 
         public int GetNoOfVisit(int? projectDesignId)
         {
-            var periods = Context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).ToList();
-            var visitCount = 0;
+            return Context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Id == projectDesignId
+           && x.DeletedDate == null && x.ProjectDesignPeriod.DeletedDate == null).Count();
 
-            periods.ForEach(b =>
-             {
-                 var visit = Context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriodId == b.Id && x.DeletedDate == null).ToList().Count;
-                 visitCount += visit;
-             });
-
-            return visitCount;
         }
 
         public int GetNoOfTemplate(int? projectDesignId)
         {
-            var periods = Context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).ToList();
-            var temCount = 0;
 
-            periods.ForEach(b =>
-            {
-                var visit = Context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriodId == b.Id && x.DeletedDate == null).ToList();
-                visit.ForEach(v =>
-                {
-                    var template = Context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisitId == v.Id && x.DeletedDate == null).ToList().Count;
-                    temCount += template;
-                });
-            });
+            return Context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Id == projectDesignId
+                && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null).Count();
 
-            return temCount;
         }
 
         public int GetNoOfFormulas(int? projectDesignId)
@@ -553,24 +452,6 @@ namespace GSC.Respository.Master
             return projectCode.ToUpper();
         }
 
-        public List<ProjectDropDown> GetChildProjectRightsDropDown()
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
 
-
-            return All.Where(x =>
-                    ((x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.DeletedDate == null)
-                    && projectList.Any(c => c == x.Id) && x.ParentProjectId != null)
-                .Select(c => new ProjectDropDown
-                {
-                    Id = c.Id,
-                    Value = c.ProjectCode,
-                    CountryId = c.CountryId,
-                    IsStatic = c.IsStatic,
-                    ParentProjectId = c.ParentProjectId != null || c.ParentProjectId > 0 ? (int)c.ParentProjectId : 0,
-                }).OrderBy(o => o.Value).ToList();
-        }
     }
 }

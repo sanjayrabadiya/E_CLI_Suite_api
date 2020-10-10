@@ -43,7 +43,7 @@ namespace GSC.Respository.Screening
             _projectWorkflowLevelRepository = projectWorkflowLevelRepository;
             _randomizationRepository = randomizationRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
-            _screeningVisitRepository= screeningVisitRepository;
+            _screeningVisitRepository = screeningVisitRepository;
         }
 
 
@@ -66,7 +66,8 @@ namespace GSC.Respository.Screening
             }).ToList();
 
             var queryList = _screeningTemplateValueRepository.GetQueryStatusByPeridId(projectDesignPeriodId);
-
+            var test = new List<WorkFlowTemplateCount>();
+            test.Add(new WorkFlowTemplateCount { Count = 1, LevelNo = 1 });
             var data = _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
              && x.PatientStatusId == ScreeningPatientStatus.Screening).Select(t => new DataCaptureGridData
              {
@@ -76,7 +77,10 @@ namespace GSC.Respository.Screening
                  IsRandomization = true,
                  SubjectNo = t.ScreeningNumber,
                  RandomizationNumber = t.RandomizationNumber,
-                 Visit = new List<DataEntryVisitTemplateDto>()
+                 TemplateCount = test,
+                 InProgress = 2,
+                 NotStarted = 3,
+                 Visit = new List<DataEntryVisitTemplateDto>(),
                  //Visit = _screeningVisitRepository.FindByInclude(x => x.DeletedDate == null).Select(t => new DataEntryVisitTemplateDto
                  //{
                  //    VisitName = "122",//t.ProjectDesignVisit.DisplayName,

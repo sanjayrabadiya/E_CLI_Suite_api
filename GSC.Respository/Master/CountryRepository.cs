@@ -62,38 +62,18 @@ namespace GSC.Respository.Master
             return "";
         }
 
-        public List<DropDownDto> GetCountryByParentProjectIdDropDown(int ProjectDesignId)
-        {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            var ParentProjectId = Context.ProjectDesign.Find(ProjectDesignId).ProjectId;
-
-            var countries = (from P in Context.Project
-                             join c in Context.Country on P.CountryId equals c.Id
-                             where (P.ParentProjectId == ParentProjectId || P.Id == ParentProjectId && P.DeletedDate == null) && projectList.Any(c => c == P.Id)
-                             select new DropDownDto
-                             {
-                                 Id = c.Id,
-                                 Value = c.CountryName,
-                                 Code = c.CountryCode
-                             }).Distinct().OrderBy(o => o.Value).ToList();
-            return countries.GroupBy(x => x.Id, (key, group) => group.First()).ToList();
-        }
-
+       
 
         public List<DropDownDto> GetCountryByProjectIdDropDown(int ParentProjectId)
         {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-           
-            var countries = (from P in Context.Project
-                             join c in Context.Country on P.CountryId equals c.Id
-                             where (P.ParentProjectId == ParentProjectId || P.Id == ParentProjectId && P.DeletedDate == null) && projectList.Any(c => c == P.Id)
-                             select new DropDownDto
-                             {
-                                 Id = c.Id,
-                                 Value = c.CountryName,
-                                 Code = c.CountryCode
-                             }).Distinct().OrderBy(o => o.Value).ToList();
-            return countries.GroupBy(x => x.Id, (key, group) => group.First()).ToList();
+
+            return Context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == ParentProjectId || x.Id == ParentProjectId)).Select(r => new DropDownDto
+            {
+                Id = r.CountryId,
+                Value = r.Country.CountryName,
+                Code = r.Country.CountryCode
+            }).Distinct().OrderBy(o => o.Value).ToList();
+
         }
 
         public List<CountryGridDto> GetCountryList(bool isDeleted)

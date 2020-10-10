@@ -161,10 +161,10 @@ namespace GSC.Api.Controllers.Location
         }
 
         [HttpGet]
-        [Route("GetCountryByParentProjectIdDropDown/{ParentProjectId}")]
-        public IActionResult GetCountryByParentProjectIdDropDown(int ParentProjectId)
+        [Route("GetCountryByProjectIdDropDown/{ParentProjectId}")]
+        public IActionResult GetCountryByProjectIdDropDown(int ParentProjectId)
         {
-            return Ok(_countryRepository.GetCountryByParentProjectIdDropDown(ParentProjectId));
+            return Ok(_countryRepository.GetCountryByProjectIdDropDown(ParentProjectId));
         }
     }
 }

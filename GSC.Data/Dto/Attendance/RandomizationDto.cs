@@ -97,6 +97,6 @@ namespace GSC.Data.Dto.Attendance
         public string ProjectName { get; set; }
         public bool IsLocked { get; set; }
         public string PatientStatusName { get; set; }
-        public ScreeningPatientStatus? PatientStatusId { get; set; }
+
     }
 }
