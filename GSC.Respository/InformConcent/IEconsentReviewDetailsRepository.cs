@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.InformConcent;
@@ -18,7 +19,8 @@ namespace GSC.Respository.InformConcent
         List<SectionsHeader> GetEconsentDocumentHeaders(int patientId);
         List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId);
         string ImportSectionData(int id, int sectionno);
-        string GetEconsentDocument(int id);
+        string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails);
         List<DashboardDto> GetEconsentMyTaskList(int ProjectId);
+        void downloadpdf(CustomParameter param);
     }
 }

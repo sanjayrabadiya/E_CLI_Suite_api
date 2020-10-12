@@ -1,0 +1,207 @@
+{
+    "sections": [
+        {
+            "blocks": [
+                {
+                    "characterFormat": {
+                        "fontColor": "empty"
+                    },
+                    "paragraphFormat": {
+                        "styleName": "Normal"
+                    },
+                    "inlines": [
+                        {
+                            "text": "_volunterlabel_",
+                            "characterFormat": {
+                                "bold": true,
+                                "fontColor": "empty"
+                            }
+                        },
+                        {
+                            "text": " Name",
+                            "characterFormat": {
+                                "bold": true,
+                                "fontColor": "empty"
+                            }
+                        },
+                        {
+                            "text": ": _voluntername_",
+                            "characterFormat": {
+                                "fontColor": "empty"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "characterFormat": {
+                        "bold": true,
+                        "fontColor": "empty"
+                    },
+                    "paragraphFormat": {
+                        "styleName": "Normal"
+                    },
+                    "inlines": [
+                        {
+                            "text": "_volunterlabel_",
+                            "characterFormat": {
+                                "bold": true,
+                                "fontColor": "empty"
+                            }
+                        },
+                        {
+                            "text": " ",
+                            "characterFormat": {
+                                "bold": true,
+                                "fontColor": "empty"
+                            }
+                        },
+                        {
+                            "text": "Signature:",
+                            "characterFormat": {
+                                "bold": true,
+                                "fontColor": "empty"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "characterFormat": {
+                        "bold": true,
+                        "fontColor": "empty"
+                    },
+                    "paragraphFormat": {
+                        "styleName": "Normal"
+                    },
+                    "inlines": [
+                        {
+                            "imageString": "_imagepath_",
+                            "length": 1,
+                            "width": 468.0,
+                            "height": 108.0,
+                            "isInlineImage": true,
+                            "isMetaFile": false,
+                            "top": 0.0,
+                            "bottom": 0.0,
+                            "right": 0.0,
+                            "left": 0.0,
+                            "getimageheight": 0.0,
+                            "getimagewidth": 0.0
+                        }
+                    ]
+                },
+                {
+                    "characterFormat": {
+                        "fontColor": "empty"
+                    },
+                    "paragraphFormat": {
+                        "styleName": "Normal"
+                    },
+                    "inlines": [
+                        {
+                            "text": "Date Time: ",
+                            "characterFormat": {
+                                "bold": true,
+                                "fontColor": "empty"
+                            }
+                        },
+                        {
+                            "text": "_datetime_",
+                            "characterFormat": {
+                                "fontColor": "empty"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "headersFooters": {
+
+            },
+            "sectionFormat": {
+                "headerDistance": 35.45000076293945,
+                "footerDistance": 35.45000076293945,
+                "pageWidth": 612.0,
+                "pageHeight": 792.0,
+                "leftMargin": 72.0,
+                "rightMargin": 72.0,
+                "topMargin": 72.0,
+                "bottomMargin": 72.0,
+                "differentFirstPage": false,
+                "differentOddAndEvenPages": false,
+                "bidi": false,
+                "restartPageNumbering": false,
+                "pageStartingNumber": 0
+            }
+        }
+    ],
+    "characterFormat": {
+        "fontSize": 11.0,
+        "fontFamily": "Calibri",
+        "fontColor": "empty",
+        "fontSizeBidi": 11.0,
+        "fontFamilyBidi": "Arial"
+    },
+    "paragraphFormat": {
+        "afterSpacing": 10.0,
+        "lineSpacing": 1.149999976158142,
+        "lineSpacingType": "Multiple"
+    },
+    "background": {
+        "color": "#FFFFFFFF"
+    },
+    "styles": [
+        {
+            "type": "Paragraph",
+            "name": "Normal",
+            "next": "Normal",
+            "characterFormat": {
+                "fontColor": "empty"
+            }
+        },
+        {
+            "type": "Character",
+            "name": "Default Paragraph Font",
+            "characterFormat": {
+                "fontColor": "empty"
+            }
+        },
+        {
+            "type": "Paragraph",
+            "name": "Balloon Text",
+            "basedOn": "Normal",
+            "next": "Balloon Text",
+            "link": "Balloon Text Char",
+            "characterFormat": {
+                "fontSize": 8.0,
+                "fontFamily": "Tahoma",
+                "fontColor": "empty",
+                "fontSizeBidi": 8.0,
+                "fontFamilyBidi": "Tahoma"
+            },
+            "paragraphFormat": {
+                "afterSpacing": 0.0,
+                "lineSpacing": 1.0,
+                "lineSpacingType": "Multiple"
+            }
+        },
+        {
+            "type": "Character",
+            "name": "Balloon Text Char",
+            "basedOn": "Default Paragraph Font",
+            "characterFormat": {
+                "fontSize": 8.0,
+                "fontFamily": "Tahoma",
+                "fontColor": "empty",
+                "fontSizeBidi": 8.0,
+                "fontFamilyBidi": "Tahoma"
+            }
+        }
+    ],
+    "defaultTabWidth": 36.0,
+    "formatting": false,
+    "trackChanges": false,
+    "protectionType": "NoProtection",
+    "enforcement": false,
+    "dontUseHTMLParagraphAutoSpacing": false,
+    "alignTablesRowByRow": false,
+    "formFieldShading": true
+}

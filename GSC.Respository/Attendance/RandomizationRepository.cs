@@ -3,10 +3,12 @@ using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
+using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.Attendance;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.InformConcent;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
@@ -29,6 +31,8 @@ namespace GSC.Respository.Attendance
         private readonly ICityRepository _cityRepository;
         private readonly IMapper _mapper;
         private readonly IPatientStatusRepository _patientStatusRepository;
+        //private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
+        private readonly GscContext _context;
         public RandomizationRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -40,6 +44,7 @@ namespace GSC.Respository.Attendance
             ICityRepository cityRepository,
              IMapper mapper,
              IPatientStatusRepository patientStatusRepository)
+            //IEconsentReviewDetailsRepository econsentReviewDetailsRepository)
             : base(uow, jwtTokenAccesser)
         {
             _userRepository = userRepository;
@@ -51,6 +56,8 @@ namespace GSC.Respository.Attendance
             _cityRepository = cityRepository;
             _mapper = mapper;
             _patientStatusRepository = patientStatusRepository;
+            _context = uow.Context;
+            //_econsentReviewDetailsRepository = econsentReviewDetailsRepository;
         }
 
         public void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto)
@@ -67,6 +74,25 @@ namespace GSC.Respository.Attendance
         {
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                    ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            //result.ForEach(x => x.PatientStatusName = x.PatientStatusId.GetDescription());
+            result.ForEach(x => {
+                x.PatientStatusName = x.PatientStatusId == null ? "" : _patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
+                x.IsShowEconsentIcon = _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id).ToList().Count > 0 ? true : false;
+                if (x.IsShowEconsentIcon == true)
+                {
+                    var EconsentReviewDetails = _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id).ToList();
+                    x.EconsentReviewDetails = _mapper.Map<List<EconsentReviewDetailsDto>>(EconsentReviewDetails);
+                    x.EconsentReviewDetails.ForEach(a => {
+                        a.EconsentDocumentName = Context.EconsentSetup.Where(t => t.Id == a.EconsentDocumentId).ToList().FirstOrDefault().DocumentName;
+                    });
+                    x.IsEconsentReviewPending = _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsApprovedByInvestigator == false).ToList().Count > 0 ? true : false;
+                    x.IsmultipleEconsentReviewDetails = _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id).ToList().Count > 1 ? true : false;
+                }
+                else
+                {
+                    x.IsEconsentReviewPending = false;
+                }
+            });
             return result;
         }
 

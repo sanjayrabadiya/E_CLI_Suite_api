@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Data.Entities.Location;
+using System.Collections.Generic;
+using GSC.Data.Dto.InformConcent;
 
 namespace GSC.Data.Dto.Attendance
 {
@@ -97,6 +99,11 @@ namespace GSC.Data.Dto.Attendance
         public string ProjectName { get; set; }
         public bool IsLocked { get; set; }
         public string PatientStatusName { get; set; }
+        public ScreeningPatientStatus? PatientStatusId { get; set; }
+        public bool IsShowEconsentIcon { get; set; }
+        public bool IsEconsentReviewPending { get; set; }
+        public List<EconsentReviewDetailsDto> EconsentReviewDetails { get; set; }
+        public bool IsmultipleEconsentReviewDetails { get; set; }
 
     }
 }

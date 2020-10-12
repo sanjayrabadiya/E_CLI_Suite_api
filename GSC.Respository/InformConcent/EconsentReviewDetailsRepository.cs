@@ -7,7 +7,9 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Helper.DocumentService;
 using GSC.Respository.Attendance;
+using GSC.Respository.Master;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,6 +19,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
+using Syncfusion.DocIORenderer;
+using Syncfusion.Pdf;
+using GSC.Data.Dto.Etmf;
+using Syncfusion.EJ2.DocumentEditor;
 
 namespace GSC.Respository.InformConcent
 {
@@ -27,11 +33,15 @@ namespace GSC.Respository.InformConcent
         private readonly IUnitOfWork<GscContext> _uow;
         private readonly IMapper _mapper;
         private readonly IRandomizationRepository _noneRegisterRepository;
+        private readonly IInvestigatorContactRepository _investigatorContactRepository;
+        private readonly IProjectRepository _projectRepository;
         private readonly GscContext _context;
         public EconsentReviewDetailsRepository(IUnitOfWork<GscContext> uow, 
                                                 IJwtTokenAccesser jwtTokenAccesser,
                                                 IEconsentSetupRepository econsentSetupRepository,
                                                 IRandomizationRepository noneRegisterRepository,
+                                                IInvestigatorContactRepository investigatorContactRepository,
+                                                IProjectRepository projectRepository,
                                                 IMapper mapper) : base(uow, jwtTokenAccesser)
         {
             _uow = uow;
@@ -40,6 +50,8 @@ namespace GSC.Respository.InformConcent
             _econsentSetupRepository = econsentSetupRepository;
             _mapper = mapper;
             _noneRegisterRepository = noneRegisterRepository;
+            _investigatorContactRepository = investigatorContactRepository;
+            _projectRepository = projectRepository;
         }
 
         public string Duplicate(EconsentReviewDetailsDto objSave)
@@ -289,10 +301,13 @@ namespace GSC.Respository.InformConcent
             return jsonnew;
         }
 
-        public string GetEconsentDocument(int id)
+        public string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails)
         {
+            
+            //var econsentreviewdetails = Find(id);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var Econsentdocument = _econsentSetupRepository.Find(id);
+            //var ecosentdocId = econsentreviewdetails.EconsentDocumentId;
+            var Econsentdocument = _econsentSetupRepository.Find(econsentreviewdetails.EconsentDocumentId);
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
@@ -304,6 +319,41 @@ namespace GSC.Respository.InformConcent
             sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
             wdocument.Dispose();
             string json = sfdtText;
+            var jsonObj = JObject.Parse(json);
+            string sign = File.ReadAllText("signaturefooterblock.json");
+            string sign2 = sign;
+            int randomizationId = econsentreviewdetails.AttendanceId;
+            var randomization = _noneRegisterRepository.Find(randomizationId);
+            string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, randomization.SignaturePath);
+            string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
+            sign = sign.Replace("_volunterlabel_", "Volunteer");
+            sign = sign.Replace("_imagepath_", signRandombase64);
+            sign = sign.Replace("_voluntername_", randomization.ScreeningNumber + " " + randomization.Initial);
+            sign = sign.Replace("_datetime_", econsentreviewdetails.patientapproveddatetime.ToString());
+            var jsonObj2 = JObject.Parse(sign);
+            jsonObj.Merge(jsonObj2, new JsonMergeSettings
+            {
+                MergeArrayHandling = MergeArrayHandling.Union
+            });
+
+            if (econsentreviewdetails.Id > 0)
+            {
+                var investigatorid = (int)_projectRepository.Find(Econsentdocument.ProjectId).InvestigatorContactId;
+                var investigator = _investigatorContactRepository.Find(investigatorid);
+                string investigatorsignaturepath = System.IO.Path.Combine(upload.DocumentPath, investigator.SignaturePath);
+                string signinvestigatorbase64 = DocumentService.ConvertBase64Image(investigatorsignaturepath);
+                sign2 = sign2.Replace("_volunterlabel_", "Investigator");
+                sign2 = sign2.Replace("_imagepath_", signinvestigatorbase64);
+                sign2 = sign2.Replace("_voluntername_", investigator.NameOfInvestigator);
+                sign2 = sign2.Replace("_datetime_", econsentreviewdetails.investigatorapproveddatetime.ToString());
+                var jsonObj3 = JObject.Parse(sign2);
+                jsonObj.Merge(jsonObj3, new JsonMergeSettings
+                {
+                    MergeArrayHandling = MergeArrayHandling.Union
+                });
+            }
+
+            json = jsonObj.ToString();
             stream.Close();
             return json;
         }
@@ -325,6 +375,16 @@ namespace GSC.Respository.InformConcent
              }).ToList();
 
             return result;
+        }
+
+        public void downloadpdf(CustomParameter param)
+        {
+            
+            //File(memory, GetMimeTypes()[ext], Path.GetFileName(path));
+            //return File(new FileStream(file, FileMode.Open), "text/plain");
+            //Response.AppendHeader("content-disposition", "attachment; filename=" + name);
+            //return File(memory, GetContentType(path), Path.GetFileName(path));
+
         }
     }
 }
