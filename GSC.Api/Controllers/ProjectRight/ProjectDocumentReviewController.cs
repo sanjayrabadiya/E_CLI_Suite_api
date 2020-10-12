@@ -109,5 +109,15 @@ namespace GSC.Api.Controllers.ProjectRight
         {
             return Ok(_projectDocumentReviewRepository.GetProjectDropDownProjectRight());
         }
+
+        [HttpGet]
+        [Route("GetCompleteTrainingDashboard/{id}")]
+        public IActionResult GetCompleteTrainingDashboard(int id)
+        {
+            var dataObj = _projectDocumentReviewRepository.GetCompleteTrainingDashboard(id);
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            dataObj.ProjectList.ForEach(t => t.DocumentPath = documentUrl + t.DocumentPath);
+            return Ok(dataObj);
+        }
     }
 }

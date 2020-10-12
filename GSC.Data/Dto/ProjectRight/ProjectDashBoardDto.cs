@@ -21,7 +21,12 @@ namespace GSC.Data.Dto.ProjectRight
         public int ProjectId { get; set; }
         public int UserId { get; set; }
         public bool IsReview { get; set; }
-        public DateTime? ReviewDate { get; set; }
+        private DateTime? _reviewDate;
+        public DateTime? ReviewDate
+        {
+            get => _reviewDate?.UtcDateTime();
+            set => _reviewDate = value?.UtcDateTime();
+        }
         public string ReviewNote { get; set; }
         public string ProjectName { get; set; }
         public string ParentProjectCode { get; set; }

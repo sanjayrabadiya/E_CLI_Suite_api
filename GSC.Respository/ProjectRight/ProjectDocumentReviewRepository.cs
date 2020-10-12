@@ -227,6 +227,7 @@ namespace GSC.Respository.ProjectRight
         public ProjectDashBoardDto GetProjectDashboardbyId(int id)
         {
             var projectDashBoardDto = new ProjectDashBoardDto();
+            var project = Context.Project.Find(id);
 
             projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
                                                              && !x.IsReview && Context.ProjectRight.Any(a =>
@@ -245,7 +246,8 @@ namespace GSC.Respository.ProjectRight
                     ProjectNumber = c.Project.ProjectCode,
                     DocumentPath = c.ProjectDocument.PathName,
                     FileName = c.ProjectDocument.FileName,
-                    MimeType = c.ProjectDocument.MimeType
+                    MimeType = c.ProjectDocument.MimeType,
+                    ParentProjectCode = Context.Project.Where(x=>x.Id == project.ParentProjectId).FirstOrDefault().ProjectCode
                 }).ToList();
 
             projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
@@ -299,5 +301,59 @@ namespace GSC.Respository.ProjectRight
             if (projectList == null || projectList.Count == 0) return null;
             return projectList;
         }
+
+        public ProjectDashBoardDto GetCompleteTrainingDashboard(int id)
+        {
+            var projectDashBoardDto = new ProjectDashBoardDto();
+            var project = Context.Project.Find(id);
+
+            projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
+                                                             && x.IsReview && Context.ProjectRight.Any(a =>
+                                                                 a.ProjectId == x.ProjectId
+                                                                 && a.UserId == _jwtTokenAccesser.UserId
+                                                                 && x.DeletedDate == null) &&
+                                                             x.DeletedDate == null).Select(c =>
+                new ProjectDocumentReviewDto
+                {
+                    Id = c.Id,
+                    ProjectDocumentId = c.ProjectDocumentId,
+                    ProjectId = c.ProjectId,
+                    IsReview = c.IsReview,
+                    UserId = c.UserId,
+                    ProjectName = c.Project.ProjectName,
+                    ProjectNumber = c.Project.ProjectCode,
+                    DocumentPath = c.ProjectDocument.PathName,
+                    FileName = c.ProjectDocument.FileName,
+                    MimeType = c.ProjectDocument.MimeType,
+                    ParentProjectCode = Context.Project.Where(x => x.Id == project.ParentProjectId).FirstOrDefault().ProjectCode,
+                    ReviewDate = c.ReviewDate
+                }).ToList();
+
+            projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
+            {
+                var projectRight = Context.ProjectRight.Where(a =>
+                    a.ProjectId == projectDocumentReview.ProjectId
+                    && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
+                if (projectRight != null)
+                {
+                    projectDocumentReview.AssignedDate = projectRight.CreatedDate;
+                    var createdByUser = Context.Users.Where(user => user.Id == projectRight.CreatedBy).FirstOrDefault();
+                    if (createdByUser != null) projectDocumentReview.AssignedBy = createdByUser.UserName;
+                }
+            });
+
+            projectDashBoardDto.ProjectList = projectDashBoardDto.ProjectList.Where(x => x.ProjectId == id).ToList();
+       
+            projectDashBoardDto.ProjectReviewed = All.Count(x => x.UserId == _jwtTokenAccesser.UserId
+                                                                 && x.IsReview && Context.ProjectRight.Any(a =>
+                                                                     a.ProjectId == x.ProjectId
+                                                                     && a.UserId == _jwtTokenAccesser.UserId &&
+                                                                     a.RoleId == _jwtTokenAccesser.RoleId
+                                                                     && x.DeletedDate == null) &&
+                                                                 x.DeletedDate == null);
+
+            return projectDashBoardDto;
+        }
+
     }
 }
