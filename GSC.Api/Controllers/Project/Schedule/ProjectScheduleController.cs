@@ -226,16 +226,19 @@ namespace GSC.Api.Controllers.Project.Schedule
             var record = _projectScheduleRepository.FindByInclude(x => x.Id == id, x => x.ProjectDesign)
                 .FirstOrDefault();
 
-            if (record == null)
+            var recordTemplate = _projectScheduleTemplateRepository.FindByInclude(x => x.ProjectScheduleId == id).FirstOrDefault();
+
+            if (record == null && recordTemplate == null)
                 return NotFound();
 
             if (!record.ProjectDesign.IsUnderTesting)
             {
-                ModelState.AddModelError("Message", "Can not delete worklow!");
+                ModelState.AddModelError("Message", "Can not delete schedule!");
                 return BadRequest(ModelState);
             }
 
             _projectScheduleRepository.Delete(record);
+            _projectScheduleTemplateRepository.Delete(recordTemplate);
             _uow.Save();
 
             return Ok();
