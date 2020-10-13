@@ -302,6 +302,12 @@ namespace GSC.Api.Controllers.Project.Design
                 .FindBy(t => t.ProjectDesignVisitId == visitId && t.DeletedDate == null).OrderBy(t => t.DesignOrder)
                 .ToList();
             orderedList.Remove(orderedList.First(t => t.Id == id));
+
+            if (orderedList.Count() < index)
+            {
+                index = index - 1;
+            }
+            
             orderedList.Insert(index, template);
 
             var i = 0;

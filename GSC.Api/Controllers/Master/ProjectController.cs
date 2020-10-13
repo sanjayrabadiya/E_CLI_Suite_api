@@ -63,6 +63,10 @@ namespace GSC.Api.Controllers.Master
             var project = _projectRepository.Find(id);
             var projectDto = _mapper.Map<ProjectDto>(project);
 
+            var projectDesign =
+                _projectDesignRepository.FindByInclude(t => t.ProjectId == id && t.DeletedDate == null).FirstOrDefault();
+            projectDto.ProjectDesignId = projectDesign == null ? (int?)null : projectDesign.Id;
+
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
                 KeyId = project.Id,
