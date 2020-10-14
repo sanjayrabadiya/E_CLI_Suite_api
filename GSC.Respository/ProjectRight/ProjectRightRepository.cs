@@ -177,6 +177,7 @@ namespace GSC.Respository.ProjectRight
 
                 foreach (var item in projectRight)
                 {
+                    item.DeletedBy = _jwtTokenAccesser.UserId;
                     item.DeletedDate = DateTime.Now;
                     item.RollbackReason = projectRightDto[0].RollbackReason;
                     item.AuditReasonId = projectRightDto[0].AuditReasonId;

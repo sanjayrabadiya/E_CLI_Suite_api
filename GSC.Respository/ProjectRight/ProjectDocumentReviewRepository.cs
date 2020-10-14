@@ -164,6 +164,7 @@ namespace GSC.Respository.ProjectRight
                 .ToList();
             foreach (var item in result)
             {
+                item.DeletedBy = _jwtTokenAccesser.UserId;
                 item.DeletedDate = DateTime.Now;
                 Update(item);
             }
