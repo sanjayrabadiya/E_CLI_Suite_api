@@ -28,8 +28,8 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetDocumentDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.TypeName}).OrderBy(o => o.Value).ToList();
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.TypeName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
         public string Duplicate(DocumentType objSave)
