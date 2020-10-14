@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -158,25 +159,28 @@ namespace GSC.Respository.Project.Design
         {
             var templates = All.Where(x => x.DeletedDate == null
                                            && x.ProjectDesignVisitId == projectDesignVisitId
-                                           && !x.Variables.Any(c => c.Id == refVariable)
                                            && x.Variables.Where(y => collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
                                                y.CollectionSource == CollectionSources.Date ||
                                                y.CollectionSource == CollectionSources.Time ||
                                                y.CollectionSource == CollectionSources.DateTime).Any()
-                                               && (refVariable.Value > 0 ? !x.Variables.Any(v => Context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Any(s => s.ProjectDesignVariableId == v.Id)) : true)
-                                               && x.Variables != null).OrderBy(t => t.Id)
+                                               // && (refVariable.Value > 0 ? !x.Variables.Any(v => Context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Any(s => s.ProjectDesignVariableId == v.Id)) : true)
+                                               && x.Variables != null
+                                               ).OrderBy(t => t.Id)
                 .Select(t => new DropDownDto
                 {
                     Id = t.Id,
                     Value = t.TemplateName,
                     Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : "",
-                    ExtraData = t.Variables.Where(y => collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
+                    ExtraData = t.Variables.Where(y => y.Id != refVariable
+                                               && !Context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Select(x=>x.ProjectDesignVariableId).Contains(y.Id)
+                                               && (collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
                                                y.CollectionSource == CollectionSources.Date ||
                                                y.CollectionSource == CollectionSources.Time ||
-                                               y.CollectionSource == CollectionSources.DateTime).ToList()
+                                               y.CollectionSource == CollectionSources.DateTime)
+                                               ).ToList() 
                 }).ToList();
-
-            return templates;
+            
+            return templates.Where(x => ((List<ProjectDesignVariable>)x.ExtraData).ToList().Count > 0).ToList();
         }
 
 
