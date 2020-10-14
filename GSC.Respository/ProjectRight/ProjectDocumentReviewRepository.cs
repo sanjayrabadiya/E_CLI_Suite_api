@@ -33,7 +33,7 @@ namespace GSC.Respository.ProjectRight
             if (projectdetails.ParentProjectId != null)
             {
                 var documents = Context.ProjectDocument
-                    .Where(x => x.ProjectId == projectdetails.ParentProjectId && x.DeletedDate == null).ToList();
+                    .Where(x => x.ProjectId == projectdetails.ParentProjectId || x.ProjectId == projectId && x.DeletedDate == null).ToList();
 
                 foreach (var item in documents)
                 {
