@@ -21,6 +21,6 @@ namespace GSC.Data.Entities.Master
         public City City { get; set; }
         public ManageSite ManageSite { get; set; }
         public Iecirb Iecirb { get; set; }
-        public string SignaturePath { get; set; }
+        //public string SignaturePath { get; set; }
     }
 }

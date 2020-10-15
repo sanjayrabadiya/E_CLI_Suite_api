@@ -10,5 +10,8 @@ namespace GSC.Respository.Attendance
         string Duplicate(Randomization objSave, int projectId);
         List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted);
         void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto);
+        void SendEmailOfStartEconsent(Randomization randomization);
+        void ChangeStatustoConsentInProgress(int id);
+        void ChangeStatustoConsentCompleted(int id);
     }
 }

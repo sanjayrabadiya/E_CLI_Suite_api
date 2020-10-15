@@ -28,7 +28,10 @@ namespace GSC.Helper
                         mail.Body = mail.Body.Replace("\r\n", "\r");
                         mail.Body = mail.Body.Replace("\r", "\r\n");
                     }
-
+                    if (emailMessage.Attachments != null && emailMessage.Attachments.Count > 0)
+                    {
+                        mail.Attachments.Add(emailMessage.Attachments[0]);
+                    }
                     smtpServer.Port = Convert.ToInt32(emailMessage.PortName);
                     smtpServer.Credentials = new NetworkCredential(emailMessage.EmailFrom, emailMessage.EmailPassword);
                     smtpServer.EnableSsl = emailMessage.MailSsl;

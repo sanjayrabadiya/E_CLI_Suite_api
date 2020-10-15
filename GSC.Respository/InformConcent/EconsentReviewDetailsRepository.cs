@@ -23,6 +23,7 @@ using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using GSC.Data.Dto.Etmf;
 using Syncfusion.EJ2.DocumentEditor;
+using System.Security.Cryptography.X509Certificates;
 
 namespace GSC.Respository.InformConcent
 {
@@ -32,14 +33,14 @@ namespace GSC.Respository.InformConcent
         private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IUnitOfWork<GscContext> _uow;
         private readonly IMapper _mapper;
-        private readonly IRandomizationRepository _noneRegisterRepository;
+        //private readonly Lazy<IRandomizationRepository> _noneRegisterRepository;
         private readonly IInvestigatorContactRepository _investigatorContactRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly GscContext _context;
         public EconsentReviewDetailsRepository(IUnitOfWork<GscContext> uow, 
                                                 IJwtTokenAccesser jwtTokenAccesser,
                                                 IEconsentSetupRepository econsentSetupRepository,
-                                                IRandomizationRepository noneRegisterRepository,
+                                                //Lazy<IRandomizationRepository> noneRegisterRepository,
                                                 IInvestigatorContactRepository investigatorContactRepository,
                                                 IProjectRepository projectRepository,
                                                 IMapper mapper) : base(uow, jwtTokenAccesser)
@@ -49,7 +50,7 @@ namespace GSC.Respository.InformConcent
             _jwtTokenAccesser = jwtTokenAccesser;
             _econsentSetupRepository = econsentSetupRepository;
             _mapper = mapper;
-            _noneRegisterRepository = noneRegisterRepository;
+           //_noneRegisterRepository = noneRegisterRepository;
             _investigatorContactRepository = investigatorContactRepository;
             _projectRepository = projectRepository;
         }
@@ -70,7 +71,7 @@ namespace GSC.Respository.InformConcent
             //var econsentsetups = _econsentSetupRepository.All.Where(x => x.ProjectId == projectid).ToList();
             var data = (from econsentsetups in Context.EconsentSetup.Where(x => x.ProjectId == projectid)
                         join EconsentReviewDetails in Context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsApprovedByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentDocumentId
-                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 1) on EconsentReviewDetails.AttendanceId equals nonregister.Id //attendance.Id equals nonregister.AttendanceId
+                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 7) on EconsentReviewDetails.AttendanceId equals nonregister.Id //attendance.Id equals nonregister.AttendanceId
                         //join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
 
                         select new DropDownDto
@@ -97,7 +98,7 @@ namespace GSC.Respository.InformConcent
         {
             var data = (from econsentsetups in Context.EconsentSetup.Where(x => x.ProjectId == projectid)
                         join EconsentReviewDetails in Context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsApprovedByInvestigator == true) on econsentsetups.Id equals EconsentReviewDetails.EconsentDocumentId
-                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 1) on EconsentReviewDetails.AttendanceId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
+                        join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 7) on EconsentReviewDetails.AttendanceId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
                         //join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
 
                         select new EconsentReviewDetailsDto
@@ -116,12 +117,23 @@ namespace GSC.Respository.InformConcent
 
         public List<SectionsHeader> GetEconsentDocumentHeaders(int patientId)
         {
-
-            var noneregister = _noneRegisterRepository.Find(patientId);
-            var languageId = noneregister.LanguageId;
-            var ProjectId = noneregister.ProjectId;
-            var Econsentdocuments = _econsentSetupRepository.FindByInclude(x => x.ProjectId == ProjectId && x.LanguageId == languageId && x.DeletedBy == null && x.DeletedDate == null).ToList();
+            var noneregister = Context.Randomization.Where(x => x.Id == patientId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(patientId);
+                                                                                                           
             var econsentReviewDetails = FindByInclude(x => x.AttendanceId == patientId).ToList();
+            var Edocuments = Context.EconsentSetup.Where(x => x.ProjectId == noneregister.ProjectId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
+
+            var Econsentdocuments = (from econsentsetups in Edocuments
+                                     join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentDocumentId into ps
+                                     from p in ps.DefaultIfEmpty()
+                                     select new EConsentDocumentHeader
+                                     {
+                                         DocumentId = econsentsetups.Id,
+                                         DocumentName = econsentsetups.DocumentName,
+                                         DocumentPath = econsentsetups.DocumentPath,
+                                         ReviewId = (p == null) ? 0 : p.Id,
+                                         IsReviewed = (p == null) ? false : p.IsReviewedByPatient
+                                     }).ToList();
+
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
             int seqNo = 0;
@@ -140,11 +152,6 @@ namespace GSC.Respository.InformConcent
                     JObject jsonstr = JObject.Parse(json);
                     Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
                     int sectioncount = 1;
-                    bool isReadcompelete = false;
-                    if (econsentReviewDetails.Where(x => x.EconsentDocumentId == document.Id).ToList().Count > 0)
-                    {
-                        isReadcompelete = true;
-                    }
                     foreach (var e1 in jsonobj.sections)
                     {
                         foreach (var e2 in e1.blocks)
@@ -163,15 +170,17 @@ namespace GSC.Respository.InformConcent
                                     }
                                 }
                                 sectionsHeader.header = headerstring;
-                                sectionsHeader.documentId = document.Id;
+                                sectionsHeader.documentId = document.DocumentId;
+                                sectionsHeader.documentReviewId = document.ReviewId; 
                                 sectionsHeader.documentName = document.DocumentName;
-                                if (documentid != document.Id)
+                                if (documentid != document.DocumentId)
                                 {
                                     seqNo++;
                                 }
-                                documentid = document.Id;
+                                documentid = document.DocumentId;
                                 sectionsHeader.seqNo = seqNo;
-                                sectionsHeader.isReadCompelete = isReadcompelete;
+                                sectionsHeader.isReadCompelete = document.IsReviewed;
+                                sectionsHeader.isReviewed = document.IsReviewed;
                                 sectionsHeaders.Add(sectionsHeader);
                                 sectioncount++;
                             }
@@ -323,29 +332,31 @@ namespace GSC.Respository.InformConcent
             string sign = File.ReadAllText("signaturefooterblock.json");
             string sign2 = sign;
             int randomizationId = econsentreviewdetails.AttendanceId;
-            var randomization = _noneRegisterRepository.Find(randomizationId);
-            string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, randomization.SignaturePath);
-            string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
+            var randomization = Context.Randomization.Where(x => x.Id == randomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
+            //string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, randomization.SignaturePath);
+            //string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetails.patientdigitalSignImagepath);
+            //string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
             sign = sign.Replace("_volunterlabel_", "Volunteer");
-            sign = sign.Replace("_imagepath_", signRandombase64);
+            sign = sign.Replace("_imagepath_", econsentreviewdetails.patientdigitalSignBase64);
             sign = sign.Replace("_voluntername_", randomization.ScreeningNumber + " " + randomization.Initial);
-            sign = sign.Replace("_datetime_", econsentreviewdetails.patientapproveddatetime.ToString());
+            sign = sign.Replace("_datetime_", (econsentreviewdetails.patientapproveddatetime == null) ? DateTime.Now.ToString() : econsentreviewdetails.patientapproveddatetime.ToString());
             var jsonObj2 = JObject.Parse(sign);
             jsonObj.Merge(jsonObj2, new JsonMergeSettings
             {
                 MergeArrayHandling = MergeArrayHandling.Union
             });
 
-            if (econsentreviewdetails.Id > 0)
+            if (econsentreviewdetails.IsReviewedByPatient == true)
             {
                 var investigatorid = (int)_projectRepository.Find(Econsentdocument.ProjectId).InvestigatorContactId;
                 var investigator = _investigatorContactRepository.Find(investigatorid);
-                string investigatorsignaturepath = System.IO.Path.Combine(upload.DocumentPath, investigator.SignaturePath);
+                //string investigatorsignaturepath = System.IO.Path.Combine(upload.DocumentPath, investigator.SignaturePath);
+                string investigatorsignaturepath = System.IO.Path.Combine(upload.DocumentPath, "InformConcent\\Original\\c27aa8dd-9537-4756-90eb-5da09a9feef3.png");
                 string signinvestigatorbase64 = DocumentService.ConvertBase64Image(investigatorsignaturepath);
                 sign2 = sign2.Replace("_volunterlabel_", "Investigator");
                 sign2 = sign2.Replace("_imagepath_", signinvestigatorbase64);
                 sign2 = sign2.Replace("_voluntername_", investigator.NameOfInvestigator);
-                sign2 = sign2.Replace("_datetime_", econsentreviewdetails.investigatorapproveddatetime.ToString());
+                sign2 = sign2.Replace("_datetime_", econsentreviewdetails.investigatorapproveddatetime == null ? DateTime.Now.ToString() : econsentreviewdetails.investigatorapproveddatetime.ToString());
                 var jsonObj3 = JObject.Parse(sign2);
                 jsonObj.Merge(jsonObj3, new JsonMergeSettings
                 {
@@ -364,7 +375,7 @@ namespace GSC.Respository.InformConcent
                           join childproject in Context.Project.Where(x => x.ParentProjectId != null) on project.Id equals childproject.ParentProjectId
                           join econsentsetups in Context.EconsentSetup on childproject.Id equals econsentsetups.ProjectId
                          join EconsentReviewDetails in Context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsApprovedByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentDocumentId
-                         join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 1) on EconsentReviewDetails.AttendanceId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
+                         join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 7) on EconsentReviewDetails.AttendanceId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
                                                                                                                                                                  //join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
 
              select new DashboardDto

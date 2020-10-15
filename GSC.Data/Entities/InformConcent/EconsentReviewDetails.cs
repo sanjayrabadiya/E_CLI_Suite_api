@@ -15,7 +15,8 @@ namespace GSC.Data.Entities.InformConcent
         public DateTime? investigatorapproveddatetime { get; set; }
         public DateTime? patientapproveddatetime { get; set; }
         public string? pdfpath { get; set; }
-        //public string? patientdigitalSignImagepath { get; set; }
+        public bool IsReviewedByPatient { get; set; }
+        public string? patientdigitalSignImagepath { get; set; }
         //public string? investigatordigitalSignImagepath { get; set; }
 
 

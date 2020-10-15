@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Net.Mail;
 using System.Text.RegularExpressions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
@@ -80,6 +83,53 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendEmailOfStartEconsent(string toMail, string userName, string documentName, string ProjectName)
+        {
+            var emailMessage = ConfigureEmail("StartEconsent", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForStartEconsent(emailMessage.MessageBody, userName,documentName, ProjectName);
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void SendEmailOfPatientReviewedPDFtoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath)
+        {
+            var emailMessage = ConfigureEmail("PatientSignedDocumentToPatient", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientReviewedPDFtoPatient(emailMessage.MessageBody, userName, documentName, ProjectName);
+            emailMessage.Subject = ReplaceSubjectForPatientReviewedPDFtoPatient(emailMessage.Subject, documentName);
+            emailMessage.Attachments.Add(new Attachment(filepath));
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void SendEmailOfPatientReviewedPDFtoInvestigator(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath)
+        {
+            var emailMessage = ConfigureEmail("PatientSignedDocumentToInvestigator", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientReviewedPDFtoInvestigator(emailMessage.MessageBody, userName, documentName, ProjectName, patientName);
+            emailMessage.Subject = ReplaceSubjectForPatientReviewedPDFtoInvestigator(emailMessage.Subject, documentName, patientName);
+            emailMessage.Attachments.Add(new Attachment(filepath));
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void SendEmailOfInvestigatorApprovedPDFtoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath)
+        {
+            var emailMessage = ConfigureEmail("InvestigatorSignedDocumentToPatient", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientReviewedPDFtoPatient(emailMessage.MessageBody, userName, documentName, ProjectName);
+            emailMessage.Subject = ReplaceSubjectForPatientReviewedPDFtoPatient(emailMessage.Subject, documentName);
+            emailMessage.Attachments.Add(new Attachment(filepath));
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void SendEmailOfEconsentDocumentuploaded(string toMail, string userName, string documentName, string ProjectName)
+        {
+            var emailMessage = ConfigureEmail("EConsentDocumentUploaded", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientReviewedPDFtoPatient(emailMessage.MessageBody, userName, documentName, ProjectName);
+            emailMessage.Subject = ReplaceSubjectForPatientReviewedPDFtoPatient(emailMessage.Subject, documentName);
+            _emailService.SendMail(emailMessage);
+        }
+
         private string ReplaceBodyForPDF(string body, string userName, string project, string linkOfPdf)
         {
             body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
@@ -149,5 +199,79 @@ namespace GSC.Respository.EmailSender
                 RegexOptions.IgnoreCase);
             return body;
         }
+
+        private string ReplaceBodyForStartEconsent(string body, string userName, string documentName, string projectName)
+        {
+            body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##projectName##", projectName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>projectName</strong>##", "<strong>" + projectName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceBodyForPatientReviewedPDFtoPatient(string body, string userName, string documentName, string projectName)
+        {
+            body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##projectName##", projectName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>projectName</strong>##", "<strong>" + projectName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceSubjectForPatientReviewedPDFtoPatient(string body, string documentName)
+        {
+            body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceBodyForPatientReviewedPDFtoInvestigator(string body, string userName, string documentName, string projectName, string patientName)
+        {
+            body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##projectName##", projectName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>projectName</strong>##", "<strong>" + projectName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##patientname##", patientName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceSubjectForPatientReviewedPDFtoInvestigator(string body, string documentName, string patientName)
+        {
+           body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##patientname##", patientName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+
     }
 }

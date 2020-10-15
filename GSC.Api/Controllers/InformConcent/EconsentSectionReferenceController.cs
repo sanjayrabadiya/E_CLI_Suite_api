@@ -62,35 +62,40 @@ namespace GSC.Api.Controllers.InformConcent
         [HttpPost]
         public IActionResult Post([FromBody] EconsentSectionReferenceDto econsentSectionReferenceDto)
         {
-            Data.Dto.InformConcent.SaveFileDto obj = new Data.Dto.InformConcent.SaveFileDto();
-            obj.Path = _uploadSettingRepository.GetDocumentPath();
-            obj.FolderType = FolderType.InformConcent;
-            obj.RootName = "EconsentSectionReference";
-            obj.FileModel = econsentSectionReferenceDto.FileModel;
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
             }
-            econsentSectionReferenceDto.Id = 0;
-
-            if (econsentSectionReferenceDto.FileModel?.Base64?.Length > 0)
+            for (int i = 0; i < econsentSectionReferenceDto.FileModel.Count; i++)
             {
-                econsentSectionReferenceDto.FilePath = DocumentService.SaveEconsentSectionReferenceFile(obj.FileModel, obj.Path, obj.FolderType, obj.RootName);
-            }
+                Data.Dto.InformConcent.SaveFileDto obj = new Data.Dto.InformConcent.SaveFileDto();
+                obj.Path = _uploadSettingRepository.GetDocumentPath();
+                obj.FolderType = FolderType.InformConcent;
+                obj.RootName = "EconsentSectionReference";
+                obj.FileModel = econsentSectionReferenceDto.FileModel[i];
 
-            var econsentSectionReference = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
+                econsentSectionReferenceDto.Id = 0;
 
-            _econsentSectionReferenceRepository.Add(econsentSectionReference);
-            string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.RootName);
-            if (_uow.Save() <= 0)
-            {
-                if (Directory.Exists(root))
+                if (econsentSectionReferenceDto.FileModel[i]?.Base64?.Length > 0)
                 {
-                    Directory.Delete(root, true);
+                    econsentSectionReferenceDto.FilePath = DocumentService.SaveEconsentSectionReferenceFile(obj.FileModel, obj.Path, obj.FolderType, obj.RootName);
                 }
-                throw new Exception($"Creating EConsent File failed on save.");
+
+                var econsentSectionReference = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
+
+                _econsentSectionReferenceRepository.Add(econsentSectionReference);
+                string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.RootName);
+                if (_uow.Save() <= 0)
+                {
+                    if (Directory.Exists(root))
+                    {
+                        Directory.Delete(root, true);
+                    }
+                    throw new Exception($"Creating EConsent File failed on save.");
+                }
             }
-            return Ok(econsentSectionReference.Id);
+           
+            return Ok();
         }
 
         [HttpPut]
@@ -108,9 +113,9 @@ namespace GSC.Api.Controllers.InformConcent
 
             var document = _econsentSectionReferenceRepository.Find(econsentSectionReferenceDto.Id);
 
-                if (econsentSectionReferenceDto.FileModel?.Base64?.Length > 0)
+                if (econsentSectionReferenceDto.FileModel[0]?.Base64?.Length > 0)
                 {
-                    document.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
+                    document.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel[0], _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
                 }
             
             document.SectionNo = econsentSectionReferenceDto.SectionNo;

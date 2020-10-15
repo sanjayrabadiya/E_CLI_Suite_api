@@ -5,6 +5,7 @@ using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -13,6 +14,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.Screening;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Screening
@@ -127,6 +129,24 @@ namespace GSC.Api.Controllers.Screening
             _uow.Save();
 
             return Ok();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("GetProjectDesignTemplateList/{projectDesignVisitId}")]
+        public IActionResult GetProjectDesignTemplateList([FromRoute] int projectDesignVisitId)
+        {
+            var projectdesignTemplates = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == projectDesignVisitId && x.IsParticipantView == true).ToList();
+            return Ok(projectdesignTemplates);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("GetProjectDesignTemplate/{projectDesignTemplateId}")]
+        public IActionResult GetProjectDesignTemplates([FromRoute] int projectDesignTemplateId)
+        {
+           var designTemplate = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
+            return Ok(designTemplate);
         }
 
         [HttpGet]

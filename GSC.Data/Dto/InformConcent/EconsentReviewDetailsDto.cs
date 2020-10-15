@@ -18,10 +18,11 @@ namespace GSC.Data.Dto.InformConcent
         public DateTime? patientapproveddatetime { get; set; }
         public string? pdfpath { get; set; }
         public string? documentData { get; set; }
-        
-        //public string? patientdigitalSignBase64 { get; set; }
+        public bool IsReviewedByPatient { get; set; }
+
+        public string? patientdigitalSignBase64 { get; set; }
         //public string? investigatordigitalSignBase64 { get; set; }
-        //public string? patientdigitalSignImagepath { get; set; }
+        public string? patientdigitalSignImagepath { get; set; }
         //public string? investigatordigitalSignImagepath { get; set; }
     }
 }

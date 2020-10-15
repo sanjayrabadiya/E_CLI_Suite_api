@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Medra;
 using GSC.Data.Entities.InformConcent;
@@ -13,6 +14,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
 using GSC.Respository.Configuration;
+using GSC.Respository.EmailSender;
 using GSC.Respository.InformConcent;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Http;
@@ -34,6 +36,7 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IEconsentSetupPatientStatusRepository _econsentSetupPatientStatusRepository;
         private readonly GscContext _context;
+        private readonly IEmailSenderRespository _emailSenderRespository;
 
         public econsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
@@ -44,6 +47,7 @@ namespace GSC.Api.Controllers.InformConcent
             IPatientStatusRepository patientStatusRepository,
             IProjectRepository projectRepository,
             IUploadSettingRepository uploadSettingRepository,
+            IEmailSenderRespository emailSenderRespository,
             IEconsentSetupPatientStatusRepository econsentSetupPatientStatusRepository)
         {
             _econsentSetupRepository = econsentSetupRepository;
@@ -56,6 +60,7 @@ namespace GSC.Api.Controllers.InformConcent
             _projectRepository = projectRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _econsentSetupPatientStatusRepository = econsentSetupPatientStatusRepository;
+            _emailSenderRespository = emailSenderRespository;
         }
 
 
@@ -157,6 +162,12 @@ namespace GSC.Api.Controllers.InformConcent
 
             var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
 
+            EconsentSetupPatientStatus econsentSetupPatientStatus = new EconsentSetupPatientStatus();
+            econsentSetupPatientStatus.Id = 0;
+            econsentSetupPatientStatus.EconsentDocumentId = 0;
+            econsentSetupPatientStatus.PatientStatusId = (int)ScreeningPatientStatus.ConsentInProcess;
+            econsent.PatientStatus.Add(econsentSetupPatientStatus);
+
             _econsentSetupRepository.Add(econsent);
             string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.RootName);
             if (_uow.Save() <= 0)
@@ -166,6 +177,34 @@ namespace GSC.Api.Controllers.InformConcent
                     Directory.Delete(root, true);
                 }
                 throw new Exception($"Creating EConsent File failed on save.");
+            }
+            var result = (from patients in _context.Randomization.Where(x => x.ProjectId == econsent.ProjectId)
+                          join status in _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id) on (int)patients.PatientStatusId equals status.PatientStatusId
+                          select new RandomizationDto
+                          {
+                              Id = patients.Id,
+                              FirstName = patients.FirstName,
+                              MiddleName = patients.MiddleName,
+                              LastName = patients.LastName,
+                              Initial = patients.Initial,
+                              ScreeningNumber = patients.ScreeningNumber,
+                              Email = patients.Email
+                          }).ToList();
+            string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
+            for (var i = 0; i < result.Count; i++)
+            {
+                if (result[i].Email != "")
+                {
+                    string patientName = "";
+                    if (result[i].ScreeningNumber != "")
+                    {
+                        patientName = result[i].Initial + " " + result[i].ScreeningNumber;
+                    } else
+                    {
+                        patientName = result[i].FirstName + " " + result[i].MiddleName + " " + result[i].LastName;
+                    }
+                    _emailSenderRespository.SendEmailOfEconsentDocumentuploaded(result[i].Email, patientName, econsent.DocumentName, projectcode);
+                }
             }
             return Ok(econsent.Id);
         }
@@ -222,10 +261,10 @@ namespace GSC.Api.Controllers.InformConcent
             for (var i = 0; i < econsentSetup.PatientStatus.Count; i++)
             {
                 var i1 = i;
-                var patientstatus = _context.EconsentSetupPatientStatus.Where(x => x.PatientStatusId == econsentSetup.PatientStatus[i1].PatientStatusId && x.EconsentDocumentId == econsentSetup.PatientStatus[i1].EconsentDocumentId).ToList().FirstOrDefault();
-                    //_econsentSetupPatientStatusRepository.FindByInclude(x => x.PatientStatusId == econsentSetup.PatientStatus[i1].PatientStatusId
-                                                               //&& x.EconsentDocumentId == econsentSetup.PatientStatus[i1].EconsentDocumentId)
-                    //.FirstOrDefault();
+                var patientstatus = _context.EconsentSetupPatientStatus.Where(x => x.PatientStatusId == econsentSetup.PatientStatus[i1].PatientStatusId
+                                                               && x.EconsentDocumentId == econsentSetup.PatientStatus[i1].EconsentDocumentId).FirstOrDefault();
+                                                               //_econsentSetupPatientStatusRepository.FindByInclude(x => x.PatientStatusId == econsentSetup.PatientStatus[i1].PatientStatusId
+                                                               //&& x.EconsentDocumentId == econsentSetup.PatientStatus[i1].EconsentDocumentId).FirstOrDefault();
                 if (patientstatus != null)
                 {
                     patientstatus.DeletedDate = null;
@@ -240,6 +279,13 @@ namespace GSC.Api.Controllers.InformConcent
         public IActionResult GetEconsentDocumentDropDown(int projectId)
         {
             return Ok(_econsentSetupRepository.GetEconsentDocumentDropDown(projectId));
+        }
+
+        [HttpGet]
+        [Route("GetPatientStatusDropDown")]
+        public IActionResult GetPatientStatusDropDown()
+        {
+            return Ok(_econsentSetupRepository.GetPatientStatusDropDown());
         }
     }
 }

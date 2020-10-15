@@ -12,5 +12,6 @@ namespace GSC.Respository.InformConcent
     {
         string Duplicate(EconsentSetupDto objSave);
         List<DropDownDto> GetEconsentDocumentDropDown(int projectId);
+        List<DropDownDto> GetPatientStatusDropDown();
     }
 }

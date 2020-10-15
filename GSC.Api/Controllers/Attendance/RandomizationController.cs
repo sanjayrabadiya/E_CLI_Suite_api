@@ -11,6 +11,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Respository.EmailSender;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -25,6 +26,7 @@ namespace GSC.Api.Controllers.Attendance
         private readonly ICityRepository _cityRepository;
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
+        
 
         public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -32,7 +34,8 @@ namespace GSC.Api.Controllers.Attendance
             IJwtTokenAccesser jwtTokenAccesser,
             ICityRepository cityRepository,
             IStateRepository stateRepository,
-            ICountryRepository countryRepository)
+            ICountryRepository countryRepository
+            )
         {
             _randomizationRepository = randomizationRepository;
             _uow = uow;
@@ -86,7 +89,7 @@ namespace GSC.Api.Controllers.Attendance
             var randomization = _mapper.Map<Randomization>(randomizationDto);
             randomization.PatientStatusId = ScreeningPatientStatus.PreScreening;
 
-
+            _randomizationRepository.SendEmailOfStartEconsent(randomization);
             _randomizationRepository.Add(randomization);
 
             if (_uow.Save() <= 0) throw new Exception("Creating randomization failed on save.");
@@ -160,10 +163,22 @@ namespace GSC.Api.Controllers.Attendance
             _randomizationRepository.SaveRandomization(randomization, randomizationDto);
 
             _randomizationRepository.Update(randomization);
+            _randomizationRepository.SendEmailOfStartEconsent(randomization);
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
             return Ok(randomization.Id);
         }
+
+        [HttpPut]
+        [Route("ChangeStatustoConsentInProgress/{id}")]
+        public IActionResult ChangeStatustoConsentInProgress(int id)
+        {
+            _randomizationRepository.ChangeStatustoConsentInProgress(id);
+            _uow.Save();
+            //if (_uow.Save() <= 0) throw new Exception("Updating status failed on save.");
+            return Ok();
+        }
+
     }
 }

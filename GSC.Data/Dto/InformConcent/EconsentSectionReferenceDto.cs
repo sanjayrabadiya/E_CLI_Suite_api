@@ -13,7 +13,7 @@ namespace GSC.Data.Dto.InformConcent
         public int SectionNo { get; set; }
         public string ReferenceTitle { get; set; }
         public string FilePath { get; set; }
-        public FileModel FileModel { get; set; }
+        public List<FileModel> FileModel { get; set; }
     }
 
     public class EconsentSectionReferenceDocumentType
