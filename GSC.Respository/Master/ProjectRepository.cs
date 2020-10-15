@@ -112,7 +112,7 @@ namespace GSC.Respository.Master
             if (objSave.ParentProjectId == null || objSave.ParentProjectId <= 0)
             {
                 if (All.AsNoTracking().Any(x =>
-                    x.Id != objSave.Id && x.ProjectName == objSave.ProjectName && x.DeletedDate == null))
+                    x.Id != objSave.Id && x.ProjectName == objSave.ProjectName && x.DeletedDate == null && x.ParentProjectId == null))
                     return "Duplicate Study name : " + objSave.ProjectName;
 
                 if (All.Any(x => x.Id != objSave.Id && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
