@@ -13,5 +13,6 @@ namespace GSC.Respository.Attendance
         void SendEmailOfStartEconsent(Randomization randomization);
         void ChangeStatustoConsentInProgress(int id);
         void ChangeStatustoConsentCompleted(int id);
+        void ChangeStatustoReConsentInProgress(int id);
     }
 }

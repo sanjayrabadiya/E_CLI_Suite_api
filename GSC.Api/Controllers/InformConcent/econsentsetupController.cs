@@ -9,10 +9,12 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Medra;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
+using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.InformConcent;
@@ -37,6 +39,8 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IEconsentSetupPatientStatusRepository _econsentSetupPatientStatusRepository;
         private readonly GscContext _context;
         private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly IRandomizationRepository _randomizationRepository;
+        private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
 
         public econsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
@@ -48,7 +52,9 @@ namespace GSC.Api.Controllers.InformConcent
             IProjectRepository projectRepository,
             IUploadSettingRepository uploadSettingRepository,
             IEmailSenderRespository emailSenderRespository,
-            IEconsentSetupPatientStatusRepository econsentSetupPatientStatusRepository)
+            IEconsentSetupPatientStatusRepository econsentSetupPatientStatusRepository,
+            IRandomizationRepository randomizationRepository,
+            IEconsentReviewDetailsRepository econsentReviewDetailsRepository)
         {
             _econsentSetupRepository = econsentSetupRepository;
             _uow = uow;
@@ -61,6 +67,8 @@ namespace GSC.Api.Controllers.InformConcent
             _uploadSettingRepository = uploadSettingRepository;
             _econsentSetupPatientStatusRepository = econsentSetupPatientStatusRepository;
             _emailSenderRespository = emailSenderRespository;
+            _randomizationRepository = randomizationRepository;
+            _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
         }
 
 
@@ -178,9 +186,9 @@ namespace GSC.Api.Controllers.InformConcent
                 }
                 throw new Exception($"Creating EConsent File failed on save.");
             }
-            var result = (from patients in _context.Randomization.Where(x => x.ProjectId == econsent.ProjectId)
+            var result = (from patients in _context.Randomization.Where(x => x.ProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId)
                           join status in _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id) on (int)patients.PatientStatusId equals status.PatientStatusId
-                          select new RandomizationDto
+                          select new Randomization
                           {
                               Id = patients.Id,
                               FirstName = patients.FirstName,
@@ -188,11 +196,21 @@ namespace GSC.Api.Controllers.InformConcent
                               LastName = patients.LastName,
                               Initial = patients.Initial,
                               ScreeningNumber = patients.ScreeningNumber,
-                              Email = patients.Email
+                              Email = patients.Email,
+                              PatientStatusId = patients.PatientStatusId
                           }).ToList();
             string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
             for (var i = 0; i < result.Count; i++)
             {
+                if (result[i].PatientStatusId == ScreeningPatientStatus.ConsentCompleted || result[i].PatientStatusId == ScreeningPatientStatus.OnTrial)
+                {
+                    EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
+                    econsentReviewDetails.AttendanceId = result[i].Id;
+                    econsentReviewDetails.EconsentDocumentId = econsent.Id;
+                    econsentReviewDetails.IsReviewedByPatient = false;
+                    _econsentReviewDetailsRepository.Add(econsentReviewDetails);
+                    _randomizationRepository.ChangeStatustoReConsentInProgress(result[i].Id);
+                }
                 if (result[i].Email != "")
                 {
                     string patientName = "";
@@ -206,6 +224,7 @@ namespace GSC.Api.Controllers.InformConcent
                     _emailSenderRespository.SendEmailOfEconsentDocumentuploaded(result[i].Email, patientName, econsent.DocumentName, projectcode);
                 }
             }
+            
             return Ok(econsent.Id);
         }
 

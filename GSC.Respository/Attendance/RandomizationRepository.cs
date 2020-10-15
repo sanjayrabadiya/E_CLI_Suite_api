@@ -197,6 +197,17 @@ namespace GSC.Respository.Attendance
             }
         }
 
+        public void ChangeStatustoReConsentInProgress(int id)
+        {
+            var randomization = Find(id);
+            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || randomization.PatientStatusId == ScreeningPatientStatus.OnTrial)
+            {
+                randomization.PatientStatusId = ScreeningPatientStatus.ReConsentInProcess;
+                Update(randomization);
+                _uow.Save();
+            }
+        }
+
 
     }
 }

@@ -23,13 +23,15 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IRoleRepository _securityRoleRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
         private readonly IUnitOfWork _uow;
 
         public SecurityRoleController(IRoleRepository securityRoleRepository,
             IRolePermissionRepository rolePermissionRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser,
+            IUserRoleRepository userRoleRepository)
         {
             _securityRoleRepository = securityRoleRepository;
             _rolePermissionRepository = rolePermissionRepository;
@@ -38,6 +40,7 @@ namespace GSC.Api.Controllers.UserMgt
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _userRoleRepository = userRoleRepository;
         }
 
         // GET: api/<controller>
@@ -114,6 +117,13 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (record == null)
                 return NotFound();
+
+            var users = _userRoleRepository.FindBy(x => x.UserRoleId == id).ToList();
+            if (users.Count > 0)
+            {
+                ModelState.AddModelError("Message", "Role is assigned to user so delete not allow");
+                return BadRequest(ModelState);
+            }
 
             _securityRoleRepository.Delete(record);
             _uow.Save();
