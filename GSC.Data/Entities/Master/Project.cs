@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Project.Design;
@@ -68,5 +69,7 @@ namespace GSC.Data.Entities.Master
         public Drug Drug { get; set; }
         public DesignTrial DesignTrial { get; set; }
         public InvestigatorContact InvestigatorContact { get; set; }
+        //[NotMapped]
+        //public List<Project> SiteList { get; set; }
     }
 }
