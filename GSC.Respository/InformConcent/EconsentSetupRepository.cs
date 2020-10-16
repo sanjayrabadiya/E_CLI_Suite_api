@@ -45,9 +45,13 @@ namespace GSC.Respository.InformConcent
 
         public List<DropDownDto> GetPatientStatusDropDown()
         {
-            return _patientStatusRepository.All.Where(x => (x.Code == 1 || x.Code == 2 || x.Code == 4 || x.Code == 7) && x.DeletedDate == null)
+            IList<int> intList = new List<int>() { (int)ScreeningPatientStatus.PreScreening, (int)ScreeningPatientStatus.Screening, (int)ScreeningPatientStatus.ConsentCompleted, (int)ScreeningPatientStatus.OnTrial };
+            return _patientStatusRepository.All.Where(x => intList.Contains(x.Id) && x.DeletedDate == null)
                .Select(c => new DropDownDto { Id = c.Id, Value = c.StatusName, IsDeleted = false }).OrderBy(o => o.Value)
                .ToList();
+            //return _patientStatusRepository.All.Where(x => (x.Code == 1 || x.Code == 2 || x.Code == 4 || x.Code == 7) && x.DeletedDate == null)
+            //   .Select(c => new DropDownDto { Id = c.Id, Value = c.StatusName, IsDeleted = false }).OrderBy(o => o.Value)
+            //   .ToList();
         }
     }
 }

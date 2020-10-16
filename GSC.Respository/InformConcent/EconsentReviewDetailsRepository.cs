@@ -334,10 +334,16 @@ namespace GSC.Respository.InformConcent
             int randomizationId = econsentreviewdetails.AttendanceId;
             var randomization = Context.Randomization.Where(x => x.Id == randomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
             //string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, randomization.SignaturePath);
-            //string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetails.patientdigitalSignImagepath);
-            //string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
+            if (econsentreviewdetails.IsReviewedByPatient == true)
+            {
+                string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetails.patientdigitalSignImagepath);
+                string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
+                sign = sign.Replace("_imagepath_", signRandombase64);
+            } else
+            {
+                sign = sign.Replace("_imagepath_", econsentreviewdetails.patientdigitalSignBase64);
+            }
             sign = sign.Replace("_volunterlabel_", "Volunteer");
-            sign = sign.Replace("_imagepath_", econsentreviewdetails.patientdigitalSignBase64);
             sign = sign.Replace("_voluntername_", randomization.ScreeningNumber + " " + randomization.Initial);
             sign = sign.Replace("_datetime_", (econsentreviewdetails.patientapproveddatetime == null) ? DateTime.Now.ToString() : econsentreviewdetails.patientapproveddatetime.ToString());
             var jsonObj2 = JObject.Parse(sign);
