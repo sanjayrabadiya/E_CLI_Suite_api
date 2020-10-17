@@ -122,7 +122,8 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.RegulatoryTypeName, x => x.MapFrom(a => a.RegulatoryType.RegulatoryTypeName))
                 .ForMember(x => x.ProjectDesignId, x => x.MapFrom(a => a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.Id).FirstOrDefault()))
                 .ForMember(x => x.Locked, x => x.MapFrom(a => !a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.IsUnderTesting).FirstOrDefault()))
-                //.ForMember(x => x.NoofSite, x => x.MapFrom(a => a.SiteList.Where(y => y.ParentProjectId == a.Id && y.DeletedDate == null).Count()))
+                .ForMember(x => x.ParentProjectCode, x => x.MapFrom(a => a.ChildProject.Select(r => r.ProjectCode).FirstOrDefault()))
+                .ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.Count()))
                 .ReverseMap();
 
             CreateMap<ManageSite, ManageSiteGridDto>()
