@@ -13,6 +13,7 @@ namespace GSC.Data.Dto.Project.Design
 
         public string Description { get; set; }
         public bool IsRepeated { get; set; }
+        public bool? IsSchedule { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
     }
 }

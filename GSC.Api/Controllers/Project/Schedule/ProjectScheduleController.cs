@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Schedule;
@@ -68,7 +69,6 @@ namespace GSC.Api.Controllers.Project.Schedule
 
         [HttpGet("{isDeleted:bool?}")]
         public IList<ProjectScheduleDto> Get(bool isDeleted)
-        //public IActionResult Get(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<ProjectScheduleDto>();
@@ -101,9 +101,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             var projectSchedule = _projectScheduleRepository.FindByInclude(t => t.Id == id, t => t.Templates,
                 t => t.ProjectDesign, t => t.ProjectDesignPeriod, t => t.ProjectDesignVisit).FirstOrDefault();
 
-            //if (projectSchedule.Templates != null)
-            //    projectSchedule.Templates = projectSchedule.Templates.Where(x => x.DeletedDate == null).OrderByDescending(t => t.RefTimeInterval).ToList();
-
+  
             var projectScheduleDto = _mapper.Map<ProjectScheduleDto>(projectSchedule);
 
             if (projectScheduleDto.Templates != null)
@@ -147,6 +145,7 @@ namespace GSC.Api.Controllers.Project.Schedule
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] ProjectScheduleDto projectScheduleDto)
 
         {
@@ -157,14 +156,19 @@ namespace GSC.Api.Controllers.Project.Schedule
 
             projectSchedule.ProjectId = _projectDesignRepository.Find(projectScheduleDto.ProjectDesignId).ProjectId;
 
-            UpdateDesignTemplatesOrder(projectSchedule);
+            _projectScheduleTemplateRepository.UpdateDesignTemplatesOrder(projectSchedule);
 
             _projectScheduleRepository.Add(projectSchedule);
             if (_uow.Save() <= 0) throw new Exception("Creating Project Schedule failed on save.");
+
+            _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(projectScheduleDto.ProjectDesignPeriodId);
+            _uow.Save();
+
             return Ok(projectSchedule.Id);
         }
 
         [HttpPut]
+        [TransactionRequired]
         public IActionResult Put([FromBody] ProjectScheduleDto projectScheduleDto)
         {
             if (projectScheduleDto.Id <= 0) return BadRequest();
@@ -172,53 +176,19 @@ namespace GSC.Api.Controllers.Project.Schedule
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var projectSchedule = _mapper.Map<ProjectSchedule>(projectScheduleDto);
-            UpdateTemplates(projectSchedule);
-            UpdateDesignTemplatesOrder(projectSchedule);
+            _projectScheduleTemplateRepository.UpdateTemplates(projectSchedule);
+            _projectScheduleTemplateRepository.UpdateDesignTemplatesOrder(projectSchedule);
 
             _projectScheduleRepository.Update(projectSchedule);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Project Schedule failed on save.");
+
+            _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(projectScheduleDto.ProjectDesignPeriodId);
+            _uow.Save();
+
             return Ok(projectSchedule.Id);
         }
 
-        private void UpdateTemplates(ProjectSchedule projectSchedule)
-        {
-            var data = _projectScheduleTemplateRepository.FindBy(x =>
-                x.ProjectScheduleId == projectSchedule.Id
-                // && !projectSchedule.Templates.Any(c => c.Id == x.Id)
-                ).ToList();
-            var deleteTemplates = data.Where(x => !projectSchedule.Templates.Any(c => c.Id == x.Id)).ToList();
-
-            foreach (var template in deleteTemplates)
-            {
-                template.DeletedBy = _jwtTokenAccesser.UserId;
-                template.DeletedDate = DateTime.Now;
-                _projectScheduleTemplateRepository.Update(template);
-            }
-        }
-
-        private void UpdateDesignTemplatesOrder(ProjectSchedule projectSchedule)
-        {
-            var orderedList = _projectDesignTemplateRepository
-                .FindBy(t => t.ProjectDesignVisitId == projectSchedule.ProjectDesignVisitId && t.DeletedDate == null)
-                .OrderBy(t => t.DesignOrder).ToList();
-
-            //var index = 0;
-            //foreach (var item in projectSchedule.Templates.OrderByDescending(t => t.RefTimeInterval))
-            //{
-            //    var template = orderedList.First(t => t.Id == item.ProjectDesignTemplateId);
-            //    orderedList.Remove(template);
-            //    orderedList.Insert(index, template);
-            //    index++;
-            //}
-
-            var i = 0;
-            foreach (var item in orderedList)
-            {
-                item.DesignOrder = ++i;
-                _projectDesignTemplateRepository.Update(item);
-            }
-        }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)

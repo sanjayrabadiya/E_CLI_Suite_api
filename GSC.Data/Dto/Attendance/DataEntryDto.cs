@@ -56,7 +56,7 @@ namespace GSC.Data.Dto.Attendance
     {
         public int ScreeningVisitId { get; set; }
         public string VisitName { get; set; }
-        public ScreeningVisitStatus VisitStatus { get; set; }
+        public string VisitStatus { get; set; }
 
         private DateTime? _scheduleDate { get; set; }
         public DateTime? ScheduleDate

@@ -59,10 +59,12 @@ namespace GSC.Respository.Screening
                             RoleName = r.SecurityRole.RoleShortName
                         }).ToList();
 
-            var projectDesignVisit = _projectDesignVisitRepository.All.Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId).
+            var projectDesignVisit = _projectDesignVisitRepository.All.
+                Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
             Select(t => new DataEntryVisitTemplateDto
             {
-                VisitName = t.DisplayName
+                VisitName = t.DisplayName,
+                VisitStatus = ScreeningVisitStatus.NotStarted.GetDescription(),
             }).ToList();
 
             var queryList = _screeningTemplateValueRepository.GetQueryStatusByPeridId(projectDesignPeriodId);
@@ -76,11 +78,16 @@ namespace GSC.Respository.Screening
                  VolunteerName = t.Initial,
                  IsRandomization = true,
                  SubjectNo = t.ScreeningNumber,
+                 PatientStatus = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  TemplateCount = test,
                  InProgress = 2,
                  NotStarted = 3,
-                 Visit = new List<DataEntryVisitTemplateDto>(),
+                 Visit = projectDesignVisit,
+
+
+
+
                  //Visit = _screeningVisitRepository.FindByInclude(x => x.DeletedDate == null).Select(t => new DataEntryVisitTemplateDto
                  //{
                  //    VisitName = "122",//t.ProjectDesignVisit.DisplayName,
