@@ -167,7 +167,7 @@ namespace GSC.Respository.Attendance
         public void ChangeStatustoConsentCompleted(int id)
         {
             var randomization = Find(id);
-            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess)
+            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
             {
                 if (_econsentReviewDetailsRepository.FindByInclude(x => x.AttendanceId == id && x.IsApprovedByInvestigator == false).ToList().Count > 0)
                 {

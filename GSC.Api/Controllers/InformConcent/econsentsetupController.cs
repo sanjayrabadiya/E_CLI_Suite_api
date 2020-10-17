@@ -256,9 +256,13 @@ namespace GSC.Api.Controllers.InformConcent
                     document.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSetup");
 
                 }
-           
-            //var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
-            UpdatePatientStatus(document);
+
+            var patientstatusDelete = _econsentSetupPatientStatusRepository.FindBy(x => x.EconsentDocumentId == document.Id && x.PatientStatusId != (int)ScreeningPatientStatus.ConsentInProcess).ToList();//_context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsentSetup.Id).ToList();
+            foreach (var item in patientstatusDelete)
+            {
+                _econsentSetupPatientStatusRepository.Remove(item);
+            }
+
             _econsentSetupRepository.Update(document);
 
             if (_uow.Save() <= 0)
@@ -266,31 +270,6 @@ namespace GSC.Api.Controllers.InformConcent
                 throw new Exception($"Updating Econsent file failed on save.");
             }
             return Ok(document.Id);
-        }
-
-        private void UpdatePatientStatus(EconsentSetup econsentSetup)
-        {
-            var patientstatusDelete = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsentSetup.Id).ToList();//_econsentSetupPatientStatusRepository.FindByInclude(x => x.EconsentDocumentId == econsentSetup.Id).ToList();
-            foreach (var item in patientstatusDelete)
-            {
-                item.DeletedDate = DateTime.Now;
-                _econsentSetupPatientStatusRepository.Update(item);
-            }
-
-            for (var i = 0; i < econsentSetup.PatientStatus.Count; i++)
-            {
-                var i1 = i;
-                var patientstatus = _context.EconsentSetupPatientStatus.Where(x => x.PatientStatusId == econsentSetup.PatientStatus[i1].PatientStatusId
-                                                               && x.EconsentDocumentId == econsentSetup.PatientStatus[i1].EconsentDocumentId).FirstOrDefault();
-                                                               //_econsentSetupPatientStatusRepository.FindByInclude(x => x.PatientStatusId == econsentSetup.PatientStatus[i1].PatientStatusId
-                                                               //&& x.EconsentDocumentId == econsentSetup.PatientStatus[i1].EconsentDocumentId).FirstOrDefault();
-                if (patientstatus != null)
-                {
-                    patientstatus.DeletedDate = null;
-                    patientstatus.DeletedBy = null;
-                    econsentSetup.PatientStatus[i] = patientstatus;
-                }
-            }
         }
 
         [HttpGet]
