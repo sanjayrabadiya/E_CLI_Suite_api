@@ -490,12 +490,15 @@ namespace GSC.Helper
     public enum ScreeningVisitStatus : short
     {
         [Description("Not Started")] NotStarted = 1,
-        [Description("In Progress")] InProgress = 2,
-        [Description("Missed")] Missed = 3,
+        [Description("Open")] Open = 2,
+        [Description("In Progress")] InProgress = 3,
         [Description("Scheduled")] Scheduled = 4,
         [Description("Re-Schedule")] ReSchedule = 5,
-        [Description("OnHold")] OnHold = 6,
-        [Description("Completed")] Completed = 7
+        [Description("Missed")] Missed = 6,
+        [Description("Withdrawal")] Withdrawal = 7,
+        [Description("OnHold")] OnHold = 8,
+        [Description("Screening Failure")] ScreeningFailure = 9,
+        [Description("Completed")] Completed = 10
     }
 
     public enum ScreeningPatientStatus : int

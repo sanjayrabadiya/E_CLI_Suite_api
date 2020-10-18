@@ -152,7 +152,7 @@ namespace GSC.Respository.Screening
             screeningEntry.EntryType = attendace.AttendanceType;
             screeningEntry.ProjectDesignPeriodId = attendace.ProjectDesignPeriodId;
 
-            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId);
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId, 0);
 
             attendace.IsProcessed = true;
             _attendanceRepository.Update(attendace);
@@ -169,7 +169,7 @@ namespace GSC.Respository.Screening
         }
 
 
-        public ScreeningEntry SaveScreeningRandomization(int randomizationId)
+        public ScreeningEntry SaveScreeningRandomization(int randomizationId, int projectDesignVisitId)
         {
             var screeningEntry = new ScreeningEntry();
             screeningEntry.Id = 0;
@@ -190,7 +190,7 @@ namespace GSC.Respository.Screening
             screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
-            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId);
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, projectDesignVisitId);
 
             screeningEntry.IsTesting = projectDesign.IsUnderTesting;
             screeningEntry.ScreeningHistory = new ScreeningHistory();

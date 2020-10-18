@@ -14,15 +14,18 @@ namespace GSC.Respository.Screening
     public class ScreeningVisitRepository : GenericRespository<ScreeningVisit, GscContext>, IScreeningVisitRepository
     {
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
+        private readonly IScreeningVisitHistoryRepository _screeningVisitHistoryRepository;
         public ScreeningVisitRepository(IUnitOfWork<GscContext> uow,
             IProjectDesignVisitRepository projectDesignVisitRepository,
+            IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
             IJwtTokenAccesser jwtTokenAccesser)
             : base(uow, jwtTokenAccesser)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
+            _screeningVisitHistoryRepository = screeningVisitHistoryRepository;
         }
 
-        public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId)
+        public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId)
         {
 
             var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(projectDesignPeriodId);
@@ -33,14 +36,17 @@ namespace GSC.Respository.Screening
                 {
 
                     ProjectDesignVisitId = r.Id,
-                    Status = ScreeningVisitStatus.NotStarted
+                    Status = projectDesignVisitId == r.Id ? ScreeningVisitStatus.Open : ScreeningVisitStatus.NotStarted
                 };
+
+                if (screeningVisit.Status == ScreeningVisitStatus.Open)
+                    _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.Open);
 
                 r.Templates.ForEach(t =>
                 {
                     screeningVisit.ScreeningTemplates.Add(new ScreeningTemplate
                     {
-                        ProjectDesignTemplateId = t.Id,
+                        ProjectDesignTemplateId = t,
                         Status = ScreeningTemplateStatus.Pending
                     });
                 });
@@ -49,6 +55,19 @@ namespace GSC.Respository.Screening
                 screeningEntry.ScreeningVisit.Add(screeningVisit);
             });
         }
+
+
+        public void StatUpdate(int screeningVisitId, ScreeningVisitStatus screeningVisitStatus, string note)
+        {
+            var visit = Find(screeningVisitId);
+            visit.Status = screeningVisitStatus;
+
+            Update(visit);
+
+            _screeningVisitHistoryRepository.Save(screeningVisitId, ScreeningVisitStatus.Open, note);
+        }
+
+
         public void VisitRepeat(int projectDesignVisitId, int screeningEntryId)
         {
             var repeatedCount = 0;

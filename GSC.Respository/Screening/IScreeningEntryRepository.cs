@@ -11,7 +11,7 @@ namespace GSC.Respository.Screening
     {
         ScreeningEntryDto GetDetails(int id);
         void SaveScreeningAttendance(ScreeningEntry screeningEntry, List<int> projectAttendanceTemplateIds);
-        ScreeningEntry SaveScreeningRandomization(int randomizationId);
+        ScreeningEntry SaveScreeningRandomization(int randomizationId, int projectDesignVisitId);
         IList<DropDownDto> AutoCompleteSearch(string searchText);
         List<AttendanceScreeningGridDto> GetScreeningList(ScreeningSearhParamDto searchParam);
         IList<ScreeningAuditDto> GetAuditHistory(int id);

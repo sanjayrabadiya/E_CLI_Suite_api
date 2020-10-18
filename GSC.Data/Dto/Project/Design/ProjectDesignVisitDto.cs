@@ -16,4 +16,13 @@ namespace GSC.Data.Dto.Project.Design
         public bool? IsSchedule { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
     }
+
+
+    public class ProjectDesignVisitBasicDto
+    {
+        public int Id { get; set; }
+        public bool IsRepeated { get; set; }
+        public bool? IsSchedule { get; set; }
+        public List<int> Templates { get; set; }
+    }
 }

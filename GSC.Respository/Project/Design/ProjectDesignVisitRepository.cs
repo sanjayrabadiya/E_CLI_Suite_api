@@ -4,6 +4,7 @@ using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
@@ -133,10 +134,16 @@ namespace GSC.Respository.Project.Design
             return visits;
         }
 
-        public IList<ProjectDesignVisit> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId)
+        public IList<ProjectDesignVisitBasicDto> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId)
         {
-            return All.Include(r => r.Templates).Where(x => x.DeletedDate == null && x.DeletedDate == null
-                                                       && x.ProjectDesignPeriodId == projectDesignPeriodId).ToList();
+            return All.Where(x => x.DeletedDate == null && x.DeletedDate == null && x.ProjectDesignPeriodId == projectDesignPeriodId)
+                .Select(t => new ProjectDesignVisitBasicDto
+                {
+                    Id = t.Id,
+                    IsRepeated = t.IsRepeated,
+                    IsSchedule = t.IsSchedule,
+                    Templates = t.Templates.Where(a => a.DeletedDate == null).Select(b => b.Id).ToList()
+                }).ToList();
         }
 
         public string Duplicate(ProjectDesignVisit objSave)

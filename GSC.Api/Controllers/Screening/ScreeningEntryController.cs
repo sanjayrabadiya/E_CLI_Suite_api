@@ -66,7 +66,7 @@ namespace GSC.Api.Controllers.Screening
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            if ( screeningEntryDto.AttendanceId == 0 || screeningEntryDto.AttendanceId == null)
+            if (screeningEntryDto.AttendanceId == 0 || screeningEntryDto.AttendanceId == null)
                 throw new Exception("Not found Attendance");
 
             var screeningEntry = _mapper.Map<ScreeningEntry>(screeningEntryDto);
@@ -78,13 +78,12 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningEntry.Id);
         }
 
-        [HttpPost]
-        [HttpPost("SaveScreeningRandomization/{randomizationId}")]
-        public IActionResult SaveScreeningRandomization(int randomizationId)
+        [HttpPost("SaveScreeningRandomization/{randomizationId}/{projectDesignVisitId}")]
+        public IActionResult SaveScreeningRandomization(int randomizationId, int projectDesignVisitId)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var result = _screeningEntryRepository.SaveScreeningRandomization(randomizationId);
+            var result = _screeningEntryRepository.SaveScreeningRandomization(randomizationId, projectDesignVisitId);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
 
