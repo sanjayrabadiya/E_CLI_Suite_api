@@ -21,6 +21,13 @@ namespace GSC.Data.Entities.Screening
             get => _visitStartDate.UtcDate();
             set => _visitStartDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
+        public bool IsSchedule { get; set; }
+        private DateTime? _visitStartDate { get; set; }
+        public DateTime? VisitStartDate
+        {
+            get => _visitStartDate.UtcDate();
+            set => _visitStartDate = value == DateTime.MinValue ? value : value.UtcDate();
+        }
 
         public int? ParentId { get; set; }
         public ScreeningEntry ScreeningEntry { get; set; }
