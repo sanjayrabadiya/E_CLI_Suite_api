@@ -39,7 +39,7 @@ namespace GSC.Data.Entities.Attendance
         public int? PeriodNo { get; set; }
         public int? ProjectSubjectId { get; set; }
         public ProjectSubject ProjectSubject { get; set; }
-        public AttendanceType AttendanceType { get; set; }
+        public DataEntryType AttendanceType { get; set; }
         public bool IsProcessed { get; set; }
         public bool IsStandby { get; set; }
         public AttendaceStatus? Status { get; set; }

@@ -22,11 +22,11 @@ namespace GSC.Data.Entities.Screening
             set => _visitStartDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
         public bool IsSchedule { get; set; }
-        private DateTime? _visitStartDate { get; set; }
-        public DateTime? VisitStartDate
+        private DateTime? _scheduleDate { get; set; }
+        public DateTime? ScheduleDate
         {
-            get => _visitStartDate.UtcDate();
-            set => _visitStartDate = value == DateTime.MinValue ? value : value.UtcDate();
+            get => _scheduleDate.UtcDate();
+            set => _scheduleDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
 
         public int? ParentId { get; set; }

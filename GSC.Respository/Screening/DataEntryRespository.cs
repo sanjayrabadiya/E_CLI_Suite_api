@@ -74,41 +74,13 @@ namespace GSC.Respository.Screening
              && x.PatientStatusId == ScreeningPatientStatus.Screening).Select(t => new DataCaptureGridData
              {
                  RandomizationId = t.Id,
-                 ScreeningEntryId = t.ScreeningEntry.Id,
                  VolunteerName = t.Initial,
                  IsRandomization = true,
                  SubjectNo = t.ScreeningNumber,
                  PatientStatus = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  TemplateCount = test,
-                 InProgress = 2,
-                 NotStarted = 3,
                  Visit = projectDesignVisit,
-
-
-
-
-                 //Visit = _screeningVisitRepository.FindByInclude(x => x.DeletedDate == null).Select(t => new DataEntryVisitTemplateDto
-                 //{
-                 //    VisitName = "122",//t.ProjectDesignVisit.DisplayName,
-                 //    ScreeningVisitId = 93,//t.Id,
-                 //    VisitStatus = ScreeningVisitStatus.Scheduled,//t.Status,
-                 //    ScheduleDate = DateTime.Now,//t.VisitStartDate,
-                 //    ActualDate = DateTime.Now,//t.VisitStartDate,
-                 //    Count = new DataEntryTemplateQueryStatus()
-                 //    //queryList.Select(q => new DataEntryTemplateQueryStatus
-                 //    //{
-                 //    //    Open = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Open),
-                 //    //    Answered = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Answered),
-                 //    //    Resolved = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Resolved),
-                 //    //    ReOpen = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Reopened),
-                 //    //    Closed = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Closed),
-                 //    //    SelfCorrection = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.SelfCorrection),
-                 //    //    Acknowledge = queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.QueryStatus == QueryStatus.Resolved),
-                 //    //    MyQuery = 0,//queryList.Count(x => x.ScreeningEntryId == t.ScreeningEntry.Id && x.AcknowledgeLevel == workflowlevel.LevelNo)
-                 //                    // TemplateCount = 
-                 //   // }).FirstOrDefault()
-                 //}).ToList()
              }).ToList();
 
             #region comment old code

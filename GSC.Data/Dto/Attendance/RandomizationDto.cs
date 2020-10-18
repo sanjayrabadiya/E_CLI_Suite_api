@@ -1,8 +1,6 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
-using GSC.Data.Entities.Location;
 using System.Collections.Generic;
 using GSC.Data.Dto.InformConcent;
 
@@ -50,7 +48,6 @@ namespace GSC.Data.Dto.Attendance
             get => _DateOfRandomization.UtcDate();
             set => _DateOfRandomization = value.UtcDate();
         }
-        public int? AttendanceId { get; set; }
         public int ParentProjectId { get; set; }
         public int? CompanyId { get; set; }
         public bool IsLocked { get; set; }

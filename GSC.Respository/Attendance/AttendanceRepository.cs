@@ -330,15 +330,15 @@ namespace GSC.Respository.Attendance
 
         public string CheckVolunteer(AttendanceDto attendanceDto)
         {
-            if (attendanceDto.AttendanceType == AttendanceType.Screening)
+            if (attendanceDto.AttendanceType == DataEntryType.Screening)
                 if (All.Any(x =>
-                    x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == AttendanceType.Screening &&
+                    x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == DataEntryType.Screening &&
                     x.AttendanceDate.ToShortDateString() == DateTime.Now.UtcDate().ToShortDateString() &&
                     x.DeletedDate == null))
                     return "Volunteer already present today";
-            if (attendanceDto.AttendanceType == AttendanceType.Project)
+            if (attendanceDto.AttendanceType == DataEntryType.Project)
                 if (All.Any(x =>
-                    x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == AttendanceType.Project &&
+                    x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == DataEntryType.Project &&
                     x.ProjectId == attendanceDto.ProjectId && x.PeriodNo == attendanceDto.PeriodNo &&
                     x.Status != AttendaceStatus.Suspended && x.DeletedDate == null))
                     return "Volunteer already attendanced";
@@ -376,13 +376,13 @@ namespace GSC.Respository.Attendance
         {
             var validateMessage = "";
 
-            if (All.Any(x => x.ProjectId == projectId && x.AttendanceType == AttendanceType.Project
+            if (All.Any(x => x.ProjectId == projectId && x.AttendanceType == DataEntryType.Project
                                                       && x.PeriodNo == 1 &&
                                                       (x.ProjectSubject != null || x.IsProcessed) &&
                                                       x.DeletedDate == null))
                 return "This project in under process!";
 
-            var result = All.Where(x => x.ProjectId == projectId && x.AttendanceType == AttendanceType.Project
+            var result = All.Where(x => x.ProjectId == projectId && x.AttendanceType == DataEntryType.Project
                                                                  && x.Status != AttendaceStatus.Suspended &&
                                                                  x.PeriodNo == 1 &&
                                                                  x.DeletedDate == null).ToList();

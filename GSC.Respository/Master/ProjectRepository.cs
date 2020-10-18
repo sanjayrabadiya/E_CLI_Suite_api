@@ -122,7 +122,7 @@ namespace GSC.Respository.Master
             if (objSave.Id > 0 && objSave.AttendanceLimit != null && !objSave.IsStatic)
             {
                 var attendantCount = Context.Attendance.Count(x => x.DeletedDate == null
-                                                                   && x.AttendanceType == AttendanceType.Project
+                                                                   && x.AttendanceType == DataEntryType.Project
                                                                    && x.Status != AttendaceStatus.Suspended
                                                                    && !x.IsStandby
                                                                    && x.ProjectId == objSave.Id && x.PeriodNo == 1);

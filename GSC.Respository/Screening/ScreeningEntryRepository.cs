@@ -12,6 +12,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
+using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Workflow;
@@ -25,36 +26,44 @@ namespace GSC.Respository.Screening
     public class ScreeningEntryRepository : GenericRespository<ScreeningEntry, GscContext>, IScreeningEntryRepository
     {
         private readonly IAttendanceRepository _attendanceRepository;
+        private readonly IRandomizationRepository _randomizationRepository;
         private readonly INumberFormatRepository _numberFormatRepository;
-        private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
+        private readonly IProjectRepository _projectRepository;
+        private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
-        private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
+        private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IVolunteerRepository _volunteerRepository;
+        private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IUnitOfWork<GscContext> _uow;
         public ScreeningEntryRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
-            IProjectDesignVisitRepository projectDesignVisitRepository,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
             IAttendanceRepository attendanceRepository,
+            IProjectDesignRepository projectDesignRepository,
+            IScreeningVisitRepository screeningVisitRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
-            IScreeningTemplateValueRepository screeningTemplateValueRepository,
+            IProjectRepository projectRepository,
+            IRandomizationRepository randomizationRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             INumberFormatRepository numberFormatRepository,
+            IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IRolePermissionRepository rolePermissionRepository)
             : base(uow, jwtTokenAccesser)
         {
-            _projectDesignVisitRepository = projectDesignVisitRepository;
             _volunteerRepository = volunteerRepository;
             _projectRightRepository = projectRightRepository;
             _attendanceRepository = attendanceRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
-            _screeningTemplateValueRepository = screeningTemplateValueRepository;
+            _randomizationRepository = randomizationRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
             _numberFormatRepository = numberFormatRepository;
             _rolePermissionRepository = rolePermissionRepository;
+            _screeningVisitRepository = screeningVisitRepository;
+            _screeningTemplateValueRepository = screeningTemplateValueRepository;
+            _projectDesignRepository = projectDesignRepository;
             _uow = uow;
         }
 
@@ -93,8 +102,7 @@ namespace GSC.Respository.Screening
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningEntryDto.ProjectDesignId);
 
-            var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryDto.Id, screeningTemplateValue,
-                    workflowlevel);
+            var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryDto.Id, screeningTemplateValue, workflowlevel);
 
             screeningEntryDto.ScreeningTemplates = templates.Where(r => r.ParentId == null).ToList();
 
@@ -134,39 +142,17 @@ namespace GSC.Respository.Screening
             return screeningEntryDto;
         }
 
-        public void SaveScreening(ScreeningEntry screeningEntry, List<int> projectAttendanceTemplateIds)
+        public void SaveScreeningAttendance(ScreeningEntry screeningEntry, List<int> projectAttendanceTemplateIds)
         {
-            var attendace = Context.Attendance.Find(screeningEntry.AttendanceId);
+            var attendace = _attendanceRepository.Find(screeningEntry.AttendanceId ?? 0);
 
             screeningEntry.Id = 0;
             screeningEntry.ScreeningNo =
                 _numberFormatRepository.GenerateNumber(attendace.IsTesting ? "TestingScreening" : "Screening");
             screeningEntry.EntryType = attendace.AttendanceType;
             screeningEntry.ProjectDesignPeriodId = attendace.ProjectDesignPeriodId;
-            screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
-            var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(attendace.ProjectDesignPeriodId);
-
-            designVisits.ForEach(r =>
-            {
-                var screeningVisit = new ScreeningVisit
-                {
-
-                    ProjectDesignVisitId = r.Id,
-                    Status = ScreeningVisitStatus.NotStarted
-                };
-
-                r.Templates.ForEach(t =>
-                {
-                    screeningVisit.ScreeningTemplates.Add(new ScreeningTemplate
-                    {
-                        ProjectDesignTemplateId = t.Id,
-                        Status = ScreeningTemplateStatus.Pending
-                    });
-                });
-
-                screeningEntry.ScreeningVisit.Add(screeningVisit);
-            });
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId);
 
             attendace.IsProcessed = true;
             _attendanceRepository.Update(attendace);
@@ -182,6 +168,38 @@ namespace GSC.Respository.Screening
             }
         }
 
+
+        public ScreeningEntry SaveScreeningRandomization(int randomizationId)
+        {
+            var screeningEntry = new ScreeningEntry();
+            screeningEntry.Id = 0;
+
+            var randomization = _randomizationRepository.Find(randomizationId);
+
+            var parentProjectId = _projectRepository.All.Where(r => r.Id == randomization.ProjectId).Select(t => t.ParentProjectId).FirstOrDefault();
+            var projectDesign = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId && r.DeletedDate == null).
+                 Select(t => new
+                 {
+                     t.IsUnderTesting,
+                     ProjectDesignPeriodId = t.ProjectDesignPeriods.Where(x => x.DeletedDate == null).Select(a => a.Id).LastOrDefault()
+                 }).FirstOrDefault();
+            randomization.PatientStatusId = ScreeningPatientStatus.OnTrial;
+            screeningEntry.ProjectId = randomization.ProjectId;
+            screeningEntry.ScreeningNo = _numberFormatRepository.GenerateNumber(projectDesign.IsUnderTesting ? "TestingScreening" : "Screening");
+            screeningEntry.EntryType = DataEntryType.Randomization;
+            screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
+            screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
+
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId);
+
+            screeningEntry.IsTesting = projectDesign.IsUnderTesting;
+            screeningEntry.ScreeningHistory = new ScreeningHistory();
+            _randomizationRepository.Update(randomization);
+            Add(screeningEntry);
+
+            return screeningEntry;
+        }
+
         public List<AttendanceScreeningGridDto> GetScreeningList(ScreeningSearhParamDto searchParam)
         {
             var status = 0;
@@ -190,7 +208,7 @@ namespace GSC.Respository.Screening
             var attendanceResult = new List<AttendanceScreeningGridDto>();
             if (searchParam.ScreeningStatus == ScreeningTemplateStatus.Pending || status == 0)
             {
-                searchParam.AttendanceType = AttendanceType.Screening;
+                searchParam.AttendanceType = DataEntryType.Screening;
                 searchParam.IsFromScreening = true;
                 attendanceResult.AddRange(_attendanceRepository.GetAttendaceList(searchParam));
             }
@@ -238,7 +256,7 @@ namespace GSC.Respository.Screening
             if (!role.IsView)
                 screeningEntries = screeningEntries.Where(x => !x.IsTesting);
 
-            screeningEntries = screeningEntries.Where(x => x.EntryType == AttendanceType.Screening);
+            screeningEntries = screeningEntries.Where(x => x.EntryType == DataEntryType.Screening);
 
             var items = screeningEntries.Select(x => new AttendanceScreeningGridDto
             {
@@ -273,7 +291,7 @@ namespace GSC.Respository.Screening
             var query = Context.Volunteer.Where(x => volunterIds.Any(a => a.Id == x.Id)
                                                      && x.Attendances.Any(t =>
                                                          t.DeletedDate == null &&
-                                                         t.AttendanceType == AttendanceType.Screening))
+                                                         t.AttendanceType == DataEntryType.Screening))
                 .Select(t => new DropDownDto
                 {
                     Id = t.Id,

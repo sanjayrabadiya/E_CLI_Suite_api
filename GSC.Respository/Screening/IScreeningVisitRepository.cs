@@ -5,5 +5,6 @@ namespace GSC.Respository.Screening
 {
     public interface IScreeningVisitRepository : IGenericRepository<ScreeningVisit>
     {
+        void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId);
     }
 }

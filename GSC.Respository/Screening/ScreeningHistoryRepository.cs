@@ -21,7 +21,7 @@ namespace GSC.Respository.Screening
         public List<ScreeningHistoryDto> GetScreeningHistoryByVolunteerId(int volunteerId, int lastDay)
         {
             var result = All.Where(x => x.ScreeningEntry.Attendance.VolunteerId == volunteerId
-                                        && x.ScreeningEntry.EntryType == AttendanceType.Screening
+                                        && x.ScreeningEntry.EntryType == DataEntryType.Screening
                                         && x.DeletedDate == null
             ).AsQueryable();
 

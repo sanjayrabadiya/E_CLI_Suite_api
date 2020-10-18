@@ -208,7 +208,7 @@ namespace GSC.Helper
     }
 
 
-    public enum AttendanceType : short
+    public enum DataEntryType : short
     {
         [Description("Screening")] Screening = 1,
         [Description("Project")] Project = 2,

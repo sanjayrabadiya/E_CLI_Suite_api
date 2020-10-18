@@ -568,7 +568,7 @@ namespace GSC.Respository.Screening
                 screeningEntry = screeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId);
 
             if (lockUnlockParams.SubjectIds != null && lockUnlockParams.SubjectIds.Length > 0)
-                screeningEntry = screeningEntry.Where(r => lockUnlockParams.SubjectIds.Contains(r.AttendanceId) && r.EntryType != AttendanceType.Screening);
+                screeningEntry = screeningEntry.Where(r => lockUnlockParams.SubjectIds.Contains(r.AttendanceId) && r.EntryType != DataEntryType.Screening);
 
             if (lockUnlockParams.PeriodIds != null && lockUnlockParams.PeriodIds.Length > 0)
                 screeningEntry = screeningEntry.Where(r => lockUnlockParams.PeriodIds.Contains(r.ProjectDesignPeriodId));

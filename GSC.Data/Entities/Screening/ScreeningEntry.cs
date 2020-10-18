@@ -12,7 +12,7 @@ namespace GSC.Data.Entities.Screening
     {
         public int? AttendanceId { get; set; }
         public int? RandomizationId { get; set; }
-        public AttendanceType EntryType { get; set; }
+        public DataEntryType EntryType { get; set; }
         public int ProjectDesignPeriodId { get; set; }
 
         public string ScreeningNo { get; set; }

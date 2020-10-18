@@ -47,7 +47,7 @@ namespace GSC.Data.Dto.Attendance
         public int? ProjectSubjectId { get; set; }
         public int? PeriodNo { get; set; }
         public string SubjectNumber { get; set; }
-        public AttendanceType AttendanceType { get; set; }
+        public DataEntryType AttendanceType { get; set; }
         public AttendaceStatus? Status { get; set; }
         public string AttendaceStatusName { get; set; }
         public bool IsReplaced { get; set; }

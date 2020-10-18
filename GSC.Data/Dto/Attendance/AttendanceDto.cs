@@ -31,7 +31,7 @@ namespace GSC.Data.Dto.Attendance
         public int? AuditReasonId { get; set; }
         public int? ScreeningEntryId { get; set; }
         public int? ProjectSubjectId { get; set; }
-        public AttendanceType AttendanceType { get; set; }
+        public DataEntryType AttendanceType { get; set; }
         public bool IsProcessed { get; set; }
         public AttendaceStatus? Status { get; set; }
         public string AttendaceTypeName { get; set; }

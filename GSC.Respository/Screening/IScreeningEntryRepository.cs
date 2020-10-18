@@ -10,7 +10,8 @@ namespace GSC.Respository.Screening
     public interface IScreeningEntryRepository : IGenericRepository<ScreeningEntry>
     {
         ScreeningEntryDto GetDetails(int id);
-        void SaveScreening(ScreeningEntry screeningEntry, List<int> projectAttendanceTemplateIds);
+        void SaveScreeningAttendance(ScreeningEntry screeningEntry, List<int> projectAttendanceTemplateIds);
+        ScreeningEntry SaveScreeningRandomization(int randomizationId);
         IList<DropDownDto> AutoCompleteSearch(string searchText);
         List<AttendanceScreeningGridDto> GetScreeningList(ScreeningSearhParamDto searchParam);
         IList<ScreeningAuditDto> GetAuditHistory(int id);

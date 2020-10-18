@@ -25,7 +25,7 @@ namespace GSC.Data.Dto.Screening
         public ScreeningTemplateStatus? ScreeningStatus { get; set; }
         public string TextSearch { get; set; }
         public bool? IsFitnessFit { get; set; }
-        public AttendanceType AttendanceType { get; set; }
+        public DataEntryType AttendanceType { get; set; }
         public bool IsFromScreening { get; set; }
         public int ProjectId { get; set; }
         public int PeriodNo { get; set; }
