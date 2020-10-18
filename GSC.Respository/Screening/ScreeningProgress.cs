@@ -30,19 +30,22 @@ namespace GSC.Respository.Screening
             var sqlquery = @"
                 Declare @TotalCnt AS INT
 
-                SELECT @TotalCnt=ISNULL(COUNT(ProjectDesignVariable.Id),1) FROM ScreeningTemplate WITH(NOLOCK)
+                SELECT @TotalCnt=ISNULL(COUNT(ProjectDesignVariable.Id),1) FROM ScreeningVisit WITH(NOLOCK)
+                INNER JOIN ScreeningTemplate WITH(NOLOCK) ON ScreeningVisit.Id=ScreeningVisit.Id AND ScreeningTemplate.DeletedDate IS NULL
                 INNER JOIN ProjectDesignTemplate WITH(NOLOCK) ON ProjectDesignTemplate.Id=ScreeningTemplate.ProjectDesignTemplateId 
+                AND ProjectDesignTemplate.DeletedDate IS NULL
                 INNER JOIN ProjectDesignVariable WITH(NOLOCK) ON ProjectDesignVariable.ProjectDesignTemplateId=ProjectDesignTemplate.Id AND ProjectDesignVariable.DeletedDate IS NULL
-                WHERE ScreeningTemplate.ScreeningEntryId=@Id
+                WHERE ScreeningVisit.DeletedDate IS NULL AND ScreeningVisit.ScreeningEntryId=@Id
 
                 Declare @ScreeningCnt AS INT
 
-                SELECT @ScreeningCnt=ISNULL(COUNT(ScreeningTemplateValue.Id),0) FROM ScreeningTemplate WITH(NOLOCK)
-                INNER JOIN ScreeningTemplateValue WITH(NOLOCK) ON ScreeningTemplateValue.ScreeningTemplateId=ScreeningTemplate.Id
-                AND (ISNULL(ScreeningTemplateValue.Value,'')<>''
-                OR EXISTS (SELECT 1 FROM ScreeningTemplateValueChild AS child WITH(NOLOCK)
-                WHERE child.ScreeningTemplateValueId = ScreeningTemplateValue.Id))
-                WHERE ScreeningTemplate.ScreeningEntryId=@Id
+                SELECT @ScreeningCnt=ISNULL(COUNT(ScreeningTemplateValue.Id),0) FROM ScreeningVisit WITH(NOLOCK)
+                    INNER JOIN ScreeningTemplate WITH(NOLOCK) ON ScreeningVisit.Id=ScreeningVisit.Id AND ScreeningTemplate.DeletedDate IS NULL
+                    INNER JOIN ScreeningTemplateValue WITH(NOLOCK) ON ScreeningTemplateValue.ScreeningTemplateId=ScreeningTemplate.Id
+                    AND ScreeningTemplateValue.DeletedDate IS NULL AND (ISNULL(ScreeningTemplateValue.Value,'')<>''
+                    OR EXISTS (SELECT 1 FROM ScreeningTemplateValueChild AS child WITH(NOLOCK)
+                    WHERE child.ScreeningTemplateValueId = ScreeningTemplateValue.Id AND child.DeletedDate IS NULL))
+                    WHERE ScreeningVisit.DeletedDate IS NULL AND ScreeningVisit.ScreeningEntryId=@Id
 
                 if (@TotalCnt=0)
 	                set @TotalCnt=1
