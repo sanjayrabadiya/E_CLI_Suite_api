@@ -24,6 +24,7 @@ using Syncfusion.Pdf;
 using GSC.Data.Dto.Etmf;
 using Syncfusion.EJ2.DocumentEditor;
 using System.Security.Cryptography.X509Certificates;
+using GSC.Respository.UserMgt;
 
 namespace GSC.Respository.InformConcent
 {
@@ -36,6 +37,7 @@ namespace GSC.Respository.InformConcent
         //private readonly Lazy<IRandomizationRepository> _noneRegisterRepository;
         private readonly IInvestigatorContactRepository _investigatorContactRepository;
         private readonly IProjectRepository _projectRepository;
+        private readonly IUserRepository _userRepository;
         private readonly GscContext _context;
         public EconsentReviewDetailsRepository(IUnitOfWork<GscContext> uow, 
                                                 IJwtTokenAccesser jwtTokenAccesser,
@@ -43,6 +45,7 @@ namespace GSC.Respository.InformConcent
                                                 //Lazy<IRandomizationRepository> noneRegisterRepository,
                                                 IInvestigatorContactRepository investigatorContactRepository,
                                                 IProjectRepository projectRepository,
+                                                IUserRepository userRepository,
                                                 IMapper mapper) : base(uow, jwtTokenAccesser)
         {
             _uow = uow;
@@ -53,6 +56,7 @@ namespace GSC.Respository.InformConcent
            //_noneRegisterRepository = noneRegisterRepository;
             _investigatorContactRepository = investigatorContactRepository;
             _projectRepository = projectRepository;
+            _userRepository = userRepository;
         }
 
         public string Duplicate(EconsentReviewDetailsDto objSave)
@@ -285,8 +289,11 @@ namespace GSC.Respository.InformConcent
                 }
             }
 
-
-            string jsonnew = JsonConvert.SerializeObject(jsonobj);
+            
+            string jsonnew = JsonConvert.SerializeObject(jsonobj,Formatting.None, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
             //Syncfusion.DocIO.DLS.WordDocument documentold = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
             //Syncfusion.DocIO.DLS.WordDocument documentnew = new Syncfusion.DocIO.DLS.WordDocument();
             //documentnew.Sections.Clear();
@@ -354,14 +361,13 @@ namespace GSC.Respository.InformConcent
 
             if (econsentreviewdetails.IsReviewedByPatient == true)
             {
-                var investigatorid = (int)_projectRepository.Find(Econsentdocument.ProjectId).InvestigatorContactId;
-                var investigator = _investigatorContactRepository.Find(investigatorid);
-                //string investigatorsignaturepath = System.IO.Path.Combine(upload.DocumentPath, investigator.SignaturePath);
-                string investigatorsignaturepath = System.IO.Path.Combine(upload.DocumentPath, "InformConcent\\Original\\c27aa8dd-9537-4756-90eb-5da09a9feef3.png");
+                //var investigatorid = (int)_projectRepository.Find(Econsentdocument.ProjectId).InvestigatorContactId;
+                var user = _userRepository.Find(_jwtTokenAccesser.UserId);
+                string investigatorsignaturepath = System.IO.Path.Combine(upload.DocumentPath, user.SignaturePath);
                 string signinvestigatorbase64 = DocumentService.ConvertBase64Image(investigatorsignaturepath);
                 sign2 = sign2.Replace("_volunterlabel_", "Investigator");
                 sign2 = sign2.Replace("_imagepath_", signinvestigatorbase64);
-                sign2 = sign2.Replace("_voluntername_", investigator.NameOfInvestigator);
+                sign2 = sign2.Replace("_voluntername_", user.UserName);
                 sign2 = sign2.Replace("_datetime_", econsentreviewdetails.investigatorapproveddatetime == null ? DateTime.Now.ToString() : econsentreviewdetails.investigatorapproveddatetime.ToString());
                 var jsonObj3 = JObject.Parse(sign2);
                 jsonObj.Merge(jsonObj3, new JsonMergeSettings

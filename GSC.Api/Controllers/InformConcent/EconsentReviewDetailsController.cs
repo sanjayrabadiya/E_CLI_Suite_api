@@ -284,11 +284,18 @@ namespace GSC.Api.Controllers.InformConcent
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
 
-            if (econsentReviewDetails.pdfpath != null)
+            try
             {
-                string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
-                System.IO.File.Delete(oldpdfpath);
+                if (econsentReviewDetails.pdfpath != null)
+                {
+                    string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
+                    System.IO.File.Delete(oldpdfpath);
+                }
             }
+            catch(Exception ex)
+            {
+            }
+            
             
 
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
@@ -349,7 +356,7 @@ namespace GSC.Api.Controllers.InformConcent
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var docName = Path.Combine(upload.DocumentUrl, econsentreviewdetails.pdfpath);
             CustomParameter param = new CustomParameter();
-            param.documentData = "https://dev2.clinvigilant.com/Documents/Project/6d79f9fb-92e6-49c1-9837-2811d2b8e52f.pdf";//docName
+            param.documentData = docName;//"https://dev2.clinvigilant.com/Documents/Project/6d79f9fb-92e6-49c1-9837-2811d2b8e52f.pdf";//docName
             param.fileName = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
             return Ok(param);
             //return Ok();

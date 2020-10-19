@@ -78,7 +78,7 @@ namespace GSC.Data.Entities.UserMgt
         public bool IsPowerAdmin { get; set; }
 
         public PrefLanguage? Language { get; set; }
-
+        public string? SignaturePath { get; set; }
 
     }
 }
