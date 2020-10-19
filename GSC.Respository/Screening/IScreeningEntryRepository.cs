@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Master;
@@ -11,7 +12,7 @@ namespace GSC.Respository.Screening
     {
         ScreeningEntryDto GetDetails(int id);
         void SaveScreeningAttendance(ScreeningEntry screeningEntry, List<int> projectAttendanceTemplateIds);
-        ScreeningEntry SaveScreeningRandomization(int randomizationId, int projectDesignVisitId);
+        ScreeningEntry SaveScreeningRandomization(int randomizationId, int projectDesignVisitId, DateTime visitDate);
         IList<DropDownDto> AutoCompleteSearch(string searchText);
         List<AttendanceScreeningGridDto> GetScreeningList(ScreeningSearhParamDto searchParam);
         IList<ScreeningAuditDto> GetAuditHistory(int id);

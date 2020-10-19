@@ -78,12 +78,12 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningEntry.Id);
         }
 
-        [HttpPost("SaveScreeningRandomization/{randomizationId}/{projectDesignVisitId}")]
-        public IActionResult SaveScreeningRandomization(int randomizationId, int projectDesignVisitId)
+        [HttpPost("SaveScreeningRandomization/{randomizationId}/{projectDesignVisitId}/{visitDate}")]
+        public IActionResult SaveScreeningRandomization(int randomizationId, int projectDesignVisitId, DateTime visitDate)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var result = _screeningEntryRepository.SaveScreeningRandomization(randomizationId, projectDesignVisitId);
+            var result = _screeningEntryRepository.SaveScreeningRandomization(randomizationId, projectDesignVisitId, visitDate);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
 

@@ -1,5 +1,7 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -12,14 +14,16 @@ namespace GSC.Respository.Screening
     public class ScreeningVisitHistoryRepository : GenericRespository<ScreeningVisitHistory, GscContext>, IScreeningVisitHistoryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IMapper _mapper;
         public ScreeningVisitHistoryRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
             : base(uow, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
-        public void SaveByScreeningVisit(ScreeningVisit screeningVisit, ScreeningVisitStatus screeningVisitStatus)
+        public void SaveByScreeningVisit(ScreeningVisit screeningVisit, ScreeningVisitStatus screeningVisitStatus, DateTime? statusDate)
         {
             var history = new ScreeningVisitHistory();
             history.ScreeningVisit = screeningVisit;
@@ -28,13 +32,10 @@ namespace GSC.Respository.Screening
             Add(history);
         }
 
-        public void Save(int screeningVisitId, ScreeningVisitStatus screeningVisitStatus,string note)
+        public void Save(ScreeningVisitHistoryDto screeningVisitHistoryDto)
         {
-            var history = new ScreeningVisitHistory();
-            history.ScreeningVisitId = screeningVisitId;
+            var history = _mapper.Map<ScreeningVisitHistory>(screeningVisitHistoryDto);
             history.RoleId = _jwtTokenAccesser.RoleId;
-            history.Notes = note;
-            history.ScreeningVisitId = screeningVisitId;
             Add(history);
         }
 

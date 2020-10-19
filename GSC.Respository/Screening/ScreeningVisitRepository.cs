@@ -1,5 +1,7 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -15,6 +17,7 @@ namespace GSC.Respository.Screening
     {
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         private readonly IScreeningVisitHistoryRepository _screeningVisitHistoryRepository;
+
         public ScreeningVisitRepository(IUnitOfWork<GscContext> uow,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
@@ -25,7 +28,7 @@ namespace GSC.Respository.Screening
             _screeningVisitHistoryRepository = screeningVisitHistoryRepository;
         }
 
-        public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId)
+        public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId, DateTime visitDate)
         {
 
             var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(projectDesignPeriodId);
@@ -40,7 +43,7 @@ namespace GSC.Respository.Screening
                 };
 
                 if (screeningVisit.Status == ScreeningVisitStatus.Open)
-                    _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.Open);
+                    _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.Open, visitDate);
 
                 r.Templates.ForEach(t =>
                 {
@@ -57,14 +60,14 @@ namespace GSC.Respository.Screening
         }
 
 
-        public void StatUpdate(int screeningVisitId, ScreeningVisitStatus screeningVisitStatus, string note)
+        public void StatusUpdate(ScreeningVisitHistoryDto screeningVisitHistoryDto)
         {
-            var visit = Find(screeningVisitId);
-            visit.Status = screeningVisitStatus;
+            var visit = Find(screeningVisitHistoryDto.ScreeningVisitId);
+            visit.Status = screeningVisitHistoryDto.VisitStatusId;
 
             Update(visit);
 
-            _screeningVisitHistoryRepository.Save(screeningVisitId, ScreeningVisitStatus.Open, note);
+            _screeningVisitHistoryRepository.Save(screeningVisitHistoryDto);
         }
 
 
