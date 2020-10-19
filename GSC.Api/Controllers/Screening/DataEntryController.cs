@@ -3,6 +3,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -34,6 +35,14 @@ namespace GSC.Api.Controllers.Screening
         public IActionResult VisitStatusUpdate(ScreeningVisitHistoryDto screeningVisitHistoryDto)
         {
             _screeningVisitRepository.StatusUpdate(screeningVisitHistoryDto);
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route("OpenVisit/{screeningVisitId}/{visitDate}")]
+        public IActionResult OpenVisit(int screeningVisitId, DateTime visitDate)
+        {
+            _screeningVisitRepository.OpenVisit(screeningVisitId, visitDate);
             return Ok();
         }
 

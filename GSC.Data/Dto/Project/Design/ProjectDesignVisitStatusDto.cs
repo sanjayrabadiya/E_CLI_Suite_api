@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,6 +11,6 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignVisitId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public int ProjectDesignVariableId { get; set; }
-        public int VisitStatusId { get; set; }
+        public ScreeningVisitStatus VisitStatusId { get; set; }
     }
 }

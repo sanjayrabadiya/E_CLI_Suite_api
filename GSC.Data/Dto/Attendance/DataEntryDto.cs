@@ -55,6 +55,7 @@ namespace GSC.Data.Dto.Attendance
     public class DataEntryVisitTemplateDto : DataEntryTemplateQueryStatus
     {
         public int ScreeningVisitId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
         public string VisitName { get; set; }
         public string VisitStatus { get; set; }
 

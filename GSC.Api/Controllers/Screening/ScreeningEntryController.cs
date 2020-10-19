@@ -27,12 +27,14 @@ namespace GSC.Api.Controllers.Screening
         private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IScreeningProgress _screeningProgress;
+        private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         public ScreeningEntryController(IScreeningEntryRepository screeningEntryRepository,
             IUnitOfWork uow, IMapper mapper,
             IUserRecentItemRepository userRecentItemRepository,
             IVolunteerRepository volunteerRepository,
             IAttendanceRepository attendanceRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
+            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
             IScreeningProgress screeningProgress)
         {
             _screeningEntryRepository = screeningEntryRepository;
@@ -42,6 +44,7 @@ namespace GSC.Api.Controllers.Screening
             _attendanceRepository = attendanceRepository;
             _screeningProgress = screeningProgress;
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
+            _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
         }
 
         [HttpGet("{id}")]
@@ -50,13 +53,13 @@ namespace GSC.Api.Controllers.Screening
             if (id <= 0) return BadRequest();
 
             var screeningEntryDto = _screeningEntryRepository.GetDetails(id);
-            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            //{
-            //    KeyId = screeningEntryDto.Id,
-            //    SubjectName = screeningEntryDto.ScreeningNo,
-            //    SubjectName1 = screeningEntryDto.VolunteerName,
-            //    ScreenType = UserRecent.Project
-            //});
+            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
+            {
+                KeyId = screeningEntryDto.Id,
+                SubjectName = screeningEntryDto.ScreeningNo,
+                SubjectName1 = screeningEntryDto.VolunteerName,
+                ScreenType = UserRecent.Project
+            });
 
             return Ok(screeningEntryDto);
         }
@@ -87,6 +90,8 @@ namespace GSC.Api.Controllers.Screening
 
             if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
 
+
+            //ScreeningTemplateValueController.Put(new ScreeningTemplateValueDto());
             return Ok(result.Id);
         }
 

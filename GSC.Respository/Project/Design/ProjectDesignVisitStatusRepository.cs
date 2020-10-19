@@ -24,18 +24,30 @@ namespace GSC.Respository.Project.Design
             _mapper = mapper;
         }
 
-        //added by vipul for get visit status by visit id on 23092020
 
         public ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByVisitId(int VisitId)
         {
-            return All.Where(x=> x.DeletedDate == null && x.ProjectDesignVisitId == VisitId).Select(t => new ProjectDesignVisitStatusDto
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == VisitId).Select(t => new ProjectDesignVisitStatusDto
             {
-                 Id = t.Id,
-                 ProjectDesignVisitId = t.ProjectDesignVisitId,
-                ProjectDesignTemplateId= t.ProjectDesignVariable.ProjectDesignTemplateId,
+                Id = t.Id,
+                ProjectDesignVisitId = t.ProjectDesignVisitId,
+                ProjectDesignTemplateId = t.ProjectDesignVariable.ProjectDesignTemplateId,
                 ProjectDesignVariableId = t.ProjectDesignVariableId,
                 VisitStatusId = t.VisitStatusId
-             }).FirstOrDefault();
+            }).FirstOrDefault();
+        }
+
+        public ProjectDesignVisitStatusDto GetProjectDesignVariableDetail(int visitId, ScreeningVisitStatus screeningVisitStatus)
+        {
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == visitId
+            && x.VisitStatusId == screeningVisitStatus).Select(t => new ProjectDesignVisitStatusDto
+            {
+                Id = t.Id,
+                ProjectDesignVisitId = t.ProjectDesignVisitId,
+                ProjectDesignTemplateId = t.ProjectDesignVariable.ProjectDesignTemplateId,
+                ProjectDesignVariableId = t.ProjectDesignVariableId,
+                VisitStatusId = t.VisitStatusId
+            }).FirstOrDefault();
         }
     }
 }

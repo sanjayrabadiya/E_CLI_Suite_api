@@ -9,5 +9,6 @@ namespace GSC.Respository.Screening
     {
         void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId,int projectDesignVisitId, DateTime visitDate);
         void StatusUpdate(ScreeningVisitHistoryDto screeningVisitHistoryDto);
+        void OpenVisit(int screeningVisitId, DateTime visitDate);
     }
 }

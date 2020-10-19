@@ -63,6 +63,7 @@ namespace GSC.Respository.Screening
                 Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
             Select(t => new DataEntryVisitTemplateDto
             {
+                ProjectDesignVisitId= t.Id,
                 VisitName = t.DisplayName,
                 VisitStatus = ScreeningVisitStatus.NotStarted.GetDescription(),
             }).ToList();
