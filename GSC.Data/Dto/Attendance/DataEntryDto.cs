@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Entities.Master;
 using GSC.Helper;
 
 namespace GSC.Data.Dto.Attendance
@@ -58,6 +59,7 @@ namespace GSC.Data.Dto.Attendance
         public int ProjectDesignVisitId { get; set; }
         public string VisitName { get; set; }
         public string VisitStatus { get; set; }
+        public int VisitStatusId { get; set; }
 
         private DateTime? _scheduleDate { get; set; }
         public DateTime? ScheduleDate

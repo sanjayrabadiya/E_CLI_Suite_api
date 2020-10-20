@@ -69,6 +69,7 @@ namespace GSC.Respository.Screening
                 ProjectDesignVisitId= t.Id,
                 VisitName = t.DisplayName,
                 VisitStatus = ScreeningVisitStatus.NotStarted.GetDescription(),
+                VisitStatusId = (int)ScreeningVisitStatus.NotStarted
             }).ToList();
 
             var queryList = _screeningTemplateValueRepository.GetQueryStatusByPeridId(projectDesignPeriodId);
@@ -105,6 +106,7 @@ namespace GSC.Respository.Screening
                     ProjectDesignVisitId= a.ProjectDesignVisitId,
                     VisitName =a.ProjectDesignVisit.DisplayName,
                     VisitStatus = a.Status.GetDescription(),
+                    VisitStatusId = (int)a.Status,
                     NotStarted = a.ScreeningTemplates.Count(c => c.DeletedDate == null && c.Status == ScreeningTemplateStatus.Pending),
                     InProgress = a.ScreeningTemplates.Count(c => c.DeletedDate == null && c.Status == ScreeningTemplateStatus.InProcess)
                 }).ToList()
