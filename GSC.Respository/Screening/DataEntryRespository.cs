@@ -26,6 +26,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
+        private readonly IScreeningEntryRepository _screeningEntryRepository;
         public DataEntryRespository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
@@ -33,7 +34,8 @@ namespace GSC.Respository.Screening
             IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
             IRandomizationRepository randomizationRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
-            IScreeningVisitRepository screeningVisitRepository
+            IScreeningVisitRepository screeningVisitRepository,
+            IScreeningEntryRepository screeningEntryRepository
         )
             : base(uow, jwtTokenAccesser)
         {
@@ -44,6 +46,7 @@ namespace GSC.Respository.Screening
             _randomizationRepository = randomizationRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _screeningVisitRepository = screeningVisitRepository;
+            _screeningEntryRepository = screeningEntryRepository;
         }
 
 
@@ -71,7 +74,8 @@ namespace GSC.Respository.Screening
             var queryList = _screeningTemplateValueRepository.GetQueryStatusByPeridId(projectDesignPeriodId);
             var test = new List<WorkFlowTemplateCount>();
             test.Add(new WorkFlowTemplateCount { Count = 1, LevelNo = 1 });
-            var data = _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
+
+            var randomizationData = _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
              && x.PatientStatusId == ScreeningPatientStatus.Screening).Select(t => new DataCaptureGridData
              {
                  RandomizationId = t.Id,
@@ -83,6 +87,29 @@ namespace GSC.Respository.Screening
                  TemplateCount = test,
                  Visit = projectDesignVisit,
              }).ToList();
+
+            var screeningData = _screeningEntryRepository.All.Where(r => r.ProjectId == projectId && r.DeletedDate == null).Select(x => new DataCaptureGridData
+            {
+                ScreeningEntryId= x.Id,
+                RandomizationId = x.RandomizationId,
+                AttendanceId= x.AttendanceId,
+                VolunteerName = x.RandomizationId != null ? x.Randomization.Initial : x.Attendance.Volunteer.AliasName,
+                IsRandomization = x.RandomizationId != null,
+                SubjectNo = x.RandomizationId != null ? x.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
+                PatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
+                RandomizationNumber = x.RandomizationId != null ?  x.Randomization.RandomizationNumber : "",
+                TemplateCount = test,
+                Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null).Select(a => new DataEntryVisitTemplateDto
+                {
+                    ScreeningVisitId= a.Id,
+                    ProjectDesignVisitId= a.ProjectDesignVisitId,
+                    VisitName =a.ProjectDesignVisit.DisplayName,
+                    VisitStatus = a.Status.GetDescription(),
+                    NotStarted = a.ScreeningTemplates.Count(c => c.DeletedDate == null && c.Status == ScreeningTemplateStatus.Pending),
+                    InProgress = a.ScreeningTemplates.Count(c => c.DeletedDate == null && c.Status == ScreeningTemplateStatus.InProcess)
+                }).ToList()
+
+            }).ToList();
 
             #region comment old code
             //var projectIds = _projectRightRepository.GetProjectRightIdList();
@@ -235,7 +262,8 @@ namespace GSC.Respository.Screening
             //}
             #endregion
 
-            result.Data.AddRange(data);
+            result.Data.AddRange(randomizationData);
+            result.Data.AddRange(screeningData);
 
             return result;
 
