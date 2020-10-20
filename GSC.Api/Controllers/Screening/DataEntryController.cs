@@ -32,7 +32,7 @@ namespace GSC.Api.Controllers.Screening
 
         [HttpPost]
         [Route("VisitStatusUpdate")]
-        public IActionResult VisitStatusUpdate(ScreeningVisitHistoryDto screeningVisitHistoryDto)
+        public IActionResult VisitStatusUpdate([FromBody] ScreeningVisitHistoryDto screeningVisitHistoryDto)
         {
             _screeningVisitRepository.StatusUpdate(screeningVisitHistoryDto);
             return Ok();
