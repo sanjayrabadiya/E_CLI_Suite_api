@@ -14,5 +14,7 @@ namespace GSC.Respository.Etmf
         void UpdateApproveDocument(int documentId, bool IsAccepted);
 
         List<CommonArtifactDocumentDto> GetDocumentList(int id);
+        string Duplicate(ProjectWorkplaceArtificatedocument objSave, ProjectWorkplaceArtificatedocumentDto objSaveDto);
+        ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto);
     }
 }

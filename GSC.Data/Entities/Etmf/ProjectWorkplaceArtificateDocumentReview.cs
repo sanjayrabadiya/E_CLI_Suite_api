@@ -13,6 +13,7 @@ namespace GSC.Data.Entities.Etmf
         public bool IsSendBack { get; set; }
         public int CompanyId { get; set; }
         public DateTime? SendBackDate { get; set; }
+        public string Message { get; set; }
         public ProjectWorkplaceArtificatedocument ProjectWorkplaceArtificatedDocument { get; set; }
     }
 }

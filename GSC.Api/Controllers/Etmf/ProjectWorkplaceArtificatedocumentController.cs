@@ -45,6 +45,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly GscContext _context;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
+        private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
         public ProjectWorkplaceArtificatedocumentController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
@@ -56,7 +57,8 @@ namespace GSC.Api.Controllers.Etmf
               IUploadSettingRepository uploadSettingRepository,
               IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
                IJwtTokenAccesser jwtTokenAccesser,
-               IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository)
+               IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
+               IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository)
         {
             _userRepository = userRepository;
             _companyRepository = companyRepository;
@@ -71,6 +73,7 @@ namespace GSC.Api.Controllers.Etmf
             _context = uow.Context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
+            _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
         }
 
         [Route("GetTreeview")]
@@ -93,33 +96,7 @@ namespace GSC.Api.Controllers.Etmf
         [TransactionRequired]
         public IActionResult Post([FromBody] ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
         {
-            var Project = _projectRepository.Find(projectWorkplaceArtificatedocumentDto.ProjectId);
-            var Projectname = Project.ProjectName + "-" + Project.ProjectCode;
-
-            string filePath = string.Empty;
-            string path = string.Empty;
-
-            if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Country)
-
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Country.GetDescription(),
-                  projectWorkplaceArtificatedocumentDto.Countryname.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
-            else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Site)
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Site.GetDescription(),
-                 projectWorkplaceArtificatedocumentDto.Sitename.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
-            else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Trial)
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Trial.GetDescription(),
-                   projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
-
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
-            string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceArtificatedocumentDto.FileModel, filePath, projectWorkplaceArtificatedocumentDto.FileName);
-
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            projectWorkplaceArtificatedocumentDto.Id = 0;
-            var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
-            projectWorkplaceArtificatedocument.DocumentName = FileName;
-            projectWorkplaceArtificatedocument.DocPath = path;
-            projectWorkplaceArtificatedocument.Status = ArtifactDocStatusType.Draft;
-            projectWorkplaceArtificatedocument.Version = "1.0";
+            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
 
             _projectWorkplaceArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
@@ -294,6 +271,7 @@ namespace GSC.Api.Controllers.Etmf
             outputStream.WriteTo(file);
 
             document.DocumentName = outputname;
+            document.Status = ArtifactDocStatusType.Final;
             _projectWorkplaceArtificatedocumentRepository.Update(document);
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
 
@@ -305,6 +283,28 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult GetArtificateDocumentHistory(int Id)
         {
             var History = _projectWorkplaceArtificateDocumentReviewRepository.GetArtificateDocumentHistory(Id);
+            return Ok(History);
+        }
+
+        [HttpPut]
+        [Route("UpdateSupersede/{id}")]
+        public IActionResult UpdateSupersede(int id)
+        {
+            var projectWorkplaceArtificatedocumentDto = _projectWorkplaceArtificatedocumentRepository.Find(id);
+            projectWorkplaceArtificatedocumentDto.Status = ArtifactDocStatusType.Supersede;
+
+            var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
+            _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            return Ok(projectWorkplaceArtificatedocument.Id);
+        }
+
+        [Route("GetArtificateDocumentApproverHistory/{Id}")]
+        [HttpGet]
+        public IActionResult GetArtificateDocumentApproverHistory(int Id)
+        {
+            var History = _projectArtificateDocumentApproverRepository.GetArtificateDocumentApproverHistory(Id);
             return Ok(History);
         }
     }

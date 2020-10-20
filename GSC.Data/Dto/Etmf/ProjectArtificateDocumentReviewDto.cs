@@ -15,6 +15,7 @@ namespace GSC.Data.Dto.Etmf
         public string Name { get; set; }
         public bool IsSelected { get; set; }
         public DateTime? SendBackDate { get; set; }
+        public string Message { get; set; }
         public List<ProjectArtificateDocumentReviewDto> users { get; set; }
     }
 
@@ -29,6 +30,7 @@ namespace GSC.Data.Dto.Etmf
         public DateTime? SendBackDate { get; set; }
         public string DocumentName { get; set; }
         public string UserName { get; set; }
+        public string Message { get; set; }
         public List<ProjectArtificateDocumentReviewDto> users { get; set; }
     }
 }

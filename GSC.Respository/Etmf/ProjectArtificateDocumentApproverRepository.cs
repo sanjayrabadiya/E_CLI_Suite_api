@@ -58,7 +58,7 @@ namespace GSC.Respository.Etmf
             {
                 UserId = c.Id,
                 Name = c.UserName,
-                IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null 
+                IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null
                 && (b.IsApproved == true || b.IsApproved == null)),
             }).Where(x => x.IsSelected == false).ToList();
 
@@ -101,6 +101,26 @@ namespace GSC.Respository.Etmf
                     + " Pending approve from your side",
                     //ExtraData = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), s.ProjectWorkplaceArtificatedDocument.DocPath, s.ProjectWorkplaceArtificatedDocument.DocumentName),
                     ExtraData = s.ProjectWorkplaceArtificatedDocumentId
+                }).OrderByDescending(x => x.Id).ToList();
+
+            return result;
+        }
+
+        public List<ProjectArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id)
+        {
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
+                .Select(x => new ProjectArtificateDocumentApproverHistory
+                {
+                    Id = x.Id,
+                    DocumentName = x.ProjectWorkplaceArtificatedDocument.DocumentName,
+                    UserName = Context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+                    UserId = x.UserId,
+                    IsApproved = x.IsApproved,
+                    ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId,
+                    CreatedDate = x.CreatedDate,
+                    CreatedByUser = Context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    ModifiedDate = x.ModifiedDate,
+                    ModifiedByUser = Context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
                 }).OrderByDescending(x => x.Id).ToList();
 
             return result;

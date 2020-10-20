@@ -1,10 +1,13 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Helper.DocumentService;
 using GSC.Respository.Configuration;
+using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -20,21 +23,26 @@ namespace GSC.Respository.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
+        private readonly IProjectRepository _projectRepository;
         public ProjectWorkplaceArtificatedocumentRepository(IUnitOfWork<GscContext> uow,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
            IUserRepository userRepository,
-           IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository
+           IMapper mapper,
+           IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
+           IProjectRepository projectRepository
            )
            : base(uow, jwtTokenAccesser)
         {
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
             _uow = uow;
             _userRepository = userRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
+            _projectRepository = projectRepository;
         }
 
         public int deleteFile(int id)
@@ -120,6 +128,14 @@ namespace GSC.Respository.Etmf
                 var Review = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id
                 && x.UserId != item.CreatedBy && x.DeletedDate == null).ToList();
 
+                var ApproveList = Context.ProjectArtificateDocumentApprover.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id).Select(y => y.UserId).Distinct().ToList();
+                var ApproverName = new List<string>();
+                ApproveList.ForEach(r =>
+                {
+                    var username = _userRepository.FindByInclude(x => x.Id == r).Select(y => y.UserName);
+                    ApproverName.AddRange(username);
+                });
+
                 CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
                 obj.Id = item.Id;
                 obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
@@ -137,11 +153,61 @@ namespace GSC.Respository.Etmf
                 obj.Level = 6;
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
+                obj.IsReview = Review.Count() == 0 ? false : Review.All(z => z.IsSendBack) ? true :false;
                 obj.IsSendBack = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 obj.IsAccepted = item.IsAccepted;
+                obj.ApprovedStatus = item.IsAccepted == null ? "" : item.IsAccepted == true ? "Approved" : "Rejected";
+                obj.Approver = string.Join(", ", ApproverName);
                 dataList.Add(obj);
             }
             return dataList;
+        }
+
+        public string Duplicate(ProjectWorkplaceArtificatedocument objSave, ProjectWorkplaceArtificatedocumentDto objSaveDto)
+        {
+            if (All.Where(x => GetDocumentOriginalName(x.DocumentName,objSaveDto.FileName) == true && x.Id != objSave.Id && x.ProjectWorkplaceArtificateId == objSave.ProjectWorkplaceArtificateId
+             && x.DeletedDate == null).ToList().Count > 0)
+                return "Duplicate Document name : " + objSaveDto.FileName;
+            return "";
+        }
+
+        public bool GetDocumentOriginalName(string name, string name2)
+        {
+            if (name.Substring(0, name.LastIndexOf('_')) == name2)
+                return true;
+            return false;
+        }
+
+        public ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
+        {
+            var Project = _projectRepository.Find(projectWorkplaceArtificatedocumentDto.ProjectId);
+            var Projectname = Project.ProjectName + "-" + Project.ProjectCode;
+
+            string filePath = string.Empty;
+            string path = string.Empty;
+
+            if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Country)
+
+                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Country.GetDescription(),
+                  projectWorkplaceArtificatedocumentDto.Countryname.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
+            else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Site)
+                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Site.GetDescription(),
+                 projectWorkplaceArtificatedocumentDto.Sitename.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
+            else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Trial)
+                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Trial.GetDescription(),
+                   projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
+
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
+            string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceArtificatedocumentDto.FileModel, filePath, projectWorkplaceArtificatedocumentDto.FileName);
+
+            projectWorkplaceArtificatedocumentDto.Id = 0;
+            var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
+            projectWorkplaceArtificatedocument.DocumentName = FileName;
+            projectWorkplaceArtificatedocument.DocPath = path;
+            projectWorkplaceArtificatedocument.Status = ArtifactDocStatusType.Draft;
+            projectWorkplaceArtificatedocument.Version = "1.0";
+
+            return projectWorkplaceArtificatedocument;
         }
     }
 }

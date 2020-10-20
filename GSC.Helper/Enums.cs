@@ -479,6 +479,7 @@ namespace GSC.Helper
     {
         [Description("Draft")] Draft = 1,
         [Description("Final")] Final = 2,
+        [Description("Supersede")] Supersede = 3,
     }
 
     public enum PrefLanguage : short

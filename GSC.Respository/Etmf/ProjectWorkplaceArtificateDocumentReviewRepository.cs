@@ -67,6 +67,7 @@ namespace GSC.Respository.Etmf
                         ProjectWorkplaceArtificatedDocumentId = ReviewDto.ProjectWorkplaceArtificatedDocumentId,
                         UserId = ReviewDto.UserId,
                         IsSendBack = false,
+                        Message = ReviewDto.Message,
                     });
                     if (_uow.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
@@ -116,8 +117,9 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id)
         {
-            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id).
-                Select(x => new ProjectArtificateDocumentReviewHistory
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
+                        && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy)
+                .Select(x => new ProjectArtificateDocumentReviewHistory
                 {
                     Id = x.Id,
                     DocumentName = x.ProjectWorkplaceArtificatedDocument.DocumentName,
@@ -131,11 +133,12 @@ namespace GSC.Respository.Etmf
                     ModifiedDate = x.ModifiedDate,
                     ModifiedByUser = Context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
                     SendBackDate = x.SendBackDate,
+                    Message = x.Message,
                 }).OrderByDescending(x => x.Id).ToList();
 
             return result;
         }
-        
+
         public List<DashboardDto> GetSendDocumentList(int ProjectId)
         {
             var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
@@ -155,11 +158,11 @@ namespace GSC.Respository.Etmf
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName
                     + " Pending Review from your side",
                     ExtraData = s.ProjectWorkplaceArtificatedDocumentId
-                }).OrderByDescending(x=>x.Id).ToList();
+                }).OrderByDescending(x => x.Id).ToList();
 
             return result;
         }
-        
+
         public List<DashboardDto> GetSendBackDocumentList(int ProjectId)
         {
             var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)

@@ -107,6 +107,7 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectWorkplace, ETMFWorkplaceGridDto>()
                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                //.ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.ToList().Count() > 0 ? a.ChildProject.ToList().Count() : 0))
                 .ReverseMap();
 
             CreateMap<Data.Entities.Master.Project, ProjectGridDto>()

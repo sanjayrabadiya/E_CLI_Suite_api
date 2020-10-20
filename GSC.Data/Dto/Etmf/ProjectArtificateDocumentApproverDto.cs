@@ -14,4 +14,14 @@ namespace GSC.Data.Dto.Etmf
         public bool? IsApproved { get; set; }
         public int CompanyId { get; set; }
     }
+
+    public class ProjectArtificateDocumentApproverHistory : BaseAuditDto
+    {
+        public int ProjectWorkplaceArtificatedDocumentId { get; set; }
+        public int UserId { get; set; }
+        public int RoleId { get; set; }
+        public string DocumentName { get; set; }
+        public string UserName { get; set; }
+        public bool? IsApproved { get; set; }
+    }
 }

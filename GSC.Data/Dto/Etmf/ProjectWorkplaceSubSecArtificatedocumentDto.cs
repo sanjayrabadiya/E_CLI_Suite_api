@@ -49,7 +49,11 @@ namespace GSC.Data.Dto.Etmf
         public bool SendBy { get; set; }
         public bool IsSendBack { get; set; }
         public string ReviewStatus { get; set; }
+        public bool IsReview { get; set; }
         public bool? IsAccepted { get; set; }
+        public string ApprovedStatus { get; set; }
+        public string Approver { get; set; }
+
     }
 
     public class CustomParameter
