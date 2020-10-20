@@ -73,4 +73,16 @@ namespace GSC.Data.Dto.Screening
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
     }
+
+    public class SaveRandomizationDto
+    {
+        public int RandomizationId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
+        private DateTime _visitDate;
+        public DateTime VisitDate
+        {
+            get => _visitDate.UtcDateTime();
+            set => _visitDate = value.UtcDateTime();
+        }
+    }
 }

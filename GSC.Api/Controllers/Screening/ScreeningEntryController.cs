@@ -53,13 +53,13 @@ namespace GSC.Api.Controllers.Screening
             if (id <= 0) return BadRequest();
 
             var screeningEntryDto = _screeningEntryRepository.GetDetails(id);
-            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            {
-                KeyId = screeningEntryDto.Id,
-                SubjectName = screeningEntryDto.ScreeningNo,
-                SubjectName1 = screeningEntryDto.VolunteerName,
-                ScreenType = UserRecent.Project
-            });
+            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
+            //{
+            //    KeyId = screeningEntryDto.Id,
+            //    SubjectName = screeningEntryDto.ScreeningNo,
+            //    SubjectName1 = screeningEntryDto.VolunteerName,
+            //    ScreenType = UserRecent.Project
+            //});
 
             return Ok(screeningEntryDto);
         }
@@ -81,15 +81,13 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningEntry.Id);
         }
 
-        [HttpPost("SaveScreeningRandomization/{randomizationId}/{projectDesignVisitId}/{visitDate}")]
-        public IActionResult SaveScreeningRandomization(int randomizationId, int projectDesignVisitId, DateTime visitDate)
+        [HttpPost]
+        [Route("SaveScreeningRandomization")]
+        public IActionResult SaveScreeningRandomization([FromBody] SaveRandomizationDto saveRandomizationDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            var result = _screeningEntryRepository.SaveScreeningRandomization(randomizationId, projectDesignVisitId, visitDate);
-
+            var result = _screeningEntryRepository.SaveScreeningRandomization(saveRandomizationDto);
             if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
-
 
             //ScreeningTemplateValueController.Put(new ScreeningTemplateValueDto());
             return Ok(result.Id);

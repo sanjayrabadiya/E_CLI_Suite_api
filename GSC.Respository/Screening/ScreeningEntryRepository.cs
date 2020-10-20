@@ -50,7 +50,7 @@ namespace GSC.Respository.Screening
             IScreeningTemplateRepository screeningTemplateRepository,
             INumberFormatRepository numberFormatRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IRolePermissionRepository rolePermissionRepository)
+        IRolePermissionRepository rolePermissionRepository)
             : base(uow, jwtTokenAccesser)
         {
             _volunteerRepository = volunteerRepository;
@@ -64,6 +64,7 @@ namespace GSC.Respository.Screening
             _screeningVisitRepository = screeningVisitRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectDesignRepository = projectDesignRepository;
+            _projectRepository = projectRepository;
             _uow = uow;
         }
 
@@ -169,19 +170,19 @@ namespace GSC.Respository.Screening
         }
 
 
-        public ScreeningEntry SaveScreeningRandomization(int randomizationId, int projectDesignVisitId, DateTime visitDate)
+        public ScreeningEntry SaveScreeningRandomization(SaveRandomizationDto saveRandomizationDto)
         {
             var screeningEntry = new ScreeningEntry();
             screeningEntry.Id = 0;
 
-            var randomization = _randomizationRepository.Find(randomizationId);
+            var randomization = _randomizationRepository.Find(saveRandomizationDto.RandomizationId);
 
             var parentProjectId = _projectRepository.All.Where(r => r.Id == randomization.ProjectId).Select(t => t.ParentProjectId).FirstOrDefault();
             var projectDesign = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId && r.DeletedDate == null).
                  Select(t => new
                  {
                      t.IsUnderTesting,
-                     ProjectDesignPeriodId = t.ProjectDesignPeriods.Where(x => x.DeletedDate == null).Select(a => a.Id).LastOrDefault()
+                     ProjectDesignPeriodId = t.ProjectDesignPeriods.Where(x => x.DeletedDate == null).Select(a => a.Id).OrderByDescending(t => t).FirstOrDefault()
                  }).FirstOrDefault();
             randomization.PatientStatusId = ScreeningPatientStatus.OnTrial;
             screeningEntry.ProjectId = randomization.ProjectId;
@@ -190,7 +191,7 @@ namespace GSC.Respository.Screening
             screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
-            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, projectDesignVisitId, visitDate);
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, saveRandomizationDto.ProjectDesignVisitId, saveRandomizationDto.VisitDate);
 
             screeningEntry.IsTesting = projectDesign.IsUnderTesting;
             screeningEntry.ScreeningHistory = new ScreeningHistory();
