@@ -20,19 +20,19 @@ namespace GSC.Audit
             SkipEntityForAudit = GetSkipEntityForAudit();
         }
 
-
         List<Dictionary> LoadDictionaries()
         {
             SetDictionariesForMaster();
 
             return _dictionaries;
         }
+
         void SetDictionariesForMaster()
         {
             _dictionaries.Add(new Dictionary { FieldName = "TrialTypeId", DisplayName = "Trial Type", SourceColumn = "TrialTypeName", TableName = "TrialType", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "OtherTitle", DisplayName = "Other Title" });
-            _dictionaries.Add(new Dictionary { FieldName = "Forename", DisplayName = "First Name" });
-            _dictionaries.Add(new Dictionary { FieldName = "MiddleName", DisplayName = "Middle Name" });
+            //_dictionaries.Add(new Dictionary { FieldName = "Forename", DisplayName = "First Name" });
+            //_dictionaries.Add(new Dictionary { FieldName = "MiddleName", DisplayName = "Middle Name" });
             _dictionaries.Add(new Dictionary { FieldName = "Surname", DisplayName = "Last Name" });
             _dictionaries.Add(new Dictionary { FieldName = "DateOfBirth", DisplayName = "Date Of Birth" });
             _dictionaries.Add(new Dictionary { FieldName = "CorrespondenceAddressId", DisplayName = "Address", SourceColumn = "DisplayAddress", TableName = "Address", PkName = "AddressId" });
@@ -72,18 +72,17 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ClientTypeName", DisplayName = "Client Type" });
             _dictionaries.Add(new Dictionary { FieldName = "DepartmentName", DisplayName = "Department Name" });
             _dictionaries.Add(new Dictionary { FieldName = "DepartmentCode", DisplayName = "Department Code" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Notes", DisplayName = "Notes" });
             _dictionaries.Add(new Dictionary { FieldName = "TypeName", DisplayName = "Type Name" });
             _dictionaries.Add(new Dictionary { FieldName = "Name", DisplayName = "Document Name" });
             _dictionaries.Add(new Dictionary { FieldName = "DocumentTypeId", DisplayName = "Document Type", SourceColumn = "TypeName", TableName = "DocumentType", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "DrugName", DisplayName = "Drug Name" });
             _dictionaries.Add(new Dictionary { FieldName = "DosageForm", DisplayName = "Dosage Form" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Strength", DisplayName = "Strength" });
+            _dictionaries.Add(new Dictionary { FieldName = "Strength", DisplayName = "Strength" });
             _dictionaries.Add(new Dictionary { FieldName = "FreezerName", DisplayName = "Freezer Name" });
             _dictionaries.Add(new Dictionary { FieldName = "FreezerType", DisplayName = "Freezer Type" });
             _dictionaries.Add(new Dictionary { FieldName = "Location", DisplayName = "Location" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Temprature", DisplayName = "Temprature" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Capacity", DisplayName = "Capacity" });
+            _dictionaries.Add(new Dictionary { FieldName = "Temprature", DisplayName = "Temprature" });
+            _dictionaries.Add(new Dictionary { FieldName = "Capacity", DisplayName = "Capacity" });
             //_dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
             _dictionaries.Add(new Dictionary { FieldName = "LanguageName", DisplayName = "Language" });
             _dictionaries.Add(new Dictionary { FieldName = "ShortName", DisplayName = "Short Name" });
@@ -150,29 +149,68 @@ namespace GSC.Audit
 
             // usermanagement audit change
 
-            //_dictionaries.Add(new Dictionary { FieldName = "ClientId", DisplayName = "Client", SourceColumn = "ClientName", TableName = "Client", PkName = "Id" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IsDefault", DisplayName = "Is Default" });
-            //_dictionaries.Add(new Dictionary { FieldName = "ContactNo", DisplayName = "Contact Number" });
-            //_dictionaries.Add(new Dictionary { FieldName = "ContactName", DisplayName = "Contact Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "ClientId", DisplayName = "Client", SourceColumn = "ClientName", TableName = "Client", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsDefault", DisplayName = "Is Default" });
+            _dictionaries.Add(new Dictionary { FieldName = "ContactNo", DisplayName = "Contact Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "ContactName", DisplayName = "Contact Name" });
             //_dictionaries.Add(new Dictionary { FieldName = "IsLogin", DisplayName = "Is Login" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IsPowerAdmin", DisplayName = "Is Power Admin" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IsLocked", DisplayName = "Is Locked" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IsFirstTime", DisplayName = "Is First Time" });
-            //_dictionaries.Add(new Dictionary { FieldName = "UserName", DisplayName = "User Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "FirstName", DisplayName = "First Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "LastName", DisplayName = "Last Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "MiddleName", DisplayName = "Middle Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Email", DisplayName = "Email" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Phone", DisplayName = "Phone" });
-            //_dictionaries.Add(new Dictionary { FieldName = "ValidFrom", DisplayName = "Valid From" });
-            //_dictionaries.Add(new Dictionary { FieldName = "ValidTo", DisplayName = "Valid To" });
-            //_dictionaries.Add(new Dictionary { FieldName = "RoleShortName", DisplayName = "Role Short Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "RoleName", DisplayName = "Role Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IsSystemRole", DisplayName = "Is System Role" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsPowerAdmin", DisplayName = "Is Power Admin" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsLocked", DisplayName = "Is Locked" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsFirstTime", DisplayName = "Is First Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "UserName", DisplayName = "User Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "FirstName", DisplayName = "First Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "LastName", DisplayName = "Last Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "MiddleName", DisplayName = "Middle Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "Email", DisplayName = "Email" });
+            _dictionaries.Add(new Dictionary { FieldName = "Phone", DisplayName = "Phone" });
+            _dictionaries.Add(new Dictionary { FieldName = "ValidFrom", DisplayName = "Valid From" });
+            _dictionaries.Add(new Dictionary { FieldName = "ValidTo", DisplayName = "Valid To" });
+            _dictionaries.Add(new Dictionary { FieldName = "RoleShortName", DisplayName = "Role Short Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "RoleName", DisplayName = "Role Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsSystemRole", DisplayName = "Is System Role" });
 
+            // medra coding audit
+            _dictionaries.Add(new Dictionary { FieldName = "PathName", DisplayName = "Path Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "MimeType", DisplayName = "Mime Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "DictionaryId", DisplayName = "Dictionary Name", SourceColumn = "DictionaryName", TableName = "Dictionary", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "MedraVersionId", DisplayName = "Medra Version", SourceColumn = "Version", TableName = "MedraVersion", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "LanguageId", DisplayName = "Language", SourceColumn = "LanguageName", TableName = "Language", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsByAnnotation", DisplayName = "Is By Annotation" });
+            _dictionaries.Add(new Dictionary { FieldName = "CoderProfile", DisplayName = "Coder Profile" });
+            _dictionaries.Add(new Dictionary { FieldName = "CoderApprover", DisplayName = "Coder Approver" });
+            _dictionaries.Add(new Dictionary { FieldName = "Version", DisplayName = "Version" });
+
+            // manage study audit
+            _dictionaries.Add(new Dictionary { FieldName = "IsStatic", DisplayName = "Is Static" });
+            _dictionaries.Add(new Dictionary { FieldName = "Period", DisplayName = "Period" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectCode", DisplayName = "Project Code" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectName", DisplayName = "Project Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectNumber", DisplayName = "Project Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "AttendanceLimit", DisplayName = "Attendance Limit" });
+            _dictionaries.Add(new Dictionary { FieldName = "PinCode", DisplayName = "Pin Code" });
+            _dictionaries.Add(new Dictionary { FieldName = "SiteName", DisplayName = "Site Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "InvestigatorContactId", DisplayName = "Investigator Contact", SourceColumn = "NameOfInvestigator", TableName = "InvestigatorContact", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "RegulatoryType", DisplayName = "Regulatory Type", SourceColumn = "RegulatoryTypeName", TableName = "RegulatoryType", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "DesignTrialId", DisplayName = "Design Trial", SourceColumn = "DesignTrialName", TableName = "DesignTrial", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "DrugId", DisplayName = "Drug", SourceColumn = "DrugName", TableName = "Drug", PkName = "Id" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "CheckFormula", DisplayName = "Check Formula" });
+            _dictionaries.Add(new Dictionary { FieldName = "TargetFormula", DisplayName = "Target Formula" });
+            _dictionaries.Add(new Dictionary { FieldName = "SampleResult", DisplayName = "Sample Result" });
+            _dictionaries.Add(new Dictionary { FieldName = "SourceFormula", DisplayName = "Source Formula" });
+            _dictionaries.Add(new Dictionary { FieldName = "ErrorMessage", DisplayName = "Error Message" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsReferenceVerify", DisplayName = "Is Reference Verify" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsOnlyTarget", DisplayName = "Is Only Target" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsFormula", DisplayName = "Is Formula" });
+            _dictionaries.Add(new Dictionary { FieldName = "AutoNumber", DisplayName = "Auto Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Project", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
+
+            // Inform Consent audit
+            _dictionaries.Add(new Dictionary { FieldName = "DocumentName", DisplayName = "Document Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "DocumentPath", DisplayName = "Document Path" });
+            _dictionaries.Add(new Dictionary { FieldName = "ReferenceTitle", DisplayName = "Reference Title" });
+            _dictionaries.Add(new Dictionary { FieldName = "FilePath", DisplayName = "File Path" });
         }
-
-
 
         private List<string> GetSkipEntityForAudit()
         {
