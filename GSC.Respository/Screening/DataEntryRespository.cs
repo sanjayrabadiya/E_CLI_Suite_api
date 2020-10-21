@@ -271,6 +271,47 @@ namespace GSC.Respository.Screening
 
         }
 
+        public List<DataEntryVisitTemplateDto> GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId,
+            int screeningStatus, bool isQuery)
+        {
+
+            return new List<DataEntryVisitTemplateDto>();
+
+            //if (isQuery)
+            //    return Context.ScreeningTemplate.Where(t =>
+            //        t.ScreeningEntryId == screeningEntryId
+            //        && t.ProjectDesignVisitId == projectDesignVisitId
+            //        && t.ScreeningTemplateValues.Any(c => c.QueryStatus != null && c.QueryStatus != QueryStatus.Closed)
+            //        && t.DeletedDate == null).Select(x => new DataEntryVisitTemplateDto
+            //        {
+            //            ScreeningEntryId = x.ScreeningEntryId,
+            //            ScreeningTemplateId = x.Id,
+            //            ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+            //            TemplateName = x.ProjectDesignTemplate.TemplateName,
+            //            VisitName = x.ProjectDesignVisit.DisplayName,
+            //            SubjectName = x.ScreeningEntry.Attendance.Volunteer == null
+            //                ? x.ScreeningEntry.Attendance.NoneRegister.Initial
+            //                : x.ScreeningEntry.Attendance.Volunteer.AliasName
+            //        }
+            //    ).ToList();
+            //return Context.ScreeningTemplate.Where(t =>
+            //    t.ScreeningEntryId == screeningEntryId
+            //    && t.ProjectDesignVisitId == projectDesignVisitId
+            //    && t.Status == screeningStatus
+            //    && t.DeletedDate == null).Select(x => new DataEntryVisitTemplateDto
+            //    {
+            //        ScreeningEntryId = x.ScreeningEntryId,
+            //        ScreeningTemplateId = x.Id,
+            //        ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+            //        TemplateName = x.ProjectDesignTemplate.TemplateName,
+            //        VisitName = x.ProjectDesignVisit.DisplayName,
+            //        SubjectName = x.ScreeningEntry.Attendance.Volunteer == null
+            //            ? x.ScreeningEntry.Attendance.NoneRegister.Initial
+            //            : x.ScreeningEntry.Attendance.Volunteer.AliasName
+            //    }
+            //).ToList();
+        }
+
 
     }
 }

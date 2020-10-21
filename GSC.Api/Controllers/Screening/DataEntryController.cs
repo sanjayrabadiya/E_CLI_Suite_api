@@ -46,6 +46,14 @@ namespace GSC.Api.Controllers.Screening
             return Ok();
         }
 
+        [HttpGet]
+        [Route("GetTemplateForVisit/{screeningEntryId}/{projectDesignVisitId}/{screeningStatus}/{isQuery}")]
+        public IActionResult GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId, int screeningStatus, bool isQuery)
+        {
+            return Ok(_dataEntryRespository.GetTemplateForVisit(screeningEntryId, projectDesignVisitId, screeningStatus,
+                isQuery));
+        }
+
 
     }
 }
