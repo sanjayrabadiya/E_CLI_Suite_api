@@ -353,7 +353,7 @@ namespace GSC.Api.Controllers.Project.Design
                 variableCategoryType));
         }
 
-
+        // Not use any where please check and remove if not use any where comment by vipul
         [HttpGet]
         [Route("GetTemplateDropDownAnnotation/{projectDesignVisitId}")]
         public IActionResult GetTemplateDropDownAnnotation(int projectDesignVisitId)

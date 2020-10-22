@@ -210,6 +210,7 @@ namespace GSC.Respository.Project.Design
             return templates;
         }
 
+        // Not use any where please check and remove if not use any where comment by vipul
         public IList<DropDownDto> GetTemplateDropDownAnnotation(int projectDesignVisitId)
         {
             var templates = All.Where(x => x.DeletedDate == null
