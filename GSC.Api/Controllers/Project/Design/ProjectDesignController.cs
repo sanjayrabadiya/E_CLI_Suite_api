@@ -123,6 +123,7 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
+        //Not Use in front please check and remove if not use comment  by vipul
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
@@ -144,6 +145,8 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
+
+        //Not Use in front please check and remove if not use comment  by vipul
         [HttpGet]
         [Route("GetProjectDesignDetail/{projectId}")]
         public async Task<IActionResult> GetProjectDesignDetail(int projectId)

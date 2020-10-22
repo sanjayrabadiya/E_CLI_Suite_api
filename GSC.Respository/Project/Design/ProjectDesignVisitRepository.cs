@@ -78,13 +78,9 @@ namespace GSC.Respository.Project.Design
             var screeningEntryId = Context.ScreeningEntry.Where(x => lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(x.AttendanceId)).ToList();
             var screeninglockAudit = new List<ScreeningTemplateLockUnlockAudit>();
             if (lockUnlockDDDto.ChildProjectId != lockUnlockDDDto.ProjectId)
-            {
                 screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
-            }
             else
-            {
                 screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
-            }
 
             if (lockUnlockDDDto.IsLock)
             {

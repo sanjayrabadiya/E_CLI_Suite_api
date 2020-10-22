@@ -232,7 +232,7 @@ namespace GSC.Api.Controllers.Medra
         [HttpGet("GetProjectStatusAndLevelDropDown/{ProjectDesignId}")]
         public IActionResult GetProjectStatusAndLevelDropDown(int ProjectDesignId)
         {
-            var parentProjectId = _projectDesignRepository.GetParentProjectDetail(ProjectDesignId);
+            var parentProjectId = _projectDesignRepository.Find(ProjectDesignId).ProjectId;
             var screeningSummaryDto = _screeningEntryRepository.GetProjectStatusAndLevelDropDown(parentProjectId);
             return Ok(screeningSummaryDto);
         }

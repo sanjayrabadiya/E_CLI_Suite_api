@@ -42,7 +42,6 @@ namespace GSC.Respository.Project.Design
                 }).OrderBy(o => o.Value).ToList();
         }
 
-
         public async Task<ProjectDetailDto> GetProjectDesignDetail(int projectId)
         {
             return All.Where(x => x.ProjectId == projectId).Include(t => t.Project)
@@ -85,6 +84,8 @@ namespace GSC.Respository.Project.Design
                 }).FirstOrDefault();
         }
 
+
+        // Not use any where please check and remove if not use any where comment by vipul
         public bool IsScreeningStarted(int projectDesignId)
         {
             return _context.ScreeningEntry.Any(t => t.ProjectDesignId == projectDesignId && t.DeletedDate == null);
@@ -106,6 +107,7 @@ namespace GSC.Respository.Project.Design
             return msg;
         }
 
+        //Not Use in front please check and remove if not use comment  by vipul
         public string Duplicate(ProjectDesign objSave)
         {
             var project = Context.Project.Where(x => x.Id == objSave.ProjectId).FirstOrDefault();
@@ -113,7 +115,6 @@ namespace GSC.Respository.Project.Design
                 return "Duplicate Design : " + project.ProjectName;
             return "";
         }
-
 
         public bool IsCompleteExist(int projectDesignId, string moduleName, bool isComplete)
         {
@@ -124,61 +125,42 @@ namespace GSC.Respository.Project.Design
             if (moduleName == "workflow")
             {
                 if (exist != null)
-                {
                     exist.IsCompleteWorkflow = isComplete;
-                }
                 else
-                {
                     electronicSignature.IsCompleteWorkflow = isComplete;
-                }
             }
             else if (moduleName == "schedule")
             {
                 if (exist != null)
-                {
                     exist.IsCompleteSchedule = isComplete;
-                }
                 else
-                {
                     electronicSignature.IsCompleteSchedule = isComplete;
-                }
             }
             else if (moduleName == "editcheck")
             {
                 if (exist != null)
-                {
                     exist.IsCompleteEditCheck = isComplete;
-                }
                 else
-                {
                     electronicSignature.IsCompleteEditCheck = isComplete;
-                }
             }
             else if (moduleName == "design")
             {
                 if (exist != null)
-                {
                     exist.IsCompleteDesign = isComplete;
-                }
                 else
-                {
                     electronicSignature.IsCompleteDesign = isComplete;
-                }
             }
 
 
             if (exist == null)
-            {
                 Context.ElectronicSignature.Add(electronicSignature);
-            }
             else
-            {
                 Context.ElectronicSignature.Update(exist);
-            }
             _uow.Save();
             return true;
         }
 
+        //Not Use in front please check and remove if not use comment  by vipul
         public int GetParentProjectDetail(int ProjectDesignId)
         {
             return Find(ProjectDesignId).ProjectId;
