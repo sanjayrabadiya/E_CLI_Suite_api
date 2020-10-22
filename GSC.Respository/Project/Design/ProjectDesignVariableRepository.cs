@@ -89,6 +89,7 @@ namespace GSC.Respository.Project.Design
             return grpresult;
         }
 
+        //Not Use in front please check and remove if not use comment  by vipul
         public IList<DropDownVaribleDto> GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId)
         {
             var query =
@@ -116,18 +117,19 @@ namespace GSC.Respository.Project.Design
         }
 
         //Added method By Vipul 19022020
-        public IList<DropDownDto> GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId)
-        {
-            return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId)
-                .OrderBy(o => o.DesignOrder)
-                .Select(c => new DropDownDto
-                {
-                    Id = c.Id,
-                    Value = c.VariableName,
-                    Code = c.CoreVariableType.ToString(),
-                    ExtraData = c.DesignOrder
-                }).OrderBy(o => o.ExtraData).ToList();
-        }
+        // Merge by vipul in IList<DropDownVaribleDto> GetVariabeAnnotationDropDown(int projectDesignTemplateId, bool isFormula)
+        //public IList<DropDownDto> GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId)
+        //{
+        //    return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId)
+        //        .OrderBy(o => o.DesignOrder)
+        //        .Select(c => new DropDownDto
+        //        {
+        //            Id = c.Id,
+        //            Value = c.VariableName,
+        //            Code = c.CoreVariableType.ToString(),
+        //            ExtraData = c.DesignOrder
+        //        }).OrderBy(o => o.ExtraData).ToList();
+        //}
 
 
         public string Duplicate(ProjectDesignVariable objSave)

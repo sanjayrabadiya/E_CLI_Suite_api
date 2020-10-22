@@ -15,7 +15,8 @@ namespace GSC.Respository.Project.Design
         IList<DropDownVaribleDto> GetVariabeAnnotationDropDown(int projectDesignTemplateId, bool isFormula);
 
         //Added method By Vipul 19022020
-        IList<DropDownDto> GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId);
+        // Merge by vipul in IList<DropDownVaribleDto> GetVariabeAnnotationDropDown(int projectDesignTemplateId, bool isFormula)
+        //IList<DropDownDto> GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId);
 
         IList<DropDownVaribleDto> GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId);
 

@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values,t=>t.Remarks)
+            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values, t => t.Remarks)
                 .FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             return Ok(variableDto);
@@ -122,7 +122,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             if (record.VariableId != null)
             {
-                var variable = _variableRepository.Find((int) record.VariableId);
+                var variable = _variableRepository.Find((int)record.VariableId);
                 if (variable != null && variable.SystemType != null)
                 {
                     ModelState.AddModelError("Message", "Can't delete record!");
@@ -193,7 +193,7 @@ namespace GSC.Api.Controllers.Project.Design
             var data = _projectDesignVariableValueRepository.FindBy(x =>
                 x.ProjectDesignVariableId == variable.Id).ToList(); //&& !variable.Values.Any(c => c.Id == x.Id)).ToList();
             var deletevalues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-                //!variable.Values.Any(c => c.Id == x.Id)).ToList();
+            //!variable.Values.Any(c => c.Id == x.Id)).ToList();
             foreach (var value in deletevalues)
                 //value.DeletedDate = DateTime.Now;
                 //_projectDesignVariableValueRepository.Update(value);
@@ -201,12 +201,14 @@ namespace GSC.Api.Controllers.Project.Design
                 _uow.Context.Remove(value);
         }
 
-        [HttpGet]
-        [Route("GetVariabeAnnotationDropDown/{projectDesignTemplateId}")]
-        public IActionResult GetVariabeAnnotationDropDown(int projectDesignTemplateId)
-        {
-            return Ok(_projectDesignVariableRepository.GetVariabeAnnotationDropDown(projectDesignTemplateId, false));
-        }
+
+        // Merge with GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula} by vipul
+        //[HttpGet]
+        //[Route("GetVariabeAnnotationDropDown/{projectDesignTemplateId}")]
+        //public IActionResult GetVariabeAnnotationDropDown(int projectDesignTemplateId)
+        //{
+        //    return Ok(_projectDesignVariableRepository.GetVariabeAnnotationDropDown(projectDesignTemplateId, false));
+        //}
 
         //Added method By Vipul 22092020 for visit status in project design get only date and datetime variable
         [HttpGet]
@@ -230,6 +232,8 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_projectDesignVariableRepository.GetVariabeAnnotationByDomainDropDown(domainId, projectId));
         }
 
+
+        //Not Use in front please check and remove if not use comment  by vipul
         [HttpGet]
         [Route("GetTargetVariabeAnnotationDropDown/{projectDesignTemplateId}")]
         public IActionResult GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId)
@@ -237,18 +241,19 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_projectDesignVariableRepository.GetTargetVariabeAnnotationDropDown(projectDesignTemplateId));
         }
 
-        //Added method By Vipul 19022020
-        [HttpGet]
-        [Route("GetVariabeAnnotationDropDownForProjectDesign/{projectDesignTemplateId}")]
-        public IActionResult GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId)
-        {
-            return Ok(
-                _projectDesignVariableRepository.GetVariabeAnnotationDropDownForProjectDesign(projectDesignTemplateId));
-        }
+        //Added method By Vipul 19022020 
+        // Merge with GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula} by vipul
+        //[HttpGet]
+        //[Route("GetVariabeAnnotationDropDownForProjectDesign/{projectDesignTemplateId}")]
+        //public IActionResult GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId)
+        //{
+        //    return Ok(
+        //        _projectDesignVariableRepository.GetVariabeAnnotationDropDownForProjectDesign(projectDesignTemplateId));
+        //}
 
         [HttpGet]
         [Route("GetAnnotationDropDown/{projectDesignId}/{isFormula}")]
-        public IActionResult GetAnnotationDropDown(int projectDesignId,bool isFormula)
+        public IActionResult GetAnnotationDropDown(int projectDesignId, bool isFormula)
         {
             return Ok(_projectDesignVariableRepository.GetAnnotationDropDown(projectDesignId, isFormula));
         }
