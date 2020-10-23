@@ -2,6 +2,7 @@
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -149,15 +150,16 @@ namespace GSC.Respository.Etmf
                 obj.CreatedDate = item.CreatedDate;
                 obj.Version = item.Version;
                 obj.StatusName = item.Status.GetDescription();
-                obj.Status = item.Status;
+                obj.Status = (int)item.Status;
                 obj.Level = 6;
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
-                obj.IsReview = Review.Count() == 0 ? false : Review.All(z => z.IsSendBack) ? true :false;
+                obj.IsReview = Review.Count() == 0 ? false : Review.All(z => z.IsSendBack) ? true : false;
                 obj.IsSendBack = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 obj.IsAccepted = item.IsAccepted;
                 obj.ApprovedStatus = item.IsAccepted == null ? "" : item.IsAccepted == true ? "Approved" : "Rejected";
                 obj.Approver = string.Join(", ", ApproverName);
+                obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
                 dataList.Add(obj);
             }
             return dataList;
@@ -165,7 +167,7 @@ namespace GSC.Respository.Etmf
 
         public string Duplicate(ProjectWorkplaceArtificatedocument objSave, ProjectWorkplaceArtificatedocumentDto objSaveDto)
         {
-            if (All.Where(x => GetDocumentOriginalName(x.DocumentName,objSaveDto.FileName) == true && x.Id != objSave.Id && x.ProjectWorkplaceArtificateId == objSave.ProjectWorkplaceArtificateId
+            if (All.Where(x => GetDocumentOriginalName(x.DocumentName, objSaveDto.FileName) == true && x.Id != objSave.Id && x.ProjectWorkplaceArtificateId == objSave.ProjectWorkplaceArtificateId
              && x.DeletedDate == null).ToList().Count > 0)
                 return "Duplicate Document name : " + objSaveDto.FileName;
             return "";
@@ -206,8 +208,23 @@ namespace GSC.Respository.Etmf
             projectWorkplaceArtificatedocument.DocPath = path;
             projectWorkplaceArtificatedocument.Status = ArtifactDocStatusType.Draft;
             projectWorkplaceArtificatedocument.Version = "1.0";
-
+            projectWorkplaceArtificatedocument.ParentDocumentId = projectWorkplaceArtificatedocumentDto.ParentDocumentId;
             return projectWorkplaceArtificatedocument;
+        }
+
+        public ProjectWorkplaceArtificatedocument AddMovedDocument(List<WorkplaceFolderDto> data)
+        {
+            var document = All.Where(x => x.Id == data.Select(x => x.DocumentId).FirstOrDefault()).FirstOrDefault();
+
+            foreach (var item in data)
+            {
+                document.Id = 0;
+                document.ProjectWorkplaceArtificateId = item.ProjectWorkplaceArtificateId;
+                Add(document);
+                _uow.Save();
+            }
+
+            return document;
         }
     }
 }

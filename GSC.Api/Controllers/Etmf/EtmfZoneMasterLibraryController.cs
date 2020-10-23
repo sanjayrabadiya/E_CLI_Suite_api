@@ -63,8 +63,8 @@ namespace GSC.Api.Controllers.Etmf
             if (data != null)
             {
                 result = _etmfZoneMasterLibraryRepository.ExcelDataConvertToEntityformat(data);
-                
-                 var LastVersiondata = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).ToList();
+
+                var LastVersiondata = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).ToList();
                 if (LastVersiondata != null && LastVersiondata.Count > 0)
                 {
                     foreach (var Lastdata in LastVersiondata)

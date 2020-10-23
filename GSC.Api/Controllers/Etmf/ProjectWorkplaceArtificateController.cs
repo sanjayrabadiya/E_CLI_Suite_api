@@ -46,5 +46,12 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(_projectWorkplaceArtificateRepository.GetProjectWorkPlaceArtificateDropDown(sectionId));
         }
 
+        [Route("GetWorkPlaceFolder/{EtmfArtificateMasterLbraryId}/{ProjectWorkplaceArtificateId}")]
+        [HttpGet]
+        public IActionResult GetWorkPlaceFolder(int EtmfArtificateMasterLbraryId, int ProjectWorkplaceArtificateId)
+        {
+            var result = _projectWorkplaceArtificateRepository.GetWorkPlaceFolder(EtmfArtificateMasterLbraryId, ProjectWorkplaceArtificateId);
+            return Ok(result);
+        }
     }
 }

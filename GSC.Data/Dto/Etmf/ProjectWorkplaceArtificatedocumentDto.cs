@@ -26,5 +26,7 @@ namespace GSC.Data.Dto.Etmf
         public string FileName { get; set; }
         public ArtifactDocStatusType Status { get; set; }
         public string Version { get; set; }
+        public int? ParentDocumentId { get; set; }
+        public bool SuperSede { get; set; }
     }
 }

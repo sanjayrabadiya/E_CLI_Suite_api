@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,5 +10,12 @@ namespace GSC.Data.Dto.Etmf
     {
         public int ProjectWorkplaceSectionId { get; set; }
         public int EtmfArtificateMasterLbraryId { get; set; }
+    }
+    public class WorkplaceFolderDto
+    {
+        public int ProjectWorkplaceArtificateId { get; set; }
+        public int EtmfArtificateMasterLbraryId { get; set; }
+        public string FolderName { get; set; }
+        public int DocumentId { get; set; }
     }
 }

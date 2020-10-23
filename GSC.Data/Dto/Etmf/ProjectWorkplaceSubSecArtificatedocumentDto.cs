@@ -31,7 +31,7 @@ namespace GSC.Data.Dto.Etmf
     {
         public int Id{ get; set; }
         public int ProjectWorkplaceSubSectionArtifactId { get; set; }
-
+        public int EtmfArtificateMasterLbraryId { get; set; }
         public int ProjectWorkplaceArtificateId { get; set; }
         public string DocumentName { get; set; }
         public string ExtendedName { get; set; }
@@ -39,7 +39,7 @@ namespace GSC.Data.Dto.Etmf
         public string DocPath { get; set; }
         public string Artificatename { get; set; }
         public string Reviewer { get; set; }
-        public ArtifactDocStatusType Status { get; set; }
+        public int Status { get; set; }
         public string StatusName { get; set; }
         public string Version { get; set; }
         public string CreatedByUser { get; set; }
@@ -62,4 +62,5 @@ namespace GSC.Data.Dto.Etmf
         public string fileName { get; set; }
         public string documentData { get; set; }
     }
+
 }

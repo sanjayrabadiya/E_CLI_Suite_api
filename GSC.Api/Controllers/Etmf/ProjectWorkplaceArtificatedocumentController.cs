@@ -24,6 +24,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
+using Microsoft.EntityFrameworkCore;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GSC.Api.Controllers.Etmf
@@ -53,12 +54,12 @@ namespace GSC.Api.Controllers.Etmf
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
-              IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository,
-              IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
-               IJwtTokenAccesser jwtTokenAccesser,
-               IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
-               IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository)
+            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
+            IUploadSettingRepository uploadSettingRepository,
+            IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
+            IJwtTokenAccesser jwtTokenAccesser,
+            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
+            IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository)
         {
             _userRepository = userRepository;
             _companyRepository = companyRepository;
@@ -126,7 +127,7 @@ namespace GSC.Api.Controllers.Etmf
         {
             var projectWorkplaceArtificatedocumentDto = _projectWorkplaceArtificatedocumentRepository.Find(id);
             projectWorkplaceArtificatedocumentDto.Version = (double.Parse(projectWorkplaceArtificatedocumentDto.Version) + 1).ToString("0.0");
-            
+
             var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
             _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
 
@@ -253,6 +254,9 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult WordToPdf(int id)
         {
             var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
+            var parent = document.ParentDocumentId != null ?
+                _projectWorkplaceArtificatedocumentRepository.Find((int)document.ParentDocumentId) : null;
+
             var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
             FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
             Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
@@ -272,6 +276,7 @@ namespace GSC.Api.Controllers.Etmf
 
             document.DocumentName = outputname;
             document.Status = ArtifactDocStatusType.Final;
+            document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
             _projectWorkplaceArtificatedocumentRepository.Update(document);
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
 
@@ -306,6 +311,37 @@ namespace GSC.Api.Controllers.Etmf
         {
             var History = _projectArtificateDocumentApproverRepository.GetArtificateDocumentApproverHistory(Id);
             return Ok(History);
+        }
+
+        [HttpPost]
+        [Route("DocumentMove")]
+        public IActionResult DocumentMove([FromBody] List<WorkplaceFolderDto> workplaceFolderDto)
+        {
+            //_projectWorkplaceArtificatedocumentRepository.AddMovedDocument(item);
+            var document = _projectWorkplaceArtificatedocumentRepository.All.Where(x => x.Id == workplaceFolderDto.Select(x => x.DocumentId).FirstOrDefault())
+                .Include(d => d.ProjectArtificateDocumentReview)
+                .Include(d => d.ProjectArtificateDocumentApprover)
+                .Include(d => d.ProjectArtificateDocumentComment)
+                .Include(d => d.ProjectArtificateDocumentHistory)
+                .AsNoTracking().FirstOrDefault();
+
+            ProjectWorkplaceArtificatedocument firstSaved = null;
+
+            foreach (var item in workplaceFolderDto)
+            {
+                document.Id = 0;
+                document.ProjectWorkplaceArtificateId = item.ProjectWorkplaceArtificateId;
+
+                document.ProjectArtificateDocumentReview.ForEach(review =>
+                {
+                    review.Id = 0;
+                });
+
+                _projectWorkplaceArtificatedocumentRepository.Add(document);
+                if (_uow.Save() <= 0) throw new Exception("Creating move document failed on save.");
+
+            }
+            return Ok(firstSaved.Id);
         }
     }
 }
