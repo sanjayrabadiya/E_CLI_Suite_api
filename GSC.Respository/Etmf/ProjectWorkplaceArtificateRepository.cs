@@ -32,14 +32,19 @@ namespace GSC.Respository.Etmf
 
         public List<WorkplaceFolderDto> GetWorkPlaceFolder(int EtmfArtificateMasterLbraryId, int ProjectWorkplaceArtificateId)
         {
-            var result = All.Where(x => x.EtmfArtificateMasterLbraryId == EtmfArtificateMasterLbraryId && x.Id != ProjectWorkplaceArtificateId)
-                .Include(y => y.ProjectWorkplaceSection).ThenInclude(y => y.ProjectWorkPlaceZone)
+            var ParentArtificateId = All.Where(x => x.Id == ProjectWorkplaceArtificateId).FirstOrDefault().ParentArtificateId;
+
+            var result = All.Where(x => x.EtmfArtificateMasterLbraryId == EtmfArtificateMasterLbraryId && x.Id != ProjectWorkplaceArtificateId
+                 && x.Id != ParentArtificateId).Include(y => y.ProjectWorkplaceSection)
+                .ThenInclude(y => y.ProjectWorkPlaceZone)
                 .ThenInclude(y => y.ProjectWorkplaceDetail).ThenInclude(y => y.ProjectWorkplace)
+                .Where(y => y.ParentArtificateId == null)
                 .Select(y => new WorkplaceFolderDto
                 {
                     ProjectWorkplaceArtificateId = y.Id,
                     EtmfArtificateMasterLbraryId = y.EtmfArtificateMasterLbraryId,
                     FolderName = ((WorkPlaceFolder)y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                    ParentArtificateId = y.ParentArtificateId
                 }).ToList();
 
             return result;

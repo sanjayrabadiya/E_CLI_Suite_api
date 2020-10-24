@@ -16,6 +16,6 @@ namespace GSC.Respository.Etmf
         List<CommonArtifactDocumentDto> GetDocumentList(int id);
         string Duplicate(ProjectWorkplaceArtificatedocument objSave, ProjectWorkplaceArtificatedocumentDto objSaveDto);
         ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto);
-        ProjectWorkplaceArtificatedocument AddMovedDocument(List<WorkplaceFolderDto> item);
+        ProjectWorkplaceArtificatedocument AddMovedDocument(WorkplaceFolderDto item);
     }
 }

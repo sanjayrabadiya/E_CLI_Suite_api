@@ -53,7 +53,7 @@ namespace GSC.Data.Dto.Etmf
         public bool? IsAccepted { get; set; }
         public string ApprovedStatus { get; set; }
         public string Approver { get; set; }
-
+        public bool IsMoved { get; set; }
     }
 
     public class CustomParameter

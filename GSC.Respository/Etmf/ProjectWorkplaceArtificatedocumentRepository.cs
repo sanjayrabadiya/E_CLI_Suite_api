@@ -123,9 +123,10 @@ namespace GSC.Respository.Etmf
                 var users = new List<string>();
                 reviewerList.ForEach(r =>
                 {
-                    var username = _userRepository.FindByInclude(x => x.Id == r).Select(y => y.UserName);
-                    users.AddRange(username);
+                    var username = _userRepository.Find(r).UserName;
+                    users.Add(username);
                 });
+
                 var Review = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id
                 && x.UserId != item.CreatedBy && x.DeletedDate == null).ToList();
 
@@ -133,9 +134,11 @@ namespace GSC.Respository.Etmf
                 var ApproverName = new List<string>();
                 ApproveList.ForEach(r =>
                 {
-                    var username = _userRepository.FindByInclude(x => x.Id == r).Select(y => y.UserName);
-                    ApproverName.AddRange(username);
+                    var username = _userRepository.Find(r).UserName;
+                    ApproverName.Add(username);
                 });
+
+                var moved = Context.ProjectWorkplaceArtificate.Where(x => x.EtmfArtificateMasterLbraryId == item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId && x.ParentArtificateId == null).Count();
 
                 CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
                 obj.Id = item.Id;
@@ -160,6 +163,7 @@ namespace GSC.Respository.Etmf
                 obj.ApprovedStatus = item.IsAccepted == null ? "" : item.IsAccepted == true ? "Approved" : "Rejected";
                 obj.Approver = string.Join(", ", ApproverName);
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
+                obj.IsMoved = moved == 1 ? true : false;
                 dataList.Add(obj);
             }
             return dataList;
@@ -212,17 +216,14 @@ namespace GSC.Respository.Etmf
             return projectWorkplaceArtificatedocument;
         }
 
-        public ProjectWorkplaceArtificatedocument AddMovedDocument(List<WorkplaceFolderDto> data)
+        public ProjectWorkplaceArtificatedocument AddMovedDocument(WorkplaceFolderDto data)
         {
-            var document = All.Where(x => x.Id == data.Select(x => x.DocumentId).FirstOrDefault()).FirstOrDefault();
-
-            foreach (var item in data)
-            {
-                document.Id = 0;
-                document.ProjectWorkplaceArtificateId = item.ProjectWorkplaceArtificateId;
-                Add(document);
-                _uow.Save();
-            }
+            var document = All.Where(x => x.Id == data.DocumentId)
+               .Include(d => d.ProjectArtificateDocumentReview)
+               .Include(d => d.ProjectArtificateDocumentApprover)
+               .Include(d => d.ProjectArtificateDocumentComment)
+               .Include(d => d.ProjectArtificateDocumentHistory)
+               .AsNoTracking().FirstOrDefault();
 
             return document;
         }

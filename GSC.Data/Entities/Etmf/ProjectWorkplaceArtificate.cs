@@ -10,6 +10,7 @@ namespace GSC.Data.Entities.Etmf
         public int ProjectWorkplaceSectionId { get; set; }
         public int EtmfArtificateMasterLbraryId { get; set; }
         public int? CompanyId { get; set; }
+        public int? ParentArtificateId { get; set; }
         public EtmfArtificateMasterLbrary EtmfArtificateMasterLbrary { get; set; }
         public ProjectWorkplaceSection ProjectWorkplaceSection { get; set; }
         public List<ProjectWorkplaceArtificatedocument> ProjectWorkplaceArtificatedocument { get; set; }

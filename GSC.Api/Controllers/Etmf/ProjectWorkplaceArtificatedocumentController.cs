@@ -47,6 +47,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly GscContext _context;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
+        private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         public ProjectWorkplaceArtificatedocumentController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
@@ -59,7 +60,8 @@ namespace GSC.Api.Controllers.Etmf
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
-            IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository)
+            IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
+            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository)
         {
             _userRepository = userRepository;
             _companyRepository = companyRepository;
@@ -75,6 +77,7 @@ namespace GSC.Api.Controllers.Etmf
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
+            _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
         }
 
         [Route("GetTreeview")]
@@ -317,30 +320,28 @@ namespace GSC.Api.Controllers.Etmf
         [Route("DocumentMove")]
         public IActionResult DocumentMove([FromBody] List<WorkplaceFolderDto> workplaceFolderDto)
         {
-            //_projectWorkplaceArtificatedocumentRepository.AddMovedDocument(item);
-            var document = _projectWorkplaceArtificatedocumentRepository.All.Where(x => x.Id == workplaceFolderDto.Select(x => x.DocumentId).FirstOrDefault())
-                .Include(d => d.ProjectArtificateDocumentReview)
-                .Include(d => d.ProjectArtificateDocumentApprover)
-                .Include(d => d.ProjectArtificateDocumentComment)
-                .Include(d => d.ProjectArtificateDocumentHistory)
-                .AsNoTracking().FirstOrDefault();
-
             ProjectWorkplaceArtificatedocument firstSaved = null;
 
-            foreach (var item in workplaceFolderDto)
+            for (var i = 0; i <= (workplaceFolderDto.Count-1); i++)
             {
-                document.Id = 0;
-                document.ProjectWorkplaceArtificateId = item.ProjectWorkplaceArtificateId;
+                var document = _projectWorkplaceArtificatedocumentRepository.AddMovedDocument(workplaceFolderDto[i]);
+                var ProjectArtificate = _projectWorkplaceArtificateRepository.All.Where(x => x.Id == workplaceFolderDto[i].ProjectWorkplaceArtificateId).FirstOrDefault();
+                ProjectArtificate.ParentArtificateId = document.ProjectWorkplaceArtificateId;
 
-                document.ProjectArtificateDocumentReview.ForEach(review =>
-                {
-                    review.Id = 0;
-                });
+                document.Id = 0;
+                document.ProjectWorkplaceArtificateId = workplaceFolderDto[i].ProjectWorkplaceArtificateId;
+
+                document.ProjectArtificateDocumentReview.Select(x => { x.Id = 0; return x; }).ToList();
+                document.ProjectArtificateDocumentApprover.Select(x => { x.Id = 0; return x; }).ToList();
+                document.ProjectArtificateDocumentComment.Select(x => { x.Id = 0; return x; }).ToList();
+                document.ProjectArtificateDocumentHistory.Select(x => { x.Id = 0; return x; }).ToList();
 
                 _projectWorkplaceArtificatedocumentRepository.Add(document);
-                if (_uow.Save() <= 0) throw new Exception("Creating move document failed on save.");
-
+                _projectWorkplaceArtificateRepository.Update(ProjectArtificate);
+                if (i == 0) firstSaved = document;
             }
+            if (_uow.Save() <= 0) throw new Exception("Creating move document failed on save.");
+
             return Ok(firstSaved.Id);
         }
     }
