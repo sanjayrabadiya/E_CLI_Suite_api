@@ -6,9 +6,10 @@ using GSC.Data.Entities.Common;
 namespace GSC.Data.Entities.UserMgt
 {
     [Table("UserClaims")]
-    public class AppUserClaim : BaseEntity
+    public class AppUserClaim
     {
-        [Required] [Key] public Guid ClaimId { get; set; }
+        [Required] [Key]
+        public Guid ClaimId { get; set; }
 
         [Required] public Guid UserId { get; set; }
 

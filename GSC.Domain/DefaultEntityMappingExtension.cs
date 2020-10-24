@@ -14,9 +14,9 @@ namespace GSC.Domain
             //   .Property(b => b.CreatedDate)
             //   .HasDefaultValueSql("getdate()");
 
-            modelBuilder.Entity<AppUserClaim>()
-                .Property(b => b.CreatedDate)
-                .HasDefaultValueSql("getdate()");
+            //modelBuilder.Entity<AppUserClaim>()
+            //    .Property(b => b.CreatedDate)
+            //    .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<Country>()
                 .Property(b => b.CreatedDate)

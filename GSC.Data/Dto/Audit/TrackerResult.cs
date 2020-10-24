@@ -1,6 +1,7 @@
-﻿using System;
+﻿using GSC.Data.Entities.Audit;
+using System;
 using System.Collections.Generic;
-using System.Text;
+
 
 namespace GSC.Data.Dto.Audit
 {
@@ -11,4 +12,8 @@ namespace GSC.Data.Dto.Audit
         public string OldValue { get; set; }
         public string NewValue { get; set; }
     }
+
+  
+
+
 }

@@ -1,12 +1,17 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.UserMgt;
+using GSC.Helper;
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Audit
 {
-    public class AuditTrailCommon : BaseEntity
+    public class AuditTrailCommon 
     {
+        [Key]
+        public int Id { get; set; }
         public string TableName { get; set; }
         public int RecordId { get; set; }
         public string Action { get; set; }
@@ -23,5 +28,18 @@ namespace GSC.Data.Entities.Audit
         public int? CompanyId { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
+
+        
+
+        private DateTime? _createdDate;
+        public DateTime? CreatedDate
+        {
+            get => _createdDate?.UtcDateTime();
+            set => _createdDate = value?.UtcDateTime();
+        }
+
+        public int? CreatedBy { get; set; }
+
+
     }
 }

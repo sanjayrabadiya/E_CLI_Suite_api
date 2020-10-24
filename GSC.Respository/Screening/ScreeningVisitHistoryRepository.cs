@@ -27,6 +27,7 @@ namespace GSC.Respository.Screening
         {
             var history = new ScreeningVisitHistory();
             history.ScreeningVisit = screeningVisit;
+            history.StatusDate = statusDate;
             history.RoleId = _jwtTokenAccesser.RoleId;
             history.VisitStatusId = screeningVisitStatus;
             Add(history);

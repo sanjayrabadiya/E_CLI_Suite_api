@@ -39,7 +39,8 @@ namespace GSC.Respository.Screening
                 {
 
                     ProjectDesignVisitId = r.Id,
-                    Status = projectDesignVisitId == r.Id ? ScreeningVisitStatus.Open : ScreeningVisitStatus.NotStarted
+                    Status = projectDesignVisitId == r.Id ? ScreeningVisitStatus.Open : ScreeningVisitStatus.NotStarted,
+                    ScreeningTemplates = new List<ScreeningTemplate>()
                 };
 
                 if (screeningVisit.Status == ScreeningVisitStatus.Open)
@@ -72,6 +73,18 @@ namespace GSC.Respository.Screening
 
 
         public void OpenVisit(int screeningVisitId, DateTime visitDate)
+        {
+            var visit = Find(screeningVisitId);
+            visit.Status = ScreeningVisitStatus.Open;
+            visit.VisitStartDate = visitDate;
+
+            Update(visit);
+
+            _screeningVisitHistoryRepository.SaveByScreeningVisit(visit, ScreeningVisitStatus.Open, visitDate);
+        }
+
+
+        public void PatientStatus(int screeningVisitId, DateTime visitDate)
         {
             var visit = Find(screeningVisitId);
             visit.Status = ScreeningVisitStatus.Open;

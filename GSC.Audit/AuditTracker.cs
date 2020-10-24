@@ -29,16 +29,16 @@ namespace GSC.Audit
 
         }
 
-        public void GetAuditTracker()
+        public List<AuditTrailCommon> GetAuditTracker()
         {
             List<TrackerResult> trackers = new List<TrackerResult>();
+            var auditTrailCommons = new List<AuditTrailCommon>();
             try
             {
 
                 var userId = _jwtTokenAccesser.UserId;
                 var roleId = _jwtTokenAccesser.RoleId;
-                var createdDate = DateTime.Now.ToUniversalTime();
-
+                var createdDate = Convert.ToDateTime(_jwtTokenAccesser.GetHeader("clientDateTime"));
                 var changeTracker = _gscContext.GetAuditTracker()
                     .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted).ToList();
 
@@ -51,13 +51,17 @@ namespace GSC.Audit
                     var action = Enum.GetName(typeof(EntityState), dbEntry.State);
                     var tableName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString();
 
+                    var recordId = (dbEntry.Entity as BaseEntity).Id;
+
                     if ((dbEntry.Entity as BaseEntity).AuditAction == AuditAction.Deleted || (dbEntry.Entity as BaseEntity).AuditAction == AuditAction.Activated)
                     {
                         var auditTrailCommon = new AuditTrailCommon
                         {
                             TableName = tableName,
-                            Action = action,
+                            Action = (dbEntry.Entity as BaseEntity).AuditAction.ToString(),
                             UserId = userId,
+                            RecordId = recordId,
+                            CreatedBy = userId,
                             UserRoleId = roleId,
                             CreatedDate = createdDate,
                             ReasonId = reasonId > 0 ? reasonId : (int?)null,
@@ -65,11 +69,11 @@ namespace GSC.Audit
                             IpAddress = _jwtTokenAccesser.IpAddress,
                             TimeZone = _jwtTokenAccesser.GetHeader("timeZone")
                         };
-                        _gscContext.AuditTrailCommon.Add(auditTrailCommon);
+                        auditTrailCommons.Add(auditTrailCommon);
                     }
                     else
                     {
-                        GetOldAndNewValues(dbEntry, ref trackers);
+                        GetOldAndNewValues(dbEntry, ref trackers, recordId);
 
                         trackers.ForEach(r =>
                         {
@@ -81,14 +85,16 @@ namespace GSC.Audit
                                 OldValue = r.OldValue,
                                 NewValue = r.NewValue,
                                 UserId = userId,
+                                CreatedBy=userId,
                                 UserRoleId = roleId,
+                                RecordId = recordId,
                                 CreatedDate = createdDate,
                                 IpAddress = _jwtTokenAccesser.IpAddress,
                                 ReasonId = reasonId > 0 ? reasonId : (int?)null,
                                 ReasonOth = reasonOth,
                                 TimeZone = _jwtTokenAccesser.GetHeader("timeZone")
                             };
-                            _gscContext.AuditTrailCommon.Add(auditTrailCommon);
+                            auditTrailCommons.Add(auditTrailCommon);
                         });
 
                     }
@@ -99,12 +105,16 @@ namespace GSC.Audit
                 Log.Logger.Error(e.Message);
             }
 
+            return auditTrailCommons;
+
         }
 
 
-        void GetOldAndNewValues(EntityEntry dbEntry, ref List<TrackerResult> trackers)
+        void GetOldAndNewValues(EntityEntry dbEntry, ref List<TrackerResult> trackers, int recordId)
         {
-            var dbValueProps =  dbEntry.GetDatabaseValues();
+            PropertyValues dbValueProps = null;
+
+
 
             foreach (var prop in dbEntry.Properties)
             {
@@ -112,6 +122,10 @@ namespace GSC.Audit
                     x.FieldName.ToLower() == prop.Metadata.Name.ToLower()).FirstOrDefault();
 
                 if (dictionary == null) continue;
+
+                if (dbValueProps == null && recordId > 0)
+                    dbValueProps = dbEntry.GetDatabaseValues();
+
                 string newValue = Convert.ToString(prop.CurrentValue);
                 string oldValue = "";
                 if (dbValueProps != null && dbValueProps.GetValue<object>(prop.Metadata.Name) != null)
@@ -191,5 +205,7 @@ namespace GSC.Audit
         }
 
     }
+
+   
 }
 

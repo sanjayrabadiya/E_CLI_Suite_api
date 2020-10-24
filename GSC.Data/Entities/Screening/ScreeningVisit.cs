@@ -35,6 +35,6 @@ namespace GSC.Data.Entities.Screening
         public ICollection<ScreeningVisit> Children { get; set; }
       
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
-        public ICollection<ScreeningTemplate> ScreeningTemplates { get; set; }
+        public List<ScreeningTemplate> ScreeningTemplates { get; set; }
     }
 }

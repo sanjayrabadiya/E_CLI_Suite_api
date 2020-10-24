@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
@@ -11,6 +12,8 @@ namespace GSC.Data.Entities.Common
         private DateTime? _deletedDate;
 
         private DateTime? _modifiedDate;
+
+        [Key]
         public int Id { get; set; }
 
         public DateTime? CreatedDate

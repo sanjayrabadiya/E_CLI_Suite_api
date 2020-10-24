@@ -188,6 +188,7 @@ namespace GSC.Respository.Screening
             screeningEntry.ProjectId = randomization.ProjectId;
             screeningEntry.ScreeningNo = _numberFormatRepository.GenerateNumber(projectDesign.IsUnderTesting ? "TestingScreening" : "Screening");
             screeningEntry.EntryType = DataEntryType.Randomization;
+            screeningEntry.ScreeningDate = saveRandomizationDto.VisitDate;
             screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
