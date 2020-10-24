@@ -145,6 +145,17 @@ namespace GSC.Respository.Project.Design
                                  Value = gcs.FirstOrDefault().TemplateName
                              }).Distinct().ToList();
             }
+            
+            // new optimization
+            //var screeningTemplates = Context.ScreeningTemplate.Include(x => x.ScreeningEntry).Where(x => x.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
+
+            //var templates = screeningTemplates.Where(x => (lockUnlockDDDto.SubjectIds == null
+            //    || lockUnlockDDDto.SubjectIds.Contains(x.ScreeningEntry.AttendanceId)) && x.IsLocked != lockUnlockDDDto.IsLock)
+            //    .Select(x => new DropDownDto
+            //    {
+            //        Id = x.ProjectDesignTemplate.Id,
+            //        Value = x.ProjectDesignTemplate.TemplateName
+            //    }).ToList();
 
             return templates;
         }

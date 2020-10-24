@@ -127,6 +127,20 @@ namespace GSC.Respository.Project.Design
                               Value = gcs.FirstOrDefault().DisplayName,
                           }).OrderBy(t => t.Id).Distinct().ToList();
             }
+
+            // new optimization
+            //var screeningTemplates = Context.ScreeningTemplate.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisitId)
+            //    .Where(x => x.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
+
+            //var visits = screeningTemplates.Where(x => (lockUnlockDDDto.SubjectIds == null
+            //    || lockUnlockDDDto.SubjectIds.Contains(x.ScreeningEntry.AttendanceId)) && x.IsLocked != lockUnlockDDDto.IsLock
+            //    // && (x.ProjectDesignVisitId == null || )
+            //    ).Select(x => new DropDownDto
+            //    {
+            //        Id = x.ProjectDesignVisit.Id,
+            //        Value = x.ProjectDesignVisit.DisplayName
+            //    }).ToList();
+
             return visits;
         }
 
