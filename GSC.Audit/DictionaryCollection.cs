@@ -131,7 +131,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "SiteName", DisplayName = "Site Name" });
             _dictionaries.Add(new Dictionary { FieldName = "SiteEmail", DisplayName = "Email" });
             _dictionaries.Add(new Dictionary { FieldName = "SiteAddress", DisplayName = "Site Address" });
-            _dictionaries.Add(new Dictionary { FieldName = "Status", DisplayName = "Status" });
+            //_dictionaries.Add(new Dictionary { FieldName = "Status", DisplayName = "Status" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactNumber", DisplayName = "Contact Number" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactName", DisplayName = "Contact Name" });
             _dictionaries.Add(new Dictionary { FieldName = "IECIRBName", DisplayName = "IEC/IRB Name" });
@@ -155,7 +155,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ContactName", DisplayName = "Contact Name" });
             //_dictionaries.Add(new Dictionary { FieldName = "IsLogin", DisplayName = "Is Login" });
             _dictionaries.Add(new Dictionary { FieldName = "IsPowerAdmin", DisplayName = "Is Power Admin" });
-            _dictionaries.Add(new Dictionary { FieldName = "IsLocked", DisplayName = "Is Locked" });
+            //_dictionaries.Add(new Dictionary { FieldName = "IsLocked", DisplayName = "Is Locked" });
             _dictionaries.Add(new Dictionary { FieldName = "IsFirstTime", DisplayName = "Is First Time" });
             _dictionaries.Add(new Dictionary { FieldName = "UserName", DisplayName = "User Name" });
             _dictionaries.Add(new Dictionary { FieldName = "FirstName", DisplayName = "First Name" });
@@ -203,7 +203,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsOnlyTarget", DisplayName = "Is Only Target" });
             _dictionaries.Add(new Dictionary { FieldName = "IsFormula", DisplayName = "Is Formula" });
             _dictionaries.Add(new Dictionary { FieldName = "AutoNumber", DisplayName = "Auto Number" });
-            _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Project", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
+            //_dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Project", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
 
             // Inform Consent audit
             _dictionaries.Add(new Dictionary { FieldName = "DocumentName", DisplayName = "Document Name" });

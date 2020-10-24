@@ -182,6 +182,7 @@ namespace GSC.Respository.Screening
                  Select(t => new
                  {
                      t.IsUnderTesting,
+                     ProjectDesignId = t.Id,
                      ProjectDesignPeriodId = t.ProjectDesignPeriods.Where(x => x.DeletedDate == null).Select(a => a.Id).OrderByDescending(t => t).FirstOrDefault()
                  }).FirstOrDefault();
             randomization.PatientStatusId = ScreeningPatientStatus.OnTrial;
@@ -189,6 +190,7 @@ namespace GSC.Respository.Screening
             screeningEntry.ScreeningNo = _numberFormatRepository.GenerateNumber(projectDesign.IsUnderTesting ? "TestingScreening" : "Screening");
             screeningEntry.EntryType = DataEntryType.Randomization;
             screeningEntry.ScreeningDate = saveRandomizationDto.VisitDate;
+            screeningEntry.ProjectDesignId = projectDesign.ProjectDesignId;
             screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
