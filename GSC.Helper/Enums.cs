@@ -514,17 +514,6 @@ namespace GSC.Helper
         [Description("OnHold")] OnHold = 8,
         [Description("Completed")] Completed = 9,
         [Description("Withdrawal")] Withdrawal = 10,
-        
-        //[Description("Pre-Screening")] PreScreening = 1,
-        //[Description("Screening")] Screening = 2,
-        //[Description("Screening Failure")] ScreeningFailure = 3,
-        //[Description("OnTrial")] OnTrial = 4,
-        //[Description("Withdrawn On Medical Ground")] WithdrawnOnMedicalGround = 5,
-        //[Description("Withdrawn On Protocol Deviation")] WithdrawnOnProtocolDeviation = 6,
-        //[Description("OnHold")] OnHold = 7,
-        //[Description("Completed")] Completed = 8,
-        //[Description("Self Withdrawal")] SelfWithdrawal = 9,
-        //[Description("Consent In Process")] ConsentInProcess = 10,
     }
 
 }

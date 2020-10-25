@@ -167,6 +167,9 @@ namespace GSC.Respository.Screening
                 volunteer.IsScreening = true;
                 _volunteerRepository.Update(volunteer);
             }
+            _uow.Save();
+
+            _screeningVisitRepository.PatientStatus(screeningEntry.Id);
         }
 
 
@@ -189,6 +192,7 @@ namespace GSC.Respository.Screening
             screeningEntry.ProjectId = randomization.ProjectId;
             screeningEntry.ScreeningNo = _numberFormatRepository.GenerateNumber(projectDesign.IsUnderTesting ? "TestingScreening" : "Screening");
             screeningEntry.EntryType = DataEntryType.Randomization;
+            screeningEntry.RandomizationId = saveRandomizationDto.RandomizationId;
             screeningEntry.ScreeningDate = saveRandomizationDto.VisitDate;
             screeningEntry.ProjectDesignId = projectDesign.ProjectDesignId;
             screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
@@ -200,6 +204,10 @@ namespace GSC.Respository.Screening
             screeningEntry.ScreeningHistory = new ScreeningHistory();
             _randomizationRepository.Update(randomization);
             Add(screeningEntry);
+
+            _uow.Save();
+
+            _screeningVisitRepository.PatientStatus(screeningEntry.Id);
 
             return screeningEntry;
         }

@@ -107,6 +107,8 @@ namespace GSC.Respository.Screening
                     VisitName =a.ProjectDesignVisit.DisplayName,
                     VisitStatus = a.Status.GetDescription(),
                     VisitStatusId = (int)a.Status,
+                    ActualDate=a.VisitStartDate,
+                    ScheduleDate=a.ScheduleDate,
                     NotStarted = a.ScreeningTemplates.Count(c => c.DeletedDate == null && c.Status == ScreeningTemplateStatus.Pending),
                     InProgress = a.ScreeningTemplates.Count(c => c.DeletedDate == null && c.Status == ScreeningTemplateStatus.InProcess)
                 }).ToList()

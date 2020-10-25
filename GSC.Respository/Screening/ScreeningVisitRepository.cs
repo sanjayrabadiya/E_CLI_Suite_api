@@ -5,6 +5,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,15 +18,20 @@ namespace GSC.Respository.Screening
     {
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         private readonly IScreeningVisitHistoryRepository _screeningVisitHistoryRepository;
+        private readonly IRandomizationRepository _randomizationRepository;
+        private readonly IUnitOfWork<GscContext> _uow;
 
         public ScreeningVisitRepository(IUnitOfWork<GscContext> uow,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IRandomizationRepository randomizationRepository,
+        IJwtTokenAccesser jwtTokenAccesser)
             : base(uow, jwtTokenAccesser)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _screeningVisitHistoryRepository = screeningVisitHistoryRepository;
+            _randomizationRepository = randomizationRepository;
+            _uow = uow;
         }
 
         public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId, DateTime visitDate)
@@ -44,7 +50,11 @@ namespace GSC.Respository.Screening
                 };
 
                 if (screeningVisit.Status == ScreeningVisitStatus.Open)
+                {
+                    screeningVisit.VisitStartDate = visitDate;
                     _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.Open, visitDate);
+                }
+
 
                 r.Templates.ForEach(t =>
                 {
@@ -69,6 +79,10 @@ namespace GSC.Respository.Screening
             Update(visit);
 
             _screeningVisitHistoryRepository.Save(screeningVisitHistoryDto);
+
+            _uow.Save();
+
+            PatientStatus(visit.ScreeningEntryId);
         }
 
 
@@ -81,18 +95,32 @@ namespace GSC.Respository.Screening
             Update(visit);
 
             _screeningVisitHistoryRepository.SaveByScreeningVisit(visit, ScreeningVisitStatus.Open, visitDate);
+
+            _uow.Save();
+            
+            PatientStatus(screeningVisitId);
         }
 
 
-        public void PatientStatus(int screeningVisitId, DateTime visitDate)
+        public void PatientStatus( int screeningEntryId)
         {
-            var visit = Find(screeningVisitId);
-            visit.Status = ScreeningVisitStatus.Open;
-            visit.VisitStartDate = visitDate;
+            var visitStatus = All.Where(x => x.ScreeningEntryId == screeningEntryId).GroupBy(t => t.Status).Select(r => r.Key).ToList();
+            var patientStatus = ScreeningPatientStatus.OnTrial;
 
-            Update(visit);
 
-            _screeningVisitHistoryRepository.SaveByScreeningVisit(visit, ScreeningVisitStatus.Open, visitDate);
+            if (visitStatus.Any(x => x == ScreeningVisitStatus.Missed || x == ScreeningVisitStatus.OnHold))
+                patientStatus = ScreeningPatientStatus.OnHold;
+
+            if (visitStatus.Any(x => x == ScreeningVisitStatus.Withdrawal))
+                patientStatus = ScreeningPatientStatus.Withdrawal;
+
+            if (visitStatus.Any(x => x == ScreeningVisitStatus.ScreeningFailure))
+                patientStatus = ScreeningPatientStatus.ScreeningFailure;
+
+            if (!visitStatus.Any(x => x != ScreeningVisitStatus.Completed))
+                patientStatus = ScreeningPatientStatus.Completed;
+
+            _randomizationRepository.PatientStatus(patientStatus, screeningEntryId);
         }
 
 

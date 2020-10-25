@@ -209,5 +209,13 @@ namespace GSC.Respository.Attendance
         }
 
 
+        public void PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId)
+        {
+            var randomization = All.Where(x => x.ScreeningEntry.Id == screeningEntryId).FirstOrDefault();
+            randomization.PatientStatusId = patientStatus;
+            Update(randomization);
+        }
+
+
     }
 }

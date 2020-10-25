@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Entities.Attendance;
+using GSC.Helper;
 using System.Collections.Generic;
 
 namespace GSC.Respository.Attendance
@@ -14,5 +15,6 @@ namespace GSC.Respository.Attendance
         void ChangeStatustoConsentInProgress(int id);
         void ChangeStatustoConsentCompleted(int id);
         void ChangeStatustoReConsentInProgress(int id);
+        void PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId);
     }
 }

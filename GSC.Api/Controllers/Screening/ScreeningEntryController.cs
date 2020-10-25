@@ -2,6 +2,7 @@
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Common;
@@ -65,6 +66,7 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] ScreeningEntryDto screeningEntryDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -82,6 +84,7 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpPost]
+        [TransactionRequired]
         [Route("SaveScreeningRandomization")]
         public IActionResult SaveScreeningRandomization([FromBody] SaveRandomizationDto saveRandomizationDto)
         {
@@ -94,6 +97,7 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpPost("SaveByAttendanceId/{id}")]
+        [TransactionRequired]
         public IActionResult SaveByAttendanceId(int id)
         {
             var attendance = _attendanceRepository.Find(id);
