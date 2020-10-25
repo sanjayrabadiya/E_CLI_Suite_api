@@ -5,6 +5,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -25,9 +26,10 @@ namespace GSC.Api.Controllers.Screening
 
         [HttpGet]
         [Route("GetDataEntriesBySubjectForGrid/{projectDesignPeriodId}/{parentProjectId}/{projectId}")]
-        public IActionResult GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
+        public async Task<IActionResult> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
         {
-            return Ok(_dataEntryRespository.GetDataEntriesBySubjectForGrid(projectDesignPeriodId, parentProjectId, projectId));
+            var result = await _dataEntryRespository.GetDataEntriesBySubjectForGrid(projectDesignPeriodId, parentProjectId, projectId);
+            return Ok(result);
         }
 
 

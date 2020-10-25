@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
@@ -21,62 +22,56 @@ namespace GSC.Respository.Screening
     {
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
+        private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
-        private readonly IProjectWorkflowLevelRepository _projectWorkflowLevelRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IRandomizationRepository _randomizationRepository;
-        private readonly IScreeningVisitRepository _screeningVisitRepository;
+        private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         public DataEntryRespository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
-            IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
             IRandomizationRepository randomizationRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
-            IScreeningVisitRepository screeningVisitRepository,
-            IScreeningEntryRepository screeningEntryRepository
+            IScreeningTemplateRepository screeningTemplateRepository,
+            IScreeningEntryRepository screeningEntryRepository,
+            IProjectDesignRepository projectDesignRepository
         )
             : base(uow, jwtTokenAccesser)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectRightRepository = projectRightRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
-            _projectWorkflowLevelRepository = projectWorkflowLevelRepository;
             _randomizationRepository = randomizationRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
-            _screeningVisitRepository = screeningVisitRepository;
+            _screeningTemplateRepository = screeningTemplateRepository;
             _screeningEntryRepository = screeningEntryRepository;
+            _projectDesignRepository = projectDesignRepository;
         }
 
 
 
-        public DataCaptureGridDto GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
+        public async Task<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
         {
             var result = new DataCaptureGridDto();
-            result.WorkFlowText = _projectWorkflowLevelRepository.All.
-                Where(x => x.ProjectWorkflow.ProjectDesign.ProjectId == parentProjectId
-                        && x.DeletedDate == null && x.ProjectWorkflow.DeletedDate == null).Select(r => new WorkFlowText
-                        {
-                            LevelNo = r.LevelNo,
-                            RoleName = r.SecurityRole.RoleShortName
-                        }).ToList();
 
-            var projectDesignVisit = _projectDesignVisitRepository.All.
+            var projectDesignId = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId).Select(t => t.Id).FirstOrDefault();
+
+            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
+            result.WorkFlowText = workflowlevel.WorkFlowText;
+
+            var projectDesignVisit = await _projectDesignVisitRepository.All.
                 Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
             Select(t => new DataEntryVisitTemplateDto
             {
-                ProjectDesignVisitId= t.Id,
+                ProjectDesignVisitId = t.Id,
                 VisitName = t.DisplayName,
                 VisitStatus = ScreeningVisitStatus.NotStarted.GetDescription(),
                 VisitStatusId = (int)ScreeningVisitStatus.NotStarted
-            }).ToList();
+            }).ToListAsync();
 
-            var queryList = _screeningTemplateValueRepository.GetQueryStatusByPeridId(projectDesignPeriodId);
-            var test = new List<WorkFlowTemplateCount>();
-            test.Add(new WorkFlowTemplateCount { Count = 1, LevelNo = 1 });
-
-            var randomizationData = _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
+            var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
              && x.PatientStatusId == ScreeningPatientStatus.Screening).Select(t => new DataCaptureGridData
              {
                  RandomizationId = t.Id,
@@ -85,186 +80,114 @@ namespace GSC.Respository.Screening
                  SubjectNo = t.ScreeningNumber,
                  PatientStatus = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
-                 TemplateCount = test,
-                 Visit = projectDesignVisit,
-             }).ToList();
+             }).ToListAsync();
 
-            var screeningData = _screeningEntryRepository.All.Where(r => r.ProjectId == projectId && r.DeletedDate == null).Select(x => new DataCaptureGridData
+            var templates = await _screeningTemplateRepository.All.Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).
+                GroupBy(c => new
+                {
+                    c.ScreeningVisit.ScreeningEntryId,
+                    c.ScreeningVisitId,
+                    c.ReviewLevel,
+                    c.Status
+                }).Select(t => new
+                {
+                    t.Key.ScreeningEntryId,
+                    t.Key.Status,
+                    t.Key.ScreeningVisitId,
+                    t.Key.ReviewLevel,
+                    TotalTemplate = t.Count()
+                }).ToListAsync();
+
+            var queries =  await _screeningTemplateValueRepository.All.Where(r => r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).
+                GroupBy(c => new
+                {
+                    c.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
+                    c.ScreeningTemplate.ScreeningVisitId,
+                    c.AcknowledgeLevel,
+                    c.QueryStatus
+                }).Select(t => new
+                {
+                    t.Key.ScreeningEntryId,
+                    t.Key.AcknowledgeLevel,
+                    t.Key.ScreeningVisitId,
+                    t.Key.QueryStatus,
+                    TotalQuery = t.Count()
+                }).ToListAsync();
+
+            var screeningData = await _screeningEntryRepository.All.Where(r => r.ProjectId == projectId && r.DeletedDate == null).Select(x => new DataCaptureGridData
             {
-                ScreeningEntryId= x.Id,
+                ScreeningEntryId = x.Id,
                 RandomizationId = x.RandomizationId,
-                AttendanceId= x.AttendanceId,
+                AttendanceId = x.AttendanceId,
                 VolunteerName = x.RandomizationId != null ? x.Randomization.Initial : x.Attendance.Volunteer.AliasName,
                 IsRandomization = x.RandomizationId != null,
                 SubjectNo = x.RandomizationId != null ? x.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
                 PatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
-                RandomizationNumber = x.RandomizationId != null ?  x.Randomization.RandomizationNumber : "",
-                TemplateCount = test,
+                RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null).Select(a => new DataEntryVisitTemplateDto
                 {
-                    ScreeningVisitId= a.Id,
-                    ProjectDesignVisitId= a.ProjectDesignVisitId,
-                    VisitName =a.ProjectDesignVisit.DisplayName,
+                    ScreeningVisitId = a.Id,
+                    ProjectDesignVisitId = a.ProjectDesignVisitId,
+                    VisitName = a.ProjectDesignVisit.DisplayName,
                     VisitStatus = a.Status.GetDescription(),
                     VisitStatusId = (int)a.Status,
-                    ActualDate=a.VisitStartDate,
-                    ScheduleDate=a.ScheduleDate,
-                    NotStarted = a.ScreeningTemplates.Count(c => c.DeletedDate == null && c.Status == ScreeningTemplateStatus.Pending),
-                    InProgress = a.ScreeningTemplates.Count(c => c.DeletedDate == null && c.Status == ScreeningTemplateStatus.InProcess)
+                    ActualDate = a.VisitStartDate,
+                    ScheduleDate = a.ScheduleDate
                 }).ToList()
 
-            }).ToList();
+            }).ToListAsync();
 
-            #region comment old code
-            //var projectIds = _projectRightRepository.GetProjectRightIdList();
-            //if (!projectIds.Any()) return new List<DataEntryDto>();
-            //var attendances = Context.Attendance.Where(t =>
-            //        t.ProjectDesignPeriodId == projectDesignPeriodId
-            //        && t.DeletedDate == null
-            //        && t.ProjectId == projectId
-            //        && !t.IsProcessed
-            //        && t.AttendanceType != AttendanceType.Screening
-            //        && projectIds.Any(p => p == t.ProjectId))
-            //    .Include(t => t.Volunteer)
-            //    .Include(t => t.Randomization)
-            //    .Include(t => t.ProjectSubject)
-            //    .Include(t => t.ProjectDesignPeriod)
-            //    .ThenInclude(t => t.VisitList)
-            //    .ThenInclude(t => t.Templates)
-            //    .ToList();
-            //var dataEntries = new List<DataEntryDto>();
-            //attendances.ForEach(t =>
-            //{
-            //    var dataEntry = new DataEntryDto
-            //    {
-            //        AttendanceId = t.Id,
-            //        ProjectDesignId = t.ProjectDesignPeriod.ProjectDesignId,
-            //        ProjectId = t.ProjectId,
-            //        ProjectDesignPeriodId = t.ProjectDesignPeriodId,
-            //        VolunteerName = t.Volunteer == null ? t.Randomization.Initial : t.Volunteer.AliasName,
-            //        SubjectNo = t.Volunteer == null ? t.Randomization.ScreeningNumber : t.Volunteer.VolunteerNo,
-            //        RandomizationNumber =
-            //            t.Volunteer == null ? t.Randomization.RandomizationNumber : t.ProjectSubject?.Number,
-            //        VisitSummary = new DashboardStudyStatusDto
-            //        {
-            //            NotStarted = t.ProjectDesignPeriod.VisitList.Where(d => d.DeletedDate == null)
-            //                .Sum(b => b.Templates.Where(h => h.DeletedDate == null).Count()),
-            //            InProcess = 0,
-            //            Review1 = 0,
-            //            Review2 = 0,
-            //            Review3 = 0,
-            //            Review4 = 0,
-            //            Review5 = 0
-            //        },
-            //        QueryStatus = new DashboardQueryStatusDto
-            //        {
-            //            Open = 0,
-            //            Answered = 0,
-            //            Resolved = 0,
-            //            ReOpened = 0,
-            //            Closed = 0,
-            //            SelfCorrection = 0,
-            //            Acknowledge = 0,
-            //            MyQuery = 0
-            //        }
-            //    };
-            //    dataEntries.Add(dataEntry);
-            //});
-            //var screenings = Context.ScreeningEntry.Where(t =>
-            //        t.ProjectDesignPeriodId == projectDesignPeriodId
-            //        && t.ProjectId == projectId
-            //        && t.DeletedDate == null
-            //        && t.EntryType != AttendanceType.Screening
-            //        && projectIds.Any(p => p == t.ProjectId))
-            //    .Include(t => t.ProjectDesignPeriod)
-            //    .ThenInclude(t => t.VisitList)
-            //    .Include(t => t.Attendance)
-            //    .ThenInclude(t => t.Volunteer)
-            //    .Include(t => t.Attendance)
-            //    .ThenInclude(t => t.Randomization)
-            //    .Include(t => t.Attendance)
-            //    .ThenInclude(t => t.ProjectSubject)
-            //    .Include(t => t.ScreeningVisit)
-            //    .ThenInclude(t => t.ScreeningTemplates)
-            //    .ThenInclude(t => t.ProjectDesignTemplate)
-            //     .Include(t => t.ScreeningVisit)
-            //    .ThenInclude(t => t.ScreeningTemplates)
-            //    .ThenInclude(t => t.ScreeningTemplateValues)
-            //    .ToList();
-            //if (screenings.Count > 0)
-            //{
-            //    var queryList = _screeningTemplateValueRepository.GetQueryStatusByPeridId(projectDesignPeriodId);
-            //    var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screenings[0].ProjectDesignId);
-            //    screenings.ForEach(screening =>
-            //    {
-            //        var dataEntry = new DataEntryDto
-            //        {
-            //            WorkflowDetail = workflowlevel,
-            //            AttendanceId = screening.Id,
-            //            ProjectDesignId = screening.ProjectDesignId,
-            //            ProjectId = screening.ProjectId,
-            //            ProjectDesignPeriodId = screening.ProjectDesignPeriodId,
-            //            VolunteerName = screening.Attendance.Volunteer == null
-            //                ? screening.Attendance.Randomization.Initial
-            //                : screening.Attendance.Volunteer.AliasName,
-            //            SubjectNo = screening.Attendance.Volunteer == null
-            //                ? screening.Attendance.Randomization.ScreeningNumber
-            //                : screening.Attendance.Volunteer.VolunteerNo,
-            //            RandomizationNumber = screening.Attendance.Volunteer == null
-            //                ? screening.Attendance.Randomization.RandomizationNumber
-            //                : screening.Attendance.ProjectSubject?.Number,
-            //            ScreeningEntryId = screening.Id,
-            //            //VisitSummary = screening.ScreeningTemplates.GroupBy(s => new
-            //            //{
-            //            //    s.ScreeningEntryId
-            //            //}).Select(x => new DashboardStudyStatusDto
-            //            //{
-            //            //    Review1 = x.Count(r => (int?)r.ReviewLevel == 1),
-            //            //    Review2 = x.Count(r => (int?)r.ReviewLevel == 2),
-            //            //    Review3 = x.Count(r => (int?)r.ReviewLevel == 3),
-            //            //    Review4 = x.Count(r => (int?)r.ReviewLevel == 4),
-            //            //    Review5 = x.Count(r => (int?)r.ReviewLevel == 5)
-            //            //}).FirstOrDefault(),
-            //            QueryStatus =
-            //                queryList.Where(r => r.ScreeningEntryId == screening.Id).FirstOrDefault() == null ||
-            //                queryList.Count() == 0
-            //                    ? new DashboardQueryStatusDto
-            //                    {
-            //                        Open = 0,
-            //                        Answered = 0,
-            //                        Resolved = 0,
-            //                        ReOpened = 0,
-            //                        Closed = 0,
-            //                        SelfCorrection = 0,
-            //                        Acknowledge = 0,
-            //                        MyQuery = 0
-            //                    }
-            //                    : new DashboardQueryStatusDto
-            //                    {
-            //                        Open = queryList.Count(x =>
-            //                            x.ScreeningEntryId == screening.Id && x.QueryStatus == QueryStatus.Open),
-            //                        Answered = queryList.Count(x =>
-            //                            x.ScreeningEntryId == screening.Id && x.QueryStatus == QueryStatus.Answered),
-            //                        Resolved = queryList.Count(x =>
-            //                            x.ScreeningEntryId == screening.Id && x.QueryStatus == QueryStatus.Resolved),
-            //                        ReOpened = queryList.Count(x =>
-            //                            x.ScreeningEntryId == screening.Id && x.QueryStatus == QueryStatus.Reopened),
-            //                        Closed = queryList.Count(x =>
-            //                            x.ScreeningEntryId == screening.Id && x.QueryStatus == QueryStatus.Closed),
-            //                        SelfCorrection = queryList.Count(x =>
-            //                            x.ScreeningEntryId == screening.Id &&
-            //                            x.QueryStatus == QueryStatus.SelfCorrection),
-            //                        Acknowledge = queryList.Count(x =>
-            //                            x.ScreeningEntryId == screening.Id && x.QueryStatus == QueryStatus.Resolved),
-            //                        MyQuery = queryList.Count(x =>
-            //                            x.ScreeningEntryId == screening.Id &&
-            //                            x.AcknowledgeLevel == workflowlevel.LevelNo)
-            //                    }
-            //        };
-            //        dataEntries.Add(dataEntry);
-            //    });
-            //}
-            #endregion
+            //await Task.WhenAll(projectDesignVisitTask, randomizationDataTask, templateTask, queryTask, screeningDataTask);
+
+            //var projectDesignVisit = await projectDesignVisitTask;
+            //var randomizationData = await randomizationDataTask;
+            //var templates = await templateTask;
+            //var queries = await queryTask;
+            //var screeningData = await screeningDataTask;
+
+            randomizationData.ForEach(r => r.Visit = projectDesignVisit);
+
+            screeningData.ForEach(r =>
+            {
+                r.Visit.ForEach(v =>
+                {
+                    if (v.VisitStatusId != 1)
+                    {
+                        v.NotStarted = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.Pending).Sum(t => t.TotalTemplate);
+                        v.InProgress = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.InProcess).Sum(t => t.TotalTemplate);
+                        v.MyQuery = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel == workflowlevel.LevelNo).Sum(t => t.TotalQuery);
+                        v.ReOpen = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Reopened).Sum(t => t.TotalQuery);
+                        v.Open = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Open).Sum(t => t.TotalQuery);
+                        v.Answered = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Answered).Sum(t => t.TotalQuery);
+                        v.Resolved = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Resolved).Sum(t => t.TotalQuery);
+                        v.Closed = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Closed).Sum(t => t.TotalQuery);
+                        v.SelfCorrection = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.SelfCorrection).Sum(t => t.TotalQuery);
+                        v.Acknowledge = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Acknowledge).Sum(t => t.TotalQuery);
+                        v.TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
+                        {
+                            LevelNo = x.LevelNo,
+                            Count = templates.Where(a => a.ScreeningEntryId == r.ScreeningEntryId && a.ScreeningVisitId == v.ScreeningVisitId && a.ReviewLevel == x.LevelNo).Sum(t => t.TotalTemplate)
+                }).ToList();
+                    }
+                });
+
+                r.NotStarted = r.Visit.Sum(x => x.NotStarted);
+                r.InProgress = r.Visit.Sum(x => x.InProgress);
+                r.MyQuery = r.Visit.Sum(x => x.MyQuery);
+                r.ReOpen = r.Visit.Sum(x => x.ReOpen);
+                r.Open = r.Visit.Sum(x => x.Open);
+                r.Resolved = r.Visit.Sum(x => x.Resolved);
+                r.Closed = r.Visit.Sum(x => x.Closed);
+                r.SelfCorrection = r.Visit.Sum(x => x.SelfCorrection);
+                r.Acknowledge = r.Visit.Sum(x => x.Acknowledge);
+                r.TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
+                {
+                    LevelNo = x.LevelNo,
+                    Count = templates.Where(a => a.ScreeningEntryId == r.ScreeningEntryId && a.ReviewLevel == x.LevelNo).Sum(t => t.TotalTemplate)
+                }).ToList();
+            });
+
+
 
             result.Data.AddRange(randomizationData);
             result.Data.AddRange(screeningData);

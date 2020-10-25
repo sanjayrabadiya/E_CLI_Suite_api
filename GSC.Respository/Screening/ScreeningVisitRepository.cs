@@ -98,7 +98,7 @@ namespace GSC.Respository.Screening
 
             _uow.Save();
             
-            PatientStatus(screeningVisitId);
+            PatientStatus(visit.ScreeningEntryId);
         }
 
 
