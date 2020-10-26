@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -12,6 +13,7 @@ using GSC.Helper.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Newtonsoft.Json;
 
@@ -51,7 +53,12 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public ActionResult Get()
         {
-            var result = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary);
+            var result = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).OrderBy(x =>
+            {
+                x.EtmfSectionMasterLibrary = x.EtmfSectionMasterLibrary.OrderBy(y => y.Sectionno).ToList();
+                return x.Id;
+            });
+
             return Ok(result);
         }
 

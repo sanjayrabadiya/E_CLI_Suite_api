@@ -64,8 +64,6 @@ namespace GSC.Respository.Etmf
                             sectionLibraryObj.EtmfArtificateMasterLbrary.Add(artificateObj);
                         }
 
-
-
                         zoneLibraryObj.EtmfSectionMasterLibrary.Add(sectionLibraryObj);
                     }
                     zoneLibraryList.Add(zoneLibraryObj);

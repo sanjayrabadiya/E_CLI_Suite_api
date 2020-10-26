@@ -102,6 +102,7 @@ namespace GSC.Respository.Etmf
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
+                        pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
                         pvListZoneObj.Level = 4;
                         pvListZoneObj.ParentMasterId = b.ProjectId;
                         pvListZoneObj.Icon = "folder";
@@ -113,6 +114,7 @@ namespace GSC.Respository.Etmf
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
                             pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
+                            pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
                             pvListSectionObj.Level = 5;
                             pvListSectionObj.ZoneId = d.Id;
                             pvListSectionObj.CountryId = c.Id;
@@ -125,6 +127,7 @@ namespace GSC.Respository.Etmf
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
+                                pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
                                 pvListArtificateObj.Level = 6;
 
                                 pvListArtificateObj.CountryId = c.Id;
@@ -178,14 +181,16 @@ namespace GSC.Respository.Etmf
                             #endregion
 
                             pvListSectionList.Add(pvListSectionObj);
-                            pvListSectionObj.Item = pvListArtificateList;
+                            pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
                         }
                         pvListZoneList.Add(pvListZoneObj);
-                        pvListZoneObj.Item = pvListSectionList;
+                        pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
                         pvListdetaiObj.Item.Add(pvListZoneObj);
                     }
 
+                    pvListdetaiObj.Item = pvListdetaiObj.Item.OrderBy(x => x.Number).ToList();
                     CountryFol.Item.Add(pvListdetaiObj);
+                    
                 }
 
                 #endregion
@@ -207,6 +212,7 @@ namespace GSC.Respository.Etmf
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
+                        pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
                         pvListZoneObj.Level = 4;
                         pvListZoneObj.ParentMasterId = b.ProjectId;
                         pvListZoneObj.Icon = "folder";
@@ -218,6 +224,7 @@ namespace GSC.Respository.Etmf
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
                             pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
+                            pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
                             pvListSectionObj.Level = 5;
                             pvListSectionObj.ZoneId = d.Id;
                             pvListSectionObj.SiteId = c.Id;
@@ -230,6 +237,7 @@ namespace GSC.Respository.Etmf
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
+                                pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
                                 pvListArtificateObj.Level = 6;
 
                                 pvListArtificateObj.CountryId = 0;
@@ -275,20 +283,21 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
                                     pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
-                                    
+
                                 }
                                 pvListArtificateList.Add(pvListArtificateObj);
                                 pvListArtificateObj.Item = pvListartifactsubsectionList;
                             }
                             #endregion
                             pvListSectionList.Add(pvListSectionObj);
-                            pvListSectionObj.Item = pvListArtificateList;
+                            pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
                         }
 
                         pvListZoneList.Add(pvListZoneObj);
-                        pvListZoneObj.Item = pvListSectionList;
+                        pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
                         pvListdetaiObj.Item.Add(pvListZoneObj);
                     }
+                    pvListdetaiObj.Item = pvListdetaiObj.Item.OrderBy(x => x.Number).ToList();
                     SiteFol.Item.Add(pvListdetaiObj);
                 }
 
@@ -311,6 +320,7 @@ namespace GSC.Respository.Etmf
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
+                        pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
                         pvListZoneObj.Level = 4;
                         pvListZoneObj.ParentMasterId = b.ProjectId;
                         pvListZoneObj.Icon = "folder";
@@ -322,6 +332,7 @@ namespace GSC.Respository.Etmf
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
                             pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
+                            pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
                             pvListSectionObj.Level = 5;
                             pvListSectionObj.ZoneId = d.Id;
                             pvListSectionObj.ParentMasterId = b.ProjectId;
@@ -333,6 +344,7 @@ namespace GSC.Respository.Etmf
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
+                                pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
                                 pvListArtificateObj.Level = 6;
 
                                 pvListArtificateObj.CountryId = 0;
@@ -386,13 +398,13 @@ namespace GSC.Respository.Etmf
                             }
                             #endregion
                             pvListSectionList.Add(pvListSectionObj);
-                            pvListSectionObj.Item = pvListArtificateList;
+                            pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
                         }
                         pvListZoneList.Add(pvListZoneObj);
-                        pvListZoneObj.Item = pvListSectionList;
+                        pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
                     }
 
-                    TrialFol.Item = pvListZoneList;
+                    TrialFol.Item = pvListZoneList.OrderBy(x => x.Number).ToList();
                 }
 
                 #endregion
@@ -604,6 +616,7 @@ namespace GSC.Respository.Etmf
     {
         public int Id { get; set; }
         public string Text { get; set; }
+        public string Number { get; set; }
         public List<TreeValue> Item { get; set; }
         public double Level { get; set; }
         public int ParentMasterId { get; set; }

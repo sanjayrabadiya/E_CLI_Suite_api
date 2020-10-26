@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -38,7 +38,8 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public ActionResult GetArtificateNamebySection(int SectionId)
         {
-            var result = _etmfArtificateMasterLbraryRepository.FindBy(x => x.EtmfSectionMasterLibraryId == SectionId);
+            var result = _etmfArtificateMasterLbraryRepository.FindBy(x => x.EtmfSectionMasterLibraryId == SectionId)
+                        .OrderBy(y => y.ArtificateNo).ToList();
             return Ok(result);
         }
 
