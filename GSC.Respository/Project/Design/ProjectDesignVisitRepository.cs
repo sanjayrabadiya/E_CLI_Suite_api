@@ -146,7 +146,7 @@ namespace GSC.Respository.Project.Design
 
         public IList<ProjectDesignVisitBasicDto> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId)
         {
-            return All.Where(x => x.DeletedDate == null && x.DeletedDate == null && x.ProjectDesignPeriodId == projectDesignPeriodId)
+            return All.Where(x => x.DeletedDate == null && x.DeletedDate == null && x.ProjectDesignPeriodId == projectDesignPeriodId && x.IsSchedule != true)
                 .Select(t => new ProjectDesignVisitBasicDto
                 {
                     Id = t.Id,

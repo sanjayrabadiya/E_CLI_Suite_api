@@ -31,6 +31,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateReviewRepository _screeningTemplateReviewRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
+        private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IUnitOfWork<GscContext> _uow;
 
         public ScreeningTemplateController(IScreeningTemplateRepository screeningTemplateRepository,
@@ -41,6 +42,7 @@ namespace GSC.Api.Controllers.Screening
             IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IProjectSubjectRepository projectSubjectRepository,
+            IScreeningVisitRepository screeningVisitRepository,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -53,6 +55,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateReviewRepository = screeningTemplateReviewRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
             _projectSubjectRepository = projectSubjectRepository;
+            _screeningVisitRepository = screeningVisitRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -99,7 +102,7 @@ namespace GSC.Api.Controllers.Screening
         [HttpPost("VisitRepeat/{projectDesignVisitId}/{screeningEntryId}")]
         public IActionResult VisitRepeat(int projectDesignVisitId, int screeningEntryId)
         {
-            _screeningTemplateRepository.VisitRepeat(projectDesignVisitId, screeningEntryId);
+            _screeningVisitRepository.VisitRepeat(projectDesignVisitId, screeningEntryId);
             if (_uow.Save() <= 0) throw new Exception("Visit Repeat failed on save.");
             return Ok();
         }
@@ -145,7 +148,7 @@ namespace GSC.Api.Controllers.Screening
         [Route("GetProjectDesignTemplate/{projectDesignTemplateId}")]
         public IActionResult GetProjectDesignTemplates([FromRoute] int projectDesignTemplateId)
         {
-           var designTemplate = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
+            var designTemplate = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
             return Ok(designTemplate);
         }
 
@@ -292,7 +295,7 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningTemplateReviewRepository.GetTemplateReviewHistory(id));
         }
 
-    
+
 
         [HttpPut]
         [Route("SubmitAttendanceTemplate/{id}")]

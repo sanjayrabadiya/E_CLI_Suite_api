@@ -393,38 +393,6 @@ namespace GSC.Respository.Screening
             return screeningTemplate;
         }
 
-
-
-        public void VisitRepeat(int projectDesignVisitId, int screeningEntryId)
-        {
-            //var repeatedCount = 0;
-            //var projectVisit = All.Where(x => x.ScreeningVisitId == projectDesignVisitId
-            //                                  && x.ScreeningVisit.ScreeningEntryId == screeningEntryId).ToList();
-            //if (projectVisit.Count > 0)
-            //    repeatedCount = projectVisit.Max(x => x.RepeatedVisit ?? 0);
-            //var templates = Context.ProjectDesignTemplate
-            //    .Where(t => t.DeletedDate == null && t.ProjectDesignVisitId == projectDesignVisitId).ToList();
-            //templates.ForEach(t =>
-            //{
-            //    var oldTemplate = Context.ScreeningTemplate.FirstOrDefault(r =>
-            //        r.ScreeningVisit.ScreeningEntryId == screeningEntryId &&
-            //        r.ScreeningVisitId == projectDesignVisitId && r.ProjectDesignTemplateId == t.Id);
-            //    Add(new ScreeningTemplate
-            //    {
-            //        ScreeningEntryId = screeningEntryId,
-            //        ProjectDesignTemplateId = t.Id,
-            //        EditCheckDetailId = oldTemplate != null ? oldTemplate.EditCheckDetailId : null,
-            //        RepeatedVisit = repeatedCount + 1,
-            //        ScreeningVisitId = t.ProjectDesignVisitId,
-            //        IsEditChecked = false,
-            //        IsDisable = false,
-            //        Status = ScreeningStatus.Pending
-            //    });
-            //});
-        }
-
-
-
         public IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
             var parentId = Context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
