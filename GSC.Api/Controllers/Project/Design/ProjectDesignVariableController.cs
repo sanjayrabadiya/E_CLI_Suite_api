@@ -111,7 +111,6 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(variable.Id);
         }
 
-
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
@@ -201,7 +200,6 @@ namespace GSC.Api.Controllers.Project.Design
                 _uow.Context.Remove(value);
         }
 
-
         // Merge with GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula} by vipul
         //[HttpGet]
         //[Route("GetVariabeAnnotationDropDown/{projectDesignTemplateId}")]
@@ -232,7 +230,6 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_projectDesignVariableRepository.GetVariabeAnnotationByDomainDropDown(domainId, projectId));
         }
 
-
         //Not Use in front please check and remove if not use comment  by vipul
         [HttpGet]
         [Route("GetTargetVariabeAnnotationDropDown/{projectDesignTemplateId}")]
@@ -241,15 +238,13 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_projectDesignVariableRepository.GetTargetVariabeAnnotationDropDown(projectDesignTemplateId));
         }
 
-        //Added method By Vipul 19022020 
-        // Merge with GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula} by vipul
-        //[HttpGet]
-        //[Route("GetVariabeAnnotationDropDownForProjectDesign/{projectDesignTemplateId}")]
-        //public IActionResult GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId)
-        //{
-        //    return Ok(
-        //        _projectDesignVariableRepository.GetVariabeAnnotationDropDownForProjectDesign(projectDesignTemplateId));
-        //}
+        [HttpGet]
+        [Route("GetVariabeAnnotationDropDownForProjectDesign/{projectDesignTemplateId}")]
+        public IActionResult GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId)
+        {
+            return Ok(
+                _projectDesignVariableRepository.GetVariabeAnnotationDropDownForProjectDesign(projectDesignTemplateId));
+        }
 
         [HttpGet]
         [Route("GetAnnotationDropDown/{projectDesignId}/{isFormula}")]
@@ -258,6 +253,7 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_projectDesignVariableRepository.GetAnnotationDropDown(projectDesignId, isFormula));
         }
 
+        // Not Use in front please check and remove if not use comment  by vipul
         [HttpGet]
         [Route("GetProjectDesignVariableValueDropDown/{projectDesignVariableId}")]
         public IActionResult GetProjectDesignVariableValueDropDown(int projectDesignVariableId)
@@ -267,7 +263,6 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         //Added method By Vipul 25062020
-
         [HttpGet]
         [Route("GetTargetVariabeAnnotationForScheduleDropDown/{projectDesignTemplateId}")]
         public IActionResult GetTargetVariabeAnnotationForScheduleDropDown(int projectDesignTemplateId)
