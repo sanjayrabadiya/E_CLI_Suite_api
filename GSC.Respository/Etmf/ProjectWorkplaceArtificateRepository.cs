@@ -43,7 +43,8 @@ namespace GSC.Respository.Etmf
                 {
                     ProjectWorkplaceArtificateId = y.Id,
                     EtmfArtificateMasterLbraryId = y.EtmfArtificateMasterLbraryId,
-                    FolderName = ((WorkPlaceFolder)y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                    FolderName = ((WorkPlaceFolder)y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription()
+                    + " - " + y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName,
                     ParentArtificateId = y.ParentArtificateId
                 }).ToList();
 

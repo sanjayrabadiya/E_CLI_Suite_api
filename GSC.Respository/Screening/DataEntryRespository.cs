@@ -50,8 +50,6 @@ namespace GSC.Respository.Screening
             _projectDesignRepository = projectDesignRepository;
         }
 
-
-
         public async Task<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
         {
             var result = new DataCaptureGridDto();
@@ -176,6 +174,7 @@ namespace GSC.Respository.Screening
                 r.MyQuery = r.Visit.Sum(x => x.MyQuery);
                 r.ReOpen = r.Visit.Sum(x => x.ReOpen);
                 r.Open = r.Visit.Sum(x => x.Open);
+                r.Answered = r.Visit.Sum(x => x.Answered);
                 r.Resolved = r.Visit.Sum(x => x.Resolved);
                 r.Closed = r.Visit.Sum(x => x.Closed);
                 r.SelfCorrection = r.Visit.Sum(x => x.SelfCorrection);
@@ -186,8 +185,6 @@ namespace GSC.Respository.Screening
                     Count = templates.Where(a => a.ScreeningEntryId == r.ScreeningEntryId && a.ReviewLevel == x.LevelNo).Sum(t => t.TotalTemplate)
                 }).ToList();
             });
-
-
 
             result.Data.AddRange(randomizationData);
             result.Data.AddRange(screeningData);
