@@ -334,7 +334,7 @@ namespace GSC.Api.Controllers.Etmf
                 document.ProjectArtificateDocumentReview.Select(x => { x.Id = 0; return x; }).ToList();
                 document.ProjectArtificateDocumentApprover.Select(x => { x.Id = 0; return x; }).ToList();
                 document.ProjectArtificateDocumentComment.Select(x => { x.Id = 0; return x; }).ToList();
-                document.ProjectArtificateDocumentHistory.Select(x => { x.Id = 0; return x; }).ToList();
+                document.ProjectArtificateDocumentHistory = null;
 
                 _projectWorkplaceArtificatedocumentRepository.Add(document);
                 _projectWorkplaceArtificateRepository.Update(ProjectArtificate);
