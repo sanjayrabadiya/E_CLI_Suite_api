@@ -34,6 +34,8 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
+
         public ProjectWorkplaceArtificateDocumentReviewController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
@@ -43,7 +45,8 @@ namespace GSC.Api.Controllers.Etmf
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
               IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser
+              IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser,
+              IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository
             )
         {
             _userRepository = userRepository;
@@ -57,6 +60,7 @@ namespace GSC.Api.Controllers.Etmf
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
         }
 
         [HttpGet]
@@ -85,16 +89,16 @@ namespace GSC.Api.Controllers.Etmf
             var projectArtificateDocumentReviewDto = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == id
             && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.DeletedDate == null).FirstOrDefault();
 
-            //foreach (var item in projectArtificateDocumentReviewList)
-            //{
             projectArtificateDocumentReviewDto.IsSendBack = true;
             projectArtificateDocumentReviewDto.SendBackDate = DateTime.UtcNow;
             var projectArtificateDocumentReview = _mapper.Map<ProjectArtificateDocumentReview>(projectArtificateDocumentReviewDto);
             _projectWorkplaceArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);
-            //}
 
             if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
             _projectWorkplaceArtificateDocumentReviewRepository.SendMailToSendBack(projectArtificateDocumentReview);
+
+            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(projectArtificateDocumentReviewDto.ProjectWorkplaceArtificatedDocumentId);
+            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, projectArtificateDocumentReviewDto.Id, null);
             return Ok();
         }
     }

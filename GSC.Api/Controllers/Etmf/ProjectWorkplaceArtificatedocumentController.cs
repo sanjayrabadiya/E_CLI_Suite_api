@@ -106,7 +106,7 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
 
             _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
-            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
+            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
             return Ok(projectWorkplaceArtificatedocument.Id);
 
         }
@@ -200,7 +200,7 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
 
-            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument);
+            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
 
             return Ok();
         }
@@ -343,6 +343,58 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Creating move document failed on save.");
 
             return Ok(firstSaved.Id);
+        }
+
+        [HttpPost]
+        [Route("GetDocumentForHistory/{id}")]
+        public IActionResult GetDocumentForHistory(int id)
+        {
+            var history = _projectArtificateDocumentHistoryRepository.Find(id);
+            var document = _projectWorkplaceArtificatedocumentRepository.Find(history.ProjectWorkplaceArtificateDocumentId);
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var FullPath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, history.DocumentName);
+            string path = FullPath;
+            if (!System.IO.File.Exists(path))
+                return null;
+            Stream stream = System.IO.File.OpenRead(path);
+            string json = ImportWordDocument(stream);
+            stream.Close();
+            return Ok(json);
+        }
+
+        [Route("GetEtmfZoneDropdown")]
+        [HttpGet]
+        public IActionResult GetEtmfZoneDropdown()
+        {
+            var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfZoneDropdown();
+            return Ok(data);
+        }
+
+        [Route("GetEtmfSectionDropdown/{zoneId}")]
+        [HttpGet]
+        public IActionResult GetEtmfSectionDropdown(int zoneId)
+        {
+            var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfSectionDropdown(zoneId);
+            return Ok(data);
+        }
+
+        [Route("GetEtmfArtificateDropdown/{sectionId}")]
+        [HttpGet]
+        public IActionResult GetEtmfArtificateDropdown(int sectionId)
+        {
+            var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfArtificateDropdown(sectionId);
+            return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("GetEtmfAuditLogReport")]
+        public IActionResult GetEtmfAuditLogReport([FromQuery] EtmfAuditLogReportSearchDto filters)
+        {
+            if (filters.projectId <= 0) return BadRequest();
+
+            var auditsDto = _projectWorkplaceArtificatedocumentRepository.GetEtmfAuditLogReport(filters);
+
+            return Ok(auditsDto);
         }
     }
 }

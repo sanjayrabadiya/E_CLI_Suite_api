@@ -108,11 +108,12 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id)
         {
-            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Include(x => x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
                 .Select(x => new ProjectArtificateDocumentApproverHistory
                 {
                     Id = x.Id,
-                    DocumentName = x.ProjectWorkplaceArtificatedDocument.DocumentName,
+                    DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
+                    ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
                     UserName = Context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                     UserId = x.UserId,
                     IsApproved = x.IsApproved,

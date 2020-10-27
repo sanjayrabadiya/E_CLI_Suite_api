@@ -10,6 +10,6 @@ namespace GSC.Respository.Etmf
 {
     public interface IProjectArtificateDocumentHistoryRepository : IGenericRepository<ProjectArtificateDocumentHistory>
     {
-        void AddHistory(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument);
+        void AddHistory(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument, int? ReviewId, int? ApproverId);
     }
 }

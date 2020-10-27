@@ -22,6 +22,7 @@ namespace GSC.Respository.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+
         public ProjectArtificateDocumentHistoryRepository(IUnitOfWork<GscContext> uow,
            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
            : base(uow, jwtTokenAccesser)
@@ -31,11 +32,13 @@ namespace GSC.Respository.Etmf
             _mapper = mapper;
         }
 
-        public void AddHistory(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument)
+        public void AddHistory(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument, int? ReviewId, int? ApproverId)
         {
-           var ProjectArtificateDocumentHistory = new ProjectArtificateDocumentHistory();
+            var ProjectArtificateDocumentHistory = new ProjectArtificateDocumentHistory();
             ProjectArtificateDocumentHistory.ProjectWorkplaceArtificateDocumentId = projectWorkplaceArtificatedocument.Id;
             ProjectArtificateDocumentHistory.DocumentName = projectWorkplaceArtificatedocument.DocumentName;
+            ProjectArtificateDocumentHistory.ProjectArtificateDocumentReviewId = ReviewId;
+            ProjectArtificateDocumentHistory.ProjectArtificateDocumentApproverId = ApproverId;
 
             Add(ProjectArtificateDocumentHistory);
             _uow.Save();

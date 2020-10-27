@@ -22,6 +22,7 @@ namespace GSC.Data.Dto.Etmf
     public class ProjectArtificateDocumentReviewHistory : BaseAuditDto
     {
         public int ProjectWorkplaceArtificatedDocumentId { get; set; }
+        public int ProjectArtificateDocumentHistoryId { get; set; }
         public int UserId { get; set; }
         public int RoleId { get; set; }
         public bool IsSendBack { get; set; }

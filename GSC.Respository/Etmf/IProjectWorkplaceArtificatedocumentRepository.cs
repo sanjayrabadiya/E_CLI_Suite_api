@@ -1,5 +1,6 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using System;
 using System.Collections.Generic;
@@ -17,5 +18,9 @@ namespace GSC.Respository.Etmf
         string Duplicate(ProjectWorkplaceArtificatedocument objSave, ProjectWorkplaceArtificatedocumentDto objSaveDto);
         ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto);
         ProjectWorkplaceArtificatedocument AddMovedDocument(WorkplaceFolderDto item);
+        List<DropDownDto> GetEtmfZoneDropdown();
+        List<DropDownDto> GetEtmfSectionDropdown(int zoneId);
+        List<DropDownDto> GetEtmfArtificateDropdown(int sectionId);
+        IList<EtmfAuditLogReportDto> GetEtmfAuditLogReport(EtmfAuditLogReportSearchDto filters);
     }
 }

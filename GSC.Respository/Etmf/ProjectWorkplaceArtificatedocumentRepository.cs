@@ -28,12 +28,16 @@ namespace GSC.Respository.Etmf
         private readonly IUserRepository _userRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IProjectRepository _projectRepository;
+        private readonly IEtmfZoneMasterLibraryRepository _etmfZoneMasterLibraryRepository;
+        private readonly IEtmfSectionMasterLibraryRepository _etmfSectionMasterLibraryRepository;
         public ProjectWorkplaceArtificatedocumentRepository(IUnitOfWork<GscContext> uow,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
            IUserRepository userRepository,
            IMapper mapper,
            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-           IProjectRepository projectRepository
+           IProjectRepository projectRepository,
+           IEtmfZoneMasterLibraryRepository etmfZoneMasterLibraryRepository,
+           IEtmfSectionMasterLibraryRepository etmfSectionMasterLibraryRepository
            )
            : base(uow, jwtTokenAccesser)
         {
@@ -44,6 +48,8 @@ namespace GSC.Respository.Etmf
             _userRepository = userRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _projectRepository = projectRepository;
+            _etmfSectionMasterLibraryRepository = etmfSectionMasterLibraryRepository;
+            _etmfZoneMasterLibraryRepository = etmfZoneMasterLibraryRepository;
         }
 
         public int deleteFile(int id)
@@ -226,6 +232,217 @@ namespace GSC.Respository.Etmf
                .AsNoTracking().FirstOrDefault();
 
             return document;
+        }
+
+        public List<DropDownDto> GetEtmfZoneDropdown()
+        {
+            return _etmfZoneMasterLibraryRepository.FindBy(x => x.DeletedDate == null)
+               .Select(c => new DropDownDto { Id = c.Id, Value = c.ZonName }).OrderBy(o => o.Value)
+               .ToList();
+        }
+
+        public List<DropDownDto> GetEtmfSectionDropdown(int zoneId)
+        {
+            return _etmfSectionMasterLibraryRepository.FindBy(x => x.EtmfZoneMasterLibraryId == zoneId && x.DeletedDate == null)
+               .Select(c => new DropDownDto { Id = c.Id, Value = c.SectionName }).OrderBy(o => o.Value)
+               .ToList();
+        }
+
+        public List<DropDownDto> GetEtmfArtificateDropdown(int sectionId)
+        {
+            return _etmfArtificateMasterLbraryRepository.FindBy(x => x.EtmfSectionMasterLibraryId == sectionId && x.DeletedDate == null)
+               .Select(c => new DropDownDto { Id = c.Id, Value = c.ArtificateName }).OrderBy(o => o.Value)
+               .ToList();
+        }
+
+        public IList<EtmfAuditLogReportDto> GetEtmfAuditLogReport(EtmfAuditLogReportSearchDto filters)
+        {
+            var workplace = Context.ProjectWorkplace.Where(x => x.ProjectId == filters.projectId).ToList().FirstOrDefault();
+            var workplacedetail = new List<int>();
+            if (filters.folderId != null)
+            {
+                workplacedetail = Context.ProjectWorkplaceDetail.Where(x => x.ProjectWorkplaceId == workplace.Id && x.WorkPlaceFolderId == filters.folderId).Select(y => y.Id).ToList();
+            }
+            else
+            {
+                workplacedetail = Context.ProjectWorkplaceDetail.Where(x => x.ProjectWorkplaceId == workplace.Id).Select(y => y.Id).ToList();
+            }
+            var workplacezone = new List<int>();
+            if (filters.zoneId != null)
+            {
+                workplacezone = Context.ProjectWorkPlaceZone.Where(x => x.EtmfZoneMasterLibraryId == filters.zoneId && workplacedetail.Contains(x.ProjectWorkplaceDetailId)).Select(y => y.Id).ToList();
+            }
+            else
+            {
+                workplacezone = Context.ProjectWorkPlaceZone.Where(x => workplacedetail.Contains(x.ProjectWorkplaceDetailId)).Select(y => y.Id).ToList();
+            }
+            var workplacesection = new List<int>();
+            if (filters.sectionId != null)
+            {
+                workplacesection = Context.ProjectWorkplaceSection.Where(x => x.EtmfSectionMasterLibraryId == filters.sectionId && workplacezone.Contains(x.ProjectWorkPlaceZoneId)).Select(y => y.Id).ToList();
+            }
+            else
+            {
+                workplacesection = Context.ProjectWorkplaceSection.Where(x => workplacezone.Contains(x.ProjectWorkPlaceZoneId)).Select(y => y.Id).ToList();
+            }
+            var workplaceartificate = new List<int>();
+            if (filters.artificateId != null)
+            {
+                workplaceartificate = Context.ProjectWorkplaceArtificate.Where(x => x.EtmfArtificateMasterLbraryId == filters.artificateId && workplacesection.Contains(x.ProjectWorkplaceSectionId)).Select(y => y.Id).ToList();
+            }
+            else
+            {
+                workplaceartificate = Context.ProjectWorkplaceArtificate.Where(x => workplacesection.Contains(x.ProjectWorkplaceSectionId)).Select(y => y.Id).ToList();
+            }
+            var workplaceartificatedocument = new List<int>();
+            workplaceartificatedocument = FindByInclude(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).Select(y => y.Id).ToList();
+
+            var projectWorkplaceArtificatedocuments = All.Include(x => x.ProjectWorkplaceArtificate).
+                ThenInclude(x => x.EtmfArtificateMasterLbrary).
+                Include(x => x.ProjectWorkplaceArtificate).
+                ThenInclude(x => x.ProjectWorkplaceSection).
+                ThenInclude(x => x.ProjectWorkPlaceZone).
+                ThenInclude(x => x.ProjectWorkplaceDetail).
+                ThenInclude(x => x.ProjectWorkplace).
+                ThenInclude(x => x.Project).
+                Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.EtmfSectionMasterLibrary).
+                Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.EtmfZoneMasterLibrary)
+                .Where(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).ToList();
+            var projectWorkplaceArtificatedocumentreviews = Context.ProjectArtificateDocumentReview.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
+            var projectWorkplaceArtificatedocumentapprover = Context.ProjectArtificateDocumentApprover.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
+
+            var cretaedData = projectWorkplaceArtificatedocuments.Select(r => new EtmfAuditLogReportDto
+            {
+                projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                folderName = ((WorkPlaceFolder)r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                zoneName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                sectionName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                artificateName = r.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
+                documentName = r.DocumentName,
+                version = r.Version,
+                status = ((ArtifactDocStatusType)r.Status).GetDescription(),
+                action = "Created",
+                userName = _userRepository.Find((int)r.CreatedBy).UserName,
+                actionDate = r.CreatedDate
+            }).ToList();
+
+            var sendData = (from doc in projectWorkplaceArtificatedocuments
+                            join review in projectWorkplaceArtificatedocumentreviews on doc.Id equals review.ProjectWorkplaceArtificatedDocumentId
+                            select new EtmfAuditLogReportDto
+                            {
+                                projectCode = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                                folderName = ((WorkPlaceFolder)doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                                zoneName = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                                sectionName = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                                artificateName = doc.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
+                                documentName = doc.DocumentName,
+                                version = doc.Version,
+                                status = ((ArtifactDocStatusType)doc.Status).GetDescription(),
+                                action = "Send",
+                                userName = _userRepository.Find((int)review.UserId).UserName,
+                                actionDate = review.CreatedDate
+                            }).ToList();
+
+            var sendBackData = (from doc in projectWorkplaceArtificatedocuments
+                                join review in projectWorkplaceArtificatedocumentreviews on doc.Id equals review.ProjectWorkplaceArtificatedDocumentId
+                                where review.IsSendBack == true
+                                select new EtmfAuditLogReportDto
+                                {
+                                    projectCode = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                                    folderName = ((WorkPlaceFolder)doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                                    zoneName = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                                    sectionName = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                                    artificateName = doc.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
+                                    documentName = doc.DocumentName,
+                                    version = doc.Version,
+                                    status = ((ArtifactDocStatusType)doc.Status).GetDescription(),
+                                    action = "Send Back",
+                                    userName = _userRepository.Find((int)review.UserId).UserName,
+                                    actionDate = review.SendBackDate
+                                }).ToList();
+
+            var sendforApproveData = (from doc in projectWorkplaceArtificatedocuments
+                                      join approve in projectWorkplaceArtificatedocumentapprover on doc.Id equals approve.ProjectWorkplaceArtificatedDocumentId
+                                      select new EtmfAuditLogReportDto
+                                      {
+                                          projectCode = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                                          folderName = ((WorkPlaceFolder)doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                                          zoneName = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                                          sectionName = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                                          artificateName = doc.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
+                                          documentName = doc.DocumentName,
+                                          version = doc.Version,
+                                          status = ((ArtifactDocStatusType)doc.Status).GetDescription(),
+                                          action = "Send for Approve",
+                                          userName = _userRepository.Find((int)approve.UserId).UserName,
+                                          actionDate = approve.CreatedDate
+                                      }).ToList();
+
+            var ApprovedData = (from doc in projectWorkplaceArtificatedocuments
+                                join approve in projectWorkplaceArtificatedocumentapprover on doc.Id equals approve.ProjectWorkplaceArtificatedDocumentId
+                                where approve.IsApproved != null
+                                select new EtmfAuditLogReportDto
+                                {
+                                    projectCode = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                                    folderName = ((WorkPlaceFolder)doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                                    zoneName = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                                    sectionName = doc.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                                    artificateName = doc.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
+                                    documentName = doc.DocumentName,
+                                    version = doc.Version,
+                                    status = ((ArtifactDocStatusType)doc.Status).GetDescription(),
+                                    action = approve.IsApproved == true ? "Approved" : "Rejected",
+                                    userName = _userRepository.Find((int)approve.UserId).UserName,
+                                    actionDate = approve.ModifiedDate
+                                }).ToList();
+
+
+            var deletedData = projectWorkplaceArtificatedocuments.Where(x => x.DeletedDate != null).Select(r => new EtmfAuditLogReportDto
+            {
+                projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                folderName = ((WorkPlaceFolder)r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                zoneName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                sectionName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                artificateName = r.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
+                documentName = r.DocumentName,
+                version = r.Version,
+                status = ((ArtifactDocStatusType)r.Status).GetDescription(),
+                action = "Delete",
+                userName = _userRepository.Find((int)r.DeletedBy).UserName,
+                actionDate = r.DeletedDate
+            }).ToList();
+
+            var supersededata = projectWorkplaceArtificatedocuments.Where(x => x.ParentDocumentId != null).Select(r => new EtmfAuditLogReportDto
+            {
+                projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                folderName = ((WorkPlaceFolder)r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                zoneName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                sectionName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                artificateName = r.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
+                documentName = r.DocumentName,
+                version = r.Version,
+                status = ((ArtifactDocStatusType)r.Status).GetDescription(),
+                action = "Supersede",
+                userName = _userRepository.Find((int)r.CreatedBy).UserName,
+                actionDate = r.ModifiedDate
+            }).ToList();
+
+            var finaldata = projectWorkplaceArtificatedocuments.Where(x => x.Status == ArtifactDocStatusType.Final).Select(r => new EtmfAuditLogReportDto
+            {
+                projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                folderName = ((WorkPlaceFolder)r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                zoneName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                sectionName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                artificateName = r.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
+                documentName = r.DocumentName,
+                version = r.Version,
+                status = ((ArtifactDocStatusType)r.Status).GetDescription(),
+                action = "Final",
+                userName = _userRepository.Find((int)r.CreatedBy).UserName,
+                actionDate = r.ModifiedDate
+            }).ToList();
+
+            return cretaedData.Union(sendData).Union(sendBackData).Union(sendforApproveData).Union(ApprovedData).Union(deletedData).Union(supersededata).Union(finaldata).OrderBy(x => x.actionDate).ToList();
         }
     }
 }

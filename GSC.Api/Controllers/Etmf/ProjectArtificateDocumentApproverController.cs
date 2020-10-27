@@ -28,13 +28,16 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
+        private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
+
         public ProjectArtificateDocumentApproverController(IProjectRepository projectRepository,
             IUnitOfWork<GscContext> uow,
             IMapper mapper,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IUploadSettingRepository uploadSettingRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
-            IJwtTokenAccesser jwtTokenAccesser
+            IJwtTokenAccesser jwtTokenAccesser,
+            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository
            )
         {
             _uow = uow;
@@ -43,6 +46,8 @@ namespace GSC.Api.Controllers.Etmf
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
+            _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
+
         }
 
         [HttpPost]
@@ -58,6 +63,10 @@ namespace GSC.Api.Controllers.Etmf
 
             _projectArtificateDocumentApproverRepository.SendMailForApprover(ProjectArtificateDocumentApproverDto);
             _projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId, false);
+
+            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApprover.ProjectWorkplaceArtificatedDocumentId);
+            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, ProjectArtificateDocumentApprover.Id);
+
             return Ok(ProjectArtificateDocumentApprover.Id);
         }
 
@@ -73,22 +82,28 @@ namespace GSC.Api.Controllers.Etmf
         [Route("ApproveDocument/{DocApprover}/{Id}")]
         public IActionResult ApproveDocument(bool DocApprover, int Id)
         {
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var ProjectArtificateDocumentApproverDto = _projectArtificateDocumentApproverRepository.FindByInclude(x => x.UserId == _jwtTokenAccesser.UserId
             && x.ProjectWorkplaceArtificatedDocumentId == Id && x.IsApproved == null).FirstOrDefault();
 
             var ProjectArtificateDocumentApprover = _mapper.Map<ProjectArtificateDocumentApprover>(ProjectArtificateDocumentApproverDto);
-            ProjectArtificateDocumentApprover.IsApproved = DocApprover ?  true : false;
+            ProjectArtificateDocumentApprover.IsApproved = DocApprover ? true : false;
             _projectArtificateDocumentApproverRepository.Update(ProjectArtificateDocumentApprover);
             if (_uow.Save() <= 0) throw new Exception("Updating Approver failed on save.");
 
             var DocumentApprover = _projectArtificateDocumentApproverRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == Id
-            && x.DeletedDate == null && (x.IsApproved == null || x.IsApproved == true)).ToList();
+            && x.DeletedDate == null).OrderByDescending(x => x.Id).GroupBy(x => x.UserId).Select(x => new ProjectArtificateDocumentApprover
+            {
+                Id = x.FirstOrDefault().Id,
+                IsApproved = x.FirstOrDefault().IsApproved,
+                ProjectWorkplaceArtificatedDocumentId = x.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId
+              }).ToList();
 
-            if (DocumentApprover.All(x => x.IsApproved == true)) {
+            if (DocumentApprover.All(x => x.IsApproved == true))
+            {
                 _projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(Id, true);
             }
-            //_projectArtificateDocumentApproverRepository.SendMailForApprover(ProjectArtificateDocumentApproverDto);
+
             return Ok(ProjectArtificateDocumentApprover.Id);
         }
 

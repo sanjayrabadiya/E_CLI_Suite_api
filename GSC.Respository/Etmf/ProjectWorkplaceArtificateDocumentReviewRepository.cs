@@ -28,12 +28,16 @@ namespace GSC.Respository.Etmf
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
+        private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
+
         public ProjectWorkplaceArtificateDocumentReviewRepository(IUnitOfWork<GscContext> uow,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
             IEmailSenderRespository emailSenderRespository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+              IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository
+            )
            : base(uow, jwtTokenAccesser)
         {
             _uploadSettingRepository = uploadSettingRepository;
@@ -43,6 +47,7 @@ namespace GSC.Respository.Etmf
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;
+            _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
         }
 
         public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id)
@@ -72,6 +77,9 @@ namespace GSC.Respository.Etmf
                     if (_uow.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
                     SendMailToReviewer(ReviewDto);
+
+                    var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(ReviewDto.ProjectWorkplaceArtificatedDocumentId);
+                    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, All.Max(p => p.Id), null);
                 }
         }
 
@@ -117,12 +125,13 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id)
         {
-            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x=>x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
                         && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy)
                 .Select(x => new ProjectArtificateDocumentReviewHistory
                 {
                     Id = x.Id,
-                    DocumentName = x.ProjectWorkplaceArtificatedDocument.DocumentName,
+                    DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
+                    ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().Id,
                     UserName = Context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                     //UserName = _userRepository.Find(x.UserId).UserName,
                     IsSendBack = x.IsSendBack,
