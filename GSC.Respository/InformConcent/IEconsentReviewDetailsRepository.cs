@@ -16,7 +16,7 @@ namespace GSC.Respository.InformConcent
         IList<DropDownDto> GetPatientDropdown(int projectid);
         List<EconsentReviewDetailsDto> GetUnApprovedEconsentDocumentList(int patientid);
         List<EconsentReviewDetailsDto> GetApprovedEconsentDocumentList(int projectid);
-        List<SectionsHeader> GetEconsentDocumentHeaders(int patientId);
+        List<SectionsHeader> GetEconsentDocumentHeaders();
         List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId);
         string ImportSectionData(int id, int sectionno);
         string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails);

@@ -2,6 +2,7 @@
 using System.Reflection;
 using AutoMapper;
 using GSC.Api.Helpers;
+using GSC.Api.Hubs;
 using GSC.Audit;
 using GSC.Data.Dto.UserMgt;
 using GSC.Domain.Context;
@@ -48,6 +49,7 @@ namespace GSC.Api
             services.AddDependencyInjection(_configuration);
             services.AddAutoMapper(Assembly.GetAssembly(typeof(AutoMapperConfiguration)));
             services.AddScoped<AllowedSafeCallerFilter>();
+            
             services.AddControllers(options =>
             {
                 options.EnableEndpointRouting = false;
@@ -74,7 +76,14 @@ namespace GSC.Api
             app.UseExceptionHandler(ErrorHandler.HttpExceptionHandling(env));
             app.UseAuthentication();
             app.UseMiddleware<LogMiddleware>();
-            app.UseCors("AllowCorsPolicy");
+            //app.UseCors("AllowCorsPolicy");
+            app.UseCors(builder =>
+            {
+                //new[] { "http://localhost:4200",
+                //                            "https://dev2.clinvigilant.com" }
+                builder.WithOrigins("http://localhost:4200")
+                .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+            });
             app.UseStaticFiles();
             var doc = _configuration["DocPath:DocDir"];
 
@@ -96,7 +105,11 @@ namespace GSC.Api
 
             app.UseRouting();
             app.UseAuthorization();
-            app.UseEndpoints(e => e.MapControllers());
+            app.UseEndpoints(e => 
+            {
+                e.MapControllers();
+                e.MapHub<MessageHub>("/MessageHub");
+            });
             app.UseSpa(spa => { spa.Options.SourcePath = "wwwroot"; });
         }
 

@@ -41,6 +41,7 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IProjectRepository _projectRepository;
         private readonly IInvestigatorContactRepository _investigatorContactRepository;
         private readonly IRandomizationRepository _randomizationRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public EconsentReviewDetailsController(IUnitOfWork<GscContext> uow,
             IMapper mapper,
@@ -49,7 +50,8 @@ namespace GSC.Api.Controllers.InformConcent
             IEmailSenderRespository emailSenderRespository,
             IProjectRepository projectRepository,
             IInvestigatorContactRepository investigatorContactRepository,
-            IRandomizationRepository randomizationRepository)
+            IRandomizationRepository randomizationRepository,
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _uow = uow;
             _mapper = mapper;
@@ -60,14 +62,15 @@ namespace GSC.Api.Controllers.InformConcent
             _projectRepository = projectRepository;
             _investigatorContactRepository = investigatorContactRepository;
             _randomizationRepository = randomizationRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
             
         }
 
         [HttpGet]
-        [Route("GetEconsentDocumentHeaders/{patientId}")]
-        public IActionResult GetEconsentDocumentHeaders(int patientId)
+        [Route("GetEconsentDocumentHeaders")]
+        public IActionResult GetEconsentDocumentHeaders()
         {
-            var sectionsHeaders = _econsentReviewDetailsRepository.GetEconsentDocumentHeaders(patientId);
+            var sectionsHeaders = _econsentReviewDetailsRepository.GetEconsentDocumentHeaders();
             return Ok(sectionsHeaders);
         }
 
@@ -92,7 +95,8 @@ namespace GSC.Api.Controllers.InformConcent
         public IActionResult Post([FromBody] EconsentReviewDetailsDto econsentReviewDetailsDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
+            var randomizationId = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault().Id;
+            econsentReviewDetailsDto.AttendanceId = randomizationId;
             var econsentReviewDetail = _mapper.Map<EconsentReviewDetails>(econsentReviewDetailsDto);
             econsentReviewDetail.patientapproveddatetime = DateTime.Now;
             var validate = _econsentReviewDetailsRepository.Duplicate(econsentReviewDetailsDto);
@@ -277,9 +281,7 @@ namespace GSC.Api.Controllers.InformConcent
             var econsentReviewDetails = _econsentReviewDetailsRepository.Find(econsentReviewDetailsDto.Id);
             econsentReviewDetails.IsApprovedByInvestigator = true;
             econsentReviewDetails.investigatorapproveddatetime = DateTime.Now;
-
             
-
             string filePath = string.Empty;
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();

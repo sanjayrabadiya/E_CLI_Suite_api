@@ -51,6 +51,7 @@ namespace GSC.Data.Dto.Attendance
         public int ParentProjectId { get; set; }
         public int? CompanyId { get; set; }
         public bool IsLocked { get; set; }
+        public int? UserId { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto

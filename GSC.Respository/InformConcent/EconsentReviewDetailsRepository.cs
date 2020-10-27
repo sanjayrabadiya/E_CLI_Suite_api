@@ -25,6 +25,8 @@ using GSC.Data.Dto.Etmf;
 using Syncfusion.EJ2.DocumentEditor;
 using System.Security.Cryptography.X509Certificates;
 using GSC.Respository.UserMgt;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace GSC.Respository.InformConcent
 {
@@ -119,11 +121,12 @@ namespace GSC.Respository.InformConcent
             return data;
         }
 
-        public List<SectionsHeader> GetEconsentDocumentHeaders(int patientId)
+        public List<SectionsHeader> GetEconsentDocumentHeaders()
         {
-            var noneregister = Context.Randomization.Where(x => x.Id == patientId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(patientId);
-                                                                                                           
-            var econsentReviewDetails = FindByInclude(x => x.AttendanceId == patientId).ToList();
+            //var noneregister = Context.Randomization.Where(x => x.Id == patientId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(patientId);
+            var noneregister = Context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(patientId);
+            if (noneregister == null) return new List<SectionsHeader>();                                                      
+            var econsentReviewDetails = FindBy(x => x.AttendanceId == noneregister.Id).ToList();
             var Edocuments = Context.EconsentSetup.Where(x => x.ProjectId == noneregister.ProjectId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
 
             var Econsentdocuments = (from econsentsetups in Edocuments
@@ -241,10 +244,8 @@ namespace GSC.Respository.InformConcent
             }
             return sectionsHeaders;
         }
-
         public string ImportSectionData(int id, int sectionno)
         {
-
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var Econsentdocument = _econsentSetupRepository.Find(id);
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
@@ -289,7 +290,6 @@ namespace GSC.Respository.InformConcent
                 }
             }
 
-            
             string jsonnew = JsonConvert.SerializeObject(jsonobj,Formatting.None, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
@@ -338,7 +338,14 @@ namespace GSC.Respository.InformConcent
             var jsonObj = JObject.Parse(json);
             string sign = File.ReadAllText("signaturefooterblock.json");
             string sign2 = sign;
-            int randomizationId = econsentreviewdetails.AttendanceId;
+            int randomizationId;
+            if (econsentreviewdetails.AttendanceId == 0)
+            {
+                randomizationId = Context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault().Id;
+            } else
+            {
+                 randomizationId = econsentreviewdetails.AttendanceId;
+            }
             var randomization = Context.Randomization.Where(x => x.Id == randomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
             //string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, randomization.SignaturePath);
             if (econsentreviewdetails.IsReviewedByPatient == true)
@@ -387,7 +394,7 @@ namespace GSC.Respository.InformConcent
                           join childproject in Context.Project.Where(x => x.ParentProjectId != null) on project.Id equals childproject.ParentProjectId
                           join econsentsetups in Context.EconsentSetup on childproject.Id equals econsentsetups.ProjectId
                          join EconsentReviewDetails in Context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsApprovedByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentDocumentId
-                         join nonregister in Context.Randomization.Where(x => x.DeletedDate == null && x.Id == 7) on EconsentReviewDetails.AttendanceId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
+                         join nonregister in Context.Randomization.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
                                                                                                                                                                  //join attendance in Context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
 
              select new DashboardDto

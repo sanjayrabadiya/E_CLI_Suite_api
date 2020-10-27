@@ -14,6 +14,7 @@ namespace GSC.Data.Dto.InformConcent
         public EconsentSetupDto()
         {
             PatientStatus = new List<EconsentSetupPatientStatus>();
+            Roles = new List<EconsentSetupRoles>();
         }
         //public int Id { get; set; }
         public int ProjectId { get; set; }
@@ -33,6 +34,7 @@ namespace GSC.Data.Dto.InformConcent
         public string ProjectName { get; set; }
         public FileModel FileModel { get; set; }
         public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
+        public List<EconsentSetupRoles> Roles { get; set; }
     }
 
     public class SaveFileDto

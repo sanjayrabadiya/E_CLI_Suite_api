@@ -1,5 +1,7 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.InformConcent;
 using System;
+using System.Collections.Generic;
 
 namespace GSC.Data.Dto.InformConcent
 {
@@ -24,5 +26,6 @@ namespace GSC.Data.Dto.InformConcent
         //public string? investigatordigitalSignBase64 { get; set; }
         public string? patientdigitalSignImagepath { get; set; }
         //public string? investigatordigitalSignImagepath { get; set; }
+        public List<EconsentReviewDetailsSectionsDto> EconsentReviewDetailsSections { get; set; }
     }
 }

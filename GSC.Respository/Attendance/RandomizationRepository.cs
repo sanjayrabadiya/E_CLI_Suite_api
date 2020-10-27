@@ -13,6 +13,7 @@ using GSC.Respository.EmailSender;
 using GSC.Respository.InformConcent;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Respository.ProjectRight;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
 using System;
@@ -38,6 +39,8 @@ namespace GSC.Respository.Attendance
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IProjectRepository _projectRepository;
         private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectRightRepository _projectRightRepository;
         public RandomizationRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -51,7 +54,8 @@ namespace GSC.Respository.Attendance
              IPatientStatusRepository patientStatusRepository,
              IEmailSenderRespository emailSenderRespository,
             IProjectRepository projectRepository,
-            IEconsentReviewDetailsRepository econsentReviewDetailsRepository)
+            IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
+            IProjectRightRepository projectRightRepository)
             : base(uow, jwtTokenAccesser)
         {
             _userRepository = userRepository;
@@ -68,6 +72,8 @@ namespace GSC.Respository.Attendance
             _projectRepository = projectRepository;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _uow = uow;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _projectRightRepository = projectRightRepository;
         }
 
         public void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto)
@@ -83,24 +89,43 @@ namespace GSC.Respository.Attendance
         public List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted)
         {
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
-                   ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            //result.ForEach(x => x.PatientStatusName = x.PatientStatusId.GetDescription());
+                  ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).ToList();
             result.ForEach(x => {
                 x.PatientStatusName = x.PatientStatusId == null ? "" : _patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
-                x.IsShowEconsentIcon = _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true).ToList().Count > 0 ? true : false;
-                if (x.IsShowEconsentIcon == true)
+                if (projectright.Count > 0)
                 {
-                    var EconsentReviewDetails = _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true).ToList();
-                    x.EconsentReviewDetails = _mapper.Map<List<EconsentReviewDetailsDto>>(EconsentReviewDetails);
-                    x.EconsentReviewDetails.ForEach(a => {
-                        a.EconsentDocumentName = Context.EconsentSetup.Where(t => t.Id == a.EconsentDocumentId).ToList().FirstOrDefault().DocumentName;
-                    });
-                    x.IsEconsentReviewPending = _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true && t.IsApprovedByInvestigator == false).ToList().Count > 0 ? true : false;
-                    x.IsmultipleEconsentReviewDetails = _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true).ToList().Count > 1 ? true : false;
+                    var EconsentReviewDetails = (from econsentreviewdetails in _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true).ToList()
+                                                 join econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == projectId && x.DeletedDate == null) on econsentreviewdetails.EconsentDocumentId equals econsentsetups.Id
+                                                 join roles in _context.EconsentSetupRoles.Where(a => a.RoleId == _jwtTokenAccesser.RoleId && a.DeletedDate == null) on econsentsetups.Id equals roles.EconsentDocumentId
+                                                 select new EconsentReviewDetailsDto
+                                                 {
+                                                     Id = econsentreviewdetails.Id,
+                                                     EconsentDocumentName = econsentsetups.DocumentName,
+                                                     IsApprovedByInvestigator = econsentreviewdetails.IsApprovedByInvestigator,
+                                                     IsReviewedByPatient = econsentreviewdetails.IsReviewedByPatient,
+                                                     AttendanceId = x.Id,
+                                                     EconsentDocumentId = econsentsetups.Id,
+                                                     patientdigitalSignImagepath = econsentreviewdetails.patientdigitalSignImagepath,
+                                                     pdfpath = econsentreviewdetails.pdfpath,
+                                                     ApprovedByRoleId = econsentreviewdetails.ApprovedByRoleId
+                                                 }
+                                            ).ToList();
+                    if (EconsentReviewDetails.Count > 0)
+                    {
+                        x.IsShowEconsentIcon = true;
+                        x.EconsentReviewDetails = EconsentReviewDetails;
+                        x.IsEconsentReviewPending = EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true && t.IsApprovedByInvestigator == false).ToList().Count > 0 ? true : false;
+                        x.IsmultipleEconsentReviewDetails = EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true).ToList().Count > 1 ? true : false;
+                    }
+                    else
+                    {
+                        x.IsShowEconsentIcon = false;
+                    }
                 }
                 else
                 {
-                    x.IsEconsentReviewPending = false;
+                    x.IsShowEconsentIcon = false;
                 }
             });
             return result;
@@ -137,10 +162,11 @@ namespace GSC.Respository.Attendance
             }
         }
 
-        public void ChangeStatustoConsentInProgress(int id)
+
+        public void ChangeStatustoConsentInProgress()
         {
 
-            var randomization = Find(id);
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
             if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening || randomization.PatientStatusId == ScreeningPatientStatus.Screening)
             {
                 var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == randomization.ProjectId && x.LanguageId == randomization.LanguageId && x.DeletedDate == null)
@@ -153,7 +179,7 @@ namespace GSC.Respository.Attendance
                 for (var i = 0; i < Econsentdocuments.Count; i++)
                 {
                     EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
-                    econsentReviewDetails.AttendanceId = id;
+                    econsentReviewDetails.AttendanceId = randomization.Id;
                     econsentReviewDetails.EconsentDocumentId = Econsentdocuments[i].Id;
                     econsentReviewDetails.IsReviewedByPatient = false;
                     _econsentReviewDetailsRepository.Add(econsentReviewDetails);

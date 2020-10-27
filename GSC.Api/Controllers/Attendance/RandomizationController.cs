@@ -171,10 +171,10 @@ namespace GSC.Api.Controllers.Attendance
         }
 
         [HttpPut]
-        [Route("ChangeStatustoConsentInProgress/{id}")]
-        public IActionResult ChangeStatustoConsentInProgress(int id)
+        [Route("ChangeStatustoConsentInProgress")]
+        public IActionResult ChangeStatustoConsentInProgress()
         {
-            _randomizationRepository.ChangeStatustoConsentInProgress(id);
+            _randomizationRepository.ChangeStatustoConsentInProgress();
             _uow.Save();
             //if (_uow.Save() <= 0) throw new Exception("Updating status failed on save.");
             return Ok();

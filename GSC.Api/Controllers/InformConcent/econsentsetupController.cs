@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
@@ -41,6 +42,7 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
+        private readonly IEconsentSetupRolesRepository _econsentSetupRolesRepository;
 
         public econsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
@@ -54,7 +56,8 @@ namespace GSC.Api.Controllers.InformConcent
             IEmailSenderRespository emailSenderRespository,
             IEconsentSetupPatientStatusRepository econsentSetupPatientStatusRepository,
             IRandomizationRepository randomizationRepository,
-            IEconsentReviewDetailsRepository econsentReviewDetailsRepository)
+            IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
+            IEconsentSetupRolesRepository econsentSetupRolesRepository)
         {
             _econsentSetupRepository = econsentSetupRepository;
             _uow = uow;
@@ -69,6 +72,7 @@ namespace GSC.Api.Controllers.InformConcent
             _emailSenderRespository = emailSenderRespository;
             _randomizationRepository = randomizationRepository;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
+            _econsentSetupRolesRepository = econsentSetupRolesRepository;
         }
 
 
@@ -98,10 +102,12 @@ namespace GSC.Api.Controllers.InformConcent
             {
                 return BadRequest();
             }
-            var econsentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id, x => x.PatientStatus).FirstOrDefault();
+            var econsentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id, x => x.PatientStatus, x => x.Roles).FirstOrDefault();
             var econsentSetupDto = _mapper.Map<EconsentSetupDto>(econsentSetup);
             if (econsentSetupDto != null && econsentSetupDto.PatientStatus != null)
                 econsentSetupDto.PatientStatus = econsentSetupDto.PatientStatus.Where(x => x.DeletedDate == null).ToList();
+            if (econsentSetupDto != null && econsentSetupDto.Roles != null)
+                econsentSetupDto.Roles = econsentSetupDto.Roles.Where(x => x.DeletedDate == null).ToList();
             return Ok(econsentSetupDto);
         }
 
@@ -133,6 +139,7 @@ namespace GSC.Api.Controllers.InformConcent
             econsentSetupDto.LanguageId = record.LanguageId;
             econsentSetupDto.Version = record.Version;
             econsentSetupDto.PatientStatus = record.PatientStatus;
+            econsentSetupDto.Roles = record.Roles;
 
             var validate = _econsentSetupRepository.Duplicate(econsentSetupDto);
             if (!string.IsNullOrEmpty(validate))
@@ -249,9 +256,10 @@ namespace GSC.Api.Controllers.InformConcent
             document.LanguageId = econsentSetupDto.LanguageId;
             document.Version = econsentSetupDto.Version;
             document.PatientStatus = econsentSetupDto.PatientStatus;
+            document.Roles = econsentSetupDto.Roles;
             //document.PatientStatusId = econsentSetupDto.PatientStatusId;
 
-                if (econsentSetupDto.FileModel?.Base64?.Length > 0)
+            if (econsentSetupDto.FileModel?.Base64?.Length > 0)
                 {
                     document.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSetup");
 
@@ -261,6 +269,12 @@ namespace GSC.Api.Controllers.InformConcent
             foreach (var item in patientstatusDelete)
             {
                 _econsentSetupPatientStatusRepository.Remove(item);
+            }
+
+            var RolesDelete = _econsentSetupRolesRepository.FindBy(x => x.EconsentDocumentId == document.Id).ToList();//_context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsentSetup.Id).ToList();
+            foreach (var item in RolesDelete)
+            {
+                _econsentSetupRolesRepository.Remove(item);
             }
 
             _econsentSetupRepository.Update(document);

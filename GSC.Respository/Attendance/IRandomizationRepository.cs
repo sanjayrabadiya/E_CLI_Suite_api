@@ -12,7 +12,7 @@ namespace GSC.Respository.Attendance
         List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted);
         void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto);
         void SendEmailOfStartEconsent(Randomization randomization);
-        void ChangeStatustoConsentInProgress(int id);
+        void ChangeStatustoConsentInProgress();
         void ChangeStatustoConsentCompleted(int id);
         void ChangeStatustoReConsentInProgress(int id);
         void PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId);

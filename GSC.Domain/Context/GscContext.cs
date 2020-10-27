@@ -157,7 +157,6 @@ namespace GSC.Domain.Context
         public DbSet<ScreeningEntry> ScreeningEntry { get; set; }
         public DbSet<ScreeningTemplate> ScreeningTemplate { get; set; }
         public DbSet<ScreeningVisit> ScreeningVisit { get; set; }
-        public DbSet<ScreeningVisitHistory> ScreeningVisitHistory { get; set; }
         public DbSet<ScreeningTemplateValue> ScreeningTemplateValue { get; set; }
         public DbSet<ScreeningTemplateValueSchedule> ScreeningTemplateValueSchedule { get; set; }
         public DbSet<ScreeningTemplateValueAudit> ScreeningTemplateValueAudit { get; set; }
@@ -262,6 +261,9 @@ namespace GSC.Domain.Context
         public DbSet<EconsentSetup> EconsentSetup { get; set; }
         public DbSet<EconsentReviewDetails> EconsentReviewDetails { get; set; }
         public DbSet<EconsentSectionReference> EconsentSectionReference { get; set; }
+        public DbSet<EconsentReviewDetailsSections> EconsentReviewDetailsSections { get; set; }
+        public DbSet<EconsentChat> EconsentChat { get; set; }
+        public DbSet<EconsentSetupRoles> EconsentSetupRoles { get; set; }
         public DbSet<RegulatoryType> RegulatoryType { get; set; }
         public DbSet<ProjectArtificateDocumentApprover> ProjectArtificateDocumentApprover { get; set; }
         private List<string> ColumnsToSkip

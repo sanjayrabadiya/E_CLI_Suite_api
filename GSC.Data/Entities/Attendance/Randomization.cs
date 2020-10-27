@@ -58,6 +58,7 @@ namespace GSC.Data.Entities.Attendance
         public virtual ScreeningEntry ScreeningEntry { get; set; }
 
         public string? SignaturePath { get; set; }
+        public int? UserId { get; set; }
 
     }
 }
