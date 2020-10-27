@@ -76,14 +76,14 @@ namespace GSC.Api
             app.UseExceptionHandler(ErrorHandler.HttpExceptionHandling(env));
             app.UseAuthentication();
             app.UseMiddleware<LogMiddleware>();
-            //app.UseCors("AllowCorsPolicy");
-            app.UseCors(builder =>
-            {
-                //new[] { "http://localhost:4200",
-                //                            "https://dev2.clinvigilant.com" }
-                builder.WithOrigins("http://localhost:4200")
-                .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
-            });
+            app.UseCors("AllowCorsPolicy");
+            //app.UseCors(builder =>
+            //{
+            //    //new[] { "http://localhost:4200",
+            //    //                            "https://dev2.clinvigilant.com" }
+            //    builder.WithOrigins("http://localhost:4200")
+            //    .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+            //});
             app.UseStaticFiles();
             var doc = _configuration["DocPath:DocDir"];
 
