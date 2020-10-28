@@ -34,11 +34,17 @@ namespace GSC.Respository.Etmf
         {
             var ParentArtificateId = All.Where(x => x.Id == ProjectWorkplaceArtificateId).FirstOrDefault().ParentArtificateId;
 
+            var ProjectId = All.Where(x => x.Id == ProjectWorkplaceArtificateId).Include(y => y.ProjectWorkplaceSection)
+                .ThenInclude(y => y.ProjectWorkPlaceZone)
+                .ThenInclude(y => y.ProjectWorkplaceDetail).ThenInclude(y => y.ProjectWorkplace).FirstOrDefault();
+
             var result = All.Where(x => x.EtmfArtificateMasterLbraryId == EtmfArtificateMasterLbraryId && x.Id != ProjectWorkplaceArtificateId
                  && x.Id != ParentArtificateId).Include(y => y.ProjectWorkplaceSection)
                 .ThenInclude(y => y.ProjectWorkPlaceZone)
                 .ThenInclude(y => y.ProjectWorkplaceDetail).ThenInclude(y => y.ProjectWorkplace)
-                .Where(y => y.ParentArtificateId == null)
+                .Where(y => y.ParentArtificateId == null && 
+                y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId 
+                == ProjectId.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId)
                 .Select(y => new WorkplaceFolderDto
                 {
                     ProjectWorkplaceArtificateId = y.Id,
