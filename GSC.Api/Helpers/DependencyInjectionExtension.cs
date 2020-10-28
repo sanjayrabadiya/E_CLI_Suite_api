@@ -252,6 +252,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEconsentReviewDetailsSectionsRepository, EconsentReviewDetailsSectionsRepository>();
             services.AddScoped<IEconsentChatRepository, EconsentChatRepository>();
             services.AddScoped<IEconsentSetupRolesRepository, EconsentSetupRolesRepository>();
+            services.AddScoped<ISiteRepository, SiteRepository>();
         }
     }
 }

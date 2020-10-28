@@ -25,7 +25,7 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.CityId == cityId && x.DeletedDate == null)
+                    && x.DeletedDate == null)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.NameOfInvestigator })
                 .OrderBy(o => o.Value).ToList();
         }

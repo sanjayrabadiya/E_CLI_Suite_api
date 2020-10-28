@@ -266,6 +266,7 @@ namespace GSC.Domain.Context
         public DbSet<EconsentSetupRoles> EconsentSetupRoles { get; set; }
         public DbSet<RegulatoryType> RegulatoryType { get; set; }
         public DbSet<ProjectArtificateDocumentApprover> ProjectArtificateDocumentApprover { get; set; }
+        public DbSet<Site> Site { get; set; }
         private List<string> ColumnsToSkip
         {
             get

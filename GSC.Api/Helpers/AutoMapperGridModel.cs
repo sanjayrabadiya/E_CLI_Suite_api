@@ -101,6 +101,11 @@ namespace GSC.Api.Helpers
             CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
 
             CreateMap<Randomization, RandomizationGridDto>()
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
+                .ForMember(x => x.CountryId, x => x.MapFrom(a => a.City.State.Country.Id))
+                .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
+                .ForMember(x => x.StateId, x => x.MapFrom(a => a.City.State.Id))
+                .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
                  .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
                  .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                  .ForMember(x => x.PatientStatusName, x => x.MapFrom(a => a.PatientStatusId.GetDescription())).ReverseMap();
@@ -139,14 +144,14 @@ namespace GSC.Api.Helpers
                .ReverseMap();
 
             CreateMap<InvestigatorContact, InvestigatorContactGridDto>()
-               .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
-               .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
-               .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
-               .ForMember(x => x.SiteName, x => x.MapFrom(a => a.ManageSite.SiteName))
-               .ForMember(x => x.IECIRBName, x => x.MapFrom(a => a.Iecirb.IECIRBName))
-               .ForMember(x => x.IECIRBContactNo, x => x.MapFrom(a => a.Iecirb.IECIRBContactNumber))
-               .ForMember(x => x.IECIRBContactName, x => x.MapFrom(a => a.Iecirb.IECIRBContactName))
-               .ForMember(x => x.IECIRBContactEmail, x => x.MapFrom(a => a.Iecirb.IECIRBContactEmail))
+               //.ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
+               //.ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
+               //.ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
+               .ForMember(x => x.TherapeuticIndication, x => x.MapFrom(a => a.TrialType.TrialTypeName))
+               //.ForMember(x => x.IECIRBName, x => x.MapFrom(a => a.Iecirb.IECIRBName))
+               //.ForMember(x => x.IECIRBContactNo, x => x.MapFrom(a => a.Iecirb.IECIRBContactNumber))
+               //.ForMember(x => x.IECIRBContactName, x => x.MapFrom(a => a.Iecirb.IECIRBContactName))
+               //.ForMember(x => x.IECIRBContactEmail, x => x.MapFrom(a => a.Iecirb.IECIRBContactEmail))
                .ReverseMap();
 
             CreateMap<InvestigatorContactDetail, InvestigatorContactDetailGridDto>().ReverseMap();
@@ -165,6 +170,14 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.CityName, x => x.MapFrom(a => a.Location.City.CityName))
               .ForMember(x => x.Address, x => x.MapFrom(a => a.Location.Address))
               .ReverseMap();
+
+            CreateMap<Site, SiteGridDto>()
+               .ForMember(x => x.SiteName, x => x.MapFrom(a => a.ManageSite.SiteName))
+               .ForMember(x => x.ContactNumber, x => x.MapFrom(a => a.ManageSite.ContactNumber))
+               .ForMember(x => x.ContactName, x => x.MapFrom(a => a.ManageSite.ContactName))
+               .ForMember(x => x.SiteEmail, x => x.MapFrom(a => a.ManageSite.SiteEmail))
+               .ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.IECIRB.ToList().Select(x => x.IECIRBName))))
+               .ReverseMap();
         }
     }
 }

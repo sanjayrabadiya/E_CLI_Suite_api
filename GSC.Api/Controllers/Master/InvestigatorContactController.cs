@@ -58,21 +58,24 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var investigatorContact = _investigatorContactRepository
-                .FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
-                .SingleOrDefault();
-            if (investigatorContact == null)
-                return BadRequest();
+            //var investigatorContact = _investigatorContactRepository
+            //    .FindByInclude(x => x.Id == id)
+            //    .SingleOrDefault();
+            //if (investigatorContact == null)
+            //    return BadRequest();
+
+            if (id <= 0) return BadRequest();
+            var investigatorContact = _investigatorContactRepository.Find(id);
 
             var investigatorContactDto = _mapper.Map<InvestigatorContactDto>(investigatorContact);
-            investigatorContactDto.StateId = investigatorContact.City.State.Id;
-            investigatorContactDto.CountryId = investigatorContact.City.State.Country.Id;
-            investigatorContactDto.IecirbName = _iecirbRepository.Find(investigatorContactDto.IecirbId).IECIRBName;
-            investigatorContactDto.CityName = _cityRepository.Find(investigatorContactDto.CityId).CityName;
-            investigatorContactDto.StateName = _stateRepository.Find(investigatorContact.City.State.Id).StateName;
-            investigatorContactDto.CountryName = _countryRepository.Find(investigatorContact.City.State.Country.Id).CountryName;
+            //investigatorContactDto.StateId = investigatorContact.City.State.Id;
+            //investigatorContactDto.CountryId = investigatorContact.City.State.Country.Id;
+            //investigatorContactDto.IecirbName = _iecirbRepository.Find(investigatorContactDto.IecirbId).IECIRBName;
+            //investigatorContactDto.CityName = _cityRepository.Find(investigatorContactDto.CityId).CityName;
+            //investigatorContactDto.StateName = _stateRepository.Find(investigatorContact.City.State.Id).StateName;
+            //investigatorContactDto.CountryName = _countryRepository.Find(investigatorContact.City.State.Country.Id).CountryName;
             investigatorContactDto.SiteName = _manageSiteRepository.Find(investigatorContactDto.ManageSiteId).SiteName;
-            investigatorContactDto.SiteAddress = _manageSiteRepository.Find(investigatorContactDto.ManageSiteId).SiteAddress;
+            //investigatorContactDto.SiteAddress = _manageSiteRepository.Find(investigatorContactDto.ManageSiteId).SiteAddress;
 
 
             return Ok(investigatorContactDto);
