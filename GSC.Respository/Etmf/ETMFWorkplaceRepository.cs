@@ -59,7 +59,7 @@ namespace GSC.Respository.Etmf
             {
 
                 pvListObj.Id = b.Id;
-                pvListObj.Text = Context.Project.Where(x => x.Id == b.ProjectId).FirstOrDefault().ProjectName;
+                pvListObj.Text = Context.Project.Where(x => x.Id == b.ProjectId).FirstOrDefault().ProjectCode;
                 pvListObj.Level = 1;
                 pvListObj.Item = new List<TreeValue>();
                 pvListObj.ParentMasterId = b.ProjectId;
