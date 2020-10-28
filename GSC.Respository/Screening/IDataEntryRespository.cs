@@ -9,7 +9,7 @@ namespace GSC.Respository.Screening
     {
 
         Task<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId);
-        List<DataEntryVisitTemplateDto> GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId, int screeningStatus, bool isQuery);
+        List<DataEntryTemplateCountDisplayDto> GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId, int screeningStatus, bool isQuery);
 
     }
 }

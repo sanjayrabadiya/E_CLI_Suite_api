@@ -75,4 +75,14 @@ namespace GSC.Data.Dto.Attendance
             set => _actualDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
     }
+
+    public class DataEntryTemplateCountDisplayDto
+    {
+        public int ScreeningEntryId { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public string TemplateName { get; set; }
+        public string VisitName { get; set; }
+        public string SubjectName { get; set; }
+    }
 }
