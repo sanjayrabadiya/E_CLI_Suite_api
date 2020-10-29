@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -6,6 +7,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -42,25 +44,7 @@ namespace GSC.Api.Controllers.Master
         [Route("GetSiteById/{InvestigatorContactId}/{isDeleted:bool?}")]
         public IActionResult GetSiteById(int InvestigatorContactId, bool isDeleted)
         {
-
             var site = _siteRepository.GetSiteById(InvestigatorContactId, isDeleted);
-
-            //var siteDto = _mapper.Map<SiteGridDto>(site);
-
-            //site.ForEach(b =>
-            //{
-            //    b.SiteName = _manageSiteRepository.Find(b.ManageSiteId).SiteName;
-            //    //b.ManageSiteId = _manageSiteRepository.Find(b.ManageSiteId).ContactName;
-            //    //b.ManageSiteId = _manageSiteRepository.Find(b.ManageSiteId).Id;
-            //    //b.ManageSiteId = _manageSiteRepository.Find(b.ManageSiteId).Id;
-            //    //b.IECIRBName = _iecirbRepository.Find(b.ManageSiteId).IECIRBName == null ? null : _iecirbRepository.Find(b.ManageSiteId).IECIRBName;
-            //    b.ContactNumber = _manageSiteRepository.Find(b.ManageSiteId).ContactNumber;
-            //    b.ContactName = _manageSiteRepository.Find(b.ManageSiteId).ContactName;
-            //    b.SiteEmail = _manageSiteRepository.Find(b.ManageSiteId).SiteEmail;
-
-
-            //});
-
             return Ok(site);
         }
 
@@ -82,16 +66,20 @@ namespace GSC.Api.Controllers.Master
             foreach (var variable in siteDto.ManageSiteIds)
             {
                 siteDto.ManageSiteId = variable;
-                var site = _mapper.Map<Site>(siteDto);
-                var validate = _siteRepository.Duplicate(site);
-                if (!string.IsNullOrEmpty(validate))
+                bool duplicateExists = _siteRepository.All.AsNoTracking().Any(x => x.ManageSiteId == siteDto.ManageSiteId && x.InvestigatorContactId == siteDto.InvestigatorContactId && x.DeletedDate == null);
+                if (!duplicateExists)
                 {
-                    ModelState.AddModelError("Message", validate);
-                    return BadRequest(ModelState);
-                }
+                    var site = _mapper.Map<Site>(siteDto);
+                    //var validate = _siteRepository.Duplicate(site);
+                    //if (!string.IsNullOrEmpty(validate))
+                    //{
+                    //    ModelState.AddModelError("Message", validate);
+                    //    return BadRequest(ModelState);
+                    //}
 
-                _siteRepository.Add(site);
-                if (_uow.Save() <= 0) throw new Exception("Creating Site failed on save.");
+                    _siteRepository.Add(site);
+                    if (_uow.Save() <= 0) throw new Exception("Creating Site failed on save.");
+                }
             }
             return Ok(siteDto.Id);
         }

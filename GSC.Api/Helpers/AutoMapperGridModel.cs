@@ -18,6 +18,7 @@ using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
+using System;
 using System.Linq;
 
 namespace GSC.Api.Helpers
@@ -174,9 +175,13 @@ namespace GSC.Api.Helpers
             CreateMap<Site, SiteGridDto>()
                .ForMember(x => x.SiteName, x => x.MapFrom(a => a.ManageSite.SiteName))
                .ForMember(x => x.ContactNumber, x => x.MapFrom(a => a.ManageSite.ContactNumber))
+               .ForMember(x => x.CountryName, x => x.MapFrom(a => a.ManageSite.City.State.Country.CountryName))
+               .ForMember(x => x.StateName, x => x.MapFrom(a => a.ManageSite.City.State.StateName))
+               .ForMember(x => x.CityName, x => x.MapFrom(a => a.ManageSite.City.CityName))
                .ForMember(x => x.ContactName, x => x.MapFrom(a => a.ManageSite.ContactName))
                .ForMember(x => x.SiteEmail, x => x.MapFrom(a => a.ManageSite.SiteEmail))
-               .ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.IECIRB.ToList().Select(x => x.IECIRBName))))
+               .ForMember(x => x.ManageSiteId, x => x.MapFrom(a => Convert.ToInt32(a.ManageSiteId)))
+               //.ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.IECIRB.ToList().Select(x => x.IECIRBName))))
                .ReverseMap();
         }
     }
