@@ -9,8 +9,12 @@ namespace GSC.Data.Dto.Master
     public class DashboardDto : BaseDto
     {
         public string TaskInformation { get; set; }
+        public string Module { get; set; }
         public object ExtraData { get; set; }
         public DateTime? DueDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public string CreatedByUser { get; set; }
+        public string DataType { get; set; }
     }
 
     public class DashboardDetailsDto : BaseDto

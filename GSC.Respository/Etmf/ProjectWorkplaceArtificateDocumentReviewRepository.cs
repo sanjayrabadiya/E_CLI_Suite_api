@@ -131,9 +131,9 @@ namespace GSC.Respository.Etmf
                 {
                     Id = x.Id,
                     DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
+                    //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
                     ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().Id,
                     UserName = Context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
-                    //UserName = _userRepository.Find(x.UserId).UserName,
                     IsSendBack = x.IsSendBack,
                     UserId = x.UserId,
                     ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId,
@@ -160,14 +160,17 @@ namespace GSC.Respository.Etmf
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
-                    TaskInformation = s.ProjectWorkplaceArtificatedDocument.DocumentName + " for " +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName
-                    + " Pending Review from your side",
-                    ExtraData = s.ProjectWorkplaceArtificatedDocumentId
-                }).OrderByDescending(x => x.Id).ToList();
+                    TaskInformation = ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription() + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.DocumentName,
+                    ExtraData = s.ProjectWorkplaceArtificatedDocumentId,
+                    CreatedDate = s.CreatedDate,
+                    CreatedByUser = Context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                    Module = MyTaskModule.ETMF.GetDescription(),
+                    DataType = MyTaskMethodModule.Reviewed.GetDescription()
+                }).OrderBy(x => x.Id).ToList();
 
             return result;
         }
@@ -184,14 +187,16 @@ namespace GSC.Respository.Etmf
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
-                    TaskInformation = s.ProjectWorkplaceArtificatedDocument.DocumentName + " for " +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName
-                    + " get send back document from reviewers ",
-                    ExtraData = s.ProjectWorkplaceArtificatedDocumentId
-                }).OrderByDescending(x => x.Id).ToList();
+                    TaskInformation = ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription() + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.DocumentName,
+                    CreatedDate = s.CreatedDate,
+                    CreatedByUser = Context.Users.Where(x=>x.Id == s.UserId).FirstOrDefault().UserName,
+                    Module = MyTaskModule.ETMF.GetDescription(),
+                    DataType = MyTaskMethodModule.SendBack.GetDescription()
+                }).OrderBy(x => x.Id).ToList();
 
             return result;
         }

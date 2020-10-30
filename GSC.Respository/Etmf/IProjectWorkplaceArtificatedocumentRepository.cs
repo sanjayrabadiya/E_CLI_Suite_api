@@ -22,5 +22,6 @@ namespace GSC.Respository.Etmf
         List<DropDownDto> GetEtmfSectionDropdown(int zoneId);
         List<DropDownDto> GetEtmfArtificateDropdown(int sectionId);
         IList<EtmfAuditLogReportDto> GetEtmfAuditLogReport(EtmfAuditLogReportSearchDto filters);
+        CommonArtifactDocumentDto GetDocument(int id);
     }
 }

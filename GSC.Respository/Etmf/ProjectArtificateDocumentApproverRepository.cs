@@ -93,15 +93,18 @@ namespace GSC.Respository.Etmf
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
-                    TaskInformation = s.ProjectWorkplaceArtificatedDocument.DocumentName + " for " +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + "_" +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName
-                    + " Pending approve from your side",
-                    //ExtraData = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), s.ProjectWorkplaceArtificatedDocument.DocPath, s.ProjectWorkplaceArtificatedDocument.DocumentName),
-                    ExtraData = s.ProjectWorkplaceArtificatedDocumentId
-                }).OrderByDescending(x => x.Id).ToList();
+                    TaskInformation = 
+                    ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription() +" | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.DocumentName,
+                    ExtraData = s.ProjectWorkplaceArtificatedDocumentId,
+                    CreatedDate = s.CreatedDate,
+                    CreatedByUser = Context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                    Module = MyTaskModule.ETMF.GetDescription(),
+                    DataType = MyTaskMethodModule.Approved.GetDescription()
+                }).OrderBy(x => x.Id).ToList();
 
             return result;
         }
@@ -113,6 +116,7 @@ namespace GSC.Respository.Etmf
                 {
                     Id = x.Id,
                     DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
+                    //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
                     ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
                     UserName = Context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                     UserId = x.UserId,
@@ -122,6 +126,7 @@ namespace GSC.Respository.Etmf
                     CreatedByUser = Context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
                     ModifiedDate = x.ModifiedDate,
                     ModifiedByUser = Context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    Comment = x.Comment
                 }).OrderByDescending(x => x.Id).ToList();
 
             return result;

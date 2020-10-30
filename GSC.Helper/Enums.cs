@@ -516,4 +516,31 @@ namespace GSC.Helper
         [Description("Withdrawal")] Withdrawal = 10,
     }
 
+    public enum MyTaskModule : short
+    {
+        [Description("Volunteer")] Volunteer = 1,
+        [Description("Common")] Common = 2,
+        //[Description("Attendance")] Attendance = 3,
+        [Description("General Configuration")] GeneralConfiguration = 4,
+        [Description("User management")] UserManagement = 5,
+        [Description("Study Set Up")] StudySetUp = 6,
+        //[Description("Screening")] Screening = 7,
+        [Description("Design library")] DesignLibrary = 8,
+        [Description("Master")] Master = 9,
+        //[Description("Barcode")] Barcode = 10,
+        [Description("Medical Coding")] MedicalCoding = 13,
+        [Description("Data Management")] DataManagement = 14,
+        [Description("ETMF")] ETMF = 15,
+        [Description("Report")] Report = 16,
+        [Description("Site Management")] SiteManagement = 17,
+        //[Description("Study Output")] StudyOutput = 18
+    }
+
+    public enum MyTaskMethodModule : short
+    {
+        [Description("Approved")] Approved = 1,
+        [Description("Reviewed")] Reviewed = 2,
+        [Description("SendBack")] SendBack = 2,
+    }
+
 }

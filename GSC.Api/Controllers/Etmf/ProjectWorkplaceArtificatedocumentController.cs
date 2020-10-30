@@ -96,6 +96,14 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(result);
         }
 
+        [Route("GetDocument/{id}")]
+        [HttpGet]
+        public IActionResult GetDocument(int id)
+        {
+            var result = _projectWorkplaceArtificatedocumentRepository.GetDocument(id);
+            return Ok(result);
+        }
+
         [HttpPost]
         [TransactionRequired]
         public IActionResult Post([FromBody] ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)

@@ -136,15 +136,21 @@ namespace GSC.Respository.Etmf
                 var Review = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id
                 && x.UserId != item.CreatedBy && x.DeletedDate == null).ToList();
 
-                var ApproveList = Context.ProjectArtificateDocumentApprover.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id).Select(y => y.UserId).Distinct().ToList();
+                var ApproveList = Context.ProjectArtificateDocumentApprover.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id).OrderByDescending(x => x.Id).ToList()
+                    .GroupBy(v => v.UserId).Select(y => new ProjectArtificateDocumentApprover
+                    {
+                        Id = y.FirstOrDefault().Id,
+                        UserId = y.Key,
+                        ProjectWorkplaceArtificatedDocumentId = y.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId,
+                        IsApproved = y.FirstOrDefault().IsApproved
+                    }).ToList();
+
                 var ApproverName = new List<string>();
                 ApproveList.ForEach(r =>
                 {
-                    var username = _userRepository.Find(r).UserName;
+                    var username = _userRepository.Find(r.UserId).UserName;
                     ApproverName.Add(username);
                 });
-
-                var moved = Context.ProjectWorkplaceArtificate.Where(x => x.EtmfArtificateMasterLbraryId == item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId && x.ParentArtificateId == null).Count();
 
                 CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
                 obj.Id = item.Id;
@@ -166,13 +172,39 @@ namespace GSC.Respository.Etmf
                 obj.IsReview = Review.Count() == 0 ? false : Review.All(z => z.IsSendBack) ? true : false;
                 obj.IsSendBack = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 obj.IsAccepted = item.IsAccepted;
-                obj.ApprovedStatus = item.IsAccepted == null ? "" : item.IsAccepted == true ? "Approved" : "Rejected";
+                obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.Any(x => x.IsApproved == false) ? "Reject" : ApproveList.All(x => x.IsApproved == true) ? "Approved"
+                    : "Send For Approval";
                 obj.Approver = string.Join(", ", ApproverName);
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
-                obj.IsMoved = moved == 1 ? true : false;
                 dataList.Add(obj);
             }
             return dataList;
+        }
+
+        public CommonArtifactDocumentDto GetDocument(int id)
+        {
+            var document = All.Include(x => x.ProjectWorkplaceArtificate).Where(x => x.Id == id && x.DeletedDate == null).FirstOrDefault();
+
+            CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
+            obj.Id = document.Id;
+            obj.ProjectWorkplaceSubSectionArtifactId = document.ProjectWorkplaceArtificateId;
+            obj.ProjectWorkplaceArtificateId = document.ProjectWorkplaceArtificateId;
+            obj.DocumentName = document.DocumentName;
+            obj.ExtendedName = document.DocumentName.Contains('_') ? document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) : document.DocumentName;
+            obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            obj.CreatedByUser = _userRepository.Find((int)document.CreatedBy).UserName;
+            obj.CreatedDate = document.CreatedDate;
+            obj.Version = document.Version;
+            obj.StatusName = document.Status.GetDescription();
+            obj.Status = (int)document.Status;
+            obj.Level = 6;
+            obj.SendBy = !(document.CreatedBy == _jwtTokenAccesser.UserId);
+            obj.IsSendBack = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == document.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
+            obj.IsAccepted = document.IsAccepted;
+            obj.ApprovedStatus = document.IsAccepted == null ? "" : document.IsAccepted == true ? "Approved" : "Rejected";
+            obj.EtmfArtificateMasterLbraryId = document.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
+
+            return obj;
         }
 
         public string Duplicate(ProjectWorkplaceArtificatedocument objSave, ProjectWorkplaceArtificatedocumentDto objSaveDto)
