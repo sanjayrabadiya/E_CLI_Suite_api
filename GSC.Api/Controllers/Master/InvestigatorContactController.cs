@@ -74,7 +74,7 @@ namespace GSC.Api.Controllers.Master
             //investigatorContactDto.CityName = _cityRepository.Find(investigatorContactDto.CityId).CityName;
             //investigatorContactDto.StateName = _stateRepository.Find(investigatorContact.City.State.Id).StateName;
             //investigatorContactDto.CountryName = _countryRepository.Find(investigatorContact.City.State.Country.Id).CountryName;
-            investigatorContactDto.SiteName = _manageSiteRepository.Find(investigatorContactDto.ManageSiteId).SiteName;
+            //investigatorContactDto.SiteName = _manageSiteRepository.Find(investigatorContactDto.ManageSiteId).SiteName;
             //investigatorContactDto.SiteAddress = _manageSiteRepository.Find(investigatorContactDto.ManageSiteId).SiteAddress;
 
 

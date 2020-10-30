@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -8,6 +9,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Helper;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
@@ -15,6 +17,7 @@ namespace GSC.Respository.Master
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _uow;
 
         public SiteRepository(IUnitOfWork<GscContext> uow,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -23,6 +26,7 @@ namespace GSC.Respository.Master
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _uow = uow;
         }
 
         public List<SiteGridDto> GetSiteList(bool isDeleted)
@@ -42,6 +46,18 @@ namespace GSC.Respository.Master
         {
             if (All.Any(x => x.Id != objSave.Id && x.ManageSiteId == objSave.ManageSiteId && x.InvestigatorContactId == objSave.InvestigatorContactId && x.DeletedDate == null))
                 return "Duplicate Site name : " + objSave.ManageSiteId;
+            return "";
+        }
+
+        public string DeleteSite(SiteDto objSave)
+        {
+            var Sites = Context.Site.AsNoTracking().Where(x => x.InvestigatorContactId == objSave.InvestigatorContactId && x.DeletedDate == null
+            && !objSave.ManageSiteIds.Contains(x.ManageSiteId)).ToList();
+            foreach (var item in Sites)
+            {
+                Delete(item);
+                _uow.Save();
+            }
             return "";
         }
 

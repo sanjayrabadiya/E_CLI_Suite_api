@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
@@ -63,6 +64,8 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             siteDto.Id = 0;
 
+            _siteRepository.DeleteSite(siteDto);
+
             foreach (var variable in siteDto.ManageSiteIds)
             {
                 siteDto.ManageSiteId = variable;
@@ -70,13 +73,6 @@ namespace GSC.Api.Controllers.Master
                 if (!duplicateExists)
                 {
                     var site = _mapper.Map<Site>(siteDto);
-                    //var validate = _siteRepository.Duplicate(site);
-                    //if (!string.IsNullOrEmpty(validate))
-                    //{
-                    //    ModelState.AddModelError("Message", validate);
-                    //    return BadRequest(ModelState);
-                    //}
-
                     _siteRepository.Add(site);
                     if (_uow.Save() <= 0) throw new Exception("Creating Site failed on save.");
                 }

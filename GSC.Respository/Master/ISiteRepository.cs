@@ -10,5 +10,6 @@ namespace GSC.Respository.Master
         string Duplicate(Site objSave);
         List<SiteGridDto> GetSiteList(bool isDeleted);
         List<SiteGridDto> GetSiteById(int InvestigatorContactId, bool isDeleted);
+        string DeleteSite(SiteDto objSave);
     }
 }
