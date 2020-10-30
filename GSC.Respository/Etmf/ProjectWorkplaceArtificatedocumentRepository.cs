@@ -176,6 +176,7 @@ namespace GSC.Respository.Etmf
                     : "Send For Approval";
                 obj.Approver = string.Join(", ", ApproverName);
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
+                obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 dataList.Add(obj);
             }
             return dataList;
