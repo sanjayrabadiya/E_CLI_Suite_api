@@ -276,6 +276,7 @@ namespace GSC.Api.Helpers
             CreateMap<User, EConsentUserChatDto>().ReverseMap();
             CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
             CreateMap<Site, SiteDto>().ReverseMap();
+            CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
         }
     }
 }

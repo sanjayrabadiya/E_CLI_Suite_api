@@ -78,6 +78,10 @@ namespace GSC.Respository.Screening
                  SubjectNo = t.ScreeningNumber,
                  PatientStatus = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
+                 TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
+                 {
+                     LevelNo = x.LevelNo
+                 }).ToList()
              }).ToListAsync();
 
             var templates = await _screeningTemplateRepository.All.Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).

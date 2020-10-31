@@ -185,7 +185,7 @@ namespace GSC.Respository.Screening
 
             if (screeningVisit == null) return;
 
-            var designVisitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == screeningVisit.ScreeningVisitId).Select(
+            var designVisitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId).Select(
                   t => new { t.ProjectDesignVariableId, t.VisitStatusId }).ToList();
 
             if (designVisitStatus != null && designVisitStatus.Count() > 0)
