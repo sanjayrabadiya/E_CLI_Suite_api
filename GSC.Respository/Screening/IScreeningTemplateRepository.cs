@@ -18,12 +18,6 @@ namespace GSC.Respository.Screening
 
         DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto,
             int screeningTemplateId);
-
-        //List<ScreeningTemplateLockUnlockDto> GetTemplatesLockUnlock(ScreeningTemplateLockUnlockParams lockUnlockParams);
-        //List<DashboardStudyStatusDto> GetDashboardStudyStatusByVisit(int projectId);
-
-        //List<DashboardStudyStatusDto> GetDashboardStudyStatusBySite(int projectId);
-
         IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters);
         List<LockUnlockListDto> GetLockUnlockList(LockUnlockSearchDto lockUnlockParams);
 

@@ -12,5 +12,6 @@ namespace GSC.Respository.Screening
         void OpenVisit(int screeningVisitId, DateTime visitDate);
         void VisitRepeat(int projectDesignVisitId, int screeningEntryId);
         void PatientStatus(int screeningEntryId);
+        void AutomaticStatusUpdate(int screeningTemplateId);
     }
 }

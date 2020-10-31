@@ -53,7 +53,7 @@ namespace GSC.Respository.Master
 
         public List<DropDownDto> GetManualVisitStatusDropDown()
         {
-            int[] id = { 6, 8 };
+            int[] id = {2,5, 6, 8 };
             return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && id.Contains(x.Id))
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.DisplayName }).OrderBy(o => o.Value).ToList();
         }

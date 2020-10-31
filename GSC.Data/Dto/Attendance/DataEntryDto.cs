@@ -52,7 +52,7 @@ namespace GSC.Data.Dto.Attendance
         public int Count { get; set; }
     }
 
-    
+
     public class DataEntryVisitTemplateDto : DataEntryTemplateQueryStatus
     {
         public int ScreeningVisitId { get; set; }

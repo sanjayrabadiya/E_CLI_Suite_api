@@ -181,6 +181,8 @@ namespace GSC.Api.Controllers.Screening
 
             _uow.Save();
 
+            _screeningVisitRepository.AutomaticStatusUpdate(id);
+
             return Ok();
         }
 

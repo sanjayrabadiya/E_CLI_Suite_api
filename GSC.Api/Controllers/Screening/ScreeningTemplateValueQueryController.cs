@@ -27,7 +27,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IEditCheckImpactRepository _editCheckImpactRepository;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
-
+        private readonly IScreeningVisitRepository _screeningVisitRepository;
         public ScreeningTemplateValueQueryController(
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
@@ -35,6 +35,7 @@ namespace GSC.Api.Controllers.Screening
             IScheduleRuleRespository scheduleRuleRespository,
             IEditCheckImpactRepository editCheckImpactRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
+            IScreeningVisitRepository screeningVisitRepository,
             IUnitOfWork<GscContext> uow, IMapper mapper)
         {
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
@@ -45,6 +46,7 @@ namespace GSC.Api.Controllers.Screening
             _mapper = mapper;
             _screeningTemplateRepository = screeningTemplateRepository;
             _editCheckImpactRepository = editCheckImpactRepository;
+            _screeningVisitRepository = screeningVisitRepository;
         }
 
         [HttpGet("{screeningTemplateValueId}")]
@@ -101,9 +103,9 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplateValueQuery, screeningTemplateValue);
 
             if (screeningTemplateValue.QueryStatus == QueryStatus.Resolved)
-               // _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
+                // _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Screening Template Value Query failed on save.");
+                if (_uow.Save() <= 0) throw new Exception("Updating Screening Template Value Query failed on save.");
 
             return Ok(screeningTemplateValueQuery.Id);
         }
@@ -200,6 +202,8 @@ namespace GSC.Api.Controllers.Screening
 
             var result = _scheduleRuleRespository.VariableResultProcess(editResult, scheduleResult);
 
+            _screeningVisitRepository.AutomaticStatusUpdate(screeningTemplate.Id);
+
             return Ok(result);
         }
 
@@ -223,7 +227,7 @@ namespace GSC.Api.Controllers.Screening
         }
 
 
-     
+
         [HttpPost("delete-query")]
         public IActionResult DeleteQuery([FromBody] ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto)
         {

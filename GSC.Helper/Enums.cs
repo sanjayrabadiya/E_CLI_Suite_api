@@ -488,7 +488,7 @@ namespace GSC.Helper
         [Description("Germany")] ge = 2
     }
 
-    public enum ScreeningVisitStatus : short
+    public enum ScreeningVisitStatus : int
     {
         [Description("Not Started")] NotStarted = 1,
         [Description("Open")] Open = 2,
