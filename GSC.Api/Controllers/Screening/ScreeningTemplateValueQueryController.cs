@@ -204,6 +204,8 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningVisitRepository.AutomaticStatusUpdate(screeningTemplate.Id);
 
+            _uow.Save();
+
             return Ok(result);
         }
 
