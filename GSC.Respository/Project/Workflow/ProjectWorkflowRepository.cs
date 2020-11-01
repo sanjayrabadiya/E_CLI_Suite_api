@@ -87,8 +87,13 @@ namespace GSC.Respository.Project.Workflow
                                                                           _jwtTokenAccesser.RoleId
                                                                           && x.DeletedDate == null).FirstOrDefault();
 
-            int totalLevel = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
-                                                                      && x.DeletedDate == null).Max(x => x.LevelNo);
+            var totalLevels = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
+                                                                       && x.DeletedDate == null).Select(c => c.LevelNo).ToList();
+
+            int totalLevel = 0;
+            if (totalLevels != null && totalLevels.Count > 0)
+                totalLevel = totalLevels.Max(t => t);
+
 
             if (level != null)
                 return new WorkFlowLevelDto

@@ -491,10 +491,10 @@ namespace GSC.Helper
     public enum ScreeningVisitStatus : int
     {
         [Description("Not Started")] NotStarted = 1,
-        [Description("Open")] Open = 2,
-        [Description("In Progress")] InProgress = 3,
-        [Description("Scheduled")] Scheduled = 4,
-        [Description("Re-Schedule")] ReSchedule = 5,
+        [Description("Scheduled")] Scheduled = 2,
+        [Description("Re-Schedule")] ReSchedule = 3,
+        [Description("Open")] Open = 4,
+        [Description("In Progress")] InProgress = 5,
         [Description("Missed")] Missed = 6,
         [Description("Withdrawal")] Withdrawal = 7,
         [Description("OnHold")] OnHold = 8,

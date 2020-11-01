@@ -91,8 +91,6 @@ namespace GSC.Api.Controllers.Screening
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var result = _screeningEntryRepository.SaveScreeningRandomization(saveRandomizationDto);
             if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
-
-            //ScreeningTemplateValueController.Put(new ScreeningTemplateValueDto());
             return Ok(result.Id);
         }
 
