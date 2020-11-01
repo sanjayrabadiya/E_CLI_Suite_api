@@ -59,6 +59,7 @@ namespace GSC.Respository.Screening
 
                     ProjectDesignVisitId = r.Id,
                     Status = projectDesignVisitId == r.Id ? ScreeningVisitStatus.Open : ScreeningVisitStatus.NotStarted,
+                    IsSchedule = r.IsSchedule ?? false,
                     ScreeningTemplates = new List<ScreeningTemplate>()
                 };
 
@@ -77,13 +78,13 @@ namespace GSC.Respository.Screening
                     };
                     if (openVariable != null && openVariable.ProjectDesignTemplateId == t)
                     {
-                        if (SaveVariableValue(visitDate.ToString(),  screeningTemplate, openVariable.Id, openVariable.ProjectDesignTemplateId))
+                        if (SaveVariableValue(visitDate.ToString(), screeningTemplate, openVariable.Id, openVariable.ProjectDesignTemplateId))
                         {
                             screeningVisit.Status = ScreeningVisitStatus.InProgress;
                             screeningTemplate.Status = ScreeningTemplateStatus.InProcess;
                             _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.InProgress, visitDate);
                         }
-                            
+
                     }
                     screeningVisit.ScreeningTemplates.Add(screeningTemplate);
 
@@ -126,6 +127,7 @@ namespace GSC.Respository.Screening
         public void StatusUpdate(ScreeningVisitHistoryDto screeningVisitHistoryDto)
         {
             var visit = Find(screeningVisitHistoryDto.ScreeningVisitId);
+
             visit.Status = screeningVisitHistoryDto.VisitStatusId;
 
             Update(visit);
@@ -137,10 +139,19 @@ namespace GSC.Respository.Screening
             PatientStatus(visit.ScreeningEntryId);
         }
 
+        public bool IsPatientScreeningFailure(int screeningVisitId)
+        {
+            var visit = Find(screeningVisitId);
+            return All.Any(t => t.ScreeningEntryId == visit.ScreeningEntryId && (
+           t.ScreeningEntry.Randomization.PatientStatusId == ScreeningPatientStatus.ScreeningFailure ||
+           t.ScreeningEntry.Randomization.PatientStatusId == ScreeningPatientStatus.Withdrawal));
+        }
 
         public void OpenVisit(int screeningVisitId, DateTime visitDate)
         {
+
             var visit = Find(screeningVisitId);
+
             visit.Status = ScreeningVisitStatus.Open;
             visit.VisitStartDate = visitDate;
 
@@ -180,13 +191,17 @@ namespace GSC.Respository.Screening
             var screeningVisit = _screeningTemplateRepository.All.Where(x => x.Id == screeningTemplateId).Select(t => new
             {
                 t.ProjectDesignTemplate.ProjectDesignVisitId,
-                t.ScreeningVisitId
+                t.ScreeningVisitId,
+                t.Status,
+                t.ScreeningVisit.ScreeningEntryId
             }).FirstOrDefault();
 
             if (screeningVisit == null) return;
 
+
             var designVisitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId).Select(
                   t => new { t.ProjectDesignVariableId, t.VisitStatusId }).ToList();
+            DateTime statusDate = System.DateTime.Now;
 
             if (designVisitStatus != null && designVisitStatus.Count() > 0)
             {
@@ -198,7 +213,6 @@ namespace GSC.Respository.Screening
 
                     if (!string.IsNullOrEmpty(screeningValue))
                     {
-                        DateTime statusDate;
                         DateTime.TryParse(screeningValue, out statusDate);
                         StatusUpdate(new ScreeningVisitHistoryDto
                         {
@@ -209,6 +223,20 @@ namespace GSC.Respository.Screening
                     }
                 }
             }
+
+            if (screeningVisit.Status == ScreeningTemplateStatus.Submitted)
+            {
+                if (!_screeningTemplateRepository.All.Any(x => x.ScreeningVisit.ScreeningEntryId == screeningVisit.ScreeningEntryId
+                && x.ScreeningVisitId == screeningVisit.ScreeningVisitId && x.Status < ScreeningTemplateStatus.Submitted))
+                    StatusUpdate(new ScreeningVisitHistoryDto
+                    {
+                        VisitStatusId = ScreeningVisitStatus.Completed,
+                        ScreeningVisitId = screeningVisit.ScreeningVisitId,
+                        StatusDate = statusDate
+                    });
+
+            }
+
         }
         public void VisitRepeat(int projectDesignVisitId, int screeningEntryId)
         {
@@ -223,11 +251,11 @@ namespace GSC.Respository.Screening
             var screeningVisit = new ScreeningVisit
             {
 
-                ProjectDesignVisitId = projectVisit.Id,
+                ProjectDesignVisitId = projectDesignVisitId,
                 Status = ScreeningVisitStatus.NotStarted,
                 ScreeningEntryId = screeningEntryId,
-                RepeatedVisitNumber = repeatedCount,
-                ParentId = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.ProjectDesignVisitId == projectDesignVisitId).FirstOrDefault().Id,
+                RepeatedVisitNumber = repeatedCount + 1,
+                ParentId = projectVisit.Id,
                 ScreeningTemplates = new List<ScreeningTemplate>()
             };
 

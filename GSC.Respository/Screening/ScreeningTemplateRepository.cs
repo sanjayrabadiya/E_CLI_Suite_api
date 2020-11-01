@@ -66,6 +66,8 @@ namespace GSC.Respository.Screening
                    RepeatedVisit = c.ScreeningVisit.RepeatedVisitNumber,
                    IsLocked = c.IsLocked,
                    IsDisable = c.IsDisable,
+                   PatientStatus = c.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId,
+                   VisitStatus = c.ScreeningVisit.Status,
                    ParentId = c.ParentId
                }).FirstOrDefault();
         }
@@ -94,6 +96,8 @@ namespace GSC.Respository.Screening
                 designTemplateDto.IsRepeated = workflowlevel.IsStartTemplate;
             if (screeningTemplateBasic.ParentId != null)
                 designTemplateDto.IsRepeated = false;
+
+
 
             designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
             designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
@@ -155,6 +159,12 @@ namespace GSC.Respository.Screening
                 Update(template);
                 _uow.Save();
             }
+
+            if (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
+                screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.Withdrawal ||
+                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
+                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold)
+                designTemplateDto.IsSubmittedButton = false;
 
             return designTemplateDto;
         }
@@ -299,7 +309,7 @@ namespace GSC.Respository.Screening
         public List<ScreeningTemplateDto> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel)
         {
             var result = All.Where(s =>
-                    s.ScreeningVisit.ScreeningEntryId == screeningEntryId && s.DeletedDate == null).Select(s =>
+                    s.ScreeningVisit.ScreeningEntryId == screeningEntryId && s.DeletedDate == null && s.ScreeningVisit.Status >= ScreeningVisitStatus.Open).Select(s =>
                     new ScreeningTemplateDto
                     {
                         Id = s.Id,

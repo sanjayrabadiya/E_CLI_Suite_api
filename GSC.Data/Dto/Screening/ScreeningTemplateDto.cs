@@ -47,6 +47,8 @@ namespace GSC.Data.Dto.Screening
         public int ScreeningEntryId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
+        public ScreeningPatientStatus? PatientStatus { get; set; }
+        public ScreeningVisitStatus? VisitStatus { get; set; }
         public int? ParentId { get; set; }
         public int? DomainId { get; set; }
         public int? RepeatedVisit { get; set; }

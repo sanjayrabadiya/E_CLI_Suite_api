@@ -125,12 +125,13 @@ namespace GSC.Respository.Screening
                 IsRandomization = x.RandomizationId != null,
                 SubjectNo = x.RandomizationId != null ? x.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
                 PatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
+                ScreeningPatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId : ScreeningPatientStatus.Screening,
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
-                Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null).Select(a => new DataEntryVisitTemplateDto
+                Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
                 {
                     ScreeningVisitId = a.Id,
                     ProjectDesignVisitId = a.ProjectDesignVisitId,
-                    VisitName = a.ProjectDesignVisit.DisplayName,
+                    VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
                     VisitStatus = a.Status.GetDescription(),
                     VisitStatusId = (int)a.Status,
                     ActualDate = a.VisitStartDate,

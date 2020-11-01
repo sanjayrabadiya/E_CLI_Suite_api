@@ -27,6 +27,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsRandomization { get; set; }
         public string SubjectNo { get; set; }
         public string PatientStatus { get; set; }
+        public ScreeningPatientStatus? ScreeningPatientStatus { get; set; }
         public string RandomizationNumber { get; set; }
         public List<DataEntryVisitTemplateDto> Visit { get; set; }
     }

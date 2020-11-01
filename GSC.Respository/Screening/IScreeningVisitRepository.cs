@@ -13,5 +13,6 @@ namespace GSC.Respository.Screening
         void VisitRepeat(int projectDesignVisitId, int screeningEntryId);
         void PatientStatus(int screeningEntryId);
         void AutomaticStatusUpdate(int screeningTemplateId);
+        bool IsPatientScreeningFailure(int screeningVisitId);
     }
 }

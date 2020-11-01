@@ -38,6 +38,13 @@ namespace GSC.Api.Controllers.Screening
         [Route("VisitStatusUpdate")]
         public IActionResult VisitStatusUpdate([FromBody] ScreeningVisitHistoryDto screeningVisitHistoryDto)
         {
+
+            if (_screeningVisitRepository.IsPatientScreeningFailure(screeningVisitHistoryDto.ScreeningVisitId))
+            {
+                ModelState.AddModelError("Message", "You can't change visit status!");
+                return BadRequest(ModelState);
+            }
+
             _screeningVisitRepository.StatusUpdate(screeningVisitHistoryDto);
             _uow.Save();
             return Ok();
@@ -48,6 +55,12 @@ namespace GSC.Api.Controllers.Screening
         [Route("OpenVisit/{screeningVisitId}/{visitDate}")]
         public IActionResult OpenVisit(int screeningVisitId, DateTime visitDate)
         {
+            if (_screeningVisitRepository.IsPatientScreeningFailure(screeningVisitId))
+            {
+                ModelState.AddModelError("Message", "You can't change visit status!");
+                return BadRequest(ModelState);
+            }
+
             _screeningVisitRepository.OpenVisit(screeningVisitId, visitDate);
             _uow.Save();
             return Ok();

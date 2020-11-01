@@ -311,15 +311,7 @@ namespace GSC.Domain.Context
 
         public int SaveChanges(IJwtTokenAccesser jwtTokenAccesser)
         {
-            SetModifiedInformation(jwtTokenAccesser);
-
-            //var auditTrails = GetAuditTrailCommons(jwtTokenAccesser);
-
-            var result = base.SaveChanges();
-
-            //SaveAuditTrailCommons(auditTrails);
-
-            return result;
+            return base.SaveChanges();
         }
 
         public int SaveChanges(int fake)
@@ -329,15 +321,7 @@ namespace GSC.Domain.Context
 
         public async Task<int> SaveChangesAsync(IJwtTokenAccesser jwtTokenAccesser)
         {
-            SetModifiedInformation(jwtTokenAccesser);
-
-            var auditTrails = GetAuditTrailCommons(jwtTokenAccesser);
-
-            var result = await base.SaveChangesAsync();
-
-            SaveAuditTrailCommons(auditTrails);
-
-            return result;
+            return await base.SaveChangesAsync();
         }
 
         public void DetectionAll()
@@ -351,139 +335,7 @@ namespace GSC.Domain.Context
             entries.ForEach(r => r.State = EntityState.Detached);
         }
 
-        private void SetModifiedInformation(IJwtTokenAccesser jwtTokenAccesser)
-        {
-            if (jwtTokenAccesser == null || jwtTokenAccesser.UserId <= 0) return;
 
-            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
-                if (entry.State == EntityState.Added)
-                {
-                    entry.Entity.CreatedBy = jwtTokenAccesser.UserId;
-                    entry.Entity.CreatedDate = DateTime.Now.ToUniversalTime();
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    entry.Property(x => x.CreatedBy).IsModified = false;
-                    entry.Property(x => x.CreatedDate).IsModified = false;
-
-                    if (entry.Entity.InActiveRecord)
-                    {
-                        entry.Entity.DeletedBy = jwtTokenAccesser.UserId;
-                        entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
-                    }
-                    else
-                    {
-                        entry.Entity.ModifiedBy = jwtTokenAccesser.UserId;
-                        entry.Entity.ModifiedDate = DateTime.Now.ToUniversalTime();
-                    }
-                }
-
-            foreach (var entry in ChangeTracker.Entries<ScreeningTemplateValueAudit>())
-            {
-                entry.Entity.TimeZone = jwtTokenAccesser.GetHeader("timeZone");
-                entry.Entity.IpAddress = jwtTokenAccesser.IpAddress;
-            }
-        }
-
-        private IEnumerable<Tuple<EntityEntry, AuditTrailCommon>> GetAuditTrailCommons(
-            IJwtTokenAccesser jwtTokenAccesser)
-        {
-            if (jwtTokenAccesser == null || jwtTokenAccesser.UserId <= 0) return null;
-
-            ChangeTracker.DetectChanges();
-
-            var changedEntityEntries = ChangeTracker.Entries().Where(e =>
-                    e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted)
-                .ToList();
-
-            var auditTrails = new List<Tuple<EntityEntry, AuditTrailCommon>>();
-
-            var userId = jwtTokenAccesser.UserId;
-            var roleId = jwtTokenAccesser.RoleId;
-            var createdDate = DateTime.Now.ToUniversalTime();
-
-            foreach (var dbEntry in changedEntityEntries)
-            {
-                var tableName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString();//dbEntry.Metadata.Name;
-                if (_tablesToSkip.Contains(tableName)) continue;
-
-                var action = Enum.GetName(typeof(EntityState), dbEntry.State);
-
-                int.TryParse(jwtTokenAccesser.GetHeader("audit-reason-id"), out var reasonId);
-                var reasonOth = jwtTokenAccesser.GetHeader("audit-reason-oth");
-
-                if ((dbEntry.Entity as BaseEntity).AuditAction == AuditAction.Deleted ||
-                    (dbEntry.Entity as BaseEntity).AuditAction == AuditAction.Activated)
-                {
-                    action = Enum.GetName(typeof(AuditAction), (dbEntry.Entity as BaseEntity).AuditAction);
-
-                    auditTrails.Add(new Tuple<EntityEntry, AuditTrailCommon>(dbEntry, new AuditTrailCommon
-                    {
-                        TableName = tableName,
-                        Action = action,
-                        UserId = userId,
-                        UserRoleId = roleId,
-                        CreatedDate = createdDate,
-                        ReasonId = reasonId > 0 ? reasonId : (int?)null,
-                        ReasonOth = reasonOth,
-                        IpAddress = jwtTokenAccesser.IpAddress,
-                        TimeZone = jwtTokenAccesser.GetHeader("timeZone")
-                    }));
-                }
-                else
-                {
-                    var dbValueProps = dbEntry.GetDatabaseValues();
-
-                    foreach (var prop in dbEntry.Properties)
-                    {
-                        var columnName = prop.Metadata.Name;
-                        if (ColumnsToSkip.Contains(columnName)) continue;
-
-                        var newValue = Convert.ToString(prop.CurrentValue);
-
-                        if (dbEntry.State == EntityState.Added && newValue.Length == 0) continue;
-
-                        var oldValue = "";
-                        if (dbEntry.State == EntityState.Modified && dbValueProps != null)
-                        {
-                            oldValue = Convert.ToString(dbValueProps.GetValue<object>(columnName));
-                            if (oldValue == newValue) continue;
-                        }
-
-                        auditTrails.Add(new Tuple<EntityEntry, AuditTrailCommon>(dbEntry, new AuditTrailCommon
-                        {
-                            TableName = tableName,
-                            Action = action,
-                            ColumnName = columnName,
-                            OldValue = oldValue,
-                            NewValue = newValue,
-                            UserId = userId,
-                            UserRoleId = roleId,
-                            CreatedDate = createdDate,
-                            IpAddress = jwtTokenAccesser.IpAddress,
-                            ReasonId = reasonId > 0 ? reasonId : (int?)null,
-                            ReasonOth = reasonOth,
-                            TimeZone = jwtTokenAccesser.GetHeader("timeZone")
-                        }));
-                    }
-                }
-            }
-
-            return auditTrails;
-        }
-
-        private void SaveAuditTrailCommons(IEnumerable<Tuple<EntityEntry, AuditTrailCommon>> auditTrails)
-        {
-            if (auditTrails == null || !auditTrails.Any()) return;
-
-            AuditTrailCommon.AddRange(
-                auditTrails.ForEach(t =>
-                        t.Item2.RecordId =
-                            Convert.ToInt32(t.Item1.Properties.First(p => p.Metadata.IsPrimaryKey()).CurrentValue))
-                    .Select(t => t.Item2)
-            );
-            base.SaveChanges();
-        }
 
         public void Begin()
         {
@@ -503,12 +355,7 @@ namespace GSC.Domain.Context
 
     public static class Extensions
     {
-        public static IDictionary<TKey, TValue> NullIfEmpty<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
-        {
-            if (dictionary == null || !dictionary.Any()) return null;
-            return dictionary;
-        }
-
+      
         public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
         {
             foreach (var element in source) action(element);
