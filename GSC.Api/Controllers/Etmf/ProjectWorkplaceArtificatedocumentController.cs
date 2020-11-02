@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Syncfusion.EJ2.DocumentEditor;
-using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using GSC.Api.Helpers;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
@@ -157,19 +156,9 @@ namespace GSC.Api.Controllers.Etmf
             if (!System.IO.File.Exists(path))
                 return null;
             Stream stream = System.IO.File.OpenRead(path);
-            string json = ImportWordDocument(stream);
+            string json = _projectWorkplaceArtificatedocumentRepository.ImportWordDocument(stream, path);
             stream.Close();
             return Ok(json);
-        }
-
-
-        public string ImportWordDocument(Stream stream)
-        {
-            string sfdtText = "";
-            EJ2WordDocument document = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
-            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document);
-            document.Dispose();
-            return sfdtText;
         }
 
         [HttpPost]
@@ -330,7 +319,7 @@ namespace GSC.Api.Controllers.Etmf
         {
             ProjectWorkplaceArtificatedocument firstSaved = null;
 
-            for (var i = 0; i <= (workplaceFolderDto.Count-1); i++)
+            for (var i = 0; i <= (workplaceFolderDto.Count - 1); i++)
             {
                 var document = _projectWorkplaceArtificatedocumentRepository.AddMovedDocument(workplaceFolderDto[i]);
                 var ProjectArtificate = _projectWorkplaceArtificateRepository.All.Where(x => x.Id == workplaceFolderDto[i].ProjectWorkplaceArtificateId).FirstOrDefault();
@@ -365,7 +354,7 @@ namespace GSC.Api.Controllers.Etmf
             if (!System.IO.File.Exists(path))
                 return null;
             Stream stream = System.IO.File.OpenRead(path);
-            string json = ImportWordDocument(stream);
+            string json = _projectWorkplaceArtificatedocumentRepository.ImportWordDocument(stream, path);
             stream.Close();
             return Ok(json);
         }

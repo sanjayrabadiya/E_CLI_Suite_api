@@ -15,7 +15,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using System.Text;
+using Syncfusion.EJ2.DocumentEditor;
 
 namespace GSC.Respository.Etmf
 {
@@ -477,5 +479,41 @@ namespace GSC.Respository.Etmf
 
             return cretaedData.Union(sendData).Union(sendBackData).Union(sendforApproveData).Union(ApprovedData).Union(deletedData).Union(supersededata).Union(finaldata).OrderBy(x => x.actionDate).ToList();
         }
+
+        public string ImportWordDocument(Stream stream, string FullPath)
+        {
+            string sfdtText = "";
+            var Extension = System.IO.Path.GetExtension(FullPath);
+            EJ2WordDocument document = EJ2WordDocument.Load(stream, GetFormatType(Extension.ToLower()));
+            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+            document.Dispose();
+            return sfdtText;
+        }
+
+        internal static FormatType GetFormatType(string format)
+        {
+            if (string.IsNullOrEmpty(format))
+                throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
+            switch (format.ToLower())
+            {
+                case ".dotx":
+                case ".docx":
+                case ".docm":
+                case ".dotm":
+                    return FormatType.Docx;
+                case ".dot":
+                case ".doc":
+                    return FormatType.Doc;
+                case ".rtf":
+                    return FormatType.Rtf;
+                case ".txt":
+                    return FormatType.Txt;
+                case ".xml":
+                    return FormatType.WordML;
+                default:
+                    throw new NotSupportedException("EJ2 DocumentEditor does not support this file format.");
+            }
+        }
+
     }
 }
