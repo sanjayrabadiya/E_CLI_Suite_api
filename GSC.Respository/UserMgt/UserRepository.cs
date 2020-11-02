@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using AutoMapper.Configuration;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -12,8 +13,11 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.CenteralAuth;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -27,13 +31,18 @@ namespace GSC.Respository.UserMgt
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IOptions<JwtSettings> _settings;
+        private readonly ICenteralRepository _centeralRepository;
+        private readonly ICenteralUserPasswordRepository _centeralUserPasswordRepository;
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
 
         public UserRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUserPasswordRepository userPasswordRepository,
             IRefreshTokenRepository refreshTokenRepository,
-            IOptions<JwtSettings> settings)
+            IOptions<JwtSettings> settings,
+            ICenteralRepository centeralRepository,
+            ICenteralUserPasswordRepository centeralUserPasswordRepository, Microsoft.Extensions.Configuration.IConfiguration configuration)
             : base(uow, jwtTokenAccesser)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
@@ -42,6 +51,9 @@ namespace GSC.Respository.UserMgt
             _jwtTokenAccesser = jwtTokenAccesser;
             _settings = settings;
             _refreshTokenRepository = refreshTokenRepository;
+            _centeralRepository = centeralRepository;
+            _centeralUserPasswordRepository = centeralUserPasswordRepository;
+            _configuration = configuration;
         }
 
         public List<UserDto> GetUsers(bool isDeleted)
@@ -67,9 +79,12 @@ namespace GSC.Respository.UserMgt
 
         public User ValidateUser(string userName, string password)
         {
+
+            //  var CenterUserDetails = _centeralRepository.CheckValidUser(userName);   
             var user = All.Where(x =>
                 (x.UserName == userName || x.Email == userName)
                 && x.DeletedDate == null).FirstOrDefault();
+
             if (user == null)
             {
                 _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
@@ -77,12 +92,19 @@ namespace GSC.Respository.UserMgt
             }
 
 
-            var userPassword = Context.UserPassword
-                .Where(x => x.UserId == user.Id)
-                .OrderByDescending(x => x.Id)
-                .First();
+            //var userPassword = Context.UserPassword
+            //    .Where(x => x.UserId == user.Id)
+            //    .OrderByDescending(x => x.Id)
+            //    .First();
 
-            if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
+            string validate = "";
+            if (Convert.ToBoolean(_configuration["IsCloud"]))
+                validate = _centeralUserPasswordRepository.VaidatePassword(password, user.Id);
+            else
+                validate = _userPasswordRepository.VaidatePassword(password, user.Id);
+
+            //if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
+            if (!string.IsNullOrEmpty(validate))
             {
                 user.FailedLoginAttempts++;
                 var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
@@ -96,7 +118,6 @@ namespace GSC.Respository.UserMgt
                     user.Id, userName);
                 return null;
             }
-
             return user;
         }
 

@@ -45,6 +45,8 @@ using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
 using System.Linq;
+using GSC.Centeral.Models;
+
 
 namespace GSC.Api.Helpers
 {
@@ -277,6 +279,8 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
             CreateMap<Site, SiteDto>().ReverseMap();
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
+
+            CreateMap<Users, UserDto>().ReverseMap();
         }
     }
 }

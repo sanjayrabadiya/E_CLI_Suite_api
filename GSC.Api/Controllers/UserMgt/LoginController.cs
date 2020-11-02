@@ -6,17 +6,20 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
+using GSC.Centeral.UnitOfWork;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
+using GSC.Respository.CenteralAuth;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 
@@ -37,6 +40,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IHubContext<Notification> _notificationHubContext;
         private readonly IAppSettingRepository _appSettingRepository;
         private readonly IRolePermissionRepository _rolePermissionRepository;
+        private readonly ICenteralRepository _centeralRepository;
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -48,7 +52,8 @@ namespace GSC.Api.Controllers.UserMgt
             IUploadSettingRepository uploadSettingRepositor,
             IHubContext<Notification> notificationHubContext,
             IAppSettingRepository appSettingRepository,
-            IRolePermissionRepository rolePermissionRepository)
+            IRolePermissionRepository rolePermissionRepository,
+            ICenteralRepository centeralRepository)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -60,6 +65,7 @@ namespace GSC.Api.Controllers.UserMgt
             _notificationHubContext = notificationHubContext;
             _appSettingRepository = appSettingRepository;
             _rolePermissionRepository = rolePermissionRepository;
+            _centeralRepository = centeralRepository;        
         }
 
         [HttpPost]
@@ -237,8 +243,8 @@ namespace GSC.Api.Controllers.UserMgt
             
             if (!string.IsNullOrEmpty(login.Token))
             {
-                _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
-                _userRepository.Update(authUser);
+                _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);               
+                _userRepository.Update(authUser);             
             }
 
             _uow.Save();
@@ -267,9 +273,9 @@ namespace GSC.Api.Controllers.UserMgt
                 LanguageShortName = authUser.Language.ToString()
             };
 
-
-            var imageUrl = _uploadSettingRepository
-                .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
+            var imageUrl ="";
+            //var imageUrl = _uploadSettingRepository
+            //    .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
 
             var company = _companyRepository.Find((int)authUser.CompanyId);
             if (company != null)
@@ -301,6 +307,7 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
                 _userRepository.Update(authUser);
+                _centeralRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
             }
 
             _uow.Save();
@@ -382,6 +389,7 @@ namespace GSC.Api.Controllers.UserMgt
         [AllowAnonymous]
         public IActionResult Refresh([FromBody] RefreshTokenDto token)
         {
+            _centeralRepository.Refresh(token.AccessToken, token.RefreshToken);
             return Ok(_userRepository.Refresh(token.AccessToken, token.RefreshToken));
         }
 

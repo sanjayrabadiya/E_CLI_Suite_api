@@ -33,6 +33,10 @@ using GSC.Respository.Volunteer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using GSC.Centeral.Context;
+using GSC.Centeral.GenericRespository;
+using GSC.Centeral.UnitOfWork;
+using GSC.Respository.CenteralAuth;
 
 namespace GSC.Api.Helpers
 {
@@ -253,6 +257,12 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEconsentChatRepository, EconsentChatRepository>();
             services.AddScoped<IEconsentSetupRolesRepository, EconsentSetupRolesRepository>();
             services.AddScoped<ISiteRepository, SiteRepository>();
+
+            services.AddScoped<ICenteralUserPasswordRepository, CenteralUserPasswordRepository>();
+            services.AddScoped<IRefreshTokenCenteralRepository, RefreshTokenCenteralRepository>();
+            services.AddScoped<ICenteralRepository, CenteralRepository>();
+            services.AddScoped<IUnitOfWorkCenteral, UnitOfWorkCenteral<CenteralContext>>();
+            services.AddScoped(typeof(IUnitOfWorkCenteral<CenteralContext>), typeof(UnitOfWorkCenteral<CenteralContext>));
         }
     }
 }

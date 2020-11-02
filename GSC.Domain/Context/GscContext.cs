@@ -59,6 +59,12 @@ namespace GSC.Domain.Context
         {
         }
 
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer(@"Server=GSCL1;Database=NewUI;user id=sa;password=gsc2019;Trusted_Connection=True;");
+        //    base.OnConfiguring(optionsBuilder);
+        //}
+
         public DbSet<InvestigatorContact> InvestigatorContact { get; set; }
         public DbSet<Activity> Activity { get; set; }
         public DbSet<AppScreen> AppScreen { get; set; }
