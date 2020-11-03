@@ -11,5 +11,6 @@ namespace GSC.Data.Entities.Master
         public string IECIRBContactEmail { get; set; }
         public string IECIRBContactNumber { get; set; }
         public int? CompanyId { get; set; }
+        public ManageSite ManageSite { get; set; }
     }
 }

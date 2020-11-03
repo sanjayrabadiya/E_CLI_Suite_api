@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.Master
         public int CityId { get; set; }
         public int? CompanyId { get; set; }
         public City City { get; set; }
-        public List<ManageSiteRole> ManageSiteRole { get; set; } = null;
+        public IList<TrialType> TrialType { get; set; } = null;
+       public List<ManageSiteRole> ManageSiteRole { get; set; } = null;
     }
 }

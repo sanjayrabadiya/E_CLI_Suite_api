@@ -16,9 +16,6 @@ namespace GSC.Data.Dto.Master
 
         [Required(ErrorMessage = "RegistrationNumber is required.")]
         public string RegistrationNumber { get; set; }
-
-        [Required(ErrorMessage = "Site Name is required.")]
-        public int ManageSiteId { get; set; }
         public string SiteName { get; set; }
 
         [Required(ErrorMessage = "ContactNumber is required.")]
