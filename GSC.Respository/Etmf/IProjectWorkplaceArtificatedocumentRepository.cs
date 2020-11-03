@@ -25,5 +25,6 @@ namespace GSC.Respository.Etmf
         IList<EtmfAuditLogReportDto> GetEtmfAuditLogReport(EtmfAuditLogReportSearchDto filters);
         CommonArtifactDocumentDto GetDocument(int id);
         string ImportWordDocument(Stream stream, string FullPath);
+        string SaveDocumentInFolder(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument, CustomParameter param);
     }
 }

@@ -93,8 +93,8 @@ namespace GSC.Respository.Etmf
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
-                    TaskInformation = 
-                    ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription() +" | " +
+                    TaskInformation =
+                    ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription() + " | " +
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
@@ -130,6 +130,22 @@ namespace GSC.Respository.Etmf
                 }).OrderByDescending(x => x.Id).ToList();
 
             return result;
+        }
+
+        public void IsApproveDocument(int Id)
+        {
+            var DocumentApprover = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
+           && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList().GroupBy(x => x.UserId).Select(x => new ProjectArtificateDocumentApprover
+           {
+               Id = x.FirstOrDefault().Id,
+               IsApproved = x.FirstOrDefault().IsApproved,
+               ProjectWorkplaceArtificatedDocumentId = x.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId
+           }).ToList();
+
+            if (DocumentApprover.All(x => x.IsApproved == true))
+            {
+                _projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(Id, true);
+            }
         }
     }
 }
