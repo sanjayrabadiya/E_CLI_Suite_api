@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 
@@ -41,6 +42,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IAppSettingRepository _appSettingRepository;
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly ICenteralRepository _centeralRepository;
+        private readonly IConfiguration _configuration;
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -53,7 +55,7 @@ namespace GSC.Api.Controllers.UserMgt
             IHubContext<Notification> notificationHubContext,
             IAppSettingRepository appSettingRepository,
             IRolePermissionRepository rolePermissionRepository,
-            ICenteralRepository centeralRepository)
+            ICenteralRepository centeralRepository, IConfiguration configuration)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -65,7 +67,8 @@ namespace GSC.Api.Controllers.UserMgt
             _notificationHubContext = notificationHubContext;
             _appSettingRepository = appSettingRepository;
             _rolePermissionRepository = rolePermissionRepository;
-            _centeralRepository = centeralRepository;        
+            _centeralRepository = centeralRepository;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -120,7 +123,7 @@ namespace GSC.Api.Controllers.UserMgt
                 dto.IsFirstTime = user.IsFirstTime;
                 return Ok(dto);
             }
-            
+
             //var loginUser = await CheckifAlreadyLogin(user);
             //if (!dto.IsAnotherDevice && loginUser.IsLogin)
             //{
@@ -240,11 +243,11 @@ namespace GSC.Api.Controllers.UserMgt
             authUser.RoleTokenId = null;
             authUser.LastLoginDate = DateTime.Now;
             _userLoginReportRepository.SaveLog("Successfully Login", authUser.Id, authUser.UserName);
-            
+
             if (!string.IsNullOrEmpty(login.Token))
             {
-                _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);               
-                _userRepository.Update(authUser);             
+                _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
+                _userRepository.Update(authUser);
             }
 
             _uow.Save();
@@ -272,10 +275,9 @@ namespace GSC.Api.Controllers.UserMgt
                 Language = authUser.Language,
                 LanguageShortName = authUser.Language.ToString()
             };
-
-            var imageUrl ="";
-            //var imageUrl = _uploadSettingRepository
-            //    .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
+                      
+            var imageUrl = _uploadSettingRepository
+                .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
 
             var company = _companyRepository.Find((int)authUser.CompanyId);
             if (company != null)
@@ -284,13 +286,13 @@ namespace GSC.Api.Controllers.UserMgt
                 login.CompanyLogo = imageUrl + company.Logo;
                 //login.UserPicUrl = imageUrl +
                 //                   (authUser.ProfilePic ?? DocumentService.DefulatProfilePic);
-                login.UserPicUrl = DocumentService.ConvertBase64Image(imageUrl +(authUser.ProfilePic ?? DocumentService.DefulatProfilePic));
+                login.UserPicUrl = DocumentService.ConvertBase64Image(imageUrl + (authUser.ProfilePic ?? DocumentService.DefulatProfilePic));
             }
 
             login.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(authUser.CompanyId);
             login.Rights = _rolePermissionRepository.GetByUserId(authUser.Id, roleId);
             login.Roles = _userRoleRepository.GetRoleByUserName(authUser.UserName);
-            login.RoleName = login.Roles.FirstOrDefault(t=>t.Id == roleId)?.Value;
+            login.RoleName = login.Roles.FirstOrDefault(t => t.Id == roleId)?.Value;
 
             authUser.FailedLoginAttempts = 0;
             authUser.RoleTokenId = roleTokenId;
@@ -307,7 +309,8 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
                 _userRepository.Update(authUser);
-                _centeralRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
+                if (Convert.ToBoolean(_configuration["IsCloud"]))
+                    _centeralRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
             }
 
             _uow.Save();
