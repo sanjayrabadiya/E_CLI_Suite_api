@@ -392,7 +392,8 @@ namespace GSC.Api.Controllers.UserMgt
         [AllowAnonymous]
         public IActionResult Refresh([FromBody] RefreshTokenDto token)
         {
-            _centeralRepository.Refresh(token.AccessToken, token.RefreshToken);
+            if (Convert.ToBoolean(_configuration["IsCloud"]))
+                _centeralRepository.Refresh(token.AccessToken, token.RefreshToken);
             return Ok(_userRepository.Refresh(token.AccessToken, token.RefreshToken));
         }
 
