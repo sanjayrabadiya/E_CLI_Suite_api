@@ -4,6 +4,7 @@ using AutoMapper;
 using GSC.Api.Helpers;
 using GSC.Api.Hubs;
 using GSC.Audit;
+using GSC.Centeral.Context;
 using GSC.Data.Dto.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -45,6 +46,12 @@ namespace GSC.Api
             {
                 options.UseSqlServer(_configuration.GetConnectionString("dbConnectionString"));
             });
+            //services.AddEntityFrameworkSqlServer().AddDbContext<GscContext>();
+            services.AddDbContextPool<CenteralContext>(options =>
+            {
+                options.UseSqlServer(_configuration.GetConnectionString("dbConnectionStringCenteral"));
+            });
+
             services.AddConfig(_configuration);
             services.AddDependencyInjection(_configuration);
             services.AddAutoMapper(Assembly.GetAssembly(typeof(AutoMapperConfiguration)));

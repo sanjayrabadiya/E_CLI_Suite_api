@@ -2,12 +2,15 @@
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Centeral.Models;
+using GSC.Centeral.UnitOfWork;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
+using GSC.Respository.CenteralAuth;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
@@ -31,6 +34,11 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
 
+        private readonly ICenteralRepository _centeralRepository;
+        private readonly ICenteralUserPasswordRepository _centeralUserPasswordRepository;
+        private readonly IUnitOfWorkCenteral _uowc;
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
+
         public UserController(IUserRepository userRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -38,7 +46,8 @@ namespace GSC.Api.Controllers.UserMgt
             IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IUserRoleRepository userRoleRepository,
-            IProjectRepository projectRepository)
+            IProjectRepository projectRepository, ICenteralRepository centeralRepository,
+            ICenteralUserPasswordRepository centeralUserPasswordRepository, IUnitOfWorkCenteral uowc, Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             _userRepository = userRepository;
             _uow = uow;
@@ -49,6 +58,10 @@ namespace GSC.Api.Controllers.UserMgt
             _uploadSettingRepository = uploadSettingRepository;
             _userRoleRepository = userRoleRepository;
             _projectRepository = projectRepository;
+            _centeralRepository = centeralRepository;
+            _centeralUserPasswordRepository = centeralUserPasswordRepository;
+            _uowc = uowc;
+            _configuration = configuration;
         }
 
 
@@ -115,18 +128,32 @@ namespace GSC.Api.Controllers.UserMgt
             user.IsLocked = false;
             //user.Location = _locationRepository.SaveLocation(user.Location);
             user.IsFirstTime = true;
-            var validate = _userRepository.DuplicateUserName(user);
+            var centeraluser = _mapper.Map<Users>(userDto);
+            // var validate = _centeralRepository.DuplicateUserName(centeraluser);
+            string validate = "";
+            bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
+            if (IsCloud)
+                validate = _centeralRepository.DuplicateUserName(centeraluser);
+            else
+                validate = _userRepository.DuplicateUserName(user);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+            //harshil          
+            if (IsCloud)
+            {
+                int UserID = _centeralRepository.Save(centeraluser);
+                user.Id = UserID;
+            }
             _userRepository.Add(user);
             if (_uow.Save() <= 0) throw new Exception("Creating a User  failed on save.");
 
             var password = RandomPassword.CreateRandomPassword(6);
             _userPasswordRepository.CreatePassword(password, user.Id);
+            if (IsCloud)
+                _centeralUserPasswordRepository.CreatePassword(password, user.Id);
 
             _emailSenderRespository.SendRegisterEMail(user.Email, password, user.UserName);
             return Ok(user.Id);
@@ -144,27 +171,36 @@ namespace GSC.Api.Controllers.UserMgt
                     _uploadSettingRepository.GetImagePath(), FolderType.Employee);
 
             var user = _mapper.Map<User>(userDto);
+            var centeraluser = _mapper.Map<Users>(userDto);
             user.IsFirstTime = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsFirstTime ?? false;
             user.IsLocked = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsLocked ?? false;
 
-            var validate = _userRepository.DuplicateUserName(user);
+            bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
+            var validate = "";
+            if (IsCloud)
+                validate = _centeralRepository.DuplicateUserName(centeraluser);
+            else
+                validate = _userRepository.DuplicateUserName(user);
+
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
             UpdateRole(user);
             _userRepository.Update(user);
             if (_uow.Save() <= 0) throw new Exception("Updating user failed on save.");
-
+            if (IsCloud)
+            {
+                _centeralRepository.Update(centeraluser);
+                if (_uowc.Save() <= 0) throw new Exception("Updating user failed on save.");
+            }
             return Ok(user.Id);
         }
 
         private void UpdateRole(User user)
         {
-            var roleDelete = _userRoleRepository.FindBy(x => x.UserId == user.Id
-                                                             )
+            var roleDelete = _userRoleRepository.FindBy(x => x.UserId == user.Id)
                 .ToList();
             foreach (var item in roleDelete)
             {
@@ -190,59 +226,137 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            var user = _userRepository.Find(id);
-            _userRepository.Delete(user);
-            _uow.Save();
+            if (!Convert.ToBoolean(_configuration["IsCloud"]))
+            {
+                var user = _userRepository.Find(id);
+                _userRepository.Delete(user);
+                _uow.Save();
+            }
+            else
+            {
+                //harshil
+                var cuser = _centeralRepository.Find(id);
+                _centeralRepository.Delete(cuser);
+                _uowc.Save();
+            }
             return Ok();
         }
-
-
         [HttpPost]
         [Route("ChangePassword")]
         [AllowAnonymous]
         public IActionResult ChangePassword([FromBody] ChangePasswordDto loginDto)
         {
-            var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
-                .FirstOrDefault();
-            if (user == null)
-                return NotFound();
+            //var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
+            //    .FirstOrDefault();
+            //if (user == null)
+            //    return NotFound();
 
-            if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(loginDto.OldPassword, user.Id)))
+            //if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(loginDto.OldPassword, user.Id)))
+            //{
+            //    ModelState.AddModelError("Message", "Current Password invalid!");
+            //    return BadRequest(ModelState);
+            //}
+
+            //user.IsFirstTime = false;
+            //user.IsLogin = false;
+            //_userRepository.Update(user);
+
+
+            //_uow.Save();
+            //harshil
+            bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
+            if (!IsCloud)
             {
-                ModelState.AddModelError("Message", "Current Password invalid!");
-                return BadRequest(ModelState);
+                var cuser = _centeralRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
+                 .FirstOrDefault();
+
+                if (cuser == null)
+                    return NotFound();
+
+                if (!string.IsNullOrEmpty(_centeralUserPasswordRepository.VaidatePassword(loginDto.OldPassword, cuser.Id)))
+                {
+                    ModelState.AddModelError("Message", "Current Password invalid!");
+                    return BadRequest(ModelState);
+                }
+                _centeralUserPasswordRepository.CreatePassword(loginDto.NewPassword, cuser.Id);
+            }
+            else
+            {
+                var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
+                    .FirstOrDefault();
+                if (user == null)
+                    return NotFound();
+
+                if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(loginDto.OldPassword, user.Id)))
+                {
+                    ModelState.AddModelError("Message", "Current Password invalid!");
+                    return BadRequest(ModelState);
+                }
+                user.IsFirstTime = false;
+                user.IsLogin = false;
+                _userRepository.Update(user);
+
+                _uow.Save();
+                _emailSenderRespository.SendRegisterEMail(user.Email, loginDto.NewPassword, user.UserName);
             }
 
-            user.IsFirstTime = false;
-            user.IsLogin = false;
-            _userRepository.Update(user);
-
-
-            _uow.Save();
-
-            _userPasswordRepository.CreatePassword(loginDto.NewPassword, user.Id);
-            _emailSenderRespository.SendRegisterEMail(user.Email, loginDto.NewPassword, user.UserName);
             return Ok();
         }
 
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
-            var record = _userRepository.Find(id);
+            //var record = _userRepository.Find(id);
 
-            if (record == null)
-                return NotFound();
+            //if (record == null)
+            //    return NotFound();
 
-            var validate = _userRepository.DuplicateUserName(record);
-            if (!string.IsNullOrEmpty(validate))
+            //var validate = _userRepository.DuplicateUserName(record);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
+
+            //_userRepository.Active(record);
+            //_uow.Save();
+
+            //harshil
+
+            bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
+            if (!IsCloud)
             {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
+                var crecord = _centeralRepository.Find(id);
+                if (crecord == null)
+                    return NotFound();
+
+                var validate = _centeralRepository.DuplicateUserName(crecord);
+                if (!string.IsNullOrEmpty(validate))
+                {
+                    ModelState.AddModelError("Message", validate);
+                    return BadRequest(ModelState);
+                }
+
+                _centeralRepository.Active(crecord);
+                _uowc.Save();
+
             }
+            else
+            {
+                var record = _userRepository.Find(id);
+                if (record == null)
+                    return NotFound();
 
-            _userRepository.Active(record);
-            _uow.Save();
+                var validate = _userRepository.DuplicateUserName(record);
+                if (!string.IsNullOrEmpty(validate))
+                {
+                    ModelState.AddModelError("Message", validate);
+                    return BadRequest(ModelState);
+                }
 
+                _userRepository.Active(record);
+                _uow.Save();
+            }
             return Ok();
         }
 

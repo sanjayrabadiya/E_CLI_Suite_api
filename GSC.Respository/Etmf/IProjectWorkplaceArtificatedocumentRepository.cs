@@ -4,6 +4,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace GSC.Respository.Etmf
@@ -23,5 +24,6 @@ namespace GSC.Respository.Etmf
         List<DropDownDto> GetEtmfArtificateDropdown(int sectionId);
         IList<EtmfAuditLogReportDto> GetEtmfAuditLogReport(EtmfAuditLogReportSearchDto filters);
         CommonArtifactDocumentDto GetDocument(int id);
+        string ImportWordDocument(Stream stream, string FullPath);
     }
 }

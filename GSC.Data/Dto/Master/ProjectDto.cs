@@ -131,4 +131,15 @@ namespace GSC.Data.Dto.Master
         public int? NoofFormulas { get; set; }
         public bool? MarkAsCompleted { get; set; }
     }
+
+
+    public class StydyDetails
+    {
+        public string StudyCode { get; set; }
+        public int NoofStudy { get; set; }
+        public int NoofSites { get; set; }
+        public DateTime ValidFrom { get; set; }
+        public DateTime ValidTo { get; set; }
+        public int CompanyID { get; set; }
+    }
 }
