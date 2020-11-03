@@ -60,5 +60,28 @@ namespace GSC.Respository.Master
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.SiteName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
+        public void UpdateRole(ManageSite ManageSite)
+        {
+            var roleDelete = Context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.Id).ToList();
+            foreach (var item in roleDelete)
+            {
+                item.DeletedDate = DateTime.Now;
+                Context.Update(item);
+            }
+
+            for (var i = 0; i < ManageSite.ManageSiteRole.Count; i++)
+            {
+                var i1 = i;
+                var siterole = Context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.ManageSiteRole[i1].ManageSiteId
+                                                               && x.TrialTypeId == ManageSite.ManageSiteRole[i1].TrialTypeId)
+                    .FirstOrDefault();
+                if (siterole != null)
+                {
+                    siterole.DeletedDate = null;
+                    siterole.DeletedBy = null;
+                    ManageSite.ManageSiteRole[i] = siterole;
+                }
+            }
+        }
     }
 }

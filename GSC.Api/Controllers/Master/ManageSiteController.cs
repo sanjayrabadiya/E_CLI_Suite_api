@@ -56,10 +56,13 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(int id)
         {
             var manageSite = _manageSiteRepository
-                    .FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
+                    .FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country, x => x.ManageSiteRole)
                     .SingleOrDefault();
             if (manageSite == null)
                 return BadRequest();
+
+            if (manageSite != null && manageSite.ManageSiteRole != null)
+                manageSite.ManageSiteRole = manageSite.ManageSiteRole.Where(x => x.DeletedDate == null).ToList();
 
             var manageSiteDto = _mapper.Map<ManageSiteDto>(manageSite);
             manageSiteDto.StateId = manageSite.City.State.Id;
@@ -104,10 +107,11 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            manageSite.Id = manageSiteDto.Id;
+            //manageSite.Id = manageSiteDto.Id;
 
+            _manageSiteRepository.UpdateRole(manageSite);
             /* Added by Darshil for effective Date on 24-07-2020 */
-            _manageSiteRepository.AddOrUpdate(manageSite);
+            _manageSiteRepository.Update(manageSite);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Site failed on save.");
             return Ok(manageSite.Id);

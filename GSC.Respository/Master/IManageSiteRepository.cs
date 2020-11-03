@@ -11,5 +11,6 @@ namespace GSC.Respository.Master
         string Duplicate(ManageSite objSave);
         List<DropDownDto> GetManageSiteDropDown();
         IList<ManageSiteDto> GetManageSiteList(int Id);
+        void UpdateRole(ManageSite ManageSite);
     }
 }

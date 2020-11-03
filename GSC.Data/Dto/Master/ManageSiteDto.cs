@@ -1,6 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Location;
-using System.ComponentModel.DataAnnotations;
+using GSC.Data.Entities.Master;
+using System.Collections.Generic;
 
 namespace GSC.Data.Dto.Master
 {
@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.Master
         public int StateId { get; set; }
         public int CountryId { get; set; }
         public int? CompanyId { get; set; }
+        public List<ManageSiteRole> ManageSiteRole { get; set; }
     }
 
      public class ManageSiteGridDto : BaseAuditDto

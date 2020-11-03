@@ -181,7 +181,8 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.ContactName, x => x.MapFrom(a => a.ManageSite.ContactName))
                .ForMember(x => x.SiteEmail, x => x.MapFrom(a => a.ManageSite.SiteEmail))
                .ForMember(x => x.ManageSiteId, x => x.MapFrom(a => Convert.ToInt32(a.ManageSiteId)))
-               //.ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.IECIRB.ToList().Select(x => x.IECIRBName))))
+               //.ForMember(x => x.IECIRBName, x => x.MapFrom(a => a.ManageSite.SiteEmail))//string.Join(", ", a.IECIRB.ToList().Select(x => x.IECIRBName))))
+               // .ForMember(x => x.IECIRBName, x => x.MapFrom(a => a.IECIRB.ToList().FirstOrDefault().IECIRBName))//string.Join(", ", a.IECIRB.ToList().Select(x => x.IECIRBName))))
                .ReverseMap();
         }
     }
