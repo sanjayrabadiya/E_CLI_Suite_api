@@ -82,7 +82,6 @@ namespace GSC.Api.Controllers.Etmf
         [Route("ApproveDocument/{DocApprover}/{Id}")]
         public IActionResult ApproveDocument(bool DocApprover, int Id)
         {
-            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var ProjectArtificateDocumentApproverDto = _projectArtificateDocumentApproverRepository.FindByInclude(x => x.UserId == _jwtTokenAccesser.UserId
             && x.ProjectWorkplaceArtificatedDocumentId == Id && x.IsApproved == null).FirstOrDefault();
 
@@ -91,18 +90,9 @@ namespace GSC.Api.Controllers.Etmf
             _projectArtificateDocumentApproverRepository.Update(ProjectArtificateDocumentApprover);
             if (_uow.Save() <= 0) throw new Exception("Updating Approver failed on save.");
 
-            var DocumentApprover = _projectArtificateDocumentApproverRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == Id
-            && x.DeletedDate == null).OrderByDescending(x => x.Id).GroupBy(x => x.UserId).Select(x => new ProjectArtificateDocumentApprover
-            {
-                Id = x.FirstOrDefault().Id,
-                IsApproved = x.FirstOrDefault().IsApproved,
-                ProjectWorkplaceArtificatedDocumentId = x.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId
-              }).ToList();
-
-            if (DocumentApprover.All(x => x.IsApproved == true))
-            {
-                _projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(Id, true);
-            }
+            _projectArtificateDocumentApproverRepository.IsApproveDocument(Id);
+            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApprover.ProjectWorkplaceArtificatedDocumentId);
+            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, ProjectArtificateDocumentApprover.Id);
 
             return Ok(ProjectArtificateDocumentApprover.Id);
         }

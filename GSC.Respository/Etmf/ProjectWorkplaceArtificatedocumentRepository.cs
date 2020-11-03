@@ -515,5 +515,83 @@ namespace GSC.Respository.Etmf
             }
         }
 
+        public string SaveDocumentInFolder(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument, CustomParameter param)
+        {
+            string filePath = string.Empty;
+            var upload = Context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var fileName = projectWorkplaceArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceArtificatedocument.DocumentName.Substring(0, projectWorkplaceArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceArtificatedocument.DocumentName;
+            var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
+            filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceArtificatedocument.DocPath, docName);
+
+            Byte[] byteArray = Convert.FromBase64String(param.documentData);
+            Stream stream = new MemoryStream(byteArray);
+            FormatType type = GetFormatTypeExport(filePath);
+
+            FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+
+            if (type != FormatType.Docx)
+            {
+                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                document.Save(fileStream, GetDocIOFomatType(type));
+                document.Close();
+            }
+            else
+            {
+                stream.Position = 0;
+                stream.CopyTo(fileStream);
+            }
+            stream.Dispose();
+            fileStream.Dispose();
+            return docName;
+        }
+
+        internal static Syncfusion.DocIO.FormatType GetDocIOFomatType(FormatType type)
+        {
+            switch (type)
+            {
+                case FormatType.Docx:
+                    return (Syncfusion.DocIO.FormatType)FormatType.Docx;
+                case FormatType.Doc:
+                    return (Syncfusion.DocIO.FormatType)FormatType.Doc;
+                case FormatType.Rtf:
+                    return (Syncfusion.DocIO.FormatType)FormatType.Rtf;
+                case FormatType.Txt:
+                    return (Syncfusion.DocIO.FormatType)FormatType.Txt;
+                case FormatType.WordML:
+                    return (Syncfusion.DocIO.FormatType)FormatType.WordML;
+                default:
+                    throw new NotSupportedException("DocIO does not support this file format.");
+            }
+        }
+
+        internal static FormatType GetFormatTypeExport(string fileName)
+        {
+            int index = fileName.LastIndexOf('.');
+            string format = index > -1 && index < fileName.Length - 1 ? fileName.Substring(index + 1) : "";
+
+            if (string.IsNullOrEmpty(format))
+                throw new NotSupportedException("EJ2 Document editor does not support this file format.");
+            switch (format.ToLower())
+            {
+                case "dotx":
+                case "docx":
+                case "docm":
+                case "dotm":
+                    return FormatType.Docx;
+                case "dot":
+                case "doc":
+                    return FormatType.Doc;
+                case "rtf":
+                    return FormatType.Rtf;
+                case "txt":
+                    return FormatType.Txt;
+                case "xml":
+                    return FormatType.WordML;
+                default:
+                    throw new NotSupportedException("EJ2 Document editor does not support this file format.");
+            }
+        }
+
+
     }
 }

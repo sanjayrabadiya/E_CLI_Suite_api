@@ -15,6 +15,7 @@ namespace GSC.Respository.Etmf
         void SendMailForApprover(ProjectArtificateDocumentApproverDto ProjectArtificateDocumentApproverDto);
         List<DashboardDto> GetEtmfMyTaskList(int ProjectId);
         List<ProjectArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id);
+        void IsApproveDocument(int Id);
 
     }
 }

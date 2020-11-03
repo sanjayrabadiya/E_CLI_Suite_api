@@ -61,6 +61,7 @@ namespace GSC.Data.Dto.Etmf
         public int id { get; set; }
         public string fileName { get; set; }
         public string documentData { get; set; }
+        public bool AddHistory { get; set; }
     }
 
 }
