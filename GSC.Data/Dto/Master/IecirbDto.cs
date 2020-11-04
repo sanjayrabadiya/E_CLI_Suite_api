@@ -5,7 +5,7 @@ namespace GSC.Data.Dto.Master
 {
     public class IecirbDto : BaseDto
     {
-        public int? ManageSiteId { get; set; }
+        public int ManageSiteId { get; set; }
         [Required(ErrorMessage = "IECIRB Name is required.")]
         public string IECIRBName { get; set; }
         [Required(ErrorMessage = "Registration Number is required.")]

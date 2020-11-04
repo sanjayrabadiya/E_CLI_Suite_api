@@ -1,6 +1,7 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Master
 {
@@ -15,7 +16,7 @@ namespace GSC.Data.Entities.Master
         public int CityId { get; set; }
         public int? CompanyId { get; set; }
         public City City { get; set; }
-        public IList<TrialType> TrialType { get; set; } = null;
-       public List<ManageSiteRole> ManageSiteRole { get; set; } = null;
+        public List<ManageSiteRole> ManageSiteRole { get; set; } = null;
+        public List<Iecirb> Iecirb { get; set; } = null;
     }
 }

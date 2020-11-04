@@ -136,7 +136,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
                 .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
-                //.ForMember(x => x.TherapeuticIndicationName, x => x.MapFrom(a => string.Join(", ", a.TrialType.ToList().Select(x => x.TrialTypeName))))
+                .ForMember(x => x.TherapeuticIndicationName, x => x.MapFrom(a => string.Join(", ", a.ManageSiteRole.Where(x => x.DeletedDate == null).Select(s => s.TrialType.TrialTypeName).ToList())))
                 .ReverseMap();
 
             CreateMap<VariableTemplate, VariableTemplateGridDto>()
@@ -172,7 +172,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.ContactName, x => x.MapFrom(a => a.ManageSite.ContactName))
                .ForMember(x => x.SiteEmail, x => x.MapFrom(a => a.ManageSite.SiteEmail))
                .ForMember(x => x.ManageSiteId, x => x.MapFrom(a => Convert.ToInt32(a.ManageSiteId)))
-               //.ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.IECIRB.ToList().Select(x => x.IECIRBName))))
+               .ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.ManageSite.Iecirb.ToList().Select(x => x.IECIRBName))))
                .ReverseMap();
         }
     }
