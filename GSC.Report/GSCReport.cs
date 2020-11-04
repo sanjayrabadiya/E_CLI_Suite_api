@@ -16,6 +16,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
 using Microsoft.AspNetCore.Mvc;
@@ -34,11 +35,12 @@ namespace GSC.Report
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
-
+        private readonly IScreeningEntryRepository _screeningEntryRepository;
         public GscReport(IReportBaseRepository reportBaseRepository, IJwtTokenAccesser jwtTokenAccesser,
             IProjectRepository projectRepository, IVolunteerRepository volunteerRepository,
              IProjectDesignPeriodRepository projectDesignPeriodRepository, IProjectDesignRepository projectDesignRepository,
-              IUploadSettingRepository uploadSettingRepository, IUserRepository userRepository, IEmailSenderRespository emailSenderRespository)
+              IUploadSettingRepository uploadSettingRepository, IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
+              IScreeningEntryRepository screeningEntryRepository)
         {
             _reportBaseRepository = reportBaseRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -49,6 +51,7 @@ namespace GSC.Report
             _uploadSettingRepository = uploadSettingRepository;
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;
+            _screeningEntryRepository = screeningEntryRepository;
         }
 
         public FileStreamResult GetProjectDesign(int id)
@@ -477,21 +480,10 @@ namespace GSC.Report
 
                             var isStatic = _projectRepository.Find(projectId).IsStatic;
                             var volunteers = new List<DropDownDto>();
-                            if (isStatic)
-                            {
-                                var projectDesignPeriod = _projectDesignPeriodRepository.FindByInclude(x => x.ProjectDesignId == reportSettingNew.ProjectId).FirstOrDefault();
-                                var attendance = _volunteerRepository.GetVolunteersForDataEntryByPeriodId(projectDesignPeriod.Id, ChildProjectId);
-                                volunteers.AddRange(attendance);
-                            }
-                            else
-                            {
-                                var projectDesignPeriod = _projectDesignPeriodRepository.FindByInclude(x => x.ProjectDesignId == reportSettingNew.ProjectId).ToList();
-                                projectDesignPeriod.ForEach(t =>
-                                {
-                                    var subject = _volunteerRepository.GetVolunteersForDataEntryByPeriodId(t.Id, ChildProjectId);
-                                    volunteers.AddRange(subject);
-                                });
-                            }
+                            var subject = _screeningEntryRepository.GetSubjectByProjecId(ChildProjectId);
+                            volunteers.AddRange(subject);
+
+
                             #endregion
 
                             foreach (var SubjectId in volunteers)

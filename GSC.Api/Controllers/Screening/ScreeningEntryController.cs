@@ -183,5 +183,12 @@ namespace GSC.Api.Controllers.Screening
 
             return Ok(screeningSummaryDto);
         }
+
+        [HttpGet]
+        [Route("GetSubjectByProjecId/{projectId}")]
+        public IActionResult GetSubjectByProjecId(int projectId)
+        {
+            return Ok(_screeningEntryRepository.GetSubjectByProjecId(projectId));
+        }
     }
 }

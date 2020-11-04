@@ -211,12 +211,7 @@ namespace GSC.Api.Controllers.Volunteer
             return Ok(_volunteerRepository.GetVolunteerForAttendance(search));
         }
 
-        [HttpGet]
-        [Route("GetVolunteersForDataEntryByPeriodId/{projectDesignPeriodId}/{projectId}")]
-        public IActionResult GetPeriodsForDataEntryByProjectId(int projectDesignPeriodId, int projectId)
-        {
-            return Ok(_volunteerRepository.GetVolunteersForDataEntryByPeriodId(projectDesignPeriodId, projectId));
-        }
+       
 
         [HttpGet]
         [Route("getVolunteersForDataEntryByPeriodIdLocked/{projectDesignPeriodId}/{projectId}/{isLock}")]

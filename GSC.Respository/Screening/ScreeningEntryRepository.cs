@@ -495,5 +495,28 @@ namespace GSC.Respository.Screening
 
             return result;
         }
+
+
+        public IList<DropDownDto> GetSubjectByProjecId(int projectId)
+        {
+
+            return All.Where(a => a.DeletedDate == null && a.ProjectId == projectId).Select(
+                x => new DropDownDto
+                {
+                    Id = x.Id,
+                    Value = x.RandomizationId != null
+                        ? Convert.ToString(x.Randomization.ScreeningNumber + " - " +
+                                           x.Randomization.Initial +
+                                           (x.Randomization.RandomizationNumber == null
+                                               ? ""
+                                               : " - " + x.Randomization.RandomizationNumber))
+                        : Convert.ToString(
+                            Convert.ToString(x.Attendance.ProjectSubject != null
+                                ? x.Attendance.ProjectSubject.Number
+                                : "") + " - " + x.Attendance.Volunteer.FullName),
+                    Code = "Screening"
+                }).Distinct().ToList();
+
+        }
     }
 }

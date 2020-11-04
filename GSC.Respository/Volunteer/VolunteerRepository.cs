@@ -286,30 +286,7 @@ namespace GSC.Respository.Volunteer
             }).ToList();
         }
 
-        public IList<DropDownDto> GetVolunteersForDataEntryByPeriodId(int projectDesignPeriodId, int projectId)
-        {
-
-            return Context.ScreeningEntry.Where(a => a.DeletedDate == null
-                                                                   && a.ProjectDesignPeriodId == projectDesignPeriodId
-                                                                   && a.ProjectId == projectId).Select(
-                x => new DropDownDto
-                {
-                    Id = x.Id,
-                    Value = x.RandomizationId != null
-                        ? Convert.ToString(x.Randomization.ScreeningNumber + " - " +
-                                           x.Randomization.Initial +
-                                           (x.Randomization.RandomizationNumber == null
-                                               ? ""
-                                               : " - " + x.Randomization.RandomizationNumber))
-                        : Convert.ToString(
-                            Convert.ToString(x.Attendance.ProjectSubject != null
-                                ? x.Attendance.ProjectSubject.Number
-                                : "") + " - " + x.Attendance.Volunteer.FullName),
-                    Code = "Screening",
-                    ExtraData = x.AttendanceId
-                }).Distinct().ToList();
-
-        }
+        
 
         public IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock)
         {

@@ -18,5 +18,6 @@ namespace GSC.Respository.Screening
         IList<ScreeningAuditDto> GetAuditHistory(int id);
         ScreeningSummaryDto GetSummary(int id);
         List<DropDownDto> GetProjectStatusAndLevelDropDown(int parentProjectId);
+        IList<DropDownDto> GetSubjectByProjecId(int projectId);
     }
 }
