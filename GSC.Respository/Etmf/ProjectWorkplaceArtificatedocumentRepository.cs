@@ -18,6 +18,7 @@ using System.Linq;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using System.Text;
 using Syncfusion.EJ2.DocumentEditor;
+using GSC.Respository.Audit;
 
 namespace GSC.Respository.Etmf
 {
