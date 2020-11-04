@@ -299,5 +299,12 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_projectRepository.GetChildProjectRightsDropDown());
         }
+
+        [HttpGet]
+        [Route("GetParentProjectDropDownwithoutRights")]
+        public IActionResult GetParentProjectDropDownwithoutRights()
+        {
+            return Ok(_projectRepository.GetParentProjectDropDown());
+        }
     }
 }

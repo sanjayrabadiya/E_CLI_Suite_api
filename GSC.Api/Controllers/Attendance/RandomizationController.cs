@@ -180,5 +180,14 @@ namespace GSC.Api.Controllers.Attendance
             return Ok();
         }
 
+        [HttpPut]
+        [Route("ChangeStatustoWithdrawal")]
+        public IActionResult ChangeStatustoWithdrawal()
+        {
+            _randomizationRepository.ChangeStatustoWithdrawal();
+            _uow.Save();
+            return Ok();
+        }
+
     }
 }

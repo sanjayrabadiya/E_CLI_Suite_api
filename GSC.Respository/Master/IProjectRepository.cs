@@ -31,5 +31,6 @@ namespace GSC.Respository.Master
         int? GetParentProjectId(int id);
 
         List<ProjectDropDown> GetChildProjectRightsDropDown();
+        List<ProjectDropDown> GetParentProjectDropDownwithoutRights();
     }
 }

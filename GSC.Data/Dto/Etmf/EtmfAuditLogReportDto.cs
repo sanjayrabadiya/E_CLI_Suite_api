@@ -9,6 +9,7 @@ namespace GSC.Data.Dto.Etmf
     {
         public string projectCode { get; set; }
         public string folderName { get; set; }
+        public string countrysiteName { get; set; }
         public string zoneName { get; set; }
         public string sectionName { get; set; }
         public string artificateName { get; set; }
@@ -18,12 +19,15 @@ namespace GSC.Data.Dto.Etmf
         public string action { get; set; }
         public string userName { get; set; }
         public DateTime? actionDate { get; set; }
+        public string auditReason { get; set; }
+        public string auditComment { get; set; }
     }
 
     public class EtmfAuditLogReportSearchDto : BaseDto
     {
         public int projectId { get; set; }
         public int? folderId { get; set; }
+        public int? countrySiteId { get; set; }
         public int? zoneId { get; set; }
         public int? sectionId { get; set; }
         public int? artificateId { get; set; }

@@ -12,5 +12,6 @@ namespace GSC.Data.Dto.InformConcent
         public string LastMessage { get; set; }
         public int UnReadMsgCount { get; set; }
         public bool IsLogin { get; set; }
+        public string LastMessageStatus { get; set; }
     }
 }

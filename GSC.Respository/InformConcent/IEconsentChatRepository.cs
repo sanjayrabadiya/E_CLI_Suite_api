@@ -13,5 +13,7 @@ namespace GSC.Respository.InformConcent
         List<EConsentUserChatDto> GetChatUsersList();
 
         List<EconsentChat> GetEconsentChat(int userId);
+        int GetUnReadMessagecount();
+        
     }
 }

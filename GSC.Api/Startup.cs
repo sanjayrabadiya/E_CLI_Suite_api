@@ -72,7 +72,6 @@ namespace GSC.Api
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GSC API", Version = "v3.1" });
             });
             services.AddHttpContextAccessor();
-
             services.AddSignalR();
         }
 
@@ -83,14 +82,12 @@ namespace GSC.Api
             app.UseExceptionHandler(ErrorHandler.HttpExceptionHandling(env));
             app.UseAuthentication();
             app.UseMiddleware<LogMiddleware>();
-            app.UseCors("AllowCorsPolicy");
-            //app.UseCors(builder =>
-            //{
-            //    //new[] { "http://localhost:4200",
-            //    //                            "https://dev2.clinvigilant.com" }
-            //    builder.WithOrigins("http://localhost:4200")
-            //    .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
-            //});
+            //app.UseCors("AllowCorsPolicy");
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins(new[] { "http://localhost:4200", "https://dev2.clinvigilant.com", "https://demo1.clinvigilant.com", "https://sandbox.clinvigilant.com" })
+                .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+            });
             app.UseStaticFiles();
             var doc = _configuration["DocPath:DocDir"];
 

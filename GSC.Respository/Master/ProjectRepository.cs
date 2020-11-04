@@ -460,6 +460,24 @@ namespace GSC.Respository.Master
             return projectCode.ToUpper();
         }
 
+        public List<ProjectDropDown> GetParentProjectDropDownwithoutRights()
+        {
+            
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ParentProjectId == null
+                    && x.ProjectCode != null)
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).OrderBy(o => o.Value).ToList();
+        }
+
 
     }
 }

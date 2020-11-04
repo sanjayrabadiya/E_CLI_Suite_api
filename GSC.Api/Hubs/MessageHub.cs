@@ -9,9 +9,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace GSC.Api.Hubs
 {
+    [AllowAnonymous]
     public class MessageHub : Hub
     {
         public async Task NewMessage(EconsentChat msg)
@@ -41,18 +43,6 @@ namespace GSC.Api.Hubs
             await Clients.Client(connectionId).SendAsync("MessageDelivered", msg);
         }
 
-        public async Task AllMessageDelivered(List<int> senderIds)
-        {
-            var userlist = ConnectedUser.Ids.Where(x => senderIds.Contains(x.userId)).ToList();
-            List<string> listData = new List<string>();
-            for (int i = 0; i < userlist.Count; i++)
-            {
-                listData.Add(userlist[i].connectionId);
-            }
-            IReadOnlyList<string> readOnlyData = listData.AsReadOnly();
-            await Clients.Clients(readOnlyData).SendAsync("AllMessageDelivered", "Done");
-        }
-
         public void RemoveUser()
         {
             var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();
@@ -75,7 +65,10 @@ namespace GSC.Api.Hubs
             var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();
             ConnectedUser.Ids.Remove(user);
             await base.OnDisconnectedAsync(exception);
-            await Clients.All.SendAsync("UserLogOut", Convert.ToInt32(user.userId));
+            if (user != null)
+            {
+                await Clients.All.SendAsync("UserLogOut", Convert.ToInt32(user.userId));
+            }
         }
 
     }

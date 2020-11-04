@@ -4,6 +4,7 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.InformConcent;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
@@ -242,6 +243,38 @@ namespace GSC.Respository.Attendance
             Update(randomization);
         }
 
+        public void ChangeStatustoWithdrawal()
+        {
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
+            {
+                randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
+                Update(randomization);
+            }
+        }
 
+        public DashboardPatientDto GetDashboardPatientDetail()
+        {
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            if (randomization != null)
+            {
+                var project = Context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault();
+                var parentproject = Context.Project.Where(x => x.Id == project.ParentProjectId).ToList().FirstOrDefault();
+                var investigator = Context.InvestigatorContact.Where(x => x.Id == project.InvestigatorContactId).ToList().FirstOrDefault();
+                DashboardPatientDto dashboardPatientDto = new DashboardPatientDto();
+                dashboardPatientDto.projectId = project.Id;
+                dashboardPatientDto.studycode = parentproject.ProjectCode;
+                dashboardPatientDto.sitecode = project.ProjectCode;
+                dashboardPatientDto.patientStatusId = (int)randomization.PatientStatusId;
+                dashboardPatientDto.patientStatus = randomization.PatientStatusId.GetDescription();
+                dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
+                dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
+                return dashboardPatientDto;
+            } else
+            {
+                return new DashboardPatientDto();
+            }
+            
+        }
     }
 }
