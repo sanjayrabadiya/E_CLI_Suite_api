@@ -27,6 +27,8 @@ namespace GSC.Data.Entities.Attendance
         public int? LanguageId { get; set; }
         public string AddressLine1 { get; set; }
         public string AddressLine2 { get; set; }
+        public int? CountryId { get; set; }
+        public int? StateId { get; set; }
         public int? CityId { get; set; }
         public int? ZipCode { get; set; }
         public string LegalFirstName { get; set; }
@@ -36,6 +38,8 @@ namespace GSC.Data.Entities.Attendance
         public string LegalEmail { get; set; }
         public int? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
+        public Country Country { get; set; }
+        public State State { get; set; }
         public City City { get; set; }
 
         public string ScreeningNumber { get; set; }
@@ -57,7 +61,7 @@ namespace GSC.Data.Entities.Attendance
         public Data.Entities.Master.Project Project { get; set; }
         public virtual ScreeningEntry ScreeningEntry { get; set; }
 
-        public string? SignaturePath { get; set; }
+    //    public string? SignaturePath { get; set; }
         public int? UserId { get; set; }
 
     }

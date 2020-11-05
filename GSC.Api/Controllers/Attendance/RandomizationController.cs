@@ -71,7 +71,7 @@ namespace GSC.Api.Controllers.Attendance
         {
             if (id <= 0) return BadRequest();
 
-            var randomization = _randomizationRepository.FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country)
+            var randomization = _randomizationRepository.FindByInclude(x => x.Id == id, x => x.Country, x => x.State, x => x.City)
                 .SingleOrDefault();
             if (randomization == null)
                 return BadRequest();

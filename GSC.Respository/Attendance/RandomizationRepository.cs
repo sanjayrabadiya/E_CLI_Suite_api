@@ -129,6 +129,10 @@ namespace GSC.Respository.Attendance
                     x.IsShowEconsentIcon = false;
                 }
             });
+
+            var projectCode = Context.Project.Find(Context.Project.Find(projectId).ParentProjectId).ProjectCode;
+            result.ForEach(x => { x.ParentProjectCode = projectCode; });
+
             return result;
         }
 

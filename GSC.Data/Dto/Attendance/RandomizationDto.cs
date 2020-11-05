@@ -32,8 +32,8 @@ namespace GSC.Data.Dto.Attendance
         public string LegalEmail { get; set; }
         public int? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
-        public int StateId { get; set; }
-        public int CountryId { get; set; }
+        public int? StateId { get; set; }
+        public int? CountryId { get; set; }
         public string ScreeningNumber { get; set; }
         public DateTime? _DateOfScreening { get; set; }
         public DateTime? DateOfScreening
@@ -95,6 +95,8 @@ namespace GSC.Data.Dto.Attendance
             get => _DateOfRandomization.UtcDate();
             set => _DateOfRandomization = value.UtcDate();
         }
+
+        public string ParentProjectCode { get; set; }
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
         public bool IsLocked { get; set; }
@@ -104,6 +106,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsEconsentReviewPending { get; set; }
         public List<EconsentReviewDetailsDto> EconsentReviewDetails { get; set; }
         public bool IsmultipleEconsentReviewDetails { get; set; }
+        public int? ZipCode { get; set; }
 
     }
 }
