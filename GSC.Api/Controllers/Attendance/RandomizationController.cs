@@ -26,7 +26,7 @@ namespace GSC.Api.Controllers.Attendance
         private readonly ICityRepository _cityRepository;
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
-        
+
 
         public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -144,16 +144,16 @@ namespace GSC.Api.Controllers.Attendance
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
 
-            if (_projectDesignRepository.All.Any(x => x.DeletedDate  == null && x.ProjectId == randomizationDto.ParentProjectId &&! x.IsCompleteDesign))
+            if (_projectDesignRepository.All.Any(x => x.DeletedDate == null && x.ProjectId == randomizationDto.ParentProjectId && !x.IsCompleteDesign))
             {
                 ModelState.AddModelError("Message", "Design is not complete");
                 return BadRequest(ModelState);
             }
 
-      
+
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
 
-            var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
+            var validate = _randomizationRepository.Duplicate(randomization, randomizationDto.ProjectId);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);

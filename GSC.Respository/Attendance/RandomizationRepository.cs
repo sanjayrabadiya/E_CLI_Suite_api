@@ -136,8 +136,13 @@ namespace GSC.Respository.Attendance
             return result;
         }
 
-        public string Duplicate(RandomizationDto objSave, int projectId)
+        public string Duplicate(Randomization objSave, int projectId)
         {
+            if (All.Any(x =>
+                x.Id != objSave.Id && x.ScreeningNumber == objSave.ScreeningNumber &&
+                x.ProjectId == projectId && 
+                x.DeletedDate == null)) return "Duplicate ScreeningNumber Number : " + objSave.ScreeningNumber;
+
             if (All.Any(x =>
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&
                 x.ProjectId == projectId && !string.IsNullOrEmpty(x.RandomizationNumber) &&
