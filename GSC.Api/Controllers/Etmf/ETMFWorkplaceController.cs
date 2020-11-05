@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
@@ -7,6 +9,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
 using GSC.Respository.Master;
@@ -114,5 +117,15 @@ namespace GSC.Api.Controllers.Etmf
         {
             return Ok(_projectRepository.GetChildProjectDropDown(ParentProjectId));
         }
+
+        [HttpGet]
+        [Route("DownloadFolder/{Id}")]
+        public IActionResult DownloadFolder(int Id)
+        {
+            var filebytes = _eTMFWorkplaceRepository.CreateZipFileOfWorkplace(Id);
+            return File(filebytes, "application/zip");
+        }
+
+
     }
 }

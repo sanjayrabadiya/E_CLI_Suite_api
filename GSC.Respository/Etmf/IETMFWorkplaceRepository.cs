@@ -15,5 +15,6 @@ namespace GSC.Respository.Etmf
         //List<TreeValue> Get(int id);
         List<TreeValue> GetTreeview(int id);
         ProjectWorkplace SaveFolderStructure(Data.Entities.Master.Project Project, List<ProjectDropDown> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList,string imageUrl);
+        byte[] CreateZipFileOfWorkplace(int Id);
     }
 }

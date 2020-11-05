@@ -7,10 +7,12 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
@@ -22,12 +24,14 @@ namespace GSC.Respository.Etmf
         ProjectWorkplaceDto projectWorkplaceDto = new ProjectWorkplaceDto();
         private readonly IMapper _mapper;
         List<ProjectWorkplaceDetail> ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         public ETMFWorkplaceRepository(IUnitOfWork<GscContext> uow,
            IJwtTokenAccesser jwtTokenAccesser,
-           IMapper mapper)
+           IMapper mapper, IUploadSettingRepository uploadSettingRepository)
            : base(uow, jwtTokenAccesser)
         {
             _mapper = mapper;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public string Duplicate(int id)
@@ -190,7 +194,7 @@ namespace GSC.Respository.Etmf
 
                     pvListdetaiObj.Item = pvListdetaiObj.Item.OrderBy(x => x.Number).ToList();
                     CountryFol.Item.Add(pvListdetaiObj);
-                    
+
                 }
 
                 #endregion
@@ -610,6 +614,21 @@ namespace GSC.Respository.Etmf
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
+        }
+
+        public byte[] CreateZipFileOfWorkplace(int Id)
+        {
+            var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), ProjectWorkplace.Project.ProjectName + "-" + ProjectWorkplace.Project.ProjectCode);
+            ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
+            byte[] compressedBytes;
+            var zipfolder = FolderPath + ".zip";
+
+            var dataBytes = File.ReadAllBytes(zipfolder);
+            var dataStream = new MemoryStream(dataBytes);
+            compressedBytes = dataStream.ToArray();
+            File.Delete(zipfolder);
+            return compressedBytes.ToArray();
         }
     }
     public class TreeValue

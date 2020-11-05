@@ -9,13 +9,8 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
-using GSC.Respository.Master;
-using GSC.Respository.UserMgt;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Syncfusion.EJ2.DocumentEditor;
 using GSC.Api.Helpers;
@@ -35,11 +30,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IMapper _mapper;
         private readonly IUnitOfWork<GscContext> _uow;
         private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IProjectRepository _projectRepository;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
-        private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -47,14 +38,10 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
-        public ProjectWorkplaceArtificatedocumentController(IProjectRepository projectRepository,
-            IUnitOfWork<GscContext> uow,
+        public ProjectWorkplaceArtificatedocumentController(IUnitOfWork<GscContext> uow,
             IMapper mapper,
             IETMFWorkplaceRepository eTMFWorkplaceRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
-            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
             IUploadSettingRepository uploadSettingRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -62,14 +49,10 @@ namespace GSC.Api.Controllers.Etmf
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository)
         {
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
-            _projectRepository = projectRepository;
             _uow = uow;
             _mapper = mapper;
             _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
-            _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _context = uow.Context;
