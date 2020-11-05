@@ -153,7 +153,7 @@ namespace GSC.Api.Controllers.Attendance
       
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
 
-            var validate = _randomizationRepository.Duplicate(randomization, randomizationDto.ProjectId);
+            var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
