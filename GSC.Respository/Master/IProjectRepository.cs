@@ -27,7 +27,7 @@ namespace GSC.Respository.Master
         IList<ProjectGridDto> GetSitesList(int projectId, bool isDeleted);
 
         string GetAutoNumber();
-        string GetAutoNumberForSites();
+        string GetAutoNumberForSites(int Id);
         int? GetParentProjectId(int id);
 
         List<ProjectDropDown> GetChildProjectRightsDropDown();

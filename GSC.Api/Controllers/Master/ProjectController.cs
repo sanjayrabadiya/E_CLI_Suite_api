@@ -285,10 +285,10 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
-        [Route("GetAutoNumberForSites")]
-        public IActionResult GetAutoNumberForSites()
+        [Route("GetAutoNumberForSites/{Id}")]
+        public IActionResult GetAutoNumberForSites(int Id)
         {
-            var autoNumber = _projectRepository.GetAutoNumberForSites();
+            var autoNumber = _projectRepository.GetAutoNumberForSites(Id);
             ModelState.AddModelError("AutoNumber", autoNumber);
             return Ok(ModelState);
         }

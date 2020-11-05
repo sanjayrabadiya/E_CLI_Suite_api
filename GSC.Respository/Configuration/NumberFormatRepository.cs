@@ -34,6 +34,21 @@ namespace GSC.Respository.Configuration
             return number.ToUpper();
         }
 
+        public string GenerateNumberForSite(string keyName, int TotalSite)
+        {
+            var result = FindBy(x => x.KeyName == keyName && x.DeletedDate == null).FirstOrDefault();
+            if (result == null)
+                return null;
+            var separate = result.SeparateSign ?? "";
+            var number = GetPrefix(result.PrefixFormat, separate);
+            number += GetYear(result.YearFormat) + separate;
+            number += GetMonth(result.MonthFormat) + separate;
+            number += (result.StartNumber + TotalSite + 1).ToString().PadLeft(result.NumberLength, '0');
+            number = number.Replace(" ", "").Replace("//", "/").Replace("--", "-");
+
+            return number.ToUpper();
+        }
+
         public string GetNumberFormat(string keyName, int number)
         {
             var result = FindBy(x => x.KeyName == keyName && x.DeletedDate == null).FirstOrDefault();

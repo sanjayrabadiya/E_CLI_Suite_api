@@ -324,7 +324,8 @@ namespace GSC.Respository.Master
 
         private string GetProjectSitesCode(Data.Entities.Master.Project project)
         {
-            var projectCode = _numberFormatRepository.GenerateNumber("prochild");
+            var SiteCount = All.Where(x => x.ParentProjectId == project.ParentProjectId).Count();
+            var projectCode = _numberFormatRepository.GenerateNumberForSite("prochild", SiteCount);
             var country = _countryRepository.Find(project.CountryId).CountryCode;
             var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
             projectCode = projectCode.Replace("DESIGN", design);
@@ -449,9 +450,10 @@ namespace GSC.Respository.Master
             return projectCode.ToUpper();
         }
 
-        public string GetAutoNumberForSites()
+        public string GetAutoNumberForSites(int Id)
         {
-            var projectCode = _numberFormatRepository.GenerateNumber("prochild");
+            var SiteCount = All.Where(x => x.ParentProjectId == Id).Count();
+            var projectCode = _numberFormatRepository.GenerateNumberForSite("prochild", SiteCount);
             var country = "In";
             var design = "007";
             projectCode = projectCode.Replace("DESIGN", design);

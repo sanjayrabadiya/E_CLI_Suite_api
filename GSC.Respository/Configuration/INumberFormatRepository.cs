@@ -7,5 +7,6 @@ namespace GSC.Respository.Configuration
     {
         string GenerateNumber(string keyName);
         string GetNumberFormat(string keyName, int number);
+        string GenerateNumberForSite(string keyName, int TotalSite);
     }
 }
