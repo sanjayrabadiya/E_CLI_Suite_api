@@ -88,7 +88,7 @@ namespace GSC.Respository.EditCheckImpact
                 }
                 else if (r.ProjectDesignTemplateId != null && !r.IsSkip)
                 {
-                    var refTemplate = _impactService.GetScreeningTemplate((int)r.ProjectDesignTemplateId, screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.RepeatedVisit);
+                    var refTemplate = _impactService.GetScreeningTemplate((int)r.ProjectDesignTemplateId, screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId);
                     if (refTemplate != null)
                     {
                         r.ScreeningTemplateId = refTemplate.Id;
@@ -115,7 +115,7 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        public List<EditCheckTargetValidationList> VariableValidateProcess(int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckIds> editCheckIds, bool isQueryRaise, int? repeatedVisit)
+        public List<EditCheckTargetValidationList> VariableValidateProcess(int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckIds> editCheckIds, bool isQueryRaise, int screeningVisitId)
         {
             if (editCheckIds == null || editCheckIds.Count == 0)
                 return new List<EditCheckTargetValidationList>();
@@ -131,13 +131,13 @@ namespace GSC.Respository.EditCheckImpact
             }
 
             var editTargetValidation = new List<EditCheckTargetValidationList>();
-            VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, repeatedVisit);
-            VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, repeatedVisit);
+            VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId);
+            VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId);
 
             return editTargetValidation;
         }
 
-        private void VariableProcess(List<EditCheckValidateDto> result, int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckTargetValidationList> editTargetValidation, bool isQueryRaise, int? repeatedVisit)
+        private void VariableProcess(List<EditCheckValidateDto> result, int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckTargetValidationList> editTargetValidation, bool isQueryRaise, int screeningVisitId)
         {
             result.ForEach(r =>
             {
@@ -154,7 +154,7 @@ namespace GSC.Respository.EditCheckImpact
                 }
                 else if (r.ProjectDesignTemplateId != null)
                 {
-                    var refTemplate = _impactService.GetScreeningTemplate((int)r.ProjectDesignTemplateId, screeningEntryId, repeatedVisit);
+                    var refTemplate = _impactService.GetScreeningTemplate((int)r.ProjectDesignTemplateId, screeningEntryId, screeningVisitId);
                     if (refTemplate != null)
                     {
                         r.ScreeningTemplateId = refTemplate.Id;

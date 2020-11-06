@@ -63,7 +63,7 @@ namespace GSC.Respository.Screening
                    Status = c.Status,
                    DomainId = c.ProjectDesignTemplate.DomainId,
                    ReviewLevel = c.ReviewLevel,
-                   RepeatedVisit = c.ScreeningVisit.RepeatedVisitNumber,
+                   ScreeningVisitId = c.ScreeningVisitId,
                    IsLocked = c.IsLocked,
                    IsDisable = c.IsDisable,
                    PatientStatus = c.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId,
@@ -630,13 +630,14 @@ namespace GSC.Respository.Screening
                 if (screeningTemplateValue.Children != null && screeningTemplateValue.Children.Count > 0)
                     value = string.Join(",", _screeningTemplateValueChildRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
 
-                var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).FirstOrDefault();
+                var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).
+                    Select(r => new { r.Id, r.ScreeningVisitId, r.ProjectDesignTemplateId, r.ScreeningVisit.ScreeningEntryId }).FirstOrDefault();
 
-                var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningTemplate.ScreeningVisit.ScreeningEntryId, screeningTemplateValue.ScreeningTemplateId,
+                var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningTemplate.ScreeningEntryId, screeningTemplateValue.ScreeningTemplateId,
                     screeningTemplateValue.IsNa ? "NA" : screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
-                    screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.ScreeningVisit.RepeatedVisitNumber);
+                    screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.ScreeningVisitId);
 
-                var scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningVisit.ScreeningEntryId, screeningTemplate.Id,
+                var scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.Id,
                  screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
                  screeningTemplateValue.ProjectDesignVariableId, true);
 

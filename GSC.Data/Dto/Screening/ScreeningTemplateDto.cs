@@ -51,7 +51,7 @@ namespace GSC.Data.Dto.Screening
         public ScreeningVisitStatus? VisitStatus { get; set; }
         public int? ParentId { get; set; }
         public int? DomainId { get; set; }
-        public int? RepeatedVisit { get; set; }
+        public int ScreeningVisitId { get; set; }
         public int ProjectDesignId { get; set; }
         public short? ReviewLevel { get; set; }
         public bool IsLocked { get; set; }

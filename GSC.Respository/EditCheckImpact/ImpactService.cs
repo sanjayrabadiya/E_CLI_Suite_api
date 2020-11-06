@@ -144,12 +144,12 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        public ScreeningTemplate GetScreeningTemplate(int projectDesignTemplateId, int screeningEntryId, int? repeatedVisit)
+        public ScreeningTemplate GetScreeningTemplate(int projectDesignTemplateId, int screeningEntryId, int screeningVisitId)
         {
             return All.AsNoTracking().Where(c =>
                    c.ScreeningVisit.ScreeningEntryId == screeningEntryId
                    && c.ProjectDesignTemplateId == projectDesignTemplateId)
-                   .ToList().Where(t => t.ParentId == null && t.ScreeningVisit.RepeatedVisitNumber == repeatedVisit).FirstOrDefault();
+                   .ToList().Where(t => t.ParentId == null && t.ScreeningVisitId == screeningVisitId).FirstOrDefault();
         }
 
         public ScheduleTemplateDto GetScreeningTemplateId(int projectDesignTemplateId, int screeningEntryId)
