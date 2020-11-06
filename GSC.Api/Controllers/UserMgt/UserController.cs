@@ -265,7 +265,7 @@ namespace GSC.Api.Controllers.UserMgt
             //_uow.Save();
             //harshil
             bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
-            if (!IsCloud)
+            if (IsCloud)
             {
                 var cuser = _centeralRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
                  .FirstOrDefault();
@@ -324,7 +324,7 @@ namespace GSC.Api.Controllers.UserMgt
             //harshil
 
             bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
-            if (!IsCloud)
+            if (IsCloud)
             {
                 var crecord = _centeralRepository.Find(id);
                 if (crecord == null)
