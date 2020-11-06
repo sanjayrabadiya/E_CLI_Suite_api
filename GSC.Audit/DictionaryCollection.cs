@@ -146,7 +146,6 @@ namespace GSC.Audit
             //_dictionaries.Add(new Dictionary { FieldName = "ClientTypeId", DisplayName = "Client Type", SourceColumn = "ClientTypeName", TableName = "ClientType", PkName = "Id" });
             //_dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "Project Manager", SourceColumn = "UserName", TableName = "Users", PkName = "Id" });
 
-
             // usermanagement audit change
 
             _dictionaries.Add(new Dictionary { FieldName = "ClientId", DisplayName = "Client", SourceColumn = "ClientName", TableName = "Client", PkName = "Id" });
@@ -210,6 +209,24 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "DocumentPath", DisplayName = "Document Path" });
             _dictionaries.Add(new Dictionary { FieldName = "ReferenceTitle", DisplayName = "Reference Title" });
             _dictionaries.Add(new Dictionary { FieldName = "FilePath", DisplayName = "File Path" });
+
+            // All Enums Audit
+            _dictionaries.Add(new Dictionary { FieldName = "ModuleId", DisplayName = "Module" });
+            _dictionaries.Add(new Dictionary { FieldName = "RoleVariableType", DisplayName = "Role" });
+            _dictionaries.Add(new Dictionary { FieldName = "CoreVariableType", DisplayName = "Core Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "CollectionSource", DisplayName = "Collection Source" });
+            _dictionaries.Add(new Dictionary { FieldName = "ValidationType", DisplayName = "Validation Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "DataType", DisplayName = "Data Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "DateValidate", DisplayName = "Date Validate" });
+            _dictionaries.Add(new Dictionary { FieldName = "PrintType", DisplayName = "Print Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "ActivityMode", DisplayName = "Type of Form" });
+            _dictionaries.Add(new Dictionary { FieldName = "Gender", DisplayName = "Gender" });
+            _dictionaries.Add(new Dictionary { FieldName = "LanguageId", DisplayName = "Preferred Language" });
+            _dictionaries.Add(new Dictionary { FieldName = "LegalRelationship", DisplayName = "Relationship to the Subject" });
+            _dictionaries.Add(new Dictionary { FieldName = "HolidayType", DisplayName = "Holiday" });
+            _dictionaries.Add(new Dictionary { FieldName = "FreezerType", DisplayName = "Freezer Type" });
+
+            
         }
 
         private List<string> GetSkipEntityForAudit()
