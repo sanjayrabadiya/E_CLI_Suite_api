@@ -33,12 +33,12 @@ namespace GSC.Api.Controllers.Project.Design
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
-        //added by vipul for get visit status by visit id on 23092020
+        //added by vipul for get visit status by template id on 23092020
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            return Ok(_projectDesignVisitStatusRepository.GetProjectDesignVisitStatusByVisitId(id));
+            return Ok(_projectDesignVisitStatusRepository.GetProjectDesignVisitStatusByTemplate(id));
         }
 
         //added by vipul for add visit status on 23092020

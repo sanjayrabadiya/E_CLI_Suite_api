@@ -8,6 +8,6 @@ namespace GSC.Respository.Project.Design
     public interface IProjectDesignVisitStatusRepository : IGenericRepository<ProjectDesignVisitStatus>
     {
         ProjectDesignVisitStatusDto GetProjectDesignVariableDetail(int visitId, ScreeningVisitStatus screeningVisitStatus);
-        ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByVisitId(int VisitId);
+        ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByTemplate(int ProjectDesignTemplateId);
     }
 }

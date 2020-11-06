@@ -25,9 +25,9 @@ namespace GSC.Respository.Project.Design
         }
 
 
-        public ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByVisitId(int VisitId)
+        public ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByTemplate(int ProjectDesignTemplateId)
         {
-            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == VisitId).Select(t => new ProjectDesignVisitStatusDto
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVariable.ProjectDesignTemplateId == ProjectDesignTemplateId).Select(t => new ProjectDesignVisitStatusDto
             {
                 Id = t.Id,
                 ProjectDesignVisitId = t.ProjectDesignVisitId,
