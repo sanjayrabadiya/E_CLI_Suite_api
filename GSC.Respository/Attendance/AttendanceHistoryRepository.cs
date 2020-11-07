@@ -44,7 +44,7 @@ namespace GSC.Respository.Attendance
             attendanceHistory.AuditReasonId = auditReasonId;
             attendanceHistory.AttendanceId = attendanceId;
             attendanceHistory.Note = note;
-            attendanceHistory.TimeZone = _jwtTokenAccesser.GetHeader("timeZone");
+            attendanceHistory.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             Add(attendanceHistory);
             return attendanceHistory;
         }

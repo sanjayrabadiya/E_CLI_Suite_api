@@ -184,7 +184,6 @@ namespace GSC.Api.Helpers
             CreateMap<VariableTemplateNote, VariableTemplateNoteDto>().ReverseMap();
 
             CreateMap<ScreeningEntry, ScreeningEntryDto>().ReverseMap();
-            CreateMap<ScreeningTemplate, ScreeningTemplateDto>().ReverseMap();
             CreateMap<ScreeningTemplateValue, ScreeningTemplateValueDto>().ReverseMap();
             CreateMap<ScreeningTemplateValue, Data.Dto.Screening.ScreeningTemplateValueBasic>()
                .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Comments.Any()));

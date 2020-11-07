@@ -306,14 +306,13 @@ namespace GSC.Respository.Screening
             return All.Where(x => x.Id == screeningTemplateId).Select(r => r.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
         }
 
-        public List<ScreeningTemplateDto> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel)
+        public List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel)
         {
             var result = All.Where(s =>
                     s.ScreeningVisit.ScreeningEntryId == screeningEntryId && s.DeletedDate == null && s.ScreeningVisit.Status >= ScreeningVisitStatus.Open).Select(s =>
-                    new ScreeningTemplateDto
+                    new ScreeningTemplateTree
                     {
                         Id = s.Id,
-                        ScreeningEntryId = s.ScreeningVisit.ScreeningEntryId,
                         ProjectDesignTemplateId = s.ProjectDesignTemplateId,
                         Status = s.Status,
                         ProjectDesignVisitId = s.ProjectDesignTemplate.ProjectDesignVisitId,

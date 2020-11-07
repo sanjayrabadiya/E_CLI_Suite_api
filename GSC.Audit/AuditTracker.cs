@@ -67,7 +67,7 @@ namespace GSC.Audit
                             ReasonId = reasonId > 0 ? reasonId : (int?)null,
                             ReasonOth = reasonOth,
                             IpAddress = _jwtTokenAccesser.IpAddress,
-                            TimeZone = _jwtTokenAccesser.GetHeader("timeZone")
+                            TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
                         };
                         auditTrailCommons.Add(auditTrailCommon);
                     }
@@ -92,7 +92,7 @@ namespace GSC.Audit
                                 IpAddress = _jwtTokenAccesser.IpAddress,
                                 ReasonId = reasonId > 0 ? reasonId : (int?)null,
                                 ReasonOth = reasonOth,
-                                TimeZone = _jwtTokenAccesser.GetHeader("timeZone")
+                                TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
                             };
                             auditTrailCommons.Add(auditTrailCommon);
                         });

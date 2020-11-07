@@ -37,7 +37,7 @@ namespace GSC.Respository.Audit
                         ReasonId = reasonId > 0 ? reasonId : (int?) null,
                         ReasonOth = reasonOth,
                         IpAddress = _jwtTokenAccesser.IpAddress,
-                        TimeZone = _jwtTokenAccesser.GetHeader("timeZone")
+                        TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
                     }
                 };
             }
@@ -54,7 +54,7 @@ namespace GSC.Respository.Audit
                 t.UserRoleId = _jwtTokenAccesser.RoleId;
                 t.CreatedDate = DateTime.Now;
                 t.IpAddress = _jwtTokenAccesser.IpAddress;
-                t.TimeZone = _jwtTokenAccesser.GetHeader("timeZone");
+                t.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                 Add(t);
             });
 

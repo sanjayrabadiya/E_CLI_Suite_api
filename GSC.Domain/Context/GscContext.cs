@@ -406,7 +406,7 @@ namespace GSC.Domain.Context
 
             foreach (var entry in ChangeTracker.Entries<ScreeningTemplateValueAudit>())
             {
-                entry.Entity.TimeZone = jwtTokenAccesser.GetHeader("timeZone");
+                entry.Entity.TimeZone = jwtTokenAccesser.GetHeader("clientTimeZone");
                 entry.Entity.IpAddress = jwtTokenAccesser.IpAddress;
             }
         }
@@ -453,7 +453,7 @@ namespace GSC.Domain.Context
                         ReasonId = reasonId > 0 ? reasonId : (int?)null,
                         ReasonOth = reasonOth,
                         IpAddress = jwtTokenAccesser.IpAddress,
-                        TimeZone = jwtTokenAccesser.GetHeader("timeZone")
+                        TimeZone = jwtTokenAccesser.GetHeader("clientTimeZone")
                     }));
                 }
                 else
@@ -489,7 +489,7 @@ namespace GSC.Domain.Context
                             IpAddress = jwtTokenAccesser.IpAddress,
                             ReasonId = reasonId > 0 ? reasonId : (int?)null,
                             ReasonOth = reasonOth,
-                            TimeZone = jwtTokenAccesser.GetHeader("timeZone")
+                            TimeZone = jwtTokenAccesser.GetHeader("clientTimeZone")
                         }));
                     }
                 }

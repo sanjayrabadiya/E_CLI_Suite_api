@@ -36,7 +36,7 @@ namespace GSC.Respository.Screening
         public void Insert(ScreeningTemplateLockUnlockAudit screeningTemplateLockUnlock)
         {
             screeningTemplateLockUnlock.IpAddress = _jwtTokenAccesser.IpAddress;
-            screeningTemplateLockUnlock.TimeZone = _jwtTokenAccesser.GetHeader("timeZone");
+            screeningTemplateLockUnlock.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             screeningTemplateLockUnlock.CreatedRoleBy = _jwtTokenAccesser.RoleId;
             Add(screeningTemplateLockUnlock);
         }

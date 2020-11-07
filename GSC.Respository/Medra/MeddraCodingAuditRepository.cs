@@ -33,7 +33,7 @@ namespace GSC.Respository.Medra
             meddraCodingAudit.ReasonId = ReasonId;
             meddraCodingAudit.ReasonOth = ReasonOth;
             meddraCodingAudit.IpAddress = _jwtTokenAccesser.IpAddress;
-            meddraCodingAudit.TimeZone = _jwtTokenAccesser.GetHeader("timeZone");
+            meddraCodingAudit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             meddraCodingAudit.CreatedDate = DateTime.Now;
             Add(meddraCodingAudit);
             return meddraCodingAudit;

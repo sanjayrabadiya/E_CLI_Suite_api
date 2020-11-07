@@ -58,36 +58,10 @@ namespace GSC.Api.Controllers.Screening
             _screeningVisitRepository = screeningVisitRepository;
         }
 
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
-        {
-            var screeningEntries = _screeningTemplateRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).ToList();
-            var screeningTemplateiesDto = _mapper.Map<IEnumerable<ScreeningTemplateDto>>(screeningEntries);
-            return Ok(screeningTemplateiesDto);
-        }
+      
+       
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if (id <= 0) return BadRequest();
-            var screeningTemplate = _screeningTemplateRepository.Find(id);
-            var screeningTemplateDto = _mapper.Map<ScreeningTemplateDto>(screeningTemplate);
-            return Ok(screeningTemplateDto);
-        }
-
-        [HttpPut]
-        public IActionResult Put([FromBody] ScreeningTemplateDto screeningTemplateDto)
-        {
-            if (screeningTemplateDto.Id <= 0) return BadRequest();
-
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            var screeningTemplate = _mapper.Map<ScreeningTemplate>(screeningTemplateDto);
-
-            _screeningTemplateRepository.Update(screeningTemplate);
-            if (_uow.Save() <= 0) throw new Exception("Updating Screening Template failed on save.");
-            return Ok(screeningTemplate.Id);
-        }
+      
 
         [HttpPost("Repeat/{screeningTemplateId}")]
         public IActionResult Repeat(int screeningTemplateId)

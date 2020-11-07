@@ -7,37 +7,26 @@ using GSC.Helper;
 
 namespace GSC.Data.Dto.Screening
 {
-    public class ScreeningTemplateDto : BaseDto
+
+    public class ScreeningTemplateTree
     {
-        [Required(ErrorMessage = "Screening is required.")]
-        public int ScreeningEntryId { get; set; }
-
-        [Required(ErrorMessage = "Template is required.")]
+        public int Id { get; set; }
         public int ProjectDesignTemplateId { get; set; }
-
-        public ScreeningTemplateStatus Status { get; set; }
         public int? ParentId { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
         public int ProjectDesignVisitId { get; set; }
-        public int? RepeatedVisit { get; set; }
         public string ProjectDesignTemplateName { get; set; }
         public decimal DesignOrder { get; set; }
         public string ProjectDesignVisitName { get; set; }
-        public string StatusName { get; set; }
         public int Progress { get; set; }
         public short? ReviewLevel { get; set; }
-        public bool IsParent { get; set; }
-        public short? StartLevel { get; set; }
-        public ProjectDesignTemplateDto ProjectDesignTemplate { get; set; }
-        public ICollection<ScreeningTemplateValueDto> ScreeningTemplateValues { get; set; }
-        public ICollection<ScreeningTemplateDto> Children { get; set; }
-        public QueryStatusDto TemplateQueryStatus { get; set; }
-        public bool IsCompleteReview { get; set; }
+        public string StatusName { get; set; }
+        public ICollection<ScreeningTemplateTree> Children { get; set; }
         public bool MyReview { get; set; }
         public bool IsVisitRepeated { get; set; }
-        public bool IsDisable { get; set; }
         public bool IsLocked { get; set; }
-        public int? RepeatSeqNo { get; set; }
-        public bool IsParticipantView { get; set; }
+        public QueryStatusDto TemplateQueryStatus { get; set; }
+
     }
 
 

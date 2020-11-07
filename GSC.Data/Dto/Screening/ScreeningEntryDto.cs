@@ -34,15 +34,9 @@ namespace GSC.Data.Dto.Screening
         public string FitnessReason { get; set; }
         public string FitnessNotes { get; set; }
         public int Progress { get; set; }
-        public ICollection<ScreeningTemplateDto> ScreeningTemplates { get; set; }
+        public ICollection<ScreeningTemplateTree> ScreeningTemplates { get; set; }
         public string VolunteerName { get; set; }
         public bool IsMultipleVisits { get; set; }
-        public string VolunteerNumber { get; set; }
-        public string AttendedBy { get; set; }
-        public string ScreeningStatusName { get; set; }
-        public string ProjectName { get; set; }
-        public string ProjectCode { get; set; }
-        public string Gender { get; set; }
         public bool MyReview { get; set; }
         public string LevelName1 { get; set; }
         public bool IsSystemQueryUpdate { get; set; }

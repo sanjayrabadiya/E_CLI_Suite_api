@@ -82,7 +82,7 @@ namespace GSC.Centeral.Context
 
             foreach (var entry in ChangeTracker.Entries<ScreeningTemplateValueAudit>())
             {
-                entry.Entity.TimeZone = jwtTokenAccesser.GetHeader("timeZone");
+                entry.Entity.TimeZone = jwtTokenAccesser.GetHeader("clientTimeZone");
                 entry.Entity.IpAddress = jwtTokenAccesser.IpAddress;
             }
         }
