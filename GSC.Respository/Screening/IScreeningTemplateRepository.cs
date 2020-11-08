@@ -15,7 +15,6 @@ namespace GSC.Respository.Screening
         List<MyReviewDto> GetScreeningTemplateReview();
         ScreeningTemplate TemplateRepeat(int id);
         List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel);
-
         DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto,
             int screeningTemplateId);
         IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters);

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -17,6 +18,7 @@ namespace GSC.Respository.Screening
     public class ScreeningVisitRepository : GenericRespository<ScreeningVisit, GscContext>, IScreeningVisitRepository
     {
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
+        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningVisitHistoryRepository _screeningVisitHistoryRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         private readonly IRandomizationRepository _randomizationRepository;
@@ -32,7 +34,8 @@ namespace GSC.Respository.Screening
             IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
-            IScreeningTemplateRepository screeningTemplateRepository)
+            IScreeningTemplateRepository screeningTemplateRepository,
+            IProjectDesignTemplateRepository projectDesignTemplateRepository)
             : base(uow, jwtTokenAccesser)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -43,6 +46,27 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
+            _projectDesignTemplateRepository = projectDesignTemplateRepository;
+        }
+
+
+        public List<ScreeningVisitTree> GetVisitTree(int screeningEntryId)
+        {
+            var result = All.Where(s => s.ScreeningEntryId == screeningEntryId && s.DeletedDate == null
+            && s.Status >= ScreeningVisitStatus.Open).Select(s => new ScreeningVisitTree
+            {
+                ScreeningVisitId = s.Id,
+                VisitSeqNo = s.RepeatedVisitNumber,
+                ProjectDesignVisitId = s.ProjectDesignVisitId,
+                ProjectDesignVisitName = s.ProjectDesignVisit.DisplayName +
+                                         Convert.ToString(s.RepeatedVisitNumber == null ? "" : "_" + s.RepeatedVisitNumber),
+                VisitStatus = s.Status,
+                VisitStatusName = s.Status.GetDescription(),
+                ParentScreeningVisitId = s.ParentId,
+                IsVisitRepeated = s.ProjectDesignVisit.IsRepeated,
+            }).OrderBy(o => o.ProjectDesignVisitId).ThenBy(t => t.VisitSeqNo).ToList();
+
+            return result;
         }
 
         public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId, DateTime visitDate)
@@ -238,34 +262,37 @@ namespace GSC.Respository.Screening
             }
 
         }
-        public void VisitRepeat(int projectDesignVisitId, int screeningEntryId)
+        public void VisitRepeat(int screeningVisitId)
         {
             var repeatedCount = 0;
-            var projectVisit = All.Include(r => r.ScreeningTemplates).Where(x => x.ProjectDesignVisitId == projectDesignVisitId
-                                              && x.ScreeningEntryId == screeningEntryId && x.ParentId == null).FirstOrDefault();
+            var cloneVisit = All.Where(x => x.Id == screeningVisitId && x.ParentId == null).FirstOrDefault();
 
-            if (projectVisit != null)
-                repeatedCount = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.ProjectDesignVisitId == projectDesignVisitId).Max(t => t.RepeatedVisitNumber) ?? 0;
+            if (cloneVisit != null)
+                repeatedCount = All.Where(x => x.ScreeningEntryId == cloneVisit.ScreeningEntryId && x.ProjectDesignVisitId == cloneVisit.ProjectDesignVisitId).Max(t => t.RepeatedVisitNumber) ?? 0;
 
+
+            var templates = _projectDesignTemplateRepository.All.Where(x => x.ProjectDesignVisitId == cloneVisit.ProjectDesignVisitId).ToList();
 
             var screeningVisit = new ScreeningVisit
             {
 
-                ProjectDesignVisitId = projectDesignVisitId,
+                ProjectDesignVisitId = cloneVisit.ProjectDesignVisitId,
                 Status = ScreeningVisitStatus.NotStarted,
-                ScreeningEntryId = screeningEntryId,
+                ScreeningEntryId = cloneVisit.ScreeningEntryId,
                 RepeatedVisitNumber = repeatedCount + 1,
-                ParentId = projectVisit.Id,
+                ParentId = cloneVisit.Id,
                 ScreeningTemplates = new List<ScreeningTemplate>()
             };
 
-            screeningVisit.ScreeningTemplates.ForEach(t =>
+            templates.ForEach(t =>
             {
-                screeningVisit.ScreeningTemplates.Add(new ScreeningTemplate
+                var template = new ScreeningTemplate
                 {
                     ProjectDesignTemplateId = t.Id,
                     Status = ScreeningTemplateStatus.Pending
-                });
+                };
+                _screeningTemplateRepository.Add(template);
+                screeningVisit.ScreeningTemplates.Add(template);
             });
 
             Add(screeningVisit);

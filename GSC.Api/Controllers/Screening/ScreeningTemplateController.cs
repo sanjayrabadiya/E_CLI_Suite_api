@@ -73,10 +73,10 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningTemplate.Id);
         }
 
-        [HttpPost("VisitRepeat/{projectDesignVisitId}/{screeningEntryId}")]
-        public IActionResult VisitRepeat(int projectDesignVisitId, int screeningEntryId)
+        [HttpPost("VisitRepeat/{screeningVisitId}")]
+        public IActionResult VisitRepeat(int screeningVisitId)
         {
-            _screeningVisitRepository.VisitRepeat(projectDesignVisitId, screeningEntryId);
+            _screeningVisitRepository.VisitRepeat(screeningVisitId);
             if (_uow.Save() <= 0) throw new Exception("Visit Repeat failed on save.");
             return Ok();
         }

@@ -70,14 +70,6 @@ namespace GSC.Respository.Screening
 
         public ScreeningEntryDto GetDetails(int id)
         {
-            var screeningTemplateValue = _screeningTemplateValueRepository
-                .FindBy(x => x.DeletedDate == null
-                && x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == id).
-                Select(r => new Data.Dto.Screening.ScreeningTemplateValueBasic
-                {
-                    ScreeningTemplateId = r.ScreeningTemplateId,
-                    QueryStatus = r.QueryStatus
-                }).ToList();
 
             var screeningEntryDto = Context.ScreeningEntry.Where(t => t.Id == id)
                 .Select(t => new ScreeningEntryDto
@@ -103,32 +95,21 @@ namespace GSC.Respository.Screening
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningEntryDto.ProjectDesignId);
 
-            var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryDto.Id, screeningTemplateValue, workflowlevel);
-
-            screeningEntryDto.ScreeningTemplates = templates.Where(r => r.ParentId == null).ToList();
+            bool myReview = false;
+            screeningEntryDto.ScreeningVisits = VisitTemplateProcess(screeningEntryDto.Id, workflowlevel, ref myReview);
 
             screeningEntryDto.IsElectronicSignature = workflowlevel.IsElectricSignature;
 
-            screeningEntryDto.ScreeningTemplates.ForEach(x =>
-            {
-                x.Children = templates.Where(c => c.ParentId == x.Id).ToList();
-            });
 
+            screeningEntryDto.IsMultipleVisits = screeningEntryDto.ScreeningVisits.Select(s => s.ProjectDesignVisitId).Distinct().Count() > 1;
 
-            screeningEntryDto.IsMultipleVisits = screeningEntryDto.ScreeningTemplates
-                                                     .Select(s => s.ProjectDesignVisitName).Distinct().Count() > 1;
-
-            screeningEntryDto.MyReview = screeningEntryDto.ScreeningTemplates.Any(x => x.MyReview);
+            screeningEntryDto.MyReview = myReview;
 
             if (workflowlevel != null && workflowlevel.WorkFlowText != null)
             {
                 screeningEntryDto.WorkFlowText = new List<WorkFlowText>
                 {
-                    new WorkFlowText
-                    {
-                        LevelNo=-1,
-                        RoleName="Operator"
-                    }
+                    new WorkFlowText { LevelNo=-1,RoleName="Operator"}
                 };
                 screeningEntryDto.WorkFlowText.AddRange(workflowlevel.WorkFlowText);
                 screeningEntryDto.WorkFlowText.Add(new WorkFlowText
@@ -141,6 +122,36 @@ namespace GSC.Respository.Screening
             }
 
             return screeningEntryDto;
+        }
+
+        private List<ScreeningVisitTree> VisitTemplateProcess(int screeningEntryId, WorkFlowLevelDto workflowlevel, ref bool myReview)
+        {
+            var screeningTemplateValue = _screeningTemplateValueRepository
+                .FindBy(x => x.DeletedDate == null
+                && x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId).
+                Select(r => new Data.Dto.Screening.ScreeningTemplateValueBasic
+                {
+                    ScreeningTemplateId = r.ScreeningTemplateId,
+                    QueryStatus = r.QueryStatus
+                }).ToList();
+
+
+            var visits = _screeningVisitRepository.GetVisitTree(screeningEntryId);
+            var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryId, screeningTemplateValue, workflowlevel);
+
+            visits.ForEach(x =>
+            {
+                x.ScreeningTemplates = templates.Where(a => a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).ToList();
+                x.ScreeningTemplates.ForEach(v => v.Children = templates.Where(a => a.ParentId == v.Id).ToList());
+
+                x.IsVisitRepeated = x.ParentScreeningVisitId != null ? false :
+                    workflowlevel.IsStartTemplate &&
+                    templates.Any(t => t.Status > ScreeningTemplateStatus.Pending && t.ScreeningVisitId == x.ScreeningVisitId) && x.IsVisitRepeated ? true : false;
+            });
+
+            myReview = templates.Any(x => x.MyReview);
+
+            return visits;
         }
 
         public void SaveScreeningAttendance(ScreeningEntry screeningEntry, List<int> projectAttendanceTemplateIds)
