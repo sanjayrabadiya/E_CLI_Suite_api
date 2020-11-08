@@ -211,22 +211,19 @@ namespace GSC.Respository.UserMgt
 
         public void UpdateRefreshToken(int userid, string refreshToken)
         {
-            var rereshToken = _refreshTokenRepository.FindBy(t => t.UserId == userid).FirstOrDefault();
+            var rereshTokens = _refreshTokenRepository.FindBy(t => t.UserId == userid).ToList();
 
-            if (rereshToken == null)
+            rereshTokens.ForEach(x =>
             {
-                rereshToken = new RefreshToken();
-                rereshToken.UserId = userid;
-                rereshToken.Token = refreshToken;
-                rereshToken.ExpiredOn = DateTime.UtcNow.AddDays(1);
-                _refreshTokenRepository.Add(rereshToken);
-            }
-            else
-            {
-                rereshToken.Token = refreshToken;
-                rereshToken.ExpiredOn = DateTime.UtcNow.AddDays(1);
-                _refreshTokenRepository.Update(rereshToken);
-            }
+                if (x.ExpiredOn < DateTime.UtcNow)
+                    _refreshTokenRepository.Remove(x);
+            });
+
+            var rereshToken = new RefreshToken();
+            rereshToken.UserId = userid;
+            rereshToken.Token = refreshToken;
+            rereshToken.ExpiredOn = DateTime.UtcNow.AddDays(1);
+            _refreshTokenRepository.Add(rereshToken);
         }
 
 
