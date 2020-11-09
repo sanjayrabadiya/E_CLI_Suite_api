@@ -30,7 +30,7 @@ namespace GSC.Common.UnitOfWork
 
             var audits = _auditTracker.GetAuditTracker();
             var result = Context.SaveChanges(_jwtTokenAccesser);
-            AduitSave(audits, addChangeTracker);
+           // AduitSave(audits, addChangeTracker);
             return result;
         }
 

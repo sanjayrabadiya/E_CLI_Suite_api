@@ -12,6 +12,8 @@ using GSC.Respository.Project.Design;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Respository.EmailSender;
+using Microsoft.Extensions.Configuration;
+using GSC.Data.Dto.UserMgt;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -26,6 +28,8 @@ namespace GSC.Api.Controllers.Attendance
         private readonly ICityRepository _cityRepository;
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
+        private readonly IAPICall _centeralendpoint;
+        private readonly IConfiguration _configuration;
 
 
         public RandomizationController(IRandomizationRepository randomizationRepository,
@@ -34,7 +38,9 @@ namespace GSC.Api.Controllers.Attendance
             IJwtTokenAccesser jwtTokenAccesser,
             ICityRepository cityRepository,
             IStateRepository stateRepository,
-            ICountryRepository countryRepository
+            ICountryRepository countryRepository,
+            IAPICall centeralendpoint,
+            IConfiguration configuration
             )
         {
             _randomizationRepository = randomizationRepository;
@@ -45,6 +51,8 @@ namespace GSC.Api.Controllers.Attendance
             _cityRepository = cityRepository;
             _stateRepository = stateRepository;
             _countryRepository = countryRepository;
+            _centeralendpoint = centeralendpoint;
+            _configuration = configuration;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -88,6 +96,17 @@ namespace GSC.Api.Controllers.Attendance
 
             var randomization = _mapper.Map<Randomization>(randomizationDto);
             randomization.PatientStatusId = ScreeningPatientStatus.PreScreening;
+            if (Convert.ToBoolean(_configuration["IsCloud"]))
+            {
+                var user = _mapper.Map<UserDto>(randomizationDto);
+                user.UserType = UserMasterUserType.Patient;
+                user.UserName = RandomPassword.CreateRandomNumericNumber(6);
+                var response = _centeralendpoint.Post(user, $"{_configuration["EndPointURL"]}/User");
+                //if (!response.IsSuccessStatusCode)
+                //    return BadRequest(response.Content.ReadAsStringAsync().Result);
+                int UserID = Convert.ToInt32(response);
+                randomization.UserId = UserID;
+            }
 
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
             _randomizationRepository.Add(randomization);
@@ -103,6 +122,17 @@ namespace GSC.Api.Controllers.Attendance
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             RandomizationDto.Initial = RandomizationDto.Initial.PadRight(3, '-');
             var randomization = _mapper.Map<Randomization>(RandomizationDto);
+            if (Convert.ToBoolean(_configuration["IsCloud"]))
+            {
+                var user = _mapper.Map<UserDto>(RandomizationDto);
+                user.UserType = UserMasterUserType.Patient;
+                user.UserName = RandomPassword.CreateRandomNumericNumber(6);
+                var response = _centeralendpoint.Put(user, $"{_configuration["EndPointURL"]}/User");
+                //if (!response.IsSuccessStatusCode)
+                //    return BadRequest(response.Content.ReadAsStringAsync().Result);
+                int UserID = Convert.ToInt32(response);
+                randomization.UserId = UserID;
+            }
             _randomizationRepository.Update(randomization);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
             return Ok(randomization.Id);

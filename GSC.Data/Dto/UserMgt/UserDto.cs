@@ -71,5 +71,7 @@ namespace GSC.Data.Dto.UserMgt
         public PrefLanguage? Language { get; set; }
         public string LanguageShortName { get; set; }
         public string? SignaturePath { get; set; }
+
+        public UserMasterUserType? UserType { get; set; }
     }
 }

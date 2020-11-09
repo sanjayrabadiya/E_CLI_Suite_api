@@ -62,8 +62,8 @@ namespace GSC.Api.Controllers.Master
             if (id <= 0) return BadRequest();
             var project = _projectRepository.Find(id);
             var projectDto = _mapper.Map<ProjectDto>(project);
-
-            projectDto.TrialTypeId = _designTrialRepository.Find(projectDto.DesignTrialId).TrialTypeId;
+            if (projectDto.DesignTrialId > 0)
+                projectDto.TrialTypeId = _designTrialRepository.Find(projectDto.DesignTrialId).TrialTypeId;
             var projectDesign =
                 _projectDesignRepository.FindByInclude(t => t.ProjectId == id && t.DeletedDate == null).FirstOrDefault();
             projectDto.ProjectDesignId = projectDesign == null ? (int?)null : projectDesign.Id;

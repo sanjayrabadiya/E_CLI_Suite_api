@@ -280,6 +280,22 @@ namespace GSC.Api.Helpers
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
 
             CreateMap<Users, UserDto>().ReverseMap();
+
+            CreateMap<Project, StydyDetails>()
+                .ForMember(x => x.StudyCode, y => y.MapFrom(a => a.ProjectCode))
+                .ForMember(x => x.ValidFrom, y => y.MapFrom(a => a.FromDate))
+                .ForMember(x => x.ValidTo, y => y.MapFrom(a => a.ToDate))
+                .ReverseMap();
+
+            CreateMap<UserDto, RandomizationDto>()
+                 .ForMember(x => x.FirstName, y => y.MapFrom(a => a.FirstName))
+                 .ForMember(x => x.MiddleName, y => y.MapFrom(a => a.MiddleName))
+                 .ForMember(x => x.LastName, y => y.MapFrom(a => a.LastName))
+                 .ForMember(x => x.DateOfBirth, y => y.MapFrom(a => a.DateOfBirth))
+                 //.ForMember(x => x.Gender, y => y.MapFrom(a => a.GenderId))
+                 .ForMember(x => x.Email, y => y.MapFrom(a => a.Email))
+                 .ForMember(x => x.PrimaryContactNumber, y => y.MapFrom(a => a.Phone))
+                 .ReverseMap();
         }
     }
 }

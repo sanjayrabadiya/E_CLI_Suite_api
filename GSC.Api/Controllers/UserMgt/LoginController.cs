@@ -414,5 +414,7 @@ namespace GSC.Api.Controllers.UserMgt
 
             return Ok(user);
         }
+
+
     }
 }

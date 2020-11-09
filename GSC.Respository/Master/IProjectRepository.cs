@@ -32,5 +32,7 @@ namespace GSC.Respository.Master
 
         List<ProjectDropDown> GetChildProjectRightsDropDown();
         List<ProjectDropDown> GetParentProjectDropDownwithoutRights();
+
+        void UpdateProject(Data.Entities.Master.Project details);
     }
 }
