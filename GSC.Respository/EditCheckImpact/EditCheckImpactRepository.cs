@@ -580,7 +580,7 @@ namespace GSC.Respository.EditCheckImpact
                 if ((int)screeningTemplate.Status < 3)
                     return false;
 
-                var screeningTemplateValueQuery = _screeningTemplateValueQueryRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id).LastOrDefault();
+                var screeningTemplateValueQuery = _screeningTemplateValueQueryRepository.All.AsNoTracking().Where(x =>  x.ScreeningTemplateValueId == screeningTemplateValue.Id).LastOrDefault();
                 if (screeningTemplateValueQuery != null && screeningTemplateValueQuery.IsSystem)
                 {
                     if (screeningTemplateValueQuery.EditCheckRefValue == sampleResult) return false;

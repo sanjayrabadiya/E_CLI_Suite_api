@@ -77,7 +77,7 @@ namespace GSC.Respository.Screening
                  VolunteerName = t.Initial,
                  IsRandomization = true,
                  SubjectNo = t.ScreeningNumber,
-                 PatientStatus = t.PatientStatusId.GetDescription(),
+                 PatientStatusName = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                  {
@@ -125,8 +125,8 @@ namespace GSC.Respository.Screening
                 VolunteerName = x.RandomizationId != null ? x.Randomization.Initial : x.Attendance.Volunteer.AliasName,
                 IsRandomization = x.RandomizationId != null,
                 SubjectNo = x.RandomizationId != null ? x.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
-                PatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
                 ScreeningPatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId : ScreeningPatientStatus.Screening,
+                PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
                 {
@@ -194,6 +194,8 @@ namespace GSC.Respository.Screening
 
             result.Data.AddRange(randomizationData);
             result.Data.AddRange(screeningData);
+
+            result.Data = result.Data.OrderByDescending(t => t.Visit.Max(r => r.ActualDate)).ToList();
 
             return result;
 
