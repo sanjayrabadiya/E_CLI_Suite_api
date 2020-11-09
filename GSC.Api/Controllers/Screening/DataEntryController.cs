@@ -74,5 +74,26 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_dataEntryRespository.GetTemplateForVisit(screeningVisitId, templateStatus));
         }
 
+        [HttpGet]
+        [Route("GetTemplateVisitMyQuery/{screeningVisitId}/{myLevel}")]
+        public IActionResult GetTemplateVisitMyQuery(int screeningVisitId, short myLevel)
+        {
+            return Ok(_dataEntryRespository.GetTemplateVisitMyQuery(screeningVisitId, myLevel));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateVisitWorkFlow/{screeningVisitId}/{reviewLevel}")]
+        public IActionResult GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel)
+        {
+            return Ok(_dataEntryRespository.GetTemplateVisitWorkFlow(screeningVisitId, reviewLevel));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateVisitQuery/{screeningVisitId}/{queryStatus}")]
+        public IActionResult GetTemplateVisitQuery(int screeningVisitId, QueryStatus queryStatus)
+        {
+            return Ok(_dataEntryRespository.GetTemplateVisitQuery(screeningVisitId, queryStatus));
+        }
+
     }
 }

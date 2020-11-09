@@ -15,6 +15,7 @@ namespace GSC.Data.Dto.Attendance
         }
         public List<WorkFlowText> WorkFlowText { get; set; }
         public List<DataCaptureGridData> Data { get; set; }
+        public short ReviewLevel { get; set; }
 
     }
 

@@ -58,6 +58,7 @@ namespace GSC.Respository.Screening
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
             result.WorkFlowText = workflowlevel.WorkFlowText;
+            result.ReviewLevel = workflowlevel.LevelNo;
 
             var projectDesignVisit = await _projectDesignVisitRepository.All.
                 Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
@@ -215,6 +216,61 @@ namespace GSC.Respository.Screening
                 }).ToList();
         }
 
+
+        public List<DataEntryTemplateCountDisplayDto> GetTemplateVisitQuery(int screeningVisitId, QueryStatus queryStatus)
+        {
+
+            return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
+            && x.ScreeningTemplateValues.Any(r => r.QueryStatus == queryStatus && r.DeletedDate == null) && x.DeletedDate == null).
+                Select(t => new DataEntryTemplateCountDisplayDto
+                {
+                    ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                    ScreeningTemplateId = t.Id,
+                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                    TemplateName = t.ProjectDesignTemplate.TemplateName,
+                    VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                    SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                                ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                                : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                }).ToList();
+        }
+
+        public List<DataEntryTemplateCountDisplayDto> GetTemplateVisitMyQuery(int screeningVisitId, short myLevel)
+        {
+
+            return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
+            && x.ScreeningTemplateValues.Any(r => r.AcknowledgeLevel == myLevel && r.DeletedDate == null) && x.DeletedDate == null).
+                Select(t => new DataEntryTemplateCountDisplayDto
+                {
+                    ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                    ScreeningTemplateId = t.Id,
+                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                    TemplateName = t.ProjectDesignTemplate.TemplateName,
+                    VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                    SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                                ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                                : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                }).ToList();
+        }
+
+
+        public List<DataEntryTemplateCountDisplayDto> GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel)
+        {
+
+            return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
+            && x.ReviewLevel == reviewLevel && x.DeletedDate == null).
+                Select(t => new DataEntryTemplateCountDisplayDto
+                {
+                    ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                    ScreeningTemplateId = t.Id,
+                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                    TemplateName = t.ProjectDesignTemplate.TemplateName,
+                    VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                    SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                                ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                                : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                }).ToList();
+        }
 
     }
 }
