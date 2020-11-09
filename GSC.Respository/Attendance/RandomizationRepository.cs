@@ -138,7 +138,7 @@ namespace GSC.Respository.Attendance
             return result;
         }
 
-        public string Duplicate(Randomization objSave, int projectId)
+        public string Duplicate(RandomizationDto objSave, int projectId)
         {
             if (All.Any(x =>
                 x.Id != objSave.Id && x.ScreeningNumber == objSave.ScreeningNumber &&
