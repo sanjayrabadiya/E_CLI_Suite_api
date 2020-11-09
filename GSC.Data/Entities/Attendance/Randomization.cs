@@ -61,7 +61,7 @@ namespace GSC.Data.Entities.Attendance
         public Data.Entities.Master.Project Project { get; set; }
         public virtual ScreeningEntry ScreeningEntry { get; set; }
 
-    //    public string? SignaturePath { get; set; }
+        public string? WithdrawSignaturePath { get; set; }
         public int? UserId { get; set; }
 
     }

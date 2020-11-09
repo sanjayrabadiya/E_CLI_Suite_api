@@ -181,12 +181,21 @@ namespace GSC.Api.Controllers.Attendance
         }
 
         [HttpPut]
-        [Route("ChangeStatustoWithdrawal")]
-        public IActionResult ChangeStatustoWithdrawal()
+        [Route("ChangeStatustoWithdrawal/{withdrawsignBase64}")]
+        public IActionResult ChangeStatustoWithdrawal(string withdrawsignBase64)
         {
-            _randomizationRepository.ChangeStatustoWithdrawal();
+            _randomizationRepository.ChangeStatustoWithdrawal(withdrawsignBase64);
             _uow.Save();
             return Ok();
+        }
+
+
+        [AllowAnonymous]
+        [HttpGet("GetPatientVisits")]
+        public IActionResult GetPatientVisits()
+        {
+            var data = _randomizationRepository.GetPatientVisits();
+            return Ok(data);
         }
 
     }

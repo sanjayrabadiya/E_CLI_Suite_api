@@ -5,10 +5,12 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Helper.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.InformConcent;
@@ -252,11 +254,19 @@ namespace GSC.Respository.Attendance
             Update(randomization);
         }
 
-        public void ChangeStatustoWithdrawal()
+        public void ChangeStatustoWithdrawal(string withdrawsignBase64)
         {
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
             if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
             {
+                if (withdrawsignBase64?.Length > 0)
+                {
+                    FileModel fileModel = new FileModel();
+                    fileModel.Base64 = withdrawsignBase64;
+                    fileModel.Extension = "png";
+                    randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
+                        Context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
+                }
                 randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
                 Update(randomization);
             }
@@ -284,6 +294,35 @@ namespace GSC.Respository.Attendance
                 return new DashboardPatientDto();
             }
             
+        }
+
+        public List<ProjectDesignVisitMobileDto> GetPatientVisits()
+        {
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            if (randomization == null) return new List<ProjectDesignVisitMobileDto>();
+            //string sqlquery = @"select d.Id,d.DisplayName
+            //                    from
+            //                    Randomization a,
+            //                    screeningentry b,
+            //                    ScreeningVisit c,
+            //                    ProjectDesignVisit d
+            //                    where
+            //                    a.Id = " + randomization.Id + @" and
+            //                    a.Id = b.RandomizationId and
+            //                    b.Id = c.ScreeningEntryId and
+            //                    c.ProjectDesignVisitId = d.Id";
+
+            var data = (from screeningentry in Context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id)
+                        join ScreeningVisit in Context.ScreeningVisit.Where(x => x.DeletedDate == null) on screeningentry.Id equals ScreeningVisit.ScreeningEntryId
+                        join ProjectDesignVisit in Context.ProjectDesignVisit.Where(x => x.DeletedDate == null) on ScreeningVisit.ProjectDesignVisitId equals ProjectDesignVisit.Id
+
+                        select new ProjectDesignVisitMobileDto
+                        {
+                            Id = ProjectDesignVisit.Id,
+                            DisplayName = ProjectDesignVisit.DisplayName,
+                        }).ToList();
+
+            return data;
         }
     }
 }
