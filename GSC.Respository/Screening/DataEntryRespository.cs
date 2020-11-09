@@ -198,45 +198,21 @@ namespace GSC.Respository.Screening
 
         }
 
-        public List<DataEntryTemplateCountDisplayDto> GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId,
-            int screeningStatus, bool isQuery)
+        public List<DataEntryTemplateCountDisplayDto> GetTemplateForVisit(int screeningVisitId, ScreeningTemplateStatus templateStatus)
         {
 
-            //return new List<DataEntryVisitTemplateDto>();
-
-            if (isQuery)
-                return Context.ScreeningTemplate.Where(t =>
-                    t.ScreeningVisit.ScreeningEntryId == screeningEntryId
-                    && t.ScreeningVisit.ProjectDesignVisitId == projectDesignVisitId
-                    && t.ScreeningTemplateValues.Any(c => c.QueryStatus != null && c.QueryStatus != QueryStatus.Closed)
-                    && t.DeletedDate == null).Select(x => new DataEntryTemplateCountDisplayDto
-                    {
-                        ScreeningEntryId = x.ScreeningVisit.ScreeningEntryId,
-                        ScreeningTemplateId = x.Id,
-                        ProjectDesignTemplateId = x.ProjectDesignTemplateId,
-                        TemplateName = x.ProjectDesignTemplate.TemplateName,
-                        VisitName = x.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                        SubjectName = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                            ? x.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                            : x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                    }
-                ).ToList();
-            return Context.ScreeningTemplate.Where(t =>
-                t.ScreeningVisit.ScreeningEntryId == screeningEntryId
-                && t.ScreeningVisit.ProjectDesignVisitId == projectDesignVisitId
-                && (int)t.ScreeningVisit.Status == screeningStatus
-                && t.DeletedDate == null).Select(x => new DataEntryTemplateCountDisplayDto
+            return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId && x.Status == templateStatus && x.DeletedDate == null).
+                Select(t => new DataEntryTemplateCountDisplayDto
                 {
-                    ScreeningEntryId = x.ScreeningVisit.ScreeningEntryId,
-                    ScreeningTemplateId = x.Id,
-                    ProjectDesignTemplateId = x.ProjectDesignTemplateId,
-                    TemplateName = x.ProjectDesignTemplate.TemplateName,
-                    VisitName = x.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                    SubjectName = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                        ? x.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                        : x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                }
-            ).ToList();
+                    ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                    ScreeningTemplateId = t.Id,
+                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                    TemplateName = t.ProjectDesignTemplate.TemplateName,
+                    VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                    SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                                ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                                : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                }).ToList();
         }
 
 

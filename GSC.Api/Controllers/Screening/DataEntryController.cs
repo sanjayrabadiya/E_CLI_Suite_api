@@ -2,6 +2,7 @@
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
+using GSC.Helper;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -67,11 +68,10 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [Route("GetTemplateForVisit/{screeningEntryId}/{projectDesignVisitId}/{screeningStatus}/{isQuery}")]
-        public IActionResult GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId, int screeningStatus, bool isQuery)
+        [Route("GetTemplateForVisit/{screeningVisitId}/{templateStatus}")]
+        public IActionResult GetTemplateForVisit(int screeningVisitId, ScreeningTemplateStatus templateStatus)
         {
-            return Ok(_dataEntryRespository.GetTemplateForVisit(screeningEntryId, projectDesignVisitId, screeningStatus,
-                isQuery));
+            return Ok(_dataEntryRespository.GetTemplateForVisit(screeningVisitId, templateStatus));
         }
 
     }
