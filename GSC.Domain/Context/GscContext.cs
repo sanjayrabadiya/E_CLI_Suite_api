@@ -21,6 +21,7 @@ using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.Pharmacy;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.EditCheck;
+using GSC.Data.Entities.Project.Rights;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
