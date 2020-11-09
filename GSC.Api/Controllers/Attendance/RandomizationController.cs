@@ -189,8 +189,6 @@ namespace GSC.Api.Controllers.Attendance
             return Ok();
         }
 
-
-        [AllowAnonymous]
         [HttpGet("GetPatientVisits")]
         public IActionResult GetPatientVisits()
         {
