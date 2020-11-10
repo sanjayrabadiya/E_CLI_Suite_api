@@ -23,19 +23,19 @@ namespace GSC.Helper
             _httpClient = httpClient;
         }
 
-        //public string Get(int Id, string controllername)
-        //{
-        //    string URL = String.Format("{0}{1}/{2}", _configuration["EndPointURL"], controllername, Id);
-        //    // HttpClient client = new HttpClient();
-        //    _httpClient.BaseAddress = new Uri(URL);
-        //    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        //    HttpResponseMessage response = _httpClient.GetAsync(URL).Result;
-        //    //  client.Dispose();
-        //    if (response.IsSuccessStatusCode)
-        //        return response.Content.ReadAsStringAsync().Result;
-        //    else
-        //        throw new HttpRequestException(response.Content.ReadAsStringAsync().Result);
-        //}
+        public string Get(string URL)
+        {
+            //string URL = String.Format("{0}{1}/{2}", _configuration["EndPointURL"], controllername, Id);
+            // HttpClient client = new HttpClient();
+           // _httpClient.BaseAddress = new Uri(URL);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            HttpResponseMessage response = _httpClient.GetAsync(URL).Result;
+            //  client.Dispose();
+            if (response.IsSuccessStatusCode)
+                return response.Content.ReadAsStringAsync().Result;
+            else
+                throw new HttpRequestException(response.Content.ReadAsStringAsync().Result);
+        }
 
         public string Post<T>(T data, string URL)
         {  
@@ -58,10 +58,10 @@ namespace GSC.Helper
             //return response;
         }
 
-        public string Delete(int Id, string controllername)
+        public string Delete(string URL)
         {
-            string URL = String.Format("{0}{1}/{2}",
-                          _configuration["EndPointURL"], controllername, Id);
+            //string URL = String.Format("{0}{1}/{2}",
+            //              _configuration["EndPointURL"], controllername, Id);
             //HttpClient client = new HttpClient();
            // _httpClient.BaseAddress = new Uri(URL);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -74,10 +74,10 @@ namespace GSC.Helper
 
         }
 
-        public string Patch(int Id, string controllername, object data)
+        public string Patch(string URL, object data)
         {
-            string URL = String.Format("{0}{1}/{2}",
-                          _configuration["EndPointURL"], controllername, Id);
+            //string URL = String.Format("{0}{1}/{2}",
+            //              _configuration["EndPointURL"], controllername, Id);
             // HttpClient client = new HttpClient();
            // _httpClient.BaseAddress = new Uri(URL);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

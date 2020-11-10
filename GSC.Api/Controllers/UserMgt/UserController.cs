@@ -2,15 +2,12 @@
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Centeral.Models;
-using GSC.Centeral.UnitOfWork;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
-using GSC.Respository.CenteralAuth;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
@@ -32,11 +29,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IUserRoleRepository _userRoleRepository;
-
-        private readonly ICenteralRepository _centeralRepository;
-        private readonly ICenteralUserPasswordRepository _centeralUserPasswordRepository;
-        private readonly IUnitOfWorkCenteral _uowc;
+        private readonly IUserRoleRepository _userRoleRepository;      
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly IAPICall _centerEndpoint;
 
@@ -47,8 +40,8 @@ namespace GSC.Api.Controllers.UserMgt
             IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IUserRoleRepository userRoleRepository,
-            IProjectRepository projectRepository, ICenteralRepository centeralRepository,
-            ICenteralUserPasswordRepository centeralUserPasswordRepository, IUnitOfWorkCenteral uowc, Microsoft.Extensions.Configuration.IConfiguration configuration,
+            IProjectRepository projectRepository, 
+            Microsoft.Extensions.Configuration.IConfiguration configuration,
             IAPICall centerEndpoint
             )
         {
@@ -60,10 +53,7 @@ namespace GSC.Api.Controllers.UserMgt
             _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
             _userRoleRepository = userRoleRepository;
-            _projectRepository = projectRepository;
-            _centeralRepository = centeralRepository;
-            _centeralUserPasswordRepository = centeralUserPasswordRepository;
-            _uowc = uowc;
+            _projectRepository = projectRepository;            
             _configuration = configuration;
             _centerEndpoint = centerEndpoint;
         }
@@ -232,7 +222,7 @@ namespace GSC.Api.Controllers.UserMgt
         {
             if (Convert.ToBoolean(_configuration["IsCloud"]))
             {
-                var response = _centerEndpoint.Delete(id, "User");
+                var response = _centerEndpoint.Delete($"{_configuration["EndPointURL"]}/User/{id}");
                 //if (!response.IsSuccessStatusCode)
                 //    return BadRequest(response.Content.ReadAsStringAsync().Result);              
             }
@@ -273,7 +263,7 @@ namespace GSC.Api.Controllers.UserMgt
                 return NotFound();
             if (Convert.ToBoolean(_configuration["IsCloud"]))
             {
-                var response = _centerEndpoint.Post(loginDto, "User");
+                var response = _centerEndpoint.Post(loginDto, $"{_configuration["EndPointURL"]}/User");
                 //if (!response.IsSuccessStatusCode)
                 //    return BadRequest(response.Content.ReadAsStringAsync().Result);
             }
@@ -301,8 +291,8 @@ namespace GSC.Api.Controllers.UserMgt
             if (record == null)
                 return NotFound();
             if (Convert.ToBoolean(_configuration["IsCloud"]))
-            {
-                var response = _centerEndpoint.Patch(id, "User", null);
+            {               
+                var responce= _centerEndpoint.Patch($"{_configuration["EndPointURL"]}/User/{id}",null);
                 //if (!response.IsSuccessStatusCode)
                 //    return BadRequest(response.Content.ReadAsStringAsync().Result);
             }

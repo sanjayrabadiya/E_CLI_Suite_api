@@ -6,17 +6,13 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
-using GSC.Api.Hubs;
-using GSC.Centeral.UnitOfWork;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
-using GSC.Respository.CenteralAuth;
 using GSC.Respository.Configuration;
-using GSC.Respository.InformConcent;
 using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Authorization;
@@ -42,11 +38,9 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IHubContext<Notification> _notificationHubContext;
         private readonly IAppSettingRepository _appSettingRepository;
-        private readonly IRolePermissionRepository _rolePermissionRepository;
-        private readonly ICenteralRepository _centeralRepository;
+        private readonly IRolePermissionRepository _rolePermissionRepository;    
         private readonly IConfiguration _configuration;
-        private readonly IHubContext<MessageHub> _hubcontext;
-        private readonly IEconsentChatRepository _econsentChatRepository;
+        private readonly IAPICall _centeralApi;
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -59,9 +53,7 @@ namespace GSC.Api.Controllers.UserMgt
             IHubContext<Notification> notificationHubContext,
             IAppSettingRepository appSettingRepository,
             IRolePermissionRepository rolePermissionRepository,
-            ICenteralRepository centeralRepository, IConfiguration configuration,
-            IHubContext<MessageHub> hubcontext,
-            IEconsentChatRepository econsentChatRepository)
+            IConfiguration configuration, IAPICall centerlApi, IMapper mapper)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -73,10 +65,10 @@ namespace GSC.Api.Controllers.UserMgt
             _notificationHubContext = notificationHubContext;
             _appSettingRepository = appSettingRepository;
             _rolePermissionRepository = rolePermissionRepository;
-            _centeralRepository = centeralRepository;
+            // _centeralRepository = centeralRepository;
             _configuration = configuration;
-            _hubcontext = hubcontext;
-            _econsentChatRepository = econsentChatRepository;
+            _centeralApi = centerlApi;
+            _mapper = mapper;
         }
 
         [HttpPost]
@@ -143,22 +135,7 @@ namespace GSC.Api.Controllers.UserMgt
             //}
 
             var validatedUser = BuildUserAuthObject(user, dto.RoleId);
-            try
-            {
-                await _hubcontext.Clients.All.SendAsync("UserLogIn", user.Id);
-                var messages = _econsentChatRepository.FindBy(x => x.ReceiverId == user.Id && x.IsDelivered == false).ToList();
-                if (messages.Count > 0)
-                {
-                    for (int i = 0; i < messages.Count; i++)
-                    {
-                        var econsent = _econsentChatRepository.Find(messages[i].Id);
 
-                        _econsentChatRepository.Update(econsent);
-                    }
-                }
-            } catch(Exception ex)
-            {
-            }
             return Ok(validatedUser);
         }
 
@@ -298,7 +275,7 @@ namespace GSC.Api.Controllers.UserMgt
                 Language = authUser.Language,
                 LanguageShortName = authUser.Language.ToString()
             };
-                      
+
             var imageUrl = _uploadSettingRepository
                 .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
 
@@ -332,10 +309,11 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
                 _userRepository.Update(authUser);
+                var refreshtokan = _mapper.Map<RefreshTokanDto>(login);
                 if (Convert.ToBoolean(_configuration["IsCloud"]))
-                    _centeralRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
+                    _centeralApi.Post(refreshtokan, $"{_configuration["EndPointURL"]}/Login/UpdateRefreshToken");
+                //_centeralRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
             }
-
             _uow.Save();
             return login;
         }
@@ -353,7 +331,7 @@ namespace GSC.Api.Controllers.UserMgt
 
         [HttpGet]
         [Route("logout/{userId}/{loginReportId}")]
-        public async Task<IActionResult> Logout(int userId, int loginReportId)
+        public IActionResult Logout(int userId, int loginReportId)
         {
             var user = _userRepository.Find(userId);
             if (user == null)
@@ -370,16 +348,7 @@ namespace GSC.Api.Controllers.UserMgt
             _userLoginReportRepository.Update(userLoginReport);
 
             _uow.Save();
-            try
-            {
-                var delusers = ConnectedUser.Ids.Where(x => x.userId == user.Id).ToList();
-                for (int i = 0; i < delusers.Count; i++)
-                {
-                    ConnectedUser.Ids.Remove(delusers[i]);
-                }
-                await _hubcontext.Clients.All.SendAsync("UserLogOut", user.Id);
-            } catch(Exception ex) { }
-            
+
             return Ok();
         }
 
@@ -389,7 +358,6 @@ namespace GSC.Api.Controllers.UserMgt
         public async Task<IActionResult> LogOutFromEveryWhere(string userName)
         {
             var user = _userRepository.All.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
-
             if (user != null)
             {
                 var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == user.Id && t.LogoutTime == null).ToList();
@@ -425,7 +393,8 @@ namespace GSC.Api.Controllers.UserMgt
         public IActionResult Refresh([FromBody] RefreshTokenDto token)
         {
             if (Convert.ToBoolean(_configuration["IsCloud"]))
-                _centeralRepository.Refresh(token.AccessToken, token.RefreshToken);
+                _centeralApi.Post(token, $"{_configuration["EndPointURL"]}/Login/Refresh");
+            //_centeralRepository.Refresh(token.AccessToken, token.RefreshToken);
             return Ok(_userRepository.Refresh(token.AccessToken, token.RefreshToken));
         }
 

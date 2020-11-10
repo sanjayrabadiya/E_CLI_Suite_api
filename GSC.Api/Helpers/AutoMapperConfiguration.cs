@@ -45,7 +45,6 @@ using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
 using System.Linq;
-using GSC.Centeral.Models;
 
 
 namespace GSC.Api.Helpers
@@ -283,7 +282,7 @@ namespace GSC.Api.Helpers
             CreateMap<Site, SiteDto>().ReverseMap();
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
 
-            CreateMap<Users, UserDto>().ReverseMap();
+            //CreateMap<Users, UserDto>().ReverseMap();
 
             CreateMap<Project, StydyDetails>()
                 .ForMember(x => x.StudyCode, y => y.MapFrom(a => a.ProjectCode))
@@ -300,6 +299,8 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.Email, y => y.MapFrom(a => a.Email))
                  .ForMember(x => x.PrimaryContactNumber, y => y.MapFrom(a => a.Phone))
                  .ReverseMap();
+
+            CreateMap<RefreshTokanDto, LoginResponseDto>().ReverseMap();
         }
     }
 }

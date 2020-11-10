@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GSC.Centeral\GSC.Centeral.csproj" />
     <ProjectReference Include="..\GSC.Common\GSC.Common.csproj" />
     <ProjectReference Include="..\GSC.Helper\GSC.Helper.csproj" />
   </ItemGroup>

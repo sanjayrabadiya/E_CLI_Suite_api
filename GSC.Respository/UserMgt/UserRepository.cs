@@ -13,13 +13,13 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.CenteralAuth;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace GSC.Respository.UserMgt
 {
@@ -30,19 +30,17 @@ namespace GSC.Respository.UserMgt
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
-        private readonly IOptions<JwtSettings> _settings;
-        private readonly ICenteralRepository _centeralRepository;
-        private readonly ICenteralUserPasswordRepository _centeralUserPasswordRepository;
+        private readonly IOptions<JwtSettings> _settings;       
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
+        private readonly IAPICall _centeralApi;
 
         public UserRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUserPasswordRepository userPasswordRepository,
             IRefreshTokenRepository refreshTokenRepository,
-            IOptions<JwtSettings> settings,
-            ICenteralRepository centeralRepository,
-            ICenteralUserPasswordRepository centeralUserPasswordRepository, Microsoft.Extensions.Configuration.IConfiguration configuration)
+            IOptions<JwtSettings> settings,         
+            Microsoft.Extensions.Configuration.IConfiguration configuration, IAPICall centeralApi)
             : base(uow, jwtTokenAccesser)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
@@ -50,10 +48,9 @@ namespace GSC.Respository.UserMgt
             _userPasswordRepository = userPasswordRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _settings = settings;
-            _refreshTokenRepository = refreshTokenRepository;
-            _centeralRepository = centeralRepository;
-            _centeralUserPasswordRepository = centeralUserPasswordRepository;
+            _refreshTokenRepository = refreshTokenRepository;           
             _configuration = configuration;
+            _centeralApi = centeralApi;
         }
 
         public List<UserDto> GetUsers(bool isDeleted)
@@ -134,7 +131,12 @@ namespace GSC.Respository.UserMgt
                 _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
                 return null;
             }
-            if (!string.IsNullOrEmpty(_centeralUserPasswordRepository.VaidatePassword(password, user.Id)))
+            var passDto = new ValidatepasswordDto();
+            passDto.UserID = user.Id;
+            passDto.Password = password;
+            string passstring = JsonConvert.DeserializeObject(_centeralApi.Post(passDto,$"{_configuration["EndPointURL"]}/User/VaidatePassword")).ToString();
+            //if (!string.IsNullOrEmpty(_centeralApi.Get($"{_configuration["EndPointURL"]}/User/VaidatePassword/{password}/{user.Id}")))
+            if (!string.IsNullOrEmpty(passstring))
             {
                 user.FailedLoginAttempts++;
                 var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
@@ -143,7 +145,6 @@ namespace GSC.Respository.UserMgt
                     user.IsLocked = true;
                     Update(user);
                 }
-
                 _userLoginReportRepository.SaveLog("Invalid Password and Login Attempt : " + user.FailedLoginAttempts,
                     user.Id, userName);
                 return null;

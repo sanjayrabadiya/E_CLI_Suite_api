@@ -7,11 +7,11 @@ namespace GSC.Helper
 {
     public interface IAPICall
     {
-      //  string Get(int Id, string controllername);
-        string Post<T>(T data, string controllername);
-        string Put<T>(T data, string controllername);
-        string Delete(int Id, string controllername);
-        string Patch(int Id, string controllername, object data);
+        string Get(string URL);
+        string Post<T>(T data, string URL);
+        string Put<T>(T data, string URL);
+        string Delete(string URL);
+        string Patch(string URL, object data);
 
     }
 }
