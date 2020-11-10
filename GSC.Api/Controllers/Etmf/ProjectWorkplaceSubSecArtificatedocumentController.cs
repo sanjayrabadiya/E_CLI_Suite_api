@@ -8,11 +8,7 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
-using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
-using GSC.Respository.Master;
-using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -25,33 +21,23 @@ namespace GSC.Api.Controllers.Etmf
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork<GscContext> _uow;
-        private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IProjectRepository _projectRepository;
         private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
-        private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
-        public ProjectWorkplaceSubSecArtificatedocumentController(IProjectRepository projectRepository,
-            IUnitOfWork<GscContext> uow,
+        private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
+        private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApproverRepository;
+        private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
+        public ProjectWorkplaceSubSecArtificatedocumentController(IUnitOfWork<GscContext> uow,
             IMapper mapper,
-            IETMFWorkplaceRepository eTMFWorkplaceRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
-              IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository
-            )
+            IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
+            IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
+            IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository)
         {
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
-            _projectRepository = projectRepository;
             _uow = uow;
             _mapper = mapper;
-            _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
             _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
-            _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
-            _uploadSettingRepository = uploadSettingRepository;
+            _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
+            _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
+            _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
         }
 
 
@@ -59,47 +45,28 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public IActionResult Get(int id)
         {
-            var documentList = _projectWorkplaceSubSecArtificatedocumentRepository.FindByInclude(x => x.ProjectWorkplaceSubSectionArtifactId == id && x.DeletedDate == null, x => x.ProjectWorkplaceSubSectionArtifact)
-                .ToList()
-                .OrderByDescending(x => x.Id);
+            var result = _projectWorkplaceSubSecArtificatedocumentRepository.GetSubSecDocumentList(id);
+            return Ok(result);
+        }
 
-            List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
-            foreach (var item in documentList)
-            {
-                CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
-                obj.Id = item.Id;
-                obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceSubSectionArtifactId;
-                obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
-                obj.DocumentName = item.DocumentName;
-                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
-                obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
-                obj.CreatedDate = item.CreatedDate;
-                obj.Level = 5.2;
-                dataList.Add(obj);
-            }
-            return Ok(dataList);
-
+        [Route("GetDocument/{id}")]
+        [HttpGet]
+        public IActionResult GetDocument(int id)
+        {
+            var result = _projectWorkplaceSubSecArtificatedocumentRepository.GetDocument(id);
+            return Ok(result);
         }
 
         [HttpPost]
         public IActionResult Post([FromBody] ProjectWorkplaceSubSecArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
         {
-            string filePath = "";
-
-            string path = _projectWorkplaceSubSecArtificatedocumentRepository.getArtifactSectionDetail(projectWorkplaceArtificatedocumentDto);
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
-            string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceArtificatedocumentDto.FileModel, filePath, projectWorkplaceArtificatedocumentDto.FileName);
-
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            projectWorkplaceArtificatedocumentDto.Id = 0;
-            var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceSubSecArtificatedocument>(projectWorkplaceArtificatedocumentDto);
-            projectWorkplaceArtificatedocument.DocumentName = FileName;
-            projectWorkplaceArtificatedocument.DocPath = path;
-
+            var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
             _projectWorkplaceSubSecArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
-            return Ok(projectWorkplaceArtificatedocument.Id);
 
+            _projectSubSecArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
+            _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
+            return Ok(projectWorkplaceArtificatedocument.Id);
         }
 
         [HttpDelete("{id}")]
@@ -113,6 +80,123 @@ namespace GSC.Api.Controllers.Etmf
             _uow.Save();
             var aa = _projectWorkplaceSubSecArtificatedocumentRepository.deleteSubsectionArtifactfile(id);
             return Ok(aa);
+        }
+
+        [HttpPut]
+        [Route("UpdateVersion/{id}")]
+        public IActionResult UpdateVersion(int id)
+        {
+            var projectSubSecArtificatedocumentDto = _projectWorkplaceSubSecArtificatedocumentRepository.Find(id);
+            projectSubSecArtificatedocumentDto.Version = (double.Parse(projectSubSecArtificatedocumentDto.Version) + 1).ToString("0.0");
+
+            var ProjectSubSecArtificatedocument = _mapper.Map<ProjectWorkplaceSubSecArtificatedocument>(projectSubSecArtificatedocumentDto);
+            _projectWorkplaceSubSecArtificatedocumentRepository.Update(ProjectSubSecArtificatedocument);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            return Ok(ProjectSubSecArtificatedocument.Id);
+        }
+
+        [HttpPost]
+        [Route("ImportData/{id}")]
+        public IActionResult ImportData(int id)
+        {
+            var result = _projectWorkplaceSubSecArtificatedocumentRepository.ImportData(id);
+            return Ok(result);
+        }
+
+        [Route("GetArtificateDocumentApproverHistory/{Id}")]
+        [HttpGet]
+        public IActionResult GetArtificateDocumentApproverHistory(int Id)
+        {
+            var History = _projectSubSecArtificateDocumentApproverRepository.GetArtificateDocumentApproverHistory(Id);
+            return Ok(History);
+        }
+
+        [Route("GetArtificateDocumentHistory/{Id}")]
+        [HttpGet]
+        public IActionResult GetArtificateDocumentHistory(int Id)
+        {
+            var History = _projectSubSecArtificateDocumentReviewRepository.GetArtificateDocumentHistory(Id);
+            return Ok(History);
+        }
+
+        [HttpPost]
+        [Route("Save")]
+        public IActionResult Save([FromBody] CustomParameter param)
+        {
+            var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(param.id);
+            var docName = _projectWorkplaceSubSecArtificatedocumentRepository.SaveDocumentInFolder(projectWorkplaceArtificatedocument, param);
+
+            projectWorkplaceArtificatedocument.DocumentName = docName;
+            _projectWorkplaceSubSecArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+
+            if (!param.AddHistory)
+                _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("WordToPdf/{id}")]
+        public IActionResult WordToPdf(int id)
+        {
+            var document = _projectWorkplaceSubSecArtificatedocumentRepository.WordToPdf(id);
+
+            _projectWorkplaceSubSecArtificatedocumentRepository.Update(document);
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route("UpdateSupersede/{id}")]
+        public IActionResult UpdateSupersede(int id)
+        {
+            var projectWorkplaceSubSecArtificatedocumentDto = _projectWorkplaceSubSecArtificatedocumentRepository.Find(id);
+            projectWorkplaceSubSecArtificatedocumentDto.Status = ArtifactDocStatusType.Supersede;
+
+            var projectWorkplaceSubSecArtificatedocument = _mapper.Map<ProjectWorkplaceSubSecArtificatedocument>(projectWorkplaceSubSecArtificatedocumentDto);
+            _projectWorkplaceSubSecArtificatedocumentRepository.Update(projectWorkplaceSubSecArtificatedocument);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            return Ok(projectWorkplaceSubSecArtificatedocument.Id);
+        }
+
+        [HttpPost]
+        [Route("DocumentMove")]
+        public IActionResult DocumentMove([FromBody] List<WorkplaceFolderDto> workplaceFolderDto)
+        {
+            ProjectWorkplaceSubSecArtificatedocument firstSaved = null;
+
+            //for (var i = 0; i <= (workplaceFolderDto.Count - 1); i++)
+            //{
+            //    var document = _projectWorkplaceSubSecArtificatedocumentRepository.AddMovedDocument(workplaceFolderDto[i]);
+            //    var ProjectArtificate = _projectWorkplaceArtificateRepository.All.Where(x => x.Id == workplaceFolderDto[i].ProjectWorkplaceArtificateId).FirstOrDefault();
+            //    ProjectArtificate.ParentArtificateId = document.ProjectWorkplaceArtificateId;
+
+            //    document.Id = 0;
+            //    document.ProjectWorkplaceArtificateId = workplaceFolderDto[i].ProjectWorkplaceArtificateId;
+
+            //    document.ProjectArtificateDocumentReview.Select(x => { x.Id = 0; return x; }).ToList();
+            //    document.ProjectArtificateDocumentApprover.Select(x => { x.Id = 0; return x; }).ToList();
+            //    document.ProjectArtificateDocumentComment.Select(x => { x.Id = 0; return x; }).ToList();
+            //    document.ProjectArtificateDocumentHistory = null;
+
+            //    _projectWorkplaceSubSecArtificatedocumentRepository.Add(document);
+            //    _projectWorkplaceArtificateRepository.Update(ProjectArtificate);
+            //    if (i == 0) firstSaved = document;
+            //}
+            //if (_uow.Save() <= 0) throw new Exception("Creating move document failed on save.");
+
+            return Ok(firstSaved.Id);
+        }
+
+        [HttpPost]
+        [Route("GetDocumentForHistory/{id}")]
+        public IActionResult GetDocumentForHistory(int id)
+        {
+            var result = _projectWorkplaceSubSecArtificatedocumentRepository.GetDocumentHistory(id);
+            return Ok(result);
         }
     }
 }

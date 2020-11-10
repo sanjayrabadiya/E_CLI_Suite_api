@@ -260,6 +260,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEconsentChatRepository, EconsentChatRepository>();
             services.AddScoped<IEconsentSetupRolesRepository, EconsentSetupRolesRepository>();
             services.AddScoped<ISiteRepository, SiteRepository>();
+            services.AddScoped<IProjectSubSecArtificateDocumentHistoryRepository, ProjectSubSecArtificateDocumentHistoryRepository>();
+            services.AddScoped<IProjectSubSecArtificateDocumentReviewRepository, ProjectSubSecArtificateDocumentReviewRepository>();
+            services.AddScoped<IProjectSubSecArtificateDocumentApproverRepository, ProjectSubSecArtificateDocumentApproverRepository>();
+            services.AddScoped<IProjectSubSecArtificateDocumentCommentRepository, ProjectSubSecArtificateDocumentCommentRepository>();
 
             services.AddScoped<ICenteralUserPasswordRepository, CenteralUserPasswordRepository>();
             services.AddScoped<IRefreshTokenCenteralRepository, RefreshTokenCenteralRepository>();

@@ -276,6 +276,10 @@ namespace GSC.Domain.Context
         public DbSet<ProjectArtificateDocumentApprover> ProjectArtificateDocumentApprover { get; set; }
         public DbSet<Site> Site { get; set; }
         public DbSet<ManageSiteRole> ManageSiteRole { get; set; }
+        public DbSet<ProjectSubSecArtificateDocumentApprover> ProjectSubSecArtificateDocumentApprover { get; set; }
+        public DbSet<ProjectSubSecArtificateDocumentComment> ProjectSubSecArtificateDocumentComment { get; set; }
+        public DbSet<ProjectSubSecArtificateDocumentHistory> ProjectSubSecArtificateDocumentHistory { get; set; }
+        public DbSet<ProjectSubSecArtificateDocumentReview> ProjectSubSecArtificateDocumentReview { get; set; }
 
         public DbSet<ProjectModuleRights> ProjectModuleRights { get; set; }
         private List<string> ColumnsToSkip

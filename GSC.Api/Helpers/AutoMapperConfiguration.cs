@@ -264,6 +264,10 @@ namespace GSC.Api.Helpers
             CreateMap<VisitStatus, VisitStatusDto>().ReverseMap();
             CreateMap<ProjectArtificateDocumentReview, ProjectArtificateDocumentReviewDto>().ReverseMap();
             CreateMap<ProjectArtificateDocumentComment, ProjectArtificateDocumentCommentDto>().ReverseMap();
+            CreateMap<ProjectSubSecArtificateDocumentReview, ProjectSubSecArtificateDocumentReviewDto>().ReverseMap();
+            CreateMap<ProjectSubSecArtificateDocumentHistory, ProjectSubSecArtificateDocumentHistoryDto>().ReverseMap();
+            CreateMap<ProjectSubSecArtificateDocumentApprover, ProjectSubSecArtificateDocumentApproverDto>().ReverseMap();
+            CreateMap<ProjectSubSecArtificateDocumentComment, ProjectSubSecArtificateDocumentCommentDto>().ReverseMap();
 
             CreateMap<ProjectDesignVisitStatus, ProjectDesignVisitStatusDto>().ReverseMap();
             CreateMap<EconsentSetup, EconsentSetupDto>().ReverseMap();
