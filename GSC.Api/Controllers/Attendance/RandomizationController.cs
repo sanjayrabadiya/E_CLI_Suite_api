@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using GSC.Respository.EmailSender;
 using Microsoft.Extensions.Configuration;
 using GSC.Data.Dto.UserMgt;
+using GSC.Helper.DocumentService;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -211,10 +212,10 @@ namespace GSC.Api.Controllers.Attendance
         }
 
         [HttpPut]
-        [Route("ChangeStatustoWithdrawal/{withdrawsignBase64}")]
-        public IActionResult ChangeStatustoWithdrawal(string withdrawsignBase64)
+        [Route("ChangeStatustoWithdrawal")]
+        public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
         {
-            _randomizationRepository.ChangeStatustoWithdrawal(withdrawsignBase64);
+            _randomizationRepository.ChangeStatustoWithdrawal(fileModel);
             _uow.Save();
             return Ok();
         }

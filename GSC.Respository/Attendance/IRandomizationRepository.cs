@@ -4,6 +4,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Attendance;
 using GSC.Helper;
+using GSC.Helper.DocumentService;
 using System.Collections.Generic;
 
 namespace GSC.Respository.Attendance
@@ -18,7 +19,7 @@ namespace GSC.Respository.Attendance
         void ChangeStatustoConsentCompleted(int id);
         void ChangeStatustoReConsentInProgress(int id);
         void PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId);
-        void ChangeStatustoWithdrawal(string withdrawsignBase64);
+        void ChangeStatustoWithdrawal(FileModel fileModel);
         DashboardPatientDto GetDashboardPatientDetail();
         //List<ProjectDesignVisitMobileDto> GetPatientVisits();
         List<ProjectDesignVisitMobileDto> GetPatientVisits();

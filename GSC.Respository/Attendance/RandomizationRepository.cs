@@ -254,16 +254,13 @@ namespace GSC.Respository.Attendance
             Update(randomization);
         }
 
-        public void ChangeStatustoWithdrawal(string withdrawsignBase64)
+        public void ChangeStatustoWithdrawal(FileModel fileModel)
         {
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
             if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
             {
-                if (withdrawsignBase64?.Length > 0)
+                if (fileModel.Base64?.Length > 0)
                 {
-                    FileModel fileModel = new FileModel();
-                    fileModel.Base64 = withdrawsignBase64;
-                    fileModel.Extension = "png";
                     randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
                         Context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
                 }
