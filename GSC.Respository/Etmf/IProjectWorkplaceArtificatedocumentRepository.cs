@@ -27,5 +27,6 @@ namespace GSC.Respository.Etmf
         CommonArtifactDocumentDto GetDocument(int id);
         string ImportWordDocument(Stream stream, string FullPath);
         string SaveDocumentInFolder(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument, CustomParameter param);
+        string ImportData(int Id);
     }
 }

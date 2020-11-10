@@ -169,7 +169,8 @@ namespace GSC.Respository.Etmf
                     CreatedDate = s.CreatedDate,
                     CreatedByUser = Context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
-                    DataType = MyTaskMethodModule.Reviewed.GetDescription()
+                    DataType = MyTaskMethodModule.Reviewed.GetDescription(),
+                    Level = 6
                 }).OrderBy(x => x.Id).ToList();
 
             return result;

@@ -20,11 +20,14 @@ namespace GSC.Data.Dto.Etmf
         public string Sectionname { get; set; }
         public string SubsectionName { get; set; }
         public string Artificatename { get; set; }
-
         public int FolderType { get; set; }
         public int ProjectId { get; set; }
         public int CompanyId { get; set; }
         public string FileName { get; set; }
+        public ArtifactDocStatusType Status { get; set; }
+        public string Version { get; set; }
+        public int? ParentDocumentId { get; set; }
+        public bool? IsAccepted { get; set; }
     }
 
     public  class CommonArtifactDocumentDto

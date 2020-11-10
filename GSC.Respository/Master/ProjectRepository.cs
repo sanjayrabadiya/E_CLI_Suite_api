@@ -32,6 +32,7 @@ namespace GSC.Respository.Master
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork<GscContext> _uow;
 
         public ProjectRepository(IUnitOfWork<GscContext> uow,
             IUserRepository userRepository,
@@ -56,6 +57,7 @@ namespace GSC.Respository.Master
             _attendanceRepository = attendanceRepository;
             _volunteerRepository = volunteerRepository;
             _mapper = mapper;
+            _uow = uow;
         }
 
         public IList<ProjectGridDto> GetProjectList(bool isDeleted)
@@ -223,7 +225,7 @@ namespace GSC.Respository.Master
                 {
                     Id = c.Id,
                     Value = c.ProjectCode,
-                    CountryId = c.CountryId,
+                    CountryId = Convert.ToInt32(c.CountryId),
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? 0
@@ -251,7 +253,7 @@ namespace GSC.Respository.Master
                 {
                     Id = c.Id,
                     Value = c.ProjectCode,
-                    CountryId = c.CountryId,
+                    CountryId = Convert.ToInt32(c.CountryId),
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? 0,
                 }).OrderBy(o => o.Value).ToList();
@@ -297,8 +299,8 @@ namespace GSC.Respository.Master
             if (project.ParentProjectId == null)
             {
                 var projectCode = _numberFormatRepository.GenerateNumber("pro");
-                var country = _countryRepository.Find(project.CountryId).CountryCode;
-                var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
+                var country = _countryRepository.Find(Convert.ToInt32(project.CountryId)).CountryCode;
+                var design = _designTrialRepository.Find(Convert.ToInt32(project.DesignTrialId)).DesignTrialCode;
                 projectCode = projectCode.Replace("DESIGN", design);
                 projectCode = projectCode.Replace("COUNTRY", country);
 
@@ -326,8 +328,8 @@ namespace GSC.Respository.Master
         {
             var SiteCount = All.Where(x => x.ParentProjectId == project.ParentProjectId).Count();
             var projectCode = _numberFormatRepository.GenerateNumberForSite("prochild", SiteCount);
-            var country = _countryRepository.Find(project.CountryId).CountryCode;
-            var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
+            var country = _countryRepository.Find(Convert.ToInt32(project.CountryId)).CountryCode;
+            var design = _designTrialRepository.Find(Convert.ToInt32(project.DesignTrialId)).DesignTrialCode;
             projectCode = projectCode.Replace("DESIGN", design);
             projectCode = projectCode.Replace("COUNTRY", country);
 
@@ -478,6 +480,51 @@ namespace GSC.Respository.Master
                     ParentProjectId = c.ParentProjectId ?? c.Id,
                     IsDeleted = c.DeletedDate != null
                 }).OrderBy(o => o.Value).ToList();
+        }
+
+        public void UpdateProject(Data.Entities.Master.Project details)
+        {
+
+            var projectdetails = Context.Project.Where(t => t.ProjectCode == details.ProjectCode).FirstOrDefault();
+            var user = Context.Users.FirstOrDefault();
+            if (projectdetails == null)
+            {
+                projectdetails = new Data.Entities.Master.Project();
+                projectdetails.ProjectCode = details.ProjectCode;
+                projectdetails.ProjectName = "";
+                projectdetails.ProjectNumber = "";
+                //projectdetails.DesignTrialId = 1;
+                //projectdetails.CountryId = 1;
+                //projectdetails.ClientId = 1;
+                //projectdetails.DrugId = 1;
+                //  projectdetails.Period = 1;
+                //   projectdetails.IsStatic = true;
+                projectdetails.FromDate = details.FromDate;
+                projectdetails.ToDate = details.ToDate;
+                projectdetails.CreatedBy = user.Id;
+                projectdetails.CreatedDate = DateTime.Now;
+                Context.Project.Add(projectdetails);
+                _uow.Save();
+                Data.Entities.ProjectRight.ProjectRight prights = new Data.Entities.ProjectRight.ProjectRight();
+                prights.UserId = user.Id;
+                prights.ProjectId = projectdetails.Id;
+                prights.RoleId = 1;
+                prights.IsPrimary = false;
+                prights.IsTrainingRequired = false;
+                prights.CreatedBy = user.Id;
+                prights.CreatedDate = DateTime.Now;
+                prights.IsReviewDone = true;
+                _projectRightRepository.Add(prights);
+            }
+            else
+            {
+                projectdetails.ProjectCode = details.ProjectCode;
+                // projectdetails.ProjectName = "";
+                projectdetails.FromDate = details.FromDate;
+                projectdetails.ToDate = details.ToDate;
+                Context.Project.Update(projectdetails);
+            }
+            _uow.Save();
         }
 
 

@@ -10,7 +10,7 @@ namespace GSC.Respository.Attendance
 {
     public interface IRandomizationRepository : IGenericRepository<Randomization>
     {
-        string Duplicate(Randomization objSave, int projectId);
+        string Duplicate(RandomizationDto objSave, int projectId);
         List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted);
         void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto);
         void SendEmailOfStartEconsent(Randomization randomization);

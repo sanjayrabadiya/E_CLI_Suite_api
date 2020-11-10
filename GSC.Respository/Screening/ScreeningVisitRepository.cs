@@ -26,6 +26,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        private readonly IScreeningProgress _screeningProgress;
         public ScreeningVisitRepository(IUnitOfWork<GscContext> uow,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
@@ -35,7 +36,8 @@ namespace GSC.Respository.Screening
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository)
+            IProjectDesignTemplateRepository projectDesignTemplateRepository,
+            IScreeningProgress screeningProgress)
             : base(uow, jwtTokenAccesser)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -47,6 +49,7 @@ namespace GSC.Respository.Screening
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _screeningProgress = screeningProgress;
         }
 
 
@@ -71,16 +74,12 @@ namespace GSC.Respository.Screening
 
         public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId, DateTime visitDate)
         {
-            var openVariable = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.VisitStatusId == ScreeningVisitStatus.Open).
-                Select(t => new { t.ProjectDesignVariable.Id, t.ProjectDesignVariable.ProjectDesignTemplateId }).FirstOrDefault();
-
             var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(projectDesignPeriodId);
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
             designVisits.ForEach(r =>
             {
                 var screeningVisit = new ScreeningVisit
                 {
-
                     ProjectDesignVisitId = r.Id,
                     Status = projectDesignVisitId == r.Id ? ScreeningVisitStatus.Open : ScreeningVisitStatus.NotStarted,
                     IsSchedule = r.IsSchedule ?? false,
@@ -100,16 +99,6 @@ namespace GSC.Respository.Screening
                         ProjectDesignTemplateId = t,
                         Status = ScreeningTemplateStatus.Pending
                     };
-                    if (openVariable != null && openVariable.ProjectDesignTemplateId == t)
-                    {
-                        if (SaveVariableValue(visitDate.ToString(), screeningTemplate, openVariable.Id, openVariable.ProjectDesignTemplateId))
-                        {
-                            screeningVisit.Status = ScreeningVisitStatus.InProgress;
-                            screeningTemplate.Status = ScreeningTemplateStatus.InProcess;
-                            _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.InProgress, visitDate);
-                        }
-
-                    }
                     screeningVisit.ScreeningTemplates.Add(screeningTemplate);
 
                 });
@@ -120,7 +109,27 @@ namespace GSC.Respository.Screening
             });
         }
 
-        private bool SaveVariableValue(string value, ScreeningTemplate screeningTemplate, int projectDesignVariableId, int projectDesignTemplateId)
+        public void FindOpenVisitVarible(int projectDesignVisitId, int screeningVisitId, DateTime visitDate)
+        {
+            var openVariable = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.VisitStatusId == ScreeningVisitStatus.Open).
+              Select(t => new { t.ProjectDesignVariable.Id, t.ProjectDesignVariable.ProjectDesignTemplateId }).FirstOrDefault();
+
+            if (openVariable != null && openVariable.ProjectDesignTemplateId == projectDesignVisitId)
+            {
+                var screeningVisit = Find(screeningVisitId);
+                var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisit.Id && x.ProjectDesignTemplateId == openVariable.ProjectDesignTemplateId && x.ParentId == null).FirstOrDefault();
+                if (screeningVisit != null && screeningTemplate != null && SaveVariableValue(visitDate.ToString(), screeningTemplate, openVariable.Id, openVariable.ProjectDesignTemplateId, screeningVisit.ScreeningEntryId))
+                {
+                    screeningVisit.Status = ScreeningVisitStatus.InProgress;
+                    screeningTemplate.Status = ScreeningTemplateStatus.InProcess;
+                    _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.InProgress, visitDate);
+                    Update(screeningVisit);
+                }
+
+            }
+        }
+
+        private bool SaveVariableValue(string value, ScreeningTemplate screeningTemplate, int projectDesignVariableId, int projectDesignTemplateId, int screeningEntryId)
         {
             if (!_projectDesignVariableRepository.All.Any(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.Id == projectDesignVariableId))
                 return false;
@@ -143,6 +152,10 @@ namespace GSC.Respository.Screening
             };
 
             _screeningTemplateValueRepository.Add(screeningTemplateValue);
+
+            _uow.Save();
+
+            _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
 
             return true;
 
@@ -181,9 +194,12 @@ namespace GSC.Respository.Screening
 
             Update(visit);
 
-            _screeningVisitHistoryRepository.SaveByScreeningVisit(visit, ScreeningVisitStatus.Open, visitDate);
+           
 
+            _screeningVisitHistoryRepository.SaveByScreeningVisit(visit, ScreeningVisitStatus.Open, visitDate);
             _uow.Save();
+
+            FindOpenVisitVarible(visit.ProjectDesignVisitId, visit.Id, visitDate);
 
             PatientStatus(visit.ScreeningEntryId);
         }
@@ -208,6 +224,8 @@ namespace GSC.Respository.Screening
                 patientStatus = ScreeningPatientStatus.Completed;
 
             _randomizationRepository.PatientStatus(patientStatus, screeningEntryId);
+
+
         }
 
         public void AutomaticStatusUpdate(int screeningTemplateId)

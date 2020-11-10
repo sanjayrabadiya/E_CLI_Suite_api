@@ -132,16 +132,8 @@ namespace GSC.Api.Controllers.Etmf
         [Route("ImportData/{id}")]
         public IActionResult ImportData(int id)
         {
-            var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
-            string path = FullPath;
-            if (!System.IO.File.Exists(path))
-                return null;
-            Stream stream = System.IO.File.OpenRead(path);
-            string json = _projectWorkplaceArtificatedocumentRepository.ImportWordDocument(stream, path);
-            stream.Close();
-            return Ok(json);
+            var result = _projectWorkplaceArtificatedocumentRepository.ImportData(id);
+            return Ok(result);
         }
 
         [HttpPost]

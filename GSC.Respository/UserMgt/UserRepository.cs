@@ -80,31 +80,61 @@ namespace GSC.Respository.UserMgt
         public User ValidateUser(string userName, string password)
         {
 
-            //  var CenterUserDetails = _centeralRepository.CheckValidUser(userName);   
-            var user = All.Where(x =>
-                (x.UserName == userName || x.Email == userName)
-                && x.DeletedDate == null).FirstOrDefault();
+            ////  var CenterUserDetails = _centeralRepository.CheckValidUser(userName);   
+            //var user = All.Where(x =>
+            //    (x.UserName == userName || x.Email == userName)
+            //    && x.DeletedDate == null).FirstOrDefault();
 
+            //if (user == null)
+            //{
+            //    _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
+            //    return null;
+            //}
+            ////var userPassword = Context.UserPassword
+            ////    .Where(x => x.UserId == user.Id)
+            ////    .OrderByDescending(x => x.Id)
+            ////    .First();
+
+            //string validate = "";
+            //if (Convert.ToBoolean(_configuration["IsCloud"]))
+            //    validate = _centeralUserPasswordRepository.VaidatePassword(password, user.Id);
+            //else
+            //    validate = _userPasswordRepository.VaidatePassword(password, user.Id);
+
+            ////if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    user.FailedLoginAttempts++;
+            //    var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
+            //    if (result != null && user.FailedLoginAttempts > result.MaxLoginAttempt)
+            //    {
+            //        user.IsLocked = true;
+            //        Update(user);
+            //    }
+
+            //    _userLoginReportRepository.SaveLog("Invalid Password and Login Attempt : " + user.FailedLoginAttempts,
+            //        user.Id, userName);
+            //    return null;
+            //}
+            //return user;
+            if (Convert.ToBoolean(_configuration["IsCloud"]))
+                return validateCenteral(userName, password);
+            else
+                return validateClient(userName, password);
+        }
+
+
+        private User validateCenteral(string userName, string password)
+        {
+            var user = All.Where(x =>
+              (x.UserName == userName || x.Email == userName)
+              && x.DeletedDate == null).FirstOrDefault();
             if (user == null)
             {
                 _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
                 return null;
             }
-
-
-            //var userPassword = Context.UserPassword
-            //    .Where(x => x.UserId == user.Id)
-            //    .OrderByDescending(x => x.Id)
-            //    .First();
-
-            string validate = "";
-            if (Convert.ToBoolean(_configuration["IsCloud"]))
-                validate = _centeralUserPasswordRepository.VaidatePassword(password, user.Id);
-            else
-                validate = _userPasswordRepository.VaidatePassword(password, user.Id);
-
-            //if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
-            if (!string.IsNullOrEmpty(validate))
+            if (!string.IsNullOrEmpty(_centeralUserPasswordRepository.VaidatePassword(password, user.Id)))
             {
                 user.FailedLoginAttempts++;
                 var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
@@ -121,14 +151,44 @@ namespace GSC.Respository.UserMgt
             return user;
         }
 
+        private User validateClient(string userName, string password)
+        {
+
+            var user = All.Where(x =>
+                (x.UserName == userName || x.Email == userName)
+                && x.DeletedDate == null).FirstOrDefault();
+
+            if (user == null)
+            {
+                _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
+                return null;
+            }
+            if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
+            {
+                user.FailedLoginAttempts++;
+                var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
+                if (result != null && user.FailedLoginAttempts > result.MaxLoginAttempt)
+                {
+                    user.IsLocked = true;
+                    Update(user);
+                }
+                _userLoginReportRepository.SaveLog("Invalid Password and Login Attempt : " + user.FailedLoginAttempts,
+                    user.Id, userName);
+                return null;
+            }
+            return user;
+        }
 
         public string DuplicateUserName(User objSave)
         {
+            if (All.Any(x => x.Id != objSave.Id && x.FirstName == objSave.FirstName && x.MiddleName == objSave.MiddleName && x.LastName == objSave.LastName && x.Email == objSave.Email && x.DeletedDate == null))
+                return "Duplicate User";
+
             if (All.Any(x => x.Id != objSave.Id && x.UserName == objSave.UserName && x.DeletedDate == null))
                 return "Duplicate User Name : " + objSave.UserName;
 
-            if (All.Any(x => x.Id != objSave.Id && x.Email == objSave.Email && x.DeletedDate == null))
-                return "Duplicate EMail : " + objSave.Email;
+            //if (All.Any(x => x.Id != objSave.Id && x.Email == objSave.Email && x.DeletedDate == null))
+            //    return "Duplicate EMail : " + objSave.Email;
 
             return "";
         }

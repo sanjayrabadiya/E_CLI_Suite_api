@@ -6,6 +6,7 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Medra;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Client;
@@ -15,6 +16,7 @@ using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
+using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using GSC.Helper.DocumentService;
@@ -174,6 +176,13 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.ManageSiteId, x => x.MapFrom(a => Convert.ToInt32(a.ManageSiteId)))
                .ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.ManageSite.Iecirb.ToList().Select(x => x.IECIRBName))))
                .ReverseMap();
+
+            CreateMap<ProjectDesignVisitStatus, ProjectDesignVisitStatusGridDto>()
+              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
+              .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignVariable.ProjectDesignTemplate.TemplateName))
+              .ForMember(x => x.ProjectDesignVariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
+              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.VisitStatusId.GetDescription()))
+              .ReverseMap();
         }
     }
 }

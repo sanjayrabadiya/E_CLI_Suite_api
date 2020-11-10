@@ -135,11 +135,15 @@ namespace GSC.Data.Dto.Master
 
     public class StydyDetails
     {
+        [Required(ErrorMessage = "Project Code is required.")]
         public string StudyCode { get; set; }
         public int NoofStudy { get; set; }
         public int NoofSites { get; set; }
+        [Required(ErrorMessage = "Valid From is required.")]
         public DateTime ValidFrom { get; set; }
+        [Required(ErrorMessage = "Valid Tos is required.")]
         public DateTime ValidTo { get; set; }
+        [Required(ErrorMessage = "Company ID is required.")]
         public int CompanyID { get; set; }
     }
 }

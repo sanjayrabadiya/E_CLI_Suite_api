@@ -37,6 +37,9 @@ using GSC.Centeral.Context;
 using GSC.Centeral.GenericRespository;
 using GSC.Centeral.UnitOfWork;
 using GSC.Respository.CenteralAuth;
+using GSC.Respository.Project.Rights;
+using GSC.Data.Entities.Project.Rights;
+using System.Net.Http;
 
 namespace GSC.Api.Helpers
 {
@@ -257,12 +260,20 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEconsentChatRepository, EconsentChatRepository>();
             services.AddScoped<IEconsentSetupRolesRepository, EconsentSetupRolesRepository>();
             services.AddScoped<ISiteRepository, SiteRepository>();
+            services.AddScoped<IProjectSubSecArtificateDocumentHistoryRepository, ProjectSubSecArtificateDocumentHistoryRepository>();
+            services.AddScoped<IProjectSubSecArtificateDocumentReviewRepository, ProjectSubSecArtificateDocumentReviewRepository>();
+            services.AddScoped<IProjectSubSecArtificateDocumentApproverRepository, ProjectSubSecArtificateDocumentApproverRepository>();
+            services.AddScoped<IProjectSubSecArtificateDocumentCommentRepository, ProjectSubSecArtificateDocumentCommentRepository>();
 
             services.AddScoped<ICenteralUserPasswordRepository, CenteralUserPasswordRepository>();
             services.AddScoped<IRefreshTokenCenteralRepository, RefreshTokenCenteralRepository>();
             services.AddScoped<ICenteralRepository, CenteralRepository>();
             services.AddScoped<IUnitOfWorkCenteral, UnitOfWorkCenteral<CenteralContext>>();
             services.AddScoped(typeof(IUnitOfWorkCenteral<CenteralContext>), typeof(UnitOfWorkCenteral<CenteralContext>));
+      
+            services.AddScoped<IProjectModuleRightsRepository, ProjectModuleRightsRepository>();
+            //services.AddScoped<IAPICall, APICall>();
+            services.AddHttpClient<IAPICall, APICall>();
         }
     }
 }

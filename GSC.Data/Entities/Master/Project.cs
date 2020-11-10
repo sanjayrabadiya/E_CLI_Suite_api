@@ -21,13 +21,13 @@ namespace GSC.Data.Entities.Master
 
         public int? ParentProjectId { get; set; }
 
-        public int DesignTrialId { get; set; }
+        public int? DesignTrialId { get; set; }
 
-        public int CountryId { get; set; }
+        public int? CountryId { get; set; }
 
-        public int ClientId { get; set; }
+        public int? ClientId { get; set; }
 
-        public int DrugId { get; set; }
+        public int? DrugId { get; set; }
 
         public int? CityAreaId { get; set; }
         public int? CityId { get; set; }
@@ -35,7 +35,7 @@ namespace GSC.Data.Entities.Master
         public string SiteName { get; set; }
         public string PinCode { get; set; }
 
-        public int Period { get; set; }
+        public int? Period { get; set; }
         public bool IsStatic { get; set; }
         public int? RegulatoryTypeId { get; set; }
         public RegulatoryType? RegulatoryType { get; set; }

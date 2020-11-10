@@ -648,6 +648,19 @@ namespace GSC.Respository.Etmf
             }
         }
 
+        public string ImportData(int Id)
+        {
+            var document = Find(Id);
+            var upload = Context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var FullPath = Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            string path = FullPath;
+            if (!System.IO.File.Exists(path))
+                return null;
+            Stream stream = System.IO.File.OpenRead(path);
+            string json = ImportWordDocument(stream, path);
+            stream.Close();
+            return json;
+        }
 
     }
 }

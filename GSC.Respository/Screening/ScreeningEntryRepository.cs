@@ -88,6 +88,7 @@ namespace GSC.Respository.Screening
                     ProjectDesignId = t.ProjectDesignId,
                     FitnessReason = t.FitnessReason,
                     FitnessNotes = t.FitnessNotes,
+                    PatientStatusName = t.RandomizationId != null ? t.Randomization.PatientStatusId.GetDescription() : "",
                     Progress = t.Progress,
                     ProjectDesignPeriodId = t.Attendance.ProjectDesignPeriodId,
                     ProjectId = t.ProjectId
@@ -141,8 +142,8 @@ namespace GSC.Respository.Screening
 
             visits.ForEach(x =>
             {
-                x.ScreeningTemplates = templates.Where(a => a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).ToList();
-                x.ScreeningTemplates.ForEach(v => v.Children = templates.Where(a => a.ParentId == v.Id).ToList());
+                x.ScreeningTemplates = templates.Where(a => a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).OrderBy(c => c.DesignOrder).ToList();
+                x.ScreeningTemplates.ForEach(v => v.Children = templates.Where(a => a.ParentId == v.Id).OrderBy(c => c.DesignOrder).ToList());
 
                 x.IsVisitRepeated = x.ParentScreeningVisitId != null ? false :
                     workflowlevel.IsStartTemplate &&
@@ -179,6 +180,7 @@ namespace GSC.Respository.Screening
                 _volunteerRepository.Update(volunteer);
             }
             _uow.Save();
+
 
             _screeningVisitRepository.PatientStatus(screeningEntry.Id);
         }
@@ -219,6 +221,12 @@ namespace GSC.Respository.Screening
             _uow.Save();
 
             _screeningVisitRepository.PatientStatus(screeningEntry.Id);
+
+            var screningVisit = screeningEntry.ScreeningVisit.Where(x => x.ProjectDesignVisitId == saveRandomizationDto.ProjectDesignVisitId).FirstOrDefault();
+
+            if (screningVisit != null)
+                _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate);
+
 
             return screeningEntry;
         }

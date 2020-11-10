@@ -2,6 +2,7 @@
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
+using GSC.Helper;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -67,11 +68,31 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [Route("GetTemplateForVisit/{screeningEntryId}/{projectDesignVisitId}/{screeningStatus}/{isQuery}")]
-        public IActionResult GetTemplateForVisit(int screeningEntryId, int projectDesignVisitId, int screeningStatus, bool isQuery)
+        [Route("GetTemplateForVisit/{screeningVisitId}/{templateStatus}")]
+        public IActionResult GetTemplateForVisit(int screeningVisitId, ScreeningTemplateStatus templateStatus)
         {
-            return Ok(_dataEntryRespository.GetTemplateForVisit(screeningEntryId, projectDesignVisitId, screeningStatus,
-                isQuery));
+            return Ok(_dataEntryRespository.GetTemplateForVisit(screeningVisitId, templateStatus));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateVisitMyQuery/{screeningVisitId}/{myLevel}")]
+        public IActionResult GetTemplateVisitMyQuery(int screeningVisitId, short myLevel)
+        {
+            return Ok(_dataEntryRespository.GetTemplateVisitMyQuery(screeningVisitId, myLevel));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateVisitWorkFlow/{screeningVisitId}/{reviewLevel}")]
+        public IActionResult GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel)
+        {
+            return Ok(_dataEntryRespository.GetTemplateVisitWorkFlow(screeningVisitId, reviewLevel));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateVisitQuery/{screeningVisitId}/{queryStatus}")]
+        public IActionResult GetTemplateVisitQuery(int screeningVisitId, QueryStatus queryStatus)
+        {
+            return Ok(_dataEntryRespository.GetTemplateVisitQuery(screeningVisitId, queryStatus));
         }
 
     }

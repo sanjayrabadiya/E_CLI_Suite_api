@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -69,7 +70,7 @@ namespace GSC.Respository.Master
 
             return Context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == ParentProjectId || x.Id == ParentProjectId)).Select(r => new DropDownDto
             {
-                Id = r.CountryId,
+                Id = Convert.ToInt32(r.CountryId),
                 Value = r.Country.CountryName,
                 Code = r.Country.CountryCode
             }).Distinct().OrderBy(o => o.Value).ToList();

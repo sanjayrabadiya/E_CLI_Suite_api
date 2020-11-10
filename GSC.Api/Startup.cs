@@ -82,10 +82,10 @@ namespace GSC.Api
             app.UseExceptionHandler(ErrorHandler.HttpExceptionHandling(env));
             app.UseAuthentication();
             app.UseMiddleware<LogMiddleware>();
-            //app.UseCors("AllowCorsPolicy");
+           // app.UseCors("AllowCorsPolicy");
             app.UseCors(builder =>
             {
-                builder.WithOrigins(new[] { "http://localhost:4200", "https://dev2.clinvigilant.com", "https://demo1.clinvigilant.com", "https://sandbox.clinvigilant.com" })
+                builder.WithOrigins(new[] { "http://localhost:4100", "http://localhost:4200", "https://dev2.clinvigilant.com", "https://demo1.clinvigilant.com", "https://sandbox.clinvigilant.com" })
                 .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
             });
             app.UseStaticFiles();

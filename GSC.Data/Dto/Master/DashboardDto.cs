@@ -15,12 +15,15 @@ namespace GSC.Data.Dto.Master
         public DateTime? CreatedDate { get; set; }
         public string CreatedByUser { get; set; }
         public string DataType { get; set; }
+        public double Level { get; set; }
     }
 
     public class DashboardDetailsDto : BaseDto
     {
         public List<DashboardDto> eTMFApproveData { get; set; }
+        public List<DashboardDto> eTMFSubSecApproveData { get; set; }
         public List<DashboardDto> eTMFSendData { get; set; }
+        public List<DashboardDto> eTMFSubSecSendData { get; set; }
         public List<DashboardDto> eTMFSendBackData { get; set; }
         public List<DashboardDto> eConsentData { get; set; }
     }
