@@ -9,8 +9,9 @@ namespace GSC.Respository.Project.Design
     public interface IProjectDesignVisitStatusRepository : IGenericRepository<ProjectDesignVisitStatus>
     {
         ProjectDesignVisitStatusDto GetProjectDesignVariableDetail(int visitId, ScreeningVisitStatus screeningVisitStatus);
-        ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByVisit(int VisitId);
-
+        ProjectDesignVisitStatusDto GetProjectDesignVisitStatusById(int Id);
         List<ProjectDesignVisitStatusGridDto> GetVisits(int VisitId);
+        string Duplicate(ProjectDesignVisitStatusDto objSave);
+
     }
 }

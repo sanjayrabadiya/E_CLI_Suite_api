@@ -181,7 +181,7 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
               .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignVariable.ProjectDesignTemplate.TemplateName))
               .ForMember(x => x.ProjectDesignVariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
-              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.VisitStatusId.GetDescription()))
+              .ForMember(x => x.VisitStatus, x => x.MapFrom(a => a.VisitStatusId.GetDescription()))
               .ReverseMap();
         }
     }

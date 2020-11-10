@@ -38,7 +38,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            return Ok(_projectDesignVisitStatusRepository.GetProjectDesignVisitStatusByVisit(id));
+            return Ok(_projectDesignVisitStatusRepository.GetProjectDesignVisitStatusById(id));
         }
 
         //added by vipul for add visit status on 23092020
@@ -48,6 +48,14 @@ namespace GSC.Api.Controllers.Project.Design
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             projectDesignVisitStatusDto.Id = 0;
             var projectDesignVisitStatus = _mapper.Map<ProjectDesignVisitStatus>(projectDesignVisitStatusDto);
+
+            var validate = _projectDesignVisitStatusRepository.Duplicate(projectDesignVisitStatusDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
             _projectDesignVisitStatusRepository.Add(projectDesignVisitStatus);
             if (_uow.Save() <= 0) throw new Exception("Project design visit status save.");
             return Ok(projectDesignVisitStatus.Id);
@@ -66,7 +74,8 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         //added by vipul for get visit status list by visit on 09112020
-        [HttpGet("{visitId}")]
+        [HttpGet]
+        [Route("GetVisits/{visitId}")]
         public IActionResult GetVisits(int visitId)
         {
             return Ok(_projectDesignVisitStatusRepository.GetVisits(visitId));

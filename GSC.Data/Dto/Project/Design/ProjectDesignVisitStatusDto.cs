@@ -14,7 +14,7 @@ namespace GSC.Data.Dto.Project.Design
         public ScreeningVisitStatus VisitStatusId { get; set; }
     }
 
-    public class ProjectDesignVisitStatusGridDto : BaseDto
+    public class ProjectDesignVisitStatusGridDto : BaseAuditDto
     {
         public string VisitName { get; set; }
         public string ProjectDesignTemplateName { get; set; }

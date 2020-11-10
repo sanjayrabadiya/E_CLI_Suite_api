@@ -499,7 +499,7 @@ namespace GSC.Helper
         [Description("Withdrawal")] Withdrawal = 7,
         [Description("OnHold")] OnHold = 8,
         [Description("Screening Failure")] ScreeningFailure = 9,
-        [Description("Completed")] Completed = 10
+        [Description("Completed")] Completed = 11
     }
 
     public enum ScreeningPatientStatus : int

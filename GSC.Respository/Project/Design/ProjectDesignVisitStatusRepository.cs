@@ -26,17 +26,9 @@ namespace GSC.Respository.Project.Design
         }
 
 
-        public ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByVisit(int VisitId)
+        public ProjectDesignVisitStatusDto GetProjectDesignVisitStatusById(int Id)
         {
-            //return All.Where(x => x.DeletedDate == null && x.ProjectDesignVariable.ProjectDesignTemplateId == ProjectDesignTemplateId).Select(t => new ProjectDesignVisitStatusDto
-            //{
-            //    Id = t.Id,
-            //    ProjectDesignVisitId = t.ProjectDesignVisitId,
-            //    ProjectDesignTemplateId = t.ProjectDesignVariable.ProjectDesignTemplateId,
-            //    ProjectDesignVariableId = t.ProjectDesignVariableId,
-            //    VisitStatusId = t.VisitStatusId
-            //}).FirstOrDefault();
-            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == VisitId).Select(t => new ProjectDesignVisitStatusDto
+            return All.Where(x => x.Id == Id).Select(t => new ProjectDesignVisitStatusDto
             {
                 Id = t.Id,
                 ProjectDesignVisitId = t.ProjectDesignVisitId,
@@ -64,5 +56,18 @@ namespace GSC.Respository.Project.Design
             return All.Where(x => x.DeletedDate == null && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisitId == VisitId).
                    ProjectTo<ProjectDesignVisitStatusGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
+
+        public string Duplicate(ProjectDesignVisitStatusDto objSave)
+        {
+            if (All.Any(x => x.ProjectDesignVisitId == objSave.ProjectDesignVisitId && x.ProjectDesignVariable.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId &&
+            x.DeletedDate == null))
+                return "Template already use.";
+
+            if (All.Any(x => x.ProjectDesignVisitId == objSave.ProjectDesignVisitId && x.VisitStatusId == objSave.VisitStatusId &&
+            x.DeletedDate == null))
+                return "Status already use.";
+            return "";
+        }
+
     }
 }
