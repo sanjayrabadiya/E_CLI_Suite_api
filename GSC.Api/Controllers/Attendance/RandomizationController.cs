@@ -227,5 +227,12 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(data);
         }
 
+        [HttpGet("GetPatientTemplates/{screeningVisitId}")]
+        public IActionResult GetPatientTemplates(int screeningVisitId)
+        {
+            var data = _randomizationRepository.GetPatientTemplates(screeningVisitId);
+            return Ok(data);
+        }
+
     }
 }

@@ -23,5 +23,6 @@ namespace GSC.Respository.Attendance
         DashboardPatientDto GetDashboardPatientDetail();
         //List<ProjectDesignVisitMobileDto> GetPatientVisits();
         List<ProjectDesignVisitMobileDto> GetPatientVisits();
+        List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId);
     }
 }

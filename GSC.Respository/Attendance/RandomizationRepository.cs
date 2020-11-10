@@ -19,9 +19,11 @@ using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 
 namespace GSC.Respository.Attendance
 {
@@ -309,14 +311,36 @@ namespace GSC.Respository.Attendance
             //                    b.Id = c.ScreeningEntryId and
             //                    c.ProjectDesignVisitId = d.Id";
 
-            var data = (from screeningentry in Context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id)
-                        join ScreeningVisit in Context.ScreeningVisit.Where(x => x.DeletedDate == null) on screeningentry.Id equals ScreeningVisit.ScreeningEntryId
-                        join ProjectDesignVisit in Context.ProjectDesignVisit.Where(x => x.DeletedDate == null) on ScreeningVisit.ProjectDesignVisitId equals ProjectDesignVisit.Id
+            //var data = (from screeningentry in Context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id)
+            //            join ScreeningVisit in Context.ScreeningVisit.Where(x => x.DeletedDate == null) on screeningentry.Id equals ScreeningVisit.ScreeningEntryId
+            //            join ProjectDesignVisit in Context.ProjectDesignVisit.Where(x => x.DeletedDate == null) on ScreeningVisit.ProjectDesignVisitId equals ProjectDesignVisit.Id
 
-                        select new ProjectDesignVisitMobileDto
+            //            select new ProjectDesignVisitMobileDto
+            //            {
+            //                Id = ScreeningVisit.Id,
+            //                DisplayName = ProjectDesignVisit.DisplayName,
+            //            }).ToList();
+
+            var data = Context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
+                        Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && x.ScreeningTemplates.Any(x => x.IsParticipantView == true)).
+                        Select(r => new ProjectDesignVisitMobileDto
                         {
-                            Id = ProjectDesignVisit.Id,
-                            DisplayName = ProjectDesignVisit.DisplayName,
+                            Id = r.Id,
+                            DisplayName = r.ProjectDesignVisit.DisplayName,
+                        }).ToList();
+
+            return data;
+        }
+
+        public List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId)
+        {
+            var data = Context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Where(x => x.ScreeningVisitId == screeningVisitId && x.IsParticipantView == true).
+                        Select(r => new ProjectDesignTemplateMobileDto
+                        {
+                            ScreeningTemplateId = r.Id,
+                            ProjectDesignTemplateId = r.ProjectDesignTemplateId,
+                            TemplateName = r.ProjectDesignTemplate.TemplateName,
+                            Status = r.Status
                         }).ToList();
 
             return data;

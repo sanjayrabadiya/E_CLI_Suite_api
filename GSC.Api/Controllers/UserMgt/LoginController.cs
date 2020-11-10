@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
+using GSC.Api.Hubs;
 using GSC.Centeral.UnitOfWork;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
@@ -15,6 +16,7 @@ using GSC.Helper;
 using GSC.Helper.DocumentService;
 using GSC.Respository.CenteralAuth;
 using GSC.Respository.Configuration;
+using GSC.Respository.InformConcent;
 using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Authorization;
@@ -43,6 +45,8 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly ICenteralRepository _centeralRepository;
         private readonly IConfiguration _configuration;
+        private readonly IHubContext<MessageHub> _hubcontext;
+        private readonly IEconsentChatRepository _econsentChatRepository;
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -55,7 +59,9 @@ namespace GSC.Api.Controllers.UserMgt
             IHubContext<Notification> notificationHubContext,
             IAppSettingRepository appSettingRepository,
             IRolePermissionRepository rolePermissionRepository,
-            ICenteralRepository centeralRepository, IConfiguration configuration)
+            ICenteralRepository centeralRepository, IConfiguration configuration,
+            IHubContext<MessageHub> hubcontext,
+            IEconsentChatRepository econsentChatRepository)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -69,6 +75,8 @@ namespace GSC.Api.Controllers.UserMgt
             _rolePermissionRepository = rolePermissionRepository;
             _centeralRepository = centeralRepository;
             _configuration = configuration;
+            _hubcontext = hubcontext;
+            _econsentChatRepository = econsentChatRepository;
         }
 
         [HttpPost]
@@ -135,7 +143,22 @@ namespace GSC.Api.Controllers.UserMgt
             //}
 
             var validatedUser = BuildUserAuthObject(user, dto.RoleId);
+            try
+            {
+                await _hubcontext.Clients.All.SendAsync("UserLogIn", user.Id);
+                var messages = _econsentChatRepository.FindBy(x => x.ReceiverId == user.Id && x.IsDelivered == false).ToList();
+                if (messages.Count > 0)
+                {
+                    for (int i = 0; i < messages.Count; i++)
+                    {
+                        var econsent = _econsentChatRepository.Find(messages[i].Id);
 
+                        _econsentChatRepository.Update(econsent);
+                    }
+                }
+            } catch(Exception ex)
+            {
+            }
             return Ok(validatedUser);
         }
 
@@ -330,7 +353,7 @@ namespace GSC.Api.Controllers.UserMgt
 
         [HttpGet]
         [Route("logout/{userId}/{loginReportId}")]
-        public IActionResult Logout(int userId, int loginReportId)
+        public async Task<IActionResult> Logout(int userId, int loginReportId)
         {
             var user = _userRepository.Find(userId);
             if (user == null)
@@ -347,7 +370,16 @@ namespace GSC.Api.Controllers.UserMgt
             _userLoginReportRepository.Update(userLoginReport);
 
             _uow.Save();
-
+            try
+            {
+                var delusers = ConnectedUser.Ids.Where(x => x.userId == user.Id).ToList();
+                for (int i = 0; i < delusers.Count; i++)
+                {
+                    ConnectedUser.Ids.Remove(delusers[i]);
+                }
+                await _hubcontext.Clients.All.SendAsync("UserLogOut", user.Id);
+            } catch(Exception ex) { }
+            
             return Ok();
         }
 

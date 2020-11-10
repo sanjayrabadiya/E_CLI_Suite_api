@@ -127,8 +127,12 @@ namespace GSC.Api.Controllers.InformConcent
             _uow.Save();
             try
             {
-                var connectionId = ConnectedUser.Ids.Where(x => x.userId == senderId).ToList().FirstOrDefault().connectionId;
-                await _hubcontext.Clients.Client(connectionId).SendAsync("AllMessageRead", _jwtTokenAccesser.UserId);
+                var connection = ConnectedUser.Ids.Where(x => x.userId == senderId).ToList().FirstOrDefault();
+                if (connection != null)
+                {
+                    var connectionId = connection.connectionId;
+                    await _hubcontext.Clients.Client(connectionId).SendAsync("AllMessageRead", _jwtTokenAccesser.UserId);
+                }
             } catch(Exception ex)
             {
 

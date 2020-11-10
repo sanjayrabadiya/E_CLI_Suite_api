@@ -51,24 +51,37 @@ namespace GSC.Api.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            var value = Context.GetHttpContext().Request.Query["userid"].FirstOrDefault().ToString();
-            SignalRUser signalRUser = new SignalRUser();
-            signalRUser.connectionId = Context.ConnectionId;
-            signalRUser.userId = Convert.ToInt32(value);
-            ConnectedUser.Ids.Add(signalRUser);
-            await base.OnConnectedAsync();
-            await Clients.All.SendAsync("UserLogIn", Convert.ToInt32(value));
+            try
+            {
+                if (Context.GetHttpContext().Request.Query["userid"].FirstOrDefault() != null)
+                {
+                    var value = Context.GetHttpContext().Request.Query["userid"].FirstOrDefault().ToString();
+                    SignalRUser signalRUser = new SignalRUser();
+                    signalRUser.connectionId = Context.ConnectionId;
+                    signalRUser.userId = Convert.ToInt32(value);
+                    ConnectedUser.Ids.Add(signalRUser);
+                    await base.OnConnectedAsync();
+                    await Clients.All.SendAsync("UserLogIn", Convert.ToInt32(value));
+                }
+            } catch (Exception)
+            {
+
+            }
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();
-            ConnectedUser.Ids.Remove(user);
-            await base.OnDisconnectedAsync(exception);
-            if (user != null)
+            try
             {
-                await Clients.All.SendAsync("UserLogOut", Convert.ToInt32(user.userId));
+                var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();
+                await base.OnDisconnectedAsync(exception);
+                if (user != null)
+                {
+                    ConnectedUser.Ids.Remove(user);
+                    await Clients.All.SendAsync("UserLogOut", Convert.ToInt32(user.userId));
+                }
             }
+            catch(Exception) { }
         }
 
     }
