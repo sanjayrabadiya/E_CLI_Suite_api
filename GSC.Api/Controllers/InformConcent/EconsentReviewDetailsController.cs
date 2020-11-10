@@ -160,10 +160,13 @@ namespace GSC.Api.Controllers.InformConcent
             if (_uow.Save() <= 0) throw new Exception("Creating Econsent review insert failed on save.");
             var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentDocumentId).ToList().FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
-            var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
             var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.AttendanceId).ToList().FirstOrDefault();
-            _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email,randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName,project.ProjectCode,outputFile);
-            _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator,investigator.NameOfInvestigator,Econsentsetup.DocumentName,project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber,outputFile);
+            _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
+            if (project.InvestigatorContactId != null)
+            {
+                var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
+                _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
+            }
             return Ok(econsentReviewDetail.Id);
         }
 
@@ -235,11 +238,13 @@ namespace GSC.Api.Controllers.InformConcent
             if (_uow.Save() <= 0) throw new Exception("Creating Econsent review insert failed on save.");
             var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentDocumentId).ToList().FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
-            var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
             var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.AttendanceId).ToList().FirstOrDefault();
             _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
-            _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
-
+            if (project.InvestigatorContactId != null)
+            {
+                var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
+                _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
+            }
             return Ok(econsentReviewDetail.Id);
         }
 
