@@ -13,4 +13,13 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignVariableId { get; set; }
         public ScreeningVisitStatus VisitStatusId { get; set; }
     }
+
+    public class ProjectDesignVisitStatusGridDto : BaseDto
+    {
+        public string VisitName { get; set; }
+        public string ProjectDesignTemplateName { get; set; }
+        public string ProjectDesignVariableName { get; set; }
+        public string VisitStatus { get; set; }
+    }
+
 }

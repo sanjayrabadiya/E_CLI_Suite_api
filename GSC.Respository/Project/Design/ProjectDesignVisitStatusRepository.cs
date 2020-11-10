@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -25,9 +26,17 @@ namespace GSC.Respository.Project.Design
         }
 
 
-        public ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByTemplate(int ProjectDesignTemplateId)
+        public ProjectDesignVisitStatusDto GetProjectDesignVisitStatusByVisit(int VisitId)
         {
-            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVariable.ProjectDesignTemplateId == ProjectDesignTemplateId).Select(t => new ProjectDesignVisitStatusDto
+            //return All.Where(x => x.DeletedDate == null && x.ProjectDesignVariable.ProjectDesignTemplateId == ProjectDesignTemplateId).Select(t => new ProjectDesignVisitStatusDto
+            //{
+            //    Id = t.Id,
+            //    ProjectDesignVisitId = t.ProjectDesignVisitId,
+            //    ProjectDesignTemplateId = t.ProjectDesignVariable.ProjectDesignTemplateId,
+            //    ProjectDesignVariableId = t.ProjectDesignVariableId,
+            //    VisitStatusId = t.VisitStatusId
+            //}).FirstOrDefault();
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == VisitId).Select(t => new ProjectDesignVisitStatusDto
             {
                 Id = t.Id,
                 ProjectDesignVisitId = t.ProjectDesignVisitId,
@@ -48,6 +57,12 @@ namespace GSC.Respository.Project.Design
                 ProjectDesignVariableId = t.ProjectDesignVariableId,
                 VisitStatusId = t.VisitStatusId
             }).FirstOrDefault();
+        }
+
+        public List<ProjectDesignVisitStatusGridDto> GetVisits(int VisitId)
+        {
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisitId == VisitId).
+                   ProjectTo<ProjectDesignVisitStatusGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

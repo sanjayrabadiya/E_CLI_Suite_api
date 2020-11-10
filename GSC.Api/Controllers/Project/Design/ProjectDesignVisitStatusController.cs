@@ -38,7 +38,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            return Ok(_projectDesignVisitStatusRepository.GetProjectDesignVisitStatusByTemplate(id));
+            return Ok(_projectDesignVisitStatusRepository.GetProjectDesignVisitStatusByVisit(id));
         }
 
         //added by vipul for add visit status on 23092020
@@ -63,6 +63,13 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVisitStatusRepository.Delete(record);
             _uow.Save();
             return Ok();
+        }
+
+        //added by vipul for get visit status list by visit on 09112020
+        [HttpGet("{visitId}")]
+        public IActionResult GetVisits(int visitId)
+        {
+            return Ok(_projectDesignVisitStatusRepository.GetVisits(visitId));
         }
     }
 }
