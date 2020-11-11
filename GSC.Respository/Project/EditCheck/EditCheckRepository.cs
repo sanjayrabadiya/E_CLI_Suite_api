@@ -70,7 +70,13 @@ namespace GSC.Respository.Project.EditCheck
                 IsLock = !r.ProjectDesign.IsUnderTesting,
                 IsFormula = r.IsFormula,
                 IsReferenceVerify = r.IsReferenceVerify,
-                IsDeleted = r.DeletedDate != null
+                IsDeleted = r.DeletedDate != null,
+                CreatedDate = r.CreatedDate,
+                CreatedByUser = Context.Users.Where(x=>x.Id == r.CreatedBy).FirstOrDefault().UserName,
+                ModifiedDate = r.ModifiedDate,
+                ModifiedByUser = Context.Users.Where(x => x.Id == r.ModifiedBy).FirstOrDefault().UserName,
+                DeletedDate = r.DeletedDate,
+                DeletedByUser = Context.Users.Where(x => x.Id == r.DeletedBy).FirstOrDefault().UserName,
             })
             .OrderByDescending(x => x.Id).ToList();
         }
@@ -183,7 +189,7 @@ namespace GSC.Respository.Project.EditCheck
 
                 if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
                 {
-                    var variableAnnotation = GetCollectionSources(x.VariableAnnotation, x.ProjectDesignId);
+                    var variableAnnotation = GetCollectionSources(x.VariableAnnotation, resut.ProjectDesignId);
                     x.CollectionSource = variableAnnotation?.CollectionSource;
                     x.DataType = variableAnnotation?.DataType;
                 }

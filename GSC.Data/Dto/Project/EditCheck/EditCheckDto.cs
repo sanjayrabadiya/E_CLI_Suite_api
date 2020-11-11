@@ -3,7 +3,7 @@ using GSC.Data.Entities.Common;
 
 namespace GSC.Data.Dto.Project.EditCheck
 {
-    public class EditCheckDto : BaseDto
+    public class EditCheckDto : BaseAuditDto
     {
         public int ProjectDesignId { get; set; }
         public string AutoNumber { get; set; }
