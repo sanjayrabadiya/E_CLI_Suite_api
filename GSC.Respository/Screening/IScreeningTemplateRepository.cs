@@ -26,5 +26,6 @@ namespace GSC.Respository.Screening
 
         int GetProjectDesignId(int screeningTemplateId);
         int GeScreeningEntryId(int screeningTemplateId);
+        string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel);
     }
 }

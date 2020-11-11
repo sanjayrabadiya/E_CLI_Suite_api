@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
 
@@ -87,4 +88,27 @@ namespace GSC.Data.Dto.Attendance
         public string VisitName { get; set; }
         public string SubjectName { get; set; }
     }
+
+    public class DataEntryTemplateCountDisplayTree
+    {
+        public int ScreeningEntryId { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public string TemplateName { get; set; }
+        public string VisitName { get; set; }
+        public string SubjectName { get; set; }
+        public int ScreeningVisitId { get; set; }
+        public int Id { get; set; }
+        public int? ParentId { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
+        public string ProjectDesignTemplateName { get; set; }
+        public decimal DesignOrder { get; set; }
+        public int Progress { get; set; }
+        public short? ReviewLevel { get; set; }
+        public string StatusName { get; set; }
+        public bool MyReview { get; set; }
+        public bool IsLocked { get; set; }
+        public QueryStatusDto TemplateQueryStatus { get; set; }
+    }
+
 }

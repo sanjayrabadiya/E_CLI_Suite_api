@@ -509,7 +509,7 @@ namespace GSC.Respository.Screening
             return workFlowButton;
         }
 
-        private string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel)
+        public string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel)
         {
             if (myReview) return "My Review";
 

@@ -70,7 +70,7 @@ namespace GSC.Respository.Master
 
             return Context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == ParentProjectId || x.Id == ParentProjectId)).Select(r => new DropDownDto
             {
-                Id = Convert.ToInt32(r.CountryId),
+                Id = r.CountryId,
                 Value = r.Country.CountryName,
                 Code = r.Country.CountryCode
             }).Distinct().OrderBy(o => o.Value).ToList();
