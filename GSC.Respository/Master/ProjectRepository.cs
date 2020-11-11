@@ -225,7 +225,7 @@ namespace GSC.Respository.Master
                 {
                     Id = c.Id,
                     Value = c.ProjectCode,
-                    CountryId = Convert.ToInt32(c.CountryId),
+                    CountryId = c.CountryId,
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? 0
@@ -253,7 +253,7 @@ namespace GSC.Respository.Master
                 {
                     Id = c.Id,
                     Value = c.ProjectCode,
-                    CountryId = Convert.ToInt32(c.CountryId),
+                    CountryId = c.CountryId,
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? 0,
                 }).OrderBy(o => o.Value).ToList();
@@ -299,8 +299,8 @@ namespace GSC.Respository.Master
             if (project.ParentProjectId == null)
             {
                 var projectCode = _numberFormatRepository.GenerateNumber("pro");
-                var country = _countryRepository.Find(Convert.ToInt32(project.CountryId)).CountryCode;
-                var design = _designTrialRepository.Find(Convert.ToInt32(project.DesignTrialId)).DesignTrialCode;
+                var country = _countryRepository.Find(project.CountryId).CountryCode;
+                var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
                 projectCode = projectCode.Replace("DESIGN", design);
                 projectCode = projectCode.Replace("COUNTRY", country);
 
@@ -328,8 +328,8 @@ namespace GSC.Respository.Master
         {
             var SiteCount = All.Where(x => x.ParentProjectId == project.ParentProjectId).Count();
             var projectCode = _numberFormatRepository.GenerateNumberForSite("prochild", SiteCount);
-            var country = _countryRepository.Find(Convert.ToInt32(project.CountryId)).CountryCode;
-            var design = _designTrialRepository.Find(Convert.ToInt32(project.DesignTrialId)).DesignTrialCode;
+            var country = _countryRepository.Find(project.CountryId).CountryCode;
+            var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
             projectCode = projectCode.Replace("DESIGN", design);
             projectCode = projectCode.Replace("COUNTRY", country);
 
