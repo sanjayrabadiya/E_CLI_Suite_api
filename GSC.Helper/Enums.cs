@@ -154,6 +154,7 @@ namespace GSC.Helper
         [Description("Report")] Report = 16,
         [Description("Site Management")] SiteManagement = 17,
         //[Description("Study Output")] StudyOutput = 18
+        [Description("Inform Consent")] InformConsent = 19
     }
 
     public enum AuditAction : short

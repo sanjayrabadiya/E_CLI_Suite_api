@@ -3,6 +3,7 @@ using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Screening;
+using GSC.Data.Entities.Master;
 
 namespace GSC.Data.Entities.Attendance
 {
@@ -41,7 +42,7 @@ namespace GSC.Data.Entities.Attendance
         public Country Country { get; set; }
         public State State { get; set; }
         public City City { get; set; }
-
+        public Language Language { get; set; }
         public string ScreeningNumber { get; set; }
         public DateTime? DateOfScreening
         {
