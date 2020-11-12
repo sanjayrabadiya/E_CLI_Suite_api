@@ -96,6 +96,7 @@ namespace GSC.Data.Dto.Attendance
             set => _DateOfRandomization = value.UtcDate();
         }
 
+        public string Language { get; set; }
         public string ParentProjectCode { get; set; }
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }

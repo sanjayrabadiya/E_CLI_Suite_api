@@ -192,6 +192,27 @@ namespace GSC.Respository.Master
                 }).OrderBy(o => o.Value).ToList();
         }
 
+        public List<ProjectDropDown> GetParentStaticProjectDropDown()
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ParentProjectId == null && x.IsStatic == true
+                    && x.ProjectCode != null
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).OrderBy(o => o.Value).ToList();
+        }
+
         public IList<ProjectDropDown> GetProjectsForDataEntry()
         {
             var projectIds = _projectRightRepository.GetProjectRightIdList();
