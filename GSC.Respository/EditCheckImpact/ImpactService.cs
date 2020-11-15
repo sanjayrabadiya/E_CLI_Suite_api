@@ -160,7 +160,9 @@ namespace GSC.Respository.EditCheckImpact
                    && c.ParentId == null).Select(r => new ScheduleTemplateDto
                    {
                        ScreeningTemplateId = r.Id,
-                       Status = r.Status
+                       Status = r.Status,
+                       ProjectDesignTemplateId = r.ProjectDesignTemplateId,
+                       ScreeningVisitId = r.ScreeningVisitId
                    }).FirstOrDefault();
         }
 

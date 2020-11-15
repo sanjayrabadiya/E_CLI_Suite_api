@@ -7,6 +7,7 @@ using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
+using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.Design;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -27,6 +28,7 @@ namespace GSC.Respository.Screening
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningProgress _screeningProgress;
+        private readonly IScheduleRuleRespository _scheduleRuleRespository;
         public ScreeningVisitRepository(IUnitOfWork<GscContext> uow,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
@@ -37,7 +39,8 @@ namespace GSC.Respository.Screening
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
-            IScreeningProgress screeningProgress)
+            IScreeningProgress screeningProgress,
+            IScheduleRuleRespository scheduleRuleRespository)
             : base(uow, jwtTokenAccesser)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -50,6 +53,7 @@ namespace GSC.Respository.Screening
             _screeningTemplateRepository = screeningTemplateRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _screeningProgress = screeningProgress;
+            _scheduleRuleRespository = scheduleRuleRespository;
         }
 
 
@@ -131,9 +135,9 @@ namespace GSC.Respository.Screening
 
         private bool SaveVariableValue(string value, ScreeningTemplate screeningTemplate, int projectDesignVariableId, int projectDesignTemplateId, int screeningEntryId)
         {
+
             if (!_projectDesignVariableRepository.All.Any(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.Id == projectDesignVariableId))
                 return false;
-
             var aduits = new List<ScreeningTemplateValueAudit>
             {
                 new ScreeningTemplateValueAudit
@@ -155,7 +159,11 @@ namespace GSC.Respository.Screening
 
             _uow.Save();
 
+            _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, false);
+
+
             _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
+
 
             return true;
 
@@ -184,24 +192,31 @@ namespace GSC.Respository.Screening
            t.ScreeningEntry.Randomization.PatientStatusId == ScreeningPatientStatus.Withdrawal));
         }
 
-        public void OpenVisit(int screeningVisitId, DateTime visitDate)
+        public void OpenVisit(ScreeningVisitDto screeningVisitDto)
         {
 
-            var visit = Find(screeningVisitId);
+            var visit = Find(screeningVisitDto.ScreeningVisitId);
 
             visit.Status = ScreeningVisitStatus.Open;
-            visit.VisitStartDate = visitDate;
+            visit.VisitStartDate = screeningVisitDto.VisitOpenDate;
 
             Update(visit);
 
-           
-
-            _screeningVisitHistoryRepository.SaveByScreeningVisit(visit, ScreeningVisitStatus.Open, visitDate);
+            _screeningVisitHistoryRepository.SaveByScreeningVisit(visit, ScreeningVisitStatus.Open, screeningVisitDto.VisitOpenDate);
             _uow.Save();
 
-            FindOpenVisitVarible(visit.ProjectDesignVisitId, visit.Id, visitDate);
+            FindOpenVisitVarible(visit.ProjectDesignVisitId, visit.Id, screeningVisitDto.VisitOpenDate);
 
             PatientStatus(visit.ScreeningEntryId);
+
+            var scheduleVisit = All.Where(x => x.ScreeningEntryId == visit.ScreeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
+                  OrderByDescending(t => t.ScheduleDate).FirstOrDefault();
+
+            if (scheduleVisit != null)
+            {
+                scheduleVisit.Status = ScreeningVisitStatus.Scheduled;
+                Update(scheduleVisit);
+            }
         }
 
 
@@ -280,10 +295,10 @@ namespace GSC.Respository.Screening
             }
 
         }
-        public void VisitRepeat(int screeningVisitId)
+        public void VisitRepeat(ScreeningVisitDto screeningVisitDto)
         {
             var repeatedCount = 0;
-            var cloneVisit = All.Where(x => x.Id == screeningVisitId && x.ParentId == null).FirstOrDefault();
+            var cloneVisit = All.Where(x => x.Id == screeningVisitDto.ScreeningVisitId && x.ParentId == null).FirstOrDefault();
 
             if (cloneVisit != null)
                 repeatedCount = All.Where(x => x.ScreeningEntryId == cloneVisit.ScreeningEntryId && x.ProjectDesignVisitId == cloneVisit.ProjectDesignVisitId).Max(t => t.RepeatedVisitNumber) ?? 0;
@@ -295,10 +310,11 @@ namespace GSC.Respository.Screening
             {
 
                 ProjectDesignVisitId = cloneVisit.ProjectDesignVisitId,
-                Status = ScreeningVisitStatus.NotStarted,
+                Status = ScreeningVisitStatus.Open,
                 ScreeningEntryId = cloneVisit.ScreeningEntryId,
                 RepeatedVisitNumber = repeatedCount + 1,
                 ParentId = cloneVisit.Id,
+                VisitStartDate = screeningVisitDto.VisitOpenDate,
                 ScreeningTemplates = new List<ScreeningTemplate>()
             };
 
@@ -315,7 +331,11 @@ namespace GSC.Respository.Screening
 
             Add(screeningVisit);
 
+            _uow.Save();
 
+            FindOpenVisitVarible(screeningVisit.ProjectDesignVisitId, screeningVisit.Id, screeningVisitDto.VisitOpenDate);
+
+            PatientStatus(screeningVisit.ScreeningEntryId);
         }
     }
 }

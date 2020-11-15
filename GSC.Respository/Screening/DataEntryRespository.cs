@@ -117,7 +117,8 @@ namespace GSC.Respository.Screening
                     TotalQuery = t.Count()
                 }).ToListAsync();
 
-            var screeningData = await _screeningEntryRepository.All.Where(r => r.ProjectId == projectId && r.DeletedDate == null).Select(x => new DataCaptureGridData
+            var screeningData = await _screeningEntryRepository.All.Where(r => r.ProjectId == projectId 
+            && r.DeletedDate == null).Select(x => new DataCaptureGridData
             {
                 ScreeningEntryId = x.Id,
                 RandomizationId = x.RandomizationId,

@@ -53,16 +53,16 @@ namespace GSC.Api.Controllers.Screening
 
         [HttpPut]
         [TransactionRequired]
-        [Route("OpenVisit/{screeningVisitId}/{visitDate}")]
-        public IActionResult OpenVisit(int screeningVisitId, DateTime visitDate)
+        [Route("OpenVisit")]
+        public IActionResult OpenVisit([FromBody] ScreeningVisitDto screeningVisitDto)
         {
-            if (_screeningVisitRepository.IsPatientScreeningFailure(screeningVisitId))
+            if (_screeningVisitRepository.IsPatientScreeningFailure(screeningVisitDto.ScreeningVisitId))
             {
                 ModelState.AddModelError("Message", "You can't change visit status!");
                 return BadRequest(ModelState);
             }
 
-            _screeningVisitRepository.OpenVisit(screeningVisitId, visitDate);
+            _screeningVisitRepository.OpenVisit(screeningVisitDto);
             _uow.Save();
             return Ok();
         }
@@ -95,5 +95,12 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_dataEntryRespository.GetTemplateVisitQuery(screeningVisitId, queryStatus));
         }
 
+        [HttpPost("VisitRepeat")]
+        public IActionResult VisitRepeat([FromBody] ScreeningVisitDto screeningVisitDto)
+        {
+            _screeningVisitRepository.VisitRepeat(screeningVisitDto);
+            if (_uow.Save() <= 0) throw new Exception("Visit Repeat failed on save.");
+            return Ok();
+        }
     }
 }

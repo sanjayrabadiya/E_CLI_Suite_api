@@ -39,6 +39,8 @@ namespace GSC.Data.Dto.Screening
     {
         public ScreeningTemplateStatus Status { get; set; }
         public int ScreeningTemplateId { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public int ScreeningVisitId { get; set; }
     }
     public class ScheduleCheckValidateDto
     {
