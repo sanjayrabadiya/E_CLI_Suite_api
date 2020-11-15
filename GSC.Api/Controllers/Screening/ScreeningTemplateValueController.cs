@@ -76,18 +76,25 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateValueRepository.Add(screeningTemplateValue);
 
-            if (screeningTemplateValueDto.ScreeningStatus== ScreeningTemplateStatus.Pending)
-            {
-                var screeningTemplate = _screeningTemplateRepository.Find(screeningTemplateValue.ScreeningTemplateId);
-                screeningTemplate.Status = ScreeningTemplateStatus.InProcess;
-                _screeningTemplateRepository.Update(screeningTemplate);
-            }
+            ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Screening Value failed on save.");
 
-            screeningTemplateValueDto = _mapper.Map<ScreeningTemplateValueDto>(screeningTemplateValue);
+            var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
 
-            return Ok(screeningTemplateValueDto);
+            return Ok(result);
+        }
+
+        private void ScreeningTemplateStatus(ScreeningTemplateValueDto screeningTemplateValueDto, int screeningTemplateId)
+        {
+            if (screeningTemplateValueDto.ScreeningStatus == Helper.ScreeningTemplateStatus.Pending)
+            {
+                var screeningTemplate = _screeningTemplateRepository.Find(screeningTemplateId);
+                if (screeningTemplate.Status > Helper.ScreeningTemplateStatus.InProcess) return;
+                screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                screeningTemplate.IsDisable = false;
+                _screeningTemplateRepository.Update(screeningTemplate);
+            }
         }
 
 
@@ -121,12 +128,15 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
 
+            ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
+
             if (_uow.Save() <= 0) throw new Exception("Updating Screening Value failed on save.");
 
-            screeningTemplateValueDto = _mapper.Map<ScreeningTemplateValueDto>(screeningTemplateValue);
+            var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
 
-            return Ok(screeningTemplateValueDto);
+            return Ok(result);
         }
+
 
         [HttpPut("UploadDocument")]
         public IActionResult UploadDocument([FromBody] ScreeningTemplateValueDto screeningTemplateValueDto)

@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.Project.EditCheck
         public int? ProjectDesignVisitId { get; set; }
         public int? ProjectDesignPeriodId { get; set; }
         public int? ProjectDesignVariableId { get; set; }
+        public int ProjectDesignId { get; set; }
         public string VariableAnnotation { get; set; }
         public int? DomainId { get; set; }
         public Operator? Operator { get; set; }
@@ -46,7 +47,6 @@ namespace GSC.Data.Dto.Project.EditCheck
         public List<ProjectDesignVariableValueDropDown> ExtraData { get; set; }
         public string StartParens { get; set; }
         public string EndParens { get; set; }
-        public int ProjectDesignId { get; set; }
     }
 
     public class EditCheckValidate

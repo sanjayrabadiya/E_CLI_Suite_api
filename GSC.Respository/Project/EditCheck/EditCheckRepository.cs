@@ -72,7 +72,7 @@ namespace GSC.Respository.Project.EditCheck
                 IsReferenceVerify = r.IsReferenceVerify,
                 IsDeleted = r.DeletedDate != null,
                 CreatedDate = r.CreatedDate,
-                CreatedByUser = Context.Users.Where(x=>x.Id == r.CreatedBy).FirstOrDefault().UserName,
+                CreatedByUser = Context.Users.Where(x => x.Id == r.CreatedBy).FirstOrDefault().UserName,
                 ModifiedDate = r.ModifiedDate,
                 ModifiedByUser = Context.Users.Where(x => x.Id == r.ModifiedBy).FirstOrDefault().UserName,
                 DeletedDate = r.DeletedDate,
@@ -189,9 +189,11 @@ namespace GSC.Respository.Project.EditCheck
 
                 if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
                 {
-                    var variableAnnotation = GetCollectionSources(x.VariableAnnotation, resut.ProjectDesignId);
+                    var variableAnnotation = _editCheckDetailRepository.GetCollectionSources(x.VariableAnnotation, resut.ProjectDesignId);
                     x.CollectionSource = variableAnnotation?.CollectionSource;
                     x.DataType = variableAnnotation?.DataType;
+                    if (variableAnnotation.Values != null)
+                        x.ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(variableAnnotation.Values.Where(x => x.DeletedDate == null).ToList());
                 }
 
                 x.CollectionValue =
@@ -207,16 +209,6 @@ namespace GSC.Respository.Project.EditCheck
             return resut;
         }
 
-        ProjectDesignVariable GetCollectionSources(string annotation, int projectDesignId)
-        {
-            if (string.IsNullOrEmpty(annotation)) return null;
-
-            var annotationVariable = Context.ProjectDesignVariable.Where(a => a.Annotation == annotation
-                       && a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId).FirstOrDefault();
-
-            return annotationVariable;
-
-        }
 
         public Data.Entities.Project.EditCheck.EditCheck UpdateFormula(int id)
         {
@@ -309,7 +301,7 @@ namespace GSC.Respository.Project.EditCheck
                                                             && x.DeletedDate == null)
                 .Select(r => new EditCheckDetailDto
                 {
-                    Id=r.Id,
+                    Id = r.Id,
                     PeriodName = r.ProjectDesignVariable != null
                          ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
                              .DisplayName
@@ -338,7 +330,7 @@ namespace GSC.Respository.Project.EditCheck
             {
                 if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
                 {
-                    var variableAnnotation = GetCollectionSources(x.VariableAnnotation, x.ProjectDesignId);
+                    var variableAnnotation = _editCheckDetailRepository.GetCollectionSources(x.VariableAnnotation, x.ProjectDesignId);
                     x.CollectionSource = variableAnnotation?.CollectionSource;
                     x.DataType = variableAnnotation?.DataType;
                 }

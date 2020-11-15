@@ -103,9 +103,9 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplateValueQuery, screeningTemplateValue);
 
             if (screeningTemplateValue.QueryStatus == QueryStatus.Resolved)
-                // _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
+                _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
 
-                if (_uow.Save() <= 0) throw new Exception("Updating Screening Template Value Query failed on save.");
+            if (_uow.Save() <= 0) throw new Exception("Updating Screening Template Value Query failed on save.");
 
             return Ok(screeningTemplateValueQuery.Id);
         }

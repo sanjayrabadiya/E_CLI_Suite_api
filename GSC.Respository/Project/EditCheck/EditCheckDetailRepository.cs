@@ -5,6 +5,7 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
+using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.EditCheck;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -28,19 +29,20 @@ namespace GSC.Respository.Project.EditCheck
 
         public EditCheckDetailDto GetDetailById(int id)
         {
-            return All.Where(x => x.Id == id).Select(c => new EditCheckDetailDto
+            var result = All.Where(x => x.Id == id).Select(c => new EditCheckDetailDto
             {
                 EditCheckId = c.EditCheckId,
                 Id = c.Id,
                 CheckBy = c.CheckBy,
                 ByAnnotation = c.ByAnnotation,
+                ProjectDesignId = c.EditCheck.ProjectDesignId,
                 ProjectDesignTemplateId = c.ProjectDesignTemplateId,
                 ProjectDesignVisitId = c.ProjectDesignVariable != null
-                    ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.Id
-                    : c.ProjectDesignTemplate.ProjectDesignVisit.Id,
+                     ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.Id
+                     : c.ProjectDesignTemplate.ProjectDesignVisit.Id,
                 ProjectDesignPeriodId = c.ProjectDesignVariable != null
-                    ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId
-                    : c.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId,
+                     ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId
+                     : c.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId,
                 ProjectDesignVariableId = c.ProjectDesignVariableId,
                 VariableAnnotation = c.VariableAnnotation,
                 DomainId = c.DomainId,
@@ -57,15 +59,39 @@ namespace GSC.Respository.Project.EditCheck
                 ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.ProjectDesignVariable.Values.Where(b => b.DeletedDate == null).ToList()),
                 QueryFormula = c.QueryFormula,
                 PeriodName = c.ProjectDesignVariable != null
-                    ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName
-                    : "",
+                     ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName
+                     : "",
                 TemplateName = c.ProjectDesignTemplate.TemplateName,
                 VariableName = c.ProjectDesignVariable.VariableName,
                 VisitName = c.ProjectDesignVariable != null
-                    ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
-                    : ""
+                     ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
+                     : ""
             }).FirstOrDefault();
+
+            if (result.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+            {
+                var variableAnnotation = GetCollectionSources(result.VariableAnnotation, result.ProjectDesignId);
+                result.CollectionSource = variableAnnotation?.CollectionSource;
+                result.DataType = variableAnnotation?.DataType;
+                if (variableAnnotation.Values != null)
+                    result.ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(variableAnnotation.Values.Where(x => x.DeletedDate == null).ToList());
+            }
+
+            return result;
+
         }
+
+        public ProjectDesignVariable GetCollectionSources(string annotation, int projectDesignId)
+        {
+            if (string.IsNullOrEmpty(annotation)) return null;
+
+            var annotationVariable = Context.ProjectDesignVariable.Include(t => t.Values).Where(a => a.Annotation == annotation
+                       && a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId).FirstOrDefault();
+
+            return annotationVariable;
+
+        }
+
 
         public string Validate(EditCheckDetail editCheckDetail)
         {
