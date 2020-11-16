@@ -46,6 +46,16 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
+            if (screeningVisitHistoryDto.VisitStatusId == ScreeningVisitStatus.ReSchedule )
+            {
+                var validation = _screeningVisitRepository.CheckScheduleDate(screeningVisitHistoryDto);
+                if (!string.IsNullOrEmpty(validation))
+                {
+                    ModelState.AddModelError("Message", validation);
+                    return BadRequest(ModelState);
+                }
+            }
+
             _screeningVisitRepository.StatusUpdate(screeningVisitHistoryDto);
             _uow.Save();
             return Ok();
@@ -59,6 +69,13 @@ namespace GSC.Api.Controllers.Screening
             if (_screeningVisitRepository.IsPatientScreeningFailure(screeningVisitDto.ScreeningVisitId))
             {
                 ModelState.AddModelError("Message", "You can't change visit status!");
+                return BadRequest(ModelState);
+            }
+
+            var validation = _screeningVisitRepository.CheckOpenDate(screeningVisitDto);
+            if (!string.IsNullOrEmpty(validation))
+            {
+                ModelState.AddModelError("Message", validation);
                 return BadRequest(ModelState);
             }
 

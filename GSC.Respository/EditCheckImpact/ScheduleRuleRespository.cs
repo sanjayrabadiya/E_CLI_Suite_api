@@ -177,7 +177,7 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        private bool Validate(ScheduleCheckValidateDto scheduleCheckValidateDto, string targetDate, string referenceDate)
+        public bool Validate(ScheduleCheckValidateDto scheduleCheckValidateDto, string targetDate, string referenceDate)
         {
             if (string.IsNullOrEmpty(targetDate)) return false;
             if (string.IsNullOrEmpty(referenceDate)) return false;

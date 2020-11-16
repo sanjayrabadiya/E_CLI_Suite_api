@@ -29,6 +29,8 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningProgress _screeningProgress;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
+        private readonly IImpactService _impactService;
+
         public ScreeningVisitRepository(IUnitOfWork<GscContext> uow,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
@@ -40,7 +42,8 @@ namespace GSC.Respository.Screening
             IScreeningTemplateRepository screeningTemplateRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningProgress screeningProgress,
-            IScheduleRuleRespository scheduleRuleRespository)
+            IScheduleRuleRespository scheduleRuleRespository,
+            IImpactService impactService)
             : base(uow, jwtTokenAccesser)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -54,6 +57,7 @@ namespace GSC.Respository.Screening
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _screeningProgress = screeningProgress;
             _scheduleRuleRespository = scheduleRuleRespository;
+            _impactService = impactService;
         }
 
 
@@ -190,6 +194,45 @@ namespace GSC.Respository.Screening
             return All.Any(t => t.ScreeningEntryId == visit.ScreeningEntryId && (
            t.ScreeningEntry.Randomization.PatientStatusId == ScreeningPatientStatus.ScreeningFailure ||
            t.ScreeningEntry.Randomization.PatientStatusId == ScreeningPatientStatus.Withdrawal));
+        }
+
+
+        public string CheckOpenDate(ScreeningVisitDto screeningVisitDto)
+        {
+            var visit = Find(screeningVisitDto.ScreeningVisitId);
+            if (visit != null
+                && (visit.Status == ScreeningVisitStatus.ReSchedule || visit.Status == ScreeningVisitStatus.Scheduled)
+                && visit.ScheduleDate != null && visit.ScheduleDate.Value.Date != screeningVisitDto.VisitOpenDate.Date)
+                return $"Schedule Date cannot be greater than visit open date";
+
+            return "";
+
+        }
+
+
+        public string CheckScheduleDate(ScreeningVisitHistoryDto screeningVisitDto)
+        {
+            var visit = Find(screeningVisitDto.ScreeningVisitId);
+
+            if (visit == null || visit.ScheduleDate == null)
+                return "";
+
+            var openVariable = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == visit.ProjectDesignVisitId
+            && x.VisitStatusId == ScreeningVisitStatus.Open).
+              Select(t => new { t.ProjectDesignVariable.Id, t.ProjectDesignVariable.ProjectDesignTemplateId }).FirstOrDefault();
+
+            if (openVariable == null) return "";
+
+            var scheduleTemplates = _impactService.GetTargetSchedule(openVariable.ProjectDesignTemplateId, false);
+
+            if (scheduleTemplates == null) return "";
+            var scheduleTemplate = scheduleTemplates.FirstOrDefault(r => r.ProjectDesignVariableId == openVariable.Id);
+            if (scheduleTemplate == null) return "";
+            if (!_scheduleRuleRespository.Validate(scheduleTemplate, screeningVisitDto.StatusDate.ToString(), visit.ScheduleDate.ToString()))
+                return scheduleTemplate.Message;
+
+            return "";
+
         }
 
         public void OpenVisit(ScreeningVisitDto screeningVisitDto)

@@ -13,5 +13,6 @@ namespace GSC.Respository.EditCheckImpact
         List<ScheduleCheckValidateDto> ValidateByTemplate(List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic, bool isQuery);
         List<ScheduleCheckValidateDto> ValidateByVariable(int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, bool isQuery);
         List<EditCheckTargetValidationList> VariableResultProcess(List<EditCheckTargetValidationList> editCheckResult, List<ScheduleCheckValidateDto> scheduleResult);
+        bool Validate(ScheduleCheckValidateDto scheduleCheckValidateDto, string targetDate, string referenceDate);
     }
 }

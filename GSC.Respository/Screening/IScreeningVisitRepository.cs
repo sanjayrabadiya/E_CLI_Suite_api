@@ -18,5 +18,7 @@ namespace GSC.Respository.Screening
         bool IsPatientScreeningFailure(int screeningVisitId);
         List<ScreeningVisitTree> GetVisitTree(int screeningEntryId);
         void FindOpenVisitVarible(int projectDesignVisitId, int screeningVisitId, DateTime visitDate);
+        string CheckOpenDate(ScreeningVisitDto screeningVisitDto);
+        string CheckScheduleDate(ScreeningVisitHistoryDto screeningVisitDto);
     }
 }
