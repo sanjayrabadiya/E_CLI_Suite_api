@@ -120,9 +120,14 @@ namespace GSC.Respository.Screening
         public void FindOpenVisitVarible(int projectDesignVisitId, int screeningVisitId, DateTime visitDate)
         {
             var openVariable = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.VisitStatusId == ScreeningVisitStatus.Open).
-              Select(t => new { t.ProjectDesignVariable.Id, t.ProjectDesignVariable.ProjectDesignTemplateId }).FirstOrDefault();
+              Select(t => new
+              {
+                  t.ProjectDesignVariable.Id,
+                  t.ProjectDesignVariable.ProjectDesignTemplateId,
+                  t.ProjectDesignVisitId
+              }).FirstOrDefault();
 
-            if (openVariable != null && openVariable.ProjectDesignTemplateId == projectDesignVisitId)
+            if (openVariable != null && openVariable.ProjectDesignVisitId == projectDesignVisitId)
             {
                 var screeningVisit = Find(screeningVisitId);
                 var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisit.Id && x.ProjectDesignTemplateId == openVariable.ProjectDesignTemplateId && x.ParentId == null).FirstOrDefault();
@@ -164,7 +169,8 @@ namespace GSC.Respository.Screening
             _uow.Save();
 
             _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, false);
-
+           
+            _uow.Save();
 
             _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
 
@@ -252,7 +258,14 @@ namespace GSC.Respository.Screening
 
             PatientStatus(visit.ScreeningEntryId);
 
-            var scheduleVisit = All.Where(x => x.ScreeningEntryId == visit.ScreeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
+            ScheduleVisitUpdate(visit.ScreeningEntryId);
+
+
+        }
+
+        public void ScheduleVisitUpdate(int screeningEntryId)
+        {
+            var scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
                   OrderByDescending(t => t.ScheduleDate).FirstOrDefault();
 
             if (scheduleVisit != null)

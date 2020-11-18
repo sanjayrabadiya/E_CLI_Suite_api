@@ -20,5 +20,6 @@ namespace GSC.Respository.Screening
         void FindOpenVisitVarible(int projectDesignVisitId, int screeningVisitId, DateTime visitDate);
         string CheckOpenDate(ScreeningVisitDto screeningVisitDto);
         string CheckScheduleDate(ScreeningVisitHistoryDto screeningVisitDto);
+        void ScheduleVisitUpdate(int screeningEntryId);
     }
 }
