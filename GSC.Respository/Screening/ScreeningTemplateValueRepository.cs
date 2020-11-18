@@ -218,6 +218,9 @@ namespace GSC.Respository.Screening
                 return child.Value;
             }
 
+            if (screeningTemplateValueDto.IsNa)
+                return "N/A";
+
             return string.IsNullOrWhiteSpace(screeningTemplateValueDto.ValueName)
                 ? screeningTemplateValueDto.Value
                 : screeningTemplateValueDto.ValueName;

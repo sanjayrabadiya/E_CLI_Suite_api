@@ -236,6 +236,10 @@ namespace GSC.Respository.EditCheckImpact
                         editCheckTarget.OriginalValidationType = ValidationType.None;
                         editCheckTarget.EditCheckDisable = true;
                     }
+                    else if (r.Operator == Operator.NotNull && r.IsOnlyTarget)
+                    {
+                        editCheckTarget.OriginalValidationType = ValidationType.Required;
+                    }
                     else if (r.Operator == Operator.SoftFetch)
                     {
                         editCheckTarget.isInfo = true;
@@ -267,7 +271,7 @@ namespace GSC.Respository.EditCheckImpact
                     {
                         editCheckTarget.ScreeningTemplateValueId = InsertScreeningValue(r.ScreeningTemplateId,
                             r.ProjectDesignVariableId, editCheckTarget.Value, note,
-                            editCheckTarget.IsSoftFetch, r.CollectionSource);
+                            editCheckTarget.IsSoftFetch, r.CollectionSource, editCheckTarget.EditCheckDisable);
                     }
 
                     if (editCheckTarget.HasQueries)
@@ -498,7 +502,7 @@ namespace GSC.Respository.EditCheckImpact
             return result;
         }
 
-        public int InsertScreeningValue(int screeningTemplateId, int projectDesignVariableId, string value, string note, bool isSoftFetch, CollectionSources? collectionSource)
+        public int InsertScreeningValue(int screeningTemplateId, int projectDesignVariableId, string value, string note, bool isSoftFetch, CollectionSources? collectionSource, bool isDisable)
         {
             var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(x =>
                 x.ProjectDesignVariableId == projectDesignVariableId &&
@@ -515,6 +519,10 @@ namespace GSC.Respository.EditCheckImpact
 
             var valueName = value;
             var oldValueName = screeningTemplateValue?.Value;
+
+            if (screeningTemplateValue?.IsNa == true)
+                oldValueName = "N/A";
+
 
             if (collectionSource == CollectionSources.RadioButton ||
                  collectionSource == CollectionSources.CheckBox ||
@@ -556,6 +564,10 @@ namespace GSC.Respository.EditCheckImpact
             {
                 screeningTemplateValue.Audits = aduits;
                 screeningTemplateValue.Value = value;
+
+                if (isDisable && string.IsNullOrEmpty(value))
+                    screeningTemplateValue.IsNa = false;
+
                 screeningTemplateValue.ObjectState = ObjectState.Modified;
                 _screeningTemplateValueRepository.Update(screeningTemplateValue);
             }

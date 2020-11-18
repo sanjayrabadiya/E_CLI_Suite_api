@@ -124,7 +124,7 @@ namespace GSC.Respository.EditCheckImpact
                     {
                         var editCheckResult = new EditCheckResult();
                         editCheckResult.Result = "failed";
-                        editCheckResult.Id =r.Id;
+                        editCheckResult.Id = r.Id;
                         result.Target.Add(editCheckResult);
                     });
                 }
@@ -343,7 +343,10 @@ namespace GSC.Respository.EditCheckImpact
                 var col = new DataColumn();
                 col.DefaultValue = r.InputValue;
 
-                if (!string.IsNullOrEmpty(r.InputValue) && string.IsNullOrEmpty(singleQuote))
+                decimal value;
+                decimal.TryParse(r.InputValue, out value);
+
+                if (value != 0 && string.IsNullOrEmpty(singleQuote))
                     col.DataType = Type.GetType("System.Decimal");
 
                 col.ColumnName = colName;

@@ -168,8 +168,8 @@ namespace GSC.Respository.Screening
 
             _uow.Save();
 
-            _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, false);
-           
+            _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, true);
+
             _uow.Save();
 
             _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);

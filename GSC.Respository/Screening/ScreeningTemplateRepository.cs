@@ -114,7 +114,7 @@ namespace GSC.Respository.Screening
                 if (variable != null)
                 {
                     variable.ScreeningValue = t.Value;
-                    variable.ScreeningValueOld = t.Value;
+                    variable.ScreeningValueOld = t.IsNa ? "N/A" : t.Value;
                     variable.ScreeningTemplateValueId = t.Id;
                     variable.ScheduleDate = t.ScheduleDate;
                     variable.QueryStatus = t.QueryStatus;
@@ -204,7 +204,7 @@ namespace GSC.Respository.Screening
                         if (r.ScreeningValue != singleResult.Value)
                         {
                             _editCheckImpactRepository.InsertScreeningValue(projectDesignTemplateDto.ScreeningTemplateId,
-                                                          (int)r.ProjectDesignVariableId, singleResult.Value, singleResult.Note, singleResult.IsSoftFetch, r.CollectionSource);
+                                                          (int)r.ProjectDesignVariableId, singleResult.Value, singleResult.Note, singleResult.IsSoftFetch, r.CollectionSource, singleResult.EditCheckDisable);
                         }
 
                         r.ScreeningValue = singleResult.Value;
@@ -315,7 +315,7 @@ namespace GSC.Respository.Screening
             && s.ScreeningVisit.Status >= ScreeningVisitStatus.Open).Select(t => new ScreeningTemplateTree
             {
                 Id = t.Id,
-                ScreeningVisitId=t.ScreeningVisitId,
+                ScreeningVisitId = t.ScreeningVisitId,
                 ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                 Status = t.Status,
                 ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
