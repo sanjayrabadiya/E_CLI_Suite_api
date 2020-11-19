@@ -140,7 +140,8 @@ namespace GSC.Respository.Screening
                     _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.InProgress, visitDate);
                     Update(screeningVisit);
                 }
-
+                _uow.Save();
+                _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
             }
         }
 
@@ -169,13 +170,9 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueRepository.Add(screeningTemplateValue);
 
             _uow.Save();
-     
+
             _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, true);
 
-            _uow.Save();
-
-            _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
-         
             return true;
 
         }
@@ -210,7 +207,7 @@ namespace GSC.Respository.Screening
             if (visit != null
                 && (visit.Status == ScreeningVisitStatus.ReSchedule || visit.Status == ScreeningVisitStatus.Scheduled)
                 && visit.ScheduleDate != null && visit.ScheduleDate.Value.Date != screeningVisitDto.VisitOpenDate.Date)
-                return $"Schedule Date cannot be greater than visit open date";
+                return $"Schedule Date and visit open date can't matching!";
 
             return "";
 
@@ -235,7 +232,7 @@ namespace GSC.Respository.Screening
             if (scheduleTemplates == null) return "";
             var scheduleTemplate = scheduleTemplates.FirstOrDefault(r => r.ProjectDesignVariableId == openVariable.Id);
             if (scheduleTemplate == null) return "";
-            if (!_scheduleRuleRespository.Validate(scheduleTemplate, screeningVisitDto.StatusDate.ToString(), visit.ScheduleDate.ToString()))
+            if (!_scheduleRuleRespository.Validate(scheduleTemplate, visit.ScheduleDate.ToString(), screeningVisitDto.StatusDate.ToString()))
                 return scheduleTemplate.Message;
 
             return "";
