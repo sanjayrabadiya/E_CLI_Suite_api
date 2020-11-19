@@ -277,7 +277,7 @@ namespace GSC.Respository.EditCheckImpact
 
             Context.DetectionAll();
 
-            2222222if (target.CollectionSource == CollectionSources.Date)
+            if (target.CollectionSource == CollectionSources.Date)
             {
                 if (target.NoOfDay.HasValue)
                     scheduleDate = scheduleDate.AddDays(Convert.ToDouble(target.NoOfDay));
