@@ -314,12 +314,14 @@ namespace GSC.Respository.EditCheckImpact
                 screeningTemplateValue.ScheduleDate = scheduleDate;
                 _screeningTemplateValueRepository.Update(screeningTemplateValue);
             }
-            _uow.Save();
 
             target.ScreeningTemplateValueId = screeningTemplateValue.Id;
 
             if (target.ScheduleDate != null)
                 VisitScheduleDate(screeningTemplate.ScreeningVisitId, (DateTime)target.ScheduleDate);
+
+
+            _uow.Save();
         }
 
         void VisitScheduleDate(int screeningVisitId, DateTime ScheduleDate)
@@ -330,9 +332,12 @@ namespace GSC.Respository.EditCheckImpact
             if (_projectDesignVisitStatusRepository.All.Any(x => x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId
            && x.VisitStatusId == ScreeningVisitStatus.Open))
             {
-                screeningVisit.VisitStartDate = ScheduleDate;
-                if (screeningVisit.IsSchedule && screeningVisit.Status > ScreeningVisitStatus.ReSchedule)
+                if (screeningVisit.VisitStartDate != null)
+                    screeningVisit.VisitStartDate = ScheduleDate;
+
+                if (screeningVisit.IsSchedule && screeningVisit.Status != ScreeningVisitStatus.ReSchedule)
                     screeningVisit.ScheduleDate = ScheduleDate;
+
                 _uow.Context.ScreeningVisit.Update(screeningVisit);
             }
 

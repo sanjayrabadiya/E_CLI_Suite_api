@@ -226,7 +226,7 @@ namespace GSC.Respository.Screening
 
             if (screningVisit != null)
             {
-                _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate);
+                _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
                 _uow.Save();
                 _screeningVisitRepository.ScheduleVisitUpdate(screeningEntry.Id);
             }
