@@ -17,10 +17,10 @@ namespace GSC.Api.Controllers.Etmf
     public class ProjectSubSecArtificateDocumentCommentController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IProjectSubSecArtificateDocumentCommentRepository _projectSubSecArtificateDocumentCommentRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public ProjectSubSecArtificateDocumentCommentController(IUnitOfWork<GscContext> uow,
+        public ProjectSubSecArtificateDocumentCommentController(IUnitOfWork uow,
             IMapper mapper,
             IProjectSubSecArtificateDocumentCommentRepository projectSubSecArtificateDocumentCommentRepository,
             IJwtTokenAccesser jwtTokenAccesser)

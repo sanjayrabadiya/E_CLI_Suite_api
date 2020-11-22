@@ -27,7 +27,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
@@ -40,7 +40,7 @@ namespace GSC.Api.Controllers.Screening
             IAttendanceRepository attendanceRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
              IProjectWorkflowRepository projectWorkflowRepository,
              IProjectSubjectRepository projectSubjectRepository,

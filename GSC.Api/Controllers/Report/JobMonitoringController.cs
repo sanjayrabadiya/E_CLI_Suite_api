@@ -22,12 +22,12 @@ namespace GSC.Api.Controllers.Report
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public JobMonitoringController(IJobMonitoringRepository jobMonitoringRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser, IProjectDesignRepository projectDesignRepository)
         {
             _jobMonitoringRepository = jobMonitoringRepository;

@@ -19,14 +19,13 @@ namespace GSC.Api.Controllers.InformConcent
     [ApiController]
     public class EconsentChatController : ControllerBase
     {
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IEconsentChatRepository _econsentChatRepository;
-        private readonly GscContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IHubContext<MessageHub> _hubcontext;
 
-        public EconsentChatController(IUnitOfWork<GscContext> uow,
+        public EconsentChatController(IUnitOfWork uow,
                                         IMapper mapper,
                                         IJwtTokenAccesser jwtTokenAccesser,
                                         IHubContext<MessageHub> hubcontext,
@@ -35,7 +34,6 @@ namespace GSC.Api.Controllers.InformConcent
             _econsentChatRepository = econsentChatRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = uow.Context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _hubcontext = hubcontext;
         }

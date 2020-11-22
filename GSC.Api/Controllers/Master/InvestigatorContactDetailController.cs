@@ -17,10 +17,10 @@ namespace GSC.Api.Controllers.Master
     {
         private readonly IInvestigatorContactDetailRepository _investigatorContactDetailRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public InvestigatorContactDetailController(IInvestigatorContactDetailRepository investigatorContactDetailRepository,
-    IUnitOfWork<GscContext> uow, IMapper mapper)
+    IUnitOfWork uow, IMapper mapper)
         {
             _investigatorContactDetailRepository = investigatorContactDetailRepository;
             _uow = uow;

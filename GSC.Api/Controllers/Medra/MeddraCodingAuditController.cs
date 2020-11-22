@@ -25,7 +25,7 @@ namespace GSC.Api.Controllers.Medra
         private readonly IMeddraCodingCommentRepository _meddraCodingCommentRepository;
         private readonly IMeddraMdHierarchyRepository _meddraMdHierarchyRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public MeddraCodingAuditController(IMeddraCodingRepository meddraCodingRepository,
             IMeddraCodingAuditRepository meddraCodingAuditRepository,
@@ -33,7 +33,7 @@ namespace GSC.Api.Controllers.Medra
             IStudyScopingRepository studyScopingRepository,
             IMeddraSocTermRepository meddraSocTermRepository,
             IMeddraMdHierarchyRepository meddraMdHierarchyRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {

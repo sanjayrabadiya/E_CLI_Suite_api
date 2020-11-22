@@ -17,10 +17,10 @@ namespace GSC.Api.Controllers.Master
     {
         private readonly IIecirbRepository _iecirbRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public IecirbController(IIecirbRepository iecirbRepository,
-        IUnitOfWork<GscContext> uow, IMapper mapper)
+        IUnitOfWork uow, IMapper mapper)
         {
             _iecirbRepository = iecirbRepository;
             _uow = uow;

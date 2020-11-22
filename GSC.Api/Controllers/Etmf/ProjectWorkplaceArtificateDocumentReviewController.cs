@@ -24,7 +24,7 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
 
         public ProjectWorkplaceArtificateDocumentReviewController(IProjectRepository projectRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IETMFWorkplaceRepository eTMFWorkplaceRepository,
             IUserRepository userRepository,

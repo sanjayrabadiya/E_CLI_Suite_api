@@ -30,23 +30,23 @@ namespace GSC.Api.Controllers.InformConcent
     public class econsentsetupController : ControllerBase
     {
         private readonly IEconsentSetupRepository _econsentSetupRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
+
         private readonly ILanguageRepository _languageRepository;
         private readonly IDocumentTypeRepository _documentTypeRepository;
         private readonly IPatientStatusRepository _patientStatusRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IEconsentSetupPatientStatusRepository _econsentSetupPatientStatusRepository;
-        private readonly GscContext _context;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IEconsentSetupRolesRepository _econsentSetupRolesRepository;
-
+        private readonly IGSCContext _context;
         public econsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             ILanguageRepository languageRepository,
             IDocumentTypeRepository documentTypeRepository,
@@ -57,12 +57,11 @@ namespace GSC.Api.Controllers.InformConcent
             IEconsentSetupPatientStatusRepository econsentSetupPatientStatusRepository,
             IRandomizationRepository randomizationRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
-            IEconsentSetupRolesRepository econsentSetupRolesRepository)
+            IEconsentSetupRolesRepository econsentSetupRolesRepository, IGSCContext context)
         {
             _econsentSetupRepository = econsentSetupRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = uow.Context;
             _languageRepository = languageRepository;
             _documentTypeRepository = documentTypeRepository;
             _patientStatusRepository = patientStatusRepository;
@@ -73,6 +72,7 @@ namespace GSC.Api.Controllers.InformConcent
             _randomizationRepository = randomizationRepository;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _econsentSetupRolesRepository = econsentSetupRolesRepository;
+            _context = context;
         }
 
 

@@ -34,8 +34,8 @@ namespace GSC.Api.Controllers.InformConcent
     public class EconsentReviewDetailsController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
-        private readonly GscContext _context;
+        private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public EconsentReviewDetailsController(IUnitOfWork<GscContext> uow,
+        public EconsentReviewDetailsController(IUnitOfWork uow,
             IMapper mapper,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IUploadSettingRepository uploadSettingRepository,
@@ -52,11 +52,11 @@ namespace GSC.Api.Controllers.InformConcent
             IProjectRepository projectRepository,
             IInvestigatorContactRepository investigatorContactRepository,
             IRandomizationRepository randomizationRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context)
         {
             _uow = uow;
             _mapper = mapper;
-            _context = uow.Context;
+            _context = context;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _emailSenderRespository = emailSenderRespository;

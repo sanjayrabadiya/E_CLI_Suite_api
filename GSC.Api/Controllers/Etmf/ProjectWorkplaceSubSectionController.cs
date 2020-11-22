@@ -20,12 +20,12 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IEtmfZoneMasterLibraryRepository _etmfZoneMasterLibraryRepository;
         private readonly IProjectWorkplaceSubSectionRepository _projectWorkplaceSubSectionRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public ProjectWorkplaceSubSectionController(
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IEtmfZoneMasterLibraryRepository etmfZoneMasterLibraryRepository,
             IUploadSettingRepository uploadSettingRepository,

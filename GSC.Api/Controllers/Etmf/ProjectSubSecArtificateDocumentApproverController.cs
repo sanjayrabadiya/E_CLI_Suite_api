@@ -23,13 +23,13 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApproverRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
 
-        public ProjectSubSecArtificateDocumentApproverController(IUnitOfWork<GscContext> uow,
+        public ProjectSubSecArtificateDocumentApproverController(IUnitOfWork uow,
             IMapper mapper,
             IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository,
             IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,

@@ -20,11 +20,11 @@ namespace GSC.Api.Controllers.Project.EditCheck
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IEditCheckRepository _editCheckRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
         public EditCheckController(
-            IUnitOfWork<GscContext> uow, IMapper mapper, IEditCheckRepository editCheckRepository,
+            IUnitOfWork uow, IMapper mapper, IEditCheckRepository editCheckRepository,
             IEditCheckDetailRepository editCheckDetailRepository,
             IEditCheckRuleRepository editCheckRuleRepository,
             IProjectDesignRepository projectDesignRepository)

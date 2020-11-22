@@ -15,10 +15,10 @@ namespace GSC.Api.Controllers.Master
     {
         private readonly IHolidayRepository _holidayRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public HolidayController(IHolidayRepository holidayRepository,
-IUnitOfWork<GscContext> uow, IMapper mapper)
+IUnitOfWork uow, IMapper mapper)
         {
             _holidayRepository = holidayRepository;
             _uow = uow;

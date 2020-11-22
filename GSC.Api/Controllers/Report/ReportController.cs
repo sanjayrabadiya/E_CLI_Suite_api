@@ -28,13 +28,13 @@ namespace GSC.Api.Controllers.Report
     {
         private readonly IGscReport _gscReport;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IProjectDesignReportSettingRepository _projectDesignReportSettingRepository;
         private readonly IJobMonitoringRepository _jobMonitoringRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IMapper _mapper;
         public ReportController(IProjectDesignReportSettingRepository projectDesignReportSettingRepository, IGscReport gscReport
-            , IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository,
+            , IUnitOfWork uow, IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository,
             IProjectDesignRepository projectDesignRepository,
             IMapper mapper)
         {

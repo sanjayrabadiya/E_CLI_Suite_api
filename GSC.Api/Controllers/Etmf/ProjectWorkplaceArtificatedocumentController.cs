@@ -29,17 +29,17 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
         private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly GscContext _context;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
-        public ProjectWorkplaceArtificatedocumentController(IUnitOfWork<GscContext> uow,
+        public ProjectWorkplaceArtificatedocumentController(IUnitOfWork uow,
             IMapper mapper,
             IETMFWorkplaceRepository eTMFWorkplaceRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
@@ -48,7 +48,8 @@ namespace GSC.Api.Controllers.Etmf
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
-            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository)
+            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
+            IGSCContext context)
         {
             _uow = uow;
             _mapper = mapper;
@@ -56,8 +57,8 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
-            _context = uow.Context;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;

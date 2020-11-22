@@ -20,7 +20,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
 
@@ -28,7 +28,7 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper,
             IVariableRepository variableRepository)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
@@ -197,7 +197,7 @@ namespace GSC.Api.Controllers.Project.Design
                 //value.DeletedDate = DateTime.Now;
                 //_projectDesignVariableValueRepository.Update(value);
 
-                _uow.Context.Remove(value);
+                _projectDesignVariableValueRepository.Remove(value);
         }
 
         // Merge with GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula} by vipul

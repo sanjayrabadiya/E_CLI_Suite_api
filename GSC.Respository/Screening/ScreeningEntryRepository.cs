@@ -91,7 +91,7 @@ namespace GSC.Respository.Screening
                     FitnessNotes = t.FitnessNotes,
                     PatientStatusName = t.RandomizationId != null ? t.Randomization.PatientStatusId.GetDescription() : "",
                     Progress = t.Progress,
-                    ProjectDesignPeriodId = t.Attendance.ProjectDesignPeriodId,
+                    ProjectDesignPeriodId = t.ProjectDesignPeriodId,
                     ProjectId = t.ProjectId
                 }).FirstOrDefault();
 

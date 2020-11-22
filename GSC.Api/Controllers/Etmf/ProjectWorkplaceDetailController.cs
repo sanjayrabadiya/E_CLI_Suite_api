@@ -24,11 +24,11 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IProjectWorkplaceDetailRepository _projectWorkplaceDetailRepository;
       
         public ProjectWorkplaceDetailController(IProjectRepository projectRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository
             )

@@ -26,11 +26,11 @@ namespace GSC.Api.Controllers.InformConcent
     public class EconsentSectionReferenceController : BaseController
     {
         private readonly IEconsentSectionReferenceRepository _econsentSectionReferenceRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public EconsentSectionReferenceController(IEconsentSectionReferenceRepository econsentSectionReferenceRepository,
-                                                IUnitOfWork<GscContext> uow,
+                                                IUnitOfWork uow,
                                                 IMapper mapper,
                                                 IUploadSettingRepository uploadSettingRepository)
         {

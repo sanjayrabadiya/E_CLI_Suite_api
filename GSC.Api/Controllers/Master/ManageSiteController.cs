@@ -24,7 +24,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IStateRepository _stateRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
 
         public ManageSiteController(IManageSiteRepository manageSiteRepository,
             IUserRepository userRepository,
@@ -32,7 +32,7 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper)
         {
             _manageSiteRepository = manageSiteRepository;
             _cityRepository = cityRepository;

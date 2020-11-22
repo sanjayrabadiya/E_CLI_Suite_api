@@ -24,7 +24,8 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IMeddraCodingRepository _meddraCodingRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IEditCheckImpactRepository _editCheckImpactRepository;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
@@ -37,7 +38,7 @@ namespace GSC.Api.Controllers.Screening
             IEditCheckImpactRepository editCheckImpactRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IScreeningVisitRepository screeningVisitRepository,
-            IUnitOfWork<GscContext> uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper, IGSCContext context)
         {
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -48,6 +49,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateRepository = screeningTemplateRepository;
             _editCheckImpactRepository = editCheckImpactRepository;
             _screeningVisitRepository = screeningVisitRepository;
+            _context = context;
         }
 
         [HttpGet("{screeningTemplateValueId}")]
@@ -185,7 +187,7 @@ namespace GSC.Api.Controllers.Screening
             var screeningEntryId = _screeningTemplateRepository.GeScreeningEntryId(screeningTemplate.Id);
 
             if (screeningTemplateValue.Children != null && screeningTemplateValue.Children.Count > 0)
-                screeningTemplateValueQueryDto.Value = string.Join(",", _uow.Context.ScreeningTemplateValueChild.Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
+                screeningTemplateValueQueryDto.Value = string.Join(",", _context.ScreeningTemplateValueChild.Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
 
             var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningEntryId, screeningTemplate.Id,
                 screeningTemplateValueQueryDto.IsNa ? "NA" : screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,

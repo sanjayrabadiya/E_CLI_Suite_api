@@ -23,7 +23,7 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -31,7 +31,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
 
         public ProjectArtificateDocumentApproverController(IProjectRepository projectRepository,
-            IUnitOfWork<GscContext> uow,
+            IUnitOfWork uow,
             IMapper mapper,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IUploadSettingRepository uploadSettingRepository,
