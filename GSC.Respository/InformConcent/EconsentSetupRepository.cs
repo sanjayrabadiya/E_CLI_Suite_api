@@ -15,13 +15,13 @@ using System.Text;
 
 namespace GSC.Respository.InformConcent
 {
-    public class EconsentSetupRepository : GenericRespository<EconsentSetup, GscContext>, IEconsentSetupRepository
+    public class EconsentSetupRepository : GenericRespository<EconsentSetup>, IEconsentSetupRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IPatientStatusRepository _patientStatusRepository;
-        public EconsentSetupRepository(IUnitOfWork<GscContext> uow, 
+        public EconsentSetupRepository(IGSCContext context, 
             IJwtTokenAccesser jwtTokenAccesser,
-            IPatientStatusRepository patientStatusRepository) : base(uow, jwtTokenAccesser)
+            IPatientStatusRepository patientStatusRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _patientStatusRepository = patientStatusRepository;

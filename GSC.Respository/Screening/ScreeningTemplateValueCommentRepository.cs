@@ -10,10 +10,10 @@ using GSC.Shared;
 namespace GSC.Respository.Screening
 {
     public class ScreeningTemplateValueCommentRepository :
-        GenericRespository<ScreeningTemplateValueComment, GscContext>, IScreeningTemplateValueCommentRepository
+        GenericRespository<ScreeningTemplateValueComment>, IScreeningTemplateValueCommentRepository
     {
-        public ScreeningTemplateValueCommentRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        public ScreeningTemplateValueCommentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
         }
 

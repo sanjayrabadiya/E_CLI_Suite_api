@@ -9,13 +9,13 @@ using GSC.Shared;
 
 namespace GSC.Respository.Configuration
 {
-    public class PharmacyConfigRepository : GenericRespository<PharmacyConfig, GscContext>, IPharmacyConfigRepository
+    public class PharmacyConfigRepository : GenericRespository<PharmacyConfig>, IPharmacyConfigRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public PharmacyConfigRepository(IUnitOfWork<GscContext> uow,
+        public PharmacyConfigRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

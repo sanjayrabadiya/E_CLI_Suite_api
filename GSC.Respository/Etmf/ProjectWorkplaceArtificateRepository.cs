@@ -14,12 +14,12 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectWorkplaceArtificateRepository : GenericRespository<ProjectWorkplaceArtificate, GscContext>, IProjectWorkplaceArtificateRepository
+    public class ProjectWorkplaceArtificateRepository : GenericRespository<ProjectWorkplaceArtificate>, IProjectWorkplaceArtificateRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public ProjectWorkplaceArtificateRepository(IUnitOfWork<GscContext> uow,
+        public ProjectWorkplaceArtificateRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

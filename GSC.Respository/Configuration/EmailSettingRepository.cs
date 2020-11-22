@@ -9,13 +9,13 @@ using GSC.Shared;
 
 namespace GSC.Respository.Configuration
 {
-    public class EmailSettingRepository : GenericRespository<EmailSetting, GscContext>, IEmailSettingRepository
+    public class EmailSettingRepository : GenericRespository<EmailSetting>, IEmailSettingRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public EmailSettingRepository(IUnitOfWork<GscContext> uow,
+        public EmailSettingRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

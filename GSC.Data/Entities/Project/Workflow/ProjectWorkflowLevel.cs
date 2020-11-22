@@ -1,4 +1,4 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Common.Base;
 using GSC.Data.Entities.UserMgt;
 
 namespace GSC.Data.Entities.Project.Workflow

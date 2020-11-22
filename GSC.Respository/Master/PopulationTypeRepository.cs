@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class PopulationTypeRepository : GenericRespository<PopulationType, GscContext>, IPopulationTypeRepository
+    public class PopulationTypeRepository : GenericRespository<PopulationType>, IPopulationTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public PopulationTypeRepository(IUnitOfWork<GscContext> uow,
+        public PopulationTypeRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

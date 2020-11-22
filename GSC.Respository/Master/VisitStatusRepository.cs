@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class VisitStatusRepository : GenericRespository<VisitStatus, GscContext>, IVisitStatusRepository
+    public class VisitStatusRepository : GenericRespository<VisitStatus>, IVisitStatusRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public VisitStatusRepository(IUnitOfWork<GscContext> uow,
+        public VisitStatusRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

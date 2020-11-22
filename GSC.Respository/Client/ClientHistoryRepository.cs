@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Client
 {
-    public class ClientHistoryRepository : GenericRespository<ClientHistory, GscContext>, IClientHistoryRepository
+    public class ClientHistoryRepository : GenericRespository<ClientHistory>, IClientHistoryRepository
     {
-        public ClientHistoryRepository(IUnitOfWork<GscContext> uow,
+        public ClientHistoryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

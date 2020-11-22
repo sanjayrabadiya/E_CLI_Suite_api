@@ -11,11 +11,11 @@ using System.Text;
 
 namespace GSC.Respository.UserMgt
 {
-    public class ReportScreenRepository : GenericRespository<ReportScreen, GscContext>,
+    public class ReportScreenRepository : GenericRespository<ReportScreen>,
         IReportScreenRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public ReportScreenRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) : base(uow, jwtTokenAccesser)
+        public ReportScreenRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

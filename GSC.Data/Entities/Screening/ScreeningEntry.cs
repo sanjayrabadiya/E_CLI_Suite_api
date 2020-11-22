@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.Attendance;
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
 using GSC.Shared;

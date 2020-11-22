@@ -1,5 +1,5 @@
 ﻿using System;
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 
 namespace GSC.Data.Entities.UserMgt
 {

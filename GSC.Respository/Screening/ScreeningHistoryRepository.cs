@@ -11,11 +11,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningHistoryRepository : GenericRespository<ScreeningHistory, GscContext>,
+    public class ScreeningHistoryRepository : GenericRespository<ScreeningHistory>,
         IScreeningHistoryRepository
     {
-        public ScreeningHistoryRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        public ScreeningHistoryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
         }
 

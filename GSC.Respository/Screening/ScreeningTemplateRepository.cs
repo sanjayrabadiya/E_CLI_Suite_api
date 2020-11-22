@@ -20,7 +20,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningTemplateRepository : GenericRespository<ScreeningTemplate, GscContext>,
+    public class ScreeningTemplateRepository : GenericRespository<ScreeningTemplate>,
         IScreeningTemplateRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -31,15 +31,15 @@ namespace GSC.Respository.Screening
         private readonly IEditCheckImpactRepository _editCheckImpactRepository;
         private readonly IMapper _mapper;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public ScreeningTemplateRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        private readonly IGSCContext _context;
+        public ScreeningTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository, IMapper mapper,
             IProjectWorkflowRepository projectWorkflowRepository,
             IEditCheckImpactRepository editCheckImpactRepository,
             IScheduleRuleRespository scheduleRuleRespository,
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -49,7 +49,7 @@ namespace GSC.Respository.Screening
             _scheduleRuleRespository = scheduleRuleRespository;
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
             _editCheckImpactRepository = editCheckImpactRepository;
-            _uow = uow;
+            _context = context;
         }
 
         private ScreeningTemplateBasic GetScreeningTemplateBasic(int screeningTemplateId)
@@ -131,7 +131,7 @@ namespace GSC.Respository.Screening
                         variable.IsValid = true;
 
                     if (variable.Values != null)
-                        variable.Values.ForEach(val =>
+                        variable.Values.ToList().ForEach(val =>
                         {
                             var childValue = t.Children.FirstOrDefault(v => v.ProjectDesignVariableValueId == val.Id);
                             if (childValue != null)
@@ -158,7 +158,7 @@ namespace GSC.Respository.Screening
                 var template = Find(screeningTemplateBasic.Id);
                 template.IsDisable = false;
                 Update(template);
-                _uow.Save();
+                 _context.Save();
             }
 
             if (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
@@ -193,7 +193,7 @@ namespace GSC.Respository.Screening
             });
 
             var variableTargetResult = _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), false, false);
-            projectDesignTemplateDto.Variables.ForEach(r =>
+            projectDesignTemplateDto.Variables.ToList().ForEach(r =>
             {
                 var singleResult = variableTargetResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
                 if (singleResult != null)
@@ -232,7 +232,7 @@ namespace GSC.Respository.Screening
                 var scheduleResult = _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, false);
                 if (scheduleResult != null && scheduleResult.Count > 0)
                 {
-                    projectDesignTemplateDto.Variables.ForEach(r =>
+                    projectDesignTemplateDto.Variables.ToList().ForEach(r =>
                     {
                         var scheduleVariable = scheduleResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).ToList();
                         if (scheduleVariable != null && scheduleVariable.Count > 0)
@@ -288,7 +288,7 @@ namespace GSC.Respository.Screening
         }
         public void SubmitReviewTemplate(int screeningTemplateId, bool isLockUnLock)
         {
-            Context.DetectionAll();
+            _context.DetachAllEntities();
             var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
             var values = GetScreeningValues(screeningTemplateBasic.Id);
             var result = _editCheckImpactRepository.CheckValidation(values, screeningTemplateBasic, true);
@@ -341,13 +341,13 @@ namespace GSC.Respository.Screening
         {
             var result = All.Where(x => x.DeletedDate == null
                                         && x.ReviewLevel != null && x.ReviewLevel > 0
-                                        && (Context.ProjectWorkflowIndependent.Any(r => r.DeletedDate == null &&
+                                        && (_context.ProjectWorkflowIndependent.Any(r => r.DeletedDate == null &&
                                                                                         r.ProjectWorkflow
                                                                                             .ProjectDesignId ==
                                                                                         x.ScreeningVisit.ScreeningEntry.ProjectDesignId
                                                                                         && r.SecurityRoleId ==
                                                                                         _jwtTokenAccesser.RoleId) ||
-                                            Context.ProjectWorkflowLevel.Any(r => r.DeletedDate == null &&
+                                            _context.ProjectWorkflowLevel.Any(r => r.DeletedDate == null &&
                                                                                   r.ProjectWorkflow.ProjectDesignId ==
                                                                                   x.ScreeningVisit.ScreeningEntry.ProjectDesignId
                                                                                   && r.SecurityRoleId ==
@@ -401,11 +401,11 @@ namespace GSC.Respository.Screening
 
         public IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
-            var parentId = Context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
             var parentIds = new List<int>();
             if (parentId == null)
             {
-                parentIds = Context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+                parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
             }
             else
             {
@@ -443,7 +443,7 @@ namespace GSC.Respository.Screening
                 VolunteerName = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName : r.ScreeningVisit.ScreeningEntry.Randomization.Initial,
                 SubjectNo = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 RandomizationNumber = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
-                ReviewLevelName = Context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId
+                ReviewLevelName = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId
                 && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault()
 
             }).ToList();
@@ -529,14 +529,14 @@ namespace GSC.Respository.Screening
 
         public List<LockUnlockListDto> GetLockUnlockList(LockUnlockSearchDto lockUnlockParams)
         {
-            var ProjectCode = Context.Project.Find(lockUnlockParams.ParentProjectId).ProjectCode;
+            var ProjectCode = _context.Project.Find(lockUnlockParams.ParentProjectId).ProjectCode;
 
-            var ProjectDesignId = Context.ProjectDesign.Where(x => x.ProjectId == lockUnlockParams.ParentProjectId).Select(r => r.Id).FirstOrDefault();
+            var ProjectDesignId = _context.ProjectDesign.Where(x => x.ProjectId == lockUnlockParams.ParentProjectId).Select(r => r.Id).FirstOrDefault();
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(ProjectDesignId);
 
-            var screeningEntry = lockUnlockParams.Status == false ? Context.ScreeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId)
-                : Context.ScreeningEntry.Where(r => r.ProjectDesignId == ProjectDesignId);
+            var screeningEntry = lockUnlockParams.Status == false ? _context.ScreeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId)
+                : _context.ScreeningEntry.Where(r => r.ProjectDesignId == ProjectDesignId);
 
             if (lockUnlockParams.ParentProjectId != lockUnlockParams.ProjectId)
                 screeningEntry = screeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId);

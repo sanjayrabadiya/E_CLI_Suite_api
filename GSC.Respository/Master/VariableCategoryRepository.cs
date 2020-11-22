@@ -11,16 +11,16 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class VariableCategoryRepository : GenericRespository<VariableCategory, GscContext>,
+    public class VariableCategoryRepository : GenericRespository<VariableCategory>,
         IVariableCategoryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public VariableCategoryRepository(IUnitOfWork<GscContext> uow,
+        public VariableCategoryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

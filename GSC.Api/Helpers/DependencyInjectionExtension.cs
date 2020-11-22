@@ -42,12 +42,18 @@ namespace GSC.Api.Helpers
 {
     public static class DependencyInjectionExtension
     {
-        public static void AddDependencyInjection(this IServiceCollection services, IConfiguration configuration)
+        public static void AddDependencyInjection<TContext>(this IServiceCollection services, IConfiguration configuration) where TContext : IContext
         {
+            var connectionString = configuration["connectionStrings:dbConnectionString"];
+            services.AddDbContext<GscContext>(o => o.UseSqlServer(connectionString));
+            services.AddScoped<IGSCContext, GscContext>();
+            services.AddScoped<IGSCContextExtension, GscContext>();
+                     
+            //services.AddScoped<IUnitOfWork, UnitOfWork<GscContext>>();
+            //services.AddScoped(typeof(IUnitOfWork<GscContext>), typeof(UnitOfWork<GscContext>));
 
-
-            services.AddScoped<IUnitOfWork, UnitOfWork<GscContext>>();
-            services.AddScoped(typeof(IUnitOfWork<GscContext>), typeof(UnitOfWork<GscContext>));
+            services.AddScoped<IUnitOfWork, UnitOfWork<TContext>>();
+            services.AddScoped(typeof(IUnitOfWork<TContext>), typeof(UnitOfWork<TContext>));
 
             services.AddScoped<IPropertyMappingService, PropertyMappingService>();
             services.AddScoped<IAppUserClaimRepository, AppUserClaimRepository>();
@@ -245,7 +251,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectArtificateDocumentCommentRepository, ProjectArtificateDocumentCommentRepository>();
             services.AddScoped<IProjectArtificateDocumentHistoryRepository, ProjectArtificateDocumentHistoryRepository>();
             services.AddScoped<IProjectDesignVisitStatusRepository, ProjectDesignVisitStatusRepository>();
-            services.AddScoped<IAuditTracker, AuditTracker>();
+            //services.AddScoped<IAuditTracker, AuditTracker>();
             services.AddSingleton<IDictionaryCollection, DictionaryCollection>();
             services.AddScoped<IEconsentReviewDetailsRepository, EconsentReviewDetailsRepository>();
             services.AddScoped<IEconsentSetupRepository, EconsentSetupRepository>();

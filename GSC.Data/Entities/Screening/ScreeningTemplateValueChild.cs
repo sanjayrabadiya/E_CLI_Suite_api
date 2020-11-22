@@ -1,4 +1,4 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Common.Base;
 using GSC.Data.Entities.Project.Design;
 
 namespace GSC.Data.Entities.Screening

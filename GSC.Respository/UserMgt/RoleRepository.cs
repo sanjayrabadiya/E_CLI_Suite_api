@@ -12,13 +12,13 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class RoleRepository : GenericRespository<SecurityRole, GscContext>, IRoleRepository
+    public class RoleRepository : GenericRespository<SecurityRole>, IRoleRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public RoleRepository(IUnitOfWork<GscContext> uow,
+        public RoleRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Configuration
 {
-    public class LoginPreferenceRepository : GenericRespository<LoginPreference, GscContext>, ILoginPreferenceRepository
+    public class LoginPreferenceRepository : GenericRespository<LoginPreference>, ILoginPreferenceRepository
     {
-        public LoginPreferenceRepository(IUnitOfWork<GscContext> uow,
+        public LoginPreferenceRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

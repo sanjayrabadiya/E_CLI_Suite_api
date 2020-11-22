@@ -24,12 +24,13 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-
+        private readonly IGSCContext _context;
         public ContactTypeController(IContactTypeRepository contactTypeRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+             IGSCContext context)
         {
             _contactTypeRepository = contactTypeRepository;
             _userRepository = userRepository;
@@ -37,6 +38,7 @@ namespace GSC.Api.Controllers.Master
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _context = context;
         }
 
         // GET: api/<controller>

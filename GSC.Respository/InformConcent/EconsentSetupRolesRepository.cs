@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 
 namespace GSC.Respository.InformConcent
 {
-    public class EconsentSetupRolesRepository : GenericRespository<EconsentSetupRoles, GscContext>, IEconsentSetupRolesRepository
+    public class EconsentSetupRolesRepository : GenericRespository<EconsentSetupRoles>, IEconsentSetupRolesRepository
     {
-        public EconsentSetupRolesRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) : base(uow, jwtTokenAccesser)
+        public EconsentSetupRolesRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
 
         }

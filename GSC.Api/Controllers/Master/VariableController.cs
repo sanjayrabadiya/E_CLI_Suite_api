@@ -194,38 +194,6 @@ namespace GSC.Api.Controllers.Master
             return Ok(_variableRepository.GetVariableListByDomainId(domainId));
         }
 
-        [HttpGet]
-        [Route("GetColumnList/{TableName}")]
-        public IActionResult GetColumnList(string tableName)
-        {
-            //var result = _variableRepository.GetColumnName("");
-
-            var sqlquery =
-                "select ORDINAL_POSITION AS Id, COLUMN_NAME AS valueName, '' AS valueCode   from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME='" +
-                tableName + "' AND Data_type = 'nvarchar'";
-            var resulttt = _uow.FromSql<CustomTable>(sqlquery).ToList();
-
-            var dtlist = new List<DropDownDto>();
-            for (var i = 0; i < resulttt.Count; i++)
-            {
-                var dt = new DropDownDto();
-
-                dt.Value = resulttt[i].ValueName;
-                dt.Id = resulttt[i].Id;
-                dtlist.Add(dt);
-            }
-
-            return Ok(dtlist);
-        }
-
-        [HttpGet]
-        [Route("GetDataFromTableAndColumn/{TableName}/{ColumnName}/{ColumnCode}")]
-        public IActionResult GetDataFromTableAndColumn(string tableName, string columnName, string columnCode)
-        {
-            var sqlquery = "SELECT Id," + columnName + " AS valueName," + columnCode + " AS valueCode  FROM " +
-                           tableName + " WHERE DeletedDate IS null";
-            var resulttt = _uow.FromSql<CustomTable>(sqlquery).ToList();
-            return Ok(resulttt);
-        }
+       
     }
 }

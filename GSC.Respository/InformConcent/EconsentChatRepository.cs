@@ -15,19 +15,19 @@ using System.Text;
 
 namespace GSC.Respository.InformConcent
 {
-    public class EconsentChatRepository : GenericRespository<EconsentChat, GscContext>, IEconsentChatRepository
+    public class EconsentChatRepository : GenericRespository<EconsentChat>, IEconsentChatRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public EconsentChatRepository(IUnitOfWork<GscContext> uow,
+        public EconsentChatRepository(IGSCContext context,
                                     IJwtTokenAccesser jwtTokenAccesser,
                                     IMapper mapper,
-                                    IUserRepository userRepository) : base(uow, jwtTokenAccesser)
+                                    IUserRepository userRepository) : base(context)
         {
-            _uow = uow;
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _userRepository = userRepository;
             _mapper = mapper;

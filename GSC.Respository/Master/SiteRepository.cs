@@ -13,20 +13,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
-    public class SiteRepository : GenericRespository<Site, GscContext>, ISiteRepository
+    public class SiteRepository : GenericRespository<Site>, ISiteRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
 
-        public SiteRepository(IUnitOfWork<GscContext> uow,
+        public SiteRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _uow = uow;
+            _context = context;
         }
 
         public List<SiteGridDto> GetSiteList(bool isDeleted)
@@ -51,12 +51,12 @@ namespace GSC.Respository.Master
 
         public string DeleteSite(SiteDto objSave)
         {
-            var Sites = Context.Site.AsNoTracking().Where(x => x.InvestigatorContactId == objSave.InvestigatorContactId && x.DeletedDate == null
+            var Sites = _context.Site.AsNoTracking().Where(x => x.InvestigatorContactId == objSave.InvestigatorContactId && x.DeletedDate == null
             && !objSave.ManageSiteIds.Contains(x.ManageSiteId)).ToList();
             foreach (var item in Sites)
             {
                 Delete(item);
-                _uow.Save();
+                 _context.Save();
             }
             return "";
         }

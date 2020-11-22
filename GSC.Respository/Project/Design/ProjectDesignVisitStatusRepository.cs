@@ -15,12 +15,11 @@ using System.Text;
 
 namespace GSC.Respository.Project.Design
 {
-    public class ProjectDesignVisitStatusRepository : GenericRespository<ProjectDesignVisitStatus, GscContext>, IProjectDesignVisitStatusRepository
+    public class ProjectDesignVisitStatusRepository : GenericRespository<ProjectDesignVisitStatus>, IProjectDesignVisitStatusRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public ProjectDesignVisitStatusRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(uow,
-            jwtTokenAccesser)
+        public ProjectDesignVisitStatusRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

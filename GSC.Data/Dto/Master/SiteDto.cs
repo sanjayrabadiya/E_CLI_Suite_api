@@ -1,4 +1,5 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Common.Base;
+using GSC.Data.Entities.Common;
 
 namespace GSC.Data.Dto.Master
 {

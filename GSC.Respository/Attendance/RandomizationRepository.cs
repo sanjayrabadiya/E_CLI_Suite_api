@@ -28,7 +28,7 @@ using System.Linq.Dynamic.Core;
 
 namespace GSC.Respository.Attendance
 {
-    public class RandomizationRepository : GenericRespository<Randomization, GscContext>, IRandomizationRepository
+    public class RandomizationRepository : GenericRespository<Randomization>, IRandomizationRepository
     {
 
         private readonly IUserRepository _userRepository;
@@ -41,13 +41,12 @@ namespace GSC.Respository.Attendance
         private readonly IMapper _mapper;
         private readonly IPatientStatusRepository _patientStatusRepository;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
-        private readonly GscContext _context;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IProjectRepository _projectRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
-        public RandomizationRepository(IUnitOfWork<GscContext> uow,
+        public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -62,7 +61,7 @@ namespace GSC.Respository.Attendance
             IProjectRepository projectRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IProjectRightRepository projectRightRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _userRepository = userRepository;
             _companyRepository = companyRepository;
@@ -73,11 +72,10 @@ namespace GSC.Respository.Attendance
             _cityRepository = cityRepository;
             _mapper = mapper;
             _patientStatusRepository = patientStatusRepository;
-            _context = uow.Context;
             _emailSenderRespository = emailSenderRespository;
             _projectRepository = projectRepository;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
-            _uow = uow;
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
         }
@@ -97,7 +95,8 @@ namespace GSC.Respository.Attendance
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                   ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).ToList();
-            result.ForEach(x => {
+            result.ForEach(x =>
+            {
                 x.PatientStatusName = x.PatientStatusId == null ? "" : _patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
                 if (projectright.Count > 0)
                 {
@@ -135,7 +134,7 @@ namespace GSC.Respository.Attendance
                 }
             });
 
-            var projectCode = Context.Project.Find(Context.Project.Find(projectId).ParentProjectId).ProjectCode;
+            var projectCode = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId).ProjectCode;
             result.ForEach(x => { x.ParentProjectCode = projectCode; });
 
             return result;
@@ -145,7 +144,7 @@ namespace GSC.Respository.Attendance
         {
             if (All.Any(x =>
                 x.Id != objSave.Id && x.ScreeningNumber == objSave.ScreeningNumber &&
-                x.ProjectId == projectId && 
+                x.ProjectId == projectId &&
                 x.DeletedDate == null)) return "Duplicate ScreeningNumber Number : " + objSave.ScreeningNumber;
 
             if (All.Any(x =>
@@ -169,7 +168,7 @@ namespace GSC.Respository.Attendance
             string documentname = "";
             for (var i = 0; i < Econsentdocuments.Count; i++)
             {
-                documentname = documentname + ((i == 0) ? "" : " , ")  + Econsentdocuments[i].DocumentName;
+                documentname = documentname + ((i == 0) ? "" : " , ") + Econsentdocuments[i].DocumentName;
             }
             if (Econsentdocuments.Count > 0)
             {
@@ -231,7 +230,7 @@ namespace GSC.Respository.Attendance
                     {
                         randomization.PatientStatusId = ScreeningPatientStatus.ConsentCompleted;
                         Update(randomization);
-                        _uow.Save();
+                        _context.Save();
                     }
                 }
 
@@ -245,7 +244,7 @@ namespace GSC.Respository.Attendance
             {
                 randomization.PatientStatusId = ScreeningPatientStatus.ReConsentInProcess;
                 Update(randomization);
-                _uow.Save();
+                _context.Save();
             }
         }
 
@@ -265,7 +264,7 @@ namespace GSC.Respository.Attendance
                 if (fileModel.Base64?.Length > 0)
                 {
                     randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
-                        Context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
+                        _context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
                 }
                 randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
                 Update(randomization);
@@ -277,9 +276,9 @@ namespace GSC.Respository.Attendance
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
             if (randomization != null)
             {
-                var project = Context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault();
-                var parentproject = Context.Project.Where(x => x.Id == project.ParentProjectId).ToList().FirstOrDefault();
-                var investigator = Context.InvestigatorContact.Where(x => x.Id == project.InvestigatorContactId).ToList().FirstOrDefault();
+                var project = _context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault();
+                var parentproject = _context.Project.Where(x => x.Id == project.ParentProjectId).ToList().FirstOrDefault();
+                var investigator = _context.InvestigatorContact.Where(x => x.Id == project.InvestigatorContactId).ToList().FirstOrDefault();
                 DashboardPatientDto dashboardPatientDto = new DashboardPatientDto();
                 dashboardPatientDto.projectId = project.Id;
                 dashboardPatientDto.studycode = parentproject.ProjectCode;
@@ -289,11 +288,12 @@ namespace GSC.Respository.Attendance
                 dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
                 dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
                 return dashboardPatientDto;
-            } else
+            }
+            else
             {
                 return new DashboardPatientDto();
             }
-            
+
         }
 
         public List<ProjectDesignVisitMobileDto> GetPatientVisits()
@@ -312,9 +312,9 @@ namespace GSC.Respository.Attendance
             //                    b.Id = c.ScreeningEntryId and
             //                    c.ProjectDesignVisitId = d.Id";
 
-            //var data = (from screeningentry in Context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id)
-            //            join ScreeningVisit in Context.ScreeningVisit.Where(x => x.DeletedDate == null) on screeningentry.Id equals ScreeningVisit.ScreeningEntryId
-            //            join ProjectDesignVisit in Context.ProjectDesignVisit.Where(x => x.DeletedDate == null) on ScreeningVisit.ProjectDesignVisitId equals ProjectDesignVisit.Id
+            //var data = (from screeningentry in _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id)
+            //            join ScreeningVisit in _context.ScreeningVisit.Where(x => x.DeletedDate == null) on screeningentry.Id equals ScreeningVisit.ScreeningEntryId
+            //            join ProjectDesignVisit in _context.ProjectDesignVisit.Where(x => x.DeletedDate == null) on ScreeningVisit.ProjectDesignVisitId equals ProjectDesignVisit.Id
 
             //            select new ProjectDesignVisitMobileDto
             //            {
@@ -322,7 +322,7 @@ namespace GSC.Respository.Attendance
             //                DisplayName = ProjectDesignVisit.DisplayName,
             //            }).ToList();
 
-            var data = Context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
+            var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
                         Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && x.ScreeningTemplates.Any(x => x.IsParticipantView == true)).
                         Select(r => new ProjectDesignVisitMobileDto
                         {
@@ -335,7 +335,7 @@ namespace GSC.Respository.Attendance
 
         public List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId)
         {
-            var data = Context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Where(x => x.ScreeningVisitId == screeningVisitId && x.IsParticipantView == true).
+            var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Where(x => x.ScreeningVisitId == screeningVisitId && x.IsParticipantView == true).
                         Select(r => new ProjectDesignTemplateMobileDto
                         {
                             ScreeningTemplateId = r.Id,

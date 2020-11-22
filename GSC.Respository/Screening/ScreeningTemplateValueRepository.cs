@@ -15,18 +15,19 @@ using System.Linq;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningTemplateValueRepository : GenericRespository<ScreeningTemplateValue, GscContext>,
+    public class ScreeningTemplateValueRepository : GenericRespository<ScreeningTemplateValue>,
         IScreeningTemplateValueRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
-
-        public ScreeningTemplateValueRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        private readonly IGSCContext _context;
+        public ScreeningTemplateValueRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IProjectDesignVariableRepository projectDesignVariableRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId,
@@ -155,14 +156,14 @@ namespace GSC.Respository.Screening
 
         public void DeleteChild(int screeningTemplateValueId)
         {
-            var childs = Context.ScreeningTemplateValueChild
+            var childs = _context.ScreeningTemplateValueChild
                 .Where(t => t.ScreeningTemplateValueId == screeningTemplateValueId).ToList();
-            Context.ScreeningTemplateValueChild.RemoveRange(childs);
+            _context.ScreeningTemplateValueChild.RemoveRange(childs);
         }
 
         public void UpdateChild(List<ScreeningTemplateValueChild> children)
         {
-            Context.ScreeningTemplateValueChild.UpdateRange(children);
+            _context.ScreeningTemplateValueChild.UpdateRange(children);
         }
 
         public string CheckCloseQueries(int screeningTemplateId)
@@ -201,10 +202,10 @@ namespace GSC.Respository.Screening
             {
                 var child = screeningTemplateValueDto.Children.First();
 
-                var variableValue = Context.ProjectDesignVariableValue.Find(child.ProjectDesignVariableValueId);
+                var variableValue = _context.ProjectDesignVariableValue.Find(child.ProjectDesignVariableValueId);
                 if (variableValue != null)
                 {
-                    var valueChild = Context.ScreeningTemplateValueChild.AsNoTracking()
+                    var valueChild = _context.ScreeningTemplateValueChild.AsNoTracking()
                         .FirstOrDefault(t => t.Id == child.Id);
                     if (valueChild != null && child.Value == "false")
                     {
@@ -245,34 +246,34 @@ namespace GSC.Respository.Screening
 
         public CommonDto GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters)
         {
-            var ProjectCode = Context.Project.Find(filters.ParentProjectId).ProjectCode;
+            var ProjectCode = _context.Project.Find(filters.ParentProjectId).ProjectCode;
 
-            var queryDtos = (from screening in Context.ScreeningEntry.Where(t =>
+            var queryDtos = (from screening in _context.ScreeningEntry.Where(t =>
                     filters.ProjectId.Contains(t.ProjectId) &&
                     (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
                     && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.AttendanceId)) &&
                     t.DeletedDate == null)
-                             join template in Context.ScreeningTemplate.Where(u =>
+                             join template in _context.ScreeningTemplate.Where(u =>
                                      (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
                                      && (filters.VisitIds == null ||
                                          filters.VisitIds.Contains(u.ScreeningVisit.ProjectDesignVisitId)) &&
                                      (filters.DomainIds == null ||
                                       filters.DomainIds.Contains(u.ProjectDesignTemplate.DomainId)) && u.DeletedDate == null)
                                  on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                             join valueTemp in Context.ScreeningTemplateValue.Where(val => val.DeletedDate == null
+                             join valueTemp in _context.ScreeningTemplateValue.Where(val => val.DeletedDate == null
                                                && val.ProjectDesignVariable.DeletedDate == null) on new { template.Id, template.ProjectDesignTemplateId }
                                              equals new { Id = valueTemp.ScreeningTemplateId, valueTemp.ProjectDesignVariable.ProjectDesignTemplateId }
                                              into valueDto
                              from value in valueDto.DefaultIfEmpty()
-                             join attendance in Context.Attendance.Where(t => t.DeletedDate == null)
+                             join attendance in _context.Attendance.Where(t => t.DeletedDate == null)
                                  on screening.AttendanceId equals attendance.Id
-                             join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
+                             join volunteerTemp in _context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
                                  volunteerDto
                              from volunteer in volunteerDto.DefaultIfEmpty()
-                             join randomizationTemp in Context.Randomization on screening.RandomizationId equals randomizationTemp.Id
+                             join randomizationTemp in _context.Randomization on screening.RandomizationId equals randomizationTemp.Id
                                  into randomizationDto
                              from randomization in randomizationDto.DefaultIfEmpty()
-                             join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals
+                             join projectSubjectTemp in _context.ProjectSubject on attendance.ProjectSubjectId equals
                                  projectSubjectTemp.Id into projectsubjectDto
                              from projectsubject in projectsubjectDto.DefaultIfEmpty()
                              select new ProjectDatabaseDto
@@ -305,25 +306,25 @@ namespace GSC.Respository.Screening
                                  VariableNameValue = value == null ? null :
                                      value.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox
                                          ? string.Join(";",
-                                             from stvc in Context.ScreeningTemplateValueChild.Where(x =>
+                                             from stvc in _context.ScreeningTemplateValueChild.Where(x =>
                                                  x.DeletedDate == null && x.ScreeningTemplateValueId == value.Id &&
                                                  x.Value == "true")
                                              join prpjectdesignvalueTemp in
-                                                 Context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null) on stvc
+                                                 _context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null) on stvc
                                                      .ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into
                                                  prpjectdesignvalueDto
                                              from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
                                              select prpjectdesignvalue.ValueName)
                                          : value.ProjectDesignVariable.CollectionSource == CollectionSources.CheckBox &&
                                            !string.IsNullOrEmpty(value.Value)
-                                             ? Context.ProjectDesignVariableValue.FirstOrDefault(b =>
+                                             ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                                  b.ProjectDesignVariableId == value.ProjectDesignVariable.Id).ValueName
                                              : value.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
                                                value.IsNa && string.IsNullOrEmpty(value.Value)
                                                  ? "NA"
                                                  : value.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
                                                    value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton
-                                                     ? Context.ProjectDesignVariableValue.FirstOrDefault(b =>
+                                                     ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                                          b.ProjectDesignVariableId == value.ProjectDesignVariable.Id &&
                                                          b.Id == Convert.ToInt32(value.Value)).ValueName
                                                      : value.Value,
@@ -351,7 +352,7 @@ namespace GSC.Respository.Screening
                         DesignOrderOfVariable = v.FirstOrDefault().DesignOrderOfVariable,
                         TemplateId = v.FirstOrDefault().TemplateId
                     }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList()
-                    : Context.ProjectDesignVariable.Where(v => v.DeletedDate == null
+                    : _context.ProjectDesignVariable.Where(v => v.DeletedDate == null
                     && v.ProjectDesignTemplateId == y.FirstOrDefault().TemplateId).Select(x => new ProjectDatabaseDto
                     {
                         VariableName = x.VariableName,
@@ -382,30 +383,30 @@ namespace GSC.Respository.Screening
                 }).OrderBy(p => p.ProjectId).ToList()
             }).ToList();
 
-            var MeddraDetails = (from meddra in Context.MeddraCoding
-                                 join mcf in Context.MedraConfig on meddra.MeddraConfigId equals mcf.Id
-                                 join mv in Context.MedraVersion on mcf.MedraVersionId equals mv.Id
-                                 join ml in Context.MedraLanguage on mcf.LanguageId equals ml.Id
-                                 join dict in Context.Dictionary on mv.DictionaryId equals dict.Id
-                                 join stv in Context.ScreeningTemplateValue on meddra.ScreeningTemplateValueId equals stv.Id
-                                 join pdv in Context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
-                                 join D in Context.Domain on pdv.DomainId equals D.Id
-                                 join st in Context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id
-                                 join visit in Context.ProjectDesignVisit on st.ScreeningVisitId equals visit.Id
-                                 join se in Context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id
-                                 join p in Context.Project on se.ProjectId equals p.Id
-                                 join A in Context.Attendance on se.AttendanceId equals A.Id
-                                 join lltDto in Context.MeddraLowLevelTerm on meddra.MeddraLowLevelTermId equals lltDto.Id into Mllt
+            var MeddraDetails = (from meddra in _context.MeddraCoding
+                                 join mcf in _context.MedraConfig on meddra.MeddraConfigId equals mcf.Id
+                                 join mv in _context.MedraVersion on mcf.MedraVersionId equals mv.Id
+                                 join ml in _context.MedraLanguage on mcf.LanguageId equals ml.Id
+                                 join dict in _context.Dictionary on mv.DictionaryId equals dict.Id
+                                 join stv in _context.ScreeningTemplateValue on meddra.ScreeningTemplateValueId equals stv.Id
+                                 join pdv in _context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
+                                 join D in _context.Domain on pdv.DomainId equals D.Id
+                                 join st in _context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id
+                                 join visit in _context.ProjectDesignVisit on st.ScreeningVisitId equals visit.Id
+                                 join se in _context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id
+                                 join p in _context.Project on se.ProjectId equals p.Id
+                                 join A in _context.Attendance on se.AttendanceId equals A.Id
+                                 join lltDto in _context.MeddraLowLevelTerm on meddra.MeddraLowLevelTermId equals lltDto.Id into Mllt
                                  from llt in Mllt.DefaultIfEmpty()
-                                 join mstDto in Context.MeddraSocTerm on meddra.MeddraSocTermId equals mstDto.Id into meddraSt
+                                 join mstDto in _context.MeddraSocTerm on meddra.MeddraSocTermId equals mstDto.Id into meddraSt
                                  from mst in meddraSt.DefaultIfEmpty()
-                                 join mdDto in Context.MeddraMdHierarchy on mst.soc_code equals mdDto.soc_code into meddraMd
+                                 join mdDto in _context.MeddraMdHierarchy on mst.soc_code equals mdDto.soc_code into meddraMd
                                  from md in meddraMd.DefaultIfEmpty()
-                                 join volunteerTemp in Context.Volunteer on A.VolunteerId equals volunteerTemp.Id into volunteerDto
+                                 join volunteerTemp in _context.Volunteer on A.VolunteerId equals volunteerTemp.Id into volunteerDto
                                  from volunteer in volunteerDto.DefaultIfEmpty()
-                                 join randomizationTemp in Context.Randomization on se.RandomizationId equals randomizationTemp.Id into randomizationDto
+                                 join randomizationTemp in _context.Randomization on se.RandomizationId equals randomizationTemp.Id into randomizationDto
                                  from randomization in randomizationDto.DefaultIfEmpty()
-                                 join userTemp in Context.Users on meddra.ModifiedBy equals userTemp.Id into userDto
+                                 join userTemp in _context.Users on meddra.ModifiedBy equals userTemp.Id into userDto
                                  from user in userDto.DefaultIfEmpty()
                                  where llt.pt_code == md.pt_code && filters.ProjectId.Contains(se.ProjectId)
                                  select new MeddraDetails
@@ -422,20 +423,20 @@ namespace GSC.Respository.Screening
                                         : st.ProjectDesignTemplate.DesignOrder + "." + st.RepeatSeqNo + " " + st.ProjectDesignTemplate.TemplateName,
                                      VariableAnnotation = pdv.Annotation,
                                      VariableTerm = stv.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox ? string.Join(";",
-                                    from stvc in Context.ScreeningTemplateValueChild.Where(x => x.DeletedDate == null && x.ScreeningTemplateValueId == stv.Id && x.Value == "true")
-                                    join prpjectdesignvalueTemp in Context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null) on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into
+                                    from stvc in _context.ScreeningTemplateValueChild.Where(x => x.DeletedDate == null && x.ScreeningTemplateValueId == stv.Id && x.Value == "true")
+                                    join prpjectdesignvalueTemp in _context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null) on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into
                                     prpjectdesignvalueDto
                                     from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
                                     select prpjectdesignvalue.ValueName)
                                     : stv.ProjectDesignVariable.CollectionSource == CollectionSources.CheckBox &&
                                     !string.IsNullOrEmpty(stv.Value)
-                                    ? Context.ProjectDesignVariableValue.FirstOrDefault(b =>
+                                    ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                     b.ProjectDesignVariableId == stv.ProjectDesignVariable.Id).ValueName
                                     : stv.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
                                     stv.IsNa && string.IsNullOrEmpty(stv.Value) ? "NA"
                                     : stv.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
                                     stv.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton
-                                    ? Context.ProjectDesignVariableValue.FirstOrDefault(b =>
+                                    ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                     b.ProjectDesignVariableId == stv.ProjectDesignVariable.Id &&
                                     b.Id == Convert.ToInt32(stv.Value)).ValueName
                                     : stv.Value,

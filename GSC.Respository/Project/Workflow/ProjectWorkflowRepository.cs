@@ -12,24 +12,24 @@ using GSC.Shared;
 
 namespace GSC.Respository.Project.Workflow
 {
-    public class ProjectWorkflowRepository : GenericRespository<ProjectWorkflow, GscContext>, IProjectWorkflowRepository
+    public class ProjectWorkflowRepository : GenericRespository<ProjectWorkflow>, IProjectWorkflowRepository
     {
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
-        private readonly GscContext _context;
+        private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
 
-        public ProjectWorkflowRepository(IUnitOfWork<GscContext> uow,
+        public ProjectWorkflowRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
-            IProjectRightRepository projectRightRepository) : base(uow, jwtTokenAccesser)
+            IProjectRightRepository projectRightRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
-            _context = uow.Context;
+            _context = context;
             _projectRightRepository = projectRightRepository;
         }
 
@@ -125,7 +125,7 @@ namespace GSC.Respository.Project.Workflow
 
         public bool IsElectronicsSignatureComplete(int projectDesignId)
         {
-            var IsElectronicsSignature = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
+            var IsElectronicsSignature = _context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
             if (IsElectronicsSignature == null)
             {
                 IsElectronicsSignature = false;

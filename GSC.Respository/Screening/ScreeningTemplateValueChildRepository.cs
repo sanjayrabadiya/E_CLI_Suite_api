@@ -9,11 +9,11 @@ using System.Text;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningTemplateValueChildRepository: GenericRespository<ScreeningTemplateValueChild, GscContext>, IScreeningTemplateValueChildRepository
+    public class ScreeningTemplateValueChildRepository: GenericRespository<ScreeningTemplateValueChild>, IScreeningTemplateValueChildRepository
     {
-        public ScreeningTemplateValueChildRepository(IUnitOfWork<GscContext> uow,
+        public ScreeningTemplateValueChildRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

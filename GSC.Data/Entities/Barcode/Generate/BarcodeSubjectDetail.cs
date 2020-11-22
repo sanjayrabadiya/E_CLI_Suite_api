@@ -1,5 +1,5 @@
 ﻿using GSC.Data.Entities.Attendance;
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 
 namespace GSC.Data.Entities.Barcode.Generate
 {

@@ -12,27 +12,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.ProjectRight
 {
-    public class ProjectDocumentReviewRepository : GenericRespository<ProjectDocumentReview, GscContext>,
+    public class ProjectDocumentReviewRepository : GenericRespository<ProjectDocumentReview>,
         IProjectDocumentReviewRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
 
-        public ProjectDocumentReviewRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) : base(
-            uow, jwtTokenAccesser)
+        public ProjectDocumentReviewRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
         }
 
         public void SaveByUserId(int projectId, int userId)
         {
-            var projectdetails = Context.Project.AsNoTracking().Where(x => x.Id == projectId).SingleOrDefault();
+            var projectdetails = _context.Project.AsNoTracking().Where(x => x.Id == projectId).SingleOrDefault();
             var childprojectdetails =
-                Context.Project.AsNoTracking().Where(x => x.ParentProjectId == projectId).ToList();
+                _context.Project.AsNoTracking().Where(x => x.ParentProjectId == projectId).ToList();
             if (projectdetails.ParentProjectId != null)
             {
-                var documents = Context.ProjectDocument
+                var documents = _context.ProjectDocument
                     .Where(x => x.ProjectId == projectdetails.ParentProjectId || x.ProjectId == projectId && x.DeletedDate == null).ToList();
 
                 foreach (var item in documents)
@@ -70,7 +69,7 @@ namespace GSC.Respository.ProjectRight
             }
             else
             {
-                var documents = Context.ProjectDocument.Where(x => x.ProjectId == projectId && x.DeletedDate == null)
+                var documents = _context.ProjectDocument.Where(x => x.ProjectId == projectId && x.DeletedDate == null)
                     .ToList();
 
                 foreach (var item in documents)
@@ -112,14 +111,14 @@ namespace GSC.Respository.ProjectRight
         public void SaveByDocumentId(int documnetId, int projectId)
         {
             var allChild = new List<Data.Entities.Master.Project>();
-            var projectParent = Context.Project.Where(x => x.Id == projectId).SingleOrDefault();
-            allChild = Context.Project.Where(x => x.ParentProjectId == projectId
+            var projectParent = _context.Project.Where(x => x.Id == projectId).SingleOrDefault();
+            allChild = _context.Project.Where(x => x.ParentProjectId == projectId
                                                   && x.DeletedDate == null).ToList();
             if (projectParent != null) allChild.Add(projectParent);
 
             foreach (var item in allChild)
             {
-                var users = Context.ProjectRight.Where(x => x.ProjectId == item.Id && x.DeletedDate == null)
+                var users = _context.ProjectRight.Where(x => x.ProjectId == item.Id && x.DeletedDate == null)
                     .Select(c => c.UserId).ToList().Distinct();
 
                 foreach (var userId in users)
@@ -154,7 +153,7 @@ namespace GSC.Respository.ProjectRight
                 }
             }
 
-            _uow.Save();
+             _context.Save();
         }
 
 
@@ -186,12 +185,12 @@ namespace GSC.Respository.ProjectRight
             var projectDashBoardDto = new ProjectDashBoardDto();
 
             projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
-                                                             && !x.IsReview && Context.ProjectRight.Any(a =>
+                                                             && !x.IsReview && _context.ProjectRight.Any(a =>
                                                                  a.ProjectId == x.ProjectId
                                                                  && a.UserId == _jwtTokenAccesser.UserId &&
                                                                  a.RoleId == _jwtTokenAccesser.RoleId
                                                                  && x.DeletedDate == null) &&
-                                                             Context.ProjectDocument.Any(a => a.ProjectId == x.ProjectId
+                                                             _context.ProjectDocument.Any(a => a.ProjectId == x.ProjectId
                                                                                               && x.DeletedDate ==
                                                                                               null) &&
                                                              x.DeletedDate == null).Select(c =>
@@ -209,13 +208,13 @@ namespace GSC.Respository.ProjectRight
                 }).ToList();
 
             projectDashBoardDto.ProjectPendingReview = projectDashBoardDto.ProjectList.Count;
-            projectDashBoardDto.ProjectCount = Context.ProjectRight.Count(x => x.UserId == _jwtTokenAccesser.UserId
+            projectDashBoardDto.ProjectCount = _context.ProjectRight.Count(x => x.UserId == _jwtTokenAccesser.UserId
                                                                                && x.RoleId ==
                                                                                _jwtTokenAccesser.RoleId &&
                                                                                x.DeletedDate == null);
 
             projectDashBoardDto.ProjectReviewed = All.Count(x => x.UserId == _jwtTokenAccesser.UserId
-                                                                 && x.IsReview && Context.ProjectRight.Any(a =>
+                                                                 && x.IsReview && _context.ProjectRight.Any(a =>
                                                                      a.ProjectId == x.ProjectId
                                                                      && a.UserId == _jwtTokenAccesser.UserId &&
                                                                      a.RoleId == _jwtTokenAccesser.RoleId
@@ -228,10 +227,10 @@ namespace GSC.Respository.ProjectRight
         public ProjectDashBoardDto GetProjectDashboardbyId(int id)
         {
             var projectDashBoardDto = new ProjectDashBoardDto();
-            var project = Context.Project.Find(id);
+            var project = _context.Project.Find(id);
 
             projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
-                                                             && !x.IsReview && Context.ProjectRight.Any(a =>
+                                                             && !x.IsReview && _context.ProjectRight.Any(a =>
                                                                  a.ProjectId == x.ProjectId
                                                                  && a.UserId == _jwtTokenAccesser.UserId
                                                                  && x.DeletedDate == null) &&
@@ -248,7 +247,7 @@ namespace GSC.Respository.ProjectRight
                     DocumentPath = c.ProjectDocument.PathName,
                     FileName = c.ProjectDocument.FileName,
                     MimeType = c.ProjectDocument.MimeType,
-                    ParentProjectCode = Context.Project.Where(x=>x.Id == project.ParentProjectId).FirstOrDefault().ProjectCode
+                    ParentProjectCode = _context.Project.Where(x=>x.Id == project.ParentProjectId).FirstOrDefault().ProjectCode
                 }).ToList();
 
             projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
@@ -258,26 +257,26 @@ namespace GSC.Respository.ProjectRight
                     projectDocumentReview.ParentProjectCode = projectDocumentReview.ProjectNumber;
                     projectDocumentReview.ProjectNumber = null;                    
                 }
-                var projectRight = Context.ProjectRight.Where(a =>
+                var projectRight = _context.ProjectRight.Where(a =>
                     a.ProjectId == projectDocumentReview.ProjectId
                     && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
                 if (projectRight != null)
                 {
                     projectDocumentReview.AssignedDate = projectRight.CreatedDate;
-                    var createdByUser = Context.Users.Where(user => user.Id == projectRight.CreatedBy).FirstOrDefault();
+                    var createdByUser = _context.Users.Where(user => user.Id == projectRight.CreatedBy).FirstOrDefault();
                     if (createdByUser != null) projectDocumentReview.AssignedBy = createdByUser.UserName;
                 }
             });
 
             projectDashBoardDto.ProjectList = projectDashBoardDto.ProjectList.Where(x => x.ProjectId == id).ToList();
             projectDashBoardDto.ProjectPendingReview = projectDashBoardDto.ProjectList.Count;
-            projectDashBoardDto.ProjectCount = Context.ProjectRight.Count(x => x.UserId == _jwtTokenAccesser.UserId
+            projectDashBoardDto.ProjectCount = _context.ProjectRight.Count(x => x.UserId == _jwtTokenAccesser.UserId
                                                                                && x.RoleId ==
                                                                                _jwtTokenAccesser.RoleId &&
                                                                                x.DeletedDate == null);
 
             projectDashBoardDto.ProjectReviewed = All.Count(x => x.UserId == _jwtTokenAccesser.UserId
-                                                                 && x.IsReview && Context.ProjectRight.Any(a =>
+                                                                 && x.IsReview && _context.ProjectRight.Any(a =>
                                                                      a.ProjectId == x.ProjectId
                                                                      && a.UserId == _jwtTokenAccesser.UserId &&
                                                                      a.RoleId == _jwtTokenAccesser.RoleId
@@ -291,7 +290,7 @@ namespace GSC.Respository.ProjectRight
         {
             // changes by swati for child project
             var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
-                                             && Context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
+                                             && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
                                                                               && a.UserId == _jwtTokenAccesser.UserId &&
                                                                               a.RoleId == _jwtTokenAccesser.RoleId
                                                                               && !x.IsReview && a.DeletedDate == null &&
@@ -311,10 +310,10 @@ namespace GSC.Respository.ProjectRight
         public ProjectDashBoardDto GetCompleteTrainingDashboard(int id)
         {
             var projectDashBoardDto = new ProjectDashBoardDto();
-            var project = Context.Project.Find(id);
+            var project = _context.Project.Find(id);
 
             projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
-                                                             && x.IsReview && Context.ProjectRight.Any(a =>
+                                                             && x.IsReview && _context.ProjectRight.Any(a =>
                                                                  a.ProjectId == x.ProjectId
                                                                  && a.UserId == _jwtTokenAccesser.UserId
                                                                  && x.DeletedDate == null) &&
@@ -331,19 +330,19 @@ namespace GSC.Respository.ProjectRight
                     DocumentPath = c.ProjectDocument.PathName,
                     FileName = c.ProjectDocument.FileName,
                     MimeType = c.ProjectDocument.MimeType,
-                    ParentProjectCode = Context.Project.Where(x => x.Id == project.ParentProjectId).FirstOrDefault().ProjectCode,
+                    ParentProjectCode = _context.Project.Where(x => x.Id == project.ParentProjectId).FirstOrDefault().ProjectCode,
                     ReviewDate = c.ReviewDate
                 }).ToList();
 
             projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
             {
-                var projectRight = Context.ProjectRight.Where(a =>
+                var projectRight = _context.ProjectRight.Where(a =>
                     a.ProjectId == projectDocumentReview.ProjectId
                     && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
                 if (projectRight != null)
                 {
                     projectDocumentReview.AssignedDate = projectRight.CreatedDate;
-                    var createdByUser = Context.Users.Where(user => user.Id == projectRight.CreatedBy).FirstOrDefault();
+                    var createdByUser = _context.Users.Where(user => user.Id == projectRight.CreatedBy).FirstOrDefault();
                     if (createdByUser != null) projectDocumentReview.AssignedBy = createdByUser.UserName;
                 }
             });
@@ -351,7 +350,7 @@ namespace GSC.Respository.ProjectRight
             projectDashBoardDto.ProjectList = projectDashBoardDto.ProjectList.Where(x => x.ProjectId == id).ToList();
        
             projectDashBoardDto.ProjectReviewed = All.Count(x => x.UserId == _jwtTokenAccesser.UserId
-                                                                 && x.IsReview && Context.ProjectRight.Any(a =>
+                                                                 && x.IsReview && _context.ProjectRight.Any(a =>
                                                                      a.ProjectId == x.ProjectId
                                                                      && a.UserId == _jwtTokenAccesser.UserId &&
                                                                      a.RoleId == _jwtTokenAccesser.RoleId

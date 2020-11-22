@@ -22,9 +22,10 @@ using System.Linq;
 
 namespace GSC.Respository.Attendance
 {
-    public class AttendanceRepository : GenericRespository<Data.Entities.Attendance.Attendance, GscContext>,
+    public class AttendanceRepository : GenericRespository<Data.Entities.Attendance.Attendance>,
         IAttendanceRepository
     {
+        private readonly IGSCContext _context;
         private readonly IAttendanceHistoryRepository _attendanceHistoryRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
@@ -36,7 +37,7 @@ namespace GSC.Respository.Attendance
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
 
-        public AttendanceRepository(IUnitOfWork<GscContext> uow,
+        public AttendanceRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -47,8 +48,9 @@ namespace GSC.Respository.Attendance
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateRepository screeningTemplateRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
+           _context = context;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _projectRightRepository = projectRightRepository;
@@ -66,7 +68,7 @@ namespace GSC.Respository.Attendance
             attendance.RoleId = _jwtTokenAccesser.RoleId;
             attendance.UserId = _jwtTokenAccesser.UserId;
             attendance.AttendanceDate = DateTime.Now.UtcDateTime();
-            attendance.IsTesting = Context.ProjectDesignPeriod.Any(x =>
+            attendance.IsTesting = _context.ProjectDesignPeriod.Any(x =>
                 x.ProjectDesign.IsUnderTesting && x.Id == attendance.ProjectDesignPeriodId);
             attendance.AttendanceHistory =
                 _attendanceHistoryRepository.SaveHistory("Added attendance", 0, attendance.AuditReasonId);
@@ -81,7 +83,7 @@ namespace GSC.Respository.Attendance
 
             if (projectList == null || projectList.Count == 0) return new List<AttendanceScreeningGridDto>();
 
-            var result = Context.Attendance.Where(t => t.DeletedDate == null
+            var result = _context.Attendance.Where(t => t.DeletedDate == null
                                                        && projectList.Any(c => c == t.ProjectId));
 
 
@@ -128,8 +130,8 @@ namespace GSC.Respository.Attendance
                 AttendanceId = x.Id,
                 VolunteerId = x.VolunteerId,
                 ProjectDesignId = x.ProjectDesignPeriod.ProjectDesignId,
-                VolunteerName =  x.Volunteer.FullName,
-                VolunteerNumber =  x.Volunteer.VolunteerNo,
+                VolunteerName = x.Volunteer.FullName,
+                VolunteerNumber = x.Volunteer.VolunteerNo,
                 Gender = x.Volunteer == null || x.Volunteer.GenderId == null ? "" : x.Volunteer.GenderId.ToString(),
                 ProjectCode = x.Project.ProjectCode,
                 ProjectId = x.ProjectId,
@@ -166,7 +168,7 @@ namespace GSC.Respository.Attendance
             //var projectList = _projectRightRepository.GetProjectRightIdList();
             //if (projectList == null || projectList.Count == 0) return new List<AttendanceScreeningGridDto>();
 
-            //var result = Context.Attendance.Where(t => t.DeletedDate == null
+            //var result = _context.Attendance.Where(t => t.DeletedDate == null
             //                                           && projectList.Any(c => c == t.ProjectId))
             //    .AsQueryable();
 
@@ -234,7 +236,7 @@ namespace GSC.Respository.Attendance
             //            t.DiscontinuedTemplateId = null;
             //        }
 
-            //        var screening = Context.ScreeningEntry.Where(x => x.AttendanceId == t.AttendanceId).FirstOrDefault();
+            //        var screening = _context.ScreeningEntry.Where(x => x.AttendanceId == t.AttendanceId).FirstOrDefault();
             //        if (screening != null)
             //        {
             //            t.AttendanceScreeningEntryId = screening.Id;
@@ -258,7 +260,7 @@ namespace GSC.Respository.Attendance
 
             //if (isLock)
             //{
-            //    items = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
+            //    items = (from attendance in _context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
             //             select new AttendanceScreeningGridDto
             //             {
             //                 Id = attendance.Id,
@@ -269,7 +271,7 @@ namespace GSC.Respository.Attendance
             //                 AttendanceId = attendance.Id,
             //             }).ToList();
 
-            //    var lstsubject = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
+            //    var lstsubject = (from attendance in _context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
             //                      select new AttendanceScreeningGridDto
             //                      {
             //                          Id = attendance.Id,
@@ -301,8 +303,8 @@ namespace GSC.Respository.Attendance
             //{
 
 
-            //    var result = (from attendance in Context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
-            //                  join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
+            //    var result = (from attendance in _context.Attendance.Where(t => t.DeletedDate == null && t.ProjectId == attendanceSearch.ProjectId && t.AttendanceType == attendanceSearch.AttendanceType)
+            //                  join locktemplate in _context.ScreeningTemplate.Where(x => x.IsLocked)
             //                  on attendance.Id equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
             //                  select new AttendanceScreeningGridDto
             //                  {
@@ -348,7 +350,7 @@ namespace GSC.Respository.Attendance
 
         public IList<DropDownDto> GetVolunteersByProjectId(int projectId)
         {
-            var volunteers = Context.Volunteer.Where(t => All.Where(x => x.DeletedDate == null
+            var volunteers = _context.Volunteer.Where(t => All.Where(x => x.DeletedDate == null
                                                                          && x.ProjectId == projectId)
                 .Select(s => s.VolunteerId).Contains(t.Id)).Select(t => new DropDownDto
                 {
@@ -402,7 +404,7 @@ namespace GSC.Respository.Attendance
 
         public IList<VolunteerAttendaceDto> GetAttendanceAnotherPeriod(VolunteerSearchDto search)
         {
-            var projectId = Context.ProjectDesignPeriod.Where(t => t.Id == search.ProjectDesignPeriodId)
+            var projectId = _context.ProjectDesignPeriod.Where(t => t.Id == search.ProjectDesignPeriodId)
                 .Select(x => x.ProjectDesign.ProjectId).FirstOrDefault();
             var query = All.Where(t => t.DeletedDate == null && t.Status == AttendaceStatus.FitnessPass
                                                              && t.PeriodNo == 1 && t.ProjectId == projectId);
@@ -446,7 +448,7 @@ namespace GSC.Respository.Attendance
             //int ProjectId = 0;
             //if (filters.ProjectId == 0)
             //{
-            //    ProjectId = Context.ProjectDesign.Find(filters.ProjectDesignId).ProjectId;
+            //    ProjectId = _context.ProjectDesign.Find(filters.ProjectDesignId).ProjectId;
             //}
             //else
             //{
@@ -456,7 +458,7 @@ namespace GSC.Respository.Attendance
             //if (projectList == null || projectList.Count == 0)
             //    return new List<DropDownDto>();
 
-            //var Isstatic = Context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().IsStatic;
+            //var Isstatic = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().IsStatic;
 
             //if (Isstatic)
             //{
@@ -490,7 +492,7 @@ namespace GSC.Respository.Attendance
         public List<int> GetProjectList(int ProjectId)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
-            return Context.Project.Where(c => c.DeletedDate == null && (c.Id == ProjectId || c.ParentProjectId == ProjectId) && projectList.Any(t => t == c.Id)).Select(x => x.Id).ToList();
+            return _context.Project.Where(c => c.DeletedDate == null && (c.Id == ProjectId || c.ParentProjectId == ProjectId) && projectList.Any(t => t == c.Id)).Select(x => x.Id).ToList();
         }
     }
 }

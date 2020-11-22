@@ -6,10 +6,10 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class AppUserClaimRepository : GenericRespository<AppUserClaim, GscContext>, IAppUserClaimRepository
+    public class AppUserClaimRepository : GenericRespository<AppUserClaim>, IAppUserClaimRepository
     {
-        public AppUserClaimRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        public AppUserClaimRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
         }
     }

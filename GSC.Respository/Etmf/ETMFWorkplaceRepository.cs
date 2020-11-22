@@ -19,18 +19,20 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ETMFWorkplaceRepository : GenericRespository<ProjectWorkplace, GscContext>, IETMFWorkplaceRepository
+    public class ETMFWorkplaceRepository : GenericRespository<ProjectWorkplace>, IETMFWorkplaceRepository
     {
         ProjectWorkplace projectWorkplace = new ProjectWorkplace();
         ProjectWorkplaceDto projectWorkplaceDto = new ProjectWorkplaceDto();
         private readonly IMapper _mapper;
+        private readonly IGSCContext _context;
         List<ProjectWorkplaceDetail> ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        public ETMFWorkplaceRepository(IUnitOfWork<GscContext> uow,
+        public ETMFWorkplaceRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IMapper mapper, IUploadSettingRepository uploadSettingRepository)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
+            _context = context;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
         }
@@ -52,7 +54,7 @@ namespace GSC.Respository.Etmf
             // Level 5 : Section Name      Level 5.1 : Sub Section Name    Level 5.2 : Sub Section Artifact Name
             // Level 6 : Artifact Name     
 
-            var projectWorkplaces = Context.ProjectWorkplace.Where(t => t.DeletedBy == null && t.ProjectId == id)
+            var projectWorkplaces = _context.ProjectWorkplace.Where(t => t.DeletedBy == null && t.ProjectId == id)
                             .Include(x => x.ProjectWorkplaceDetail)
                             .ThenInclude(x => x.ProjectWorkPlaceZone)
                             .ThenInclude(x => x.ProjectWorkplaceSection)
@@ -64,7 +66,7 @@ namespace GSC.Respository.Etmf
             {
 
                 pvListObj.Id = b.Id;
-                pvListObj.Text = Context.Project.Where(x => x.Id == b.ProjectId).FirstOrDefault().ProjectCode;
+                pvListObj.Text = _context.Project.Where(x => x.Id == b.ProjectId).FirstOrDefault().ProjectCode;
                 pvListObj.Level = 1;
                 pvListObj.Item = new List<TreeValue>();
                 pvListObj.ParentMasterId = b.ProjectId;
@@ -102,7 +104,7 @@ namespace GSC.Respository.Etmf
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                     {
-                        d.EtmfZoneMasterLibrary = Context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+                        d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
 
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
@@ -114,7 +116,7 @@ namespace GSC.Respository.Etmf
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
-                            e.EtmfSectionMasterLibrary = Context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+                            e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
 
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
@@ -128,7 +130,7 @@ namespace GSC.Respository.Etmf
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                             {
-                                f.EtmfArtificateMasterLbrary = Context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
@@ -146,7 +148,7 @@ namespace GSC.Respository.Etmf
 
                             #region Add sub section folder data
                             List<TreeValue> pvListsubsectionList = new List<TreeValue>();
-                            var SectionData = Context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
+                            var SectionData = _context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
                             foreach (var s in SectionData)
                             {
 
@@ -164,7 +166,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "folder";
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
-                                var artifactsubSectionData = Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
+                                var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                 foreach (var itemartifact in artifactsubSectionData)
                                 {
                                     TreeValue pvListartifactsubsectionobj = new TreeValue();
@@ -212,7 +214,7 @@ namespace GSC.Respository.Etmf
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                     {
-                        d.EtmfZoneMasterLibrary = Context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+                        d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
 
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
@@ -224,7 +226,7 @@ namespace GSC.Respository.Etmf
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
-                            e.EtmfSectionMasterLibrary = Context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+                            e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
 
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
@@ -238,7 +240,7 @@ namespace GSC.Respository.Etmf
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                             {
-                                f.EtmfArtificateMasterLbrary = Context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
@@ -256,7 +258,7 @@ namespace GSC.Respository.Etmf
 
                             #region Add sub section folder data
                             List<TreeValue> pvListsubsectionList = new List<TreeValue>();
-                            var SectionData = Context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
+                            var SectionData = _context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
                             foreach (var s in SectionData)
                             {
 
@@ -272,7 +274,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "folder";
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
-                                var artifactsubSectionData = Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
+                                var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                 foreach (var itemartifact in artifactsubSectionData)
                                 {
                                     TreeValue pvListartifactsubsectionobj = new TreeValue();
@@ -320,7 +322,7 @@ namespace GSC.Respository.Etmf
 
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                     {
-                        d.EtmfZoneMasterLibrary = Context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+                        d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
 
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
@@ -332,7 +334,7 @@ namespace GSC.Respository.Etmf
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
-                            e.EtmfSectionMasterLibrary = Context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+                            e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
 
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
@@ -345,7 +347,7 @@ namespace GSC.Respository.Etmf
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                             {
-                                f.EtmfArtificateMasterLbrary = Context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
@@ -363,7 +365,7 @@ namespace GSC.Respository.Etmf
 
                             #region Add sub section folder data
                             List<TreeValue> pvListsubsectionList = new List<TreeValue>();
-                            var SectionData = Context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
+                            var SectionData = _context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
                             foreach (var s in SectionData)
                             {
 
@@ -380,7 +382,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.Icon = "folder";
                                 #region MyRegion
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
-                                var artifactsubSectionData = Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
+                                var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                 foreach (var itemartifact in artifactsubSectionData)
                                 {
                                     TreeValue pvListartifactsubsectionobj = new TreeValue();

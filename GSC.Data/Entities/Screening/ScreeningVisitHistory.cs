@@ -1,4 +1,4 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Common.Base;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
 using System;

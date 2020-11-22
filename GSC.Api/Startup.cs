@@ -42,13 +42,15 @@ namespace GSC.Api
         {
          
             services.AddAuth(_configuration);
-            services.AddDbContext<GscContext>(options =>
-            {
-                options.UseSqlServer(_configuration.GetConnectionString("dbConnectionString"));
-            });
+            //services.AddDbContext<GscContext>(options =>
+            //{
+            //    options.UseSqlServer(_configuration.GetConnectionString("dbConnectionString"));
+            //});
 
             services.AddConfig(_configuration);
-            services.AddDependencyInjection(_configuration);
+
+            services.AddDependencyInjection<IGSCContext>(_configuration);
+
             services.AddAutoMapper(Assembly.GetAssembly(typeof(AutoMapperConfiguration)));
             services.AddScoped<AllowedSafeCallerFilter>();
             

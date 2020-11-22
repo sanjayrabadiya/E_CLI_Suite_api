@@ -9,17 +9,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GSC.Helper\GSC.Helper.csproj" />
-    <ProjectReference Include="..\GSC.Shared\GSC.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="ResourceParameters\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="18.2.0.59" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GSC.Common\GSC.Common.csproj" />
+    <ProjectReference Include="..\GSC.Helper\GSC.Helper.csproj" />
+    <ProjectReference Include="..\GSC.Shared\GSC.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

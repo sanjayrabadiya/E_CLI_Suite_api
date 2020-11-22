@@ -1,11 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using GSC.Shared;
 
-namespace GSC.Data.Entities.Common
+namespace GSC.Common.Base
 {
     public abstract class BaseEntity
     {
@@ -41,13 +40,10 @@ namespace GSC.Data.Entities.Common
 
         public int? DeletedBy { get; set; }
 
-        [NotMapped] 
-        public ObjectState ObjectState { get; set; }
+        //[NotMapped] 
+        //public ViewModelState State { get; set; }
 
-        [NotMapped] 
-        public bool InActiveRecord { get; set; }
-
-
+     
         [NotMapped] 
         public AuditAction AuditAction { get; set; }
 

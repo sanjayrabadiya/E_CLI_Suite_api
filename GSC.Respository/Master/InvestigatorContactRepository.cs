@@ -9,14 +9,14 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class InvestigatorContactRepository : GenericRespository<InvestigatorContact, GscContext>,
+    public class InvestigatorContactRepository : GenericRespository<InvestigatorContact>,
         IInvestigatorContactRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public InvestigatorContactRepository(IUnitOfWork<GscContext> uow,
+        public InvestigatorContactRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

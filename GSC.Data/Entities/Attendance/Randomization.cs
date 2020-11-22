@@ -1,5 +1,5 @@
 using System;
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 using GSC.Helper;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Screening;
@@ -63,7 +63,7 @@ namespace GSC.Data.Entities.Attendance
         public Data.Entities.Master.Project Project { get; set; }
         public virtual ScreeningEntry ScreeningEntry { get; set; }
 
-        public string? WithdrawSignaturePath { get; set; }
+        public string WithdrawSignaturePath { get; set; }
         public int? UserId { get; set; }
 
     }

@@ -1,4 +1,4 @@
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.Attendance

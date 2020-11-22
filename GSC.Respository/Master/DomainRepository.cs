@@ -10,17 +10,19 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class DomainRepository : GenericRespository<Data.Entities.Master.Domain, GscContext>, IDomainRepository
+    public class DomainRepository : GenericRespository<Data.Entities.Master.Domain>, IDomainRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public DomainRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public DomainRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _context = context;
         }
 
         public string ValidateDomain(Data.Entities.Master.Domain objSave)
@@ -56,7 +58,7 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null
-                                                                                        && Context.ProjectDesignTemplate
+                                                                                        && _context.ProjectDesignTemplate
                                                                                             .Any(r => r.DomainId == x.Id
                                                                                                       && r
                                                                                                           .ProjectDesignVisit

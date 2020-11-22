@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class DocumentTypeRepository : GenericRespository<DocumentType, GscContext>, IDocumentTypeRepository
+    public class DocumentTypeRepository : GenericRespository<DocumentType>, IDocumentTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public DocumentTypeRepository(IUnitOfWork<GscContext> uow,
+        public DocumentTypeRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

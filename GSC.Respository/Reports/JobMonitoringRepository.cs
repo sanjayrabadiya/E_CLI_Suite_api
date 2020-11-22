@@ -10,18 +10,19 @@ using System.Linq;
 
 namespace GSC.Respository.Reports
 {
-    public class JobMonitoringRepository : GenericRespository<JobMonitoring, GscContext>, IJobMonitoringRepository
+    public class JobMonitoringRepository : GenericRespository<JobMonitoring>, IJobMonitoringRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-
-        public JobMonitoringRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public JobMonitoringRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IUploadSettingRepository uploadSettingRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _uploadSettingRepository = uploadSettingRepository;
+            _context = context;
         }
 
         public List<JobMonitoringDto> JobMonitoringList()
@@ -41,11 +42,11 @@ namespace GSC.Respository.Reports
                 FolderPath = x.FolderPath,
                 FolderName = x.FolderName,
                 JobNamestr = x.JobName.GetDescription(),                
-                JobDescriptionstr = Context.Project.Where(z => z.Id == x.JobDescription).FirstOrDefault().ProjectCode + " - " +
-                                        Context.Project.Where(z => z.Id == x.JobDescription).FirstOrDefault().ProjectName,
+                JobDescriptionstr = _context.Project.Where(z => z.Id == x.JobDescription).FirstOrDefault().ProjectCode + " - " +
+                                        _context.Project.Where(z => z.Id == x.JobDescription).FirstOrDefault().ProjectName,
                 JobTypestr = x.JobType.GetDescription(),
                 JobStatusstr = x.JobStatus.GetDescription(),
-                SubmittedBystr = Context.Users.Where(y => y.Id == x.SubmittedBy).FirstOrDefault().UserName,
+                SubmittedBystr = _context.Users.Where(y => y.Id == x.SubmittedBy).FirstOrDefault().UserName,
                 JobDetailsstr = x.JobDetails.GetDescription(),
                 FullPath = !(string.IsNullOrEmpty(x.FolderName) && (string.IsNullOrEmpty(x.FolderName))) ? System.IO.Path.Combine(x.FolderPath, x.FolderName) : "",
             }).Where(t=>t.SubmittedBy == _jwtTokenAccesser.UserId).OrderByDescending(t=>t.Id).ToList();

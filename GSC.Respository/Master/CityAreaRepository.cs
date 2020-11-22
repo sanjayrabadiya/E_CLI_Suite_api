@@ -12,15 +12,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class CityAreaRepository : GenericRespository<CityArea, GscContext>, ICityAreaRepository
+    public class CityAreaRepository : GenericRespository<CityArea>, ICityAreaRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public CityAreaRepository(IUnitOfWork<GscContext> uow,
+        public CityAreaRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

@@ -13,19 +13,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.Design
 {
-    public class ProjectDesignRepository : GenericRespository<ProjectDesign, GscContext>, IProjectDesignRepository
+    public class ProjectDesignRepository : GenericRespository<ProjectDesign>, IProjectDesignRepository
     {
-        private readonly GscContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public ProjectDesignRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
-            IProjectRightRepository projectRightRepository) : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ProjectDesignRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
+            IProjectRightRepository projectRightRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _context = uow.Context;
             _projectRightRepository = projectRightRepository;
-            _uow = uow;
+            _context = context;
         }
 
         public IList<DropDownDto> GetProjectByDesignDropDown()
@@ -110,7 +108,7 @@ namespace GSC.Respository.Project.Design
         //Not Use in front please check and remove if not use comment  by vipul
         public string Duplicate(ProjectDesign objSave)
         {
-            var project = Context.Project.Where(x => x.Id == objSave.ProjectId).FirstOrDefault();
+            var project = _context.Project.Where(x => x.Id == objSave.ProjectId).FirstOrDefault();
             if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.DeletedDate == null))
                 return "Duplicate Design : " + project.ProjectName;
             return "";
@@ -118,7 +116,7 @@ namespace GSC.Respository.Project.Design
 
         public bool IsCompleteExist(int projectDesignId, string moduleName, bool isComplete)
         {
-            var exist = Context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
+            var exist = _context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
             var electronicSignature = new ElectronicSignature();
             electronicSignature.ProjectDesignId = projectDesignId;
 
@@ -153,10 +151,10 @@ namespace GSC.Respository.Project.Design
 
 
             if (exist == null)
-                Context.ElectronicSignature.Add(electronicSignature);
+                _context.ElectronicSignature.Add(electronicSignature);
             else
-                Context.ElectronicSignature.Update(exist);
-            _uow.Save();
+                _context.ElectronicSignature.Update(exist);
+             _context.Save();
             return true;
         }
 

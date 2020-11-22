@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class LanguageRepository : GenericRespository<Language, GscContext>, ILanguageRepository
+    public class LanguageRepository : GenericRespository<Language>, ILanguageRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public LanguageRepository(IUnitOfWork<GscContext> uow,
+        public LanguageRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

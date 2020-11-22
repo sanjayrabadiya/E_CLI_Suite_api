@@ -10,18 +10,18 @@ using System.Linq;
 
 namespace GSC.Respository.Project.Schedule
 {
-    public class ProjectScheduleTemplateRepository : GenericRespository<ProjectScheduleTemplate, GscContext>,
+    public class ProjectScheduleTemplateRepository : GenericRespository<ProjectScheduleTemplate>,
         IProjectScheduleTemplateRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
-        public ProjectScheduleTemplateRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        public ProjectScheduleTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectScheduleRepository projectScheduleRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository) :
-            base(uow, jwtTokenAccesser)
+            base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;

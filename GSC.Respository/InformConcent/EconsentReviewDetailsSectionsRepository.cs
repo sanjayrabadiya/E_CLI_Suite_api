@@ -9,14 +9,14 @@ using System.Text;
 
 namespace GSC.Respository.InformConcent
 {
-    public class EconsentReviewDetailsSectionsRepository : GenericRespository<EconsentReviewDetailsSections, GscContext>, IEconsentReviewDetailsSectionsRepository
+    public class EconsentReviewDetailsSectionsRepository : GenericRespository<EconsentReviewDetailsSections>, IEconsentReviewDetailsSectionsRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public EconsentReviewDetailsSectionsRepository(IUnitOfWork<GscContext> uow,
-                                                IJwtTokenAccesser jwtTokenAccesser) : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public EconsentReviewDetailsSectionsRepository(IGSCContext context,
+                                                IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
-            _uow = uow;
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
     }

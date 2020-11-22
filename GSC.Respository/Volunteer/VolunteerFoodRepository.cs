@@ -9,12 +9,14 @@ using GSC.Shared;
 
 namespace GSC.Respository.Volunteer
 {
-    public class VolunteerFoodRepository : GenericRespository<VolunteerFood, GscContext>, IVolunteerFoodRepository
+    public class VolunteerFoodRepository : GenericRespository<VolunteerFood>, IVolunteerFoodRepository
     {
-        public VolunteerFoodRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public VolunteerFoodRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
+            _context = context;
         }
 
         public void SaveFoods(VolunteerFoodDto foodDto)
@@ -36,11 +38,11 @@ namespace GSC.Respository.Volunteer
 
         public List<VolunteerFoodDto> GetFoods(int volunteerId)
         {
-            var foods = Context.FoodType.Where(t => t.DeletedDate == null).Select(s => new VolunteerFoodDto
+            var foods = _context.FoodType.Where(t => t.DeletedDate == null).Select(s => new VolunteerFoodDto
             {
                 FoodTypeId = s.Id,
                 FoodTypeName = s.TypeName,
-                Selected = Context.VolunteerFood.Any(t => t.VolunteerId == volunteerId && t.FoodTypeId == s.Id)
+                Selected = _context.VolunteerFood.Any(t => t.VolunteerId == volunteerId && t.FoodTypeId == s.Id)
             }).ToList();
 
             return foods;

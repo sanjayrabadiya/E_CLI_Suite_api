@@ -6,12 +6,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.Volunteer
 {
-    public class VolunteerBiometricRepository : GenericRespository<VolunteerBiometric, GscContext>,
+    public class VolunteerBiometricRepository : GenericRespository<VolunteerBiometric>,
         IVolunteerBiometricRepository
     {
-        public VolunteerBiometricRepository(IUnitOfWork<GscContext> uow,
+        public VolunteerBiometricRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

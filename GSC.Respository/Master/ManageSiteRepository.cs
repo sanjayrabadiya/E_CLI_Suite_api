@@ -12,16 +12,18 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class ManageSiteRepository : GenericRespository<ManageSite, GscContext>, IManageSiteRepository
+    public class ManageSiteRepository : GenericRespository<ManageSite>, IManageSiteRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public ManageSiteRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public ManageSiteRepository(IGSCContext context,
         IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
-        : base(uow, jwtTokenAccesser)
+        : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _context = context;
         }
 
         public List<ManageSiteGridDto> GetManageSites(bool isDeleted)
@@ -62,17 +64,17 @@ namespace GSC.Respository.Master
         }
         public void UpdateRole(ManageSite ManageSite)
         {
-            var roleDelete = Context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.Id).ToList();
+            var roleDelete = _context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.Id).ToList();
             foreach (var item in roleDelete)
             {
                 item.DeletedDate = DateTime.Now;
-                Context.Update(item);
+                _context.ManageSiteRole.Update(item);
             }
 
             for (var i = 0; i < ManageSite.ManageSiteRole.Count; i++)
             {
                 var i1 = i;
-                var siterole = Context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.ManageSiteRole[i1].ManageSiteId
+                var siterole = _context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.ManageSiteRole[i1].ManageSiteId
                                                                && x.TrialTypeId == ManageSite.ManageSiteRole[i1].TrialTypeId)
                     .FirstOrDefault();
                 if (siterole != null)

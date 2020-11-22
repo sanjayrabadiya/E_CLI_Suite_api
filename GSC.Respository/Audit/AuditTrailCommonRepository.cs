@@ -9,18 +9,17 @@ using GSC.Shared;
 
 namespace GSC.Respository.Audit
 {
-    public class AuditTrailCommonRepository : GenericRespository<AuditTrailCommon, GscContext>,
-        IAuditTrailCommonRepository
+    public class AuditTrailCommonRepository : GenericRespository<AuditTrailCommon>, IAuditTrailCommonRepository
     {
-        public AuditTrailCommonRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public AuditTrailCommonRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
+           _context = context;
         }
 
         public IList<AuditTrailCommonDto> Search(AuditTrailCommonDto search)
         {
-            if (search.TableName == nameof(GscContext.ProjectDesign))
+            if (search.TableName == nameof(_context.ProjectDesign))
                 return SearchProjectDesign(search);
 
             var query = All.AsQueryable();
@@ -63,17 +62,17 @@ namespace GSC.Respository.Audit
             if (search.RecordId > 0)
                 designIds.Add(search.RecordId);
             else
-                designIds = Context.ProjectDesign.Select(s => s.Id).ToList();
+                designIds = _context.ProjectDesign.Select(s => s.Id).ToList();
 
-            var periodIds = Context.ProjectDesignPeriod.Where(t => designIds.Contains(t.ProjectDesignId))
+            var periodIds = _context.ProjectDesignPeriod.Where(t => designIds.Contains(t.ProjectDesignId))
                 .Select(s => s.Id).ToList();
-            var visitIds = Context.ProjectDesignVisit.Where(t => periodIds.Contains(t.ProjectDesignPeriodId))
+            var visitIds = _context.ProjectDesignVisit.Where(t => periodIds.Contains(t.ProjectDesignPeriodId))
                 .Select(s => s.Id).ToList();
-            var templateIds = Context.ProjectDesignTemplate.Where(t => visitIds.Contains(t.ProjectDesignVisitId))
+            var templateIds = _context.ProjectDesignTemplate.Where(t => visitIds.Contains(t.ProjectDesignVisitId))
                 .Select(s => s.Id).ToList();
-            var variableIds = Context.ProjectDesignVariable.Where(t => templateIds.Contains(t.ProjectDesignTemplateId))
+            var variableIds = _context.ProjectDesignVariable.Where(t => templateIds.Contains(t.ProjectDesignTemplateId))
                 .Select(s => s.Id).ToList();
-            var variableValueIds = Context.ProjectDesignVariableValue
+            var variableValueIds = _context.ProjectDesignVariableValue
                 .Where(t => variableIds.Contains(t.ProjectDesignVariableId)).Select(s => s.Id).ToList();
 
             var skipColNames = new List<string>
@@ -83,16 +82,16 @@ namespace GSC.Respository.Audit
             };
 
             query = query.Where(x => !skipColNames.Contains(x.ColumnName) &&
-                                     (x.TableName == nameof(GscContext.ProjectDesign) && designIds.Contains(x.RecordId)
-                                      || x.TableName == nameof(GscContext.ProjectDesignPeriod) &&
+                                     (x.TableName == nameof(_context.ProjectDesign) && designIds.Contains(x.RecordId)
+                                      || x.TableName == nameof(_context.ProjectDesignPeriod) &&
                                       periodIds.Contains(x.RecordId)
-                                      || x.TableName == nameof(GscContext.ProjectDesignVisit) &&
+                                      || x.TableName == nameof(_context.ProjectDesignVisit) &&
                                       visitIds.Contains(x.RecordId)
-                                      || x.TableName == nameof(GscContext.ProjectDesignTemplate) &&
+                                      || x.TableName == nameof(_context.ProjectDesignTemplate) &&
                                       templateIds.Contains(x.RecordId)
-                                      || x.TableName == nameof(GscContext.ProjectDesignVariable) &&
+                                      || x.TableName == nameof(_context.ProjectDesignVariable) &&
                                       variableIds.Contains(x.RecordId)
-                                      || x.TableName == nameof(GscContext.ProjectDesignVariableValue) &&
+                                      || x.TableName == nameof(_context.ProjectDesignVariableValue) &&
                                       variableValueIds.Contains(x.RecordId)
                                      ));
 
@@ -119,7 +118,7 @@ namespace GSC.Respository.Audit
                 CreatedDate = x.CreatedDate,
                 ReasonName = x.Reason.ReasonName,
                 UserName = x.User.UserName,
-                UserRoleName = Context.SecurityRole.First(t => t.Id == x.UserRoleId).RoleName,
+                UserRoleName = _context.SecurityRole.First(t => t.Id == x.UserRoleId).RoleName,
                 IpAddress = x.IpAddress,
                 TimeZone = x.TimeZone
             }).OrderByDescending(x => x.Id).ToList();

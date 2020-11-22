@@ -1,11 +1,6 @@
-﻿using GSC.Data.Entities.Common;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+﻿
 
-namespace GSC.Data.Entities.UserMgt
+namespace GSC.Common.Base
 {
   
     public class UserAduit

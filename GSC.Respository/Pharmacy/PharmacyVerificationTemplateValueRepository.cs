@@ -12,12 +12,12 @@ using GSC.Shared;
 namespace GSC.Respository.Pharmacy
 {
     public class PharmacyVerificationTemplateValueRepository :
-        GenericRespository<PharmacyVerificationTemplateValue, GscContext>, IPharmacyVerificationTemplateValueRepository
+        GenericRespository<PharmacyVerificationTemplateValue>, IPharmacyVerificationTemplateValueRepository
     {
-        public PharmacyVerificationTemplateValueRepository(IUnitOfWork<GscContext> uow,
+        public PharmacyVerificationTemplateValueRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser
         )
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 
@@ -57,12 +57,12 @@ namespace GSC.Respository.Pharmacy
         //public VariableDto GetPharmacyVariable(VariableDto designVariableDto, int PharmacyEntryId)
         //{
         //    //designTemplateDto.StatusName = getStatusName(screeningTemplateObject, workflowlevel.LevelNo == screeningTemplateObject.ReviewLevel);
-        //    var values = Context.PharmacyTemplateValue.Where(t => t.PharmacyEntryId == PharmacyEntryId).ToList();
+        //    var values = _context.PharmacyTemplateValue.Where(t => t.PharmacyEntryId == PharmacyEntryId).ToList();
         //    values.ForEach(t =>
         //    {
         //        var variable = designVariableDto;
         //        //var variable = designVariableDto..FirstOrDefault(v => v.Id == t.ProjectDesignVariableId);
-        //        //var variable = Context.Variable.Where(x => x.Id == pharmacyTemplate.VariableId).FirstOrDefault();
+        //        //var variable = _context.Variable.Where(x => x.Id == pharmacyTemplate.VariableId).FirstOrDefault();
         //        if (variable != null)
         //        {
         //            variable.Id = t.Id;

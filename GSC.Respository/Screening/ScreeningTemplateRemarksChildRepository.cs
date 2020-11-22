@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningTemplateRemarksChildRepository : GenericRespository<ScreeningTemplateRemarksChild, GscContext>, IScreeningTemplateRemarksChildRepository
+    public class ScreeningTemplateRemarksChildRepository : GenericRespository<ScreeningTemplateRemarksChild>, IScreeningTemplateRemarksChildRepository
     {
-        public ScreeningTemplateRemarksChildRepository(IUnitOfWork<GscContext> uow,
+        public ScreeningTemplateRemarksChildRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

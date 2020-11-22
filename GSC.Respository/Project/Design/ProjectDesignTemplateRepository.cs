@@ -17,20 +17,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.Design
 {
-    public class ProjectDesignTemplateRepository : GenericRespository<ProjectDesignTemplate, GscContext>,
+    public class ProjectDesignTemplateRepository : GenericRespository<ProjectDesignTemplate>,
         IProjectDesignTemplateRepository
     {
         private readonly IMapper _mapper;
-        public ProjectDesignTemplateRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(
-            uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ProjectDesignTemplateRepository(IGSCContext context,
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
         {
             _mapper = mapper;
+            _context = context;
         }
 
         public ProjectDesignTemplate GetTemplateClone(int id)
         {
-            var template = Context.ProjectDesignTemplate.
+            var template = _context.ProjectDesignTemplate.
                 Where(t => t.Id == id)
                 .Include(d => d.Variables)
                 .ThenInclude(d => d.Values)
@@ -54,7 +55,7 @@ namespace GSC.Respository.Project.Design
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
                     Variables = null,
-                    Notes = Context.VariableTemplateNote.
+                    Notes = _context.VariableTemplateNote.
                     Where(c => c.DeletedDate == null && c.VariableTemplateId == r.VariableTemplateId).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
@@ -66,11 +67,11 @@ namespace GSC.Respository.Project.Design
 
             if (result != null)
             {
-                result.Variables = Context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null)
+                result.Variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null)
                     .ProjectTo<DesignScreeningVariableDto>(_mapper.ConfigurationProvider).ToList().OrderBy(r => r.DesignOrder).ToList();
 
-                var variableNotes = Context.VariableTemplateDetail.Where(x => x.VariableTemplateId == result.VariableTemplateId).ToList();
-                result.Variables.ForEach(x =>
+                var variableNotes = _context.VariableTemplateDetail.Where(x => x.VariableTemplateId == result.VariableTemplateId).ToList();
+                result.Variables.ToList().ForEach(x =>
                 {
                     x.Note = variableNotes.FirstOrDefault(c => c.VariableId == x.VariableId)?.Note;
                 });
@@ -87,7 +88,7 @@ namespace GSC.Respository.Project.Design
                 {
                     Id = t.Id,
                     Value = t.TemplateName,
-                    Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
+                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
                 }).ToList();
 
             return templates;
@@ -96,12 +97,12 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
         {
             var templates = new List<DropDownDto>();
-            var screeningEntryId = Context.ScreeningEntry.Where(x => lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(x.AttendanceId)).ToList();
+            var screeningEntryId = _context.ScreeningEntry.Where(x => lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(x.AttendanceId)).ToList();
             var screeninglockAudit = new List<ScreeningTemplateLockUnlockAudit>();
             if (lockUnlockDDDto.ChildProjectId != lockUnlockDDDto.ProjectId)
-                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
+                screeninglockAudit = _context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
             else
-                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
+                screeninglockAudit = _context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
 
             if (lockUnlockDDDto.IsLock)
             {
@@ -120,7 +121,7 @@ namespace GSC.Respository.Project.Design
                 {
                     Id = t.Id,
                     Value = t.TemplateName,
-                    Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
+                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
                 }).ToList();
 
                 if (lockUnlockDDDto.SubjectIds != null && lockUnlockDDDto.SubjectIds.Length == 1)
@@ -128,7 +129,7 @@ namespace GSC.Respository.Project.Design
             }
             else
             {
-                templates = (from template in Context.ProjectDesignTemplate.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == lockUnlockDDDto.Id)
+                templates = (from template in _context.ProjectDesignTemplate.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == lockUnlockDDDto.Id)
                              join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
                              .Select(y => new LockUnlockListDto
                              {
@@ -146,9 +147,9 @@ namespace GSC.Respository.Project.Design
                                  Value = gcs.FirstOrDefault().TemplateName
                              }).Distinct().ToList();
             }
-            
+
             // new optimization
-            //var screeningTemplates = Context.ScreeningTemplate.Include(x => x.ScreeningEntry).Where(x => x.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
+            //var screeningTemplates = _context.ScreeningTemplate.Include(x => x.ScreeningEntry).Where(x => x.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
 
             //var templates = screeningTemplates.Where(x => (lockUnlockDDDto.SubjectIds == null
             //    || lockUnlockDDDto.SubjectIds.Contains(x.ScreeningEntry.AttendanceId)) && x.IsLocked != lockUnlockDDDto.IsLock)
@@ -169,16 +170,16 @@ namespace GSC.Respository.Project.Design
                                                y.CollectionSource == CollectionSources.Date ||
                                                y.CollectionSource == CollectionSources.Time ||
                                                y.CollectionSource == CollectionSources.DateTime).Any()
-                                               // && (refVariable.Value > 0 ? !x.Variables.Any(v => Context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Any(s => s.ProjectDesignVariableId == v.Id)) : true)
+                                               // && (refVariable.Value > 0 ? !x.Variables.Any(v => _context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Any(s => s.ProjectDesignVariableId == v.Id)) : true)
                                                && x.Variables != null
                                                ).OrderBy(t => t.Id)
                 .Select(t => new DropDownDto
                 {
                     Id = t.Id,
                     Value = t.TemplateName,
-                    Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : "",
+                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : "",
                     ExtraData = t.Variables.Where(y => y.Id != refVariable
-                                               && !Context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Select(x => x.ProjectDesignVariableId).Contains(y.Id)
+                                               && !_context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Select(x => x.ProjectDesignVariableId).Contains(y.Id)
                                                && (collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
                                                y.CollectionSource == CollectionSources.Date ||
                                                y.CollectionSource == CollectionSources.Time ||
@@ -209,7 +210,7 @@ namespace GSC.Respository.Project.Design
             var templates = All.Where(x => x.DeletedDate == null
                                            && x.ProjectDesignVisit.DeletedDate == null
                                            && x.ProjectDesignVisit.ProjectDesignPeriod.Id == projectDesignPeriodId
-                                           && Context.ProjectDesignVariable.Any(t =>
+                                           && _context.ProjectDesignVariable.Any(t =>
                                                t.SystemType == variableCategoryType
                                                && t.DeletedDate == null
                                                && t.ProjectDesignTemplateId == x.Id)
@@ -231,7 +232,7 @@ namespace GSC.Respository.Project.Design
                 {
                     Id = t.Id,
                     Value = t.Domain.DomainName,
-                    Code = Context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
+                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
                 }).ToList();
 
             return templates;

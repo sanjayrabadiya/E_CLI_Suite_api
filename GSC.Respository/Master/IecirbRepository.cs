@@ -10,12 +10,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class IecirbRepository : GenericRespository<Iecirb, GscContext>, IIecirbRepository
+    public class IecirbRepository : GenericRespository<Iecirb>, IIecirbRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public IecirbRepository(IUnitOfWork<GscContext> uow,
+        public IecirbRepository(IGSCContext context,
         IJwtTokenAccesser jwtTokenAccesser)
-        : base(uow, jwtTokenAccesser)
+        : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

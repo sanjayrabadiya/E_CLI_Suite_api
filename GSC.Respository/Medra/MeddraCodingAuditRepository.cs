@@ -11,14 +11,16 @@ using System.Linq;
 
 namespace GSC.Respository.Medra
 {
-    public class MeddraCodingAuditRepository : GenericRespository<MeddraCodingAudit, GscContext>, IMeddraCodingAuditRepository
+    public class MeddraCodingAuditRepository : GenericRespository<MeddraCodingAudit>, IMeddraCodingAuditRepository
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraCodingAuditRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public MeddraCodingAuditRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public MeddraCodingAudit SaveAudit(string note, int meddraCodingId, int? meddraLowLevelTermId, int? meddraSocTermId, string Action, int? ReasonId, string ReasonOth)
@@ -42,18 +44,18 @@ namespace GSC.Respository.Medra
 
         public IList<MeddraCodingAuditDto> GetMeddraAuditDetails(int MeddraCodingId)
         {
-            var result = (from MCA in Context.MeddraCodingAudit
-                          join soc in Context.MeddraSocTerm on MCA.MeddraSocTermId equals soc.Id into socDto
+            var result = (from MCA in _context.MeddraCodingAudit
+                          join soc in _context.MeddraSocTerm on MCA.MeddraSocTermId equals soc.Id into socDto
                           from meddraSoc in socDto.DefaultIfEmpty()
-                          join mllt in Context.MeddraLowLevelTerm on MCA.MeddraLowLevelTermId equals mllt.Id into mlltDto
+                          join mllt in _context.MeddraLowLevelTerm on MCA.MeddraLowLevelTermId equals mllt.Id into mlltDto
                           from meddraLLT in mlltDto.DefaultIfEmpty()
-                          join md in Context.MeddraMdHierarchy on meddraSoc.soc_code equals md.soc_code into mdDto
+                          join md in _context.MeddraMdHierarchy on meddraSoc.soc_code equals md.soc_code into mdDto
                           from meddraMD in mdDto.DefaultIfEmpty()
-                          join reasonTemp in Context.AuditReason on MCA.ReasonId equals reasonTemp.Id into reasonDt
+                          join reasonTemp in _context.AuditReason on MCA.ReasonId equals reasonTemp.Id into reasonDt
                           from reason in reasonDt.DefaultIfEmpty()
-                          join users in Context.Users on MCA.CreatedBy equals users.Id into userDto
+                          join users in _context.Users on MCA.CreatedBy equals users.Id into userDto
                           from user in userDto.DefaultIfEmpty()
-                          join roles in Context.SecurityRole on MCA.UserRoleId equals roles.Id into roleDto
+                          join roles in _context.SecurityRole on MCA.UserRoleId equals roles.Id into roleDto
                           from role in roleDto.DefaultIfEmpty()
                           where MCA.MeddraCodingId == MeddraCodingId && meddraLLT.pt_code == meddraMD.pt_code
                           select new MeddraCodingAuditDto

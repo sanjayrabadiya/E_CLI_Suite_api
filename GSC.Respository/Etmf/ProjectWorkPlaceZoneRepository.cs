@@ -12,14 +12,15 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectWorkPlaceZoneRepository : GenericRespository<ProjectWorkPlaceZone, GscContext>, IProjectWorkPlaceZoneRepository
+    public class ProjectWorkPlaceZoneRepository : GenericRespository<ProjectWorkPlaceZone>, IProjectWorkPlaceZoneRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public ProjectWorkPlaceZoneRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public ProjectWorkPlaceZoneRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
@@ -32,9 +33,9 @@ namespace GSC.Respository.Etmf
 
         public List<DropDownDto> GetProjectByZone(int ParentProjectId)
         {
-            var data = (from workplace in Context.ProjectWorkplace.Where(x => x.ProjectId == ParentProjectId)
-                        join workplacedetail in Context.ProjectWorkplaceDetail.Where(x => x.DeletedDate == null && x.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial) on workplace.Id equals workplacedetail.ProjectWorkplaceId
-                        join zone in Context.ProjectWorkPlaceZone.Where(x => x.DeletedDate == null) on workplacedetail.Id equals zone.ProjectWorkplaceDetailId
+            var data = (from workplace in _context.ProjectWorkplace.Where(x => x.ProjectId == ParentProjectId)
+                        join workplacedetail in _context.ProjectWorkplaceDetail.Where(x => x.DeletedDate == null && x.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial) on workplace.Id equals workplacedetail.ProjectWorkplaceId
+                        join zone in _context.ProjectWorkPlaceZone.Where(x => x.DeletedDate == null) on workplacedetail.Id equals zone.ProjectWorkplaceDetailId
                         select new DropDownDto
                         {
                             Id = zone.Id,

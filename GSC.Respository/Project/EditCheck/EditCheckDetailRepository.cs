@@ -14,18 +14,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.EditCheck
 {
-    public class EditCheckDetailRepository : GenericRespository<EditCheckDetail, GscContext>, IEditCheckDetailRepository
+    public class EditCheckDetailRepository : GenericRespository<EditCheckDetail>, IEditCheckDetailRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public EditCheckDetailRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(uow,
-            jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public EditCheckDetailRepository(IGSCContext context,
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _uow = uow;
+            _context = context;
         }
 
         public EditCheckDetailDto GetDetailById(int id)
@@ -86,7 +85,7 @@ namespace GSC.Respository.Project.EditCheck
         {
             if (string.IsNullOrEmpty(annotation)) return null;
 
-            var annotationVariable = Context.ProjectDesignVariable.Include(t => t.Values).Where(a => a.Annotation == annotation
+            var annotationVariable = _context.ProjectDesignVariable.Include(t => t.Values).Where(a => a.Annotation == annotation
                        && a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId).FirstOrDefault();
 
             return annotationVariable;
@@ -176,7 +175,7 @@ namespace GSC.Respository.Project.EditCheck
 
                 Update(x);
             });
-            _uow.Save();
+            _context.Save();
         }
     }
 }

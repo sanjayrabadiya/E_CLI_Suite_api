@@ -1,74 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GSC.Data.Entities.Audit;
-using GSC.Data.Entities.Common;
-using GSC.Domain.Context;
 using GSC.Shared;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace GSC.Common.UnitOfWork
 {
     public class UnitOfWork<TContext> : IUnitOfWork<TContext>
-        where TContext : GscContext
+        where TContext : IContext
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IAuditTracker _auditTracker;
-        public UnitOfWork(TContext context, IJwtTokenAccesser jwtTokenAccesser, IAuditTracker auditTracker)
+        private readonly TContext _context;
+       
+        public UnitOfWork(TContext context)
         {
-            Context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _auditTracker = auditTracker;
+            _context = context;
         }
 
         public int Save()
         {
-            var addChangeTracker = Context.GetAuditTracker().ToList();
-
-            var audits = _auditTracker.GetAuditTracker();
-            var result = Context.SaveChanges();
-            AduitSave(audits, addChangeTracker);
-            return result;
+            return _context.Save();
         }
 
-        async void AduitSave(List<AuditTrailCommon> audits, List<EntityEntry> entities)
-        {
-            if (audits != null || audits.Count() > 0)
-            {
-                audits.ForEach(x =>
-                {
-                    if (x.RecordId == 0)
-                    {
-                        var entity = entities.FirstOrDefault(c => c.CurrentValues.EntityType.ClrType.Name == x.TableName);
-                        x.RecordId = (entity.Entity as BaseEntity).Id;
-                    }
-                    Context.AuditTrailCommon.Add(x);
-
-                });
-                Context.SaveChanges();
-            }
-        }
 
         public async Task<int> SaveAsync()
         {
-            return await Context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
-
-        public IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class
-        {
-            return Context.Set<TEntity>().FromSqlRaw(sql, parameters);
-        }
-
-        public TContext Context { get; }
 
         public void Dispose()
         {
-            Context.Dispose();
+            _context.Dispose();
         }
 
+        public TContext Context => _context;
         public void Begin()
         {
             Context.Begin();

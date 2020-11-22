@@ -10,16 +10,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
-    public class VariableTemplateRepository : GenericRespository<VariableTemplate, GscContext>,
+    public class VariableTemplateRepository : GenericRespository<VariableTemplate>,
         IVariableTemplateRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public VariableTemplateRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public VariableTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public List<DropDownDto> GetVariableTemplateDropDown()
@@ -41,7 +42,7 @@ namespace GSC.Respository.Master
 
         public VariableTemplate GetTemplate(int id)
         {
-            var template = Context.VariableTemplate.Where(t => t.Id == id)
+            var template = _context.VariableTemplate.Where(t => t.Id == id)
                 .Include(d => d.VariableTemplateDetails)
                 .Include(t => t.Domain)
                 .Include(t => t.Notes)
@@ -52,7 +53,7 @@ namespace GSC.Respository.Master
                 .OrderBy(t => t.SeqNo).ToList();
             template.VariableTemplateDetails.ForEach(detail =>
             {
-                detail.Variable = Context.Variable.Where(t => t.Id == detail.VariableId)
+                detail.Variable = _context.Variable.Where(t => t.Id == detail.VariableId)
                     .Include(variable => variable.Values)
                     .Include(r=> r.Remarks)
                     .Include(t => t.Unit)
@@ -62,7 +63,7 @@ namespace GSC.Respository.Master
                 detail.Variable.Remarks = detail.Variable.Remarks.Where(t => t.DeletedDate == null).ToList();
                 detail.VariableCategoryName = detail.Variable.VariableCategoryId == null
                     ? ""
-                    : Context.VariableCategory.Where(t => t.Id == detail.Variable.VariableCategoryId).FirstOrDefault()?.CategoryName;
+                    : _context.VariableCategory.Where(t => t.Id == detail.Variable.VariableCategoryId).FirstOrDefault()?.CategoryName;
             });
 
             return template;

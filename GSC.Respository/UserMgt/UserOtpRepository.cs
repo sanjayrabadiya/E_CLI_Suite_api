@@ -10,18 +10,18 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class UserOtpRepository : GenericRespository<UserOtp, GscContext>, IUserOtpRepository
+    public class UserOtpRepository : GenericRespository<UserOtp>, IUserOtpRepository
     {
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
 
-        public UserOtpRepository(IUnitOfWork<GscContext> uow,
+        public UserOtpRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IUserRepository userRepository,
             IEmailSenderRespository emailSenderRespository,
             IUserPasswordRepository userPasswordRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;

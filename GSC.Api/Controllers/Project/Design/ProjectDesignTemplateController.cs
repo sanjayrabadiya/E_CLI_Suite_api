@@ -56,7 +56,7 @@ namespace GSC.Api.Controllers.Project.Design
                 t.ProjectDesignVisitId == projectDesignVisitId
                 && t.DeletedDate == null, t => t.Domain).OrderBy(t => t.DesignOrder).ToList();
 
-            var templatesDto = _mapper.Map<IEnumerable<ProjectDesignTemplateDto>>(templates);
+            var templatesDto = _mapper.Map<IEnumerable<ProjectDesignTemplateDto>>(templates).ToList();
             templatesDto.ForEach(t =>
             {
                 t.DomainId = t.DomainId;
@@ -308,7 +308,7 @@ namespace GSC.Api.Controllers.Project.Design
             {
                 index = index - 1;
             }
-            
+
             orderedList.Insert(index, template);
 
             var i = 0;
@@ -340,7 +340,7 @@ namespace GSC.Api.Controllers.Project.Design
             if (id <= 0) return BadRequest();
             var designTemplate = _projectDesignTemplateRepository.GetTemplate(id);
 
-           // var designTemplateDto = _mapper.Map<ProjectDesignTemplate>(designTemplate);
+            // var designTemplateDto = _mapper.Map<ProjectDesignTemplate>(designTemplate);
 
             return Ok(designTemplate);
         }

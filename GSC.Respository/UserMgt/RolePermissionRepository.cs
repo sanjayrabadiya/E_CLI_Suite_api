@@ -9,56 +9,56 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class RolePermissionRepository : GenericRespository<RolePermission, GscContext>, IRolePermissionRepository
+    public class RolePermissionRepository : GenericRespository<RolePermission>, IRolePermissionRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public RolePermissionRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public RolePermissionRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
         }
 
         public void Save(List<RolePermission> rolePermissions)
         {
             var userRoleId = rolePermissions.First().UserRoleId;
 
-            var existing = Context.RolePermission.Where(t => t.UserRoleId == userRoleId).ToList();
+            var existing = _context.RolePermission.Where(t => t.UserRoleId == userRoleId).ToList();
             if (existing.Any())
             {
-                Context.RolePermission.RemoveRange(existing);
-                _uow.Save();
+                _context.RolePermission.RemoveRange(existing);
+                 _context.Save();
             }
 
             rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
                 .ToList();
 
-            Context.RolePermission.AddRange(rolePermissions);
-            _uow.Save();
+            _context.RolePermission.AddRange(rolePermissions);
+             _context.Save();
         }
        
         public void updatePermission(List<RolePermission> rolePermissions)
         {
             var userRoleId = rolePermissions.First().UserRoleId;
 
-            var existing = Context.RolePermission.Where(t => t.UserRoleId == userRoleId).ToList();
+            var existing = _context.RolePermission.Where(t => t.UserRoleId == userRoleId).ToList();
             if (existing.Any())
             {
-                Context.RolePermission.RemoveRange(existing);
-                _uow.Save();
+                _context.RolePermission.RemoveRange(existing);
+                 _context.Save();
             }
 
             rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
                 .ToList();
-            Context.RolePermission.UpdateRange(rolePermissions);
-            _uow.Save();
+            _context.RolePermission.UpdateRange(rolePermissions);
+             _context.Save();
         }
 
         public List<RolePermissionDto> GetByRoleId(int roleId)
         {
-            var permissions = Context.AppScreen.Where(t => t.IsPermission && t.DeletedDate == null).Select(t =>
+            var permissions = _context.AppScreen.Where(t => t.IsPermission && t.DeletedDate == null).Select(t =>
                 new RolePermissionDto
                 {
                     CanAdd = t.IsAdd,
@@ -77,7 +77,7 @@ namespace GSC.Respository.UserMgt
             permissions.ForEach(t =>
             {
                 t.UserRoleId = roleId;
-                var p = Context.RolePermission.Where(s =>
+                var p = _context.RolePermission.Where(s =>
                     s.ScreenCode == t.ScreenCode && s.UserRoleId == roleId).FirstOrDefault();
                 if (p == null) return;
                 t.IsAdd = p.IsAdd;
@@ -95,16 +95,16 @@ namespace GSC.Respository.UserMgt
         public List<AppScreen> GetByUserId(int userId, int roleId)
         {
             if (userId == 0) return new List<AppScreen>();
-            var screens = Context.AppScreen.Where(x => x.DeletedDate == null).ToList();
+            var screens = _context.AppScreen.Where(x => x.DeletedDate == null).ToList();
 
-            var isPowerAdmin = Context.Users.Find(userId).IsPowerAdmin;
+            var isPowerAdmin = _context.Users.Find(userId).IsPowerAdmin;
 
             var permissions = new List<RolePermission>();
             if (!isPowerAdmin)
-                permissions = Context.RolePermission.Where(t => t.UserRoleId == roleId && t.DeletedDate == null)
+                permissions = _context.RolePermission.Where(t => t.UserRoleId == roleId && t.DeletedDate == null)
                     .ToList();
 
-            var favorites = Context.UserFavoriteScreen.Where(t => t.UserId == userId && t.DeletedDate == null).ToList();
+            var favorites = _context.UserFavoriteScreen.Where(t => t.UserId == userId && t.DeletedDate == null).ToList();
 
             screens.ForEach(t =>
             {
@@ -124,7 +124,7 @@ namespace GSC.Respository.UserMgt
 
         public RolePermission GetRolePermissionByScreenCode(string screenCode)
         {
-            var isPowerAdmin = Context.Users.Find(_jwtTokenAccesser.UserId).IsPowerAdmin;
+            var isPowerAdmin = _context.Users.Find(_jwtTokenAccesser.UserId).IsPowerAdmin;
             if (isPowerAdmin)
                 return new RolePermission
                     {IsAdd = true, IsView = true, IsDelete = true, IsEdit = true, IsExport = true};

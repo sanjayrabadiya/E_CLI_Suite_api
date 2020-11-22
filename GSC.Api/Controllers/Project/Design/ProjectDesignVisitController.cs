@@ -108,7 +108,7 @@ namespace GSC.Api.Controllers.Project.Design
 
         [HttpGet]
         [Route("GetVisitByLockedDropDown")]
-        public IActionResult GetVisitByLockedDropDown([FromQuery]LockUnlockDDDto lockUnlockDDDto)
+        public IActionResult GetVisitByLockedDropDown([FromQuery] LockUnlockDDDto lockUnlockDDDto)
         {
             return Ok(_projectDesignVisitRepository.GetVisitByLockedDropDown(lockUnlockDDDto));
         }
@@ -133,13 +133,13 @@ namespace GSC.Api.Controllers.Project.Design
                 var visit = _projectDesignVisitRepository.GetVisit(id);
                 visit.Id = 0;
                 visit.ProjectDesignPeriodId = projectDesignPeriodId;
-                visit.Templates.ForEach(template =>
+                visit.Templates.ToList().ForEach(template =>
                 {
                     template.Id = 0;
-                    template.Variables.ForEach(variable =>
+                    template.Variables.ToList().ForEach(variable =>
                     {
                         variable.Id = 0;
-                        variable.Values.ForEach(value => { value.Id = 0; });
+                        variable.Values.ToList().ForEach(value => { value.Id = 0; });
                     });
                 });
 

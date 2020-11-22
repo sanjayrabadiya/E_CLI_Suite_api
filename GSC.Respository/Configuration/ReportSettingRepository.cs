@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Configuration
 {
-    public class ReportSettingRepository : GenericRespository<ReportSetting, GscContext>, IReportSettingRepository
+    public class ReportSettingRepository : GenericRespository<ReportSetting>, IReportSettingRepository
     {
-        public ReportSettingRepository(IUnitOfWork<GscContext> uow,
+        public ReportSettingRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

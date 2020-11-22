@@ -9,11 +9,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class AppScreenRepository : GenericRespository<AppScreen, GscContext>, IAppScreenRepository
+    public class AppScreenRepository : GenericRespository<AppScreen>, IAppScreenRepository
     {
-        public AppScreenRepository(IUnitOfWork<GscContext> uow,
+        public AppScreenRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 

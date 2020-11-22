@@ -14,14 +14,16 @@ using System.Text;
 
 namespace GSC.Respository.Medra
 {
-    public class MeddraMdHierarchyRepository : GenericRespository<MeddraMdHierarchy, GscContext>, IMeddraMdHierarchyRepository
+    public class MeddraMdHierarchyRepository : GenericRespository<MeddraMdHierarchy>, IMeddraMdHierarchyRepository
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraMdHierarchyRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public MeddraMdHierarchyRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public int AddMdhierFileData(SaveFileDto obj)
@@ -58,8 +60,8 @@ namespace GSC.Respository.Medra
         }
         public MeddraMdHierarchy GetHierarchyData(int meddraSocTermID, int meddraLowLevelTermId)
         {
-            var SocCode = Context.MeddraSocTerm.Where(x => x.Id == meddraSocTermID).FirstOrDefault();
-            var LowLevelTermCode = Context.MeddraLowLevelTerm.Where(x => x.Id == meddraLowLevelTermId).FirstOrDefault();
+            var SocCode = _context.MeddraSocTerm.Where(x => x.Id == meddraSocTermID).FirstOrDefault();
+            var LowLevelTermCode = _context.MeddraLowLevelTerm.Where(x => x.Id == meddraLowLevelTermId).FirstOrDefault();
             return All.Where(x => x.pt_code == LowLevelTermCode.pt_code && x.soc_code == SocCode.soc_code).FirstOrDefault();
         }
     }

@@ -15,17 +15,19 @@ using System.Text;
 
 namespace GSC.Respository.Medra
 {
-    public class MeddraCodingCommentRepository : GenericRespository<MeddraCodingComment, GscContext>, IMeddraCodingCommentRepository
+    public class MeddraCodingCommentRepository : GenericRespository<MeddraCodingComment>, IMeddraCodingCommentRepository
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMeddraCodingAuditRepository _meddraCodingAuditRepository;
-        public MeddraCodingCommentRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService,
-            IMeddraCodingAuditRepository meddraCodingAuditRepository) : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public MeddraCodingCommentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService,
+            IMeddraCodingAuditRepository meddraCodingAuditRepository) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
             _meddraCodingAuditRepository = meddraCodingAuditRepository;
+            _context = context;
         }
 
         public MeddraCodingComment GetLatest(int MeddraCodingId)
@@ -62,12 +64,12 @@ namespace GSC.Respository.Medra
         public IList<MeddraCodingCommentDto> GetData(int MeddraCodingId)
         {
             var queryDtos =
-                      (from query in Context.MeddraCodingComment.Where(t => t.MeddraCodingId == MeddraCodingId)
-                       join reasonTemp in Context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
+                      (from query in _context.MeddraCodingComment.Where(t => t.MeddraCodingId == MeddraCodingId)
+                       join reasonTemp in _context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
                        from reason in reasonDt.DefaultIfEmpty()
-                       join userTemp in Context.Users on query.CreatedBy equals userTemp.Id into userDto
+                       join userTemp in _context.Users on query.CreatedBy equals userTemp.Id into userDto
                        from user in userDto.DefaultIfEmpty()
-                       join roleTemp in Context.SecurityRole on query.UserRole equals roleTemp.Id into roleDto
+                       join roleTemp in _context.SecurityRole on query.UserRole equals roleTemp.Id into roleDto
                        from role in roleDto.DefaultIfEmpty()
                        select new MeddraCodingCommentDto
                        {
@@ -87,10 +89,10 @@ namespace GSC.Respository.Medra
                            NewPTCode = query.NewPTCode == 0 ? (long?)null : query.NewPTCode
                        }).OrderByDescending(o => o.Id).ToList();
 
-            var coding = Context.MeddraCoding.Where(t => t.Id == MeddraCodingId)
+            var coding = _context.MeddraCoding.Where(t => t.Id == MeddraCodingId)
                         .Include(s => s.ScreeningTemplateValue).AsNoTracking().FirstOrDefault();
             ButtonShow button = new ButtonShow();
-            var ProfileData = Context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectDesignVariableId == coding.ScreeningTemplateValue.ProjectDesignVariableId).FirstOrDefault();
+            var ProfileData = _context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectDesignVariableId == coding.ScreeningTemplateValue.ProjectDesignVariableId).FirstOrDefault();
             var commentLatest = All.Where(t => t.MeddraCodingId == MeddraCodingId).OrderByDescending(o => o.Id).FirstOrDefault();
             if (ProfileData != null)
             {

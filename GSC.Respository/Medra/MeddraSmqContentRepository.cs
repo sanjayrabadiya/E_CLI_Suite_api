@@ -14,11 +14,11 @@ using System.Text;
 
 namespace GSC.Respository.Medra
 {
-    public class MeddraSmqContentRepository : GenericRespository<MeddraSmqContent, GscContext>, IMeddraSmqContentRepository
+    public class MeddraSmqContentRepository : GenericRespository<MeddraSmqContent>, IMeddraSmqContentRepository
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraSmqContentRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
+        public MeddraSmqContentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;

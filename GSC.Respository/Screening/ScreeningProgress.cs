@@ -11,10 +11,10 @@ namespace GSC.Respository.Screening
 {
     public class ScreeningProgress : IScreeningProgress
     {
-        private readonly IUnitOfWork<GscContext> _uow;
-        public ScreeningProgress(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ScreeningProgress(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
         {
-            _uow = uow;
+            _context = context;
         }
         public ScreeningProgressDto GetScreeningProgress(int screeningEntryId, int screeningTemplateId)
         {
@@ -54,7 +54,7 @@ namespace GSC.Respository.Screening
 
                 SELECT ((@ScreeningCnt * 100) / @TotalCnt) AS Cnt";
 
-            var result = _uow.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).ToList().FirstOrDefault();
+            var result = _context.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).ToList().FirstOrDefault();
 
             if (result != null)
                 return result.Cnt;
@@ -88,7 +88,7 @@ namespace GSC.Respository.Screening
 
                 SELECT ((@ScreeningCnt * 100) / @TotalCnt) AS Cnt";
 
-            var result = _uow.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).ToList().FirstOrDefault();
+            var result = _context.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).ToList().FirstOrDefault();
 
             if (result != null)
                 return result.Cnt;

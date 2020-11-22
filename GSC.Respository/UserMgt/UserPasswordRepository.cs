@@ -8,17 +8,17 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class UserPasswordRepository : GenericRespository<UserPassword, GscContext>, IUserPasswordRepository
+    public class UserPasswordRepository : GenericRespository<UserPassword>, IUserPasswordRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         public UserPasswordRepository(
-            IUnitOfWork<GscContext> uow,
+            IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
         }
 
         public void CreatePassword(string password, int userId)
@@ -29,7 +29,7 @@ namespace GSC.Respository.UserMgt
             userPassword.Salt = saltKey;
             userPassword.Password = Cryptography.CreatePasswordHash(password, saltKey);
             Add(userPassword);
-            _uow.Save();
+             _context.Save();
         }
 
         public string VaidatePassword(string password, int userId)

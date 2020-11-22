@@ -9,11 +9,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Project.Design
 {
-    public class ProjectDesignVariableValueRepository : GenericRespository<ProjectDesignVariableValue, GscContext>,
+    public class ProjectDesignVariableValueRepository : GenericRespository<ProjectDesignVariableValue>,
         IProjectDesignVariableValueRepository
     {
-        public ProjectDesignVariableValueRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) :
-            base(uow, jwtTokenAccesser)
+        public ProjectDesignVariableValueRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) :
+            base(context)
         {
         }
 

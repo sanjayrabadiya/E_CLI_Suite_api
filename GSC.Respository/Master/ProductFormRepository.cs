@@ -9,13 +9,13 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class ProductFormRepository : GenericRespository<MProductForm, GscContext>, IProductFomRepository
+    public class ProductFormRepository : GenericRespository<MProductForm>, IProductFomRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public ProductFormRepository(IUnitOfWork<GscContext> uow,
+        public ProductFormRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

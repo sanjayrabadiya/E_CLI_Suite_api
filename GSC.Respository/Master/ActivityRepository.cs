@@ -9,13 +9,13 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class ActivityRepository : GenericRespository<Activity, GscContext>, IActivityRepository
+    public class ActivityRepository : GenericRespository<Activity>, IActivityRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public ActivityRepository(IUnitOfWork<GscContext> uow,
+        public ActivityRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

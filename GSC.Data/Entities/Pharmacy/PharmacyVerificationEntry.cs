@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 using GSC.Shared;
 
 namespace GSC.Data.Entities.Pharmacy

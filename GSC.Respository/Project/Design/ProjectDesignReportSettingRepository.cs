@@ -18,22 +18,20 @@ using System.Text;
 
 namespace GSC.Respository.Project.Design
 {
-    public class ProjectDesignReportSettingRepository : GenericRespository<ProjectDesignReportSetting, GscContext>, IProjectDesignReportSettingRepository
+    public class ProjectDesignReportSettingRepository : GenericRespository<ProjectDesignReportSetting>, IProjectDesignReportSettingRepository
     {
         private IPropertyMappingService _propertyMappingService;
-        private readonly GscContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        public ProjectDesignReportSettingRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IPropertyMappingService propertyMappingService,
+        public ProjectDesignReportSettingRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IPropertyMappingService propertyMappingService,
                IUploadSettingRepository uploadSettingRepository
-            ) : base(uow, jwtTokenAccesser)
+            ) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _context = uow.Context;
-            _uow = uow;
+            _context = context;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
         }
@@ -46,12 +44,12 @@ namespace GSC.Respository.Project.Design
                                     WHERE PW.[ProjectDesignId] =" + reportSetting.ProjectId + " AND PWL.[SecurityRoleId] =" + _jwtTokenAccesser.RoleId + " ORDER BY PWL.Id DESC";
 
 
-            var WorkFlowData = _uow.FromSql<ProjectWorkflowLevel>(WorkFlowQuery).ToList();
+            var WorkFlowData = _context.FromSql<ProjectWorkflowLevel>(WorkFlowQuery).ToList();
             bool issig = WorkFlowData != null && WorkFlowData.Count > 0 ? WorkFlowData.FirstOrDefault().IsElectricSignature : false;
 
-            var clientlogo = (from projectdesign in Context.ProjectDesign.Where(t => t.Id == reportSetting.ProjectId)
-                              join project in Context.Project on projectdesign.ProjectId equals project.Id
-                              join client in Context.Client on project.ClientId equals client.Id
+            var clientlogo = (from projectdesign in _context.ProjectDesign.Where(t => t.Id == reportSetting.ProjectId)
+                              join project in _context.Project on projectdesign.ProjectId equals project.Id
+                              join client in _context.Client on project.ClientId equals client.Id
                               select new
                               {
                                   client.Logo
@@ -79,20 +77,20 @@ namespace GSC.Respository.Project.Design
                         " LEFT JOIN country country ON country.Id = location.CountryId" +
                         " LEFT JOIN UploadSetting uploadsetting ON uploadsetting.CompanyId = company.Id" +
                         " LEFT JOIN Client client ON client.CompanyId = company.Id WHERE company.Id = " + _jwtTokenAccesser.CompanyId;
-            var cData = _uow.FromSql<CompanyData>(query).ToList();
+            var cData = _context.FromSql<CompanyData>(query).ToList();
             var cDataDto = _mapper.Map<List<CompanyDataDto>>(cData);
-            //var sqlquery = (from company in Context.Company
-            //                join locationdto in Context.Location on company.Location.Id equals locationdto.Id into locationdto
+            //var sqlquery = (from company in _context.Company
+            //                join locationdto in _context.Location on company.Location.Id equals locationdto.Id into locationdto
             //                from location in locationdto.DefaultIfEmpty()
-            //                join statedto in Context.State on location.StateId equals statedto.Id into statedto
+            //                join statedto in _context.State on location.StateId equals statedto.Id into statedto
             //                from state in locationdto.DefaultIfEmpty()
-            //                join citydto in Context.City on location.CityId equals citydto.Id into citydto
+            //                join citydto in _context.City on location.CityId equals citydto.Id into citydto
             //                from city in locationdto.DefaultIfEmpty()
-            //                join countrydto in Context.Country on location.CountryId equals countrydto.Id into countrydto
+            //                join countrydto in _context.Country on location.CountryId equals countrydto.Id into countrydto
             //                from country in locationdto.DefaultIfEmpty()
-            //                join uploadSettingdto in Context.UploadSetting on company.Id equals uploadSettingdto.CompanyId into uploadSettingdto
+            //                join uploadSettingdto in _context.UploadSetting on company.Id equals uploadSettingdto.CompanyId into uploadSettingdto
             //                from uploadSetting in uploadSettingdto.DefaultIfEmpty()
-            //                join clientdto in Context.Client on company.Id equals clientdto.CompanyId into clientdto
+            //                join clientdto in _context.Client on company.Id equals clientdto.CompanyId into clientdto
             //                from client in clientdto.DefaultIfEmpty()
             //                select new CompanyDataDto
             //                {

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GSC.Common;
+using GSC.Common.Base;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Audit;
@@ -32,27 +34,23 @@ using GSC.Data.Entities.Volunteer;
 using GSC.Helper;
 using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace GSC.Domain.Context
 {
-    public class GscContext : DbContext
+    public class GscContext : GscContext<GscContext>, IGSCContext, IGSCContextExtension
     {
 
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IOptions<EnvironmentSetting> _settings;
 
-        public GscContext(DbContextOptions options,
+        public GscContext(DbContextOptions<GscContext> options,
             IJwtTokenAccesser jwtTokenAccesser,
-            IOptions<EnvironmentSetting> settings) : base(options)
+            IOptions<EnvironmentSetting> settings) : base(options, jwtTokenAccesser)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _settings = settings;
         }
-
-
 
 
         public void ConfigureServices(string connectionString)
@@ -71,7 +69,7 @@ namespace GSC.Domain.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!_settings.Value.IsPremise)
+            if (_settings != null && !_settings.Value.IsPremise)
                 optionsBuilder.UseSqlServer(@"data source=198.38.85.197;Initial Catalog=Cli_Development;user id=sa;password=Pushkar@7!;");
             base.OnConfiguring(optionsBuilder);
         }
@@ -118,7 +116,6 @@ namespace GSC.Domain.Context
         public DbSet<RefreshToken> RefreshToken { get; set; }
         public DbSet<UserRole> UserRole { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<UserAduit> UserAduit { get; set; }
         public DbSet<VariableGroup> VariableGroup { get; set; }
         public DbSet<Volunteer> Volunteer { get; set; }
         public DbSet<VolunteerAddress> VolunteerAddress { get; set; }
@@ -292,24 +289,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectSubSecArtificateDocumentReview> ProjectSubSecArtificateDocumentReview { get; set; }
 
         public DbSet<ProjectModuleRights> ProjectModuleRights { get; set; }
-        private List<string> ColumnsToSkip
-        {
-            get
-            {
-                var props = new List<string>();
-                foreach (var prop in typeof(BaseEntity).GetProperties()) props.Add(prop.Name);
 
-                props.Add("CompanyId");
-
-                return props;
-            }
-        }
-
-        public IList<EntityEntry> GetAuditTracker()
-        {
-            return ChangeTracker.Entries().ToList();
-
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -318,113 +298,8 @@ namespace GSC.Domain.Context
             base.OnModelCreating(modelBuilder);
         }
 
-       
-
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
-        {
-            throw new Exception("Please provide IJwtTokenAccesser in SaveChangesAsync() method.");
-        }
-
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            throw new Exception("Please provide IJwtTokenAccesser in SaveChangesAsync() method.");
-        }
-
-        public override int SaveChanges()
-        {
-            SetModifiedInformation(_jwtTokenAccesser);
-            var result = base.SaveChanges();
-            return result;
-        }
-
-        public int SaveChanges(int fake)
-        {
-            return base.SaveChanges();
-        }
-
-        public async Task<int> SaveChangesAsync()
-        {
-            SetModifiedInformation(_jwtTokenAccesser);
-
-            var result = await base.SaveChangesAsync();
-
-
-            return result;
-        }
-
-        public void DetectionAll()
-        {
-            var entries = ChangeTracker.Entries().Where(e =>
-                    e.State == EntityState.Added ||
-                    e.State == EntityState.Unchanged ||
-                    e.State == EntityState.Modified ||
-                    e.State == EntityState.Deleted)
-                .ToList();
-            entries.ForEach(r => r.State = EntityState.Detached);
-        }
-
-
-
-        public void Begin()
-        {
-            base.Database.BeginTransaction();
-        }
-
-        public void Commit()
-        {
-            base.Database.CommitTransaction();
-        }
-
-        public void Rollback()
-        {
-            base.Database.RollbackTransaction();
-        }
-
-        private void SetModifiedInformation(IJwtTokenAccesser jwtTokenAccesser)
-        {
-            if (jwtTokenAccesser == null || jwtTokenAccesser.UserId <= 0) return;
-
-            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
-                if (entry.State == EntityState.Added)
-                {
-                    entry.Entity.CreatedBy = jwtTokenAccesser.UserId;
-                    entry.Entity.CreatedDate = DateTime.Now.ToUniversalTime();
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    entry.Property(x => x.CreatedBy).IsModified = false;
-                    entry.Property(x => x.CreatedDate).IsModified = false;
-
-                    if (entry.Entity.InActiveRecord)
-                    {
-                        entry.Entity.DeletedBy = jwtTokenAccesser.UserId;
-                        entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
-                    }
-                    else
-                    {
-                        entry.Entity.ModifiedBy = jwtTokenAccesser.UserId;
-                        entry.Entity.ModifiedDate = DateTime.Now.ToUniversalTime();
-                    }
-                }
-
-            foreach (var entry in ChangeTracker.Entries<ScreeningTemplateValueAudit>())
-            {
-                entry.Entity.TimeZone = jwtTokenAccesser.GetHeader("clientTimeZone");
-                entry.Entity.IpAddress = jwtTokenAccesser.IpAddress;
-            }
-        }
-
-
 
     }
 
-    public static class Extensions
-    {
 
-        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
-        {
-            foreach (var element in source) action(element);
-            return source;
-        }
-    }
 }

@@ -1,4 +1,4 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Common.Base;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Master

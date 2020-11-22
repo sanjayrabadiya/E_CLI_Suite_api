@@ -22,46 +22,46 @@ using GSC.Shared;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectWorkplaceSubSecArtificatedocumentRepository : GenericRespository<ProjectWorkplaceSubSecArtificatedocument, GscContext>, IProjectWorkplaceSubSecArtificatedocumentRepository
+    public class ProjectWorkplaceSubSecArtificatedocumentRepository : GenericRespository<ProjectWorkplaceSubSecArtificatedocument>, IProjectWorkplaceSubSecArtificatedocumentRepository
     {
 
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserRepository _userRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
 
-        public ProjectWorkplaceSubSecArtificatedocumentRepository(IUnitOfWork<GscContext> uow,
+        public ProjectWorkplaceSubSecArtificatedocumentRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
            IUserRepository userRepository, IMapper mapper,
            IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository
            )
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
             _uploadSettingRepository = uploadSettingRepository;
             _userRepository = userRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _uow = uow;
+            _context = context;
             _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
         }
 
         public string getArtifactSectionDetail(ProjectWorkplaceSubSecArtificatedocumentDto projectWorkplaceSubSectionDto)
         {
-            var data = (from artifact in Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.Id == projectWorkplaceSubSectionDto.ProjectWorkplaceSubSectionArtifactId)
-                        join subsection in Context.ProjectWorkplaceSubSection on artifact.ProjectWorkplaceSubSectionId equals subsection.Id
-                        join section in Context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
-                        join etmfsection in Context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
-                        join workzone in Context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
-                        join etmfZone in Context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
-                        join workdetail in Context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
-                        join work in Context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
-                        join project in Context.Project on work.ProjectId equals project.Id
+            var data = (from artifact in _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.Id == projectWorkplaceSubSectionDto.ProjectWorkplaceSubSectionArtifactId)
+                        join subsection in _context.ProjectWorkplaceSubSection on artifact.ProjectWorkplaceSubSectionId equals subsection.Id
+                        join section in _context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
+                        join etmfsection in _context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
+                        join workzone in _context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
+                        join etmfZone in _context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
+                        join workdetail in _context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
+                        join work in _context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
+                        join project in _context.Project on work.ProjectId equals project.Id
 
-                        join countryleft in Context.Country on workdetail.ItemId equals countryleft.Id into countryl
+                        join countryleft in _context.Country on workdetail.ItemId equals countryleft.Id into countryl
                         from country in countryl.DefaultIfEmpty()
-                        join projectsite in Context.Project on workdetail.ItemId equals projectsite.Id into siteleft
+                        join projectsite in _context.Project on workdetail.ItemId equals projectsite.Id into siteleft
                         from site in siteleft.DefaultIfEmpty()
                         select new ProjectWorkplaceSubSectionDto
                         {
@@ -100,20 +100,20 @@ namespace GSC.Respository.Etmf
 
         public int deleteSubsectionArtifactfile(int id)
         {
-            var data = (from artifactdoc in Context.ProjectWorkplaceSubSecArtificatedocument.Where(x => x.Id == id)
-                        join artifact in Context.ProjectWorkplaceSubSectionArtifact on artifactdoc.ProjectWorkplaceSubSectionArtifactId equals artifact.Id
-                        join subsection in Context.ProjectWorkplaceSubSection on artifact.ProjectWorkplaceSubSectionId equals subsection.Id
-                        join section in Context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
-                        join etmfsection in Context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
-                        join workzone in Context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
-                        join etmfZone in Context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
-                        join workdetail in Context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
-                        join work in Context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
-                        join project in Context.Project on work.ProjectId equals project.Id
+            var data = (from artifactdoc in _context.ProjectWorkplaceSubSecArtificatedocument.Where(x => x.Id == id)
+                        join artifact in _context.ProjectWorkplaceSubSectionArtifact on artifactdoc.ProjectWorkplaceSubSectionArtifactId equals artifact.Id
+                        join subsection in _context.ProjectWorkplaceSubSection on artifact.ProjectWorkplaceSubSectionId equals subsection.Id
+                        join section in _context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
+                        join etmfsection in _context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
+                        join workzone in _context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
+                        join etmfZone in _context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
+                        join workdetail in _context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
+                        join work in _context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
+                        join project in _context.Project on work.ProjectId equals project.Id
 
-                        join countryleft in Context.Country on workdetail.ItemId equals countryleft.Id into countryl
+                        join countryleft in _context.Country on workdetail.ItemId equals countryleft.Id into countryl
                         from country in countryl.DefaultIfEmpty()
-                        join projectsite in Context.Project on workdetail.ItemId equals projectsite.Id into siteleft
+                        join projectsite in _context.Project on workdetail.ItemId equals projectsite.Id into siteleft
                         from site in siteleft.DefaultIfEmpty()
                         select new ProjectWorkplaceSubSecArtificatedocumentDto
                         {
@@ -153,7 +153,7 @@ namespace GSC.Respository.Etmf
         public List<CommonArtifactDocumentDto> GetSubSecDocumentList(int Id)
         {
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
-            var reviewdocument = Context.ProjectSubSecArtificateDocumentReview.Where(c => c.DeletedDate == null
+            var reviewdocument = _context.ProjectSubSecArtificateDocumentReview.Where(c => c.DeletedDate == null
             && c.UserId == _jwtTokenAccesser.UserId).Select(x => x.ProjectWorkplaceSubSecArtificateDocumentId).ToList();
 
             if (reviewdocument == null || reviewdocument.Count == 0) return dataList;
@@ -162,17 +162,17 @@ namespace GSC.Respository.Etmf
 
             foreach (var item in documentList)
             {
-                var reviewerList = Context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId != item.CreatedBy).Select(z => z.UserId).Distinct().ToList();
+                var reviewerList = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId != item.CreatedBy).Select(z => z.UserId).Distinct().ToList();
                 var users = new List<string>();
                 reviewerList.ForEach(r =>
                 {
                     var username = _userRepository.Find(r).UserName;
                     users.Add(username);
                 });
-                var Review = Context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
+                var Review = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
                 && x.UserId != item.CreatedBy && x.DeletedDate == null).ToList();
 
-                var ApproveList = Context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id).OrderByDescending(x => x.Id).ToList()
+                var ApproveList = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id).OrderByDescending(x => x.Id).ToList()
                     .GroupBy(v => v.UserId).Select(y => new ProjectSubSecArtificateDocumentApprover
                     {
                         Id = y.FirstOrDefault().Id,
@@ -207,7 +207,7 @@ namespace GSC.Respository.Etmf
                 obj.Reviewer = string.Join(", ", users);
                 obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
                 obj.IsReview = Review.Count() == 0 ? false : Review.All(z => z.IsSendBack) ? true : false;
-                obj.IsSendBack = Context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
+                obj.IsSendBack = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.Any(x => x.IsApproved == false) ? "Reject" : ApproveList.All(x => x.IsApproved == true) ? "Approved"
                    : "Send For Approval";
                 obj.Approver = string.Join(", ", ApproverName);
@@ -234,7 +234,7 @@ namespace GSC.Respository.Etmf
             obj.Status = (int)document.Status;
             obj.Level = 5.2;
             obj.SendBy = !(document.CreatedBy == _jwtTokenAccesser.UserId);
-            obj.IsSendBack = Context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == document.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
+            obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == document.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
             obj.IsAccepted = document.IsAccepted;
             obj.ApprovedStatus = document.IsAccepted == null ? "" : document.IsAccepted == true ? "Approved" : "Rejected";
             return obj;
@@ -259,7 +259,7 @@ namespace GSC.Respository.Etmf
         public string ImportData(int Id)
         {
             var document = Find(Id);
-            var upload = Context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
             string path = FullPath;
             if (!File.Exists(path))
@@ -308,13 +308,13 @@ namespace GSC.Respository.Etmf
             var document = All.Where(x => x.Id == documentId).FirstOrDefault();
             document.IsAccepted = IsAccepted;
             Update(document);
-            _uow.Save();
+             _context.Save();
         }
 
         public string SaveDocumentInFolder(ProjectWorkplaceSubSecArtificatedocument projectWorkplaceSubSecArtificatedocument, CustomParameter param)
         {
             string filePath = string.Empty;
-            var upload = Context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var fileName = projectWorkplaceSubSecArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceSubSecArtificatedocument.DocumentName.Substring(0, projectWorkplaceSubSecArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceSubSecArtificatedocument.DocumentName;
             var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
             filePath = Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceSubSecArtificatedocument.DocPath, docName);
@@ -420,7 +420,7 @@ namespace GSC.Respository.Etmf
         {
             var history = _projectSubSecArtificateDocumentHistoryRepository.Find(Id);
             var document = Find(history.ProjectWorkplaceSubSecArtificateDocumentId);
-            var upload = Context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var FullPath = Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, history.DocumentName);
             string path = FullPath;
             if (!File.Exists(path))

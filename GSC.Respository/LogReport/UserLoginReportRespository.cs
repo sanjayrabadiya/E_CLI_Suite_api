@@ -7,18 +7,18 @@ using GSC.Shared;
 
 namespace GSC.Respository.LogReport
 {
-    public class UserLoginReportRespository : GenericRespository<UserLoginReport, GscContext>,
+    public class UserLoginReportRespository : GenericRespository<UserLoginReport>,
         IUserLoginReportRespository
     {
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public UserLoginReportRespository(IUnitOfWork<GscContext> uow,
+        public UserLoginReportRespository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
         }
 
 
@@ -31,7 +31,7 @@ namespace GSC.Respository.LogReport
             userLoginReport.LoginTime = DateTime.Now;
             userLoginReport.IpAddress = _jwtTokenAccesser.IpAddress;
             Add(userLoginReport);
-            _uow.Save();
+             _context.Save();
             return userLoginReport.Id;
         }
     }

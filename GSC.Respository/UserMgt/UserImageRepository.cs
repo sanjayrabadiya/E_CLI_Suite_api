@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class UserImageRepository : GenericRespository<UserImage, GscContext>, IUserImageRepository
+    public class UserImageRepository : GenericRespository<UserImage>, IUserImageRepository
     {
-        public UserImageRepository(IUnitOfWork<GscContext> uow,
+        public UserImageRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

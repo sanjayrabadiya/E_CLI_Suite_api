@@ -154,7 +154,7 @@ namespace GSC.Api.Controllers.Master
                     ((int) x.ModuleId == modulelId || x.ModuleId == AuditModule.Common)
                 ).OrderBy(o => o.ReasonName).ToList();
             var auditReasonsDto = _mapper.Map<IEnumerable<AuditReasonDto>>(auditReasons);
-            auditReasonsDto.ForEach(t => t.ModuleName = t.ModuleId.GetDescription());
+            auditReasonsDto.ToList().ForEach(t => t.ModuleName = t.ModuleId.GetDescription());
             return Ok(auditReasonsDto);
         }
     }

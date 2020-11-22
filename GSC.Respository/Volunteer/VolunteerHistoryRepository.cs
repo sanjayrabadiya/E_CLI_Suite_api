@@ -6,12 +6,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.Volunteer
 {
-    public class VolunteerHistoryRepository : GenericRespository<VolunteerHistory, GscContext>,
+    public class VolunteerHistoryRepository : GenericRespository<VolunteerHistory>,
         IVolunteerHistoryRepository
     {
-        public VolunteerHistoryRepository(IUnitOfWork<GscContext> uow,
+        public VolunteerHistoryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

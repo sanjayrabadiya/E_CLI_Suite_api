@@ -6,10 +6,10 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class UserGridSettingRepository : GenericRespository<UserGridSetting, GscContext>, IUserGridSettingRepository
+    public class UserGridSettingRepository : GenericRespository<UserGridSetting>, IUserGridSettingRepository
     {
-        public UserGridSettingRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        public UserGridSettingRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
         }
     }

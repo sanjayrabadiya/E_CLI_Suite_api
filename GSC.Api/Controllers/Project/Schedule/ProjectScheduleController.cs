@@ -105,7 +105,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             var projectScheduleDto = _mapper.Map<ProjectScheduleDto>(projectSchedule);
 
             if (projectScheduleDto.Templates != null)
-                projectScheduleDto.Templates.ForEach(t =>
+                projectScheduleDto.Templates.ToList().ForEach(t =>
                 {
                     t.TemplateName = _projectDesignTemplateRepository.Find(t.ProjectDesignTemplateId).TemplateName;
                     t.Variables = _projectDesignVariableRepository.GetVariabeDropDown(t.ProjectDesignTemplateId);

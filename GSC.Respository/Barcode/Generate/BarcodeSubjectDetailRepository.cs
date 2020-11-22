@@ -9,14 +9,14 @@ using GSC.Shared;
 
 namespace GSC.Respository.Barcode.Generate
 {
-    public class BarcodeSubjectDetailRepository : GenericRespository<BarcodeSubjectDetail, GscContext>,
+    public class BarcodeSubjectDetailRepository : GenericRespository<BarcodeSubjectDetail>,
         IBarcodeSubjectDetailRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public BarcodeSubjectDetailRepository(IUnitOfWork<GscContext> uow,
+        public BarcodeSubjectDetailRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

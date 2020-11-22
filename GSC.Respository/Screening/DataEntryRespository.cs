@@ -19,7 +19,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
 {
-    public class DataEntryRespository : GenericRespository<ScreeningEntry, GscContext>, IDataEntryRespository
+    public class DataEntryRespository : GenericRespository<ScreeningEntry>, IDataEntryRespository
     {
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
@@ -29,7 +29,7 @@ namespace GSC.Respository.Screening
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningEntryRepository _screeningEntryRepository;
-        public DataEntryRespository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        public DataEntryRespository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
@@ -39,7 +39,7 @@ namespace GSC.Respository.Screening
             IScreeningEntryRepository screeningEntryRepository,
             IProjectDesignRepository projectDesignRepository
         )
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectRightRepository = projectRightRepository;

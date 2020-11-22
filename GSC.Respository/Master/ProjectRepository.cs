@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace GSC.Respository.Master
 {
-    public class ProjectRepository : GenericRespository<Data.Entities.Master.Project, GscContext>, IProjectRepository
+    public class ProjectRepository : GenericRespository<Data.Entities.Master.Project>, IProjectRepository
     {
         private readonly ICountryRepository _countryRepository;
         private readonly IUserRepository _userRepository;
@@ -33,9 +33,9 @@ namespace GSC.Respository.Master
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
 
-        public ProjectRepository(IUnitOfWork<GscContext> uow,
+        public ProjectRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -46,7 +46,7 @@ namespace GSC.Respository.Master
             IAttendanceRepository attendanceRepository,
             IVolunteerRepository volunteerRepository,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _numberFormatRepository = numberFormatRepository;
             _companyRepository = companyRepository;
@@ -58,7 +58,7 @@ namespace GSC.Respository.Master
             _attendanceRepository = attendanceRepository;
             _volunteerRepository = volunteerRepository;
             _mapper = mapper;
-            _uow = uow;
+            _context = context;
         }
 
         public IList<ProjectGridDto> GetProjectList(bool isDeleted)
@@ -124,7 +124,7 @@ namespace GSC.Respository.Master
 
             if (objSave.Id > 0 && objSave.AttendanceLimit != null && !objSave.IsStatic)
             {
-                var attendantCount = Context.Attendance.Count(x => x.DeletedDate == null
+                var attendantCount = _context.Attendance.Count(x => x.DeletedDate == null
                                                                    && x.AttendanceType == DataEntryType.Project
                                                                    && x.Status != AttendaceStatus.Suspended
                                                                    && !x.IsStandby
@@ -136,7 +136,7 @@ namespace GSC.Respository.Master
 
             if (objSave.Id > 0)
                 if (objSave.IsStatic != All.AsNoTracking().Any(x => x.Id == objSave.Id && x.IsStatic) &&
-                    Context.ProjectDesign.Any(x => x.ProjectId == objSave.Id && x.DeletedDate == null))
+                    _context.ProjectDesign.Any(x => x.ProjectId == objSave.Id && x.DeletedDate == null))
                     return "Can't IsStatic value, already started project design!";
             return "";
         }
@@ -256,7 +256,7 @@ namespace GSC.Respository.Master
 
         public List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int ProjectDesignId)
         {
-            var ParentProjectId = Context.ProjectDesign.Where(x => x.Id == ProjectDesignId).Select(t => t.ProjectId).FirstOrDefault();
+            var ParentProjectId = _context.ProjectDesign.Where(x => x.Id == ProjectDesignId).Select(t => t.ProjectId).FirstOrDefault();
 
             return GetChildProjectDropDown(ParentProjectId);
         }
@@ -372,28 +372,28 @@ namespace GSC.Respository.Master
             siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.CountryId).Select(t => t.Key).Count();
             siteDetailsDto.MarkAsCompleted = All.Any(x => x.ParentProjectId == projectId && x.DeletedDate == null);
 
-            var projectDeisgn = Context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
+            var projectDeisgn = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
             var projectDeisgnId = projectDeisgn?.Id;
 
-            designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : Context.ProjectDesignPeriod.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null);
+            designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : _context.ProjectDesignPeriod.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null);
             designDetailsDto.NoofVisit = projectDeisgnId == null ? 0 : GetNoOfVisit(projectDeisgnId);
             designDetailsDto.NoofECrf = projectDeisgnId == null ? 0 : GetNoOfTemplate(projectDeisgnId);
             designDetailsDto.MarkAsCompleted = projectDeisgn?.IsCompleteDesign;
 
-            var projectWorkflowId = Context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.Id;
-            workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : Context.ProjectWorkflowIndependent.Count(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null);
-            workflowDetailsDto.NoofLevels = projectWorkflowId == null ? 0 : Context.ProjectWorkflowLevel.Count(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null);
-            workflowDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteWorkflow == true);
+            var projectWorkflowId = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.Id;
+            workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : _context.ProjectWorkflowIndependent.Count(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null);
+            workflowDetailsDto.NoofLevels = projectWorkflowId == null ? 0 : _context.ProjectWorkflowLevel.Count(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null);
+            workflowDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteWorkflow == true);
 
-            userRightDetailsDto.NoofUser = Context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.UserId).Select(t => t.Key).Count();
-            userRightDetailsDto.MarkAsCompleted = Context.ProjectRight.Any(x => x.ProjectId == projectId && x.DeletedDate == null);
+            userRightDetailsDto.NoofUser = _context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.UserId).Select(t => t.Key).Count();
+            userRightDetailsDto.MarkAsCompleted = _context.ProjectRight.Any(x => x.ProjectId == projectId && x.DeletedDate == null);
 
-            schedulesDetailsDto.NoofVisit = Context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignVisitId).Select(t => t.Key).Count();
-            schedulesDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteSchedule == true);
+            schedulesDetailsDto.NoofVisit = _context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignVisitId).Select(t => t.Key).Count();
+            schedulesDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteSchedule == true);
 
             editCheckDetailsDto.NoofFormulas = GetNoOfFormulas(projectDeisgnId);
-            editCheckDetailsDto.NoofRules = projectDeisgnId == null ? 0 : Context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
-            editCheckDetailsDto.MarkAsCompleted = Context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteEditCheck == true);
+            editCheckDetailsDto.NoofRules = projectDeisgnId == null ? 0 : _context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
+            editCheckDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteEditCheck == true);
 
             projectDetailsDto.siteDetails = siteDetailsDto;
             projectDetailsDto.designDetails = designDetailsDto;
@@ -406,7 +406,7 @@ namespace GSC.Respository.Master
 
         public int GetNoOfVisit(int? projectDesignId)
         {
-            return Context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Id == projectDesignId
+            return _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Id == projectDesignId
            && x.DeletedDate == null && x.ProjectDesignPeriod.DeletedDate == null).Count();
 
         }
@@ -414,19 +414,19 @@ namespace GSC.Respository.Master
         public int GetNoOfTemplate(int? projectDesignId)
         {
 
-            return Context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Id == projectDesignId
+            return _context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Id == projectDesignId
                 && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null).Count();
 
         }
 
         public int GetNoOfFormulas(int? projectDesignId)
         {
-            var rules = Context.EditCheck.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).ToList();
+            var rules = _context.EditCheck.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).ToList();
             var formulasCount = 0;
 
             rules.ForEach(b =>
             {
-                var formula = Context.EditCheckDetail.Where(x => x.EditCheckId == b.Id && x.DeletedDate == null).ToList().Count;
+                var formula = _context.EditCheckDetail.Where(x => x.EditCheckId == b.Id && x.DeletedDate == null).ToList().Count;
                 formulasCount += formula;
             });
 
@@ -441,7 +441,7 @@ namespace GSC.Respository.Master
             var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ParentProjectId == projectId).
                 ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
-            var projectCode = Context.Project.Find(projectId).ProjectCode;
+            var projectCode = _context.Project.Find(projectId).ProjectCode;
 
             projects.ForEach(x =>
             {
@@ -451,8 +451,8 @@ namespace GSC.Respository.Master
 
             //projects.ForEach(x =>
             //{
-            //    x.ParentProjectCode = Context.Project.Find(x.ParentProjectId).ProjectCode;
-            //    var design = Context.ProjectDesign.Where(t =>
+            //    x.ParentProjectCode = _context.Project.Find(x.ParentProjectId).ProjectCode;
+            //    var design = _context.ProjectDesign.Where(t =>
             //        t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null).FirstOrDefault();
             //    if (design != null)
             //    {
@@ -507,8 +507,8 @@ namespace GSC.Respository.Master
         public void UpdateProject(Data.Entities.Master.Project details)
         {
 
-            var projectdetails = Context.Project.Where(t => t.ProjectCode == details.ProjectCode).FirstOrDefault();
-            var user = Context.Users.FirstOrDefault();
+            var projectdetails = _context.Project.Where(t => t.ProjectCode == details.ProjectCode).FirstOrDefault();
+            var user = _context.Users.FirstOrDefault();
             if (projectdetails == null)
             {
                 projectdetails = new Data.Entities.Master.Project();
@@ -525,8 +525,8 @@ namespace GSC.Respository.Master
                 projectdetails.ToDate = details.ToDate;
                 projectdetails.CreatedBy = user.Id;
                 projectdetails.CreatedDate = DateTime.Now;
-                Context.Project.Add(projectdetails);
-                _uow.Save();
+                _context.Project.Add(projectdetails);
+                 _context.Save();
                 Data.Entities.ProjectRight.ProjectRight prights = new Data.Entities.ProjectRight.ProjectRight();
                 prights.UserId = user.Id;
                 prights.ProjectId = projectdetails.Id;
@@ -544,9 +544,9 @@ namespace GSC.Respository.Master
                 // projectdetails.ProjectName = "";
                 projectdetails.FromDate = details.FromDate;
                 projectdetails.ToDate = details.ToDate;
-                Context.Project.Update(projectdetails);
+                _context.Project.Update(projectdetails);
             }
-            _uow.Save();
+             _context.Save();
         }
 
 

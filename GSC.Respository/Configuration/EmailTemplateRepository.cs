@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Configuration
 {
-    public class EmailTemplateRepository : GenericRespository<EmailTemplate, GscContext>, IEmailTemplateRepository
+    public class EmailTemplateRepository : GenericRespository<EmailTemplate>, IEmailTemplateRepository
     {
-        public EmailTemplateRepository(IUnitOfWork<GscContext> uow,
+        public EmailTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

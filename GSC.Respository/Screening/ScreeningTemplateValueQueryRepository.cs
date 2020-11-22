@@ -17,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningTemplateValueQueryRepository : GenericRespository<ScreeningTemplateValueQuery, GscContext>,
+    public class ScreeningTemplateValueQueryRepository : GenericRespository<ScreeningTemplateValueQuery>,
         IScreeningTemplateValueQueryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -25,28 +25,30 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IScreeningTemplateValueScheduleRepository _screeningTemplateValueScheduleRepository;
         private WorkFlowLevelDto _workFlowLevelDto;
-        public ScreeningTemplateValueQueryRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        private readonly IGSCContext _context;
+        public ScreeningTemplateValueQueryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IScreeningTemplateValueScheduleRepository screeningTemplateValueScheduleRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
             _screeningTemplateValueScheduleRepository = screeningTemplateValueScheduleRepository;
+            _context = context;
         }
 
         public IList<ScreeningTemplateValueQueryDto> GetQueries(int screeningTemplateValueId)
         {
             var queryDtos =
-                (from query in Context.ScreeningTemplateValueQuery.Where(t =>
+                (from query in _context.ScreeningTemplateValueQuery.Where(t =>
                         t.ScreeningTemplateValueId == screeningTemplateValueId)
-                 join reasonTemp in Context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
+                 join reasonTemp in _context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
                  from reason in reasonDt.DefaultIfEmpty()
-                 join userTemp in Context.Users on query.CreatedBy equals userTemp.Id into userDto
+                 join userTemp in _context.Users on query.CreatedBy equals userTemp.Id into userDto
                  from user in userDto.DefaultIfEmpty()
-                 join roleTemp in Context.SecurityRole on query.UserRoleId equals roleTemp.Id into roleDto
+                 join roleTemp in _context.SecurityRole on query.UserRoleId equals roleTemp.Id into roleDto
                  from role in roleDto.DefaultIfEmpty()
                  select new ScreeningTemplateValueQueryDto
                  {
@@ -96,7 +98,7 @@ namespace GSC.Respository.Screening
             screeningTemplateValue.Value = screeningTemplateValueQueryDto.Value;
             if (updateQueryStatus == QueryStatus.Resolved)
             {
-                var screeningTemplate = Context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
+                var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
                 if (screeningTemplate.ReviewLevel == 1)
                     screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
                 else if (screeningTemplateValue.AcknowledgeLevel != null &&
@@ -141,7 +143,7 @@ namespace GSC.Respository.Screening
             screeningTemplateValue.AcknowledgeLevel = -1;
             if (workFlowLevel.IsWorkFlowBreak)
             {
-                var screeningTemplate = Context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
+                var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
                 screeningTemplateValue.AcknowledgeLevel = screeningTemplate.StartLevel;
             }
 
@@ -177,7 +179,7 @@ namespace GSC.Respository.Screening
         {
             var screeningTemplateValue =
                 _screeningTemplateValueRepository.Find(screeningTemplateValueQuery.ScreeningTemplateValueId);
-            var screeningTemplate = Context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
+            var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
 
 
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
@@ -260,41 +262,41 @@ namespace GSC.Respository.Screening
 
         public IList<QueryManagementDto> GetQueryEntries(QuerySearchDto filters)
         {
-            var queryDtos = (from screening in Context.ScreeningEntry.Where(t =>
+            var queryDtos = (from screening in _context.ScreeningEntry.Where(t =>
                     t.ProjectId == filters.ProjectId &&
                     (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId)) && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.AttendanceId)))
-                             join template in Context.ScreeningTemplate.Where(u =>
+                             join template in _context.ScreeningTemplate.Where(u =>
                                      (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
                                      && (filters.VisitIds == null ||
                                          filters.VisitIds.Contains(u.ScreeningVisit.ProjectDesignVisitId))) on screening.Id
                                  equals
                                  template.ScreeningVisit.ScreeningEntryId
-                             join value in Context.ScreeningTemplateValue.Where(val =>
+                             join value in _context.ScreeningTemplateValue.Where(val =>
                                  filters.DataEntryBy == null || val.CreatedBy == filters.DataEntryBy) on template.Id equals value
                                  .ScreeningTemplateId
-                             join query in Context.ScreeningTemplateValueQuery on value.Id equals query.ScreeningTemplateValueId
-                             join reasonTemp in Context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
+                             join query in _context.ScreeningTemplateValueQuery on value.Id equals query.ScreeningTemplateValueId
+                             join reasonTemp in _context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
                              from reason in reasonDt.DefaultIfEmpty()
-                             join userTemp in Context.Users on query.CreatedBy equals userTemp.Id into userDto
+                             join userTemp in _context.Users on query.CreatedBy equals userTemp.Id into userDto
                              from user in userDto.DefaultIfEmpty()
-                             join roleTemp in Context.SecurityRole on query.UserRoleId equals roleTemp.Id into roleDto
+                             join roleTemp in _context.SecurityRole on query.UserRoleId equals roleTemp.Id into roleDto
                              from role in roleDto.DefaultIfEmpty()
-                             join usermodifiedTemp in Context.Users on query.ModifiedBy equals usermodifiedTemp.Id into
+                             join usermodifiedTemp in _context.Users on query.ModifiedBy equals usermodifiedTemp.Id into
                                  userModifiedDto
                              from userModified in userDto.DefaultIfEmpty()
-                             join roleModifiedTemp in Context.SecurityRole on query.UserRoleId equals roleModifiedTemp.Id into
+                             join roleModifiedTemp in _context.SecurityRole on query.UserRoleId equals roleModifiedTemp.Id into
                                  roleModifiedDto
                              from roleModified in roleDto.DefaultIfEmpty()
-                             join attendance in Context.Attendance.Where(t =>
+                             join attendance in _context.Attendance.Where(t =>
                                  t.DeletedDate == null) on screening
                                  .AttendanceId equals attendance.Id
-                             join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
+                             join volunteerTemp in _context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
                                  volunteerDto
                              from volunteer in volunteerDto.DefaultIfEmpty()
-                             join randomizationTemp in Context.Randomization on screening.RandomizationId equals randomizationTemp.Id into
+                             join randomizationTemp in _context.Randomization on screening.RandomizationId equals randomizationTemp.Id into
                                  randomizationDto
                              from randomization in randomizationDto.DefaultIfEmpty()
-                             join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals
+                             join projectSubjectTemp in _context.ProjectSubject on attendance.ProjectSubjectId equals
                                  projectSubjectTemp.Id into projectsubjectDto
                              from projectsubject in projectsubjectDto.DefaultIfEmpty()
                              select new QueryManagementDto
@@ -377,16 +379,16 @@ namespace GSC.Respository.Screening
 
         public IList<QueryManagementDto> GetGenerateQueryBy(int projectId)
         {
-            var queryData = (from screening in Context.ScreeningEntry.Where(t => t.ProjectId == projectId)
-                             join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                             join value in Context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
-                             join query in Context.ScreeningTemplateValueQuery.Where(q => q.QueryStatus == QueryStatus.Open) on
+            var queryData = (from screening in _context.ScreeningEntry.Where(t => t.ProjectId == projectId)
+                             join template in _context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
+                             join value in _context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
+                             join query in _context.ScreeningTemplateValueQuery.Where(q => q.QueryStatus == QueryStatus.Open) on
                                  value.Id equals query.ScreeningTemplateValueId
-                             join reasonTemp in Context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
+                             join reasonTemp in _context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
                              from reason in reasonDt.DefaultIfEmpty()
-                             join userTemp in Context.Users on query.CreatedBy equals userTemp.Id into userDto
+                             join userTemp in _context.Users on query.CreatedBy equals userTemp.Id into userDto
                              from user in userDto.DefaultIfEmpty()
-                             join roleTemp in Context.SecurityRole on query.UserRoleId equals roleTemp.Id into roleDto
+                             join roleTemp in _context.SecurityRole on query.UserRoleId equals roleTemp.Id into roleDto
                              from role in roleDto.DefaultIfEmpty()
                              select new QueryManagementDto
                              {
@@ -404,15 +406,15 @@ namespace GSC.Respository.Screening
 
         public IList<QueryManagementDto> GetDataEntryBy(int projectId)
         {
-            var dataEntryData = (from screening in Context.ScreeningEntry.Where(t => t.ProjectId == projectId)
-                                 join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                                 join value in Context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
-                                 join audit in Context.ScreeningTemplateValueAudit on value.Id equals audit.ScreeningTemplateValueId
-                                 join reasonTemp in Context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
+            var dataEntryData = (from screening in _context.ScreeningEntry.Where(t => t.ProjectId == projectId)
+                                 join template in _context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
+                                 join value in _context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
+                                 join audit in _context.ScreeningTemplateValueAudit on value.Id equals audit.ScreeningTemplateValueId
+                                 join reasonTemp in _context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
                                  from reason in reasonDt.DefaultIfEmpty()
-                                 join userTemp in Context.Users on audit.UserId equals userTemp.Id into userDto
+                                 join userTemp in _context.Users on audit.UserId equals userTemp.Id into userDto
                                  from user in userDto.DefaultIfEmpty()
-                                 join roleTemp in Context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
+                                 join roleTemp in _context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
                                  from role in roleDto.DefaultIfEmpty()
                                  select new QueryManagementDto
                                  {
@@ -431,7 +433,7 @@ namespace GSC.Respository.Screening
         {
             if (_workFlowLevelDto != null) return _workFlowLevelDto;
 
-            var templateData = Context.ScreeningTemplate.Where(x => x.Id == screeningTemplateId).Select(r => new
+            var templateData = _context.ScreeningTemplate.Where(x => x.Id == screeningTemplateId).Select(r => new
             {
                 r.ScreeningVisit.ScreeningEntryId,
                 r.ScreeningVisit.ScreeningEntry.ProjectDesignId,
@@ -458,19 +460,19 @@ namespace GSC.Respository.Screening
             var queryValue = "";
             if (screeningTemplateValueQueryDto.Children?.Count > 0)
             {
-                var oldProjectDesignVariableValueIds = Context.ScreeningTemplateValueChild.AsNoTracking().Where(t =>
+                var oldProjectDesignVariableValueIds = _context.ScreeningTemplateValueChild.AsNoTracking().Where(t =>
                         screeningTemplateValueQueryDto.Children.Select(s => s.Id).Contains(t.Id) && t.Value == "true")
                     .Select(t => t.ProjectDesignVariableValueId).ToList();
 
                 queryOldValue = string.Join(", ",
-                    Context.ProjectDesignVariableValue.Where(t => oldProjectDesignVariableValueIds.Contains(t.Id))
+                    _context.ProjectDesignVariableValue.Where(t => oldProjectDesignVariableValueIds.Contains(t.Id))
                         .Select(t => t.ValueName).ToList());
 
                 var newProjectDesignVariableValueIds = screeningTemplateValueQueryDto.Children
                     .Where(t => t.Value == "true").Select(t => t.ProjectDesignVariableValueId).ToList();
 
                 queryValue = string.Join(", ",
-                    Context.ProjectDesignVariableValue.Where(t => newProjectDesignVariableValueIds.Contains(t.Id))
+                    _context.ProjectDesignVariableValue.Where(t => newProjectDesignVariableValueIds.Contains(t.Id))
                         .Select(t => t.ValueName).ToList());
 
                 _screeningTemplateValueRepository.UpdateChild(screeningTemplateValueQueryDto.Children.ToList());

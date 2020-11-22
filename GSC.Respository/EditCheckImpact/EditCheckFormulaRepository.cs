@@ -19,7 +19,7 @@ namespace GSC.Respository.EditCheckImpact
             {
                 result.Target = new List<EditCheckResult>();
 
-                editCheck.Where(r => r.IsTarget).ForEach(r =>
+                editCheck.Where(r => r.IsTarget).ToList().ForEach(r =>
                 {
                     var targetResult = new EditCheckResult();
                     targetResult.Id = r.Id;
@@ -59,7 +59,7 @@ namespace GSC.Respository.EditCheckImpact
             var result = new EditCheckResult();
             try
             {
-                editCheck.Where(x => !x.IsTarget).ForEach(r =>
+                editCheck.Where(x => !x.IsTarget).ToList().ForEach(r =>
                 {
                     if (r.Operator == Operator.SquareRoot)
                         ruleStr = ruleStr + $"{r.CollectionValue2}{r.StartParens}{"sqrt("}{r.InputValue}{")"}{r.EndParens}{r.CollectionValue}";

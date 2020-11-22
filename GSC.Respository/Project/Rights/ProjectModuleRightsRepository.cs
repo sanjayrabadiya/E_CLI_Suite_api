@@ -14,34 +14,34 @@ using GSC.Shared;
 
 namespace GSC.Respository.Project.Rights
 {
-    public class ProjectModuleRightsRepository : GenericRespository<GSC.Data.Entities.Project.Rights.ProjectModuleRights, GscContext>, IProjectModuleRightsRepository
+    public class ProjectModuleRightsRepository : GenericRespository<GSC.Data.Entities.Project.Rights.ProjectModuleRights>, IProjectModuleRightsRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
 
-        public ProjectModuleRightsRepository(IUnitOfWork<GscContext> uow,
+        public ProjectModuleRightsRepository(IGSCContext context,
          IJwtTokenAccesser jwtTokenAccesser,
          IMapper mapper)
-         : base(uow, jwtTokenAccesser)
+         : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _uow = uow;
+            _context = context;
         }
 
         public void Save(StudyModuleDto details)
         {
-            var project = Context.Project.Where(t => t.ProjectCode == details.StudyCode).SingleOrDefault();
+            var project = _context.Project.Where(t => t.ProjectCode == details.StudyCode).SingleOrDefault();
             
-            var existing = Context.ProjectModuleRights.Where(t => t.ProjectID == project.Id).ToList();
+            var existing = _context.ProjectModuleRights.Where(t => t.ProjectID == project.Id).ToList();
             if (existing.Any())
             {
-                Context.ProjectModuleRights.RemoveRange(existing);
-                _uow.Save();
+                _context.ProjectModuleRights.RemoveRange(existing);
+                 _context.Save();
             }
             List<GSC.Data.Entities.Project.Rights.ProjectModuleRights> rightdetails = new List<Data.Entities.Project.Rights.ProjectModuleRights>();
-            var appscreen = Context.AppScreen.ToList();
+            var appscreen = _context.AppScreen.ToList();
             foreach(var module in details.StudyModules)
             {
                 GSC.Data.Entities.Project.Rights.ProjectModuleRights data = new Data.Entities.Project.Rights.ProjectModuleRights();
@@ -49,8 +49,8 @@ namespace GSC.Respository.Project.Rights
                 data.AppScreenID = appscreen.Where(a => a.ScreenCode == module.ModuleCode).Select(i => i.Id).SingleOrDefault();
                 rightdetails.Add(data);
             }
-            Context.ProjectModuleRights.AddRange(rightdetails);
-            _uow.Save();
+            _context.ProjectModuleRights.AddRange(rightdetails);
+             _context.Save();
         }
 
     }

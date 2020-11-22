@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class ContactTypeRepository : GenericRespository<ContactType, GscContext>, IContactTypeRepository
+    public class ContactTypeRepository : GenericRespository<ContactType>, IContactTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public ContactTypeRepository(IUnitOfWork<GscContext> uow,
+        public ContactTypeRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

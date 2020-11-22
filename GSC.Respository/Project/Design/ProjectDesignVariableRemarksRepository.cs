@@ -11,10 +11,10 @@ using System.Text;
 
 namespace GSC.Respository.Project.Design
 {
-    public class ProjectDesignVariableRemarksRepository : GenericRespository<ProjectDesignVariableRemarks, GscContext>, IProjectDesignVariableRemarksRepository
+    public class ProjectDesignVariableRemarksRepository : GenericRespository<ProjectDesignVariableRemarks>, IProjectDesignVariableRemarksRepository
     {
-        public ProjectDesignVariableRemarksRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) :
-            base(uow, jwtTokenAccesser)
+        public ProjectDesignVariableRemarksRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) :
+            base(context)
         {
         }
 

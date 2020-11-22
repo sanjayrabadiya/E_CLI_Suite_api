@@ -9,14 +9,14 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class TemplateRightsRoleListRepository : GenericRespository<TemplateRightsRoleList, GscContext>,
+    public class TemplateRightsRoleListRepository : GenericRespository<TemplateRightsRoleList>,
         ITemplateRightsRoleListRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public TemplateRightsRoleListRepository(IUnitOfWork<GscContext> uow,
+        public TemplateRightsRoleListRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

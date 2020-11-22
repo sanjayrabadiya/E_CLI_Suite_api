@@ -9,15 +9,16 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class UserFavoriteScreenRepository : GenericRespository<UserFavoriteScreen, GscContext>,
+    public class UserFavoriteScreenRepository : GenericRespository<UserFavoriteScreen>,
         IUserFavoriteScreenRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public UserFavoriteScreenRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public UserFavoriteScreenRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public void Favorite(int appScreenId)
@@ -26,7 +27,7 @@ namespace GSC.Respository.UserMgt
                 .FirstOrDefault();
             if (favorite != null)
             {
-                Context.Remove(favorite);
+                Remove(favorite);
             }
             else
             {
@@ -47,7 +48,7 @@ namespace GSC.Respository.UserMgt
             var favoriteScreenIds =
                 FindBy(t => t.UserId == _jwtTokenAccesser.UserId).Select(t => t.AppScreenId).ToList();
 
-            var screens = Context.AppScreen.Where(x => favoriteScreenIds.Contains(x.Id) && x.DeletedDate == null)
+            var screens = _context.AppScreen.Where(x => favoriteScreenIds.Contains(x.Id) && x.DeletedDate == null)
                 .ToList();
 
             return screens.Select(x => new MenuDto

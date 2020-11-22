@@ -8,12 +8,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.Client
 {
-    public class ClientAddressRepository : GenericRespository<ClientAddress, GscContext>, IClientAddressRepository
+    public class ClientAddressRepository : GenericRespository<ClientAddress>, IClientAddressRepository
     {
-        public ClientAddressRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ClientAddressRepository(IGSCContext context) : base(context)
         {
+           _context = context;
         }
 
         public List<ClientAddress> GetAddresses(int clientId, bool isDeleted)
@@ -27,16 +27,16 @@ namespace GSC.Respository.Client
                     continue;
 
                 var id = address.Location.CountryId;
-                address.Location.CountryName = id > 0 ? Context.Country.Find(id).CountryName : "";
+                address.Location.CountryName = id > 0 ? _context.Country.Find(id).CountryName : "";
 
                 id = address.Location.StateId;
-                address.Location.StateName = id > 0 ? Context.State.Find(id).StateName : "";
+                address.Location.StateName = id > 0 ? _context.State.Find(id).StateName : "";
 
                 id = address.Location.CityId;
-                address.Location.CityName = id > 0 ? Context.City.Find(id).CityName : "";
+                address.Location.CityName = id > 0 ? _context.City.Find(id).CityName : "";
 
                 id = address.Location.CityAreaId;
-                address.Location.CityAreaName = id > 0 ? Context.CityArea.Find(id).AreaName : "";
+                address.Location.CityAreaName = id > 0 ? _context.CityArea.Find(id).AreaName : "";
             }
 
             return addresses;

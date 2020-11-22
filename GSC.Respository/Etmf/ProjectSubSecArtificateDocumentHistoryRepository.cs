@@ -17,18 +17,18 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectSubSecArtificateDocumentHistoryRepository : GenericRespository<ProjectSubSecArtificateDocumentHistory, GscContext>, IProjectSubSecArtificateDocumentHistoryRepository
+    public class ProjectSubSecArtificateDocumentHistoryRepository : GenericRespository<ProjectSubSecArtificateDocumentHistory>, IProjectSubSecArtificateDocumentHistoryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
 
-        public ProjectSubSecArtificateDocumentHistoryRepository(IUnitOfWork<GscContext> uow,
+        public ProjectSubSecArtificateDocumentHistoryRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
             _mapper = mapper;
         }
 
@@ -41,7 +41,7 @@ namespace GSC.Respository.Etmf
             ProjectSubSecArtificateDocumentHistory.ProjectSubSecArtificateDocumentApproverId = ApproverId;
 
             Add(ProjectSubSecArtificateDocumentHistory);
-            _uow.Save();
+             _context.Save();
         }
     }
 }

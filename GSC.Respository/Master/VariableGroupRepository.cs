@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class VariableGroupRepository : GenericRespository<VariableGroup, GscContext>, IVariableGroupRepository
+    public class VariableGroupRepository : GenericRespository<VariableGroup>, IVariableGroupRepository
     {
-        public VariableGroupRepository(IUnitOfWork<GscContext> uow,
+        public VariableGroupRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

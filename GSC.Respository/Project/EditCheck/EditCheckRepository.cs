@@ -18,7 +18,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.EditCheck
 {
-    public class EditCheckRepository : GenericRespository<Data.Entities.Project.EditCheck.EditCheck, GscContext>,
+    public class EditCheckRepository : GenericRespository<Data.Entities.Project.EditCheck.EditCheck>,
         IEditCheckRepository
     {
         private readonly INumberFormatRepository _numberFormatRepository;
@@ -27,14 +27,14 @@ namespace GSC.Respository.Project.EditCheck
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IMapper _mapper;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public EditCheckRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public EditCheckRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository,
             IMapper mapper,
             IEditCheckDetailRepository editCheckDetailRepository,
             IEditCheckRuleRepository editCheckRuleRepository,
-            INumberFormatRepository numberFormatRepository) : base(uow, jwtTokenAccesser)
+            INumberFormatRepository numberFormatRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
@@ -42,7 +42,7 @@ namespace GSC.Respository.Project.EditCheck
             _editCheckDetailRepository = editCheckDetailRepository;
             _editCheckRuleRepository = editCheckRuleRepository;
             _mapper = mapper;
-            _uow = uow;
+            _context = context;
         }
 
         public List<EditCheckDto> GetAll(int projectDesignId, bool isDeleted)
@@ -73,11 +73,11 @@ namespace GSC.Respository.Project.EditCheck
                 IsReferenceVerify = r.IsReferenceVerify,
                 IsDeleted = r.DeletedDate != null,
                 CreatedDate = r.CreatedDate,
-                CreatedByUser = Context.Users.Where(x => x.Id == r.CreatedBy).FirstOrDefault().UserName,
+                CreatedByUser = _context.Users.Where(x => x.Id == r.CreatedBy).FirstOrDefault().UserName,
                 ModifiedDate = r.ModifiedDate,
-                ModifiedByUser = Context.Users.Where(x => x.Id == r.ModifiedBy).FirstOrDefault().UserName,
+                ModifiedByUser = _context.Users.Where(x => x.Id == r.ModifiedBy).FirstOrDefault().UserName,
                 DeletedDate = r.DeletedDate,
-                DeletedByUser = Context.Users.Where(x => x.Id == r.DeletedBy).FirstOrDefault().UserName,
+                DeletedByUser = _context.Users.Where(x => x.Id == r.DeletedBy).FirstOrDefault().UserName,
             })
             .OrderByDescending(x => x.Id).ToList();
         }
@@ -202,7 +202,7 @@ namespace GSC.Respository.Project.EditCheck
                              ? ""
                              :
                                IsMultiCollection(x.CollectionSource)
-                                       ? string.Join(", ", Context.ProjectDesignVariableValue
+                                       ? string.Join(", ", _context.ProjectDesignVariableValue
                                                    .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
                                                    Select(a => a.ValueName).ToList())
                                        : x.CollectionValue;
@@ -230,7 +230,7 @@ namespace GSC.Respository.Project.EditCheck
 
             Update(editCheck);
 
-            _uow.Save();
+             _context.Save();
 
             return editCheck;
         }
@@ -267,7 +267,7 @@ namespace GSC.Respository.Project.EditCheck
             List<int> result = new List<int>();
             if (!string.IsNullOrEmpty(collectionValue))
             {
-                collectionValue.Split(",").ForEach(x => { result.Add(Convert.ToInt32(x)); });
+                collectionValue.Split(",").ToList().ForEach(x => { result.Add(Convert.ToInt32(x)); });
             }
             return result;
         }
@@ -292,12 +292,12 @@ namespace GSC.Respository.Project.EditCheck
 
         private string GetFormula(int id, bool isTarget)
         {
-            var variableValues = Context.EditCheckDetail.
+            var variableValues = _context.EditCheckDetail.
                 Where(x => x.EditCheckId == id
                 && x.IsTarget == isTarget
                 && x.DeletedDate == null).Select(r => r.CollectionValue).ToList();
 
-            var result = Context.EditCheckDetail.Where(x => x.EditCheckId == id
+            var result = _context.EditCheckDetail.Where(x => x.EditCheckId == id
                                                             && x.IsTarget == isTarget
                                                             && x.DeletedDate == null)
                 .Select(r => new EditCheckDetailDto
@@ -352,7 +352,7 @@ namespace GSC.Respository.Project.EditCheck
                 var collectionValue = (string.IsNullOrEmpty(x.CollectionValue) ? ""
                          : IsMultiCollection(x.CollectionSource) ?
                          Convert.ToString(IsInFilter(x.Operator) ? "(" : "") +
-                         string.Join(", ", Context.ProjectDesignVariableValue
+                         string.Join(", ", _context.ProjectDesignVariableValue
                          .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
                          Select(a => a.ValueName).ToList()) +
                          Convert.ToString(IsInFilter(x.Operator) ? ")" : "")

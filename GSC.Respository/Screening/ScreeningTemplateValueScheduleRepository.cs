@@ -11,12 +11,12 @@ using Microsoft.EntityFrameworkCore;
 namespace GSC.Respository.Screening
 {
     public class ScreeningTemplateValueScheduleRepository :
-        GenericRespository<ScreeningTemplateValueSchedule, GscContext>, IScreeningTemplateValueScheduleRepository
+        GenericRespository<ScreeningTemplateValueSchedule>, IScreeningTemplateValueScheduleRepository
     {
         private readonly List<int> _projectDesignVariableId = new List<int>();
 
-        public ScreeningTemplateValueScheduleRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        public ScreeningTemplateValueScheduleRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
         }
 

@@ -14,21 +14,22 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class CountryRepository : GenericRespository<Country, GscContext>, ICountryRepository
+    public class CountryRepository : GenericRespository<Country>, ICountryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IMapper _mapper;
-
-        public CountryRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public CountryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _mapper = mapper;
+            _context = context;
         }
 
         public List<DropDownDto> GetCountryDropDown()
@@ -68,7 +69,7 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetCountryByProjectIdDropDown(int ParentProjectId)
         {
 
-            return Context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == ParentProjectId || x.Id == ParentProjectId)).Select(r => new DropDownDto
+            return _context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == ParentProjectId || x.Id == ParentProjectId)).Select(r => new DropDownDto
             {
                 Id = r.CountryId,
                 Value = r.Country.CountryName,

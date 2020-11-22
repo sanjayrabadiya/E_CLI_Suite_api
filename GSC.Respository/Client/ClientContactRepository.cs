@@ -9,11 +9,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Client
 {
-    public class ClientContactRepository : GenericRespository<ClientContact, GscContext>, IClientContactRepository
+    public class ClientContactRepository : GenericRespository<ClientContact>, IClientContactRepository
     {
-        public ClientContactRepository(IUnitOfWork<GscContext> uow,
+        public ClientContactRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 

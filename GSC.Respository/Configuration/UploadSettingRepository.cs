@@ -7,13 +7,13 @@ using GSC.Shared;
 
 namespace GSC.Respository.Configuration
 {
-    public class UploadSettingRepository : GenericRespository<UploadSetting, GscContext>, IUploadSettingRepository
+    public class UploadSettingRepository : GenericRespository<UploadSetting>, IUploadSettingRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public UploadSettingRepository(IUnitOfWork<GscContext> uow,
+        public UploadSettingRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

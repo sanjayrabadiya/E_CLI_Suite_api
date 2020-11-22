@@ -12,18 +12,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.EmailSender
 {
-    public class EmailSenderRespository : GenericRespository<EmailTemplate, GscContext>, IEmailSenderRespository
+    public class EmailSenderRespository : GenericRespository<EmailTemplate>, IEmailSenderRespository
     {
-        private readonly GscContext _context;
+        private readonly IGSCContext _context;
         private readonly IEmailService _emailService;
 
-        public EmailSenderRespository(IUnitOfWork<GscContext> uow,
+        public EmailSenderRespository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IEmailService emailService)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _emailService = emailService;
-            _context = uow.Context;
+            _context = context;
         }
 
         public void SendRegisterEMail(string toMail, string password, string userName)

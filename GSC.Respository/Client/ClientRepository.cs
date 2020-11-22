@@ -13,17 +13,17 @@ using GSC.Shared;
 
 namespace GSC.Respository.Client
 {
-    public class ClientRepository : GenericRespository<Data.Entities.Client.Client, GscContext>, IClientRepository
+    public class ClientRepository : GenericRespository<Data.Entities.Client.Client>, IClientRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IMapper _mapper;
 
-        public ClientRepository(IUnitOfWork<GscContext> uow,
+        public ClientRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IUploadSettingRepository uploadSettingRepository,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _uploadSettingRepository = uploadSettingRepository;

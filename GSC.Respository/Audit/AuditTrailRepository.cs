@@ -11,16 +11,16 @@ using GSC.Shared;
 
 namespace GSC.Respository.Audit
 {
-    public class AuditTrailRepository : GenericRespository<AuditTrail, GscContext>, IAuditTrailRepository
+    public class AuditTrailRepository : GenericRespository<AuditTrail>, IAuditTrailRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public AuditTrailRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public AuditTrailRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
         }
 
         public void Save(AuditModule moduleId, AuditTable tableId, AuditAction action, int recordId,
@@ -59,7 +59,7 @@ namespace GSC.Respository.Audit
                 Add(t);
             });
 
-            _uow.Save();
+            _context.Save();
         }
 
         public IList<AuditTrailDto> Search(AuditTrailDto search)
@@ -133,10 +133,10 @@ namespace GSC.Respository.Audit
                 ActionName = x.Action.GetDescription(),
                 ReasonName = x.Reason.ReasonName,
                 UserName = x.User.UserName,
-                UserRoleName = Context.SecurityRole.First(t => t.Id == x.UserRoleId).RoleName,
+                UserRoleName = _context.SecurityRole.First(t => t.Id == x.UserRoleId).RoleName,
                 IpAddress = x.IpAddress,
                 TimeZone = x.TimeZone,
-                VolunteerName = Context.Volunteer
+                VolunteerName = _context.Volunteer
                     .Where(c => c.Id == x.RecordId && x.TableId == AuditTable.Volunteer || c.Id == x.ParentRecordId)
                     .Select(a => a.VolunteerNo + " - " + a.FullName).FirstOrDefault()
             }).OrderByDescending(x => x.Id).ToList();

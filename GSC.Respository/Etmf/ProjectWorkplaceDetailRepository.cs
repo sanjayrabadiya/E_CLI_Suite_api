@@ -12,22 +12,23 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectWorkplaceDetailRepository : GenericRespository<ProjectWorkplaceDetail, GscContext>, IProjectWorkplaceDetailRepository
+    public class ProjectWorkplaceDetailRepository : GenericRespository<ProjectWorkplaceDetail>, IProjectWorkplaceDetailRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public ProjectWorkplaceDetailRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public ProjectWorkplaceDetailRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public List<DropDownDto> GetCountryByWorkplace(int ParentProjectId)
         {
-            var data = (from workplace in Context.ProjectWorkplace.Where(x => x.ProjectId == ParentProjectId)
-                        join workplacedetail in Context.ProjectWorkplaceDetail.Where(x => x.DeletedDate == null && x.WorkPlaceFolderId == (int) WorkPlaceFolder.Country ) on workplace.Id equals workplacedetail.ProjectWorkplaceId
-                        join country in Context.Country.Where(x => x.DeletedDate == null) on workplacedetail.ItemId equals country.Id
+            var data = (from workplace in _context.ProjectWorkplace.Where(x => x.ProjectId == ParentProjectId)
+                        join workplacedetail in _context.ProjectWorkplaceDetail.Where(x => x.DeletedDate == null && x.WorkPlaceFolderId == (int) WorkPlaceFolder.Country ) on workplace.Id equals workplacedetail.ProjectWorkplaceId
+                        join country in _context.Country.Where(x => x.DeletedDate == null) on workplacedetail.ItemId equals country.Id
                         select new DropDownDto
                         {
                             Id = workplacedetail.Id,
@@ -41,9 +42,9 @@ namespace GSC.Respository.Etmf
 
         public List<DropDownDto> GetSiteByWorkplace(int ParentProjectId)
         {
-            var data = (from workplace in Context.ProjectWorkplace.Where(x => x.ProjectId == ParentProjectId)
-                        join workplacedetail in Context.ProjectWorkplaceDetail.Where(x => x.DeletedDate == null && x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site) on workplace.Id equals workplacedetail.ProjectWorkplaceId
-                        join project in Context.Project.Where(x => x.DeletedDate == null) on workplacedetail.ItemId equals project.Id
+            var data = (from workplace in _context.ProjectWorkplace.Where(x => x.ProjectId == ParentProjectId)
+                        join workplacedetail in _context.ProjectWorkplaceDetail.Where(x => x.DeletedDate == null && x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site) on workplace.Id equals workplacedetail.ProjectWorkplaceId
+                        join project in _context.Project.Where(x => x.DeletedDate == null) on workplacedetail.ItemId equals project.Id
                         select new DropDownDto
                         {
                             Id = workplacedetail.Id,

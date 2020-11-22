@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class BlockCategoryRepository : GenericRespository<BlockCategory, GscContext>, IBlockCategoryRepository
+    public class BlockCategoryRepository : GenericRespository<BlockCategory>, IBlockCategoryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public BlockCategoryRepository(IUnitOfWork<GscContext> uow,
+        public BlockCategoryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

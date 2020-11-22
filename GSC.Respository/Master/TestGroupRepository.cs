@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class TestGroupRepository : GenericRespository<TestGroup, GscContext>, ITestGroupRepository
+    public class TestGroupRepository : GenericRespository<TestGroup>, ITestGroupRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public TestGroupRepository(IUnitOfWork<GscContext> uow,
+        public TestGroupRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

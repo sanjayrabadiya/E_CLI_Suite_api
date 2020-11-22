@@ -12,15 +12,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class AuditReasonRepository : GenericRespository<AuditReason, GscContext>, IAuditReasonRepository
+    public class AuditReasonRepository : GenericRespository<AuditReason>, IAuditReasonRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public AuditReasonRepository(IUnitOfWork<GscContext> uow,
+        public AuditReasonRepository(IGSCContext context,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

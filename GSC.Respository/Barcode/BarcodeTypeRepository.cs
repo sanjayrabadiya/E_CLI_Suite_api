@@ -9,13 +9,13 @@ using GSC.Shared;
 
 namespace GSC.Respository.Barcode
 {
-    public class BarcodeTypeRepository : GenericRespository<BarcodeType, GscContext>, IBarcodeTypeRepository
+    public class BarcodeTypeRepository : GenericRespository<BarcodeType>, IBarcodeTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public BarcodeTypeRepository(IUnitOfWork<GscContext> uow,
+        public BarcodeTypeRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

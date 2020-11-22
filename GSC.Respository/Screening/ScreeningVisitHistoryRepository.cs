@@ -12,13 +12,13 @@ using System.Text;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningVisitHistoryRepository : GenericRespository<ScreeningVisitHistory, GscContext>, IScreeningVisitHistoryRepository
+    public class ScreeningVisitHistoryRepository : GenericRespository<ScreeningVisitHistory>, IScreeningVisitHistoryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public ScreeningVisitHistoryRepository(IUnitOfWork<GscContext> uow,
+        public ScreeningVisitHistoryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

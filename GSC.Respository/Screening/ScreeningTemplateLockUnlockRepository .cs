@@ -12,25 +12,27 @@ using System.Linq;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningTemplateLockUnlockRepository : GenericRespository<ScreeningTemplateLockUnlockAudit, GscContext>, IScreeningTemplateLockUnlockRepository
+    public class ScreeningTemplateLockUnlockRepository : GenericRespository<ScreeningTemplateLockUnlockAudit>, IScreeningTemplateLockUnlockRepository
     {
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public ScreeningTemplateLockUnlockRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        private readonly IGSCContext _context;
+        public ScreeningTemplateLockUnlockRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
             IProjectWorkflowRepository projectWorkflowRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public void Insert(ScreeningTemplateLockUnlockAudit screeningTemplateLockUnlock)
@@ -43,9 +45,9 @@ namespace GSC.Respository.Screening
 
         public List<LockUnlockHistoryListDto> ProjectLockUnLockHistory(int projectId, int ParentProjectId)
         {
-            var ProjectCode = Context.Project.Find(ParentProjectId).ProjectCode;
+            var ProjectCode = _context.Project.Find(ParentProjectId).ProjectCode;
 
-            var parent = Context.Project.Where(x => (x.Id == projectId) || (x.ParentProjectId == projectId)).Select(x => x.Id).ToList();
+            var parent = _context.Project.Where(x => (x.Id == projectId) || (x.ParentProjectId == projectId)).Select(x => x.Id).ToList();
 
             var result = All.Where(y => parent.Contains(y.ProjectId)).Select(x => new LockUnlockHistoryListDto
             {
@@ -68,13 +70,13 @@ namespace GSC.Respository.Screening
                 IpAddress = x.IpAddress,
                 TimeZone = x.TimeZone,
                 CreatedBy = x.CreatedBy,
-                CreatedByName = Context.Users.Where(u => u.Id == x.CreatedBy).FirstOrDefault().UserName + " (" + Context.SecurityRole.Where(u => u.Id == x.CreatedRoleBy).FirstOrDefault().RoleShortName + ") ",
-                CreatedRoleByName = Context.SecurityRole.Where(u => u.Id == x.CreatedRoleBy).FirstOrDefault().RoleShortName,
+                CreatedByName = _context.Users.Where(u => u.Id == x.CreatedBy).FirstOrDefault().UserName + " (" + _context.SecurityRole.Where(u => u.Id == x.CreatedRoleBy).FirstOrDefault().RoleShortName + ") ",
+                CreatedRoleByName = _context.SecurityRole.Where(u => u.Id == x.CreatedRoleBy).FirstOrDefault().RoleShortName,
                 CreatedRoleBy = x.CreatedRoleBy,
                 CreatedDate = x.CreatedDate,
                 AuditReasonComment = x.AuditReasonComment,
                 AuditReasonId = x.AuditReasonId,
-                AuditReasonName = Context.AuditReason.FirstOrDefault(y => y.Id == x.AuditReasonId).ReasonName,
+                AuditReasonName = _context.AuditReason.FirstOrDefault(y => y.Id == x.AuditReasonId).ReasonName,
                 ProjectName = x.ScreeningEntry.Project.ParentProjectId != null ? x.ScreeningEntry.Project.ProjectCode : null,
                 ProjectCode = ProjectCode,
                 ParentProjectId = x.ScreeningEntry.Project.ParentProjectId,

@@ -9,13 +9,13 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class TemplateRightsRepository : GenericRespository<TemplateRights, GscContext>, ITemplateRightsRepository
+    public class TemplateRightsRepository : GenericRespository<TemplateRights>, ITemplateRightsRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public TemplateRightsRepository(IUnitOfWork<GscContext> uow,
+        public TemplateRightsRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

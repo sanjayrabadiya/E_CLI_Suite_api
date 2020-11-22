@@ -11,14 +11,14 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class DomainClassRepository : GenericRespository<DomainClass, GscContext>, IDomainClassRepository
+    public class DomainClassRepository : GenericRespository<DomainClass>, IDomainClassRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public DomainClassRepository(IUnitOfWork<GscContext> uow,
+        public DomainClassRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

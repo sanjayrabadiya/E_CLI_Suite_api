@@ -12,13 +12,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Pharmacy
 {
-    public class PharmacyTemplateValueRepository : GenericRespository<PharmacyTemplateValue, GscContext>,
+    public class PharmacyTemplateValueRepository : GenericRespository<PharmacyTemplateValue>,
         IPharmacyTemplateValueRepository
     {
-        public PharmacyTemplateValueRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser
+        private readonly IGSCContext _context;
+        public PharmacyTemplateValueRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser
         )
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
+            _context = context;
         }
 
         //public void UpdateVariableOnSubmit(int projectDesignTemplateId, int pharmacyTemplateId)
@@ -101,8 +103,8 @@ namespace GSC.Respository.Pharmacy
                                                  && x.VariableId == pharmacyTemplateValue.VariableId
                                                  && x.Value == pharmacyTemplateValue.Value
                                                  && x.Status == pharmacyTemplateValue.Status
-                //&& x.ReviewLevel == pharmacyTemplateValue.ReviewLevel
-                //&& x.AcknowledgeLevel == pharmacyTemplateValue.AcknowledgeLevel
+            //&& x.ReviewLevel == pharmacyTemplateValue.ReviewLevel
+            //&& x.AcknowledgeLevel == pharmacyTemplateValue.AcknowledgeLevel
             );
             if (result != null)
                 return result;
@@ -113,12 +115,12 @@ namespace GSC.Respository.Pharmacy
         public VariableDto GetPharmacyVariable(VariableDto designVariableDto, int pharmacyEntryId)
         {
             //designTemplateDto.StatusName = getStatusName(screeningTemplateObject, workflowlevel.LevelNo == screeningTemplateObject.ReviewLevel);
-            var values = Context.PharmacyTemplateValue.Where(t => t.PharmacyEntryId == pharmacyEntryId).ToList();
+            var values = _context.PharmacyTemplateValue.Where(t => t.PharmacyEntryId == pharmacyEntryId).ToList();
             values.ForEach(t =>
             {
                 var variable = designVariableDto;
                 //var variable = designVariableDto..FirstOrDefault(v => v.Id == t.ProjectDesignVariableId);
-                //var variable = Context.Variable.Where(x => x.Id == pharmacyTemplate.VariableId).FirstOrDefault();
+                //var variable = _context.Variable.Where(x => x.Id == pharmacyTemplate.VariableId).FirstOrDefault();
                 if (variable != null)
                     variable.Id = t.Id;
                 //variable.VariableName = t.;

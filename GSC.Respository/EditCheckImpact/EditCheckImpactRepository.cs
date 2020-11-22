@@ -15,13 +15,13 @@ using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-
+using GSC.Common.Base;
 
 namespace GSC.Respository.EditCheckImpact
 {
-    public class EditCheckImpactRepository : GenericRespository<ScreeningTemplate, GscContext>, IEditCheckImpactRepository
+    public class EditCheckImpactRepository : GenericRespository<ScreeningTemplate>, IEditCheckImpactRepository
     {
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IImpactService _impactService;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
@@ -36,7 +36,7 @@ namespace GSC.Respository.EditCheckImpact
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IScreeningTemplateLockUnlockRepository _screeningTemplateLockUnlockRepository;
         public EditCheckImpactRepository(IImpactService editCheckImpactService,
-            IMapper mapper, IUnitOfWork<GscContext> uow,
+            IMapper mapper, IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateLockUnlockRepository screeningTemplateLockUnlockRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
@@ -46,11 +46,11 @@ namespace GSC.Respository.EditCheckImpact
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
-            IEditCheckRuleRepository editCheckRuleRepository) : base(uow, jwtTokenAccesser)
+            IEditCheckRuleRepository editCheckRuleRepository) : base(context)
         {
             _impactService = editCheckImpactService;
             _mapper = mapper;
-            _uow = uow;
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateLockUnlockRepository = screeningTemplateLockUnlockRepository;
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
@@ -71,7 +71,7 @@ namespace GSC.Respository.EditCheckImpact
             if (!isQuery)
             {
                 var editCheckIds = result.Where(x => x.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId && x.IsTarget).Select(t => t.EditCheckId).ToList();
-                result.Where(t => !editCheckIds.Contains(t.EditCheckId)).ForEach(b => b.IsSkip = true);
+                result.Where(t => !editCheckIds.Contains(t.EditCheckId)).ToList().ForEach(b => b.IsSkip = true);
             }
 
             result.ForEach(r =>
@@ -121,7 +121,7 @@ namespace GSC.Respository.EditCheckImpact
             if (editCheckIds == null || editCheckIds.Count == 0)
                 return new List<EditCheckTargetValidationList>();
 
-            Context.DetectionAll();
+            _context.DetachAllEntities();
 
             var result = _impactService.GetEditCheckByVaiableId(projectDesignTemplateId, projectDesignVariableId, editCheckIds);
 
@@ -185,14 +185,14 @@ namespace GSC.Respository.EditCheckImpact
                 else
                     UpdateEnableTemplate(0, (int)r.DomainId, screeningEntryId, r, editTargetValidation);
             });
-            _uow.Save();
+            _context.Save();
 
             var variableResult = UpdateVariale(targetResult.Where(r => r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation).ToList(), true, isQueryRaise);
 
             if (variableResult != null)
                 editTargetValidation.AddRange(variableResult);
 
-            _uow.Save();
+            _context.Save();
         }
 
         public List<EditCheckTargetValidationList> UpdateVariale(List<EditCheckValidateDto> editCheckValidateDto, bool isVariable, bool isQueryRaise)
@@ -350,7 +350,7 @@ namespace GSC.Respository.EditCheckImpact
                     UnLockTemplate(r);
 
                 Update(r);
-                _uow.Save();
+                _context.Save();
 
 
             });
@@ -569,11 +569,10 @@ namespace GSC.Respository.EditCheckImpact
                 if (isDisable && string.IsNullOrEmpty(value))
                     screeningTemplateValue.IsNa = false;
 
-                screeningTemplateValue.ObjectState = ObjectState.Modified;
                 _screeningTemplateValueRepository.Update(screeningTemplateValue);
             }
-            _uow.Save();
-            Context.DetectionAll();
+            _context.Save();
+            _context.DetachAllEntities();
 
             return screeningTemplateValue.Id;
         }
@@ -626,8 +625,8 @@ namespace GSC.Respository.EditCheckImpact
                 if (isUnLock)
                     Update(screeningTemplate);
 
-                _uow.Save();
-                Context.DetectionAll();
+                _context.Save();
+                _context.DetachAllEntities();
 
                 return true;
             }
@@ -642,7 +641,7 @@ namespace GSC.Respository.EditCheckImpact
             if (screeningTemplate != null && screeningTemplate.IsLocked)
             {
                 var screeningVisit = All.AsNoTracking().Where(x => x.Id == screeningTemplate.Id).Select(t => new { t.ScreeningVisit.ScreeningEntry.ProjectId, t.ScreeningVisit.ScreeningEntryId }).FirstOrDefault();
-                var auditReasonId = Context.AuditReason.Where(x => x.ModuleId == AuditModule.Common && x.IsOther && x.DeletedDate == null).Select(t => t.Id).FirstOrDefault();
+                var auditReasonId = _context.AuditReason.Where(x => x.ModuleId == AuditModule.Common && x.IsOther && x.DeletedDate == null).Select(t => t.Id).FirstOrDefault();
                 screeningTemplate.IsLocked = false;
                 Update(screeningTemplate);
                 var lockAudit = new ScreeningTemplateLockUnlockAudit

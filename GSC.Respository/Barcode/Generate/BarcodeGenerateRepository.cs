@@ -11,15 +11,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Barcode.Generate
 {
-    public class BarcodeGenerateRepository : GenericRespository<BarcodeGenerate, GscContext>, IBarcodeGenerateRepository
+    public class BarcodeGenerateRepository : GenericRespository<BarcodeGenerate>, IBarcodeGenerateRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public BarcodeGenerateRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public BarcodeGenerateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+           _context = context;
         }
 
         public List<BarcodeGenerateDto> GetBarcodeGenerate(bool isDeleted)
@@ -38,19 +39,19 @@ namespace GSC.Respository.Barcode.Generate
 
         public async Task<List<BarcodeGenerateDto>> GetGenerateBarcodeDetail(int[] templateId)
         {
-            return await  (from barcodeGenerate in Context.BarcodeGenerate.Where(x =>
+            return await  (from barcodeGenerate in _context.BarcodeGenerate.Where(x =>
                     templateId.Contains(x.ProejctDesignTemplateId))
-                join barcodeSubjectDetail in Context.BarcodeSubjectDetail.Where(t => t.DeletedDate == null) on
+                join barcodeSubjectDetail in _context.BarcodeSubjectDetail.Where(t => t.DeletedDate == null) on
                     barcodeGenerate.Id equals barcodeSubjectDetail.BarcodeGenerateId
-                join projectSubject in Context.ProjectSubject.Where(t => t.DeletedDate == null) on barcodeSubjectDetail
+                join projectSubject in _context.ProjectSubject.Where(t => t.DeletedDate == null) on barcodeSubjectDetail
                     .ProjectSubjectId equals projectSubject.Id
-                join projectDesignTemplate in Context.ProjectDesignTemplate.Where(t => t.DeletedDate == null) on
+                join projectDesignTemplate in _context.ProjectDesignTemplate.Where(t => t.DeletedDate == null) on
                     barcodeGenerate.ProejctDesignTemplateId equals projectDesignTemplate.Id
-                join project in Context.Project.Where(t => t.DeletedDate == null) on projectSubject.ProjectId equals
+                join project in _context.Project.Where(t => t.DeletedDate == null) on projectSubject.ProjectId equals
                     project.Id
-                join users in Context.Users.Where(t => t.DeletedDate == null) on barcodeGenerate.CreatedBy equals users
+                join users in _context.Users.Where(t => t.DeletedDate == null) on barcodeGenerate.CreatedBy equals users
                     .Id
-                from volunteer in Context.Volunteer
+                from volunteer in _context.Volunteer
                     .Where(x => x.DeletedBy == null && x.Id == projectSubject.VolunteerId).DefaultIfEmpty()
                 select new BarcodeGenerateDto
                 {

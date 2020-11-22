@@ -73,7 +73,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+          
             _departmentRepository.Add(clientType);
             if (_uow.Save() <= 0) throw new Exception("Creating Client Type failed on save.");
             return Ok(clientType.Id);

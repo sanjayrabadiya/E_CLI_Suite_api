@@ -6,12 +6,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class RefreshTokenRepository : GenericRespository<RefreshToken, GscContext>, IRefreshTokenRepository
+    public class RefreshTokenRepository : GenericRespository<RefreshToken>, IRefreshTokenRepository
     {
         public RefreshTokenRepository(
-            IUnitOfWork<GscContext> uow,
+            IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

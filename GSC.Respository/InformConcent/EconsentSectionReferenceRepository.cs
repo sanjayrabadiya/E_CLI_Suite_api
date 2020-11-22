@@ -17,16 +17,16 @@ using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 
 namespace GSC.Respository.InformConcent
 {
-    public class EconsentSectionReferenceRepository : GenericRespository<EconsentSectionReference, GscContext>, IEconsentSectionReferenceRepository
+    public class EconsentSectionReferenceRepository : GenericRespository<EconsentSectionReference>, IEconsentSectionReferenceRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         
-        public EconsentSectionReferenceRepository(IUnitOfWork<GscContext> uow, 
+        public EconsentSectionReferenceRepository(IGSCContext context, 
             IJwtTokenAccesser jwtTokenAccesser,
             IEconsentSetupRepository econsentSetupRepository,
-            IUploadSettingRepository uploadSettingRepository) : base(uow, jwtTokenAccesser)
+            IUploadSettingRepository uploadSettingRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _econsentSetupRepository = econsentSetupRepository;

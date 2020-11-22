@@ -15,19 +15,21 @@ using System.Linq;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectSubSecArtificateDocumentApproverRepository : GenericRespository<ProjectSubSecArtificateDocumentApprover, GscContext>, IProjectSubSecArtificateDocumentApproverRepository
+    public class ProjectSubSecArtificateDocumentApproverRepository : GenericRespository<ProjectSubSecArtificateDocumentApprover>, IProjectSubSecArtificateDocumentApproverRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
-        public ProjectSubSecArtificateDocumentApproverRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public ProjectSubSecArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
            IEmailSenderRespository emailSenderRespository,
            IUserRepository userRepository)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
             _emailSenderRespository = emailSenderRespository;
@@ -36,7 +38,7 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id)
         {
-            var users = Context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId).Select(c => new ProjectSubSecArtificateDocumentReviewDto
+            var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId).Select(c => new ProjectSubSecArtificateDocumentReviewDto
             {
                 UserId = c.Id,
                 Name = c.UserName,
@@ -84,7 +86,7 @@ namespace GSC.Respository.Etmf
                     s.ProjectWorkplaceSubSecArtificateDocument.DocumentName,
                     ExtraData = s.ProjectWorkplaceSubSecArtificateDocumentId,
                     CreatedDate = s.CreatedDate,
-                    CreatedByUser = Context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                    CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.Approved.GetDescription(),
                     Level = 5.2
@@ -102,14 +104,14 @@ namespace GSC.Respository.Etmf
                     DocumentName = x.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
                     //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
                     ProjectArtificateDocumentHistoryId = x.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
-                    UserName = Context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+                    UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                     UserId = x.UserId,
                     IsApproved = x.IsApproved,
                     ProjectWorkplaceSubSecArtificateDocumentId = x.ProjectWorkplaceSubSecArtificateDocumentId,
                     CreatedDate = x.CreatedDate,
-                    CreatedByUser = Context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
                     ModifiedDate = x.ModifiedDate,
-                    ModifiedByUser = Context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
                     Comment = x.Comment
                 }).OrderByDescending(x => x.Id).ToList();
 

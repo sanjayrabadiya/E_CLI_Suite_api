@@ -9,12 +9,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.Volunteer
 {
-    public class VolunteerLanguageRepository : GenericRespository<VolunteerLanguage, GscContext>,
+    public class VolunteerLanguageRepository : GenericRespository<VolunteerLanguage>,
         IVolunteerLanguageRepository
     {
-        public VolunteerLanguageRepository(IUnitOfWork<GscContext> uow,
+        public VolunteerLanguageRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 

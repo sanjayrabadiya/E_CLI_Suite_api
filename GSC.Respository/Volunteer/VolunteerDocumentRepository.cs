@@ -8,12 +8,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.Volunteer
 {
-    public class VolunteerDocumentRepository : GenericRespository<VolunteerDocument, GscContext>,
+    public class VolunteerDocumentRepository : GenericRespository<VolunteerDocument>,
         IVolunteerDocumentRepository
     {
-        public VolunteerDocumentRepository(IUnitOfWork<GscContext> uow,
+        public VolunteerDocumentRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 
@@ -25,13 +25,13 @@ namespace GSC.Respository.Volunteer
             //foreach (var document in documents)
             //{
             //    var id = document.DocumentTypeId;
-            //    document.DocumentTypeName = id > 0 ? Context.Countries.Find(id).CountryName : "";
+            //    document.DocumentTypeName = id > 0 ? _context.Countries.Find(id).CountryName : "";
 
             //    id = document.Location.StateId;
-            //    document.Location.StateName = id > 0 ? Context.State.Find(id).StateName : "";
+            //    document.Location.StateName = id > 0 ? _context.State.Find(id).StateName : "";
 
             //    id = document.Location.CityId;
-            //    document.Location.CityName = id > 0 ? Context.City.Find(id).CityName : "";
+            //    document.Location.CityName = id > 0 ? _context.City.Find(id).CityName : "";
             //}
 
             return documents;

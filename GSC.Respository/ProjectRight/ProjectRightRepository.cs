@@ -13,26 +13,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.ProjectRight
 {
-    public class ProjectRightRepository : GenericRespository<Data.Entities.ProjectRight.ProjectRight, GscContext>,
+    public class ProjectRightRepository : GenericRespository<Data.Entities.ProjectRight.ProjectRight>,
         IProjectRightRepository
     {
         private readonly IProjectDocumentReviewRepository _documentReviewRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
 
-        public ProjectRightRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        public ProjectRightRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IProjectDocumentReviewRepository documentReviewRepository
-            ) : base(uow, jwtTokenAccesser)
+            ) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
             _documentReviewRepository = documentReviewRepository;
         }
 
         public List<ProjectRightListDto> GetProjectRights()
         {
-            var projects = Context.Project.Where(x =>
-                x.DeletedDate == null && Context.ProjectRight.Any(c => c.DeletedDate == null
+            var projects = _context.Project.Where(x =>
+                x.DeletedDate == null && _context.ProjectRight.Any(c => c.DeletedDate == null
                                                                        && c.ProjectId == x.Id
                                                                        && c.UserId == _jwtTokenAccesser.UserId
                                                                        && c.RoleId == _jwtTokenAccesser.RoleId));
@@ -43,21 +43,21 @@ namespace GSC.Respository.ProjectRight
                 ProjectCode = x.ProjectCode,
                 ProjectName = x.ProjectName,
                 Users = string.Join(", ",
-                    Context.ProjectRight.Include(a => a.User).Where(c => c.ProjectId == x.Id && x.DeletedDate == null)
+                    _context.ProjectRight.Include(a => a.User).Where(c => c.ProjectId == x.Id && x.DeletedDate == null)
                         .Select(a => a.User.UserName).ToList()),
                 Documents = string.Join(", ",
-                    Context.ProjectDocument.Where(c => c.ProjectId == x.Id && x.DeletedDate == null)
+                    _context.ProjectDocument.Where(c => c.ProjectId == x.Id && x.DeletedDate == null)
                         .Select(a => a.FileName).ToList())
             }).ToList();
         }
 
         public List<ProjectRightDto> GetProjectRightByProjectId(int projectId)
         {
-            var roles = Context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectRightDto
+            var roles = _context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectRightDto
             {
                 RoleId = c.Id,
                 Name = c.RoleName,
-                users = Context.UserRole.Where(a => a.UserRoleId == c.Id && a.User.DeletedDate == null
+                users = _context.UserRole.Where(a => a.UserRoleId == c.Id && a.User.DeletedDate == null
                                                                          && a.DeletedDate == null).Select(r =>
                     new ProjectRightDto
                     {
@@ -93,8 +93,8 @@ namespace GSC.Respository.ProjectRight
                                                                                  x.DeletedDate == null
                                                                                  && !x.IsReview);
 
-                    var checkparentTrainig = Context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId;
-                    var checkchildTrainig = Context.Project.Where(x => x.ParentProjectId == projectId).ToList();
+                    var checkparentTrainig = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId;
+                    var checkchildTrainig = _context.Project.Where(x => x.ParentProjectId == projectId).ToList();
 
                     var isProjectRightFound = new Data.Entities.ProjectRight.ProjectRight();
                     var isProjectRightUserFound = new Data.Entities.ProjectRight.ProjectRight();
@@ -191,18 +191,18 @@ namespace GSC.Respository.ProjectRight
         {
             List<Data.Entities.Master.Project> allChild;
 
-            var projectParent = Context.Project.AsNoTracking().Where(x => x.Id == projectId).SingleOrDefault();
+            var projectParent = _context.Project.AsNoTracking().Where(x => x.Id == projectId).SingleOrDefault();
             if (projectParent != null && projectParent.ParentProjectId != null)
             {
-                allChild = Context.Project.AsNoTracking().Where(x => x.ParentProjectId == projectParent.ParentProjectId
-                                                                     && Context.ProjectRight.AsNoTracking().Any(a =>
+                allChild = _context.Project.AsNoTracking().Where(x => x.ParentProjectId == projectParent.ParentProjectId
+                                                                     && _context.ProjectRight.AsNoTracking().Any(a =>
                                                                          a.ProjectId == x.Id
                                                                          && a.UserId == _jwtTokenAccesser.UserId
                                                                          && x.DeletedDate == null) &&
                                                                      x.DeletedDate == null).ToList();
 
-                var parentProjectExist = Context.Project.AsNoTracking().Where(x => x.Id == projectParent.ParentProjectId
-                                                                                   && Context.ProjectRight
+                var parentProjectExist = _context.Project.AsNoTracking().Where(x => x.Id == projectParent.ParentProjectId
+                                                                                   && _context.ProjectRight
                                                                                        .AsNoTracking().Any(a =>
                                                                                            a.ProjectId == x.Id
                                                                                            && a.UserId ==
@@ -213,15 +213,15 @@ namespace GSC.Respository.ProjectRight
             }
             else
             {
-                allChild = Context.Project.AsNoTracking().Where(x => x.ParentProjectId == projectId
-                                                                     && Context.ProjectRight.AsNoTracking().Any(a =>
+                allChild = _context.Project.AsNoTracking().Where(x => x.ParentProjectId == projectId
+                                                                     && _context.ProjectRight.AsNoTracking().Any(a =>
                                                                          a.ProjectId == x.Id
                                                                          && a.UserId == _jwtTokenAccesser.UserId
                                                                          && x.DeletedDate == null) &&
                                                                      x.DeletedDate == null).ToList();
 
-                var parentProjectExist = Context.Project.AsNoTracking().Where(x => x.Id == projectParent.Id
-                                                                                   && Context.ProjectRight
+                var parentProjectExist = _context.Project.AsNoTracking().Where(x => x.Id == projectParent.Id
+                                                                                   && _context.ProjectRight
                                                                                        .AsNoTracking().Any(a =>
                                                                                            a.ProjectId == x.Id
                                                                                            && a.UserId ==
@@ -239,7 +239,7 @@ namespace GSC.Respository.ProjectRight
 
                 foreach (var projectRight in projectRights)
                 {
-                    if (Context.ProjectDocumentReview.AsNoTracking().Any(x =>
+                    if (_context.ProjectDocumentReview.AsNoTracking().Any(x =>
                         x.ProjectId == allData.Id && x.UserId == projectRight.UserId &&
                         x.IsReview == false && x.DeletedDate == null))
                     {
@@ -258,7 +258,7 @@ namespace GSC.Respository.ProjectRight
                     Update(projectRight);
                 }
 
-                if (isSave) _uow.Save();
+                if (isSave) _context.Save();
             }
         }
 
@@ -278,20 +278,20 @@ namespace GSC.Respository.ProjectRight
             var result = latestProjectRight.Select(x => new ProjectDocumentReviewDto
             {
                 Id = x.Id,
-                Project = Context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault(),
-                ProjectName = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectName).FirstOrDefault(),
+                Project = _context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault(),
+                ProjectName = _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectName).FirstOrDefault(),
                 //Add By vipul on 14092020 for get study and site display on grid project access
-                ProjectNumber = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? "" : Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
-                ParentProjectCode = Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? Context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault() 
-                : Context.Project.Where(p => p.Id == x.project.ParentProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
+                ProjectNumber = _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? "" : _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
+                ParentProjectCode = _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault()
+                : _context.Project.Where(p => p.Id == x.project.ParentProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
 
                 ProjectId = x.ProjectId,
                 UserId = x.UserId,
-                UserName = Context.Users.Where(p => p.Id == x.UserId).Select(r => r.UserName).FirstOrDefault(),
+                UserName = _context.Users.Where(p => p.Id == x.UserId).Select(r => r.UserName).FirstOrDefault(),
                 AccessType = x.AuditReasonId != null ? "Revoke" : "Grant",
                 RoleId = x.RoleId,
-                RoleName = Context.ProjectRight.Where(c => c.ProjectId == x.ProjectId && c.UserId == x.UserId && c.RoleId == x.RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
-                TotalReview = Context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
+                RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.ProjectId && c.UserId == x.UserId && c.RoleId == x.RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
+                TotalReview = _context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
                                           && a.UserId == x.UserId && a.IsReview).Select(b => new ReviewDeteail
                                           {
                                               DocumentPath = b.ProjectDocument.FileName,
@@ -299,9 +299,9 @@ namespace GSC.Respository.ProjectRight
                                               ReviewNote = b.ReviewNote,
                                               TrainingDuration = b.TrainingDuration,
                                               TrainingType = b.TrainingType == null ? "" : ((TrainigType)b.TrainingType).GetDescription(),
-                                              TrainerName = Context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
+                                              TrainerName = _context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
                                           }).ToList().OrderByDescending(k => k.AssignedDate).ToList(),
-                PendingReview = Context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
+                PendingReview = _context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
                                           && a.UserId == x.UserId && !a.IsReview).Select(b => new ReviewDeteail
                                           {
                                               DocumentPath = b.ProjectDocument.FileName
@@ -314,7 +314,7 @@ namespace GSC.Respository.ProjectRight
 
             result.ForEach(r =>
             {
-                var createdByUser = Context.Users.Where(user => user.Id == r.TrainerId).FirstOrDefault();
+                var createdByUser = _context.Users.Where(user => user.Id == r.TrainerId).FirstOrDefault();
                 if (createdByUser != null) r.RollabackBy = createdByUser.UserName;
             });
 
@@ -327,12 +327,12 @@ namespace GSC.Respository.ProjectRight
                 {
                     r.TotalReview.ForEach(collection =>
                     {
-                        var projectRights = Context.ProjectRight.Where(a => a.ProjectId == r.ProjectId
+                        var projectRights = _context.ProjectRight.Where(a => a.ProjectId == r.ProjectId
                                                                                      && a.UserId == r.UserId).FirstOrDefault();
                         if (projectRights != null)
                         {
                             collection.AssignedDate = projectRights.CreatedDate;
-                            var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
+                            var createdByUser = _context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
                             if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
                         }
                     });
@@ -348,12 +348,12 @@ namespace GSC.Respository.ProjectRight
                 {
                     r.PendingReview.ForEach(collection =>
                     {
-                        var projectRights = Context.ProjectRight.Where(a => a.ProjectId == r.ProjectId
+                        var projectRights = _context.ProjectRight.Where(a => a.ProjectId == r.ProjectId
                                                                                      && a.UserId == r.UserId).FirstOrDefault();
                         if (projectRights != null)
                         {
                             collection.AssignedDate = projectRights.CreatedDate;
-                            var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
+                            var createdByUser = _context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
                             if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
                         }
                     });
@@ -372,19 +372,19 @@ namespace GSC.Respository.ProjectRight
 
             var result = projectrightlist.Select(x => new ProjectDocumentReviewDto
             {
-                ProjectName = Context.Project.Where(p => p.Id == x.ProjectId).Select(c => c.ProjectName).FirstOrDefault(),
-                ProjectNumber = Context.Project.Where(p => p.Id == x.ProjectId).Select(c => c.ProjectCode).FirstOrDefault(),
+                ProjectName = _context.Project.Where(p => p.Id == x.ProjectId).Select(c => c.ProjectName).FirstOrDefault(),
+                ProjectNumber = _context.Project.Where(p => p.Id == x.ProjectId).Select(c => c.ProjectCode).FirstOrDefault(),
                 ProjectId = x.ProjectId,
                 UserId = x.UserId,
-                UserName = Context.Users.Where(p => p.Id == x.UserId).Select(c => c.UserName).FirstOrDefault(),
+                UserName = _context.Users.Where(p => p.Id == x.UserId).Select(c => c.UserName).FirstOrDefault(),
                 IsTraning = x.IsReviewDone ? "Yes" : "No",
-                RoleName = string.Join(", ", Context.ProjectRight.Where(c => c.ProjectId == x.ProjectId
+                RoleName = string.Join(", ", _context.ProjectRight.Where(c => c.ProjectId == x.ProjectId
                                                                              && c.UserId == x.UserId)
                     .Select(a => a.role.RoleName).ToList().Distinct()),
                 AuditReasonID = x.AuditReasonId,
                 AuditReason = x.AuditReasonId == null
                     ? null
-                    : Context.AuditReason.Where(y => y.Id == x.AuditReasonId).FirstOrDefault().ReasonName,
+                    : _context.AuditReason.Where(y => y.Id == x.AuditReasonId).FirstOrDefault().ReasonName,
                 RollbackReason = x.RollbackReason,
                 TrainerId = x.DeletedBy,
                 RollbackOn = x.DeletedDate,
@@ -397,13 +397,13 @@ namespace GSC.Respository.ProjectRight
             {
                 r.CreatedDate = r.AccessType == "Revoke" ? null : r.CreatedDate;
                 r.CreatedBy = r.AccessType == "Revoke" ? null : r.CreatedBy;
-                var createdByUser = Context.Users.Where(user => user.Id == r.TrainerId).FirstOrDefault();
+                var createdByUser = _context.Users.Where(user => user.Id == r.TrainerId).FirstOrDefault();
                 if (createdByUser != null) r.RollabackBy = createdByUser.UserName;
             });
 
             result.ForEach(r =>
             {
-                var createdByUser = Context.Users.Where(user => user.Id == r.CreatedBy).FirstOrDefault();
+                var createdByUser = _context.Users.Where(user => user.Id == r.CreatedBy).FirstOrDefault();
                 if (createdByUser != null) r.CreatedByName = createdByUser.UserName;
             });
 
@@ -421,14 +421,14 @@ namespace GSC.Respository.ProjectRight
 
             grantresult.ForEach(r =>
             {
-                var createdByUser = Context.Users.Where(user => user.Id == r.CreatedBy).FirstOrDefault();
+                var createdByUser = _context.Users.Where(user => user.Id == r.CreatedBy).FirstOrDefault();
                 if (createdByUser != null) r.CreatedByName = createdByUser.UserName;
             });
 
             result.AddRange(grantresult);
 
             objdochistory.RollbackRights = result;
-            objdochistory.TotalReview = Context.ProjectDocumentReview.Where(a => a.ProjectId == projectId
+            objdochistory.TotalReview = _context.ProjectDocumentReview.Where(a => a.ProjectId == projectId
                                                                                  && a.UserId == userId).Select(b =>
                 new ReviewDeteail
                 {
@@ -437,23 +437,23 @@ namespace GSC.Respository.ProjectRight
                     ReviewNote = b.ReviewNote,
                     TrainingDuration = b.TrainingDuration,
                     TrainingType = b.TrainingType == null ? "" : ((TrainigType)b.TrainingType).GetDescription(),
-                    TrainerName = Context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
+                    TrainerName = _context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
                 }).ToList().OrderByDescending(k => k.AssignedDate).ToList();
 
             objdochistory.TotalReview.ForEach(collection =>
             {
-                var projectRights = Context.ProjectRight.Where(a => a.ProjectId == projectId
+                var projectRights = _context.ProjectRight.Where(a => a.ProjectId == projectId
                                                                              && a.UserId == userId).FirstOrDefault();
                 if (projectRights != null)
                 {
                     collection.AssignedDate = projectRights.CreatedDate;
-                    var createdByUser = Context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
+                    var createdByUser = _context.Users.Where(user => user.Id == projectRights.CreatedBy).FirstOrDefault();
                     if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
                 }
             });
 
 
-            objdochistory.PendingReview = Context.ProjectDocumentReview.Where(a => a.ProjectId == projectId
+            objdochistory.PendingReview = _context.ProjectDocumentReview.Where(a => a.ProjectId == projectId
                                                                                    && a.UserId == userId && !a.IsReview)
                 .Select(b => new ReviewDeteail
                 {
@@ -463,12 +463,12 @@ namespace GSC.Respository.ProjectRight
 
             objdochistory.PendingReview.ForEach(collection =>
             {
-                var projectRights = Context.ProjectRight.FirstOrDefault(a => a.ProjectId == projectId
+                var projectRights = _context.ProjectRight.FirstOrDefault(a => a.ProjectId == projectId
                                                                              && a.UserId == userId);
                 if (projectRights != null)
                 {
                     collection.AssignedDate = projectRights.CreatedDate;
-                    var createdByUser = Context.Users.FirstOrDefault(user => user.Id == projectRights.CreatedBy);
+                    var createdByUser = _context.Users.FirstOrDefault(user => user.Id == projectRights.CreatedBy);
                     if (createdByUser != null) collection.AssignedBy = createdByUser.UserName;
                 }
             });
@@ -478,8 +478,8 @@ namespace GSC.Respository.ProjectRight
 
         public IList<ProjectTrainingDto> GetRoles(int ProjectId)
         {
-            var queryDtos = (from projectRight in Context.ProjectRight.Where(t => t.ProjectId == ProjectId)
-                             join roleTemp in Context.SecurityRole on projectRight.RoleId equals roleTemp.Id into roleDto
+            var queryDtos = (from projectRight in _context.ProjectRight.Where(t => t.ProjectId == ProjectId)
+                             join roleTemp in _context.SecurityRole on projectRight.RoleId equals roleTemp.Id into roleDto
                              from role in roleDto
                              group new { role, projectRight } by new { role.Id, role.RoleName } into g
                              select new ProjectTrainingDto
@@ -492,8 +492,8 @@ namespace GSC.Respository.ProjectRight
 
         public IList<ProjectTrainingDto> GetUsers(int ProjectId)
         {
-            var queryDtos = (from projectRight in Context.ProjectRight.Where(t => t.ProjectId == ProjectId)
-                             join userTemp in Context.Users on projectRight.UserId equals userTemp.Id into userDto
+            var queryDtos = (from projectRight in _context.ProjectRight.Where(t => t.ProjectId == ProjectId)
+                             join userTemp in _context.Users on projectRight.UserId equals userTemp.Id into userDto
                              from user in userDto
                              group new { user, projectRight } by new { user.Id, user.UserName } into g
                              select new ProjectTrainingDto
@@ -506,23 +506,23 @@ namespace GSC.Respository.ProjectRight
 
         public IList<ProjectAccessDto> GetProjectAccessReportList(ProjectTrainigAccessSearchDto filters)
         {
-            var parent = Context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            var parent = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
 
-            var queryDtos = (from projectRight in Context.ProjectRight.Where(t => t.ProjectId == filters.ProjectId
+            var queryDtos = (from projectRight in _context.ProjectRight.Where(t => t.ProjectId == filters.ProjectId
                              && (filters.UserIds == null || filters.UserIds.Contains(t.UserId))
                              && (filters.RoleIds == null || filters.RoleIds.Contains(t.RoleId)))
-                             join project in Context.Project on projectRight.ProjectId equals project.Id
-                             join auditReasonTemp in Context.AuditReason on projectRight.AuditReasonId equals auditReasonTemp.Id into auditReasonTempDto
+                             join project in _context.Project on projectRight.ProjectId equals project.Id
+                             join auditReasonTemp in _context.AuditReason on projectRight.AuditReasonId equals auditReasonTemp.Id into auditReasonTempDto
                              from auditReason in auditReasonTempDto.DefaultIfEmpty()
-                             join projectDocument in Context.ProjectDocument.Where(x => x.DeletedDate == null) on parent != null ? parent : projectRight.ProjectId equals projectDocument.ProjectId
-                             join projectDocumentReviewTemp in Context.ProjectDocumentReview on new { x = projectDocument.Id, y = projectRight.UserId, z = projectDocument.ProjectId } equals new { x = projectDocumentReviewTemp.ProjectDocumentId, y = projectDocumentReviewTemp.UserId, z = projectDocumentReviewTemp.ProjectId } into projectDocumentReviewDto
+                             join projectDocument in _context.ProjectDocument.Where(x => x.DeletedDate == null) on parent != null ? parent : projectRight.ProjectId equals projectDocument.ProjectId
+                             join projectDocumentReviewTemp in _context.ProjectDocumentReview on new { x = projectDocument.Id, y = projectRight.UserId, z = projectDocument.ProjectId } equals new { x = projectDocumentReviewTemp.ProjectDocumentId, y = projectDocumentReviewTemp.UserId, z = projectDocumentReviewTemp.ProjectId } into projectDocumentReviewDto
                              from projectDocumentReview in projectDocumentReviewDto.DefaultIfEmpty()
                              where projectDocumentReview.DeletedDate == null
-                             join trainerTemp in Context.Users on projectDocumentReview.TrainerId equals trainerTemp.Id into trainerDto
+                             join trainerTemp in _context.Users on projectDocumentReview.TrainerId equals trainerTemp.Id into trainerDto
                              from trainer in trainerDto.DefaultIfEmpty()
-                             join userTemp in Context.Users on projectRight.UserId equals userTemp.Id into userDto
+                             join userTemp in _context.Users on projectRight.UserId equals userTemp.Id into userDto
                              from user in userDto.DefaultIfEmpty()
-                             join roleTemp in Context.SecurityRole on projectRight.RoleId equals roleTemp.Id into roleDto
+                             join roleTemp in _context.SecurityRole on projectRight.RoleId equals roleTemp.Id into roleDto
                              from role in roleDto.DefaultIfEmpty()
                              select new ProjectAccessDto
                              {
@@ -538,9 +538,9 @@ namespace GSC.Respository.ProjectRight
                                  RollbackOn = projectRight.DeletedDate.UtcDateTime(),
                                  CreatedDate = projectRight.CreatedDate.UtcDateTime(),
                                  TrainerId = projectDocumentReview.DeletedBy,
-                                 CreatedByName = this.Context.Users.FirstOrDefault(user => user.Id == projectRight.CreatedBy).UserName,
+                                 CreatedByName = _context.Users.FirstOrDefault(user => user.Id == projectRight.CreatedBy).UserName,
                                  AuditReason = auditReason.ReasonName,
-                                 RollabackBy = this.Context.Users.FirstOrDefault(user => user.Id == projectRight.DeletedBy && projectRight.AuditReasonId != null).UserName,
+                                 RollabackBy = _context.Users.FirstOrDefault(user => user.Id == projectRight.DeletedBy && projectRight.AuditReasonId != null).UserName,
                              }).OrderBy(x => x.Id).ToList();
 
             var Rollbackresult = queryDtos.Where(x => x.AuditReason != null).ToList();
@@ -565,7 +565,7 @@ namespace GSC.Respository.ProjectRight
                 r.CreatedDate = r.AccessType == "Revoke" ? null : r.CreatedDate;
                 r.CreatedBy = r.AccessType == "Revoke" ? null : r.CreatedBy;
                 r.CreatedByName = r.AccessType == "Revoke" ? null : r.CreatedByName;
-                var createdByUser = this.Context.Users.FirstOrDefault(user => user.Id == r.TrainerId);
+                var createdByUser = _context.Users.FirstOrDefault(user => user.Id == r.TrainerId);
                 if (r.RollabackBy == null)
                 {
                     r.RollabackBy = "N/AP";
@@ -578,7 +578,7 @@ namespace GSC.Respository.ProjectRight
 
             queryDtos.ForEach(r =>
             {
-                var createdByUser = this.Context.Users.FirstOrDefault(user => user.Id == r.CreatedBy);
+                var createdByUser = _context.Users.FirstOrDefault(user => user.Id == r.CreatedBy);
                 if (createdByUser != null)
                 {
                     r.CreatedByName = createdByUser.UserName;
@@ -587,7 +587,7 @@ namespace GSC.Respository.ProjectRight
 
             Grantresult.ForEach(r =>
             {
-                var createdByUser = this.Context.Users.FirstOrDefault(user => user.Id == r.CreatedBy);
+                var createdByUser = _context.Users.FirstOrDefault(user => user.Id == r.CreatedBy);
                 if (createdByUser != null)
                 {
                     r.CreatedByName = createdByUser.UserName;
@@ -600,22 +600,22 @@ namespace GSC.Respository.ProjectRight
 
         public IList<ProjectTrainingDto> GetProjectTrainingReportList(ProjectTrainigAccessSearchDto filters)
         {
-            var parent = Context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
-            var queryDtos = (from projectRight in Context.ProjectRight.Where(t => t.ProjectId == filters.ProjectId
+            var parent = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            var queryDtos = (from projectRight in _context.ProjectRight.Where(t => t.ProjectId == filters.ProjectId
                                      && (filters.UserIds == null || filters.UserIds.Contains(t.UserId))
                                      && (filters.RoleIds == null || filters.RoleIds.Contains(t.RoleId)))
-                             join project in Context.Project on projectRight.ProjectId equals project.Id
-                             join auditReasonTemp in Context.AuditReason on projectRight.AuditReasonId equals auditReasonTemp.Id into auditReasonTempDto
+                             join project in _context.Project on projectRight.ProjectId equals project.Id
+                             join auditReasonTemp in _context.AuditReason on projectRight.AuditReasonId equals auditReasonTemp.Id into auditReasonTempDto
                              from auditReason in auditReasonTempDto.DefaultIfEmpty()
-                             join projectDocument in Context.ProjectDocument.Where(x => x.DeletedDate == null) on parent != null ? parent : projectRight.ProjectId equals projectDocument.ProjectId
-                             join projectDocumentReviewTemp in Context.ProjectDocumentReview on new { x = projectDocument.Id, y = projectRight.UserId, z = projectRight.ProjectId } equals new { x = projectDocumentReviewTemp.ProjectDocumentId, y = projectDocumentReviewTemp.UserId, z = projectDocumentReviewTemp.ProjectId } into projectDocumentReviewDto
+                             join projectDocument in _context.ProjectDocument.Where(x => x.DeletedDate == null) on parent != null ? parent : projectRight.ProjectId equals projectDocument.ProjectId
+                             join projectDocumentReviewTemp in _context.ProjectDocumentReview on new { x = projectDocument.Id, y = projectRight.UserId, z = projectRight.ProjectId } equals new { x = projectDocumentReviewTemp.ProjectDocumentId, y = projectDocumentReviewTemp.UserId, z = projectDocumentReviewTemp.ProjectId } into projectDocumentReviewDto
                              from projectDocumentReview in projectDocumentReviewDto.DefaultIfEmpty()
                              where projectDocumentReview.DeletedDate == null
-                             join trainerTemp in Context.Users on projectDocumentReview.TrainerId equals trainerTemp.Id into trainerDto
+                             join trainerTemp in _context.Users on projectDocumentReview.TrainerId equals trainerTemp.Id into trainerDto
                              from trainer in trainerDto.DefaultIfEmpty()
-                             join userTemp in Context.Users on projectRight.UserId equals userTemp.Id into userDto
+                             join userTemp in _context.Users on projectRight.UserId equals userTemp.Id into userDto
                              from user in userDto.DefaultIfEmpty()
-                             join roleTemp in Context.SecurityRole on projectRight.RoleId equals roleTemp.Id into roleDto
+                             join roleTemp in _context.SecurityRole on projectRight.RoleId equals roleTemp.Id into roleDto
                              from role in roleDto.DefaultIfEmpty()
                              select new ProjectTrainingDto
                              {
@@ -624,13 +624,13 @@ namespace GSC.Respository.ProjectRight
                                  SiteName = string.IsNullOrEmpty(project.SiteName) ? project.ProjectName : project.SiteName,
                                  UserName = user.UserName,
                                  RoleName = role.RoleName,
-                                 AssignedBy = this.Context.ProjectRight.FirstOrDefault(a => a.CreatedBy == user.Id).User.UserName,
-                                 AssignedDate = this.Context.ProjectRight.FirstOrDefault(a => a.ProjectId == (project.ParentProjectId == null ? project.Id : project.ParentProjectId)).CreatedDate.UtcDateTime(),
+                                 AssignedBy = _context.ProjectRight.FirstOrDefault(a => a.CreatedBy == user.Id).User.UserName,
+                                 AssignedDate = _context.ProjectRight.FirstOrDefault(a => a.ProjectId == (project.ParentProjectId == null ? project.Id : project.ParentProjectId)).CreatedDate.UtcDateTime(),
                                  DocumentName = projectDocument.FileName,
                                  ReviewDate = projectDocumentReview.ReviewDate,
                                  TrainerName = trainer.UserName,
-                                 TrainingType = this.Context.ProjectDocumentReview.FirstOrDefault(a => (a.ProjectDocumentId == projectDocument.Id) && (a.UserId == projectRight.UserId) && (a.ProjectId == projectDocument.ProjectId)).TrainingType.ToString(),
-                                 TrainingDuration = Context.ProjectDocumentReview.Where(c => c.ProjectId == projectRight.ProjectId && c.UserId == projectRight.UserId && c.ProjectDocumentId == projectDocument.Id).FirstOrDefault().TrainingDuration,
+                                 TrainingType = _context.ProjectDocumentReview.FirstOrDefault(a => (a.ProjectDocumentId == projectDocument.Id) && (a.UserId == projectRight.UserId) && (a.ProjectId == projectDocument.ProjectId)).TrainingType.ToString(),
+                                 TrainingDuration = _context.ProjectDocumentReview.Where(c => c.ProjectId == projectRight.ProjectId && c.UserId == projectRight.UserId && c.ProjectDocumentId == projectDocument.Id).FirstOrDefault().TrainingDuration,
                                  ReviewNote = projectDocumentReview.ReviewNote,
                              }).OrderBy(x => x.Id).ToList();
 
@@ -638,20 +638,20 @@ namespace GSC.Respository.ProjectRight
         }
         public IList<UserReportDto> GetUserReportList(UserReportSearchDto filters)
         {
-            var results = (from user in Context.Users.Where(t => ((t.DeletedBy != null && filters.UserId == 2) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) ||
+            var results = (from user in _context.Users.Where(t => ((t.DeletedBy != null && filters.UserId == 2) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) ||
                            ((t.DeletedBy == null && filters.UserId == 3) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) || ((t.IsLogin == true && filters.UserId == 1) && (filters.UserIds == null || filters.UserIds.Contains(t.Id)))
                           )
                            select new UserReportDto
                            {
-                               UserName = this.Context.Users.FirstOrDefault(b => b.Id == user.Id).UserName,
+                               UserName = _context.Users.FirstOrDefault(b => b.Id == user.Id).UserName,
                                Session = "Active",
-                               CreatedBy = this.Context.Users.FirstOrDefault(b => b.Id == user.CreatedBy).UserName,
-                               DeletedBy = this.Context.Users.FirstOrDefault(b => b.Id == user.DeletedBy).UserName,
+                               CreatedBy = _context.Users.FirstOrDefault(b => b.Id == user.CreatedBy).UserName,
+                               DeletedBy = _context.Users.FirstOrDefault(b => b.Id == user.DeletedBy).UserName,
                                CreatedDate = user.CreatedDate,
                                DeletedDate = user.DeletedDate,
                                LoginTime = user.LastLoginDate.UtcDateTime(),
                                LastIpAddress = user.LastIpAddress,
-                               RoleName = string.Join(" ,", this.Context.Users.FirstOrDefault(b => b.Id == user.Id).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
+                               RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.Id).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
                            }).ToList();//OrderBy(x => x.Id).ToList();
             results = results.OrderBy(x => x.Id).ToList();
 
@@ -659,7 +659,7 @@ namespace GSC.Respository.ProjectRight
             {
                 if (filters.UserId == 1)
                 {
-                    r.RoleName = this.Context.SecurityRole.FirstOrDefault(a => a.Id == _jwtTokenAccesser.RoleId).RoleName;
+                    r.RoleName = _context.SecurityRole.FirstOrDefault(a => a.Id == _jwtTokenAccesser.RoleId).RoleName;
                 }
             });
 
@@ -667,20 +667,20 @@ namespace GSC.Respository.ProjectRight
         }
         public IList<UserReportDto> GetLoginLogoutReportList(UserReportSearchDto filters)
         {
-            var parent = Context.Project.Where(x => (x.Id == filters.ProjectId) || (x.ParentProjectId == filters.ProjectId)).Select(x => x.Id).ToList();
+            var parent = _context.Project.Where(x => (x.Id == filters.ProjectId) || (x.ParentProjectId == filters.ProjectId)).Select(x => x.Id).ToList();
 
-            var queryDtos = (from user in Context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId)))
-                             join projectRight in Context.ProjectRight.Where(u => filters.ProjectId == null || parent.Contains(u.ProjectId))
+            var queryDtos = (from user in _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId)))
+                             join projectRight in _context.ProjectRight.Where(u => filters.ProjectId == null || parent.Contains(u.ProjectId))
                              on user.UserId equals projectRight.UserId
-                             join project in Context.Project on projectRight.ProjectId equals project.Id
+                             join project in _context.Project on projectRight.ProjectId equals project.Id
                              select new UserReportDto
                              {
                                  UserName = user.LoginName,
                                  ParentProjectId = project.Id,
                                  SiteName = string.IsNullOrEmpty(project.SiteName) ? project.ProjectName : project.SiteName,
-                                 LoginTime = this.Context.UserLoginReport.FirstOrDefault(a => a.UserId == projectRight.UserId).LoginTime.UtcDateTime(),
+                                 LoginTime = _context.UserLoginReport.FirstOrDefault(a => a.UserId == projectRight.UserId).LoginTime.UtcDateTime(),
                                  LogOutTime = user.LoginTime.UtcDateTime(),
-                                 RoleName = string.Join(" ,", this.Context.Users.FirstOrDefault(b => b.Id == user.UserId).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
+                                 RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.UserId).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
                              }).ToList();//OrderBy(x => x.Id).ToList();
 
             queryDtos = queryDtos.OrderBy(x => x.Id).ToList();
@@ -689,7 +689,7 @@ namespace GSC.Respository.ProjectRight
             {
                 if (filters.ProjectId == 1)
                 {
-                    r.RoleName = this.Context.SecurityRole.FirstOrDefault(a => a.Id == _jwtTokenAccesser.RoleId).RoleName;
+                    r.RoleName = _context.SecurityRole.FirstOrDefault(a => a.Id == _jwtTokenAccesser.RoleId).RoleName;
 
                 }
             });

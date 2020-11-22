@@ -1,8 +1,4 @@
-﻿using GSC.Data.Entities.Audit;
-using GSC.Data.Entities.LogReport;
-using GSC.Data.Entities.Screening;
-using GSC.Data.Entities.Volunteer;
-using System;
+﻿
 using System.Collections.Generic;
 using System.Text;
 
@@ -232,20 +228,20 @@ namespace GSC.Audit
         private List<string> GetSkipEntityForAudit()
         {
             return new List<string> {
-            nameof(AuditTrailCommon),
-            nameof(UserLoginReport),
-            nameof(AuditTrail),
-            nameof(Volunteer),
-            nameof(VolunteerAddress),
-            nameof(VolunteerBiometric),
-            nameof(VolunteerContact),
-            nameof(VolunteerDocument),
-            nameof(VolunteerFood),
-            nameof(VolunteerHistory),
-            nameof(VolunteerImage),
-            nameof(VolunteerLanguage),
-            nameof(ScreeningTemplateValue),
-            nameof(ScreeningTemplateValueAudit)
+            //nameof(AuditTrailCommon),
+            //nameof(UserLoginReport),
+            //nameof(AuditTrail),
+            //nameof(Volunteer),
+            //nameof(VolunteerAddress),
+            //nameof(VolunteerBiometric),
+            //nameof(VolunteerContact),
+            //nameof(VolunteerDocument),
+            //nameof(VolunteerFood),
+            //nameof(VolunteerHistory),
+            //nameof(VolunteerImage),
+            //nameof(VolunteerLanguage),
+            //nameof(ScreeningTemplateValue),
+            //nameof(ScreeningTemplateValueAudit)
             };
 
         }

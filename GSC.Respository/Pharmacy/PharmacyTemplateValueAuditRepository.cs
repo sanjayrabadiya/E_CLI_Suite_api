@@ -9,24 +9,26 @@ using GSC.Shared;
 
 namespace GSC.Respository.Pharmacy
 {
-    public class PharmacyTemplateValueAuditRepository : GenericRespository<PharmacyTemplateValueAudit, GscContext>,
+    public class PharmacyTemplateValueAuditRepository : GenericRespository<PharmacyTemplateValueAudit>,
         IPharmacyTemplateValueAuditRepository
     {
-        public PharmacyTemplateValueAuditRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public PharmacyTemplateValueAuditRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
+            _context = context;
         }
 
         public IList<PharmacyAuditDto> GetAudits(int pharmacyTemplateValueId)
         {
             var auditDtos =
-                (from audit in Context.PharmacyTemplateValueAudit.Where(t =>
+                (from audit in _context.PharmacyTemplateValueAudit.Where(t =>
                         t.PharmacyTemplateValueId == pharmacyTemplateValueId)
-                    join reasonTemp in Context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
+                    join reasonTemp in _context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
                     from reason in reasonDt.DefaultIfEmpty()
-                    join userTemp in Context.Users on audit.UserId equals userTemp.Id into userDto
+                    join userTemp in _context.Users on audit.UserId equals userTemp.Id into userDto
                     from user in userDto.DefaultIfEmpty()
-                    join roleTemp in Context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
+                    join roleTemp in _context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
                     from role in roleDto.DefaultIfEmpty()
                     select new PharmacyAuditDto
                     {

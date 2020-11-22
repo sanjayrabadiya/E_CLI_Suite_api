@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GSC.Report", "GSC.Report\GS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GSC.Audit", "GSC.Audit\GSC.Audit.csproj", "{73D3FDB8-EED1-4620-A14F-70632B830F85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSC.Shared", "GSC.Shared\GSC.Shared.csproj", "{81B7317B-CBF5-495A-BE76-1CDACC59D21D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GSC.Shared", "GSC.Shared\GSC.Shared.csproj", "{81B7317B-CBF5-495A-BE76-1CDACC59D21D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

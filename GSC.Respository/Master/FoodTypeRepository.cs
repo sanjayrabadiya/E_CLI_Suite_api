@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class FoodTypeRepository : GenericRespository<FoodType, GscContext>, IFoodTypeRepository
+    public class FoodTypeRepository : GenericRespository<FoodType>, IFoodTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public FoodTypeRepository(IUnitOfWork<GscContext> uow,
+        public FoodTypeRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

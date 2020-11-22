@@ -14,15 +14,16 @@ using GSC.Shared;
 namespace GSC.Respository.Project.Design
 {
 
-    public class ProjectDesignVariableRepository : GenericRespository<ProjectDesignVariable, GscContext>,
+    public class ProjectDesignVariableRepository : GenericRespository<ProjectDesignVariable>,
         IProjectDesignVariableRepository
     {
         private readonly IMapper _mapper;
-        public ProjectDesignVariableRepository(IUnitOfWork<GscContext> uow,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(
-            uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ProjectDesignVariableRepository(IGSCContext context,
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
         {
             _mapper = mapper;
+            _context = context;
         }
 
         public IList<DropDownDto> GetVariabeDropDown(int projectDesignTemplateId)
@@ -94,9 +95,9 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownVaribleDto> GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId)
         {
             var query =
-                from c in Context.ProjectDesignVariable
+                from c in _context.ProjectDesignVariable
                 where c.ProjectDesignTemplateId == projectDesignTemplateId &&
-                      !(from o in Context.ProjectScheduleTemplate
+                      !(from o in _context.ProjectScheduleTemplate
                         where o.DeletedDate == null
                         select o.ProjectDesignVariableId)
                           .Contains(c.Id)
@@ -203,9 +204,9 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownVaribleDto> GetTargetVariabeAnnotationForScheduleDropDown(int projectDesignTemplateId)
         {
             var query =
-                from c in Context.ProjectDesignVariable
+                from c in _context.ProjectDesignVariable
                 where c.ProjectDesignTemplateId == projectDesignTemplateId &&
-                      !(from o in Context.ProjectScheduleTemplate
+                      !(from o in _context.ProjectScheduleTemplate
                         where o.DeletedDate == null
                         select o.ProjectDesignVariableId)
                           .Contains(c.Id) && (c.CollectionSource == CollectionSources.Date || c.CollectionSource == CollectionSources.Time || c.CollectionSource == CollectionSources.DateTime)

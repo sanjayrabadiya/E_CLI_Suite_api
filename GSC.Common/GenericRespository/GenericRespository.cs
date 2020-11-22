@@ -4,35 +4,27 @@ using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using GSC.Common.UnitOfWork;
-using GSC.Data.Entities.Common;
-using GSC.Domain.Context;
+using GSC.Common.Base;
 using GSC.Helper;
-using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Common.GenericRespository
 {
-    public class GenericRespository<TC, TContext> : IGenericRepository<TC>
-        where TC : class
-        where TContext : GscContext
+    public abstract class GenericRespository<TC> : IGenericRepository<TC> where TC : class
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        protected readonly TContext Context;
-        internal readonly DbSet<TC> DbSet;
-
-        protected GenericRespository(IUnitOfWork<TContext> uow, IJwtTokenAccesser jwtTokenAccesser)
+        internal IContext Context { get; private set; }
+        internal readonly DbSet<TC> _dbSet;
+        protected GenericRespository(IContext context)
         {
-            Context = uow.Context;
-            DbSet = Context.Set<TC>();
-            _jwtTokenAccesser = jwtTokenAccesser;
+            Context = context;
+            _dbSet = Context.Set<TC>();
         }
 
         public IQueryable<TC> All => Context.Set<TC>();
 
-        public void Add(TC entity)
+        public virtual void Add(TC entity)
         {
-            Context.Add(entity);
+            Context.SetAdd(entity);
         }
 
         public IQueryable<TC> AllIncluding(params Expression<Func<TC, object>>[] includeProperties)
@@ -50,7 +42,7 @@ namespace GSC.Common.GenericRespository
 
         public IEnumerable<TC> FindBy(Expression<Func<TC, bool>> predicate)
         {
-            var queryable = DbSet.AsNoTracking();
+            var queryable = _dbSet.AsNoTracking();
             IEnumerable<TC> results = queryable.Where(predicate).ToList();
             return results;
         }
@@ -58,7 +50,7 @@ namespace GSC.Common.GenericRespository
         public async Task<IEnumerable<TC>> FindByAsync(Expression<Func<TC, bool>> predicate)
         {
             // IQueryable<TC> queryable = DbSet.AsNoTracking();
-            IEnumerable<TC> results = await DbSet.AsNoTracking().Where(predicate).ToListAsync();
+            IEnumerable<TC> results = await _dbSet.AsNoTracking().Where(predicate).ToListAsync();
             return results;
         }
 
@@ -74,13 +66,13 @@ namespace GSC.Common.GenericRespository
 
         public virtual void Update(TC entity)
         {
-            Context.Update(entity);
+            Context.SetModified(entity);
         }
 
         public void InsertUpdateGraph(TC entity)
         {
             Context.Set<TC>().Add(entity);
-            Context.ApplyStateChanges(_jwtTokenAccesser);
+            Context.ApplyStateChanges();
         }
 
         public virtual void Delete(int id)
@@ -94,16 +86,14 @@ namespace GSC.Common.GenericRespository
             Context.Set<TC>().Remove(entity);
         }
 
-        
+
         public virtual void Delete(TC entityData)
         {
             var entity = entityData as BaseEntity;
             if (entity != null)
             {
-                entity.DeletedBy = _jwtTokenAccesser.UserId;
-                entity.DeletedDate = DateTime.Now.ToUniversalTime();
                 entity.AuditAction = AuditAction.Deleted;
-                Context.Update(entity);
+                Context.SetModified(entity);
             }
         }
 
@@ -115,19 +105,19 @@ namespace GSC.Common.GenericRespository
                 entity.DeletedBy = null;
                 entity.DeletedDate = null;
                 entity.AuditAction = AuditAction.Activated;
-                Context.Update(entity);
+                Context.SetModified(entity);
             }
         }
 
         private IQueryable<TC> GetAllIncluding(params Expression<Func<TC, object>>[] includeProperties)
         {
-            var queryable = DbSet.AsNoTracking();
+            var queryable = _dbSet.AsNoTracking();
 
             return includeProperties.Aggregate
                 (queryable, (current, includeProperty) => current.Include(includeProperty));
         }
 
-        
+
         public void Dispose()
         {
             Context.Dispose();
@@ -136,19 +126,17 @@ namespace GSC.Common.GenericRespository
         public virtual void AddOrUpdate(TC entity)
         {
             var referenceExists = false;
-            using (var transaction = Context.Database.BeginTransaction())
+            try
             {
-                try
-                {
-                    Context.Remove(entity);
-                    Context.SaveChanges(1);
-                    transaction.Rollback();
-                }
-                catch (Exception)
-                {
-                    referenceExists = true;
-                    transaction.Rollback();
-                }
+                Context.Begin();
+                Context.SetRemove(entity);
+                Context.SaveAsync().Wait();
+                Context.Commit();
+            }
+            catch (Exception)
+            {
+                referenceExists = true;
+                Context.Rollback();
             }
 
             Context.Entry(entity).State = EntityState.Detached;
@@ -165,7 +153,7 @@ namespace GSC.Common.GenericRespository
             }
             else
             {
-                Context.Update(entity);
+                Context.SetModified(entity);
             }
         }
 

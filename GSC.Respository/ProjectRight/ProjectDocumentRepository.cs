@@ -9,10 +9,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.ProjectRight
 {
-    public class ProjectDocumentRepository : GenericRespository<ProjectDocument, GscContext>, IProjectDocumentRepository
+    public class ProjectDocumentRepository : GenericRespository<ProjectDocument>, IProjectDocumentRepository
     {
-        public ProjectDocumentRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ProjectDocumentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
+            _context = context;
         }
 
         public string Duplicate(ProjectDocument objSave)
@@ -25,7 +27,7 @@ namespace GSC.Respository.ProjectRight
 
         public List<ProjectDocumentDto> GetDocument(int id)
         {
-            var parentId = Context.Project.Where(p => p.Id == id).Select(p => p.ParentProjectId).FirstOrDefault();
+            var parentId = _context.Project.Where(p => p.Id == id).Select(p => p.ParentProjectId).FirstOrDefault();
             var result = All.Where(t => t.DeletedDate == null);
             if (parentId > 0)
                 result = result.Where(r => r.ProjectId == id || r.ProjectId == parentId);

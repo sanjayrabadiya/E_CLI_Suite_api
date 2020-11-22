@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Project.Workflow
 {
-    public class ProjectWorkflowIndependentRepository : GenericRespository<ProjectWorkflowIndependent, GscContext>,
+    public class ProjectWorkflowIndependentRepository : GenericRespository<ProjectWorkflowIndependent>,
         IProjectWorkflowIndependentRepository
     {
-        public ProjectWorkflowIndependentRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser) :
-            base(uow, jwtTokenAccesser)
+        public ProjectWorkflowIndependentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) :
+            base(context)
         {
         }
     }

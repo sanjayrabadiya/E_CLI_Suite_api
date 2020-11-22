@@ -1,4 +1,4 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Common.Base;
 using GSC.Data.Entities.Location;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;

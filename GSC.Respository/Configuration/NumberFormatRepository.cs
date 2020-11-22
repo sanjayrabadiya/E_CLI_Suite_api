@@ -8,11 +8,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Configuration
 {
-    public class NumberFormatRepository : GenericRespository<NumberFormat, GscContext>, INumberFormatRepository
+    public class NumberFormatRepository : GenericRespository<NumberFormat>, INumberFormatRepository
     {
-        public NumberFormatRepository(IUnitOfWork<GscContext> uow,
+        public NumberFormatRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 

@@ -6,11 +6,15 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
-    <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="18.2.0.59" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GSC.Domain\GSC.Domain.csproj" />
+    <ProjectReference Include="..\GSC.Helper\GSC.Helper.csproj" />
+    <ProjectReference Include="..\GSC.Shared\GSC.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -16,16 +16,18 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectArtificateDocumentCommentRepository : GenericRespository<ProjectArtificateDocumentComment, GscContext>, IProjectArtificateDocumentCommentRepository
+    public class ProjectArtificateDocumentCommentRepository : GenericRespository<ProjectArtificateDocumentComment>, IProjectArtificateDocumentCommentRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserRepository _userRepository;
-        public ProjectArtificateDocumentCommentRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public ProjectArtificateDocumentCommentRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
            IUserRepository userRepository)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
+            _context = context;
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _userRepository = userRepository;
@@ -43,7 +45,7 @@ namespace GSC.Respository.Etmf
                     CreatedDate = t.CreatedDate,
                     CreatedByName = t.CreatedByUser.UserName,
                     Response = t.Response,
-                    ResponseByName = !string.IsNullOrEmpty(t.Response) ? Context.Users.Where(x => x.Id == t.ResponseBy).FirstOrDefault().UserName : "",
+                    ResponseByName = !string.IsNullOrEmpty(t.Response) ? _context.Users.Where(x => x.Id == t.ResponseBy).FirstOrDefault().UserName : "",
                     ResponseBy = t.ResponseBy,
                     ResponseDate = t.ResponseDate,
                     ViewDelete = t.CreatedBy == _jwtTokenAccesser.UserId && string.IsNullOrEmpty(t.Response),

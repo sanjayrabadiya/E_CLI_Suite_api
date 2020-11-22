@@ -11,15 +11,16 @@ using System.Linq;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectSubSecArtificateDocumentCommentRepository : GenericRespository<ProjectSubSecArtificateDocumentComment, GscContext>, IProjectSubSecArtificateDocumentCommentRepository
+    public class ProjectSubSecArtificateDocumentCommentRepository : GenericRespository<ProjectSubSecArtificateDocumentComment>, IProjectSubSecArtificateDocumentCommentRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        
-        public ProjectSubSecArtificateDocumentCommentRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public ProjectSubSecArtificateDocumentCommentRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public IList<ProjectSubSecArtificateDocumentCommentDto> GetComments(int documentId)
@@ -34,7 +35,7 @@ namespace GSC.Respository.Etmf
                     CreatedDate = t.CreatedDate,
                     CreatedByName = t.CreatedByUser.UserName,
                     Response = t.Response,
-                    ResponseByName = !string.IsNullOrEmpty(t.Response) ? Context.Users.Where(x => x.Id == t.ResponseBy).FirstOrDefault().UserName : "",
+                    ResponseByName = !string.IsNullOrEmpty(t.Response) ? _context.Users.Where(x => x.Id == t.ResponseBy).FirstOrDefault().UserName : "",
                     ResponseBy = t.ResponseBy,
                     ResponseDate = t.ResponseDate,
                     ViewDelete = t.CreatedBy == _jwtTokenAccesser.UserId && string.IsNullOrEmpty(t.Response),

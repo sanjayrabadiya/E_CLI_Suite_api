@@ -1,19 +1,19 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Common.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Common
 {
     public class StateHelpers
     {
-        public static EntityState ConvertState(ObjectState objstate)
+        public static EntityState ConvertState(ViewModelState objstate)
         {
             switch (objstate)
             {
-                case ObjectState.Added:
+                case ViewModelState.Added:
                     return EntityState.Added;
-                case ObjectState.Modified:
+                case ViewModelState.Modified:
                     return EntityState.Modified;
-                case ObjectState.Deleted:
+                case ViewModelState.Deleted:
                     return EntityState.Deleted;
                 default:
                     return EntityState.Unchanged;

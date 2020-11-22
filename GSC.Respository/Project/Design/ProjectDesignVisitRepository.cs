@@ -14,20 +14,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.Design
 {
-    public class ProjectDesignVisitRepository : GenericRespository<ProjectDesignVisit, GscContext>,
+    public class ProjectDesignVisitRepository : GenericRespository<ProjectDesignVisit>,
         IProjectDesignVisitRepository
     {
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-        public ProjectDesignVisitRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository) : base(uow,
-            jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ProjectDesignVisitRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
+            IProjectDesignTemplateRepository projectDesignTemplateRepository) : base(context)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _context = context;
         }
 
         public ProjectDesignVisit GetVisit(int id)
         {
-            var visit = Context.ProjectDesignVisit.Where(t => t.Id == id)
+            var visit = _context.ProjectDesignVisit.Where(t => t.Id == id)
                 .Include(d => d.Templates)
                 .ThenInclude(d => d.Variables)
                 .ThenInclude(d => d.Values)
@@ -38,22 +39,21 @@ namespace GSC.Respository.Project.Design
 
         public IList<DropDownDto> GetVisitsByProjectDesignId(int projectDesignId)
         {
-            var periods = Context.ProjectDesignPeriod.Where(x => x.DeletedDate == null
+            var periods = _context.ProjectDesignPeriod.Where(x => x.DeletedDate == null
                                                                  && x.ProjectDesignId == projectDesignId)
-                .Include(t => t.VisitList);
+                .Include(t => t.VisitList).ToList();
 
             var visits = new List<DropDownDto>();
             periods.ForEach(period =>
             {
-                period.VisitList.Where(x => x.DeletedDate == null)
-                    .ForEach(visit =>
+                period.VisitList.Where(x => x.DeletedDate == null).ToList().ForEach(visit =>
+                {
+                    visits.Add(new DropDownDto
                     {
-                        visits.Add(new DropDownDto
-                        {
-                            Id = visit.Id,
-                            Value = visit.DisplayName + " (" + period.DisplayName + ")"
-                        });
+                        Id = visit.Id,
+                        Value = visit.DisplayName + " (" + period.DisplayName + ")"
                     });
+                });
             });
 
             return visits;
@@ -75,16 +75,16 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetVisitByLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
         {
             var visits = new List<DropDownDto>();
-            var screeningEntryId = Context.ScreeningEntry.Where(x => lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(x.AttendanceId)).ToList();
+            var screeningEntryId = _context.ScreeningEntry.Where(x => lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(x.AttendanceId)).ToList();
             var screeninglockAudit = new List<ScreeningTemplateLockUnlockAudit>();
             if (lockUnlockDDDto.ChildProjectId != lockUnlockDDDto.ProjectId)
-                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
+                screeninglockAudit = _context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
             else
-                screeninglockAudit = Context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
+                screeninglockAudit = _context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
 
             if (lockUnlockDDDto.IsLock)
             {
-                var lstvisit = Context.ProjectDesignVisit.Where(x => x.DeletedDate == null
+                var lstvisit = _context.ProjectDesignVisit.Where(x => x.DeletedDate == null
                                             && x.ProjectDesignPeriodId == lockUnlockDDDto.Id).Include(x => x.Templates).OrderBy(t => t.Id).ToList();
 
                 visits = All.Where(x => x.DeletedDate == null
@@ -108,8 +108,8 @@ namespace GSC.Respository.Project.Design
             }
             else
             {
-                visits = (from visit in Context.ProjectDesignVisit.Where(x => x.DeletedDate == null && x.ProjectDesignPeriodId == lockUnlockDDDto.Id)
-                          join template in Context.ProjectDesignTemplate.Where(x => x.DeletedDate == null) on visit.Id equals template.ProjectDesignVisitId
+                visits = (from visit in _context.ProjectDesignVisit.Where(x => x.DeletedDate == null && x.ProjectDesignPeriodId == lockUnlockDDDto.Id)
+                          join template in _context.ProjectDesignTemplate.Where(x => x.DeletedDate == null) on visit.Id equals template.ProjectDesignVisitId
                           join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
                           .Select(y => new LockUnlockListDto
                           {
@@ -129,7 +129,7 @@ namespace GSC.Respository.Project.Design
             }
 
             // new optimization
-            //var screeningTemplates = Context.ScreeningTemplate.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisitId)
+            //var screeningTemplates = _context.ScreeningTemplate.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisitId)
             //    .Where(x => x.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
 
             //var visits = screeningTemplates.Where(x => (lockUnlockDDDto.SubjectIds == null

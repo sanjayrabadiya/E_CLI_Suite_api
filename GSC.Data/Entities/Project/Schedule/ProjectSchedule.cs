@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 using GSC.Data.Entities.Project.Design;
 
 namespace GSC.Data.Entities.Project.Schedule

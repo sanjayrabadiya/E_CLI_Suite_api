@@ -10,27 +10,29 @@ using GSC.Shared;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningTemplateValueAuditRepository : GenericRespository<ScreeningTemplateValueAudit, GscContext>,
+    public class ScreeningTemplateValueAuditRepository : GenericRespository<ScreeningTemplateValueAudit>,
         IScreeningTemplateValueAuditRepository
     {
         private static List<string> _months = new List<string>
             {"UNK", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-        public ScreeningTemplateValueAuditRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ScreeningTemplateValueAuditRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
+            _context = context;
         }
 
         public IList<ScreeningAuditDto> GetAudits(int screeningTemplateValueId)
         {
             var auditDtos =
-                (from audit in Context.ScreeningTemplateValueAudit.Where(t =>
+                (from audit in _context.ScreeningTemplateValueAudit.Where(t =>
                         t.ScreeningTemplateValueId == screeningTemplateValueId)
-                    join reasonTemp in Context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
+                    join reasonTemp in _context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
                     from reason in reasonDt.DefaultIfEmpty()
-                    join userTemp in Context.Users on audit.UserId equals userTemp.Id into userDto
+                    join userTemp in _context.Users on audit.UserId equals userTemp.Id into userDto
                     from user in userDto.DefaultIfEmpty()
-                    join roleTemp in Context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
+                    join roleTemp in _context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
                     from role in roleDto.DefaultIfEmpty()
                     select new ScreeningAuditDto
                     {
@@ -47,8 +49,8 @@ namespace GSC.Respository.Screening
                         User = user.UserName
                     }).OrderByDescending(t => t.CreatedDate).ToList();
 
-            //var projectDesignVariableId = Context.ScreeningTemplateValue.First(t => t.Id == screeningTemplateValueId).ProjectDesignVariableId;
-            //var collectionSource = Context.ProjectDesignVariable.First(t => t.Id == projectDesignVariableId).CollectionSource;
+            //var projectDesignVariableId = _context.ScreeningTemplateValue.First(t => t.Id == screeningTemplateValueId).ProjectDesignVariableId;
+            //var collectionSource = _context.ProjectDesignVariable.First(t => t.Id == projectDesignVariableId).CollectionSource;
             //if (collectionSource == CollectionSources.PartialDate)
             //{
             //    auditDtos.ForEach(data =>

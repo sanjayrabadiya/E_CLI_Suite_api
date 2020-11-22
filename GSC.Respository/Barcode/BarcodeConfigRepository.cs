@@ -11,15 +11,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Barcode
 {
-    public class BarcodeConfigRepository : GenericRespository<BarcodeConfig, GscContext>, IBarcodeConfigRepository
+    public class BarcodeConfigRepository : GenericRespository<BarcodeConfig>, IBarcodeConfigRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public BarcodeConfigRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public BarcodeConfigRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+           _context = context;
         }
 
         public List<BarcodeConfigDto> GetBarcodeConfig(bool isDeleted)
@@ -94,7 +95,7 @@ namespace GSC.Respository.Barcode
 
         public BarcodeConfig GetBarcodeConfig(int barcodeTypeId)
         {
-            var barcode = Context.BarcodeConfig.Where(t => t.BarcodeTypeId == barcodeTypeId)
+            var barcode = _context.BarcodeConfig.Where(t => t.BarcodeTypeId == barcodeTypeId)
                 .AsNoTracking().FirstOrDefault();
 
             return barcode;

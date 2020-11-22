@@ -8,11 +8,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Configuration
 {
-    public class AppSettingRepository : GenericRespository<AppSetting, GscContext>, IAppSettingRepository
+    public class AppSettingRepository : GenericRespository<AppSetting>, IAppSettingRepository
     {
-        public AppSettingRepository(IUnitOfWork<GscContext> uow,
+        public AppSettingRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 

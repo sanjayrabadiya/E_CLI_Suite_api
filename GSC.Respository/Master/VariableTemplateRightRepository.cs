@@ -8,12 +8,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class VariableTemplateRightRepository : GenericRespository<VariableTemplateRight, GscContext>,
+    public class VariableTemplateRightRepository : GenericRespository<VariableTemplateRight>,
         IVariableTemplateRightRepository
     {
-        public VariableTemplateRightRepository(IUnitOfWork<GscContext> uow,
+        public VariableTemplateRightRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 
@@ -22,7 +22,7 @@ namespace GSC.Respository.Master
             var savedTemplateRights = FindBy(t => t.SecurityRoleId == templateRightDto.SecurityRoleId).ToList();
             var deleteTemplateRights =
                 savedTemplateRights.Where(t => !templateRightDto.VariableTemplateIds.Contains(t.VariableTemplateId));
-            deleteTemplateRights.ForEach(Delete);
+            deleteTemplateRights.ToList().ForEach(Delete);
 
             templateRightDto.VariableTemplateIds.ForEach(variableTemplateId =>
             {

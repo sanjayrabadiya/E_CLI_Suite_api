@@ -20,7 +20,7 @@ using System.Linq;
 
 namespace GSC.Respository.EditCheckImpact
 {
-    public class ImpactService : GenericRespository<ScreeningTemplate, GscContext>, IImpactService
+    public class ImpactService : GenericRespository<ScreeningTemplate>, IImpactService
     {
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IMapper _mapper;
@@ -30,7 +30,7 @@ namespace GSC.Respository.EditCheckImpact
         private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
-        public ImpactService(IUnitOfWork<GscContext> uow,
+        public ImpactService(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
@@ -40,7 +40,7 @@ namespace GSC.Respository.EditCheckImpact
             IProjectScheduleTemplateRepository projectScheduleTemplateRepository,
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
             IProjectScheduleRepository projectScheduleRepository,
-            IEditCheckDetailRepository editCheckDetailRepository) : base(uow, jwtTokenAccesser)
+            IEditCheckDetailRepository editCheckDetailRepository) : base(context)
         {
             _mapper = mapper;
             _editCheckDetailRepository = editCheckDetailRepository;
@@ -250,7 +250,7 @@ namespace GSC.Respository.EditCheckImpact
             List<int> result = new List<int>();
             if (!string.IsNullOrEmpty(collectionValue))
             {
-                collectionValue.Split(",").ForEach(x => { result.Add(Convert.ToInt32(x)); });
+                collectionValue.Split(",").ToList().ForEach(x => { result.Add(Convert.ToInt32(x)); });
             }
             return result;
         }

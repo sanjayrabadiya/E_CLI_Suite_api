@@ -13,15 +13,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Medra
 {
-    public class MedraLanguageRepository : GenericRespository<MedraLanguage, GscContext>, IMedraLanguageRepository
+    public class MedraLanguageRepository : GenericRespository<MedraLanguage>, IMedraLanguageRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public MedraLanguageRepository(IUnitOfWork<GscContext> uow,
+        public MedraLanguageRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

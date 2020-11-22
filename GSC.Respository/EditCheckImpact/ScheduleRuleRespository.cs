@@ -17,22 +17,22 @@ using System.Linq;
 
 namespace GSC.Respository.EditCheckImpact
 {
-    public class ScheduleRuleRespository : GenericRespository<ScreeningTemplate, GscContext>, IScheduleRuleRespository
+    public class ScheduleRuleRespository : GenericRespository<ScreeningTemplate>, IScheduleRuleRespository
     {
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IImpactService _impactService;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         public ScheduleRuleRespository(IImpactService editCheckImpactService,
-            IUnitOfWork<GscContext> uow,
+            IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
-            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository) : base(uow, jwtTokenAccesser)
+            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository) : base(context)
         {
             _impactService = editCheckImpactService;
-            _uow = uow;
+            _context = context;
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
@@ -52,8 +52,8 @@ namespace GSC.Respository.EditCheckImpact
 
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, "", screeningTemplateBasic.ScreeningEntryId);
 
-            _uow.Save();
-            Context.DetectionAll();
+             _context.Save();
+            _context.DetachAllEntities();
 
             return targetScheduleTemplate;
 
@@ -130,9 +130,9 @@ namespace GSC.Respository.EditCheckImpact
 
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue, screeningEntryId);
 
-            _uow.Save();
+             _context.Save();
 
-            Context.DetectionAll();
+            _context.DetachAllEntities();
 
             return targetScheduleTemplate;
         }
@@ -276,7 +276,7 @@ namespace GSC.Respository.EditCheckImpact
             DateTime scheduleDate;
             DateTime.TryParse(targetSchDate, out scheduleDate);
 
-            Context.DetectionAll();
+            _context.DetachAllEntities();
 
             if (target.CollectionSource == CollectionSources.Date)
             {
@@ -322,12 +322,12 @@ namespace GSC.Respository.EditCheckImpact
                 VisitScheduleDate(screeningTemplate.ScreeningVisitId, (DateTime)target.ScheduleDate);
 
 
-            _uow.Save();
+             _context.Save();
         }
 
         void VisitScheduleDate(int screeningVisitId, DateTime ScheduleDate)
         {
-            var screeningVisit = _uow.Context.ScreeningVisit.Find(screeningVisitId);
+            var screeningVisit = _context.ScreeningVisit.Find(screeningVisitId);
             if (screeningVisit == null) return;
 
             if (_projectDesignVisitStatusRepository.All.Any(x => x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId
@@ -339,7 +339,7 @@ namespace GSC.Respository.EditCheckImpact
                 if (screeningVisit.IsSchedule && screeningVisit.Status != ScreeningVisitStatus.ReSchedule)
                     screeningVisit.ScheduleDate = ScheduleDate;
 
-                _uow.Context.ScreeningVisit.Update(screeningVisit);
+                _context.ScreeningVisit.Update(screeningVisit);
             }
 
 
@@ -381,8 +381,8 @@ namespace GSC.Respository.EditCheckImpact
                         ScreeningTemplateValueId = screeningTemplateValue.Id
                     }, screeningTemplateValue);
 
-                _uow.Save();
-                Context.DetectionAll();
+                 _context.Save();
+                _context.DetachAllEntities();
 
                 return true;
             }

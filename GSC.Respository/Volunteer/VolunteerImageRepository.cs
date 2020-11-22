@@ -6,11 +6,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Volunteer
 {
-    public class VolunteerImageRepository : GenericRespository<VolunteerImage, GscContext>, IVolunteerImageRepository
+    public class VolunteerImageRepository : GenericRespository<VolunteerImage>, IVolunteerImageRepository
     {
-        public VolunteerImageRepository(IUnitOfWork<GscContext> uow,
+        public VolunteerImageRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

@@ -7,11 +7,11 @@ using GSC.Shared;
 
 namespace GSC.Respository.Common
 {
-    public class LocationRepository : GenericRespository<Location, GscContext>, ILocationRepository
+    public class LocationRepository : GenericRespository<Location>, ILocationRepository
     {
-        public LocationRepository(IUnitOfWork<GscContext> uow,
+        public LocationRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
 

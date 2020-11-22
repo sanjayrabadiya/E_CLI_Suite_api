@@ -11,40 +11,42 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class EtmfArtificateMasterLbraryRepository : GenericRespository<EtmfArtificateMasterLbrary, GscContext>, IEtmfArtificateMasterLbraryRepository
+    public class EtmfArtificateMasterLbraryRepository : GenericRespository<EtmfArtificateMasterLbrary>, IEtmfArtificateMasterLbraryRepository
     {
-        public EtmfArtificateMasterLbraryRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public EtmfArtificateMasterLbraryRepository(IGSCContext context,
          IJwtTokenAccesser jwtTokenAccesser)
-         : base(uow, jwtTokenAccesser)
+         : base(context)
         {
+            _context = context;
         }
 
         public List<MasterLibraryJoinDto> GetArtifcateWithAllList()
         {
-            var dtolist = (from zone in Context.EtmfZoneMasterLibrary.Where(t => t.DeletedDate == null)
-                                 join section in Context.EtmfSectionMasterLibrary.Where(t => t.DeletedDate == null) on zone.Id equals
-                                     section.EtmfZoneMasterLibraryId
-                                 join artificate in Context.EtmfArtificateMasterLbrary.Where(t => t.DeletedDate == null) on section.Id equals
-                                     artificate.EtmfSectionMasterLibraryId
-                                 select new MasterLibraryJoinDto
-                                 {
-                                     ZoneId = zone.Id,
-                                     ZoneName = zone.ZonName,
-                                     Zoneno = zone.ZoneNo,
+            var dtolist = (from zone in _context.EtmfZoneMasterLibrary.Where(t => t.DeletedDate == null)
+                           join section in _context.EtmfSectionMasterLibrary.Where(t => t.DeletedDate == null) on zone.Id equals
+                               section.EtmfZoneMasterLibraryId
+                           join artificate in _context.EtmfArtificateMasterLbrary.Where(t => t.DeletedDate == null) on section.Id equals
+                               artificate.EtmfSectionMasterLibraryId
+                           select new MasterLibraryJoinDto
+                           {
+                               ZoneId = zone.Id,
+                               ZoneName = zone.ZonName,
+                               Zoneno = zone.ZoneNo,
 
-                                     SectionId = section.Id,
-                                     SectionName = section.SectionName,
-                                     SectionNo = section.Sectionno,
+                               SectionId = section.Id,
+                               SectionName = section.SectionName,
+                               SectionNo = section.Sectionno,
 
-                                     ArtificateId = artificate.Id,
-                                     ArtificateName = artificate.ArtificateName,
-                                     ArtificateNo = artificate.ArtificateNo,
+                               ArtificateId = artificate.Id,
+                               ArtificateName = artificate.ArtificateName,
+                               ArtificateNo = artificate.ArtificateNo,
 
-                                     TrailLevelDoc = artificate.TrailLevelDoc,
-                                     SiteLevelDoc = artificate.SiteLevelDoc,
-                                     CountryLevelDoc = artificate.CountryLevelDoc,
+                               TrailLevelDoc = artificate.TrailLevelDoc,
+                               SiteLevelDoc = artificate.SiteLevelDoc,
+                               CountryLevelDoc = artificate.CountryLevelDoc,
 
-                                 }).ToList();
+                           }).ToList();
 
             return dtolist;
 

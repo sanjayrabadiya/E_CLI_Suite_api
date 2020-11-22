@@ -24,7 +24,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningEntryRepository : GenericRespository<ScreeningEntry, GscContext>, IScreeningEntryRepository
+    public class ScreeningEntryRepository : GenericRespository<ScreeningEntry>, IScreeningEntryRepository
     {
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IRandomizationRepository _randomizationRepository;
@@ -38,8 +38,8 @@ namespace GSC.Respository.Screening
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public ScreeningEntryRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        private readonly IGSCContext _context;
+        public ScreeningEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
             IAttendanceRepository attendanceRepository,
@@ -52,7 +52,7 @@ namespace GSC.Respository.Screening
             INumberFormatRepository numberFormatRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
         IRolePermissionRepository rolePermissionRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _volunteerRepository = volunteerRepository;
             _projectRightRepository = projectRightRepository;
@@ -66,13 +66,13 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectDesignRepository = projectDesignRepository;
             _projectRepository = projectRepository;
-            _uow = uow;
+            _context = context;
         }
 
         public ScreeningEntryDto GetDetails(int id)
         {
 
-            var screeningEntryDto = Context.ScreeningEntry.Where(t => t.Id == id)
+            var screeningEntryDto = _context.ScreeningEntry.Where(t => t.Id == id)
                 .Select(t => new ScreeningEntryDto
                 {
                     Id = t.Id,
@@ -181,7 +181,7 @@ namespace GSC.Respository.Screening
                 volunteer.IsScreening = true;
                 _volunteerRepository.Update(volunteer);
             }
-            _uow.Save();
+            _context.Save();
 
 
             _screeningVisitRepository.PatientStatus(screeningEntry.Id);
@@ -220,7 +220,9 @@ namespace GSC.Respository.Screening
             _randomizationRepository.Update(randomization);
             Add(screeningEntry);
 
-            _uow.Save();
+            _context.Save();
+
+            _context.DetachAllEntities();
 
             _screeningVisitRepository.PatientStatus(screeningEntry.Id);
 
@@ -229,7 +231,7 @@ namespace GSC.Respository.Screening
             if (screningVisit != null)
             {
                 _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
-                _uow.Save();
+                _context.Save();
                 _screeningVisitRepository.ScheduleVisitUpdate(screeningEntry.Id);
             }
 
@@ -326,7 +328,7 @@ namespace GSC.Respository.Screening
             var volunterIds = _volunteerRepository.AutoCompleteSearch(searchText, true);
             if (volunterIds == null || volunterIds.Count == 0) return new List<DropDownDto>();
 
-            var query = Context.Volunteer.Where(x => volunterIds.Any(a => a.Id == x.Id)
+            var query = _context.Volunteer.Where(x => volunterIds.Any(a => a.Id == x.Id)
                                                      && x.Attendances.Any(t =>
                                                          t.DeletedDate == null &&
                                                          t.AttendanceType == DataEntryType.Screening))
@@ -341,22 +343,22 @@ namespace GSC.Respository.Screening
 
         public IList<ScreeningAuditDto> GetAuditHistory(int id)
         {
-            var auditDtos = (from screening in Context.ScreeningEntry.Where(t => t.Id == id)
-                             join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                             join value in Context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
-                             join audit in Context.ScreeningTemplateValueAudit on value.Id equals audit.ScreeningTemplateValueId
-                             join reasonTemp in Context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
+            var auditDtos = (from screening in _context.ScreeningEntry.Where(t => t.Id == id)
+                             join template in _context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
+                             join value in _context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
+                             join audit in _context.ScreeningTemplateValueAudit on value.Id equals audit.ScreeningTemplateValueId
+                             join reasonTemp in _context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
                              from reason in reasonDt.DefaultIfEmpty()
-                             join designVerialbe in Context.ProjectDesignVariable on value.ProjectDesignVariableId equals
+                             join designVerialbe in _context.ProjectDesignVariable on value.ProjectDesignVariableId equals
                                  designVerialbe.Id
-                             join designTemplate in Context.ProjectDesignTemplate on template.ProjectDesignTemplateId equals
+                             join designTemplate in _context.ProjectDesignTemplate on template.ProjectDesignTemplateId equals
                                  designTemplate.Id
-                             join designVisit in Context.ProjectDesignVisit on designTemplate.ProjectDesignVisitId equals
+                             join designVisit in _context.ProjectDesignVisit on designTemplate.ProjectDesignVisitId equals
                                  designVisit
                                      .Id
-                             join userTemp in Context.Users on audit.UserId equals userTemp.Id into userDto
+                             join userTemp in _context.Users on audit.UserId equals userTemp.Id into userDto
                              from user in userDto.DefaultIfEmpty()
-                             join roleTemp in Context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
+                             join roleTemp in _context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
                              from role in roleDto.DefaultIfEmpty()
                              select new ScreeningAuditDto
                              {
@@ -382,9 +384,9 @@ namespace GSC.Respository.Screening
 
         public ScreeningSummaryDto GetSummary(int id)
         {
-            var values = (from screening in Context.ScreeningEntry.Where(t => t.Id == id)
-                          join template in Context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                          join value in Context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
+            var values = (from screening in _context.ScreeningEntry.Where(t => t.Id == id)
+                          join template in _context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
+                          join value in _context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
                           select new ScreeningSummaryValue
                           {
                               Id = value.Id,
@@ -392,7 +394,7 @@ namespace GSC.Respository.Screening
                               ProjectDesignVariableId = value.ProjectDesignVariableId
                           }).ToList();
 
-            var summary = Context.ScreeningEntry.Where(t => t.Id == id)
+            var summary = _context.ScreeningEntry.Where(t => t.Id == id)
                 .Include(t => t.Attendance)
                 .ThenInclude(t => t.ProjectDesignPeriod)
                 .ThenInclude(t => t.VisitList)
@@ -432,11 +434,11 @@ namespace GSC.Respository.Screening
                         }).ToList()
                 }).FirstOrDefault();
 
-            summary.Visits.ForEach(visit =>
+            summary.Visits.ToList().ForEach(visit =>
             {
-                visit.Templates.ForEach(template =>
+                visit.Templates.ToList().ForEach(template =>
                 {
-                    template.Variables.ForEach(variable =>
+                    template.Variables.ToList().ForEach(variable =>
                     {
                         var screeningValue = values.FirstOrDefault(t =>
                             t.ProjectDesignVariableId == variable.ProjectDesignVariableId);
@@ -471,9 +473,9 @@ namespace GSC.Respository.Screening
                                     else if (variable.CollectionSource == CollectionSources.MultiCheckBox)
                                     {
                                         variable.Items = new List<ScreeningSummaryValueItem>();
-                                        var childValues = Context.ScreeningTemplateValueChild
+                                        var childValues = _context.ScreeningTemplateValueChild
                                             .Where(c => c.ScreeningTemplateValueId == screeningValue.Id).ToList();
-                                        variable.Values.ForEach(value =>
+                                        variable.Values.ToList().ForEach(value =>
                                         {
                                             var childValue = childValues.FirstOrDefault(t =>
                                                 t.ProjectDesignVariableValueId == value.Id);
@@ -507,7 +509,7 @@ namespace GSC.Respository.Screening
             result.Add(new DropDownDto { Id = (int)ScreeningTemplateStatus.InProcess, Value = ScreeningTemplateStatus.InProcess.GetDescription(), ExtraData = false });
             //result.Add(new DropDownDto { Id = (int)ScreeningStatus.Pending, Value = ScreeningStatus.Pending.GetDescription(), ExtraData = false });
 
-            var projectDesign = Context.ProjectDesign.FirstOrDefault(x => x.ProjectId == parentProjectId);
+            var projectDesign = _context.ProjectDesign.FirstOrDefault(x => x.ProjectId == parentProjectId);
 
             if (projectDesign != null)
             {

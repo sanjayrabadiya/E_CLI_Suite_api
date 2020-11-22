@@ -20,18 +20,18 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectWorkplaceArtificateDocumentReviewRepository : GenericRespository<ProjectArtificateDocumentReview, GscContext>, IProjectWorkplaceArtificateDocumentReviewRepository
+    public class ProjectWorkplaceArtificateDocumentReviewRepository : GenericRespository<ProjectArtificateDocumentReview>, IProjectWorkplaceArtificateDocumentReviewRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
 
-        public ProjectWorkplaceArtificateDocumentReviewRepository(IUnitOfWork<GscContext> uow,
+        public ProjectWorkplaceArtificateDocumentReviewRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
@@ -39,11 +39,11 @@ namespace GSC.Respository.Etmf
             IUserRepository userRepository,
               IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository
             )
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _emailSenderRespository = emailSenderRespository;
@@ -53,7 +53,7 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id)
         {
-            var users = Context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId).Select(c => new ProjectArtificateDocumentReviewDto
+            var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId).Select(c => new ProjectArtificateDocumentReviewDto
             {
                 UserId = c.Id,
                 Name = c.UserName,
@@ -75,7 +75,7 @@ namespace GSC.Respository.Etmf
                         IsSendBack = false,
                         Message = ReviewDto.Message,
                     });
-                    if (_uow.Save() < 0) throw new Exception("Artificate Send failed on save.");
+                    if ( _context.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
                     SendMailToReviewer(ReviewDto);
 
@@ -121,7 +121,7 @@ namespace GSC.Respository.Etmf
                 RoleId = _jwtTokenAccesser.RoleId
             });
 
-            _uow.Save();
+             _context.Save();
         }
 
         public List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id)
@@ -134,14 +134,14 @@ namespace GSC.Respository.Etmf
                     DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
                     //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
                     ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().Id,
-                    UserName = Context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+                    UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                     IsSendBack = x.IsSendBack,
                     UserId = x.UserId,
                     ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId,
                     CreatedDate = x.CreatedDate,
-                    CreatedByUser = Context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
                     ModifiedDate = x.ModifiedDate,
-                    ModifiedByUser = Context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
                     SendBackDate = x.SendBackDate,
                     Message = x.Message,
                 }).OrderByDescending(x => x.Id).ToList();
@@ -168,7 +168,7 @@ namespace GSC.Respository.Etmf
                     s.ProjectWorkplaceArtificatedDocument.DocumentName,
                     ExtraData = s.ProjectWorkplaceArtificatedDocumentId,
                     CreatedDate = s.CreatedDate,
-                    CreatedByUser = Context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                    CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.Reviewed.GetDescription(),
                     Level = 6
@@ -195,7 +195,7 @@ namespace GSC.Respository.Etmf
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.DocumentName,
                     CreatedDate = s.CreatedDate,
-                    CreatedByUser = Context.Users.Where(x=>x.Id == s.UserId).FirstOrDefault().UserName,
+                    CreatedByUser = _context.Users.Where(x=>x.Id == s.UserId).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.SendBack.GetDescription()
                 }).OrderBy(x => x.Id).ToList();

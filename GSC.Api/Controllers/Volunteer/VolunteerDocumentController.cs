@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.Volunteer
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var volunteerDocument = _volunteerDocumentRepository
                 .FindByInclude(t => t.VolunteerId == id && t.DeletedDate == null, t => t.DocumentType,
-                    t => t.DocumentName).OrderByDescending(x => x.Id);
+                    t => t.DocumentName).OrderByDescending(x => x.Id).ToList();
             volunteerDocument.ForEach(t => t.PathName = documentUrl + t.PathName);
             return Ok(volunteerDocument);
         }

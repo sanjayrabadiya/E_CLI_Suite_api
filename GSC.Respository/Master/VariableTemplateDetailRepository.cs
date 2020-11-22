@@ -6,12 +6,12 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class VariableTemplateDetailRepository : GenericRespository<VariableTemplateDetail, GscContext>,
+    public class VariableTemplateDetailRepository : GenericRespository<VariableTemplateDetail>,
         IVariableTemplateDetailRepository
     {
-        public VariableTemplateDetailRepository(IUnitOfWork<GscContext> uow,
+        public VariableTemplateDetailRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
         }
     }

@@ -13,16 +13,16 @@ using GSC.Shared.DocumentService;
 
 namespace GSC.Respository.Configuration
 {
-    public class CompanyRepository : GenericRespository<Company, GscContext>, ICompanyRepository
+    public class CompanyRepository : GenericRespository<Company>, ICompanyRepository
     {
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IMapper _mapper;
 
-        public CompanyRepository(IUnitOfWork<GscContext> uow,
+        public CompanyRepository(IGSCContext context,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
             IUploadSettingRepository uploadSettingRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _uploadSettingRepository = uploadSettingRepository;
             _mapper = mapper;
@@ -52,13 +52,13 @@ namespace GSC.Respository.Configuration
             //        continue;
 
             //    var id = company.Location.CountryId;
-            //    company.Location.CountryName = id > 0 ? Context.Country.Find(id).CountryName : "";
+            //    company.Location.CountryName = id > 0 ? _context.Country.Find(id).CountryName : "";
 
             //    id = company.Location.StateId;
-            //    company.Location.StateName = id > 0 ? Context.State.Find(id).StateName : "";
+            //    company.Location.StateName = id > 0 ? _context.State.Find(id).StateName : "";
 
             //    id = company.Location.CityId;
-            //    company.Location.CityName = id > 0 ? Context.City.Find(id).CityName : "";
+            //    company.Location.CityName = id > 0 ? _context.City.Find(id).CityName : "";
             //}
 
             //return companies;

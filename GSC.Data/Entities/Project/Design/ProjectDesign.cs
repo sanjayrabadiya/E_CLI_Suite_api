@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 
 namespace GSC.Data.Entities.Project.Design
 {

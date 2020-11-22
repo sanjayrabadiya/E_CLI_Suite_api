@@ -19,7 +19,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Volunteer
 {
-    public class VolunteerRepository : GenericRespository<Data.Entities.Volunteer.Volunteer, GscContext>,
+    public class VolunteerRepository : GenericRespository<Data.Entities.Volunteer.Volunteer>,
         IVolunteerRepository
     {
         private readonly ICityRepository _cityRepository;
@@ -31,9 +31,9 @@ namespace GSC.Respository.Volunteer
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
 
-        public VolunteerRepository(IUnitOfWork<GscContext> uow,
+        public VolunteerRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             INumberFormatRepository numberFormatRepository,
             IUploadSettingRepository uploadSettingRepository,
@@ -44,7 +44,7 @@ namespace GSC.Respository.Volunteer
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateRepository screeningTemplateRepository
         )
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _uploadSettingRepository = uploadSettingRepository;
@@ -55,7 +55,7 @@ namespace GSC.Respository.Volunteer
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
-            _uow = uow;
+            _context = context;
         }
 
         public IList<VolunteerGridDto> GetVolunteerList()
@@ -101,8 +101,8 @@ namespace GSC.Respository.Volunteer
                     query = query.Where(x => x.PopulationTypeId == search.PopulationTypeId);
                 if (!string.IsNullOrEmpty(search.CityName))
                     query = query.Where(x =>
-                        Context.VolunteerAddress.Where(t => t.Location.CityId != null &&
-                                                            Context.City
+                        _context.VolunteerAddress.Where(t => t.Location.CityId != null &&
+                                                            _context.City
                                                                 .Where(c => c.CityName.ToLower()
                                                                     .Contains(search.CityName.ToLower()))
                                                                 .Select(c => c.Id)
@@ -110,15 +110,15 @@ namespace GSC.Respository.Volunteer
                             .Select(s => s.VolunteerId).Contains(x.Id));
                 if (!string.IsNullOrEmpty(search.CityAreaName))
                     query = query.Where(x =>
-                        Context.VolunteerAddress.Where(t => t.Location.CityAreaId != null &&
-                                                            Context.CityArea
+                        _context.VolunteerAddress.Where(t => t.Location.CityAreaId != null &&
+                                                            _context.CityArea
                                                                 .Where(c => c.AreaName.ToLower()
                                                                     .Contains(search.CityAreaName.ToLower()))
                                                                 .Select(c => c.Id)
                                                                 .Contains(t.Location.CityAreaId.Value))
                             .Select(s => s.VolunteerId).Contains(x.Id));
                 if (!string.IsNullOrEmpty(search.ContactNo))
-                    query = query.Where(x => Context.VolunteerContact.Where(t => t.ContactNo != null &&
+                    query = query.Where(x => _context.VolunteerContact.Where(t => t.ContactNo != null &&
                                                                                  t.ContactNo.ToLower()
                                                                                      .Contains(
                                                                                          search.ContactNo.ToLower()))
@@ -176,25 +176,25 @@ namespace GSC.Respository.Volunteer
                     break;
                 }
             }
-            if (!Context.VolunteerAddress.Where(t => t.VolunteerId == id).Any())
+            if (!_context.VolunteerAddress.Where(t => t.VolunteerId == id).Any())
             {
                 message += "#Address ";
                 inComplete = true;
             }
 
-            if (!Context.VolunteerContact.Where(t => t.VolunteerId == id).Any())
+            if (!_context.VolunteerContact.Where(t => t.VolunteerId == id).Any())
             {
                 message += "#Contact ";
                 inComplete = true;
             }
 
-            if (!Context.VolunteerFood.Where(t => t.VolunteerId == id).Any())
+            if (!_context.VolunteerFood.Where(t => t.VolunteerId == id).Any())
             {
                 message += "#Food ";
                 inComplete = true;
             }
 
-            if (!Context.VolunteerLanguage.Where(t => t.VolunteerId == id).Any())
+            if (!_context.VolunteerLanguage.Where(t => t.VolunteerId == id).Any())
             {
                 message += "#Language";
                 inComplete = true;
@@ -205,7 +205,7 @@ namespace GSC.Respository.Volunteer
                 volunteer.Status = VolunteerStatus.Completed;
                 volunteer.VolunteerNo = GetVolunteerNumber();
                 Update(volunteer);
-                _uow.Save();
+                 _context.Save();
                 return new VolunteerStatusCheck
                 {
                     Id = id,
@@ -238,10 +238,10 @@ namespace GSC.Respository.Volunteer
                                                                                                   .LastScreening)
                                                                                               .Date));
 
-            var projectId = Context.ProjectDesignPeriod.Where(t => t.Id == search.ProjectDesignPeriodId)
+            var projectId = _context.ProjectDesignPeriod.Where(t => t.Id == search.ProjectDesignPeriodId)
                 .Select(x => x.ProjectDesign.ProjectId).FirstOrDefault();
 
-            query = query.Where(x => !Context.Attendance.Any(t => t.DeletedDate == null
+            query = query.Where(x => !_context.Attendance.Any(t => t.DeletedDate == null
                                                                   && (t.Status == null ||
                                                                       t.Status != AttendaceStatus.Suspended)
                                                                   && t.PeriodNo == search.PeriodNo &&
@@ -291,133 +291,11 @@ namespace GSC.Respository.Volunteer
 
         public IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock)
         {
-            var proId = Context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId ?? projectId;
-            var projectdesignId = Context.ProjectDesign.Where(x => x.ProjectId == proId && x.DeletedDate == null).FirstOrDefault().Id;
-            var PeriodId = Context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectdesignId && x.DeletedDate == null).FirstOrDefault().Id;
+            var proId = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId ?? projectId;
+            var projectdesignId = _context.ProjectDesign.Where(x => x.ProjectId == proId && x.DeletedDate == null).FirstOrDefault().Id;
+            var PeriodId = _context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectdesignId && x.DeletedDate == null).FirstOrDefault().Id;
             var subjects = new List<DropDownDto>();
-            //if (isLock)
-            //{
-            //    var attendance = Context.Attendance.Where(a => a.DeletedDate == null
-            //                                                   && !a.IsProcessed &&
-            //                                                   a.ProjectDesignPeriodId == PeriodId
-            //                                                   && a.ProjectId == projectId
-            //                                                   && a.AttendanceType != AttendanceType.Screening
-            //                                                  ).Select(x =>
-            //        new DropDownDto
-            //        {
-            //            Id = x.Id,
-            //            Value = x.Volunteer == null
-            //                ? Convert.ToString(x.Randomization.ScreeningNumber + " - " + x.Randomization.Initial +
-            //                                   (x.Randomization.RandomizationNumber == null
-            //                                       ? ""
-            //                                       : " - " + x.Randomization.RandomizationNumber))
-            //                : Convert.ToString(Convert.ToString(x.ProjectSubject != null ? x.ProjectSubject.Number : "") +
-            //                                   " - " + x.Volunteer.FullName),
-            //            Code = "Attendance",
-            //            ExtraData = x.Id
-            //        }).ToList();
-
-            //    var screeningEntry = Context.ScreeningEntry.Where(a => a.DeletedDate == null
-            //                                                           && a.ProjectDesignPeriodId == PeriodId
-            //                                                           && a.ProjectId == projectId
-            //                                                           && a.EntryType != AttendanceType.Screening).Select(
-            //        x => new DropDownDto
-            //        {
-            //            Id = x.Id,
-            //            Value = x.Attendance.Volunteer == null
-            //                ? Convert.ToString(x.Attendance.Randomization.ScreeningNumber + " - " +
-            //                                   x.Attendance.Randomization.Initial +
-            //                                   (x.Attendance.Randomization.RandomizationNumber == null
-            //                                       ? ""
-            //                                       : " - " + x.Attendance.Randomization.RandomizationNumber))
-            //                : Convert.ToString(
-            //                    Convert.ToString(x.Attendance.ProjectSubject != null
-            //                        ? x.Attendance.ProjectSubject.Number
-            //                        : "") + " - " + x.Attendance.Volunteer.FullName),
-            //            Code = "Screening",
-            //            ExtraData = x.AttendanceId
-            //        }).Distinct().ToList();
-            //    subjects.AddRange(attendance);
-            //    subjects.AddRange(screeningEntry);
-
-            //    var lstsubjects = new List<DropDownDto>();
-            //    lstsubjects.AddRange(attendance);
-            //    lstsubjects.AddRange(screeningEntry);
-
-            //    foreach (var item in lstsubjects)
-            //    {
-            //        var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.ScreeningVisit.ScreeningEntry.AttendanceId == (int)item.ExtraData && x.DeletedDate == null).ToList();
-            //        if (screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false))
-            //        {
-            //            var itemexist = subjects.Where(x => x.Id == item.Id).FirstOrDefault();
-            //            if (itemexist == null)
-            //            {
-            //                subjects.Add(item);
-            //            }
-            //        }
-            //        else
-            //        {
-            //            subjects.RemoveAll(x => x.Id == item.Id);
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    var attendance = (from atten in Context.Attendance.Where(a => a.DeletedDate == null
-            //                                                  && !a.IsProcessed &&
-            //                                                  a.ProjectDesignPeriodId == PeriodId
-            //                                                  && a.ProjectId == projectId
-            //                                                  && a.AttendanceType != AttendanceType.Screening)
-            //                      join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
-            //                      on atten.Id equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
-            //                      select new DropDownDto
-            //                      {
-            //                          Id = atten.Id,
-            //                          Value = atten.Volunteer == null
-            //                              ? Convert.ToString(atten.Randomization.ScreeningNumber + " - " + atten.Randomization.Initial +
-            //                                                 (atten.Randomization.RandomizationNumber == null
-            //                                                     ? ""
-            //                                                     : " - " + atten.Randomization.RandomizationNumber))
-            //                              : Convert.ToString(Convert.ToString(atten.ProjectSubject != null ? atten.ProjectSubject.Number : "") +
-            //                                                 " - " + atten.Volunteer.FullName),
-            //                          Code = "Attendance",
-            //                          ExtraData = atten.Id
-            //                      }).ToList();
-
-            //    var screeningEntry = (from screening in Context.ScreeningEntry.Where(a => a.DeletedDate == null
-            //                                                           && a.ProjectDesignPeriodId == PeriodId
-            //                                                           && a.ProjectId == projectId
-            //                                                           && a.EntryType != AttendanceType.Screening)
-            //                          join locktemplate in Context.ScreeningTemplate.Where(x => x.IsLocked)
-            //                          on screening.AttendanceId equals locktemplate.ScreeningVisit.ScreeningEntry.AttendanceId
-            //                          select new DropDownDto
-            //                          {
-            //                              Id = screening.Id,
-            //                              Value = screening.Attendance.Volunteer == null
-            //                                ? Convert.ToString(screening.Attendance.Randomization.ScreeningNumber + " - " +
-            //                                                   screening.Attendance.Randomization.Initial +
-            //                                                   (screening.Attendance.Randomization.RandomizationNumber == null
-            //                                                       ? ""
-            //                                                       : " - " + screening.Attendance.Randomization.RandomizationNumber))
-            //                                : Convert.ToString(
-            //                                    Convert.ToString(screening.Attendance.ProjectSubject != null
-            //                                        ? screening.Attendance.ProjectSubject.Number
-            //                                        : "") + " - " + screening.Attendance.Volunteer.FullName),
-            //                              Code = "Screening",
-            //                              ExtraData = screening.AttendanceId
-            //                          }).Distinct().ToList();
-            //    subjects.AddRange(attendance);
-            //    subjects.AddRange(screeningEntry);
-            //}
-
-            //var volunteer = subjects.GroupBy(x => x.Id).Select(s => new DropDownDto()
-            //{
-            //    Id = s.Key,
-            //    Value = s.FirstOrDefault().Value,
-            //    ExtraData = s.FirstOrDefault().ExtraData
-            //}).ToList();
-
-            //return volunteer;
+            
 
             return null;
         }
@@ -455,8 +333,8 @@ namespace GSC.Respository.Volunteer
                 Foods = !isSummary
                      ? ""
                      : string.Join(", ",
-                         Context.FoodType
-                             .Where(t => Context.VolunteerFood.Where(v => v.VolunteerId == x.Id)
+                         _context.FoodType
+                             .Where(t => _context.VolunteerFood.Where(v => v.VolunteerId == x.Id)
                                  .Select(s => s.FoodTypeId).Contains(t.Id)).Select(s => s.TypeName).ToList()),
                 RegisterDate = x.RegisterDate,
                 StatusName = x.Status.GetDescription(),

@@ -14,16 +14,16 @@ using System.Text;
 
 namespace GSC.Respository.Medra
 {
-    public class MedraConfigCommonRepository : GenericRespository<MedraConfig, GscContext>, IMedraConfigCommonRepository
+    public class MedraConfigCommonRepository : GenericRespository<MedraConfig>, IMedraConfigCommonRepository
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public MedraConfigCommonRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public MedraConfigCommonRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
         }
 
         public void AddDataInMedraTableUsingAsciiFile(int MedraConfigId, string path, FolderType folderType, string Language, string Version, string Rootname)
@@ -66,7 +66,7 @@ namespace GSC.Respository.Medra
                     //    model.llt_icd10_code = allField[8];
                     //    model.llt_currency = allField[9];
                     //    model.llt_jart_code = allField[10];
-                    //    Context._1_low_level_term.Add(model);
+                    //    _context._1_low_level_term.Add(model);
                         
                     //}
                     //else if (fileName == fullPath + "\\pt.asc") {
@@ -83,7 +83,7 @@ namespace GSC.Respository.Medra
                     //    model.pt_icd9cm_code = allField[8];
                     //    model.pt_icd10_code = allField[9];
                     //    model.pt_jart_code = allField[10];
-                    //    Context._1_pref_term.Add(model);
+                    //    _context._1_pref_term.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\hlt.asc") {
                     //    _1_hlt_pref_term model = new _1_hlt_pref_term();
@@ -97,14 +97,14 @@ namespace GSC.Respository.Medra
                     //    model.hlt_icd9cm_code = allField[6];
                     //    model.hlt_icd10_code = allField[7];
                     //    model.hlt_jart_code = allField[8];
-                    //    Context._1_hlt_pref_term.Add(model);
+                    //    _context._1_hlt_pref_term.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\hlt_pt.asc") {
                     //    _1_hlt_pref_comp model = new _1_hlt_pref_comp();
                     //    model.MedraConfigId = MedraConfigId;
                     //    model.hlt_code = Convert.ToInt64(allField[0]);
                     //    model.pt_code = Convert.ToInt64(allField[1]);
-                    //    Context._1_hlt_pref_comp.Add(model);
+                    //    _context._1_hlt_pref_comp.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\hlgt.asc") {
                     //    _1_hlgt_pref_term model = new _1_hlgt_pref_term();
@@ -118,14 +118,14 @@ namespace GSC.Respository.Medra
                     //    model.hlgt_icd9cm_code = allField[6];
                     //    model.hlgt_icd10_code = allField[7];
                     //    model.hlgt_jart_code = allField[8];
-                    //    Context._1_hlgt_pref_term.Add(model);
+                    //    _context._1_hlgt_pref_term.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\hlgt_hlt.asc") {
                     //    _1_hlgt_hlt_comp model = new _1_hlgt_hlt_comp();
                     //    model.MedraConfigId = MedraConfigId;
                     //    model.hlgt_code = Convert.ToInt64(allField[0]);
                     //    model.hlt_code = Convert.ToInt64(allField[1]);
-                    //    Context._1_hlgt_hlt_comp.Add(model);
+                    //    _context._1_hlgt_hlt_comp.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\soc.asc") {
                     //    _1_soc_term model = new _1_soc_term();
@@ -139,14 +139,14 @@ namespace GSC.Respository.Medra
                     //    model.soc_icd9cm_code = allField[6];
                     //    model.soc_icd10_code = allField[7];
                     //    model.soc_jart_code = allField[8];
-                    //    Context._1_soc_term.Add(model);
+                    //    _context._1_soc_term.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\soc_hlgt.asc") {
                     //    _1_soc_hlgt_comp model = new _1_soc_hlgt_comp();
                     //    model.MedraConfigId = MedraConfigId;
                     //    model.soc_code = Convert.ToInt64(allField[0]);
                     //    model.hlgt_code = Convert.ToInt64(allField[1]);
-                    //    Context._1_soc_hlgt_comp.Add(model);
+                    //    _context._1_soc_hlgt_comp.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\mdhier.asc") {
                     //    _1_md_hierarchy model =new _1_md_hierarchy();
@@ -163,14 +163,14 @@ namespace GSC.Respository.Medra
                     //    model.null_field = allField[9];
                     //    model.pt_soc_code = allField[10] == "" ? (long?)null : Convert.ToInt64(allField[10]);
                     //    model.primary_soc_fg = allField[11];
-                    //    Context._1_md_hierarchy.Add(model);
+                    //    _context._1_md_hierarchy.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\intl_ord.asc") {
                     //    _1_soc_intl_order model = new _1_soc_intl_order();
                     //    model.MedraConfigId = MedraConfigId;
                     //    model.intl_ord_code = Convert.ToInt64(allField[0]);
                     //    model.soc_code = Convert.ToInt64(allField[1]);
-                    //    Context._1_soc_intl_order.Add(model);
+                    //    _context._1_soc_intl_order.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\smq_list.asc") {
                     //    _1_smq_list model = new _1_smq_list();
@@ -184,7 +184,7 @@ namespace GSC.Respository.Medra
                     //    model.MedDRA_version = allField[6];
                     //    model.status = allField[7];
                     //    model.smq_algorithm = allField[8];
-                    //    Context._1_smq_list.Add(model);
+                    //    _context._1_smq_list.Add(model);
                     //}
                     //else if (fileName == fullPath + "\\smq_content.asc") {
                     //    _1_smq_Content model = new _1_smq_Content();
@@ -198,11 +198,11 @@ namespace GSC.Respository.Medra
                     //    model.term_status = allField[6];
                     //    model.term_addition_version = allField[7];
                     //    model.term_last_modified_version = allField[8];
-                    //    Context._1_smq_Content.Add(model);
+                    //    _context._1_smq_Content.Add(model);
                     //}
                 }
 
-                _uow.Save();
+                 _context.Save();
             }
             // ProcessFile(fileName);
 
@@ -211,11 +211,11 @@ namespace GSC.Respository.Medra
         public SummaryDto getSummary(int MedraConfigId)
         {
             SummaryDto count = new SummaryDto();
-            count.Soc = Context.MeddraSocTerm.Where(x=>x.MedraConfigId == MedraConfigId).Count();
-            count.Hlgt = Context.MeddraHlgtPrefTerm.Where(x => x.MedraConfigId == MedraConfigId).Count();
-            count.Hlt = Context.MeddraHltPrefTerm.Where(x => x.MedraConfigId == MedraConfigId).Count();
-            count.Pt = Context.MeddraPrefTerm.Where(x => x.MedraConfigId == MedraConfigId).Count();
-            count.Llt = Context.MeddraLowLevelTerm.Where(x => x.MedraConfigId == MedraConfigId).Count();
+            count.Soc = _context.MeddraSocTerm.Where(x=>x.MedraConfigId == MedraConfigId).Count();
+            count.Hlgt = _context.MeddraHlgtPrefTerm.Where(x => x.MedraConfigId == MedraConfigId).Count();
+            count.Hlt = _context.MeddraHltPrefTerm.Where(x => x.MedraConfigId == MedraConfigId).Count();
+            count.Pt = _context.MeddraPrefTerm.Where(x => x.MedraConfigId == MedraConfigId).Count();
+            count.Llt = _context.MeddraLowLevelTerm.Where(x => x.MedraConfigId == MedraConfigId).Count();
             return count;
         }
 

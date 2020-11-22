@@ -15,25 +15,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Pharmacy
 {
-    public class PharmacyVerificationEntryRepository : GenericRespository<PharmacyVerificationEntry, GscContext>,
+    public class PharmacyVerificationEntryRepository : GenericRespository<PharmacyVerificationEntry>,
         IPharmacyVerificationEntryRepository
     {
         //private readonly IAttendanceRepository _attendanceRepository;
         //private readonly IProjectWorkflowRepository _projectWorkflowRepository;        
         private readonly IPharmacyVerificationTemplateValueRepository _pharmacyVerificationTemplateValueRepository;
-
+        private readonly IGSCContext _context;
         //private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         //private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IVolunteerRepository _volunteerRepository;
 
-        public PharmacyVerificationEntryRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        public PharmacyVerificationEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             //IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IVolunteerRepository volunteerRepository,
             IPharmacyVerificationTemplateValueRepository pharmacyVerificationTemplateValueRepository
         // IProjectDesignVariableRepository projectDesignVariableRepository
         )
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
+            _context = context;
             //_projectDesignVariableRepository = projectDesignVariableRepository;
             //_projectDesignTemplateRepository = projectDesignTemplateRepository;
             _volunteerRepository = volunteerRepository;
@@ -45,7 +46,7 @@ namespace GSC.Respository.Pharmacy
             //var PharmacyTemplateValue = _pharmacyTemplateValueRepository.
             //    FindBy(x => x.DeletedDate == null && x.PharmacyEntryId == id).ToList();
 
-            var pharmacyVerificationEntryDto = Context.PharmacyVerificationEntry
+            var pharmacyVerificationEntryDto = _context.PharmacyVerificationEntry
                 .Where(t => t.Id == id && t.DeletedDate == null)
                 .Select(t => new PharmacyVerificationEntryDto
                 {
@@ -80,10 +81,10 @@ namespace GSC.Respository.Pharmacy
         public List<PharmacyVerificationEntryDto> GetpharmacyVerificationList()
         {
             var pharmacyVerificationEntry =
-                (from pharmacyverificationentry in Context.PharmacyVerificationEntry.Where(t => t.DeletedDate == null)
-                 join project in Context.Project.Where(t => t.DeletedDate == null) on pharmacyverificationentry
+                (from pharmacyverificationentry in _context.PharmacyVerificationEntry.Where(t => t.DeletedDate == null)
+                 join project in _context.Project.Where(t => t.DeletedDate == null) on pharmacyverificationentry
                      .ProjectId equals project.Id
-                 join config in Context.PharmacyConfig.Where(t => t.DeletedDate == null) on pharmacyverificationentry
+                 join config in _context.PharmacyConfig.Where(t => t.DeletedDate == null) on pharmacyverificationentry
                      .FormId equals config.FormId
                  select new PharmacyVerificationEntryDto
                  {
@@ -105,10 +106,10 @@ namespace GSC.Respository.Pharmacy
         public PharmacyVerificationTemplateValueListDto GetpharmacyVerificationTemplateValueList(int projectId,
             int domainId)
         {
-            var receiptTemlId = Context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsVerification)
+            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsVerification)
                 .FirstOrDefault();
-            var pharmacyVerificationVariable = (from variable in Context.Variable
-                                                join variabletemplateDetail in Context.VariableTemplateDetail.Where(
+            var pharmacyVerificationVariable = (from variable in _context.Variable
+                                                join variabletemplateDetail in _context.VariableTemplateDetail.Where(
                                                     vv => vv.DeletedBy == null && vv.VariableTemplateId == receiptTemlId.VariableTemplateId
                                                 ).OrderBy(a => a.SeqNo) on variable.Id equals variabletemplateDetail.VariableId
                                                 select new VariableDto
@@ -119,9 +120,9 @@ namespace GSC.Respository.Pharmacy
                                                     VariableCode = variable.VariableCode
                                                 }).ToList();
 
-            var pharmacyVerificationEntry = (from pharmacyverificationentry in Context.PharmacyVerificationEntry
+            var pharmacyVerificationEntry = (from pharmacyverificationentry in _context.PharmacyVerificationEntry
                     .Where(t => t.DeletedDate == null && t.ProjectId == projectId).OrderByDescending(x => x.Id)
-                                                 //join productType in Context.ProductType.Where(t=>t.DeletedBy == null) on pharmacyverificationentry.ProductTypeId equals productType.Id
+                                                 //join productType in _context.ProductType.Where(t=>t.DeletedBy == null) on pharmacyverificationentry.ProductTypeId equals productType.Id
                                              select new PharmacyVerificationEntryDto
                                              {
                                                  IsDeleted = pharmacyverificationentry.DeletedDate != null,
@@ -145,10 +146,10 @@ namespace GSC.Respository.Pharmacy
 
         public List<PharmacyVerificationTemplateValueDto> GetpharmacyVerificationTemplateListByEntry(int entryId)
         {
-            var receiptTemlId = Context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsVerification)
+            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsVerification)
                 .FirstOrDefault();
-            var pharmacyVerificationValue = (from p in Context.VariableTemplateDetail.Where(vv => vv.DeletedBy == null)
-                                             from ptv in Context.PharmacyVerificationTemplateValue.Where(x =>
+            var pharmacyVerificationValue = (from p in _context.VariableTemplateDetail.Where(vv => vv.DeletedBy == null)
+                                             from ptv in _context.PharmacyVerificationTemplateValue.Where(x =>
                                                      x.DeletedBy == null && x.VariableId == p.VariableId && x.PharmacyVerificationEntryId == entryId)
                                                  .DefaultIfEmpty()
                                              where p.VariableTemplateId == receiptTemlId.VariableTemplateId
@@ -164,13 +165,13 @@ namespace GSC.Respository.Pharmacy
 
             foreach (var item in pharmacyVerificationValue)
             {
-                var objVariable = Context.Variable.Where(x => x.Id == item.VariableId).FirstOrDefault();
+                var objVariable = _context.Variable.Where(x => x.Id == item.VariableId).FirstOrDefault();
                 if (objVariable != null)
                 {
                     if (objVariable.CollectionSource == CollectionSources.ComboBox ||
                         objVariable.CollectionSource == CollectionSources.RadioButton)
                     {
-                        var varvalue = Context.VariableValue.Where(x => x.Id == Convert.ToInt32(item.Value))
+                        var varvalue = _context.VariableValue.Where(x => x.Id == Convert.ToInt32(item.Value))
                             .FirstOrDefault();
                         item.ValueId = item.Value;
                         item.Value = varvalue != null ? varvalue.ValueName : item.Value;
@@ -178,10 +179,10 @@ namespace GSC.Respository.Pharmacy
                     else if (objVariable.CollectionSource == CollectionSources.MultiCheckBox)
                     {
                         var varvalue =
-                            from ptv in Context.PharmacyVerificationTemplateValueChild.Where(x =>
+                            from ptv in _context.PharmacyVerificationTemplateValueChild.Where(x =>
                                 x.PharmacyVerificationTemplateValueId == item.TempId)
-                            from vv in Context.VariableValue.Where(x => x.Id == ptv.VariableValueId)
-                            from v in Context.Variable.Where(x => x.Id == vv.VariableId)
+                            from vv in _context.VariableValue.Where(x => x.Id == ptv.VariableValueId)
+                            from v in _context.Variable.Where(x => x.Id == vv.VariableId)
                             select new
                             {
                                 vv.ValueName
@@ -197,9 +198,9 @@ namespace GSC.Respository.Pharmacy
 
         public VariableTemplate GetTemplate(int id)
         {
-            var receiptTemlId = Context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsVerification)
+            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsVerification)
                 .FirstOrDefault();
-            var template = Context.VariableTemplate.Where(t => t.Id == receiptTemlId.VariableTemplateId)
+            var template = _context.VariableTemplate.Where(t => t.Id == receiptTemlId.VariableTemplateId)
                 .Include(d => d.VariableTemplateDetails)
                 .Include(t => t.Domain)
                 .Include(t => t.Notes)
@@ -211,7 +212,7 @@ namespace GSC.Respository.Pharmacy
                     .OrderBy(t => t.SeqNo).ToList();
                 template.VariableTemplateDetails.ForEach(detail =>
                 {
-                    detail.Variable = Context.Variable.Where(t => t.Id == detail.VariableId)
+                    detail.Variable = _context.Variable.Where(t => t.Id == detail.VariableId)
                         .Include(variable => variable.Values)
                         .Include(t => t.Unit)
                         .FirstOrDefault();
@@ -221,7 +222,7 @@ namespace GSC.Respository.Pharmacy
                         detail.Variable.Values = detail.Variable.Values.Where(t => t.DeletedDate == null).ToList();
                         detail.VariableCategoryName = detail.Variable.VariableCategoryId == null
                             ? ""
-                            : Context.VariableCategory.FirstOrDefault(t => t.Id == detail.Variable.VariableCategoryId)
+                            : _context.VariableCategory.FirstOrDefault(t => t.Id == detail.Variable.VariableCategoryId)
                                 ?.CategoryName;
                     }
                 });

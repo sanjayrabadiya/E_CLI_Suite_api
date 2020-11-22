@@ -15,17 +15,17 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectWorkplaceSubSectionArtifactRepository : GenericRespository<ProjectWorkplaceSubSectionArtifact, GscContext>, IProjectWorkplaceSubSectionArtifactRepository
+    public class ProjectWorkplaceSubSectionArtifactRepository : GenericRespository<ProjectWorkplaceSubSectionArtifact>, IProjectWorkplaceSubSectionArtifactRepository
     {
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
-        public ProjectWorkplaceSubSectionArtifactRepository(IUnitOfWork<GscContext> uow, IUploadSettingRepository uploadSettingRepository,
+        public ProjectWorkplaceSubSectionArtifactRepository(IGSCContext context, IUploadSettingRepository uploadSettingRepository,
           IJwtTokenAccesser jwtTokenAccesser, IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository)
-          : base(uow, jwtTokenAccesser)
+          : base(context)
         {
-            _uow = uow;
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _uploadSettingRepository = uploadSettingRepository;
             _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
@@ -41,18 +41,18 @@ namespace GSC.Respository.Etmf
 
         public ProjectWorkplaceSubSectionDto getSectionDetail(ProjectWorkplaceSubSectionArtifactDto projectWorkplaceSubSectionDto)
         {
-            var data = (from subsection in Context.ProjectWorkplaceSubSection.Where(x => x.Id == projectWorkplaceSubSectionDto.ProjectWorkplaceSubSectionId)
-                        join section in Context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
-                        join etmfsection in Context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
-                        join workzone in Context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
-                        join etmfZone in Context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
-                        join workdetail in Context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
-                        join work in Context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
-                        join project in Context.Project on work.ProjectId equals project.Id
+            var data = (from subsection in _context.ProjectWorkplaceSubSection.Where(x => x.Id == projectWorkplaceSubSectionDto.ProjectWorkplaceSubSectionId)
+                        join section in _context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
+                        join etmfsection in _context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
+                        join workzone in _context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
+                        join etmfZone in _context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
+                        join workdetail in _context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
+                        join work in _context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
+                        join project in _context.Project on work.ProjectId equals project.Id
 
-                        join countryleft in Context.Country on workdetail.ItemId equals countryleft.Id into countryl
+                        join countryleft in _context.Country on workdetail.ItemId equals countryleft.Id into countryl
                         from country in countryl.DefaultIfEmpty()
-                        join projectsite in Context.Project on workdetail.ItemId equals projectsite.Id into siteleft
+                        join projectsite in _context.Project on workdetail.ItemId equals projectsite.Id into siteleft
                         from site in siteleft.DefaultIfEmpty()
                         select new ProjectWorkplaceSubSectionDto
                         {
@@ -91,19 +91,19 @@ namespace GSC.Respository.Etmf
 
         public ProjectWorkplaceSubSectionArtifactDto UpdateArtifactDetail(ProjectWorkplaceSubSectionArtifactDto projectWorkplaceSubSectionDto)
         {
-            var data = (from artifact in Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.Id == projectWorkplaceSubSectionDto.Id)
-                        join subsection in Context.ProjectWorkplaceSubSection on artifact.ProjectWorkplaceSubSectionId equals subsection.Id
-                        join section in Context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
-                        join etmfsection in Context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
-                        join workzone in Context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
-                        join etmfZone in Context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
-                        join workdetail in Context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
-                        join work in Context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
-                        join project in Context.Project on work.ProjectId equals project.Id
+            var data = (from artifact in _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.Id == projectWorkplaceSubSectionDto.Id)
+                        join subsection in _context.ProjectWorkplaceSubSection on artifact.ProjectWorkplaceSubSectionId equals subsection.Id
+                        join section in _context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
+                        join etmfsection in _context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
+                        join workzone in _context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
+                        join etmfZone in _context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
+                        join workdetail in _context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
+                        join work in _context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
+                        join project in _context.Project on work.ProjectId equals project.Id
 
-                        join countryleft in Context.Country on workdetail.ItemId equals countryleft.Id into countryl
+                        join countryleft in _context.Country on workdetail.ItemId equals countryleft.Id into countryl
                         from country in countryl.DefaultIfEmpty()
-                        join projectsite in Context.Project on workdetail.ItemId equals projectsite.Id into siteleft
+                        join projectsite in _context.Project on workdetail.ItemId equals projectsite.Id into siteleft
                         from site in siteleft.DefaultIfEmpty()
                         select new ProjectWorkplaceSubSectionArtifactDto
                         {
@@ -159,7 +159,7 @@ namespace GSC.Respository.Etmf
             {
                 b.DocPath = path;
                 _projectWorkplaceSubSecArtificatedocumentRepository.Update(b);
-                _uow.Save();
+                 _context.Save();
             });
             
             #endregion
@@ -168,19 +168,19 @@ namespace GSC.Respository.Etmf
 
         public string DeletArtifactDetailFolder(int id)
         {
-            var data = (from artifact in Context.ProjectWorkplaceSubSectionArtifact.Where(x => x.Id == id)
-                        join subsection in Context.ProjectWorkplaceSubSection on artifact.ProjectWorkplaceSubSectionId equals subsection.Id
-                        join section in Context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
-                        join etmfsection in Context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
-                        join workzone in Context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
-                        join etmfZone in Context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
-                        join workdetail in Context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
-                        join work in Context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
-                        join project in Context.Project on work.ProjectId equals project.Id
+            var data = (from artifact in _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.Id == id)
+                        join subsection in _context.ProjectWorkplaceSubSection on artifact.ProjectWorkplaceSubSectionId equals subsection.Id
+                        join section in _context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
+                        join etmfsection in _context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
+                        join workzone in _context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
+                        join etmfZone in _context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
+                        join workdetail in _context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
+                        join work in _context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
+                        join project in _context.Project on work.ProjectId equals project.Id
 
-                        join countryleft in Context.Country on workdetail.ItemId equals countryleft.Id into countryl
+                        join countryleft in _context.Country on workdetail.ItemId equals countryleft.Id into countryl
                         from country in countryl.DefaultIfEmpty()
-                        join projectsite in Context.Project on workdetail.ItemId equals projectsite.Id into siteleft
+                        join projectsite in _context.Project on workdetail.ItemId equals projectsite.Id into siteleft
                         from site in siteleft.DefaultIfEmpty()
                         select new ProjectWorkplaceSubSectionArtifactDto
                         {

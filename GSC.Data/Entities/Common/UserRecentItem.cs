@@ -1,4 +1,5 @@
-﻿using GSC.Helper;
+﻿using GSC.Common.Base;
+using GSC.Helper;
 
 namespace GSC.Data.Entities.Common
 {

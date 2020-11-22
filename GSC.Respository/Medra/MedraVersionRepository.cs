@@ -15,14 +15,14 @@ using System.Text;
 
 namespace GSC.Respository.Medra
 {
-    public class MedraVersionRepository : GenericRespository<MedraVersion, GscContext>, IMedraVersionRepository
+    public class MedraVersionRepository : GenericRespository<MedraVersion>, IMedraVersionRepository
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public MedraVersionRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, 
+        public MedraVersionRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, 
             IPropertyMappingService propertyMappingService,
-            IMapper mapper) : base(uow, jwtTokenAccesser)
+            IMapper mapper) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;

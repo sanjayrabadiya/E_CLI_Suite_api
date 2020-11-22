@@ -10,16 +10,16 @@ using GSC.Shared;
 
 namespace GSC.Respository.Common
 {
-    public class UserRecentItemRepository : GenericRespository<UserRecentItem, GscContext>, IUserRecentItemRepository
+    public class UserRecentItemRepository : GenericRespository<UserRecentItem>, IUserRecentItemRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public UserRecentItemRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public UserRecentItemRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
+            _context = context;
         }
 
         public void SaveUserRecentItem(UserRecentItem userRecentItem)
@@ -32,7 +32,7 @@ namespace GSC.Respository.Common
                 userRecentItem.UserId = _jwtTokenAccesser.UserId;
                 userRecentItem.RoleId = _jwtTokenAccesser.RoleId;
                 Add(userRecentItem);
-                _uow.Save();
+                _context.Save();
             }
         }
 
@@ -70,10 +70,10 @@ namespace GSC.Respository.Common
                     break;
             }
 
-            var result = Context.AppScreen.Where(x => x.ScreenCode == urlName).FirstOrDefault();
+            var result = _context.AppScreen.Where(x => x.ScreenCode == urlName).FirstOrDefault();
             if (result != null)
             {
-                var parent = Context.AppScreen.Where(x => x.Id == result.ParentAppScreenId).FirstOrDefault()?.IconPath;
+                var parent = _context.AppScreen.Where(x => x.Id == result.ParentAppScreenId).FirstOrDefault()?.IconPath;
                 var finalResult = new ScreenModal {IconPath = parent + "small", UrlName = result.UrlName};
                 return finalResult;
             }

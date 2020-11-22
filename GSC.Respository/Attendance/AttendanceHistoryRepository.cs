@@ -9,14 +9,14 @@ using GSC.Shared;
 
 namespace GSC.Respository.Attendance
 {
-    public class AttendanceHistoryRepository : GenericRespository<AttendanceHistory, GscContext>,
+    public class AttendanceHistoryRepository : GenericRespository<AttendanceHistory>,
         IAttendanceHistoryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public AttendanceHistoryRepository(IUnitOfWork<GscContext> uow,
+        public AttendanceHistoryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
         }

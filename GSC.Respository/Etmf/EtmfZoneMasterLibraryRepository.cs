@@ -11,11 +11,11 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class EtmfZoneMasterLibraryRepository : GenericRespository<EtmfZoneMasterLibrary, GscContext>, IEtmfZoneMasterLibraryRepository
+    public class EtmfZoneMasterLibraryRepository : GenericRespository<EtmfZoneMasterLibrary>, IEtmfZoneMasterLibraryRepository
     {
-        public EtmfZoneMasterLibraryRepository(IUnitOfWork<GscContext> uow,
+        public EtmfZoneMasterLibraryRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser)
-           : base(uow, jwtTokenAccesser)
+           : base(context)
         {
         }
 

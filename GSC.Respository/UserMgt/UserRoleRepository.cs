@@ -10,15 +10,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {
-    public class UserRoleRepository : GenericRespository<UserRole, GscContext>, IUserRoleRepository
+    public class UserRoleRepository : GenericRespository<UserRole>, IUserRoleRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IRolePermissionRepository _rolePermissionRepository;
 
-        public UserRoleRepository(IUnitOfWork<GscContext> uow,
+        public UserRoleRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IRolePermissionRepository rolePermissionRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _rolePermissionRepository = rolePermissionRepository;
             _jwtTokenAccesser = jwtTokenAccesser;

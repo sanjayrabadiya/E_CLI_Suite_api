@@ -14,14 +14,16 @@ using GSC.Shared;
 
 namespace GSC.Respository.Medra
 {
-    public class MeddraLowLevelTermRepository : GenericRespository<MeddraLowLevelTerm, GscContext>, IMeddraLowLevelTermRepository
+    public class MeddraLowLevelTermRepository : GenericRespository<MeddraLowLevelTerm>, IMeddraLowLevelTermRepository
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraLowLevelTermRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public MeddraLowLevelTermRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public int AddLltFileData(SaveFileDto obj)
@@ -84,8 +86,8 @@ namespace GSC.Respository.Medra
         private IList<MeddraCodingSearchDetails> GetItems(IQueryable<Data.Entities.Medra.MeddraLowLevelTerm> query, MeddraCodingSearchDto search)
         {
             return (from q in query
-                    join md in Context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == search.MeddraConfigId) on q.pt_code equals md.pt_code
-                    join soc in Context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == search.MeddraConfigId) on md.soc_code equals soc.soc_code
+                    join md in _context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == search.MeddraConfigId) on q.pt_code equals md.pt_code
+                    join soc in _context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == search.MeddraConfigId) on md.soc_code equals soc.soc_code
 
                     select new MeddraCodingSearchDetails
                     {

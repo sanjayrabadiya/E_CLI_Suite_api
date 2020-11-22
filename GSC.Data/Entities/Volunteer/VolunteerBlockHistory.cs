@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using GSC.Data.Entities.Common;
+using GSC.Common.Base;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.UserMgt;
 using GSC.Shared;

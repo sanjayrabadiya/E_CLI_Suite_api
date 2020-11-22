@@ -11,7 +11,7 @@ using GSC.Shared;
 
 namespace GSC.Respository.Attendance
 {
-    public class ProjectSubjectRepository : GenericRespository<ProjectSubject, GscContext>, IProjectSubjectRepository
+    public class ProjectSubjectRepository : GenericRespository<ProjectSubject>, IProjectSubjectRepository
     {
         private readonly IAttendanceHistoryRepository _attendanceHistoryRepository;
         private readonly IAttendanceRepository _attendanceRepository;
@@ -19,15 +19,15 @@ namespace GSC.Respository.Attendance
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
-        public ProjectSubjectRepository(IUnitOfWork<GscContext> uow,
+        private readonly IGSCContext _context;
+        public ProjectSubjectRepository(IGSCContext context,
             INumberFormatRepository numberFormatRepository,
             IProjectRepository projectRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IAttendanceRepository attendanceRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IAttendanceHistoryRepository attendanceHistoryRepository)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _numberFormatRepository = numberFormatRepository;
             _projectRepository = projectRepository;
@@ -35,7 +35,7 @@ namespace GSC.Respository.Attendance
             _attendanceRepository = attendanceRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _attendanceHistoryRepository = attendanceHistoryRepository;
-            _uow = uow;
+            _context = context;
         }
 
         public void SaveSubjectForVolunteer(int attendanceId, int screeningTemplateId)
@@ -64,7 +64,7 @@ namespace GSC.Respository.Attendance
                     {
                         replaceProject.IsRepaced = true;
                         Update(replaceProject);
-                        var volunteerName = Context.Volunteer.Find(replaceProject.VolunteerId ?? 0).FullName;
+                        var volunteerName = _context.Volunteer.Find(replaceProject.VolunteerId ?? 0).FullName;
                         _attendanceHistoryRepository.SaveHistory("Fitness passed with auto replace " + volunteerName,
                             attendance.Id, null);
                     }
@@ -101,7 +101,7 @@ namespace GSC.Respository.Attendance
 
             projectSubject.Number = GetSubjectNumer(projectId, parentProjectId, numberType);
             Add(projectSubject);
-            _uow.Save();
+            _context.Save();
 
             return projectSubject;
         }
@@ -143,7 +143,7 @@ namespace GSC.Respository.Attendance
             replaceSubject.VolunteerId = attendance.VolunteerId;
             attendance.ProjectSubjectId = replaceSubject.Id;
             Update(replaceSubject);
-            var volunteerName = Context.Volunteer.Find(replaceSubject.VolunteerId ?? 0).FullName;
+            var volunteerName = _context.Volunteer.Find(replaceSubject.VolunteerId ?? 0).FullName;
             _attendanceHistoryRepository.SaveHistory("Replaced with " + volunteerName, attendance.Id, null);
             _attendanceRepository.Update(attendance);
         }
@@ -151,7 +151,7 @@ namespace GSC.Respository.Attendance
         private string GetSubjectNumer(int projectId, int parentProjectId, SubjectNumberType numberType)
         {
             var project = _projectRepository.Find(projectId);
-            var underTesting = Context.ProjectDesign.Any(x =>
+            var underTesting = _context.ProjectDesign.Any(x =>
                 x.DeletedDate == null && x.ProjectId == parentProjectId && x.IsUnderTesting);
             var keyName = underTesting ? "Testing" : "";
             keyName += numberType == SubjectNumberType.StandBy ? "ExtraSub" : "Sub";

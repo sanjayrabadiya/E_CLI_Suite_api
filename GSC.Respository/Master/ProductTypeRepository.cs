@@ -11,15 +11,15 @@ using GSC.Shared;
 
 namespace GSC.Respository.Master
 {
-    public class ProductTypeRepository : GenericRespository<ProductType, GscContext>, IProductTypeRepository
+    public class ProductTypeRepository : GenericRespository<ProductType>, IProductTypeRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public ProductTypeRepository(IUnitOfWork<GscContext> uow,
+        public ProductTypeRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

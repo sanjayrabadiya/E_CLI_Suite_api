@@ -17,14 +17,14 @@ using System.Linq;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningVisitRepository : GenericRespository<ScreeningVisit, GscContext>, IScreeningVisitRepository
+    public class ScreeningVisitRepository : GenericRespository<ScreeningVisit>, IScreeningVisitRepository
     {
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningVisitHistoryRepository _screeningVisitHistoryRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         private readonly IRandomizationRepository _randomizationRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
@@ -32,7 +32,7 @@ namespace GSC.Respository.Screening
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
         private readonly IImpactService _impactService;
 
-        public ScreeningVisitRepository(IUnitOfWork<GscContext> uow,
+        public ScreeningVisitRepository(IGSCContext context,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
             IRandomizationRepository randomizationRepository,
@@ -45,13 +45,13 @@ namespace GSC.Respository.Screening
             IScreeningProgress screeningProgress,
             IScheduleRuleRespository scheduleRuleRespository,
             IImpactService impactService)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _screeningVisitHistoryRepository = screeningVisitHistoryRepository;
             _randomizationRepository = randomizationRepository;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
-            _uow = uow;
+            _context = context;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -85,7 +85,7 @@ namespace GSC.Respository.Screening
         {
             var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(projectDesignPeriodId);
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
-            designVisits.ForEach(r =>
+            designVisits.ToList().ForEach(r =>
             {
                 var screeningVisit = new ScreeningVisit
                 {
@@ -141,8 +141,9 @@ namespace GSC.Respository.Screening
                     _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.InProgress, visitDate);
                     Update(screeningVisit);
                 }
-                _uow.Save();
-                _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
+                _context.Save();
+                if (screeningTemplate != null)
+                    _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
             }
         }
 
@@ -174,7 +175,7 @@ namespace GSC.Respository.Screening
             }
 
 
-            _uow.Save();
+            _context.Save();
 
             _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, true);
 
@@ -192,7 +193,7 @@ namespace GSC.Respository.Screening
 
             _screeningVisitHistoryRepository.Save(screeningVisitHistoryDto);
 
-            _uow.Save();
+            _context.Save();
 
             PatientStatus(visit.ScreeningEntryId);
         }
@@ -255,7 +256,7 @@ namespace GSC.Respository.Screening
             Update(visit);
 
             _screeningVisitHistoryRepository.SaveByScreeningVisit(visit, ScreeningVisitStatus.Open, screeningVisitDto.VisitOpenDate);
-            _uow.Save();
+            _context.Save();
 
             FindOpenVisitVarible(visit.ProjectDesignVisitId, visit.Id, screeningVisitDto.VisitOpenDate, visit.ScreeningEntryId);
 
@@ -390,7 +391,7 @@ namespace GSC.Respository.Screening
 
             Add(screeningVisit);
 
-            _uow.Save();
+            _context.Save();
 
             FindOpenVisitVarible(screeningVisit.ProjectDesignVisitId, screeningVisit.Id, screeningVisitDto.VisitOpenDate, screeningVisit.ScreeningEntryId);
 

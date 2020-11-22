@@ -22,7 +22,7 @@ using Newtonsoft.Json;
 
 namespace GSC.Respository.UserMgt
 {
-    public class UserRepository : GenericRespository<User, GscContext>, IUserRepository
+    public class UserRepository : GenericRespository<User>, IUserRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
@@ -32,14 +32,15 @@ namespace GSC.Respository.UserMgt
         private readonly IOptions<JwtSettings> _settings;       
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
-        public UserRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
+        private readonly IGSCContext _context;
+        public UserRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUserPasswordRepository userPasswordRepository,
             IRefreshTokenRepository refreshTokenRepository,
             IOptions<JwtSettings> settings,
             Microsoft.Extensions.Configuration.IConfiguration configuration, IAPICall centeralApi)
-            : base(uow, jwtTokenAccesser)
+            : base(context)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
             _userLoginReportRepository = userLoginReportRepository;
@@ -49,6 +50,7 @@ namespace GSC.Respository.UserMgt
             _refreshTokenRepository = refreshTokenRepository;           
             _configuration = configuration;
             _centeralApi = centeralApi;
+            _context = context;
         }
 
         public List<UserDto> GetUsers(bool isDeleted)
@@ -74,8 +76,6 @@ namespace GSC.Respository.UserMgt
 
         public User ValidateUser(string userName, string password)
         {
-            Context.ConfigureServices( "data source = 198.38.85.197; Initial Catalog = Cli_Dev; user id = sa; password = Pushkar@7!;");
-
             if (Convert.ToBoolean(_configuration["IsCloud"]))
                 return ValidateCenteral(userName, password);
             else
@@ -193,7 +193,7 @@ namespace GSC.Respository.UserMgt
         {
             var principal = GetPrincipalFromExpiredToken(accessToken);
 
-            var login = Context.RefreshToken.FirstOrDefault(t =>
+            var login = _context.RefreshToken.FirstOrDefault(t =>
                 t.Token == refreshToken && t.ExpiredOn > DateTime.UtcNow);
 
             if (login == null) throw new SecurityTokenException("Refresh token not found or has been expired.");

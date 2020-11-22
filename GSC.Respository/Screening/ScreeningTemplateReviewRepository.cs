@@ -10,12 +10,14 @@ using GSC.Shared;
 
 namespace GSC.Respository.Screening
 {
-    public class ScreeningTemplateReviewRepository : GenericRespository<ScreeningTemplateReview, GscContext>,
+    public class ScreeningTemplateReviewRepository : GenericRespository<ScreeningTemplateReview>,
         IScreeningTemplateReviewRepository
     {
-        public ScreeningTemplateReviewRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser)
-            : base(uow, jwtTokenAccesser)
+        private readonly IGSCContext _context;
+        public ScreeningTemplateReviewRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
+            _context = context;
         }
 
         public List<ScreeningTemplateReviewDto> GetTemplateReviewHistory(int id)
@@ -33,11 +35,11 @@ namespace GSC.Respository.Screening
 
         public IList<ReviewDto> GetReviewLevel(int projectId)
         {
-            var ParentProjectId = Context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId ?? projectId;
-            var ProjectDesignId = Context.ProjectDesign.Where(x => x.ProjectId == ParentProjectId).FirstOrDefault().Id;
+            var ParentProjectId = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId ?? projectId;
+            var ProjectDesignId = _context.ProjectDesign.Where(x => x.ProjectId == ParentProjectId).FirstOrDefault().Id;
 
-            var reviewdto = (from workflow in Context.ProjectWorkflow.Where(t => t.ProjectDesignId == ProjectDesignId)
-                             join workflowlevel in Context.ProjectWorkflowLevel.Where(x => x.DeletedDate == null) on workflow.Id equals workflowlevel.ProjectWorkflowId
+            var reviewdto = (from workflow in _context.ProjectWorkflow.Where(t => t.ProjectDesignId == ProjectDesignId)
+                             join workflowlevel in _context.ProjectWorkflowLevel.Where(x => x.DeletedDate == null) on workflow.Id equals workflowlevel.ProjectWorkflowId
                              group workflowlevel by new
                              {
                                  ReviewLevel = workflowlevel.LevelNo,

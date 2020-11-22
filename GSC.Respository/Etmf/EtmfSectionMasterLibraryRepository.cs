@@ -10,11 +10,11 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class EtmfSectionMasterLibraryRepository : GenericRespository<EtmfSectionMasterLibrary, GscContext>, IEtmfSectionMasterLibraryRepository
+    public class EtmfSectionMasterLibraryRepository : GenericRespository<EtmfSectionMasterLibrary>, IEtmfSectionMasterLibraryRepository
     {
-        public EtmfSectionMasterLibraryRepository(IUnitOfWork<GscContext> uow,
+        public EtmfSectionMasterLibraryRepository(IGSCContext context,
          IJwtTokenAccesser jwtTokenAccesser)
-         : base(uow, jwtTokenAccesser)
+         : base(context)
         {
         }
         public string Duplicate(EtmfSectionMasterLibrary objSave)

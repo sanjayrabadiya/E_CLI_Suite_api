@@ -12,11 +12,11 @@ using System.Text;
 
 namespace GSC.Respository.Medra
 {
-    public class DictionaryRepository : GenericRespository<Dictionary, GscContext>, IDictionaryRepository
+    public class DictionaryRepository : GenericRespository<Dictionary>, IDictionaryRepository
     {
         private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public DictionaryRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(uow, jwtTokenAccesser)
+        public DictionaryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
         {
             _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
