@@ -7,9 +7,9 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

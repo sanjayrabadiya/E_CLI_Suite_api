@@ -5,6 +5,7 @@ using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Data.Entities.Screening
 {

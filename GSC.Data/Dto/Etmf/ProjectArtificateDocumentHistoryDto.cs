@@ -1,5 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
 using System.Text;

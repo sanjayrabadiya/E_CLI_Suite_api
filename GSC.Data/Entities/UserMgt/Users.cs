@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Data.Entities.UserMgt
 {

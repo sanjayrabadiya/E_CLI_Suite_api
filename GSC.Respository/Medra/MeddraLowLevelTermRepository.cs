@@ -3,7 +3,6 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Medra;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.PropertyMapping;
 using System;
 using System.Collections.Generic;
@@ -11,6 +10,7 @@ using System.Text;
 using System.Linq;
 using GSC.Data.Dto.Medra;
 using System.IO;
+using GSC.Shared;
 
 namespace GSC.Respository.Medra
 {

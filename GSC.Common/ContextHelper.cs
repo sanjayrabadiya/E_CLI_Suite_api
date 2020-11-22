@@ -1,6 +1,6 @@
 ﻿using System;
 using GSC.Data.Entities.Common;
-using GSC.Helper;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Common

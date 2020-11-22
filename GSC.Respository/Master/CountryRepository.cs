@@ -9,8 +9,8 @@ using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Location;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.ProjectRight;
+using GSC.Shared;
 
 namespace GSC.Respository.Master
 {

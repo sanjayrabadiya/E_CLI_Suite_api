@@ -5,7 +5,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Barcode;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.Barcode
 {

@@ -9,12 +9,13 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.ProjectRight
 {

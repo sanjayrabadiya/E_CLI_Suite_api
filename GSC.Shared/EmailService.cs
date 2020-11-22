@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public class EmailService : IEmailService
     {
@@ -39,7 +39,7 @@ namespace GSC.Helper
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex,"");
+                    Log.Error(ex, "");
                 }
             });
         }

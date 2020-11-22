@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
-using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Data.Dto.Pharmacy
 {

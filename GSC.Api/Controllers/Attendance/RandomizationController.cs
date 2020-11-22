@@ -14,7 +14,8 @@ using Microsoft.AspNetCore.Mvc;
 using GSC.Respository.EmailSender;
 using Microsoft.Extensions.Configuration;
 using GSC.Data.Dto.UserMgt;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.Attendance
 {

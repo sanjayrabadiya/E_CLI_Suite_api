@@ -6,13 +6,14 @@ using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Common;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Attendance;
 using GSC.Respository.Audit;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Volunteer

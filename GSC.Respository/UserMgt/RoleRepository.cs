@@ -8,7 +8,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.UserMgt
 {

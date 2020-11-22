@@ -3,8 +3,8 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

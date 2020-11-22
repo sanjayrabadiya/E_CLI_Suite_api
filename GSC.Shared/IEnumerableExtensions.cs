@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Reflection;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public static class EnumerableExtensions
     {
@@ -75,7 +75,7 @@ namespace GSC.Helper
                     var propertyValue = propertyInfo.GetValue(sourceObject);
 
                     // add the field to the ExpandoObject
-                    ((IDictionary<string, object>) dataShapedObject).Add(propertyInfo.Name, propertyValue);
+                    ((IDictionary<string, object>)dataShapedObject).Add(propertyInfo.Name, propertyValue);
                 }
 
                 // add the ExpandoObject to the list

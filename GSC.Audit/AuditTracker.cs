@@ -5,6 +5,7 @@ using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Common;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;

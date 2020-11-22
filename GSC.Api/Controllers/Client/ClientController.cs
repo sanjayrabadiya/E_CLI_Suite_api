@@ -7,7 +7,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Client;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Client;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;

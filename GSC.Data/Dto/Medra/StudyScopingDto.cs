@@ -3,7 +3,7 @@ using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.UserMgt;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
 using System.Text;

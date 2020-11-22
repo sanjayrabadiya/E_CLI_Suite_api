@@ -5,7 +5,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.ProjectRight
 {

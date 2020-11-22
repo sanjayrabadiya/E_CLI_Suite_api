@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GSC.Helper.Validation
+namespace GSC.Shared.Validation
 {
     public class ValidModelException : Exception
     {

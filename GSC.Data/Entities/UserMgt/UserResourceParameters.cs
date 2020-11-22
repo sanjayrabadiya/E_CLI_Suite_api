@@ -1,4 +1,4 @@
-﻿using GSC.Helper;
+﻿using GSC.Shared;
 
 namespace GSC.Data.Entities.UserMgt
 {

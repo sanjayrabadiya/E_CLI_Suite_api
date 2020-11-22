@@ -3,7 +3,6 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Rights;
 using GSC.Domain.Context;
-using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq.Dynamic.Core;
@@ -11,6 +10,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Text;
 using System.Linq;
+using GSC.Shared;
+
 namespace GSC.Respository.Project.Rights
 {
     public class ProjectModuleRightsRepository : GenericRespository<GSC.Data.Entities.Project.Rights.ProjectModuleRights, GscContext>, IProjectModuleRightsRepository

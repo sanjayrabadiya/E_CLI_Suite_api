@@ -5,7 +5,7 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.UserMgt;
 using System;
@@ -18,6 +18,7 @@ using Syncfusion.EJ2.DocumentEditor;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using Microsoft.EntityFrameworkCore;
+using GSC.Shared;
 
 namespace GSC.Respository.Etmf
 {

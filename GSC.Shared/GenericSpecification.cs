@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public class GenericSpecification<T>
     {

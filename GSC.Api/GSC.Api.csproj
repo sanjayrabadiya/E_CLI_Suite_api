@@ -45,6 +45,7 @@
     <ProjectReference Include="..\GSC.Domain\GSC.Domain.csproj" />
     <ProjectReference Include="..\GSC.Report\GSC.Report.csproj" />
     <ProjectReference Include="..\GSC.Respository\GSC.Respository.csproj" />
+    <ProjectReference Include="..\GSC.Shared\GSC.Shared.csproj" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

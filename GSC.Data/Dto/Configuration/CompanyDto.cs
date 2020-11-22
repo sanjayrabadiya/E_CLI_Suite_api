@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 
 namespace GSC.Data.Dto.Configuration
 {

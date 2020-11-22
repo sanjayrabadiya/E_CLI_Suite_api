@@ -2,7 +2,7 @@
 using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -7,9 +7,9 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.UserMgt

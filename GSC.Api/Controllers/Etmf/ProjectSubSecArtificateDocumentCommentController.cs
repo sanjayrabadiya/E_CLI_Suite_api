@@ -5,8 +5,8 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Etmf;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860

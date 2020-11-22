@@ -1,5 +1,5 @@
 ﻿
-using GSC.Helper.Validation;
+using GSC.Shared.Validation;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 

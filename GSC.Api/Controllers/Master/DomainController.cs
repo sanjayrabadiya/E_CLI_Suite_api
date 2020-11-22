@@ -6,11 +6,11 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Master

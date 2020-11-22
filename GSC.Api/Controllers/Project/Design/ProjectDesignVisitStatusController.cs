@@ -7,8 +7,8 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
-using GSC.Helper;
 using GSC.Respository.Project.Design;
+using GSC.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

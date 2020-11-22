@@ -5,8 +5,8 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Screening;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Screening

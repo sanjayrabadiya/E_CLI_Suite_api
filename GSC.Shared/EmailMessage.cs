@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Mail;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public class EmailMessage
     {

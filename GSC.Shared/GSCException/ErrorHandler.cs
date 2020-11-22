@@ -1,7 +1,7 @@
 ﻿
 using System;
 using System.Net;
-using GSC.Helper.Validation;
+using GSC.Shared.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace GSC.Helper.GSCException
+namespace GSC.Shared.GSCException
 {
     public static class ErrorHandler
     {

@@ -14,6 +14,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
@@ -101,7 +102,9 @@ namespace GSC.Respository.Screening
                     TotalTemplate = t.Count()
                 }).ToListAsync();
 
-            var queries = await _screeningTemplateValueRepository.All.Where(r => r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).
+            var queries = await _screeningTemplateValueRepository.All.Where(r =>
+            r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
+            r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
                 GroupBy(c => new
                 {
                     c.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
@@ -117,7 +120,7 @@ namespace GSC.Respository.Screening
                     TotalQuery = t.Count()
                 }).ToListAsync();
 
-            var screeningData = await _screeningEntryRepository.All.Where(r => r.ProjectId == projectId 
+            var screeningData = await _screeningEntryRepository.All.Where(r => r.ProjectId == projectId
             && r.DeletedDate == null).Select(x => new DataCaptureGridData
             {
                 ScreeningEntryId = x.Id,

@@ -12,6 +12,7 @@ using GSC.Respository.Project.Design;
 using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Schedule;
 using GSC.Respository.Screening;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

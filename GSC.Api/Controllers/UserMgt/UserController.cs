@@ -7,7 +7,7 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
@@ -15,6 +15,7 @@ using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.UserMgt
 {

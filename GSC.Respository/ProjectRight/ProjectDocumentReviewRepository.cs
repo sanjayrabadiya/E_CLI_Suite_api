@@ -7,7 +7,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.ProjectRight

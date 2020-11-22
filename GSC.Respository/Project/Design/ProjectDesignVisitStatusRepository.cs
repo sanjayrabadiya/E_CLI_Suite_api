@@ -7,6 +7,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

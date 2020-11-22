@@ -4,7 +4,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Attendance;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using System.Collections.Generic;
 
 namespace GSC.Respository.Attendance

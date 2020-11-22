@@ -6,6 +6,7 @@ using GSC.Data.Entities.Medra;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.PropertyMapping;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

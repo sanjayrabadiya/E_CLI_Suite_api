@@ -2,7 +2,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public class Cryptography
     {
@@ -30,7 +30,7 @@ namespace GSC.Helper
 
         private static string CreateHash(byte[] data)
         {
-            var algorithm = (HashAlgorithm) CryptoConfig.CreateFromName("SHA512");
+            var algorithm = (HashAlgorithm)CryptoConfig.CreateFromName("SHA512");
             if (algorithm == null)
                 throw new ArgumentException("Unrecognized hash name");
 

@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public static class Authorization
     {
@@ -45,7 +45,7 @@ namespace GSC.Helper
                                 var userInfo = accessToken.Claims.Where(a => a.Type == "gsc_user_token").FirstOrDefault()?.Value;
                                 if (userInfo == null)
                                     userInfo = accessToken.Claims.Where(a => a.Type == ClaimTypes.GivenName).FirstOrDefault()?.Value;
-                                                
+
                                 context.HttpContext.Request.Headers.Add("user", userInfo);
                             }
                             return Task.CompletedTask;

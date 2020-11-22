@@ -3,9 +3,9 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using System.Collections.Generic;
 using System.Linq;
 

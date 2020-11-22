@@ -8,6 +8,7 @@ using GSC.Data.Dto.Pharmacy;
 using GSC.Data.Entities.Pharmacy;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.Pharmacy
 {

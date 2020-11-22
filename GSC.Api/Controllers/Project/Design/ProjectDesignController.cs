@@ -15,6 +15,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Design

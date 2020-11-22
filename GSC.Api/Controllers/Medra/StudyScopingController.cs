@@ -4,17 +4,17 @@ using System.Linq;
 using AutoMapper;
 using GSC.Common.UnitOfWork;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Api.Controllers.Common;
 using GSC.Respository.Medra;
 using GSC.Respository.Configuration;
 using GSC.Data.Dto.Medra;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Data.Entities.Medra;
 using GSC.Respository.UserMgt;
 using Microsoft.EntityFrameworkCore;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.Medra
 {

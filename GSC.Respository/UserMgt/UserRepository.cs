@@ -15,8 +15,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using GSC.Shared;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -33,13 +32,12 @@ namespace GSC.Respository.UserMgt
         private readonly IOptions<JwtSettings> _settings;       
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
-
         public UserRepository(IUnitOfWork<GscContext> uow, IJwtTokenAccesser jwtTokenAccesser,
             ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUserPasswordRepository userPasswordRepository,
             IRefreshTokenRepository refreshTokenRepository,
-            IOptions<JwtSettings> settings,         
+            IOptions<JwtSettings> settings,
             Microsoft.Extensions.Configuration.IConfiguration configuration, IAPICall centeralApi)
             : base(uow, jwtTokenAccesser)
         {
@@ -76,52 +74,16 @@ namespace GSC.Respository.UserMgt
 
         public User ValidateUser(string userName, string password)
         {
+            Context.ConfigureServices( "data source = 198.38.85.197; Initial Catalog = Cli_Dev; user id = sa; password = Pushkar@7!;");
 
-            ////  var CenterUserDetails = _centeralRepository.CheckValidUser(userName);   
-            //var user = All.Where(x =>
-            //    (x.UserName == userName || x.Email == userName)
-            //    && x.DeletedDate == null).FirstOrDefault();
-
-            //if (user == null)
-            //{
-            //    _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
-            //    return null;
-            //}
-            ////var userPassword = Context.UserPassword
-            ////    .Where(x => x.UserId == user.Id)
-            ////    .OrderByDescending(x => x.Id)
-            ////    .First();
-
-            //string validate = "";
-            //if (Convert.ToBoolean(_configuration["IsCloud"]))
-            //    validate = _centeralUserPasswordRepository.VaidatePassword(password, user.Id);
-            //else
-            //    validate = _userPasswordRepository.VaidatePassword(password, user.Id);
-
-            ////if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    user.FailedLoginAttempts++;
-            //    var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
-            //    if (result != null && user.FailedLoginAttempts > result.MaxLoginAttempt)
-            //    {
-            //        user.IsLocked = true;
-            //        Update(user);
-            //    }
-
-            //    _userLoginReportRepository.SaveLog("Invalid Password and Login Attempt : " + user.FailedLoginAttempts,
-            //        user.Id, userName);
-            //    return null;
-            //}
-            //return user;
             if (Convert.ToBoolean(_configuration["IsCloud"]))
-                return validateCenteral(userName, password);
+                return ValidateCenteral(userName, password);
             else
                 return validateClient(userName, password);
         }
 
 
-        private User validateCenteral(string userName, string password)
+        private User ValidateCenteral(string userName, string password)
         {
             var user = All.Where(x =>
               (x.UserName == userName || x.Email == userName)
@@ -135,7 +97,6 @@ namespace GSC.Respository.UserMgt
             passDto.UserID = user.Id;
             passDto.Password = password;
             string passstring = JsonConvert.DeserializeObject(_centeralApi.Post(passDto,$"{_configuration["EndPointURL"]}/User/VaidatePassword")).ToString();
-            //if (!string.IsNullOrEmpty(_centeralApi.Get($"{_configuration["EndPointURL"]}/User/VaidatePassword/{password}/{user.Id}")))
             if (!string.IsNullOrEmpty(passstring))
             {
                 user.FailedLoginAttempts++;

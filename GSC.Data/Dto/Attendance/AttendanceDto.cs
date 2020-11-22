@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Data.Dto.Attendance
 {

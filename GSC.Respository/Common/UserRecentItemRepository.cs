@@ -6,6 +6,7 @@ using GSC.Data.Dto.Common;
 using GSC.Data.Entities.Common;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.Common
 {

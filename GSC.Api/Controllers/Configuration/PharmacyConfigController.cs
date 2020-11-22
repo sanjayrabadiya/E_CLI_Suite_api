@@ -9,6 +9,7 @@ using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Configuration

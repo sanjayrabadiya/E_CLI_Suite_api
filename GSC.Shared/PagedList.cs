@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public class PagedList<T> : List<T>
     {
@@ -11,7 +11,7 @@ namespace GSC.Helper
             TotalCount = count;
             PageSize = pageSize;
             CurrentPage = pageNumber;
-            TotalPages = (int) Math.Ceiling(count / (double) pageSize);
+            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             AddRange(items);
         }
 

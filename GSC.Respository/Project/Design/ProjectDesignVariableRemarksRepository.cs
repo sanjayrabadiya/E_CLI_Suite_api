@@ -3,7 +3,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

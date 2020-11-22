@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GSC.Common\GSC.Common.csproj" />
     <ProjectReference Include="..\GSC.Helper\GSC.Helper.csproj" />
+    <ProjectReference Include="..\GSC.Shared\GSC.Shared.csproj" />
   </ItemGroup>
 
 </Project>

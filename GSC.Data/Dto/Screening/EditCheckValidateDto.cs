@@ -1,4 +1,5 @@
 ﻿using GSC.Helper;
+using GSC.Shared;
 using System;
 
 namespace GSC.Data.Dto.Screening

@@ -1,9 +1,8 @@
 using System.Linq;
-using GSC.Helper;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public class JwtTokenAccesser : IJwtTokenAccesser
     {

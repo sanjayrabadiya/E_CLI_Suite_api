@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Context;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public class LogConfiguration
     {
@@ -25,7 +25,7 @@ namespace GSC.Helper
 
             var applicationName = Assembly.GetEntryAssembly()?.GetName().Name;
 
-       
+
 
             Log.Logger = new LoggerConfiguration()
                           .ReadFrom.Configuration(configuration)
@@ -60,13 +60,13 @@ namespace GSC.Helper
             {
                 return HandleException(httpContext, ex);
             }
-           
+
         }
 
         private Task HandleException(HttpContext httpContext, Exception ex)
         {
             httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        var message = ParseMessage(ex);
+            var message = ParseMessage(ex);
             Log.Error(ex, "HandleException");
             return httpContext.Response.WriteAsync(message);
         }

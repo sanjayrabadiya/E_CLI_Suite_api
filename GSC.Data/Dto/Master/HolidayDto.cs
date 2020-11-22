@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Helper;
+using GSC.Shared;
 using System;
 using System.ComponentModel.DataAnnotations;
 

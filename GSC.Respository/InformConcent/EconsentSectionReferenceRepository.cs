@@ -5,6 +5,7 @@ using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Shared;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;

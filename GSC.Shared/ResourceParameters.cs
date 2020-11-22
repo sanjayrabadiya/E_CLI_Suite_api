@@ -1,4 +1,4 @@
-﻿namespace GSC.Helper
+﻿namespace GSC.Shared
 {
     public abstract class ResourceParameters
     {

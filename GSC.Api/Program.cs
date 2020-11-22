@@ -1,4 +1,4 @@
-﻿using GSC.Helper;
+﻿using GSC.Shared;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;

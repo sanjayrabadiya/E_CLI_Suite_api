@@ -2,8 +2,8 @@
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Project.Design;
+using GSC.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

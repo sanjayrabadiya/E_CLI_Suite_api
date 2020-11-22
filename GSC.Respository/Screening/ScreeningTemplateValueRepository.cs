@@ -7,6 +7,7 @@ using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Project.Design;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -66,6 +67,7 @@ namespace GSC.Respository.Screening
         public QueryStatusDto GetQueryStatusCount(int screeningTemplateId)
         {
             var result = All.Where(x => x.DeletedDate == null
+                                        && x.ProjectDesignVariable.DeletedDate == null
                                         && x.ScreeningTemplateId == screeningTemplateId).
                                         Select(r => new
                                         Data.Dto.Screening.ScreeningTemplateValueBasic
@@ -84,9 +86,8 @@ namespace GSC.Respository.Screening
         {
             if (screeningTemplateValue == null) return null;
 
-            var result = screeningTemplateValue.Where(x => x.ScreeningTemplateId == screeningTemplateId &&
-                                                           x.QueryStatus != QueryStatus.Closed && x.QueryStatus != null)
-                .ToList();
+            var result = screeningTemplateValue.Where(x => x.ScreeningTemplateId == screeningTemplateId
+            && x.QueryStatus != QueryStatus.Closed && x.QueryStatus != null).ToList();
             if (result != null && result.Count > 0)
             {
                 var queryStatusDto = new QueryStatusDto();
@@ -268,7 +269,7 @@ namespace GSC.Respository.Screening
                              join volunteerTemp in Context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into
                                  volunteerDto
                              from volunteer in volunteerDto.DefaultIfEmpty()
-                             join randomizationTemp in Context.Randomization  on screening.RandomizationId equals randomizationTemp.Id
+                             join randomizationTemp in Context.Randomization on screening.RandomizationId equals randomizationTemp.Id
                                  into randomizationDto
                              from randomization in randomizationDto.DefaultIfEmpty()
                              join projectSubjectTemp in Context.ProjectSubject on attendance.ProjectSubjectId equals

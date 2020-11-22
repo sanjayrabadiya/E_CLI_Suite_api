@@ -11,10 +11,11 @@ using GSC.Api.Controllers.Common;
 using GSC.Respository.Medra;
 using GSC.Respository.Configuration;
 using GSC.Data.Dto.Medra;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Data.Entities.Medra;
 using GSC.Respository.UserMgt;
 using System.IO;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.Medra
 {

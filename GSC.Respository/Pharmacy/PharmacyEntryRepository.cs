@@ -10,6 +10,7 @@ using GSC.Data.Entities.Pharmacy;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Volunteer;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Pharmacy

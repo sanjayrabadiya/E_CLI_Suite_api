@@ -5,6 +5,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;

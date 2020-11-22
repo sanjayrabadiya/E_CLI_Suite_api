@@ -8,6 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Common;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Common.GenericRespository

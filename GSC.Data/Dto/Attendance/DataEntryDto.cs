@@ -5,6 +5,7 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Data.Dto.Attendance
 {

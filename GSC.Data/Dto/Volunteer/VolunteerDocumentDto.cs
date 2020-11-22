@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 
 namespace GSC.Data.Dto.Volunteer
 {

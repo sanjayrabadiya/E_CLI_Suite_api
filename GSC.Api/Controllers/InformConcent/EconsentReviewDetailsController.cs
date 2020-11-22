@@ -11,7 +11,7 @@ using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
@@ -25,6 +25,7 @@ using Newtonsoft.Json.Linq;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.InformConcent
 {

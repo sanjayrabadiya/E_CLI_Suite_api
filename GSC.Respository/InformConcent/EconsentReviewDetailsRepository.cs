@@ -7,7 +7,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Attendance;
 using GSC.Respository.Master;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +27,7 @@ using System.Security.Cryptography.X509Certificates;
 using GSC.Respository.UserMgt;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using GSC.Shared;
 
 namespace GSC.Respository.InformConcent
 {

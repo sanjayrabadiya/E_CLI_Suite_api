@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public static class RandomPassword
     {
@@ -13,7 +13,7 @@ namespace GSC.Helper
             var chars = new char[passwordLength];
             var allowedCharCount = allowedChars.Length;
             for (var i = 0; i < passwordLength; i++)
-                chars[i] = allowedChars[(int) (allowedChars.Length * randNum.NextDouble())];
+                chars[i] = allowedChars[(int)(allowedChars.Length * randNum.NextDouble())];
             return new string(chars);
         }
         public static string CreateRandomNumericNumber(int len)
@@ -31,7 +31,7 @@ namespace GSC.Helper
             data = new byte[size];
             crypto.GetNonZeroBytes(data);
             StringBuilder result = new StringBuilder(size);
-            foreach (byte b in data) { result.Append(chars[b % (chars.Length)]); }
+            foreach (byte b in data) { result.Append(chars[b % chars.Length]); }
             return result.ToString();
         }
     }

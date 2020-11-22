@@ -7,6 +7,7 @@ using GSC.Data.Dto.Audit;
 using GSC.Data.Entities.Audit;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.Audit
 {

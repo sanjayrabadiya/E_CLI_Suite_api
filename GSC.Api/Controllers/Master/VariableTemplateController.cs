@@ -12,6 +12,7 @@ using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Master

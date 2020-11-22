@@ -3,6 +3,7 @@ using GSC.Data.Entities.Common;
 using GSC.Helper;
 using System.Collections.Generic;
 using GSC.Data.Dto.InformConcent;
+using GSC.Shared;
 
 namespace GSC.Data.Dto.Attendance
 {

@@ -2,7 +2,7 @@
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-   public class EtmfSectionMasterLibraryRepository : GenericRespository<EtmfSectionMasterLibrary, GscContext>, IEtmfSectionMasterLibraryRepository
+    public class EtmfSectionMasterLibraryRepository : GenericRespository<EtmfSectionMasterLibrary, GscContext>, IEtmfSectionMasterLibraryRepository
     {
         public EtmfSectionMasterLibraryRepository(IUnitOfWork<GscContext> uow,
          IJwtTokenAccesser jwtTokenAccesser)

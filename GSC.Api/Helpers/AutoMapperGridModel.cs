@@ -19,7 +19,8 @@ using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
+using GSC.Shared;
 using System;
 using System.Linq;
 

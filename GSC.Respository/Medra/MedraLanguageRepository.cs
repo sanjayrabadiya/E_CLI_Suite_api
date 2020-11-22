@@ -9,7 +9,7 @@ using GSC.Data.Dto.Medra;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.Medra
 {

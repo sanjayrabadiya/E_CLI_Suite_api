@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public static class UtcDateTimeExtension
     {

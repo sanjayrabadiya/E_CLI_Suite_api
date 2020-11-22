@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GSC.Data.Dto.Master;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Data.Dto.Screening
 {

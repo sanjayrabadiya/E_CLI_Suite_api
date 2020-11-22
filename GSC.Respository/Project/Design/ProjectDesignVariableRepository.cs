@@ -9,6 +9,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.Project.Design
 {

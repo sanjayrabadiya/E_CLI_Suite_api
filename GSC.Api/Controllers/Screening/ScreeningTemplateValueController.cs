@@ -8,10 +8,11 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.Screening
 {

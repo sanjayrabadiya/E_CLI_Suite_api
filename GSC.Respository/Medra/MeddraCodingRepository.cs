@@ -10,6 +10,7 @@ using GSC.Helper;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.PropertyMapping;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

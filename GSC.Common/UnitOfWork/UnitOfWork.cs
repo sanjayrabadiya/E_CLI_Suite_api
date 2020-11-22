@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Common;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -29,7 +29,7 @@ namespace GSC.Common.UnitOfWork
             var addChangeTracker = Context.GetAuditTracker().ToList();
 
             var audits = _auditTracker.GetAuditTracker();
-            var result = Context.SaveChanges(_jwtTokenAccesser);
+            var result = Context.SaveChanges();
             AduitSave(audits, addChangeTracker);
             return result;
         }
@@ -48,13 +48,13 @@ namespace GSC.Common.UnitOfWork
                     Context.AuditTrailCommon.Add(x);
 
                 });
-                Context.SaveChanges(_jwtTokenAccesser);
+                Context.SaveChanges();
             }
         }
 
         public async Task<int> SaveAsync()
         {
-            return await Context.SaveChangesAsync(_jwtTokenAccesser);
+            return await Context.SaveChangesAsync();
         }
 
         public IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class

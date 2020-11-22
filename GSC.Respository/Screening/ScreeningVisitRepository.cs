@@ -9,6 +9,7 @@ using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.Design;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -159,15 +160,19 @@ namespace GSC.Respository.Screening
                 }
             };
 
-            var screeningTemplateValue = new ScreeningTemplateValue
+            if (!_screeningTemplateValueRepository.All.Any(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ScreeningTemplateId == screeningTemplate.Id))
             {
-                ScreeningTemplateId = screeningTemplate.Id,
-                ProjectDesignVariableId = projectDesignVariableId,
-                Value = value,
-                Audits = aduits
-            };
+                var screeningTemplateValue = new ScreeningTemplateValue
+                {
+                    ScreeningTemplateId = screeningTemplate.Id,
+                    ProjectDesignVariableId = projectDesignVariableId,
+                    Value = value,
+                    Audits = aduits
+                };
 
-            _screeningTemplateValueRepository.Add(screeningTemplateValue);
+                _screeningTemplateValueRepository.Add(screeningTemplateValue);
+            }
+
 
             _uow.Save();
 
@@ -264,7 +269,7 @@ namespace GSC.Respository.Screening
         public void ScheduleVisitUpdate(int screeningEntryId)
         {
             var scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
-                  OrderByDescending(t => t.ScheduleDate).FirstOrDefault();
+                  OrderBy(t => t.ScheduleDate).FirstOrDefault();
 
             if (scheduleVisit != null)
             {

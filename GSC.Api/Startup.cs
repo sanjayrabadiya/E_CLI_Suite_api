@@ -7,7 +7,8 @@ using GSC.Audit;
 using GSC.Data.Dto.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.GSCException;
+using GSC.Shared;
+using GSC.Shared.GSCException;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -41,15 +42,10 @@ namespace GSC.Api
         {
          
             services.AddAuth(_configuration);
-            services.AddDbContextPool<GscContext>(options =>
+            services.AddDbContext<GscContext>(options =>
             {
                 options.UseSqlServer(_configuration.GetConnectionString("dbConnectionString"));
             });
-            //services.AddEntityFrameworkSqlServer().AddDbContext<GscContext>();
-            //services.AddDbContextPool<CenteralContext>(options =>
-            //{
-            //    options.UseSqlServer(_configuration.GetConnectionString("dbConnectionStringCenteral"));
-            //});
 
             services.AddConfig(_configuration);
             services.AddDependencyInjection(_configuration);

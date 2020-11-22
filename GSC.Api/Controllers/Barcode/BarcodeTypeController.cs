@@ -7,8 +7,8 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Barcode;
 using GSC.Data.Entities.Barcode;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Barcode;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Barcode

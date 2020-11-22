@@ -1,12 +1,12 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
+﻿using GSC.Helper;
+using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Text;
 
-namespace GSC.Helper.DocumentService
+
+namespace GSC.Shared.DocumentService
 {
     public class DocumentService
     {

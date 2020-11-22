@@ -13,6 +13,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Medra;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
+using GSC.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

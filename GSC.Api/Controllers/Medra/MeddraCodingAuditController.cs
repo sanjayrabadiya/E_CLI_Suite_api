@@ -6,8 +6,8 @@ using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Medra;
+using GSC.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

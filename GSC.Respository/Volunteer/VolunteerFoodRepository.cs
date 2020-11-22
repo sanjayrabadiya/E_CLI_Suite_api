@@ -5,7 +5,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
 using GSC.Domain.Context;
-using GSC.Helper;
+using GSC.Shared;
 
 namespace GSC.Respository.Volunteer
 {

@@ -7,8 +7,8 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.LogReport;
 using GSC.Data.Entities.LogReport;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.LogReport;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.LogReport

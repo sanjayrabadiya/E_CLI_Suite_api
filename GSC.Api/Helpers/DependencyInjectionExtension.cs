@@ -2,7 +2,6 @@
 using GSC.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Report;
 using GSC.Report.Common;
 using GSC.Respository.Attendance;
@@ -36,6 +35,8 @@ using Microsoft.Extensions.DependencyInjection;
 using GSC.Respository.Project.Rights;
 using GSC.Data.Entities.Project.Rights;
 using System.Net.Http;
+using GSC.Shared;
+using GSC.Helper;
 
 namespace GSC.Api.Helpers
 {

@@ -9,7 +9,7 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
 using Microsoft.AspNetCore.Mvc;

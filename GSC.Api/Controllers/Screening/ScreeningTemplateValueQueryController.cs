@@ -12,6 +12,7 @@ using GSC.Helper;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Medra;
 using GSC.Respository.Screening;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Screening

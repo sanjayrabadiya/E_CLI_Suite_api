@@ -14,7 +14,7 @@ using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;

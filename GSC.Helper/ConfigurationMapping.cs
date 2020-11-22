@@ -12,6 +12,7 @@ namespace GSC.Helper
         {
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<SafeIPAddress>(configuration.GetSection("safeIPAddress"));
+            services.Configure<EnvironmentSetting>(configuration.GetSection("EnvironmentSetting"));
         }
     }
 
@@ -21,6 +22,13 @@ namespace GSC.Helper
         public string Issuer { get; set; }
         public string Audience { get; set; }
         public int MinutesToExpiration { get; set; }
+    }
+
+    public class EnvironmentSetting
+    {
+        public bool IsPremise { get; set; }
+        public string CentralApi { get; set; }
+        public string ClientSqlConnection { get; set; }
     }
 
     public class SafeIPAddress

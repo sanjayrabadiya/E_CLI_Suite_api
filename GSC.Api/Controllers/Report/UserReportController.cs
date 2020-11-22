@@ -6,8 +6,8 @@ using GSC.Api.Controllers.Common;
 using GSC.Data.Dto.Report;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Authorization;
-using GSC.Helper;
 using GSC.Respository.ProjectRight;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.Report
 {

@@ -7,10 +7,10 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Location;
 using GSC.Data.Entities.Location;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860

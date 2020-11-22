@@ -13,6 +13,7 @@ using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.ProjectRight;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.EditCheck

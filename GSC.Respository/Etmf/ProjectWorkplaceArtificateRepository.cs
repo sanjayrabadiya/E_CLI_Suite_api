@@ -5,6 +5,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

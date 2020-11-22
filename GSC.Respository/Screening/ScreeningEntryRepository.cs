@@ -19,6 +19,7 @@ using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
@@ -129,6 +130,7 @@ namespace GSC.Respository.Screening
         {
             var screeningTemplateValue = _screeningTemplateValueRepository
                 .FindBy(x => x.DeletedDate == null
+                && x.ProjectDesignVariable.DeletedDate == null
                 && x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId).
                 Select(r => new Data.Dto.Screening.ScreeningTemplateValueBasic
                 {

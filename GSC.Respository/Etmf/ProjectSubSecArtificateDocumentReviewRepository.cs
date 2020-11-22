@@ -7,6 +7,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.EmailSender;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

@@ -12,6 +12,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.Design

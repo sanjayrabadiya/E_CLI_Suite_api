@@ -7,7 +7,7 @@ using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Audit;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;

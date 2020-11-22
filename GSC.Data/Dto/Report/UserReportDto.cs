@@ -1,6 +1,7 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
+using GSC.Shared;
 using System;
 using System.Collections.Generic;
 

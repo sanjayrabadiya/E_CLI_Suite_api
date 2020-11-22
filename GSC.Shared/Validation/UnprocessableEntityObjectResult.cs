@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace GSC.Helper.Validation
+namespace GSC.Shared.Validation
 {
     public class UnprocessableEntityObjectResult : ObjectResult
     {

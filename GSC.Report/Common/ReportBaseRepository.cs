@@ -10,6 +10,7 @@ using GSC.Data.Entities.Report;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Reports;
+using GSC.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;

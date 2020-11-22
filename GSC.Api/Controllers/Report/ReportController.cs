@@ -11,6 +11,7 @@ using GSC.Helper;
 using GSC.Report;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Reports;
+using GSC.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;

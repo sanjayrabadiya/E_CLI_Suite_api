@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Project.Design;
+using GSC.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

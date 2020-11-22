@@ -9,12 +9,12 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Schedule;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Schedule;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Schedule

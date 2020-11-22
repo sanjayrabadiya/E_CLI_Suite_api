@@ -8,7 +8,7 @@ using GSC.Data.Dto.Configuration;
 using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Helper.DocumentService;
+using GSC.Shared.DocumentService;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using Microsoft.AspNetCore.Mvc;

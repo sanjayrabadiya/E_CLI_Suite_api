@@ -1,4 +1,4 @@
-﻿namespace GSC.Helper.DocumentService
+﻿namespace GSC.Shared.DocumentService
 {
     public class FileModel
     {
