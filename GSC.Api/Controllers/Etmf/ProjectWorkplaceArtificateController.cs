@@ -53,5 +53,13 @@ namespace GSC.Api.Controllers.Etmf
             var result = _projectWorkplaceArtificateRepository.GetWorkPlaceFolder(EtmfArtificateMasterLbraryId, ProjectWorkplaceArtificateId);
             return Ok(result);
         }
+
+        [Route("GetRedChart/{projectId}")]
+        [HttpGet]
+        public IActionResult GetRedChart(int projectId)
+        {
+            var result = _projectWorkplaceArtificateRepository.GetRedChart(projectId);
+            return Ok(result);
+        }
     }
 }

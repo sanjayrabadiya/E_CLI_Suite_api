@@ -17,11 +17,13 @@ namespace GSC.Respository.Etmf
     public class ProjectWorkplaceArtificateRepository : GenericRespository<ProjectWorkplaceArtificate>, IProjectWorkplaceArtificateRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
         public ProjectWorkplaceArtificateRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser)
            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public List<DropDownDto> GetProjectWorkPlaceArtificateDropDown(int sectionId)
@@ -43,8 +45,8 @@ namespace GSC.Respository.Etmf
                  && x.Id != ParentArtificateId).Include(y => y.ProjectWorkplaceSection)
                 .ThenInclude(y => y.ProjectWorkPlaceZone)
                 .ThenInclude(y => y.ProjectWorkplaceDetail).ThenInclude(y => y.ProjectWorkplace)
-                .Where(y => y.ParentArtificateId == null && 
-                y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId 
+                .Where(y => y.ParentArtificateId == null &&
+                y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId
                 == ProjectId.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId)
                 .Select(y => new WorkplaceFolderDto
                 {
@@ -54,6 +56,30 @@ namespace GSC.Respository.Etmf
                     + " - " + y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName,
                     ParentArtificateId = y.ParentArtificateId
                 }).ToList();
+
+            return result;
+        }
+
+        public WorkplaceChartDto GetRedChart(int id)
+        {
+            WorkplaceChartDto result = new WorkplaceChartDto();
+            var ArtificateDoc = All.Include(y => y.ProjectWorkplaceArtificatedocument).Include(y => y.ProjectWorkplaceSection)
+                .ThenInclude(y => y.ProjectWorkPlaceZone)
+                .ThenInclude(y => y.ProjectWorkplaceDetail)
+                .ThenInclude(y => y.ProjectWorkplace)
+                .Where(y => y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == id
+                ).ToList();
+
+            var SubSectionArtificateDoc = _context.ProjectWorkplaceSubSectionArtifact.Include(t => t.ProjectWorkplaceSubSecArtificatedocument)
+                .Include(x => x.ProjectWorkplaceSubSection)
+                .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
+                .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
+                .Where(y => y.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == id
+                ).ToList();
+
+            result.All = ArtificateDoc.Count() + SubSectionArtificateDoc.Count();
+            result.Missing = ArtificateDoc.Where(y => y.ProjectWorkplaceArtificatedocument.Count == 0).Count()
+                + SubSectionArtificateDoc.Where(y => y.ProjectWorkplaceSubSecArtificatedocument.Count == 0).Count();
 
             return result;
         }

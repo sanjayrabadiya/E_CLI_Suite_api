@@ -20,4 +20,10 @@ namespace GSC.Data.Dto.Etmf
         public string FolderName { get; set; }
         public int DocumentId { get; set; }
     }
+
+    public class WorkplaceChartDto
+    {
+        public int All { get; set; }
+        public int Missing { get; set; }
+    }
 }
