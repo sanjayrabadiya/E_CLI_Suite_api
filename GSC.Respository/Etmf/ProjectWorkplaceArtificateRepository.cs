@@ -63,24 +63,60 @@ namespace GSC.Respository.Etmf
         public WorkplaceChartDto GetRedChart(int id)
         {
             WorkplaceChartDto result = new WorkplaceChartDto();
-            var ArtificateDoc = All.Include(y => y.ProjectWorkplaceArtificatedocument).Include(y => y.ProjectWorkplaceSection)
+            var Artificate = All.Include(y => y.ProjectWorkplaceArtificatedocument).Include(y => y.ProjectWorkplaceSection)
                 .ThenInclude(y => y.ProjectWorkPlaceZone)
                 .ThenInclude(y => y.ProjectWorkplaceDetail)
                 .ThenInclude(y => y.ProjectWorkplace)
                 .Where(y => y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == id
                 ).ToList();
 
-            var SubSectionArtificateDoc = _context.ProjectWorkplaceSubSectionArtifact.Include(t => t.ProjectWorkplaceSubSecArtificatedocument)
+            var ArtificateDocument = _context.ProjectWorkplaceArtificatedocument.Include(x => x.ProjectArtificateDocumentApprover)
+                .Include(x => x.ProjectArtificateDocumentReview).Include(x => x.ProjectArtificateDocumentComment)
+                .Include(x => x.ProjectArtificateDocumentHistory).Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceSection)
+                .ThenInclude(y => y.ProjectWorkPlaceZone)
+                .ThenInclude(y => y.ProjectWorkplaceDetail)
+                .ThenInclude(y => y.ProjectWorkplace)
+                .Where(y => y.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == id
+                ).ToList();
+
+            var SubSecArtificateDocument = _context.ProjectWorkplaceSubSecArtificatedocument.Include(x => x.ProjectSubSecArtificateDocumentApprover)
+                .Include(x => x.ProjectSubSecArtificateDocumentReview).Include(x => x.ProjectSubSecArtificateDocumentComment)
+                .Include(x => x.ProjectSubSecArtificateDocumentHistory).Include(x => x.ProjectWorkplaceSubSectionArtifact)
+                .ThenInclude(x => x.ProjectWorkplaceSubSection)
+                .ThenInclude(x => x.ProjectWorkplaceSection)
+                .ThenInclude(y => y.ProjectWorkPlaceZone)
+                .ThenInclude(y => y.ProjectWorkplaceDetail)
+                .ThenInclude(y => y.ProjectWorkplace)
+                .Where(y => y.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == id
+                ).ToList();
+
+            var SubSectionArtificate = _context.ProjectWorkplaceSubSectionArtifact.Include(t => t.ProjectWorkplaceSubSecArtificatedocument)
                 .Include(x => x.ProjectWorkplaceSubSection)
                 .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
                 .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
                 .Where(y => y.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == id
                 ).ToList();
 
-            result.All = ArtificateDoc.Count() + SubSectionArtificateDoc.Count();
-            result.Missing = ArtificateDoc.Where(y => y.ProjectWorkplaceArtificatedocument.Count == 0).Count()
-                + SubSectionArtificateDoc.Where(y => y.ProjectWorkplaceSubSecArtificatedocument.Count == 0).Count();
+            result.All = Artificate.Count() + SubSectionArtificate.Count();
+            result.Missing = Artificate.Where(y => y.ProjectWorkplaceArtificatedocument.Count == 0).Count()
+                + SubSectionArtificate.Where(y => y.ProjectWorkplaceSubSecArtificatedocument.Count == 0).Count();
 
+            result.AllPendingApprove = ArtificateDocument.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0).Count()
+                + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count != 0).Count();
+            result.PendingApprove = ArtificateDocument.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null).Count()
+                + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null).Count();
+
+            result.AllDocument = ArtificateDocument.Count() + SubSecArtificateDocument.Count();
+            result.Final = ArtificateDocument.Where(x => x.Status == ArtifactDocStatusType.Final).Count() + SubSecArtificateDocument.Where(x => x.Status == ArtifactDocStatusType.Final).Count();
+
+            result.InComplete = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Count() == 0).Count() +
+                    SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() == 0).Count();
+
+            result.PendingReview = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Count != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0).Count()
+                + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0).Count(); 
+            result.AllPendingReview = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Count != 0).Count()
+                + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0).Count();
+            
             return result;
         }
     }
