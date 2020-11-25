@@ -72,7 +72,6 @@ namespace GSC.Common.GenericRespository
         public void InsertUpdateGraph(TC entity)
         {
             Context.Set<TC>().Add(entity);
-            Context.ApplyStateChanges();
         }
 
         public virtual void Delete(int id)
@@ -125,36 +124,52 @@ namespace GSC.Common.GenericRespository
 
         public virtual void AddOrUpdate(TC entity)
         {
-            var referenceExists = false;
-            try
+           
+            var record = entity as BaseEntity;
+            if (record.Id ==0)
             {
-                Context.Begin();
-                Context.SetRemove(entity);
-                Context.SaveAsync().Wait();
-                Context.Commit();
-            }
-            catch (Exception)
-            {
-                referenceExists = true;
-                Context.Rollback();
-            }
-
-            Context.Entry(entity).State = EntityState.Detached;
-
-            if (referenceExists)
-            {
-                var record = entity as BaseEntity;
-                Delete(record.Id);
-
-                Context.Entry(entity).State = EntityState.Detached;
-                record.Id = 0;
-
                 Add(entity);
             }
             else
             {
-                Context.SetModified(entity);
+                var referenceExists = false;
+                try
+                {
+                    Context.Begin();
+                    Context.SetRemove(entity);
+                    Context.SaveWithOutAuditAsync().Wait();
+                    Context.Rollback();
+                }
+                catch (Exception)
+                {
+                    referenceExists = true;
+                    Context.Rollback();
+                }
+
+                Context.Entry(entity).State = EntityState.Detached;
+
+                if (referenceExists)
+                {
+
+                    var oldRecord = Find(record.Id) as BaseEntity;
+                    oldRecord.Id = 0;
+                    Context.Entry(oldRecord).State = EntityState.Added;
+                    Context.SaveWithOutAuditAsync().Wait();
+                    Context.DetachAllEntities();
+
+                    Delete(record.Id);
+                    record.Id = oldRecord.Id;
+                    Context.Entry(entity).State = EntityState.Modified;
+                    Update(entity);
+
+                }
+                else
+                {
+                    Update(entity);
+                }
+
             }
+            
         }
 
 

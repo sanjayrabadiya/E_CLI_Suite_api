@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using GSC.Common.Common;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Audit;
@@ -14,7 +15,7 @@ namespace GSC.Respository.Audit
         private readonly IGSCContext _context;
         public AuditTrailCommonRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
-           _context = context;
+            _context = context;
         }
 
         public IList<AuditTrailCommonDto> Search(AuditTrailCommonDto search)
@@ -37,18 +38,18 @@ namespace GSC.Respository.Audit
             if (!string.IsNullOrEmpty(search.NewValue))
                 query = query.Where(x =>
                     x.NewValue != null && x.NewValue.ToLower().Contains(search.NewValue.ToLower()));
-            if (search.ReasonId.HasValue)
+
+
+            if (!string.IsNullOrEmpty(search.ReasonName))
             {
-                if (search.ReasonId == -1)
-                    query = query.Where(x => x.ReasonId != null);
-                else
-                    query = query.Where(x => x.ReasonId == search.ReasonId);
+                query = query.Where(x => x.Reason == search.ReasonName);
             }
 
             if (search.UserId > 0)
                 query = query.Where(x => x.UserId == search.UserId);
-            if (search.UserRoleId > 0)
-                query = query.Where(x => x.UserRoleId == search.UserRoleId);
+
+            if (!string.IsNullOrEmpty(search.UserRoleName))
+                query = query.Where(x => x.UserRole == search.UserRoleName);
 
             var result = GetItems(query);
 
@@ -111,14 +112,12 @@ namespace GSC.Respository.Audit
                 ColumnName = x.ColumnName,
                 OldValue = x.OldValue,
                 NewValue = x.NewValue,
-                ReasonId = x.ReasonId,
                 ReasonOth = x.ReasonOth,
                 UserId = x.UserId,
-                UserRoleId = x.UserRoleId,
                 CreatedDate = x.CreatedDate,
-                ReasonName = x.Reason.ReasonName,
+                ReasonName = x.Reason,
                 UserName = x.User.UserName,
-                UserRoleName = _context.SecurityRole.First(t => t.Id == x.UserRoleId).RoleName,
+                UserRoleName = x.UserRole,
                 IpAddress = x.IpAddress,
                 TimeZone = x.TimeZone
             }).OrderByDescending(x => x.Id).ToList();

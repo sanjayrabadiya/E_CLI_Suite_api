@@ -1,4 +1,5 @@
 ﻿using GSC.Common;
+using GSC.Common.Base;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Barcode;
@@ -107,7 +108,7 @@ namespace GSC.Domain.Context
         DbSet<TestGroup> TestGroup { get; set; }
         DbSet<AuditReason> AuditReason { get; set; }
         DbSet<AuditTrail> AuditTrail { get; set; }
-        DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
+        
         DbSet<AppSetting> AppSetting { get; set; }
         DbSet<ProjectDesign> ProjectDesign { get; set; }
         DbSet<ProjectDesignPeriod> ProjectDesignPeriod { get; set; }
@@ -230,7 +231,6 @@ namespace GSC.Domain.Context
         DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
 
         DbSet<ProjectArtificateDocumentHistory> ProjectArtificateDocumentHistory { get; set; }
-        DbSet<AuditValue> AuditValue { get; set; }
         DbSet<EconsentSetupPatientStatus> EconsentSetupPatientStatus { get; set; }
         DbSet<EconsentSetup> EconsentSetup { get; set; }
         DbSet<EconsentReviewDetails> EconsentReviewDetails { get; set; }

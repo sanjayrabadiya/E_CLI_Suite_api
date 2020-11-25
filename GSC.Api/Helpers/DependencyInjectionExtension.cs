@@ -33,10 +33,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GSC.Respository.Project.Rights;
-using GSC.Data.Entities.Project.Rights;
-using System.Net.Http;
 using GSC.Shared;
 using GSC.Helper;
+
 
 namespace GSC.Api.Helpers
 {
@@ -251,7 +250,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectArtificateDocumentCommentRepository, ProjectArtificateDocumentCommentRepository>();
             services.AddScoped<IProjectArtificateDocumentHistoryRepository, ProjectArtificateDocumentHistoryRepository>();
             services.AddScoped<IProjectDesignVisitStatusRepository, ProjectDesignVisitStatusRepository>();
-            //services.AddScoped<IAuditTracker, AuditTracker>();
+            services.AddScoped<IAuditTracker, AuditTracker>();
             services.AddSingleton<IDictionaryCollection, DictionaryCollection>();
             services.AddScoped<IEconsentReviewDetailsRepository, EconsentReviewDetailsRepository>();
             services.AddScoped<IEconsentSetupRepository, EconsentSetupRepository>();

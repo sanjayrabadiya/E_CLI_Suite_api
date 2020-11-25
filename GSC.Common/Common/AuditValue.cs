@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace GSC.Data.Entities.Custom
+namespace GSC.Common.Common
 {
-   public class AuditValue
+    public class AuditValue
     {
         [Key]
         public string Value { get; set; }

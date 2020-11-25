@@ -13,7 +13,6 @@ namespace GSC.Audit
         public DictionaryCollection()
         {
             Dictionaries = LoadDictionaries();
-            SkipEntityForAudit = GetSkipEntityForAudit();
         }
 
         List<Dictionary> LoadDictionaries()
@@ -222,28 +221,9 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "HolidayType", DisplayName = "Holiday" });
             _dictionaries.Add(new Dictionary { FieldName = "FreezerType", DisplayName = "Freezer Type" });
 
-            
-        }
-
-        private List<string> GetSkipEntityForAudit()
-        {
-            return new List<string> {
-            //nameof(AuditTrailCommon),
-            //nameof(UserLoginReport),
-            //nameof(AuditTrail),
-            //nameof(Volunteer),
-            //nameof(VolunteerAddress),
-            //nameof(VolunteerBiometric),
-            //nameof(VolunteerContact),
-            //nameof(VolunteerDocument),
-            //nameof(VolunteerFood),
-            //nameof(VolunteerHistory),
-            //nameof(VolunteerImage),
-            //nameof(VolunteerLanguage),
-            //nameof(ScreeningTemplateValue),
-            //nameof(ScreeningTemplateValueAudit)
-            };
 
         }
+
+
     }
 }

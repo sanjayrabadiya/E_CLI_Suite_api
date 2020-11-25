@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using GSC.Common.Common;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Audit;
-using GSC.Data.Entities.Audit;
+
 
 namespace GSC.Respository.Audit
 {

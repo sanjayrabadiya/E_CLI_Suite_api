@@ -38,8 +38,9 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IHubContext<Notification> _notificationHubContext;
+        private readonly IRoleRepository _roleRepository;
         private readonly IAppSettingRepository _appSettingRepository;
-        private readonly IRolePermissionRepository _rolePermissionRepository;    
+        private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
 
@@ -47,6 +48,7 @@ namespace GSC.Api.Controllers.UserMgt
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
             IOptions<JwtSettings> settings,
+            IRoleRepository roleRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUnitOfWork uow,
             ICompanyRepository companyRepository,
@@ -65,8 +67,8 @@ namespace GSC.Api.Controllers.UserMgt
             _uploadSettingRepository = uploadSettingRepositor;
             _notificationHubContext = notificationHubContext;
             _appSettingRepository = appSettingRepository;
+            _roleRepository = roleRepository;
             _rolePermissionRepository = rolePermissionRepository;
-            // _centeralRepository = centeralRepository;
             _configuration = configuration;
             _centeralApi = centerlApi;
             _mapper = mapper;
@@ -326,6 +328,7 @@ namespace GSC.Api.Controllers.UserMgt
             userInfo.UserName = user.UserName;
             userInfo.CompanyId = (int)user.CompanyId;
             userInfo.RoleId = roleId;
+            userInfo.RoleName = _roleRepository.All.Where(x => x.Id == roleId).Select(r => r.RoleShortName).FirstOrDefault();
             var claims = new List<Claim> { new Claim("gsc_user_token", userInfo.ToJsonString()) };
             return _userRepository.GenerateAccessToken(claims);
         }

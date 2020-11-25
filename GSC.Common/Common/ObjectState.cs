@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GSC.Common.Base
+namespace GSC.Common.Common
 {
-    public enum ViewModelState  
+    public enum ViewModelState
     {
         Added,
         Modified,

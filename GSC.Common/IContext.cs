@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GSC.Common.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace GSC.Common
     public interface IContext : IDisposable
     {
         int Save();
-        Task<int> SaveAsync();
+        Task<int> SaveWithOutAuditAsync();
         void Begin();
         void Commit();
         void Rollback();
@@ -26,5 +27,6 @@ namespace GSC.Common
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
         IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class;
         void DetachAllEntities();
+        DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
     }
 }

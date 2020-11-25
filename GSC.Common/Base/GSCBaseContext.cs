@@ -1,4 +1,5 @@
-﻿using GSC.Shared;
+﻿using GSC.Common.Common;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
@@ -10,26 +11,35 @@ using System.Threading.Tasks;
 
 namespace GSC.Common.Base
 {
-    public class GscContext<TContext> : DbContext where TContext : DbContext
+    public class GSCBaseContext<TContext> : DbContext where TContext : DbContext
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        protected GscContext(DbContextOptions<TContext> options, IJwtTokenAccesser jwtTokenAccesser)
+        private readonly IAuditTracker _auditTracker;
+        protected GSCBaseContext(DbContextOptions<TContext> options, IJwtTokenAccesser jwtTokenAccesser,
+            IAuditTracker auditTracker)
          : base(options)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-
+            _auditTracker = auditTracker;
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public DbSet<UserAduit> UserAduit { get; set; }
+        public DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
+        public DbSet<AuditValue> AuditValue { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
+
             SetAuditInformation();
-            return base.SaveChangesAsync(cancellationToken);
+            var addChangeTracker = GetAuditTracker();
+            var audits = _auditTracker.GetAuditTracker(addChangeTracker, this);
+            var result = base.SaveChangesAsync(cancellationToken);
+            AduitSave(audits, addChangeTracker.ToList());
+            return result;
         }
 
-        public async Task<int> SaveAsync()
+        public async Task<int> SaveWithOutAuditAsync()
         {
             SetAuditInformation();
             return await base.SaveChangesAsync();
@@ -38,16 +48,16 @@ namespace GSC.Common.Base
         public int Save()
         {
             SetAuditInformation();
-            return base.SaveChanges();
+            var addChangeTracker = GetAuditTracker();
+            var audits = _auditTracker.GetAuditTracker(addChangeTracker, this);
+            var result = base.SaveChanges();
+            AduitSave(audits, addChangeTracker.ToList());
+            return result;
         }
 
         public void ApplyStateChanges()
         {
-            foreach (var entry in base.ChangeTracker.Entries<BaseEntity>())
-            {
-                var stateInfo = entry.Entity;
-                //entry.State = StateHelpers.ConvertState(stateInfo.State);
-            }
+            SetAuditInformation();
         }
 
         #region Transactions
@@ -94,7 +104,7 @@ namespace GSC.Common.Base
                     entry.Property(x => x.CreatedBy).IsModified = false;
                     entry.Property(x => x.CreatedDate).IsModified = false;
 
-                    if (entry.Entity.AuditAction== Helper.AuditAction.Deleted)
+                    if (entry.Entity.AuditAction == Helper.AuditAction.Deleted)
                     {
                         entry.Entity.DeletedBy = _jwtTokenAccesser.UserId;
                         entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
@@ -107,7 +117,7 @@ namespace GSC.Common.Base
                 }
         }
 
-        
+
 
 
         public IList<EntityEntry> GetAuditTracker()
@@ -130,102 +140,25 @@ namespace GSC.Common.Base
                 entry.State = EntityState.Detached;
         }
 
-        //public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
-        //{
-        //    throw new Exception("Please provide IJwtTokenAccesser in SaveChangesAsync() method.");
-        //}
+        async void AduitSave(List<AuditTrailCommon> audits, List<EntityEntry> entities)
+        {
+            DetachAllEntities();
+            if (audits != null && audits.Count() > 0)
+            {
+                audits.ForEach(x =>
+                {
+                    if (x.RecordId == 0)
+                    {
+                        var entity = entities.FirstOrDefault(c => c.CurrentValues.EntityType.ClrType.Name == x.TableName);
+                        x.RecordId = (entity.Entity as BaseEntity).Id;
+                    }
 
-        //public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
-        //{
-        //    throw new Exception("Please provide IJwtTokenAccesser in SaveChangesAsync() method.");
-        //}
+                    this.Entry(x).State = EntityState.Added;
 
-        //public IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters)
-        //    where TEntity : class => Set<TEntity>().FromSqlRaw(sql, parameters);
+                });
+                base.SaveChangesAsync().Wait();
+            }
+        }
 
-
-        //public int Save()
-        //{
-        //    SetModifiedInformation();
-        //    var result = base.SaveChanges();
-        //    return result;
-        //}
-
-        //public int SaveChanges(int fake)
-        //{
-        //    return base.SaveChanges();
-        //}
-
-        //public async Task<int> SaveChangesAsync()
-        //{
-        //    SetModifiedInformation();
-
-        //    var result = await base.SaveChangesAsync();
-
-
-        //    return result;
-        //}
-
-        //public void DetectionAll()
-        //{
-        //    var entries = ChangeTracker.Entries().Where(e =>
-        //            e.State == EntityState.Added ||
-        //            e.State == EntityState.Unchanged ||
-        //            e.State == EntityState.Modified ||
-        //            e.State == EntityState.Deleted)
-        //        .ToList();
-        //    entries.ForEach(r => r.State = EntityState.Detached);
-        //}
-
-
-
-        //public void Begin()
-        //{
-        //    base.Database.BeginTransaction();
-        //}
-
-        //public void Commit()
-        //{
-        //    base.Database.CommitTransaction();
-        //}
-
-        //public void Rollback()
-        //{
-        //    base.Database.RollbackTransaction();
-        //}
-
-        //private void SetModifiedInformation()
-        //{
-        //    if (_jwtTokenAccesser == null || _jwtTokenAccesser.UserId <= 0) return;
-
-        //    foreach (var entry in ChangeTracker.Entries<BaseEntity>())
-        //        if (entry.State == EntityState.Added)
-        //        {
-        //            entry.Entity.CreatedBy = _jwtTokenAccesser.UserId;
-        //            entry.Entity.CreatedDate = DateTime.Now.ToUniversalTime();
-        //        }
-        //        else if (entry.State == EntityState.Modified)
-        //        {
-        //            entry.Property(x => x.CreatedBy).IsModified = false;
-        //            entry.Property(x => x.CreatedDate).IsModified = false;
-
-        //            if (entry.Entity.InActiveRecord)
-        //            {
-        //                entry.Entity.DeletedBy = _jwtTokenAccesser.UserId;
-        //                entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
-        //            }
-        //            else
-        //            {
-        //                entry.Entity.ModifiedBy = _jwtTokenAccesser.UserId;
-        //                entry.Entity.ModifiedDate = DateTime.Now.ToUniversalTime();
-        //            }
-        //        }
-
-        //    //foreach (var entry in ChangeTracker.Entries<ScreeningTemplateValueAudit>())
-        //    //{
-        //    //    entry.Entity.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
-        //    //    entry.Entity.IpAddress = _jwtTokenAccesser.IpAddress;
-        //    //}
-        //}
     }
 }

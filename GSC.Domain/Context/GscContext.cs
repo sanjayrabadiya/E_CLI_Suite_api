@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GSC.Common;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Audit;
@@ -38,15 +39,15 @@ using Microsoft.Extensions.Options;
 
 namespace GSC.Domain.Context
 {
-    public class GscContext : GscContext<GscContext>, IGSCContext, IGSCContextExtension
+    public class GscContext : GSCBaseContext<GscContext>, IGSCContext, IGSCContextExtension
     {
 
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IOptions<EnvironmentSetting> _settings;
-
+        
         public GscContext(DbContextOptions<GscContext> options,
             IJwtTokenAccesser jwtTokenAccesser,
-            IOptions<EnvironmentSetting> settings) : base(options, jwtTokenAccesser)
+            IOptions<EnvironmentSetting> settings, IAuditTracker auditTracker) : base(options, jwtTokenAccesser, auditTracker)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _settings = settings;
@@ -271,7 +272,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
 
         public DbSet<ProjectArtificateDocumentHistory> ProjectArtificateDocumentHistory { get; set; }
-        public DbSet<AuditValue> AuditValue { get; set; }
+       
         public DbSet<EconsentSetupPatientStatus> EconsentSetupPatientStatus { get; set; }
         public DbSet<EconsentSetup> EconsentSetup { get; set; }
         public DbSet<EconsentReviewDetails> EconsentReviewDetails { get; set; }

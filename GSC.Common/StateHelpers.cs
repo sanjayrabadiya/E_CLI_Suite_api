@@ -1,4 +1,4 @@
-﻿using GSC.Common.Base;
+﻿using GSC.Common.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Common

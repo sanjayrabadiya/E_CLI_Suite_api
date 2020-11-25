@@ -1,8 +1,6 @@
-﻿
-
-namespace GSC.Common.Base
+﻿namespace GSC.Common.Common
 {
-  
+
     public class UserAduit
     {
 

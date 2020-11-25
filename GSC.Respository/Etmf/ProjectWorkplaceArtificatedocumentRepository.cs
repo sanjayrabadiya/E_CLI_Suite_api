@@ -115,7 +115,7 @@ namespace GSC.Respository.Etmf
             var document = All.Where(x => x.Id == documentId).FirstOrDefault();
             document.IsAccepted = IsAccepted;
             Update(document);
-             _context.Save();
+            _context.Save();
         }
 
         public List<CommonArtifactDocumentDto> GetDocumentList(int id)
@@ -385,7 +385,7 @@ namespace GSC.Respository.Etmf
                 .Where(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).ToList();
             var projectWorkplaceArtificatedocumentreviews = _context.ProjectArtificateDocumentReview.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var projectWorkplaceArtificatedocumentapprover = _context.ProjectArtificateDocumentApprover.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
-            var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && (x.ReasonId != null || x.ReasonOth != null), x => x.Reason).ToList();
+            var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null, x => x.Reason).ToList();
             var cretaedData = projectWorkplaceArtificatedocuments.Select(r => new EtmfAuditLogReportDto
             {
                 projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
@@ -401,7 +401,7 @@ namespace GSC.Respository.Etmf
                 userName = _userRepository.Find((int)r.CreatedBy).UserName,
                 actionDate = r.CreatedDate,
                 auditComment = auditrialdata.Where(x => x.Action == "Added" && x.ColumnName == "Document Name" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth,
-                auditReason = auditrialdata.Where(x => x.Action == "Added" && x.ColumnName == "Document Name" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason?.ReasonName
+                auditReason = auditrialdata.Where(x => x.Action == "Added" && x.ColumnName == "Document Name" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason
             }).ToList();
 
             var sendData = (from doc in projectWorkplaceArtificatedocuments
@@ -495,7 +495,7 @@ namespace GSC.Respository.Etmf
                 userName = _userRepository.Find((int)r.DeletedBy).UserName,
                 actionDate = r.DeletedDate,
                 auditComment = auditrialdata.Where(x => x.Action == "Deleted" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth,
-                auditReason = auditrialdata.Where(x => x.Action == "Deleted" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason?.ReasonName
+                auditReason = auditrialdata.Where(x => x.Action == "Deleted" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason
             }).ToList();
 
             var supersededata = projectWorkplaceArtificatedocuments.Where(x => x.ParentDocumentId != null).Select(r => new EtmfAuditLogReportDto
@@ -513,7 +513,7 @@ namespace GSC.Respository.Etmf
                 userName = _userRepository.Find((int)r.CreatedBy).UserName,
                 actionDate = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Supersede" && x.RecordId == r.Id).ToList().FirstOrDefault()?.CreatedDate,
                 auditComment = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Supersede" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth,
-                auditReason = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Supersede" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason.ReasonName
+                auditReason = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Supersede" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason
             }).ToList();
 
             var finaldata = projectWorkplaceArtificatedocuments.Where(x => x.Status == ArtifactDocStatusType.Final).Select(r => new EtmfAuditLogReportDto

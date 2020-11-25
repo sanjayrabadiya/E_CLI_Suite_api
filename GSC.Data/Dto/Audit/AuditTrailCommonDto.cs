@@ -13,10 +13,8 @@ namespace GSC.Data.Dto.Audit
         public string OldValue { get; set; }
         public string NewValue { get; set; }
         public bool? IsRecordDeleted { get; set; }
-        public int? ReasonId { get; set; }
         public string ReasonOth { get; set; }
         public int UserId { get; set; }
-        public int UserRoleId { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string ReasonName { get; set; }
         public string UserName { get; set; }

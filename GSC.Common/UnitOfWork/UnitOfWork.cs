@@ -9,7 +9,6 @@ namespace GSC.Common.UnitOfWork
         where TContext : IContext
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IAuditTracker _auditTracker;
         private readonly TContext _context;
        
         public UnitOfWork(TContext context)

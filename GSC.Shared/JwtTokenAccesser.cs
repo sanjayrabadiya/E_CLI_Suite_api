@@ -18,6 +18,7 @@ namespace GSC.Shared
                 var userInfo = JsonConvert.DeserializeObject<UserInfo>(user);
                 UserId = userInfo.UserId;
                 UserName = userInfo.UserName;
+                RoleName = userInfo.RoleName;
                 CompanyId = userInfo.CompanyId;
                 RoleId = userInfo.RoleId;
             }
@@ -41,6 +42,7 @@ namespace GSC.Shared
         public int CompanyId { get; }
 
         public int RoleId { get; }
+        public string RoleName { get;}
 
         public string IpAddress { get; }
     }
@@ -51,5 +53,6 @@ namespace GSC.Shared
         public string UserName { get; set; }
         public int CompanyId { get; set; }
         public int RoleId { get; set; }
+        public string RoleName { get; set; }
     }
 }
