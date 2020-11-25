@@ -8,7 +8,6 @@ namespace GSC.Common.UnitOfWork
     public class UnitOfWork<TContext> : IUnitOfWork<TContext>
         where TContext : IContext
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly TContext _context;
        
         public UnitOfWork(TContext context)
@@ -47,10 +46,6 @@ namespace GSC.Common.UnitOfWork
             Context.Rollback();
         }
 
-        public IList<EntityEntry> GetAuditTracker()
-        {
-            return Context.GetAuditTracker();
-
-        }
+       
     }
 }

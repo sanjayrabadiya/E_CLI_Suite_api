@@ -12,6 +12,5 @@ namespace GSC.Common.UnitOfWork
         void Begin();
         void Commit();
         void Rollback();
-        IList<EntityEntry> GetAuditTracker();
     }
 }

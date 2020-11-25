@@ -17,7 +17,6 @@ namespace GSC.Common
         void Begin();
         void Commit();
         void Rollback();
-        IList<EntityEntry> GetAuditTracker();
         void ApplyStateChanges();
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
         void SetModified(object entity);

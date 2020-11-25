@@ -11,8 +11,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-
+using System.Reflection;
 
 namespace GSC.Audit
 {
@@ -44,17 +43,8 @@ namespace GSC.Audit
                 var reason = _jwtTokenAccesser.GetHeader("audit-reason-name");
                 var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
 
-
                 foreach (var dbEntry in changeTracker)
                 {
-                    //var commonAduit = dbEntry as ICommonAduit;
-
-                    //if (commonAduit != null)
-                    //{
-
-
-                    //}
-
                     var action = Enum.GetName(typeof(EntityState), dbEntry.State);
                     var tableName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString();
 

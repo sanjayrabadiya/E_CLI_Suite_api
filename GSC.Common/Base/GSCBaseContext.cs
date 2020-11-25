@@ -32,7 +32,7 @@ namespace GSC.Common.Base
         {
 
             SetAuditInformation();
-            var addChangeTracker = GetAuditTracker();
+            var addChangeTracker = GetAuditTracker<ICommonAduit>();
             var audits = _auditTracker.GetAuditTracker(addChangeTracker, this);
             var result = base.SaveChangesAsync(cancellationToken);
             AduitSave(audits, addChangeTracker.ToList());
@@ -48,7 +48,7 @@ namespace GSC.Common.Base
         public int Save()
         {
             SetAuditInformation();
-            var addChangeTracker = GetAuditTracker();
+            var addChangeTracker = GetAuditTracker<ICommonAduit>();
             var audits = _auditTracker.GetAuditTracker(addChangeTracker, this);
             var result = base.SaveChanges();
             AduitSave(audits, addChangeTracker.ToList());
@@ -120,7 +120,7 @@ namespace GSC.Common.Base
 
 
 
-        public IList<EntityEntry> GetAuditTracker()
+        public IList<EntityEntry> GetAuditTracker<T>() where T : ICommonAduit
         {
             ChangeTracker.DetectChanges();
 
