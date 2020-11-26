@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Project.Design
 {
-    public class ProjectDesignVariableValue : BaseEntity
+    public class ProjectDesignVariableValue : BaseEntity, ICommonAduit
     {
         public int ProjectDesignVariableId { get; set; }
         public string ValueCode { get; set; }

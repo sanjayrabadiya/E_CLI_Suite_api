@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.Master
 {
-    public class Variable : BaseEntity
+    public class Variable : BaseEntity, ICommonAduit
     {
         public string VariableName { get; set; }
         public string VariableCode { get; set; }

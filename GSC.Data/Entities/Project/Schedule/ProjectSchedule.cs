@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Project.Design;
 
 namespace GSC.Data.Entities.Project.Schedule
 {
-    public class ProjectSchedule : BaseEntity
+    public class ProjectSchedule : BaseEntity, ICommonAduit
     {
         public int ProjectId { get; set; }
         public int ProjectDesignId { get; set; }

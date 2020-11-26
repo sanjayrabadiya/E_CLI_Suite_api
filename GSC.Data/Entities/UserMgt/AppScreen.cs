@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.UserMgt
 {
-    public class AppScreen : BaseEntity
+    public class AppScreen : BaseEntity, ICommonAduit
     {
         public string ScreenCode { get; set; }
 

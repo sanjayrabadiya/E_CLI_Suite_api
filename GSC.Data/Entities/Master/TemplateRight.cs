@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class TemplateRights : BaseEntity
+    public class TemplateRights : BaseEntity, ICommonAduit
     {
         public string TemplateCode { get; set; }
 

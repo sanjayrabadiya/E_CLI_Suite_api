@@ -1,4 +1,5 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
 using GSC.Shared;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace GSC.Data.Entities.Medra
 {
-    public class MeddraCoding : BaseEntity
+    public class MeddraCoding : BaseEntity, ICommonAduit
     {
         public int MeddraConfigId { get; set; }
         public int ScreeningTemplateValueId { get; set; }

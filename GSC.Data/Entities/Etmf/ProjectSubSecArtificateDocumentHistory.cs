@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Etmf
 {
-    public class ProjectSubSecArtificateDocumentHistory : BaseEntity
+    public class ProjectSubSecArtificateDocumentHistory : BaseEntity, ICommonAduit
     {
         public int ProjectWorkplaceSubSecArtificateDocumentId { get; set; }
         public int? ProjectSubSecArtificateDocumentReviewId { get; set; }

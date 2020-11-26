@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Project.Design;
 using GSC.Shared;
 
 namespace GSC.Data.Entities.Master
 {
-    public class Project : BaseEntity
+    public class Project : BaseEntity, ICommonAduit
     {
         private DateTime? _FromDate;
 

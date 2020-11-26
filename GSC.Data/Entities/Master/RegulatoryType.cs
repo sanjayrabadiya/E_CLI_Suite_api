@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class RegulatoryType : BaseEntity
+    public class RegulatoryType : BaseEntity, ICommonAduit
     {
         public string RegulatoryTypeCode { get; set; }
         public string RegulatoryTypeName { get; set; }

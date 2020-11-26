@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 
 namespace GSC.Data.Entities.Project.Design
 {
-    public class ProjectDesignTemplate : BaseEntity
+    public class ProjectDesignTemplate : BaseEntity, ICommonAduit
     {
         public int ProjectDesignVisitId { get; set; }
         public string TemplateCode { get; set; }

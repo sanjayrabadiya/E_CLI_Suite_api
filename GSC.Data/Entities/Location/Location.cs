@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Location
 {
-    public class Location : BaseEntity
+    public class Location : BaseEntity, ICommonAduit
     {
         public string Address { get; set; }
         public int? CountryId { get; set; }

@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class Domain : BaseEntity
+    public class Domain : BaseEntity, ICommonAduit
     {
         public string DomainCode { get; set; }
 

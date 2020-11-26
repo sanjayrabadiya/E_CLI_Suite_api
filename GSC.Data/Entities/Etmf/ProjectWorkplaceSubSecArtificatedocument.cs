@@ -2,11 +2,11 @@
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Etmf
 {
-    public class ProjectWorkplaceSubSecArtificatedocument : BaseEntity
+    public class ProjectWorkplaceSubSecArtificatedocument : BaseEntity, ICommonAduit
     {
         public int ProjectWorkplaceSubSectionArtifactId { get; set; }
         public string DocumentName { get; set; }

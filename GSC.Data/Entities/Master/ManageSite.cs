@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Location;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Master
 {
-    public class ManageSite : BaseEntity
+    public class ManageSite : BaseEntity, ICommonAduit
     {
         public string SiteName { get; set; }
         public string ContactName { get; set; }

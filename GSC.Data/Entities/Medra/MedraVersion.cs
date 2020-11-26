@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace GSC.Data.Entities.Medra
 {
-    public class MedraVersion:BaseEntity
+    public class MedraVersion:BaseEntity, ICommonAduit
     {
         public int DictionaryId { get; set; }
         public string Version { get; set; }

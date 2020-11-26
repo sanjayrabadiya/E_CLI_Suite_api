@@ -1,9 +1,10 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.UserMgt;
 
 namespace GSC.Data.Entities.Master
 {
-    public class InvestigatorContactDetail : BaseEntity
+    public class InvestigatorContactDetail : BaseEntity, ICommonAduit
     {
         public int? InvestigatorContactId { get; set; }
         public int? ContactTypeId { get; set; }

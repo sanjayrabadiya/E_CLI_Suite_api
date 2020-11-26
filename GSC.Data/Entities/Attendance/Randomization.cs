@@ -5,10 +5,11 @@ using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.Master;
 using GSC.Shared;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Attendance
 {
-    public class Randomization : BaseEntity
+    public class Randomization : BaseEntity, ICommonAduit
     {
         private DateTime? _dateOfRandomization;
 

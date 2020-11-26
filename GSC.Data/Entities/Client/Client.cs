@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.UserMgt;
 
 namespace GSC.Data.Entities.Client
 {
-    public class Client : BaseEntity
+    public class Client : BaseEntity, ICommonAduit
     {
         public string ClientCode { get; set; }
         public string ClientName { get; set; }

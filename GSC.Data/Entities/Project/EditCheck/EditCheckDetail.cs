@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.Project.EditCheck
 {
-    public class EditCheckDetail : BaseEntity
+    public class EditCheckDetail : BaseEntity, ICommonAduit
     {
         public int EditCheckId { get; set; }
         public EditCheckRuleBy CheckBy { get; set; }

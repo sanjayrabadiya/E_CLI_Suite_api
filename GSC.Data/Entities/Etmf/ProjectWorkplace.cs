@@ -2,11 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Etmf
 {
-    public class ProjectWorkplace : BaseEntity
+    public class ProjectWorkplace : BaseEntity, ICommonAduit
     {
         public int ProjectId { get; set; }
 

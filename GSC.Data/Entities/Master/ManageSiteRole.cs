@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class ManageSiteRole : BaseEntity
+    public class ManageSiteRole : BaseEntity, ICommonAduit
     {
         public int TrialTypeId { get; set; }
         [ForeignKey("TrialTypeId")]

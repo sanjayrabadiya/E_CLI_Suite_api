@@ -1,9 +1,10 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.Master
 {
-    public class AuditReason : BaseEntity
+    public class AuditReason : BaseEntity, ICommonAduit
     {
         public string ReasonName { get; set; }
         public AuditModule ModuleId { get; set; }

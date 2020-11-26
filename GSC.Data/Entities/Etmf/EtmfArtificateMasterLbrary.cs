@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace GSC.Data.Entities.Etmf
 {
-    public class EtmfArtificateMasterLbrary : BaseEntity
+    public class EtmfArtificateMasterLbrary : BaseEntity, ICommonAduit
     {
         public string ArtificateNo{ get; set; }
         public string ArtificateName { get; set; }

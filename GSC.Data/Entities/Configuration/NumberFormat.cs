@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Configuration
 {
-    public class NumberFormat : BaseEntity
+    public class NumberFormat : BaseEntity, ICommonAduit
     {
         public string KeyName { get; set; }
         public string PrefixFormat { get; set; }

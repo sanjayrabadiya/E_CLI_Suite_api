@@ -1,4 +1,5 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.UserMgt;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace GSC.Data.Entities.Medra
 {
-    public class StudyScoping : BaseEntity
+    public class StudyScoping : BaseEntity, ICommonAduit
     {
         public int ProjectId { get; set; }        
         public bool IsByAnnotation { get; set; }

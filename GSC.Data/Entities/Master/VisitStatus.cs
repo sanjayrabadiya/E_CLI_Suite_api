@@ -1,9 +1,10 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using System;
 
 namespace GSC.Data.Entities.Master
 {
-    public class VisitStatus : BaseEntity
+    public class VisitStatus : BaseEntity, ICommonAduit
     {
         public Int16 Code { get; set; }
         public string StatusName { get; set; }

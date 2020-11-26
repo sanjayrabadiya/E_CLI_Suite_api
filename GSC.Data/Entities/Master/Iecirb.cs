@@ -1,9 +1,10 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Master
 {
-   public class Iecirb : BaseEntity
+   public class Iecirb : BaseEntity, ICommonAduit
     {
         public int ManageSiteId { get; set; }
         public string IECIRBName { get; set; }

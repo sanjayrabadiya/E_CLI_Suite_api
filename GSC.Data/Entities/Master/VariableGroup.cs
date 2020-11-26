@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class VariableGroup : BaseEntity
+    public class VariableGroup : BaseEntity, ICommonAduit
     {
         public string VariableGroupName { get; set; }
 

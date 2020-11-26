@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.UserMgt
 {
-    public class UserImage : BaseEntity
+    public class UserImage : BaseEntity, ICommonAduit
     {
         public int UserId { get; set; }
         public byte[] BiometricBinary { get; set; }

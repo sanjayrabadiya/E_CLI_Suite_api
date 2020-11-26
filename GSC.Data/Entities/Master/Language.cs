@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class Language : BaseEntity
+    public class Language : BaseEntity, ICommonAduit
     {
         public string LanguageName { get; set; }
 

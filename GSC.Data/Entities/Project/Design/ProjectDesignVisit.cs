@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Project.Design
 {
-    public class ProjectDesignVisit : BaseEntity
+    public class ProjectDesignVisit : BaseEntity, ICommonAduit
     {
         public int ProjectDesignPeriodId { get; set; }
         public ProjectDesignPeriod ProjectDesignPeriod { get; set; }

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.ProjectRight
 {
-    public class ProjectDocumentReview : BaseEntity
+    public class ProjectDocumentReview : BaseEntity, ICommonAduit
     {
         public int ProjectDocumentId { get; set; }
         public int UserId { get; set; }

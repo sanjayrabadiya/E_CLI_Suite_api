@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class Test : BaseEntity
+    public class Test : BaseEntity, ICommonAduit
     {
         public string TestName { get; set; }
 

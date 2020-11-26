@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.UserMgt
 {
-    public class RolePermission : BaseEntity
+    public class RolePermission : BaseEntity, ICommonAduit
     {
         public int UserRoleId { get; set; }
 

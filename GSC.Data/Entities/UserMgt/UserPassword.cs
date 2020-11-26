@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.UserMgt
 {
-    public class UserPassword : BaseEntity
+    public class UserPassword : BaseEntity, ICommonAduit
     {
         public int UserId { get; set; }
 

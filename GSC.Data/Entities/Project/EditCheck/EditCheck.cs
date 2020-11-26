@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Project.Design;
 
 namespace GSC.Data.Entities.Project.EditCheck
 {
-    public class EditCheck : BaseEntity
+    public class EditCheck : BaseEntity, ICommonAduit
     {
         public int ProjectDesignId { get; set; }
         public string AutoNumber { get; set; }

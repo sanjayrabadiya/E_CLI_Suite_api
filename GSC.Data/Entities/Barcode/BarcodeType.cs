@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Barcode
 {
-    public class BarcodeType : BaseEntity
+    public class BarcodeType : BaseEntity, ICommonAduit
     {
         public string BarcodeTypeCode { get; set; }
 

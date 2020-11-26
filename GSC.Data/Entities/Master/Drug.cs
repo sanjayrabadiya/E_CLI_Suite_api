@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class Drug : BaseEntity
+    public class Drug : BaseEntity, ICommonAduit
     {
         public string DrugName { get; set; }
 

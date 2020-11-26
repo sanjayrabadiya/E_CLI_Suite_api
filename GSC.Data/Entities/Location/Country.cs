@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Location
 {
-    public class Country : BaseEntity
+    public class Country : BaseEntity, ICommonAduit
     {
         public string CountryName { get; set; }
 

@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Configuration
 {
-    public class EmailSetting : BaseEntity
+    public class EmailSetting : BaseEntity, ICommonAduit
     {
         public string EmailFrom { get; set; }
 

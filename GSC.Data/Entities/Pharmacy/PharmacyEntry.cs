@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Helper;
 using GSC.Shared;
 
 namespace GSC.Data.Entities.Pharmacy
 {
-    public class PharmacyEntry : BaseEntity
+    public class PharmacyEntry : BaseEntity, ICommonAduit
     {
         public string PharmacyNo { get; set; }
         private DateTime _pharmacyDate { get; set; }

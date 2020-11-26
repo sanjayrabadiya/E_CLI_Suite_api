@@ -1,10 +1,11 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.UserMgt;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.ProjectRight
 {
-    public class ProjectRight : BaseEntity
+    public class ProjectRight : BaseEntity, ICommonAduit
     {
         public int ProjectId { get; set; }
         public int UserId { get; set; }

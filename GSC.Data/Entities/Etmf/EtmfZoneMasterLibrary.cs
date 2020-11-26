@@ -1,11 +1,11 @@
 ﻿using GSC.Common.Base;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Etmf
 {
-    public class EtmfZoneMasterLibrary : BaseEntity
+    public class EtmfZoneMasterLibrary : BaseEntity, ICommonAduit
     {
         public string ZoneNo { get; set; }
         public string ZonName { get; set; }

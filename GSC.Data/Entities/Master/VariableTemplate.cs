@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.Master
 {
-    public class VariableTemplate : BaseEntity
+    public class VariableTemplate : BaseEntity, ICommonAduit
     {
         public string TemplateCode { get; set; }
         public string ActivityName { get; set; }

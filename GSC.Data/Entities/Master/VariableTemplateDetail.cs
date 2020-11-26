@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class VariableTemplateDetail : BaseEntity
+    public class VariableTemplateDetail : BaseEntity, ICommonAduit
     {
         public int VariableTemplateId { get; set; }
         public int VariableId { get; set; }

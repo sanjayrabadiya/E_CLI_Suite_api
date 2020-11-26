@@ -1,4 +1,5 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace GSC.Data.Entities.InformConcent
 {
-    public class EconsentSetup : BaseEntity
+    public class EconsentSetup : BaseEntity, ICommonAduit
     {
 
         //public int Id { get; set; }

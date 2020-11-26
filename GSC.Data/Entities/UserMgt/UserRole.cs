@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.UserMgt
 {
-    public class UserRole : BaseEntity
+    public class UserRole : BaseEntity, ICommonAduit
     {
         public int UserRoleId { get; set; }
 

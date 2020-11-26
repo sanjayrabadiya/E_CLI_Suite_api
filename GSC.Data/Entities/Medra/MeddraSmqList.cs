@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace GSC.Data.Entities.Medra
 {
-    public class MeddraSmqList : BaseEntity
+    public class MeddraSmqList : BaseEntity, ICommonAduit
     {
         public int MedraConfigId { get; set; }
         public long smq_code { get; set; }

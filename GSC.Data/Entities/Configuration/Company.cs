@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Configuration
 {
-    public class Company : BaseEntity
+    public class Company : BaseEntity, ICommonAduit
     {
         public string CompanyCode { get; set; }
         public string CompanyName { get; set; }

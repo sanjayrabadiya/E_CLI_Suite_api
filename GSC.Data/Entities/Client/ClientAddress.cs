@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Client
 {
-    public class ClientAddress : BaseEntity
+    public class ClientAddress : BaseEntity, ICommonAduit
     {
         public int ClientId { get; set; }
 

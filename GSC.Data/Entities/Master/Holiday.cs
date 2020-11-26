@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Helper;
 using GSC.Shared;
 using System;
 
 namespace GSC.Data.Entities.Master
 {
-    public class Holiday : BaseEntity
+    public class Holiday : BaseEntity, ICommonAduit
     {
         public int InvestigatorContactId { get; set; }
         public HolidayType HolidayType  { get; set; }

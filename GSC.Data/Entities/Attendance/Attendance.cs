@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
-
+using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
@@ -11,7 +11,7 @@ using GSC.Shared;
 
 namespace GSC.Data.Entities.Attendance
 {
-    public class Attendance : BaseEntity
+    public class Attendance : BaseEntity, ICommonAduit
     {
         private DateTime _AttendanceDate;
         public int ProjectId { get; set; }

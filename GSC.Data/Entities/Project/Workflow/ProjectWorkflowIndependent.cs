@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Project.Workflow
 {
-    public class ProjectWorkflowIndependent : BaseEntity
+    public class ProjectWorkflowIndependent : BaseEntity, ICommonAduit
     {
         public int ProjectWorkflowId { get; set; }
         public int SecurityRoleId { get; set; }

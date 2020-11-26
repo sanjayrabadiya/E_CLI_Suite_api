@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Helper;
 using GSC.Shared;
 
 namespace GSC.Data.Entities.UserMgt
 {
     [Table("Users")]
-    public class User : BaseEntity
+    public class User : BaseEntity, ICommonAduit
     {
         private DateTime? _DateOfBirth;
 

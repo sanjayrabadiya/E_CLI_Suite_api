@@ -1,9 +1,10 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.Attendance
 {
-    public class ProjectSubject : BaseEntity
+    public class ProjectSubject : BaseEntity, ICommonAduit
     {
         public int ProjectId { get; set; }
         public int ParentProjectId { get; set; }

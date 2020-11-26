@@ -1,11 +1,11 @@
 ﻿using GSC.Common.Base;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Etmf
 {
-    public class ProjectWorkplaceArtificate : BaseEntity
+    public class ProjectWorkplaceArtificate : BaseEntity, ICommonAduit
     {
         public int ProjectWorkplaceSectionId { get; set; }
         public int EtmfArtificateMasterLbraryId { get; set; }

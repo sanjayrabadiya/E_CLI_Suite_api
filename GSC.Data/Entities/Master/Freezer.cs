@@ -1,9 +1,10 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.Master
 {
-    public class Freezer : BaseEntity
+    public class Freezer : BaseEntity, ICommonAduit
     {
         public string FreezerName { get; set; }
 

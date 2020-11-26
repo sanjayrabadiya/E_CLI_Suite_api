@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace GSC.Data.Entities.Medra
 {
-    public class MeddraHltPrefTerm : BaseEntity
+    public class MeddraHltPrefTerm : BaseEntity, ICommonAduit
     {
         public int MedraConfigId { get; set; }
         public long hlt_code { get; set; }

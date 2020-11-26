@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.UserMgt
 {
-    public class SecurityRole : BaseEntity
+    public class SecurityRole : BaseEntity, ICommonAduit
     {
         public string RoleShortName { get; set; }
 

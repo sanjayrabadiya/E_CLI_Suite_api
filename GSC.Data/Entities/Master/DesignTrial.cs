@@ -1,8 +1,9 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Master
 {
-    public class DesignTrial : BaseEntity
+    public class DesignTrial : BaseEntity, ICommonAduit
     {
         public string DesignTrialCode { get; set; }
         public int TrialTypeId { get; set; }

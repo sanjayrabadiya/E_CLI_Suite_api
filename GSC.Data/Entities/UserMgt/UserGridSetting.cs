@@ -1,8 +1,9 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.UserMgt
 {
-    public class UserGridSetting : BaseEntity
+    public class UserGridSetting : BaseEntity, ICommonAduit
     {
         public int UserId { get; set; }
         public string ScreenCode { get; set; }
