@@ -251,9 +251,13 @@ namespace GSC.Respository.Attendance
 
         public void PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId)
         {
-            var randomization = All.Where(x => x.ScreeningEntry.Id == screeningEntryId).FirstOrDefault();
-            randomization.PatientStatusId = patientStatus;
-            Update(randomization);
+            var randomization = All.AsNoTracking().Where(x => x.ScreeningEntry.Id == screeningEntryId).FirstOrDefault();
+            if (randomization.PatientStatusId != patientStatus)
+            {
+                randomization.PatientStatusId = patientStatus;
+                Update(randomization);
+            }
+
         }
 
         public void ChangeStatustoWithdrawal(FileModel fileModel)

@@ -61,7 +61,7 @@ namespace GSC.Api.Controllers.Project.Design
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var projectDesignPeriod = _mapper.Map<ProjectDesignPeriod>(projectDesignPeriodDto);
             _projectDesignPeriodRepository.Add(projectDesignPeriod);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design Period failed on save.");
+            _uow.Save();
             return Ok(projectDesignPeriod.Id);
         }
 
@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             _projectDesignPeriodRepository.Update(projectDesignPeriod);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Project Design Period failed on save.");
+            _uow.Save();
             return Ok(projectDesignPeriod.Id);
         }
 
@@ -160,12 +160,12 @@ namespace GSC.Api.Controllers.Project.Design
 
                     visitStatus.ForEach(e =>
                     {
-                        e.Id=0;
+                        e.Id = 0;
                         e.ProjectDesignVisitId = 0;
                         e.ProjectDesignVisit = visit;
                         _projectDesignVisitStatusRepository.Add(e);
                     });
-                    
+
                 });
 
                 period.DisplayName = "Period " + ++saved;
@@ -173,7 +173,7 @@ namespace GSC.Api.Controllers.Project.Design
                 if (i == 1) firstSaved = period;
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design Period failed on clone period.");
+            _uow.Save();
 
             return Ok(firstSaved.Id);
         }

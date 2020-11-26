@@ -73,7 +73,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             _projectDesignVariableRepository.Add(variable);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design Variable failed on save.");
+            _uow.Save();
             return Ok(variable.Id);
         }
 
@@ -107,7 +107,7 @@ namespace GSC.Api.Controllers.Project.Design
             UpdateVariableValues(variable);
 
             _projectDesignVariableRepository.Update(variable);
-            if (_uow.Save() <= 0) throw new Exception("Updating Project Design Variable failed on save.");
+            _uow.Save();
             return Ok(variable.Id);
         }
 

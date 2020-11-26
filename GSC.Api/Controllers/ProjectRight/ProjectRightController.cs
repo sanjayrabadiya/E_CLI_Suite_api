@@ -63,7 +63,7 @@ namespace GSC.Api.Controllers.ProjectRight
             _projectRightRepository.SaveProjectAccessRight(projectRightSaveDto.projectRightDto,
                 projectRightSaveDto.projectId);
 
-            if (_uow.Save() < 0) throw new Exception("Project access rights failed on save.");
+            _uow.Save();
 
             return Ok(projectRightSaveDto.projectId);
         }

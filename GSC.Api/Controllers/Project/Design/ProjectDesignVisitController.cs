@@ -68,7 +68,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             _projectDesignVisitRepository.Add(projectDesignVisit);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design Visit failed on save.");
+            _uow.Save();
 
             return Ok(projectDesignVisit.Id);
         }
@@ -91,7 +91,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             _projectDesignVisitRepository.Update(projectDesignVisit);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Project Design Visit failed on save.");
+            _uow.Save();
             return Ok(projectDesignVisit.Id);
         }
 
@@ -158,7 +158,8 @@ namespace GSC.Api.Controllers.Project.Design
                         });
 
                         variable.Id = 0;
-                        variable.Values.ToList().ForEach(value => { 
+                        variable.Values.ToList().ForEach(value =>
+                        {
                             value.Id = 0;
                             _projectDesignVariableValueRepository.Add(value);
                         });
@@ -181,7 +182,7 @@ namespace GSC.Api.Controllers.Project.Design
                 if (i == 1) firstSaved = visit;
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design Visit failed on clone period.");
+            _uow.Save();
 
             return Ok(firstSaved != null ? firstSaved.Id : id);
         }

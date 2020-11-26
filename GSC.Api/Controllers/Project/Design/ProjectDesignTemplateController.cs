@@ -84,7 +84,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             _projectDesignTemplateRepository.Update(projectDesignTemplate);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Project Design Template failed on save.");
+            _uow.Save();
             return Ok(projectDesignTemplate.Id);
         }
 
@@ -149,7 +149,7 @@ namespace GSC.Api.Controllers.Project.Design
                 _projectDesignTemplateRepository.Add(projectDesignTemplate);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design Template failed on save.");
+            _uow.Save();
 
             return Ok();
         }
@@ -196,7 +196,7 @@ namespace GSC.Api.Controllers.Project.Design
                 _projectDesignTemplateRepository.Add(projectDesignTemplate);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design Template failed on save.");
+            _uow.Save();
 
             return Ok();
         }
@@ -217,7 +217,7 @@ namespace GSC.Api.Controllers.Project.Design
                     variable.DeletedDate = DateTime.Now.UtcDate();
                     _projectDesignVariableRepository.Update(variable);
                 }
-                   
+
 
                 var variables = parent.Variables.ToList();
                 foreach (var variable in variables)
@@ -228,7 +228,7 @@ namespace GSC.Api.Controllers.Project.Design
                         variableValue.Id = 0;
                         _projectDesignVariableValueRepository.Add(variableValue);
                     }
-                       
+
                     clonnedTemplate.Variables.Add(variable);
                     _projectDesignVariableRepository.Add(variable);
                 }
@@ -236,7 +236,7 @@ namespace GSC.Api.Controllers.Project.Design
                 _projectDesignTemplateRepository.Update(clonnedTemplate);
             });
 
-            if (_uow.Save() <= 0) throw new Exception("Modify Clonned Templates failed on save.");
+            _uow.Save();
 
             return Ok();
         }

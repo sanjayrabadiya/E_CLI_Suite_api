@@ -80,7 +80,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateValueQueryRepository.GenerateQuery(screeningTemplateValueQueryDto,
                 screeningTemplateValueQuery, screeningTemplateValue);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Screening Template Value Query failed on save.");
+            _uow.Save();
 
             return Ok(screeningTemplateValueQuery.Id);
         }
@@ -108,7 +108,7 @@ namespace GSC.Api.Controllers.Screening
             if (screeningTemplateValue.QueryStatus == QueryStatus.Resolved)
                 _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Screening Template Value Query failed on save.");
+            _uow.Save();
 
             return Ok(screeningTemplateValueQuery.Id);
         }
@@ -144,7 +144,7 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateValueQueryRepository.ReviewQuery(screeningTemplateValue, screeningTemplateValueQuery);
 
-            if (_uow.Save() <= 0) throw new Exception("Reviewing Screening Template Value Query failed on save.");
+            _uow.Save();
 
             return Ok(screeningTemplateValueQuery.Id);
         }
@@ -181,8 +181,7 @@ namespace GSC.Api.Controllers.Screening
 
             _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
 
-            if (_uow.Save() <= 0)
-                throw new Exception("Creating Self Generate Screening Template Value Query failed on save.");
+            _uow.Save();
 
             var screeningEntryId = _screeningTemplateRepository.GeScreeningEntryId(screeningTemplate.Id);
 

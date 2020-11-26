@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             _projectDesignVisitStatusRepository.Add(projectDesignVisitStatus);
-            if (_uow.Save() <= 0) throw new Exception("Project design visit status save.");
+             _uow.Save();
             return Ok(projectDesignVisitStatus.Id);
         }
 

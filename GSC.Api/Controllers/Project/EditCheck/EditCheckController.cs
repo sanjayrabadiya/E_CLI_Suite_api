@@ -59,7 +59,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
             var projectEditCheck = _mapper.Map<Data.Entities.Project.EditCheck.EditCheck>(editCheck);
             projectEditCheck.Id = 0;
             _editCheckRepository.SaveEditCheck(projectEditCheck);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Edit Check failed on save.");
+             _uow.Save();
             return Ok(_editCheckRepository.GetAll(editCheck.ProjectDesignId, false));
         }
 
@@ -113,7 +113,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
         public IActionResult CopyTo(int id)
         {
             var editCheck = _editCheckRepository.CopyTo(id);
-            if (_uow.Save() <= 0) throw new Exception("Copy To failed!");
+             _uow.Save() ;
             return Ok(_editCheckRepository.GetAll(editCheck.ProjectDesignId, false));
         }
 

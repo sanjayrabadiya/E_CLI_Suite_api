@@ -101,7 +101,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             var projectSchedule = _projectScheduleRepository.FindByInclude(t => t.Id == id, t => t.Templates,
                 t => t.ProjectDesign, t => t.ProjectDesignPeriod, t => t.ProjectDesignVisit).FirstOrDefault();
 
-  
+
             var projectScheduleDto = _mapper.Map<ProjectScheduleDto>(projectSchedule);
 
             if (projectScheduleDto.Templates != null)
@@ -159,7 +159,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             _projectScheduleTemplateRepository.UpdateDesignTemplatesOrder(projectSchedule);
 
             _projectScheduleRepository.Add(projectSchedule);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Schedule failed on save.");
+            _uow.Save();
 
             _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(projectScheduleDto.ProjectDesignPeriodId);
             _uow.Save();
@@ -181,7 +181,7 @@ namespace GSC.Api.Controllers.Project.Schedule
 
             _projectScheduleRepository.Update(projectSchedule);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Project Schedule failed on save.");
+            _uow.Save();
 
             _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(projectScheduleDto.ProjectDesignPeriodId);
             _uow.Save();

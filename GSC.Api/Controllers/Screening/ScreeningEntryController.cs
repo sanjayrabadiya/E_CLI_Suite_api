@@ -78,7 +78,7 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningEntryRepository.SaveScreeningAttendance(screeningEntry, screeningEntryDto.ProjectAttendanceTemplateIds);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
+            _uow.Save();
 
             return Ok(screeningEntry.Id);
         }
@@ -90,7 +90,9 @@ namespace GSC.Api.Controllers.Screening
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var result = _screeningEntryRepository.SaveScreeningRandomization(saveRandomizationDto);
-            if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
+            _uow.Save();
+            if (result.Id <= 0) throw new Exception("Creating Screening Entry failed on save.");
+
             return Ok(result.Id);
         }
 
@@ -109,7 +111,7 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningEntryRepository.SaveScreeningAttendance(screeningEntry, null);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
+            _uow.Save();
 
             return Ok(screeningEntry.Id);
         }
@@ -128,7 +130,7 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningEntryRepository.Update(screeningEntry);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Screening Entry failed on save.");
+            _uow.Save();
 
             return Ok(screeningEntry.Id);
         }

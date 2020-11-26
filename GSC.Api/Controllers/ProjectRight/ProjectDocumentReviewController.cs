@@ -5,7 +5,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
-using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Respository.ProjectRight;
 using Microsoft.AspNetCore.Mvc;

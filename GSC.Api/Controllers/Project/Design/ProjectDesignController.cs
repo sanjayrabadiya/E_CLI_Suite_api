@@ -89,7 +89,7 @@ namespace GSC.Api.Controllers.Project.Design
             projectDesignDto.IsUnderTesting = true;
             var projectDesign = _mapper.Map<ProjectDesign>(projectDesignDto);
             _projectDesignRepository.Add(projectDesign);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Design failed on save.");
+            _uow.Save();
 
 
             return Ok(projectDesign.Id);

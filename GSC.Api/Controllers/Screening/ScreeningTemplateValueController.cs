@@ -79,7 +79,7 @@ namespace GSC.Api.Controllers.Screening
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Screening Value failed on save.");
+            _uow.Save();
 
             var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
 
@@ -131,7 +131,7 @@ namespace GSC.Api.Controllers.Screening
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Screening Value failed on save.");
+            _uow.Save();
 
             var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
 
@@ -156,7 +156,7 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplateValue.MimeType = screeningTemplateValueDto.FileModel.Extension;
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Uploading document failed on save.");
+            _uow.Save();
 
             screeningTemplateValueDto.DocPath = documentUrl + screeningTemplateValue.DocPath;
 

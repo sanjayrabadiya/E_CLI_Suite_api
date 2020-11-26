@@ -156,7 +156,7 @@ namespace GSC.Api.Controllers.ProjectRight
 
             _projectDocumentRepository.Update(document);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating project document failed on save.");
+            _uow.Save();
             _projectRightRepository.UpdateIsReviewDone(projectDocumentDto.ProjectId);
             return Ok(document.Id);
         }

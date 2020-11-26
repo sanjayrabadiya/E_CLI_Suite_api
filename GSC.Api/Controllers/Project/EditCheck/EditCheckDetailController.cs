@@ -74,16 +74,16 @@ namespace GSC.Api.Controllers.Project.EditCheck
                     _editCheckDetailRepository.Add(editCheckDetail);
 
                 }
-                if (_uow.Save() <= 0) throw new Exception("Creating Edit Check failed on save.");
+                _uow.Save();
             }
             else
             {
                 editCheckDetail = _mapper.Map<EditCheckDetail>(editCheckDetailDto);
                 _editCheckDetailRepository.Add(editCheckDetail);
-                if (_uow.Save() <= 0) throw new Exception("Creating Edit Check failed on save.");
+                _uow.Save();
                 _editCheckDetailRepository.UpdateEditDetail(editCheckDetail);
             }
-
+            _uow.Save();
             _editCheckRepository.UpdateFormula(editCheckDetailDto.EditCheckId);
             _editCheckDetailRepository.UpdateEditDetail(editCheckDetail);
             return Ok(_editCheckRepository.GetEditCheckDetail(editCheckDetailDto.EditCheckId, true));
@@ -111,7 +111,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
 
             _editCheckDetailRepository.Update(editCheckDetail);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Edit Check detail failed on save.");
+            _uow.Save();
             _editCheckDetailRepository.UpdateEditDetail(editCheckDetail);
             _editCheckRepository.UpdateFormula(editCheckDetailDto.EditCheckId);
             return Ok(_editCheckRepository.GetEditCheckDetail(editCheckDetailDto.EditCheckId, true));

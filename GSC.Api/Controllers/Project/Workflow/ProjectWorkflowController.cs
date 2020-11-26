@@ -100,7 +100,7 @@ namespace GSC.Api.Controllers.Project.Workflow
 
             var projectWorkflow = _mapper.Map<ProjectWorkflow>(projectWorkflowDto);
             _projectWorkflowRepository.Add(projectWorkflow);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Workflow failed on save.");
+            _uow.Save();
             return Ok(projectWorkflow.Id);
         }
 
@@ -119,7 +119,7 @@ namespace GSC.Api.Controllers.Project.Workflow
             UpdateLevels(projectWorkflow);
             _projectWorkflowRepository.Update(projectWorkflow);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Project Workflow failed on save.");
+            _uow.Save();
             return Ok(projectWorkflow.Id);
         }
 
@@ -127,8 +127,8 @@ namespace GSC.Api.Controllers.Project.Workflow
         {
             var data = _projectWorkflowIndependentRepository.FindBy(x =>
                 x.ProjectWorkflowId == projectWorkflow.Id).ToList();
-                //&& !projectWorkflow.Independents.Any(c => c.Id == x.Id)).ToList();
-                var deleteIndependents = data.Where(t => projectWorkflow.Independents.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+            //&& !projectWorkflow.Independents.Any(c => c.Id == x.Id)).ToList();
+            var deleteIndependents = data.Where(t => projectWorkflow.Independents.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             foreach (var item in deleteIndependents)
             {
                 item.DeletedDate = DateTime.Now;
