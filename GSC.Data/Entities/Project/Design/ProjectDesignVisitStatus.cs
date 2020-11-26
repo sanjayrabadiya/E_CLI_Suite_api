@@ -14,5 +14,6 @@ namespace GSC.Data.Entities.Project.Design
         public ScreeningVisitStatus VisitStatusId { get; set; }
         public int? CompanyId { get; set; }
         public ProjectDesignVariable ProjectDesignVariable { get; set; }
+        public ProjectDesignVisit ProjectDesignVisit { get; set; }
     }
 }

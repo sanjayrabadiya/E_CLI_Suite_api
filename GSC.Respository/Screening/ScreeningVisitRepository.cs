@@ -108,6 +108,7 @@ namespace GSC.Respository.Screening
                         ProjectDesignTemplateId = t,
                         Status = ScreeningTemplateStatus.Pending
                     };
+                    _screeningTemplateRepository.Add(screeningTemplate);
                     screeningVisit.ScreeningTemplates.Add(screeningTemplate);
 
                 });

@@ -28,6 +28,8 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IDomainRepository _domainRepository;
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
+        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
+        private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
 
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
@@ -35,6 +37,8 @@ namespace GSC.Api.Controllers.Project.Design
             IDomainRepository domainRepository,
             IProjectScheduleTemplateRepository projectScheduleTemplateRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
+            IProjectDesignVariableRepository projectDesignVariableRepository,
+            IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IUnitOfWork uow, IMapper mapper)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
@@ -44,6 +48,8 @@ namespace GSC.Api.Controllers.Project.Design
             _mapper = mapper;
             _projectScheduleTemplateRepository = projectScheduleTemplateRepository;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
+            _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
+            _projectDesignVariableRepository = projectDesignVariableRepository;
             _domainRepository = domainRepository;
         }
 
@@ -113,7 +119,7 @@ namespace GSC.Api.Controllers.Project.Design
                     projectDesignVariable.Id = 0;
                     projectDesignVariable.VariableId = variableDetail.VariableId;
                     projectDesignVariable.DesignOrder = ++variableOrder;
-
+                    _projectDesignVariableRepository.Add(projectDesignVariable);
                     projectDesignTemplate.Variables.Add(projectDesignVariable);
 
                     projectDesignVariable.Values = new List<ProjectDesignVariableValue>();
@@ -124,7 +130,7 @@ namespace GSC.Api.Controllers.Project.Design
                         var projectDesignVariableValue = _mapper.Map<ProjectDesignVariableValue>(variableValue);
                         projectDesignVariableValue.Id = 0;
                         projectDesignVariableValue.SeqNo = ++valueOrder;
-
+                        _projectDesignVariableValueRepository.Add(projectDesignVariableValue);
                         projectDesignVariable.Values.Add(projectDesignVariableValue);
                     }
 
@@ -177,7 +183,12 @@ namespace GSC.Api.Controllers.Project.Design
                     variable.Unit = null;
                     variable.VariableCategory = null;
                     variable.ProjectDesignTemplate = null;
-                    foreach (var variableValue in variable.Values) variableValue.Id = 0;
+                    _projectDesignVariableRepository.Add(variable);
+                    variable.Values.ToList().ForEach(r =>
+                    {
+                        r.Id = 0;
+                        _projectDesignVariableValueRepository.Add(r);
+                    });
                 }
 
                 projectDesignTemplate.ProjectDesignVisit = null;
@@ -202,14 +213,24 @@ namespace GSC.Api.Controllers.Project.Design
 
                 var clonnedTemplate = _projectDesignTemplateRepository.GetTemplateClone(t);
                 foreach (var variable in clonnedTemplate.Variables)
+                {
                     variable.DeletedDate = DateTime.Now.UtcDate();
+                    _projectDesignVariableRepository.Update(variable);
+                }
+                   
 
                 var variables = parent.Variables.ToList();
                 foreach (var variable in variables)
                 {
                     variable.Id = 0;
-                    foreach (var variableValue in variable.Values) variableValue.Id = 0;
+                    foreach (var variableValue in variable.Values)
+                    {
+                        variableValue.Id = 0;
+                        _projectDesignVariableValueRepository.Add(variableValue);
+                    }
+                       
                     clonnedTemplate.Variables.Add(variable);
+                    _projectDesignVariableRepository.Add(variable);
                 }
 
                 _projectDesignTemplateRepository.Update(clonnedTemplate);

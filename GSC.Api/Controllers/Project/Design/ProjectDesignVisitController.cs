@@ -18,13 +18,24 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IMapper _mapper;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
+        private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+        private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         public ProjectDesignVisitController(IProjectDesignVisitRepository projectDesignVisitRepository,
-            IUnitOfWork uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper,
+            IProjectDesignTemplateRepository projectDesignTemplateRepository,
+            IProjectDesignVariableRepository projectDesignVariableRepository,
+            IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _uow = uow;
             _mapper = mapper;
+            _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _projectDesignVariableRepository = projectDesignVariableRepository;
+            _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
+            _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
         }
 
         [HttpGet("{id}/{projectDesignPeriodId}")]
@@ -130,6 +141,8 @@ namespace GSC.Api.Controllers.Project.Design
             ProjectDesignVisit firstSaved = null;
             for (var i = 1; i <= noOfVisits; i++)
             {
+                var visitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == id).ToList();
+
                 var visit = _projectDesignVisitRepository.GetVisit(id);
                 visit.Id = 0;
                 visit.ProjectDesignPeriodId = projectDesignPeriodId;
@@ -138,13 +151,33 @@ namespace GSC.Api.Controllers.Project.Design
                     template.Id = 0;
                     template.Variables.ToList().ForEach(variable =>
                     {
+                        visitStatus.Where(e => e.ProjectDesignVariableId == variable.Id).ToList().ForEach(g =>
+                        {
+                            g.ProjectDesignVariable = variable;
+                            g.ProjectDesignVariableId = 0;
+                        });
+
                         variable.Id = 0;
-                        variable.Values.ToList().ForEach(value => { value.Id = 0; });
+                        variable.Values.ToList().ForEach(value => { 
+                            value.Id = 0;
+                            _projectDesignVariableValueRepository.Add(value);
+                        });
+                        _projectDesignVariableRepository.Add(variable);
                     });
+                    _projectDesignTemplateRepository.Add(template);
                 });
 
                 visit.DisplayName = "Visit " + ++saved;
                 _projectDesignVisitRepository.Add(visit);
+
+                visitStatus.ForEach(e =>
+                {
+                    e.Id = 0;
+                    e.ProjectDesignVisitId = 0;
+                    e.ProjectDesignVisit = visit;
+                    _projectDesignVisitStatusRepository.Add(e);
+                });
+
                 if (i == 1) firstSaved = visit;
             }
 
