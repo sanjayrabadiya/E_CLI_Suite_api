@@ -123,7 +123,9 @@ namespace GSC.Api.Controllers.Attendance
             if (RandomizationDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             RandomizationDto.Initial = RandomizationDto.Initial.PadRight(3, '-');
+            var details = _randomizationRepository.Find(RandomizationDto.Id);               
             var randomization = _mapper.Map<Randomization>(RandomizationDto);
+            randomization.PatientStatusId = details.PatientStatusId;
             if (Convert.ToBoolean(_configuration["IsCloud"]))
             {
                 var user = _mapper.Map<UserDto>(RandomizationDto);
