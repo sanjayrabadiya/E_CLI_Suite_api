@@ -34,7 +34,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GSC.Respository.Project.Rights;
 using GSC.Shared;
-using GSC.Helper;
 
 
 namespace GSC.Api.Helpers

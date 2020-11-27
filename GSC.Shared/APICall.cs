@@ -1,17 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using System.Web.Http;
-using System.Net;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public class APICall : IAPICall
     {
@@ -27,7 +20,7 @@ namespace GSC.Helper
         {
             //string URL = String.Format("{0}{1}/{2}", _configuration["EndPointURL"], controllername, Id);
             // HttpClient client = new HttpClient();
-           // _httpClient.BaseAddress = new Uri(URL);
+            // _httpClient.BaseAddress = new Uri(URL);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             HttpResponseMessage response = _httpClient.GetAsync(URL).Result;
             //  client.Dispose();
@@ -38,7 +31,7 @@ namespace GSC.Helper
         }
 
         public string Post<T>(T data, string URL)
-        {  
+        {
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var response = _httpClient.PostAsJsonAsync(URL, data).Result;
             if (response.IsSuccessStatusCode)
@@ -63,7 +56,7 @@ namespace GSC.Helper
             //string URL = String.Format("{0}{1}/{2}",
             //              _configuration["EndPointURL"], controllername, Id);
             //HttpClient client = new HttpClient();
-           // _httpClient.BaseAddress = new Uri(URL);
+            // _httpClient.BaseAddress = new Uri(URL);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var response = _httpClient.DeleteAsync(URL).Result;
             //client.Dispose();
@@ -79,7 +72,7 @@ namespace GSC.Helper
             //string URL = String.Format("{0}{1}/{2}",
             //              _configuration["EndPointURL"], controllername, Id);
             // HttpClient client = new HttpClient();
-           // _httpClient.BaseAddress = new Uri(URL);
+            // _httpClient.BaseAddress = new Uri(URL);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var content = new ObjectContent<object>(data, new JsonMediaTypeFormatter());
             HttpResponseMessage response = _httpClient.PatchAsync(URL, content).Result;
