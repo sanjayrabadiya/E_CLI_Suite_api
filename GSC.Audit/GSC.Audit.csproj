@@ -1,13 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.9.0" />
-    <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="18.2.0.59" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GSC.Common\GSC.Common.csproj" />

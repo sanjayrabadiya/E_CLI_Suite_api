@@ -104,7 +104,7 @@ namespace GSC.Common.Base
                     entry.Property(x => x.CreatedBy).IsModified = false;
                     entry.Property(x => x.CreatedDate).IsModified = false;
 
-                    if (entry.Entity.AuditAction == Helper.AuditAction.Deleted)
+                    if (entry.Entity.AuditAction == AuditAction.Deleted)
                     {
                         entry.Entity.DeletedBy = _jwtTokenAccesser.UserId;
                         entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();

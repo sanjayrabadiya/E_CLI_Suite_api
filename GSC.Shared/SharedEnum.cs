@@ -11,4 +11,12 @@ namespace GSC.Shared
         [Description("Patient")] Patient = 3,
         [Description("User")] User = 4
     }
+
+    public enum AuditAction : short
+    {
+        [Description("Inserted")] Inserted = 1,
+        [Description("Updated")] Updated = 2,
+        [Description("Deleted")] Deleted = 3,
+        [Description("Activated")] Activated = 4
+    }
 }

@@ -157,13 +157,7 @@ namespace GSC.Helper
         [Description("Inform Consent")] InformConsent = 19
     }
 
-    public enum AuditAction : short
-    {
-        [Description("Inserted")] Inserted = 1,
-        [Description("Updated")] Updated = 2,
-        [Description("Deleted")] Deleted = 3,
-        [Description("Activated")] Activated = 4
-    }
+   
 
     public enum AuditTable : short
     {

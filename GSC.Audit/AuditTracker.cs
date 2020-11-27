@@ -2,8 +2,6 @@
 using GSC.Common;
 using GSC.Common.Base;
 using GSC.Common.Common;
-using GSC.Common.UnitOfWork;
-using GSC.Helper;
 using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -11,7 +9,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace GSC.Audit
 {

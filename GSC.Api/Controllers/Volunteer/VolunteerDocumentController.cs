@@ -13,6 +13,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Volunteer;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Shared;
 
 namespace GSC.Api.Controllers.Volunteer
 {

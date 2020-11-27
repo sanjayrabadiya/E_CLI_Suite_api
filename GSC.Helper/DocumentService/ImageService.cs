@@ -1,5 +1,4 @@
 ﻿
-
 using GSC.Helper;
 using Serilog;
 using System;

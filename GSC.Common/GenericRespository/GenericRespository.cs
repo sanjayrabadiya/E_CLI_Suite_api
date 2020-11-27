@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using GSC.Common.Base;
-using GSC.Helper;
+using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Common.GenericRespository

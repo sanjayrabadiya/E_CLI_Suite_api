@@ -8,6 +8,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Audit;
 using GSC.Respository.Volunteer;
+using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Volunteer
