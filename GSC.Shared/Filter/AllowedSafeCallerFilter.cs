@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using System.Net;
-using GSC.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 
-namespace GSC.Api.Helpers
+namespace GSC.Shared.Filter
 {
     public class AllowedSafeCallerFilter : ActionFilterAttribute
     {

@@ -335,7 +335,7 @@ namespace GSC.Respository.InformConcent
             wdocument.Dispose();
             string json = sfdtText;
             var jsonObj = JObject.Parse(json);
-            string sign = File.ReadAllText("signaturefooterblock.json");
+            string sign = File.ReadAllText("Config//signaturefooterblock.json");
             string sign2 = sign;
             int randomizationId;
             if (econsentreviewdetails.AttendanceId == 0)

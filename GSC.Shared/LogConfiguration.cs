@@ -19,7 +19,7 @@ namespace GSC.Shared
             var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var configuration = new ConfigurationBuilder()
                .SetBasePath(Directory.GetCurrentDirectory())
-                       .AddJsonFile("appsettings.json")
+                       .AddJsonFile("Config//appsettings.json")
                        .AddEnvironmentVariables()
                        .Build();
 

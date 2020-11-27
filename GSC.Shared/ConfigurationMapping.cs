@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GSC.Helper
+namespace GSC.Shared
 {
     public static class ConfigurationMapping
     {

@@ -1,9 +1,7 @@
-﻿
-using GSC.Shared.Validation;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 
 
-namespace GSC.Api.Helpers
+namespace GSC.Shared.Validation
 {
     public class ValidateModelAttribute : ActionFilterAttribute
     {

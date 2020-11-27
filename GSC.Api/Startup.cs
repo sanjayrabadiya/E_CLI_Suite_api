@@ -6,9 +6,10 @@ using GSC.Api.Hubs;
 using GSC.Audit;
 using GSC.Data.Dto.UserMgt;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Shared;
+using GSC.Shared.Filter;
 using GSC.Shared.GSCException;
+using GSC.Shared.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -31,8 +32,8 @@ namespace GSC.Api
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddEnvironmentVariables()
-                .AddJsonFile("ipAddress.json", false, true)
-                .AddJsonFile("appSettings.json", false, true);
+                .AddJsonFile("Config//ipAddress.json", false, true)
+                .AddJsonFile("Config//appSettings.json", false, true);
             _configuration = builder.Build();
         }
 
@@ -111,7 +112,7 @@ namespace GSC.Api
                 e.MapControllers();
                 e.MapHub<MessageHub>("/MessageHub");
             });
-            app.UseSpa(spa => { spa.Options.SourcePath = "wwwroot"; });
+            //app.UseSpa(spa => { spa.Options.SourcePath = "wwwroot"; });
         }
 
 

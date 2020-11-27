@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using GSC.Common.UnitOfWork;
-using GSC.Domain.Context;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace GSC.Api.Helpers

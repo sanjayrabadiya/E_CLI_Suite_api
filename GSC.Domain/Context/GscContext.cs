@@ -32,7 +32,6 @@ using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
-using GSC.Helper;
 using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
