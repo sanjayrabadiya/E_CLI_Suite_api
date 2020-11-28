@@ -5,7 +5,8 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Schedule;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Project.Schedule
 {

@@ -6,7 +6,8 @@ using GSC.Data.Dto.Barcode;
 using GSC.Data.Entities.Barcode;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Barcode

@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace GSC.Shared
+namespace GSC.Shared.Security
 {
     public static class RandomPassword
     {

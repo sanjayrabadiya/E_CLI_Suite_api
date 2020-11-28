@@ -4,13 +4,14 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Context;
 
-namespace GSC.Shared
+namespace GSC.Shared.Configuration
 {
     public class LogConfiguration
     {

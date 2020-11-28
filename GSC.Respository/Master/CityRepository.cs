@@ -8,7 +8,7 @@ using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Location;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Master
 {

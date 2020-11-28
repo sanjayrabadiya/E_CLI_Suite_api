@@ -18,7 +18,8 @@ using Syncfusion.EJ2.DocumentEditor;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using Microsoft.EntityFrameworkCore;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Etmf
 {

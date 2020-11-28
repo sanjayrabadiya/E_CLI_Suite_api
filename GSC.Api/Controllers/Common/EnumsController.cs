@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GSC.Data.Dto.Master;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Common

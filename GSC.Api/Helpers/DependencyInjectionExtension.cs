@@ -34,7 +34,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GSC.Respository.Project.Rights;
 using GSC.Shared;
-
+using GSC.Shared.Extension;
+using GSC.Shared.Email;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Helpers
 {

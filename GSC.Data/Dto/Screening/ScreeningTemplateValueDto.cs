@@ -4,8 +4,8 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
-using GSC.Shared;
 using GSC.Shared.DocumentService;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Screening
 {

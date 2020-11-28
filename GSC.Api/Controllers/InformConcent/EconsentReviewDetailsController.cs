@@ -25,7 +25,7 @@ using Newtonsoft.Json.Linq;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Controllers.InformConcent
 {

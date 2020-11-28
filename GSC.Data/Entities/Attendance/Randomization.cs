@@ -4,8 +4,8 @@ using GSC.Helper;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.Master;
-using GSC.Shared;
 using GSC.Common.Common;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Attendance
 {

@@ -2,7 +2,7 @@
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Audit

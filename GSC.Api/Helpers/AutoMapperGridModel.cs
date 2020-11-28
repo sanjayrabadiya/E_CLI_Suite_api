@@ -19,9 +19,9 @@ using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.UserMgt;
 using GSC.Common.Base;
-using GSC.Shared;
 using System;
 using System.Linq;
+using GSC.Shared.Extension;
 
 namespace GSC.Api.Helpers
 {

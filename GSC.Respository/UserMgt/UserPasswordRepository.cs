@@ -4,7 +4,8 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
+using GSC.Shared.Security;
 
 namespace GSC.Respository.UserMgt
 {

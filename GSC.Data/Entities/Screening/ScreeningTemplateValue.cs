@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using GSC.Common.Base;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Screening
 {

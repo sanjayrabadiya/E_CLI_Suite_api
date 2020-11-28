@@ -16,6 +16,8 @@ using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Shared;
+using GSC.Shared.Security;
+using GSC.Shared.Generic;
 
 namespace GSC.Api.Controllers.UserMgt
 {

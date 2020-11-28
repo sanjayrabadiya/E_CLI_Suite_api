@@ -14,7 +14,7 @@ using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Schedule;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Schedule

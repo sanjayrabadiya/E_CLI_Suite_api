@@ -6,7 +6,8 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Respository.EmailSender;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
+using GSC.Shared.Security;
 
 namespace GSC.Respository.UserMgt
 {

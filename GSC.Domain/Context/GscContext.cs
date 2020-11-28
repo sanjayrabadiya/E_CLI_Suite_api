@@ -32,7 +32,9 @@ using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
-using GSC.Shared;
+using GSC.Shared.Configuration;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 

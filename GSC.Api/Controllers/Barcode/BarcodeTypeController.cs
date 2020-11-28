@@ -8,7 +8,7 @@ using GSC.Data.Dto.Barcode;
 using GSC.Data.Entities.Barcode;
 using GSC.Domain.Context;
 using GSC.Respository.Barcode;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Barcode

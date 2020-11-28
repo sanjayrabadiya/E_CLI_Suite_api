@@ -1,8 +1,6 @@
-﻿
+﻿using System.ComponentModel;
 
-using System.ComponentModel;
-
-namespace GSC.Shared
+namespace GSC.Shared.Generic
 {
     public enum UserMasterUserType : short
     {

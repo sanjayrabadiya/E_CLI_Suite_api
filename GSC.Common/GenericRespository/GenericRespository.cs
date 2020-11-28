@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using GSC.Common.Base;
-using GSC.Shared;
+using GSC.Shared.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Common.GenericRespository

@@ -1,8 +1,7 @@
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
-namespace GSC.Shared
+namespace GSC.Shared.JWTAuth
 {
     public class JwtTokenAccesser : IJwtTokenAccesser
     {
@@ -42,7 +41,7 @@ namespace GSC.Shared
         public int CompanyId { get; }
 
         public int RoleId { get; }
-        public string RoleName { get;}
+        public string RoleName { get; }
 
         public string IpAddress { get; }
     }

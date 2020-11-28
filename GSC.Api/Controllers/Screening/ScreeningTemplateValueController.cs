@@ -12,7 +12,7 @@ using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Controllers.Screening
 {

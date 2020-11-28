@@ -1,6 +1,6 @@
 using System;
 using GSC.Common.Base;
-using GSC.Shared;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.LogReport
 {

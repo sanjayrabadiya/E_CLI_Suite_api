@@ -10,7 +10,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Respository.Medra;
 using GSC.Respository.UserMgt;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

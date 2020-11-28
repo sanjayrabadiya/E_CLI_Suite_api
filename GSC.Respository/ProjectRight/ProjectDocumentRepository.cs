@@ -5,7 +5,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.ProjectRight
 {

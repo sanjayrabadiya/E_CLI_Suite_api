@@ -15,7 +15,8 @@ using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.Workflow;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening

@@ -8,7 +8,8 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.ProjectRight

@@ -14,8 +14,9 @@ using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
-using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Volunteer
 {

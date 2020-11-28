@@ -8,8 +8,8 @@ using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
-using GSC.Shared;
 using GSC.Shared.DocumentService;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Configuration
 {

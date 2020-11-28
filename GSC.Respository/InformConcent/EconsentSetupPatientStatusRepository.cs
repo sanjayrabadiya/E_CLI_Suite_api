@@ -2,7 +2,7 @@
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Text;

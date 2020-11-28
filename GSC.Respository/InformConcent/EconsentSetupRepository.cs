@@ -7,7 +7,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Master;
 using GSC.Respository.PropertyMapping;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;

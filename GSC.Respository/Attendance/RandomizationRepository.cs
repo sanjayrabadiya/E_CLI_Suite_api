@@ -19,12 +19,13 @@ using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
-using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Attendance
 {

@@ -5,7 +5,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Client;
 using GSC.Data.Entities.Client;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Client
 {

@@ -19,7 +19,8 @@ using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using System.Text;
 using Syncfusion.EJ2.DocumentEditor;
 using GSC.Respository.Audit;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Etmf
 {

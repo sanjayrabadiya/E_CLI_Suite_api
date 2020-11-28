@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Screening
 {

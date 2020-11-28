@@ -1,7 +1,7 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
 using System;
 
 namespace GSC.Data.Entities.Master

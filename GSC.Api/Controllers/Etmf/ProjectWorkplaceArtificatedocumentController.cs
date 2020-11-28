@@ -19,7 +19,8 @@ using Newtonsoft.Json;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using Microsoft.EntityFrameworkCore;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GSC.Api.Controllers.Etmf

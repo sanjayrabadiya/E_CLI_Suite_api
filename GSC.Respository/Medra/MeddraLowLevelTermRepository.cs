@@ -10,7 +10,7 @@ using System.Text;
 using System.Linq;
 using GSC.Data.Dto.Medra;
 using System.IO;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Medra
 {

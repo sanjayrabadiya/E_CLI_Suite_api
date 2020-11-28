@@ -1,5 +1,5 @@
 ﻿using System;
-using GSC.Shared;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Screening
 {

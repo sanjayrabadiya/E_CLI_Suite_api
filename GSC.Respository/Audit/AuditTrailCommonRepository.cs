@@ -6,7 +6,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Audit;
 using GSC.Data.Entities.Audit;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Audit
 {

@@ -6,7 +6,8 @@ using GSC.Data.Dto.Common;
 using GSC.Data.Entities.Common;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Common
 {

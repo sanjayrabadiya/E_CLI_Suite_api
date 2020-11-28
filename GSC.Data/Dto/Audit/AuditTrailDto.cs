@@ -1,7 +1,7 @@
 using System;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Generic;
 
 namespace GSC.Data.Dto.Audit
 {

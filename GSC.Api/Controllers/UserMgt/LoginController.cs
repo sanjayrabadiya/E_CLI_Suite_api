@@ -22,7 +22,9 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
+using GSC.Shared.Configuration;
 
 namespace GSC.Api.Controllers.UserMgt
 {

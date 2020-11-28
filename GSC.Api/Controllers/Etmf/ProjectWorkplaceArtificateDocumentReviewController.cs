@@ -13,7 +13,7 @@ using GSC.Respository.Etmf;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Mvc;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

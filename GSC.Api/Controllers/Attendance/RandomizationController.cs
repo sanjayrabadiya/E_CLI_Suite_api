@@ -16,6 +16,9 @@ using Microsoft.Extensions.Configuration;
 using GSC.Data.Dto.UserMgt;
 using GSC.Shared.DocumentService;
 using GSC.Shared;
+using GSC.Shared.JWTAuth;
+using GSC.Shared.Security;
+using GSC.Shared.Generic;
 
 namespace GSC.Api.Controllers.Attendance
 {

@@ -3,7 +3,7 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Audit;
 using GSC.Data.Entities.Audit;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Generic;
 
 namespace GSC.Respository.Audit
 {

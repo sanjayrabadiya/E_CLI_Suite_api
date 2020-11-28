@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GSC.Shared
+namespace GSC.Shared.Extension
 {
     public static class DateTimeOffsetExtensions
     {

@@ -1,4 +1,4 @@
-﻿using GSC.Shared;
+﻿using GSC.Shared.Extension;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

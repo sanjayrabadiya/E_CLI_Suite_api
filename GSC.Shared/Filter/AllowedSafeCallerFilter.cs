@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
+using GSC.Shared.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;

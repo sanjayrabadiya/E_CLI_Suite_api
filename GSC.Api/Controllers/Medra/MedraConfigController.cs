@@ -15,7 +15,7 @@ using GSC.Shared.DocumentService;
 using GSC.Data.Entities.Medra;
 using GSC.Respository.UserMgt;
 using System.IO;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Controllers.Medra
 {

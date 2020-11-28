@@ -9,7 +9,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.EditCheck;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.EditCheck

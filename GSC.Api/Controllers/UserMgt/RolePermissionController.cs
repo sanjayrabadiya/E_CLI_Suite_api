@@ -4,7 +4,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Data.Entities.UserMgt;
 using GSC.Respository.UserMgt;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.UserMgt

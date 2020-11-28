@@ -1,11 +1,11 @@
-﻿using GSC.Shared;
+﻿using GSC.Shared.Extension;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 
-namespace GSC.Shared    
+namespace GSC.Shared.Generic
 {
     public class HttpService
     {
@@ -13,7 +13,7 @@ namespace GSC.Shared
         {
             string responseData;
             StringContent content;
-            if (CheckObjectExtensions.Isnt(parameter, typeof(string)))
+            if (parameter.Isnt(typeof(string)))
             {
                 content = new StringContent(parameter.ToString());
             }
@@ -39,7 +39,7 @@ namespace GSC.Shared
         {
             string responseData;
             StringContent content;
-            if (CheckObjectExtensions.Isnt(parameter, typeof(string)))
+            if (parameter.Isnt(typeof(string)))
             {
                 content = new StringContent(parameter.ToString());
             }
@@ -93,7 +93,7 @@ namespace GSC.Shared
         {
             string responseData;
             StringContent content;
-            if (CheckObjectExtensions.Isnt(parameter, typeof(string)))
+            if (parameter.Isnt(typeof(string)))
             {
                 content = new StringContent(parameter.ToString());
             }
@@ -119,7 +119,7 @@ namespace GSC.Shared
         {
             string responseData;
             StringContent content;
-            if (CheckObjectExtensions.Isnt(parameter, typeof(string)))
+            if (parameter.Isnt(typeof(string)))
             {
                 content = new StringContent(parameter.ToString());
             }

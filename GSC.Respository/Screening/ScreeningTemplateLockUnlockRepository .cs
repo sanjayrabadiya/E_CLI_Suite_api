@@ -5,7 +5,7 @@ using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Respository.Project.Workflow;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;

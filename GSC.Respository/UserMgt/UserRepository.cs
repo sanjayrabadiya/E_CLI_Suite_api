@@ -15,6 +15,8 @@ using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using GSC.Shared;
+using GSC.Shared.Configuration;
+using GSC.Shared.JWTAuth;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;

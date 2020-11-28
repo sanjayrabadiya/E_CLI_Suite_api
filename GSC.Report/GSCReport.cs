@@ -19,7 +19,8 @@ using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Telerik.Reporting;
 

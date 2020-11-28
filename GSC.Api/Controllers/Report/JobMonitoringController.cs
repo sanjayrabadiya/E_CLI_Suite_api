@@ -8,7 +8,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Reports;
 using GSC.Respository.UserMgt;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Report

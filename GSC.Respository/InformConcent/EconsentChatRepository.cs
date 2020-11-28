@@ -7,7 +7,7 @@ using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Respository.UserMgt;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;

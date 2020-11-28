@@ -1,4 +1,4 @@
-namespace GSC.Shared
+namespace GSC.Shared.JWTAuth
 {
     public interface IJwtTokenAccesser
     {

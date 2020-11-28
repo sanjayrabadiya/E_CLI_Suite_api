@@ -1,5 +1,5 @@
 ﻿using GSC.Common.Base;
-using GSC.Shared;
+using GSC.Shared.Extension;
 using System;
 using System.Collections.Generic;
 using System.Text;

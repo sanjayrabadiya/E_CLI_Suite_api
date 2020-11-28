@@ -10,7 +10,8 @@ using GSC.Data.Entities.Medra;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Medra;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

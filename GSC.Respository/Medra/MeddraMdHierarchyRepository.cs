@@ -5,7 +5,7 @@ using GSC.Data.Dto.Medra;
 using GSC.Data.Entities.Medra;
 using GSC.Domain.Context;
 using GSC.Respository.PropertyMapping;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.IO;

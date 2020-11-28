@@ -27,7 +27,7 @@ using System.Security.Cryptography.X509Certificates;
 using GSC.Respository.UserMgt;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.InformConcent
 {

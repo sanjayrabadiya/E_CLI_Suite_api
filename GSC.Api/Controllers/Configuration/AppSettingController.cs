@@ -4,7 +4,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

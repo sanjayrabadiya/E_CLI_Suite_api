@@ -5,7 +5,7 @@ using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Project.Design;
-using GSC.Shared;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Master
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using GSC.Common.Base;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Common

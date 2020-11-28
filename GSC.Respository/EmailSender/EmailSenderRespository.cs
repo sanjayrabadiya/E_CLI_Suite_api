@@ -7,7 +7,8 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.Email;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.EmailSender

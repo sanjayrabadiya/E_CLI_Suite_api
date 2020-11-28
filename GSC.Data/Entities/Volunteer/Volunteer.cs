@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Volunteer
 {

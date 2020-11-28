@@ -2,7 +2,8 @@
 using GSC.Common;
 using GSC.Common.Base;
 using GSC.Common.Common;
-using GSC.Shared;
+using GSC.Shared.Generic;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;

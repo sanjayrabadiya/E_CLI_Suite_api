@@ -8,7 +8,7 @@ using GSC.Data.Dto.LogReport;
 using GSC.Data.Entities.LogReport;
 using GSC.Domain.Context;
 using GSC.Respository.LogReport;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.LogReport

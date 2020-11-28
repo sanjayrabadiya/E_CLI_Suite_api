@@ -3,7 +3,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;

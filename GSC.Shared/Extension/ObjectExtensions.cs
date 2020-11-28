@@ -6,7 +6,7 @@ using System.Dynamic;
 using System.Reflection;
 
 
-namespace GSC.Shared
+namespace GSC.Shared.Extension
 {
     public static class ObjectExtensions
     {

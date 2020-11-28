@@ -8,7 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Respository.InformConcent;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

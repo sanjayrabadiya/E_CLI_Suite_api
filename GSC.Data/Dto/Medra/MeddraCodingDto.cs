@@ -2,7 +2,7 @@
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
-using GSC.Shared;
+using GSC.Shared.Extension;
 using System;
 using System.Collections.Generic;
 using System.Text;

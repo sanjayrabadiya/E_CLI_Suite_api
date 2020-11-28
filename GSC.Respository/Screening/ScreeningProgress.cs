@@ -2,7 +2,7 @@
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Custom;
 using GSC.Domain.Context;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 using Microsoft.Data.SqlClient;
 using System.Linq;
 

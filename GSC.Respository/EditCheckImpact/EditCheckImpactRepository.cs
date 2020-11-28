@@ -11,11 +11,12 @@ using GSC.Helper;
 using GSC.Respository.Medra;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
-using GSC.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.Base;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.EditCheckImpact
 {

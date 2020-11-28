@@ -9,7 +9,7 @@ using GSC.Data.Dto.Master;
 using GSC.Domain.Context;
 using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Client
 {

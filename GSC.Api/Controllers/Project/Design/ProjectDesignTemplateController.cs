@@ -12,7 +12,7 @@ using GSC.Helper;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Schedule;
-using GSC.Shared;
+using GSC.Shared.Extension;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Design

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 
-namespace GSC.Shared
+namespace GSC.Shared.Configuration
 {
     public static class ConfigurationMapping
     {

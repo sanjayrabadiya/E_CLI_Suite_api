@@ -7,7 +7,7 @@ using GSC.Data.Dto.Report;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Authorization;
 using GSC.Respository.ProjectRight;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Controllers.Report
 {

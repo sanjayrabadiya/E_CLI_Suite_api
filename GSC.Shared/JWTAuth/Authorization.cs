@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
-namespace GSC.Shared
+namespace GSC.Shared.JWTAuth
 {
     public static class Authorization
     {

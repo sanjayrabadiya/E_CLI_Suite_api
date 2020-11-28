@@ -2,7 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Common;
-using GSC.Shared;
+using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 
 namespace GSC.Common.Base
 {

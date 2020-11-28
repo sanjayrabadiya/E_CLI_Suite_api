@@ -13,8 +13,9 @@ using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
-using GSC.Shared;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 
 namespace GSC.Api.Controllers.Volunteer
 {

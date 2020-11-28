@@ -15,7 +15,7 @@ using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
 using Microsoft.AspNetCore.Mvc;
-using GSC.Shared;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Controllers.ProjectRight
 {
