@@ -271,7 +271,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectModuleRightsRepository, ProjectModuleRightsRepository>();
             //services.AddScoped<IAPICall, APICall>();
             services.AddHttpClient<IAPICall, APICall>();
-            //services.AddHttpClient<IUserService, UserService>();
+            services.AddHttpClient<ICentreUserService, CentreUserService>();
         }
     }
 }

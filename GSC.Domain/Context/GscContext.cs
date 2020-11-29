@@ -42,34 +42,28 @@ namespace GSC.Domain.Context
 {
     public class GscContext : GSCBaseContext<GscContext>, IGSCContext, IGSCContextExtension
     {
-
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        
         public GscContext(DbContextOptions<GscContext> options,
             IJwtTokenAccesser jwtTokenAccesser,
             IOptions<EnvironmentSetting> settings, IAuditTracker auditTracker) : base(options, jwtTokenAccesser, auditTracker)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
+
         }
 
 
         public void ConfigureServices(string connectionString)
         {
-            //base.OnConfiguring(new DbContextOptionsBuilder());
-
-            //services.AddDbContext<GscContext>(options => {
-            //    options.UseSqlServer(connectionString);
-            //});
+            base.OnConfiguring(new DbContextOptionsBuilder(GetOptions(connectionString)));
+           
         }
 
-        private static DbContextOptions GetOptions(string connectionString)
+        public static DbContextOptions GetOptions(string connectionString)
         {
             return SqlServerDbContextOptionsExtensions.UseSqlServer(new DbContextOptionsBuilder(), connectionString).Options;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (ConfigurationMapping.EnvironmentSetting != null && !ConfigurationMapping.EnvironmentSetting.IsPremise)
+            if (_jwtTokenAccesser != null && ConfigurationMapping.EnvironmentSetting != null && !ConfigurationMapping.EnvironmentSetting.IsPremise)
                 optionsBuilder.UseSqlServer(@"data source=198.38.85.197;Initial Catalog=Cli_Development;user id=sa;password=Pushkar@7!;");
             base.OnConfiguring(optionsBuilder);
         }
@@ -271,7 +265,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
 
         public DbSet<ProjectArtificateDocumentHistory> ProjectArtificateDocumentHistory { get; set; }
-       
+
         public DbSet<EconsentSetupPatientStatus> EconsentSetupPatientStatus { get; set; }
         public DbSet<EconsentSetup> EconsentSetup { get; set; }
         public DbSet<EconsentReviewDetails> EconsentReviewDetails { get; set; }

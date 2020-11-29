@@ -13,7 +13,7 @@ namespace GSC.Common.Base
 {
     public class GSCBaseContext<TContext> : DbContext where TContext : DbContext
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        public readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IAuditTracker _auditTracker;
 
         protected GSCBaseContext(DbContextOptions<TContext> options, IJwtTokenAccesser jwtTokenAccesser,

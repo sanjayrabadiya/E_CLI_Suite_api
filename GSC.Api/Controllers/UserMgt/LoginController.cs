@@ -29,6 +29,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly ICentreUserService _centreUserService;
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
@@ -36,7 +37,8 @@ namespace GSC.Api.Controllers.UserMgt
             IUnitOfWork uow,
             IHubContext<Notification> notificationHubContext,
             IConfiguration configuration, IAPICall centerlApi,
-            IOptions<EnvironmentSetting> environmentSetting)
+            IOptions<EnvironmentSetting> environmentSetting,
+            ICentreUserService centreUserService)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -46,6 +48,7 @@ namespace GSC.Api.Controllers.UserMgt
             _configuration = configuration;
             _centeralApi = centerlApi;
             _environmentSetting = environmentSetting;
+            _centreUserService = centreUserService;
         }
 
         [HttpPost]
@@ -59,6 +62,8 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (_environmentSetting.Value.IsPremise)
                 user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+            else
+                user = await _centreUserService.ValidateClient(dto, _environmentSetting.Value.CentralApi);
 
             if (!user.IsValid)
             {
