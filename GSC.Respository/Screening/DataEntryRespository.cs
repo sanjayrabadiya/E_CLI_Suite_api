@@ -63,7 +63,7 @@ namespace GSC.Respository.Screening
             result.ReviewLevel = workflowlevel.LevelNo;
 
             var projectDesignVisit = await _projectDesignVisitRepository.All.
-                Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
+                Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
             Select(t => new DataEntryVisitTemplateDto
             {
                 ProjectDesignVisitId = t.Id,

@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,6 +15,7 @@ namespace GSC.Common.Base
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IAuditTracker _auditTracker;
+
         protected GSCBaseContext(DbContextOptions<TContext> options, IJwtTokenAccesser jwtTokenAccesser,
             IAuditTracker auditTracker)
          : base(options)

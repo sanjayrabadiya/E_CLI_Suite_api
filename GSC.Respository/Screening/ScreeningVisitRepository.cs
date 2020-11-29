@@ -305,7 +305,7 @@ namespace GSC.Respository.Screening
 
         }
 
-        public void AutomaticStatusUpdate(int screeningTemplateId)
+        public ScreeningVisitStatus? AutomaticStatusUpdate(int screeningTemplateId)
         {
             var screeningVisit = _screeningTemplateRepository.All.AsNoTracking().Where(x => x.Id == screeningTemplateId).Select(t => new
             {
@@ -315,47 +315,60 @@ namespace GSC.Respository.Screening
                 t.ScreeningVisit.ScreeningEntryId
             }).FirstOrDefault();
 
-            if (screeningVisit == null) return;
+            if (screeningVisit == null) return null;
 
 
-            var designVisitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId).Select(
+            var designVisitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.DeletedDate == null
+            && x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId &&
+            (x.VisitStatusId == ScreeningVisitStatus.ScreeningFailure || x.VisitStatusId == ScreeningVisitStatus.Withdrawal)).Select(
                   t => new { t.ProjectDesignVariableId, t.VisitStatusId }).ToList();
-            DateTime statusDate = System.DateTime.Now;
 
-            if (designVisitStatus != null && designVisitStatus.Count() > 0)
-            {
-                var designVariable = designVisitStatus.FirstOrDefault(t => t.VisitStatusId > ScreeningVisitStatus.Scheduled);
-                if (designVariable != null)
-                {
-                    var screeningValue = _screeningTemplateValueRepository.All.Where(t => t.ProjectDesignVariableId == designVariable.ProjectDesignVariableId
-                      && t.ScreeningTemplateId == screeningTemplateId).Select(r => r.Value).FirstOrDefault();
 
-                    if (!string.IsNullOrEmpty(screeningValue))
-                    {
-                        DateTime.TryParse(screeningValue, out statusDate);
-                        StatusUpdate(new ScreeningVisitHistoryDto
-                        {
-                            VisitStatusId = designVariable.VisitStatusId,
-                            ScreeningVisitId = screeningVisit.ScreeningVisitId,
-                            StatusDate = statusDate
-                        });
-                    }
-                }
-            }
+            DateTime? statusDate = null;
+            ScreeningVisitStatus? visitStatus = null;
+
 
             if (screeningVisit.Status == ScreeningTemplateStatus.Submitted)
             {
                 if (!_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningVisit.ScreeningEntryId
                 && x.ScreeningVisitId == screeningVisit.ScreeningVisitId && x.Status < ScreeningTemplateStatus.Submitted))
-                    StatusUpdate(new ScreeningVisitHistoryDto
-                    {
-                        VisitStatusId = ScreeningVisitStatus.Completed,
-                        ScreeningVisitId = screeningVisit.ScreeningVisitId,
-                        StatusDate = statusDate
-                    });
-
+                {
+                    statusDate = System.DateTime.Now;
+                    visitStatus = ScreeningVisitStatus.Completed;
+                }
             }
 
+
+            designVisitStatus.ForEach(x =>
+            {
+                var screeningValue = _screeningTemplateValueRepository.All.Where(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId
+                      && t.ScreeningTemplateId == screeningTemplateId).Select(r => r.Value).FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(screeningValue))
+                {
+                    DateTime convertDte;
+                    var isSucess = DateTime.TryParse(screeningValue, out convertDte);
+
+                    if (isSucess)
+                    {
+                        statusDate = convertDte;
+                        visitStatus = x.VisitStatusId;
+                    }
+                }
+            });
+
+
+            if (visitStatus != null && statusDate != null)
+            {
+                StatusUpdate(new ScreeningVisitHistoryDto
+                {
+                    VisitStatusId = (ScreeningVisitStatus)visitStatus,
+                    ScreeningVisitId = screeningVisit.ScreeningVisitId,
+                    StatusDate = statusDate
+                });
+            }
+
+            return visitStatus;
         }
         public void VisitRepeat(ScreeningVisitDto screeningVisitDto)
         {

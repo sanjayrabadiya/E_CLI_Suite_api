@@ -2,6 +2,7 @@
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +15,7 @@ namespace GSC.Respository.Screening
         void OpenVisit(ScreeningVisitDto screeningVisitDto);
         void VisitRepeat(ScreeningVisitDto screeningVisitDto);
         void PatientStatus(int screeningEntryId);
-        void AutomaticStatusUpdate(int screeningTemplateId);
+        ScreeningVisitStatus? AutomaticStatusUpdate(int screeningTemplateId);
         bool IsPatientScreeningFailure(int screeningVisitId);
         List<ScreeningVisitTree> GetVisitTree(int screeningEntryId);
         void FindOpenVisitVarible(int projectDesignVisitId, int screeningVisitId, DateTime visitDate, int screeningEntryId);

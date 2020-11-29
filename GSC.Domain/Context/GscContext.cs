@@ -44,14 +44,12 @@ namespace GSC.Domain.Context
     {
 
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IOptions<EnvironmentSetting> _settings;
         
         public GscContext(DbContextOptions<GscContext> options,
             IJwtTokenAccesser jwtTokenAccesser,
             IOptions<EnvironmentSetting> settings, IAuditTracker auditTracker) : base(options, jwtTokenAccesser, auditTracker)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _settings = settings;
         }
 
 
@@ -71,7 +69,7 @@ namespace GSC.Domain.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (_settings != null && !_settings.Value.IsPremise)
+            if (ConfigurationMapping.EnvironmentSetting != null && !ConfigurationMapping.EnvironmentSetting.IsPremise)
                 optionsBuilder.UseSqlServer(@"data source=198.38.85.197;Initial Catalog=Cli_Development;user id=sa;password=Pushkar@7!;");
             base.OnConfiguring(optionsBuilder);
         }

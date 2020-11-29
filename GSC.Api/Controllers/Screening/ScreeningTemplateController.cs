@@ -59,10 +59,10 @@ namespace GSC.Api.Controllers.Screening
             _screeningVisitRepository = screeningVisitRepository;
         }
 
-      
-       
 
-      
+
+
+
 
         [HttpPost("Repeat/{screeningTemplateId}")]
         public IActionResult Repeat(int screeningTemplateId)
@@ -74,7 +74,7 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningTemplate.Id);
         }
 
-       
+
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
@@ -158,11 +158,11 @@ namespace GSC.Api.Controllers.Screening
 
             _uow.Save();
 
-            _screeningVisitRepository.AutomaticStatusUpdate(id);
+            var result = _screeningVisitRepository.AutomaticStatusUpdate(id);
 
             _uow.Save();
 
-            return Ok();
+            return Ok(result);
         }
 
         private void SubmittedTemplate(int id)
