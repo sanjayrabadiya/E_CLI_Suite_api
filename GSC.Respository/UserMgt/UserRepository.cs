@@ -8,6 +8,7 @@ using System.Text;
 using AutoMapper.Configuration;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
@@ -16,6 +17,8 @@ using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using GSC.Shared;
 using GSC.Shared.Configuration;
+using GSC.Shared.DocumentService;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -34,13 +37,26 @@ namespace GSC.Respository.UserMgt
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
         private readonly IGSCContext _context;
+        private readonly ICompanyRepository _companyRepository;
+        private readonly IAppSettingRepository _appSettingRepository;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IRolePermissionRepository _rolePermissionRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
         public UserRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUserPasswordRepository userPasswordRepository,
             IRefreshTokenRepository refreshTokenRepository,
             IOptions<JwtSettings> settings,
-            Microsoft.Extensions.Configuration.IConfiguration configuration, IAPICall centeralApi)
+            Microsoft.Extensions.Configuration.IConfiguration configuration,
+            IAPICall centeralApi,
+            ICompanyRepository companyRepository,
+             IAppSettingRepository appSettingRepository,
+             IUploadSettingRepository uploadSettingRepository,
+             IRoleRepository roleRepository,
+             IRolePermissionRepository rolePermissionRepository,
+             IUserRoleRepository userRoleRepository)
             : base(context)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
@@ -52,6 +68,12 @@ namespace GSC.Respository.UserMgt
             _configuration = configuration;
             _centeralApi = centeralApi;
             _context = context;
+            _companyRepository = companyRepository;
+            _uploadSettingRepository = uploadSettingRepository;
+            _appSettingRepository = appSettingRepository;
+            _roleRepository = roleRepository;
+            _rolePermissionRepository = rolePermissionRepository;
+            _userRoleRepository = userRoleRepository;
         }
 
         public List<UserDto> GetUsers(bool isDeleted)
@@ -75,12 +97,59 @@ namespace GSC.Respository.UserMgt
             }).OrderByDescending(x => x.Id).ToList();
         }
 
-        public User ValidateUser(string userName, string password)
+        public UserViewModel ValidateUser(string userName, string password)
         {
-            if (Convert.ToBoolean(_configuration["IsCloud"]))
-                return ValidateCenteral(userName, password);
-            else
-                return validateClient(userName, password);
+            var userViewModel = new UserViewModel();
+            var user = All.Where(x =>
+                (x.UserName == userName || x.Email == userName)
+                && x.DeletedDate == null).FirstOrDefault();
+
+            if (user == null)
+            {
+                userViewModel.ValidateMessage = "Invalid username";
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, null, userName);
+                return userViewModel;
+            }
+
+            if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
+            {
+                user.FailedLoginAttempts++;
+                var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
+                if (result != null && user.FailedLoginAttempts > result.MaxLoginAttempt)
+                {
+                    user.IsLocked = true;
+                    Update(user);
+                }
+
+                userViewModel.ValidateMessage = "Invalid Password and Login Attempt : " + user.FailedLoginAttempts;
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
+                return userViewModel;
+            }
+           
+            if (user.IsLocked)
+            {
+
+                userViewModel.ValidateMessage = "User is locked, Please contact your administrator";
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
+                return userViewModel;
+            }
+
+            if (user.ValidFrom.HasValue && user.ValidFrom.Value > DateTime.Now ||
+                user.ValidTo.HasValue && user.ValidTo.Value < DateTime.Now)
+            {
+              
+                userViewModel.ValidateMessage = "User not active, Please contact your administrator";
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
+                return userViewModel;
+            }
+
+            userViewModel.IsFirstTime = user.IsFirstTime;
+            userViewModel.UserId = user.Id;
+            userViewModel.Language = user.Language;
+            userViewModel.IsValid = true;
+
+            return userViewModel;
+
         }
 
 
@@ -114,33 +183,7 @@ namespace GSC.Respository.UserMgt
             return user;
         }
 
-        private User validateClient(string userName, string password)
-        {
 
-            var user = All.Where(x =>
-                (x.UserName == userName || x.Email == userName)
-                && x.DeletedDate == null).FirstOrDefault();
-
-            if (user == null)
-            {
-                _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
-                return null;
-            }
-            if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
-            {
-                user.FailedLoginAttempts++;
-                var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
-                if (result != null && user.FailedLoginAttempts > result.MaxLoginAttempt)
-                {
-                    user.IsLocked = true;
-                    Update(user);
-                }
-                _userLoginReportRepository.SaveLog("Invalid Password and Login Attempt : " + user.FailedLoginAttempts,
-                    user.Id, userName);
-                return null;
-            }
-            return user;
-        }
 
         public string DuplicateUserName(User objSave)
         {
@@ -149,9 +192,6 @@ namespace GSC.Respository.UserMgt
 
             if (All.Any(x => x.Id != objSave.Id && x.UserName == objSave.UserName && x.DeletedDate == null))
                 return "Duplicate User Name : " + objSave.UserName;
-
-            //if (All.Any(x => x.Id != objSave.Id && x.Email == objSave.Email && x.DeletedDate == null))
-            //    return "Duplicate EMail : " + objSave.Email;
 
             return "";
         }
@@ -170,6 +210,73 @@ namespace GSC.Respository.UserMgt
             {
                 Delete(user);
             }
+        }
+
+        public LoginResponseDto BuildUserAuthObject(UserViewModel userViewModel, int roleId)
+        {
+            var roleTokenId = new Guid().ToString();
+            var user = Find(userViewModel.UserId);
+  
+            var login = new LoginResponseDto
+            {
+                UserName = user.UserName,
+                Token = roleId == 0 ? null : BuildJwtToken(user, roleId),
+                RefreshToken = roleId == 0 ? null : GenerateRefreshToken(),
+                ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.Value.MinutesToExpiration),
+                IsFirstTime = userViewModel.IsFirstTime,
+                UserId = user.Id,
+                RoleTokenId = roleTokenId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                RoleId = roleId,
+                Language = userViewModel.Language,
+                LanguageShortName = userViewModel.Language.ToString()
+            };
+
+            var imageUrl = _uploadSettingRepository
+                .FindBy(x => x.CompanyId == user.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
+
+            var company = _companyRepository.Find((int)user.CompanyId);
+            if (company != null)
+            {
+                login.CompanyName = company.CompanyName;
+                login.CompanyLogo = imageUrl + company.Logo;
+                login.UserPicUrl = DocumentService.ConvertBase64Image(imageUrl + (user.ProfilePic ?? DocumentService.DefulatProfilePic));
+            }
+
+            login.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(user.CompanyId);
+            login.Rights = _rolePermissionRepository.GetByUserId(user.Id, roleId);
+            login.Roles = _userRoleRepository.GetRoleByUserName(user.UserName);
+            login.RoleName = login.Roles.FirstOrDefault(t => t.Id == roleId)?.Value;
+
+            user.FailedLoginAttempts = 0;
+            user.RoleTokenId = roleTokenId;
+            if (roleId > 0)
+            {
+                user.IsLogin = true;
+                user.RoleTokenId = null;
+                user.LastLoginDate = DateTime.Now;
+                login.LoginReportId =
+                    _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName);
+            }
+
+            
+            Update(user);
+
+            return login;
+        }
+
+        private string BuildJwtToken(User user, int roleId)
+        {
+            var userInfo = new UserInfo();
+            userInfo.UserId = user.Id;
+            userInfo.UserName = user.UserName;
+            userInfo.CompanyId = (int)user.CompanyId;
+            userInfo.RoleId = roleId;
+            userInfo.RoleName = _roleRepository.All.Where(x => x.Id == roleId).Select(r => r.RoleShortName).FirstOrDefault();
+            var claims = new List<Claim> { new Claim("gsc_user_token", userInfo.ToJsonString()) };
+            return GenerateAccessToken(claims);
         }
 
         public List<DropDownDto> GetUserName()

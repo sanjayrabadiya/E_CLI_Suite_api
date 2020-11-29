@@ -10,6 +10,7 @@ using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

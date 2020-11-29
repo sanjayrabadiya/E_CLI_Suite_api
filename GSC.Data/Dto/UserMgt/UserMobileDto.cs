@@ -1,4 +1,5 @@
 ﻿using GSC.Helper;
+using GSC.Shared.Generic;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

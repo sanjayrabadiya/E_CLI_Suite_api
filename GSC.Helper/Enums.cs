@@ -477,12 +477,7 @@ namespace GSC.Helper
         [Description("Supersede")] Supersede = 3,
     }
 
-    public enum PrefLanguage : short
-    {
-        [Description("English")] en = 1,
-        [Description("Germany")] ge = 2
-    }
-
+   
     public enum ScreeningVisitStatus : int
     {
         [Description("Not Started")] NotStarted = 1,

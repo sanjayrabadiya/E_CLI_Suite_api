@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GSC.Audit", "GSC.Audit\GSC.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GSC.Shared", "GSC.Shared\GSC.Shared.csproj", "{81B7317B-CBF5-495A-BE76-1CDACC59D21D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSC.User.Centre", "GSC.User.Centre\GSC.User.Centre.csproj", "{2FA41E1A-FDB1-4D30-BB4F-17C855C80ABC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{81B7317B-CBF5-495A-BE76-1CDACC59D21D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81B7317B-CBF5-495A-BE76-1CDACC59D21D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81B7317B-CBF5-495A-BE76-1CDACC59D21D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FA41E1A-FDB1-4D30-BB4F-17C855C80ABC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FA41E1A-FDB1-4D30-BB4F-17C855C80ABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FA41E1A-FDB1-4D30-BB4F-17C855C80ABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FA41E1A-FDB1-4D30-BB4F-17C855C80ABC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

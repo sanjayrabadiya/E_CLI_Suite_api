@@ -9,7 +9,7 @@ namespace GSC.Respository.UserMgt
 {
     public interface IUserRepository : IGenericRepository<User>
     {
-        User ValidateUser(string userName, string password);
+        UserViewModel ValidateUser(string userName, string password);
         string DuplicateUserName(User objSave);
         void UpdateUserStatus(int id);
         List<DropDownDto> GetUserName();
@@ -19,5 +19,6 @@ namespace GSC.Respository.UserMgt
         string GenerateRefreshToken();
         List<UserDto> GetUsers(bool isDeleted);
         List<DropDownDto> GetUserNameDropdown();
+        LoginResponseDto BuildUserAuthObject(UserViewModel userViewModel, int roleId);
     }
 }

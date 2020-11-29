@@ -5,6 +5,7 @@ using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Helper;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 
 namespace GSC.Data.Entities.UserMgt
 {

@@ -17,4 +17,11 @@ namespace GSC.Shared.Generic
         [Description("Deleted")] Deleted = 3,
         [Description("Activated")] Activated = 4
     }
+
+    public enum PrefLanguage : short
+    {
+        [Description("English")] en = 1,
+        [Description("Germany")] ge = 2
+    }
+
 }

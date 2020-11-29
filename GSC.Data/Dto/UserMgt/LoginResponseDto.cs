@@ -2,6 +2,7 @@ using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
+using GSC.Shared.Generic;
 using System;
 using System.Collections.Generic;
 

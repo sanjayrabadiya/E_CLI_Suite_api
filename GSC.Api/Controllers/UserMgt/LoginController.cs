@@ -25,6 +25,7 @@ using Microsoft.Extensions.Options;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Configuration;
+using GSC.Shared.Generic;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -84,30 +85,13 @@ namespace GSC.Api.Controllers.UserMgt
                 return BadRequest(ModelState);
 
             var user = _userRepository.ValidateUser(dto.UserName, dto.Password);
-            if (user == null)
+            if (!user.IsValid)
             {
-                ModelState.AddModelError("UserName", "Invalid username or password");
+                ModelState.AddModelError("UserName", user.ValidateMessage);
                 return BadRequest(ModelState);
             }
 
-            if (user.IsLocked)
-            {
-                ModelState.AddModelError("UserName", "User is locked, Please contact your administrator");
-                _userLoginReportRepository.SaveLog("User is locked, Please contact your administrator", user.Id,
-                    dto.UserName);
-                return BadRequest(ModelState);
-            }
-
-            if (user.ValidFrom.HasValue && user.ValidFrom.Value > DateTime.Now ||
-                user.ValidTo.HasValue && user.ValidTo.Value < DateTime.Now)
-            {
-                ModelState.AddModelError("UserName", "User not active, Please contact your administrator");
-                _userLoginReportRepository.SaveLog("User not active, Please contact your administrator", user.Id,
-                    dto.UserName);
-                return BadRequest(ModelState);
-            }
-
-            var roles = _userRoleRepository.GetRoleByUserName(user.UserName);
+            var roles = _userRoleRepository.GetRoleByUserName(dto.UserName);
 
             if (roles.Count <= 0)
             {
@@ -124,22 +108,18 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 dto.Roles = roles;
                 dto.AskToSelectRole = true;
-                //dto
                 dto.IsFirstTime = user.IsFirstTime;
                 return Ok(dto);
             }
 
-            //var loginUser = await CheckifAlreadyLogin(user);
-            //if (!dto.IsAnotherDevice && loginUser.IsLogin)
-            //{
-            //    var errorResult = new ObjectResult(dto.UserName)
-            //    {
-            //        StatusCode = 409
-            //    };
-            //    return errorResult;
-            //}
 
-            var validatedUser = BuildUserAuthObject(user, dto.RoleId);
+            var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
+            if (!string.IsNullOrEmpty(validatedUser.Token))
+            {
+                _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);
+            }
+
+            _uow.Save();
 
             return Ok(validatedUser);
         }
@@ -153,31 +133,44 @@ namespace GSC.Api.Controllers.UserMgt
                 return BadRequest(ModelState);
 
             var user = _userRepository.ValidateUser(dto.UserName, dto.Password);
-            if (user == null)
+            if (!user.IsValid)
             {
-                ModelState.AddModelError("UserName", "Invalid username or password");
+                ModelState.AddModelError("UserName", user.ValidateMessage);
                 return BadRequest(ModelState);
             }
 
-            if (user.IsLocked)
+            var roles = _userRoleRepository.GetRoleByUserName(dto.UserName);
+
+            if (roles.Count <= 0)
             {
-                ModelState.AddModelError("UserName", "User is locked, Please contact your administrator");
-                _userLoginReportRepository.SaveLog("User is locked, Please contact your administrator", user.Id,
-                    dto.UserName);
+                ModelState.AddModelError("UserName",
+                    "You have not assigned any role, Please contact your administrator");
                 return BadRequest(ModelState);
             }
 
-            if (user.ValidFrom.HasValue && user.ValidFrom.Value > DateTime.Now ||
-                user.ValidTo.HasValue && user.ValidTo.Value < DateTime.Now)
+            if (roles.Count == 1)
+                dto.RoleId = roles.First().Id;
+
+            dto.AskToSelectRole = false;
+            if (dto.RoleId == 0)
             {
-                ModelState.AddModelError("UserName", "User not active, Please contact your administrator");
-                _userLoginReportRepository.SaveLog("User not active, Please contact your administrator", user.Id,
-                    dto.UserName);
-                return BadRequest(ModelState);
+                dto.Roles = roles;
+                dto.AskToSelectRole = true;
+                dto.IsFirstTime = user.IsFirstTime;
+                return Ok(dto);
             }
 
-            var validatedUser = BuildUserAuthObjectMobile(user);
+
+            var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
+            if (!string.IsNullOrEmpty(validatedUser.Token))
+            {
+                _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);
+            }
+
+            _uow.Save();
+
             return Ok(validatedUser);
+
         }
 
         [HttpPost]
@@ -200,7 +193,12 @@ namespace GSC.Api.Controllers.UserMgt
                 return BadRequest(ModelState);
             }
 
-            var validatedUser = BuildUserAuthObject(user, loginDto.RoleId);
+            var userViewModel = new UserViewModel();
+            userViewModel.IsFirstTime = user.IsFirstTime;
+            userViewModel.UserId = user.Id;
+            userViewModel.Language = user.Language;
+            userViewModel.IsValid = true;
+            var validatedUser = _userRepository.BuildUserAuthObject(userViewModel, loginDto.RoleId);
 
             return Ok(validatedUser);
         }
@@ -213,127 +211,6 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(_userRoleRepository.GetRoleByUserName(userName));
         }
 
-        private LogInResponseMobileDto BuildUserAuthObjectMobile(User authUser)
-        {
-            if (authUser.Language == null)
-                authUser.Language = PrefLanguage.en;
-            var login = new LogInResponseMobileDto
-            {
-                UserName = authUser.UserName,
-                Token = BuildJwtToken(authUser, 0),
-                RefreshToken = _userRepository.GenerateRefreshToken(),
-                IsFirstTime = authUser.IsFirstTime,
-                UserId = authUser.Id,
-                FirstName = authUser.FirstName,
-                LastName = authUser.LastName,
-                Email = authUser.Email,
-                LanguageShortName = authUser.Language.ToString()
-            };
-
-
-            var imageUrl = _uploadSettingRepository
-                .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
-
-            var company = _companyRepository.Find((int)authUser.CompanyId);
-            if (company != null)
-            {
-                login.CompanyName = company.CompanyName;
-                login.CompanyLogo = imageUrl + company.Logo;
-                login.UserPicUrl = imageUrl +
-                                   (authUser.ProfilePic ?? DocumentService.DefulatProfilePic);
-            }
-
-            authUser.FailedLoginAttempts = 0;
-            authUser.IsLogin = true;
-            authUser.RoleTokenId = null;
-            authUser.LastLoginDate = DateTime.Now;
-            _userLoginReportRepository.SaveLog("Successfully Login", authUser.Id, authUser.UserName);
-
-            if (!string.IsNullOrEmpty(login.Token))
-            {
-                _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
-                _userRepository.Update(authUser);
-            }
-
-            _uow.Save();
-            return login;
-        }
-
-        private LoginResponseDto BuildUserAuthObject(User authUser, int roleId)
-        {
-            var roleTokenId = new Guid().ToString();
-            if (authUser.Language == null)
-                authUser.Language = PrefLanguage.en;
-            var login = new LoginResponseDto
-            {
-                UserName = authUser.UserName,
-                Token = roleId == 0 ? null : BuildJwtToken(authUser, roleId),
-                RefreshToken = roleId == 0 ? null : _userRepository.GenerateRefreshToken(),
-                ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.Value.MinutesToExpiration),
-                IsFirstTime = authUser.IsFirstTime,
-                UserId = authUser.Id,
-                RoleTokenId = roleTokenId,
-                FirstName = authUser.FirstName,
-                LastName = authUser.LastName,
-                Email = authUser.Email,
-                RoleId = roleId,
-                Language = authUser.Language,
-                LanguageShortName = authUser.Language.ToString()
-            };
-
-            var imageUrl = _uploadSettingRepository
-                .FindBy(x => x.CompanyId == authUser.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
-
-            var company = _companyRepository.Find((int)authUser.CompanyId);
-            if (company != null)
-            {
-                login.CompanyName = company.CompanyName;
-                login.CompanyLogo = imageUrl + company.Logo;
-                //login.UserPicUrl = imageUrl +
-                //                   (authUser.ProfilePic ?? DocumentService.DefulatProfilePic);
-                login.UserPicUrl = DocumentService.ConvertBase64Image(imageUrl + (authUser.ProfilePic ?? DocumentService.DefulatProfilePic));
-            }
-
-            login.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(authUser.CompanyId);
-            login.Rights = _rolePermissionRepository.GetByUserId(authUser.Id, roleId);
-            login.Roles = _userRoleRepository.GetRoleByUserName(authUser.UserName);
-            login.RoleName = login.Roles.FirstOrDefault(t => t.Id == roleId)?.Value;
-
-            authUser.FailedLoginAttempts = 0;
-            authUser.RoleTokenId = roleTokenId;
-            if (roleId > 0)
-            {
-                authUser.IsLogin = true;
-                authUser.RoleTokenId = null;
-                authUser.LastLoginDate = DateTime.Now;
-                login.LoginReportId =
-                    _userLoginReportRepository.SaveLog("Successfully Login", authUser.Id, authUser.UserName);
-            }
-
-            if (!string.IsNullOrEmpty(login.Token))
-            {
-                _userRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
-                _userRepository.Update(authUser);
-                var refreshtokan = _mapper.Map<RefreshTokanDto>(login);
-                if (Convert.ToBoolean(_configuration["IsCloud"]))
-                    _centeralApi.Post(refreshtokan, $"{_configuration["EndPointURL"]}/Login/UpdateRefreshToken");
-                //_centeralRepository.UpdateRefreshToken(login.UserId, login.RefreshToken);
-            }
-            _uow.Save();
-            return login;
-        }
-
-        private string BuildJwtToken(User user, int roleId)
-        {
-            var userInfo = new UserInfo();
-            userInfo.UserId = user.Id;
-            userInfo.UserName = user.UserName;
-            userInfo.CompanyId = (int)user.CompanyId;
-            userInfo.RoleId = roleId;
-            userInfo.RoleName = _roleRepository.All.Where(x => x.Id == roleId).Select(r => r.RoleShortName).FirstOrDefault();
-            var claims = new List<Claim> { new Claim("gsc_user_token", userInfo.ToJsonString()) };
-            return _userRepository.GenerateAccessToken(claims);
-        }
 
         [HttpGet]
         [Route("logout/{userId}/{loginReportId}")]
