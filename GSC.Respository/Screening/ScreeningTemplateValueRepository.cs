@@ -171,7 +171,9 @@ namespace GSC.Respository.Screening
         {
             var validateMsg = "";
 
-            if (All.Any(x => x.ScreeningTemplateId == screeningTemplateId && x.QueryStatus != null && x.QueryStatus != QueryStatus.Closed))
+            if (All.Any(x => x.ScreeningTemplateId == screeningTemplateId && x.DeletedDate == null &&
+            x.ProjectDesignVariable.DeletedDate == null
+            && x.QueryStatus != null && x.QueryStatus != QueryStatus.Closed))
                 validateMsg = "Please close all queries! \n";
 
             return validateMsg;
