@@ -1,80 +1,51 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.UserMgt;
-using GSC.Data.Entities.UserMgt;
-using GSC.Helper;
-using GSC.Shared.DocumentService;
-using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
 using GSC.Shared;
+using GSC.Shared.Configuration;
+using GSC.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
-using GSC.Shared.Configuration;
-using GSC.Shared.Generic;
 
 namespace GSC.Api.Controllers.UserMgt
 {
     [Route("api/[controller]")]
     public class LoginController : BaseController
     {
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IOptions<JwtSettings> _settings;
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IHubContext<Notification> _notificationHubContext;
-        private readonly IRoleRepository _roleRepository;
-        private readonly IAppSettingRepository _appSettingRepository;
-        private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
-
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
-            IOptions<JwtSettings> settings,
-            IRoleRepository roleRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUnitOfWork uow,
-            ICompanyRepository companyRepository,
-            IUploadSettingRepository uploadSettingRepositor,
             IHubContext<Notification> notificationHubContext,
-            IAppSettingRepository appSettingRepository,
-            IRolePermissionRepository rolePermissionRepository,
-            IConfiguration configuration, IAPICall centerlApi, IMapper mapper)
+            IConfiguration configuration, IAPICall centerlApi,
+            IOptions<EnvironmentSetting> environmentSetting)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
-            _settings = settings;
             _uow = uow;
             _userLoginReportRepository = userLoginReportRepository;
-            _companyRepository = companyRepository;
-            _uploadSettingRepository = uploadSettingRepositor;
             _notificationHubContext = notificationHubContext;
-            _appSettingRepository = appSettingRepository;
-            _roleRepository = roleRepository;
-            _rolePermissionRepository = rolePermissionRepository;
             _configuration = configuration;
             _centeralApi = centerlApi;
-            _mapper = mapper;
+            _environmentSetting = environmentSetting;
         }
 
         [HttpPost]
@@ -84,7 +55,11 @@ namespace GSC.Api.Controllers.UserMgt
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+            var user = new UserViewModel();
+
+            if (_environmentSetting.Value.IsPremise)
+                user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+
             if (!user.IsValid)
             {
                 ModelState.AddModelError("UserName", user.ValidateMessage);
@@ -178,7 +153,7 @@ namespace GSC.Api.Controllers.UserMgt
         [AllowAnonymous]
         public IActionResult ValidateLoginWithRole([FromBody] LoginRoleDto loginDto)
         {
-            User user;
+            Data.Entities.UserMgt.User user;
             if (loginDto.UserId > 0)
                 user = _userRepository.Find(loginDto.UserId);
             else
@@ -265,7 +240,7 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok();
         }
 
-        private async Task<User> CheckifAlreadyLogin(User user)
+        private async Task<Data.Entities.UserMgt.User> CheckifAlreadyLogin(Data.Entities.UserMgt.User user)
         {
             return await _userRepository.FindAsync(user.Id);
         }

@@ -5,9 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using AutoMapper.Configuration;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.UserMgt;
@@ -20,6 +18,7 @@ using GSC.Shared.Configuration;
 using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using GSC.Shared.Security;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -119,6 +118,7 @@ namespace GSC.Respository.UserMgt
                 {
                     user.IsLocked = true;
                     Update(user);
+                    _context.Save();
                 }
 
                 userViewModel.ValidateMessage = "Invalid Password and Login Attempt : " + user.FailedLoginAttempts;

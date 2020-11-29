@@ -84,7 +84,7 @@ namespace GSC.Api.Controllers.UserMgt
                 if (user != null)
                 {
                     user.IsFirstTime = false;
-                    var userupdate = _mapper.Map<User>(user);
+                    var userupdate = _mapper.Map<Data.Entities.UserMgt.User>(user);
 
                     _userRepository.Update(userupdate);
                 }
@@ -210,7 +210,7 @@ namespace GSC.Api.Controllers.UserMgt
                 return BadRequest(ModelState);
             }
 
-            var user = _mapper.Map<User>(userExists);
+            var user = _mapper.Map<Data.Entities.UserMgt.User>(userExists);
             user.IsFirstTime = true;
 
             _userRepository.Update(user);

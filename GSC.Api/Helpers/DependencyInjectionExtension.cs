@@ -38,6 +38,7 @@ using GSC.Shared.Extension;
 using GSC.Shared.Email;
 using GSC.Shared.JWTAuth;
 
+
 namespace GSC.Api.Helpers
 {
     public static class DependencyInjectionExtension
@@ -270,6 +271,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectModuleRightsRepository, ProjectModuleRightsRepository>();
             //services.AddScoped<IAPICall, APICall>();
             services.AddHttpClient<IAPICall, APICall>();
+            //services.AddHttpClient<IUserService, UserService>();
         }
     }
 }

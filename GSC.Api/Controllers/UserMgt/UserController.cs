@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using GSC.Shared;
 using GSC.Shared.Security;
 using GSC.Shared.Generic;
+using GSC.Data.Entities;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -121,7 +122,7 @@ namespace GSC.Api.Controllers.UserMgt
                 userDto.ProfilePic = new ImageService().ImageSave(userDto.FileModel,
                     _uploadSettingRepository.GetImagePath(), FolderType.Employee);
 
-            var user = _mapper.Map<User>(userDto);
+            var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.IsLocked = false;
             user.IsFirstTime = true;
             bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
@@ -166,7 +167,7 @@ namespace GSC.Api.Controllers.UserMgt
                 userDto.ProfilePic = new ImageService().ImageSave(userDto.FileModel,
                     _uploadSettingRepository.GetImagePath(), FolderType.Employee);
 
-            var user = _mapper.Map<User>(userDto);
+            var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.IsFirstTime = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsFirstTime ?? false;
             user.IsLocked = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsLocked ?? false;
 
@@ -195,7 +196,7 @@ namespace GSC.Api.Controllers.UserMgt
         }
 
 
-        private void UpdateRole(User user)
+        private void UpdateRole(Data.Entities.UserMgt.User user)
         {
             var roleDelete = _userRoleRepository.FindBy(x => x.UserId == user.Id)
                 .ToList();

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using GSC.Shared.Security;
+using System.Threading.Tasks;
 
 namespace GSC.User.Centre
 {
     public interface IUserService
     {
-        UserViewModel ValidateClient(string userName, string password);
+        Task<UserViewModel> ValidateClient(string userName, string password, string clientUrl);
     }
 }

@@ -98,8 +98,8 @@ namespace GSC.Api.Helpers
             CreateMap<VolunteerFood, VolunteerFoodDto>().ReverseMap();
             CreateMap<VolunteerHistory, VolunteerHistoryDto>().ReverseMap();
             CreateMap<VolunteerLanguage, VolunteerLanguageDto>().ReverseMap();
-            CreateMap<User, UserDto>().ReverseMap();
-            CreateMap<User, UserMobileDto>().ReverseMap();
+            CreateMap<Data.Entities.UserMgt.User, UserDto>().ReverseMap();
+            CreateMap<Data.Entities.UserMgt.User, UserMobileDto>().ReverseMap();
             CreateMap<Client, ClientDto>().ReverseMap();
             CreateMap<ClientAddress, ClientAddressDto>().ReverseMap();
             CreateMap<ClientContact, ClientContactDto>().ReverseMap();
@@ -277,7 +277,7 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentSectionReference, EconsentSectionReferenceDto>().ReverseMap();
             CreateMap<EconsentReviewDetailsSections, EconsentReviewDetailsSectionsDto>().ReverseMap();
             CreateMap<EconsentChat, EconsentChatDto>().ReverseMap();
-            CreateMap<User, EConsentUserChatDto>().ReverseMap();
+            CreateMap<Data.Entities.UserMgt.User, EConsentUserChatDto>().ReverseMap();
             CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
             CreateMap<Site, SiteDto>().ReverseMap();
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
