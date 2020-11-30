@@ -37,7 +37,7 @@ using GSC.Shared;
 using GSC.Shared.Extension;
 using GSC.Shared.Email;
 using GSC.Shared.JWTAuth;
-
+using GSC.Shared.Caching;
 
 namespace GSC.Api.Helpers
 {
@@ -273,6 +273,9 @@ namespace GSC.Api.Helpers
             //services.AddScoped<IAPICall, APICall>();
             services.AddHttpClient<IAPICall, APICall>();
             services.AddHttpClient<ICentreUserService, CentreUserService>();
+            services.AddMemoryCache();
+            services.AddSingleton(typeof(IGSCCaching), typeof(GSCCaching));
+
         }
     }
 }
