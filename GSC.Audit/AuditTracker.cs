@@ -34,7 +34,11 @@ namespace GSC.Audit
             {
                 var userId = _jwtTokenAccesser.UserId;
                 var roleId = _jwtTokenAccesser.RoleId;
-                var createdDate = Convert.ToDateTime(_jwtTokenAccesser.GetHeader("clientDateTime"));
+                var clientDate = _jwtTokenAccesser.GetHeader("clientDateTime");
+                DateTime createdDate;
+                var isSucess = DateTime.TryParse(clientDate, out createdDate);
+                if (!isSucess) createdDate = System.DateTime.Now;
+
                 var changeTracker = entities.Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted).ToList();
 
 

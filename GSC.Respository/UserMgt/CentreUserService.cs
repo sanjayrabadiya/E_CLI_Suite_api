@@ -28,10 +28,10 @@ namespace GSC.Respository.UserMgt
         public async Task<UserViewModel> ValidateClient(LoginDto loginDto, string clientUrl)
         {
             var result = await HttpService.Post<UserViewModel>(_httpClient, clientUrl + "Login/ValidateUser", loginDto);
-            if (result != null)
+            if (result != null && result.IsValid)
             {
-                _gSCContextExtension.ConfigureServices("data source=198.38.85.197;Initial Catalog=Cli_Development;user id=sa;password=Pushkar@7!;");
-                //if (result != null && user.FailedLoginAttempts > result.MaxLoginAttempt)
+                _gSCContextExtension.ConfigureServices(result.ConnectionString);
+                //if (result != null && result.FailedLoginAttempts > result.MaxLoginAttempt)
                 //{
                 //    user.IsLocked = true;
                 //    Update(user);
