@@ -269,6 +269,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectSubSecArtificateDocumentApproverRepository, ProjectSubSecArtificateDocumentApproverRepository>();
             services.AddScoped<IProjectSubSecArtificateDocumentCommentRepository, ProjectSubSecArtificateDocumentCommentRepository>();
             services.AddScoped<IProjectModuleRightsRepository, ProjectModuleRightsRepository>();
+            services.AddScoped<IProjectDesignTemplateNoteRepository, ProjectDesignTemplateNoteRepository>();
             //services.AddScoped<IAPICall, APICall>();
             services.AddHttpClient<IAPICall, APICall>();
             services.AddHttpClient<ICentreUserService, CentreUserService>();

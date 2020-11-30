@@ -11,5 +11,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetVariableTemplateByDomainId(int domainId);
         VariableTemplate GetTemplate(int id);
         string Duplicate(VariableTemplate objSave);
+        List<Variable> GetVariableNotAddedinTemplate(int variableTemplateId);
     }
 }

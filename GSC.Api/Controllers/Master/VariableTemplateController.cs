@@ -205,5 +205,12 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_variableTemplateRepository.GetVariableTemplateByDomainId(domainId));
         }
+
+        [HttpGet]
+        [Route("GetVariableNotAddedinTemplate/{variableTemplateId}")]
+        public IActionResult GetVariableNotAddedinTemplate(int variableTemplateId)
+        {
+            return Ok(_variableTemplateRepository.GetVariableNotAddedinTemplate(variableTemplateId));
+        }
     }
 }

@@ -21,5 +21,7 @@ namespace GSC.Data.Entities.Project.Design
         public Domain Domain { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public VariableTemplate VariableTemplate { get; set; }
+
+        public IList<ProjectDesignTemplateNote> ProjectDesignTemplateNote { get; set; }
     }
 }

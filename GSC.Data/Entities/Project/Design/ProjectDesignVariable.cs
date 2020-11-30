@@ -47,5 +47,6 @@ namespace GSC.Data.Entities.Project.Design
         public bool IsNa { get; set; }
         public DateValidateType? DateValidate { get; set; }
         public Domain Domain { get; set; }
+        public string Note { get; set; }
     }
 }

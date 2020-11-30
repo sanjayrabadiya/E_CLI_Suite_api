@@ -82,5 +82,31 @@ namespace GSC.Respository.Master
 
             return "";
         }
+
+        public List<Variable> GetVariableNotAddedinTemplate(int variableTemplateId)
+        {
+            //var variables = All.Where(t => t.DeletedDate == null && t.Id == variableTemplateId)
+            //    .Include(x => x.VariableTemplateDetails)
+            //    .ThenInclude(x => x.Variable).ToList();
+
+
+
+            //template.VariableTemplateDetails.ForEach(detail =>
+            //{
+            //    detail.Variable = _context.Variable.Where(t => t.Id == detail.VariableId)
+            //        .Include(variable => variable.Values)
+            //        .Include(r => r.Remarks)
+            //        .Include(t => t.Unit)
+            //        .FirstOrDefault();
+
+            //    detail.Variable.Values = detail.Variable.Values.Where(t => t.DeletedDate == null).ToList();
+            //    detail.Variable.Remarks = detail.Variable.Remarks.Where(t => t.DeletedDate == null).ToList();
+            //    detail.VariableCategoryName = detail.Variable.VariableCategoryId == null
+            //        ? ""
+            //        : _context.VariableCategory.Where(t => t.Id == detail.Variable.VariableCategoryId).FirstOrDefault()?.CategoryName;
+            //});
+
+            return new List<Variable>();
+        }
     }
 }

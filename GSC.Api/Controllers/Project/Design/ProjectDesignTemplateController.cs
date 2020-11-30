@@ -29,6 +29,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
+        private readonly IProjectDesignTemplateNoteRepository _projectDesignTemplateNoteRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
 
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
@@ -38,6 +39,7 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectScheduleTemplateRepository projectScheduleTemplateRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
+            IProjectDesignTemplateNoteRepository projectDesignTemplateNoteRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IUnitOfWork uow, IMapper mapper)
         {
@@ -50,6 +52,7 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
+            _projectDesignTemplateNoteRepository = projectDesignTemplateNoteRepository;
             _domainRepository = domainRepository;
         }
 
@@ -109,8 +112,9 @@ namespace GSC.Api.Controllers.Project.Design
                 projectDesignTemplate.Id = 0;
                 projectDesignTemplate.ProjectDesignVisitId = projectDesignVisitId;
                 projectDesignTemplate.VariableTemplateId = variableTemplateId;
-                projectDesignTemplate.DesignOrder = ++designOrder;
+                projectDesignTemplate.DesignOrder = ++designOrder;                
                 projectDesignTemplate.Variables = new List<ProjectDesignVariable>();
+                projectDesignTemplate.ProjectDesignTemplateNote = new List<ProjectDesignTemplateNote>();
 
                 var variableOrder = 0;
                 foreach (var variableDetail in variableTemplate.VariableTemplateDetails)
@@ -119,6 +123,7 @@ namespace GSC.Api.Controllers.Project.Design
                     projectDesignVariable.Id = 0;
                     projectDesignVariable.VariableId = variableDetail.VariableId;
                     projectDesignVariable.DesignOrder = ++variableOrder;
+                    projectDesignVariable.Note = variableDetail.Note;
                     _projectDesignVariableRepository.Add(projectDesignVariable);
                     projectDesignTemplate.Variables.Add(projectDesignVariable);
 
@@ -144,6 +149,15 @@ namespace GSC.Api.Controllers.Project.Design
                         projectDesignVariable.Remarks.Add(projectDesignVariableRemark);
                     }
 
+                }
+
+                //Added for template Notes
+                foreach (var note in variableTemplate.Notes)
+                {
+                    var projectDesignTemplateNote = _mapper.Map<ProjectDesignTemplateNote>(note);
+                    projectDesignTemplateNote.Id = 0;
+                    _projectDesignTemplateNoteRepository.Add(projectDesignTemplateNote);
+                    projectDesignTemplate.ProjectDesignTemplateNote.Add(projectDesignTemplateNote);
                 }
 
                 _projectDesignTemplateRepository.Add(projectDesignTemplate);
@@ -189,6 +203,12 @@ namespace GSC.Api.Controllers.Project.Design
                         r.Id = 0;
                         _projectDesignVariableValueRepository.Add(r);
                     });
+                }
+
+                foreach (var note in projectDesignTemplate.ProjectDesignTemplateNote)
+                {
+                    note.Id = 0;
+                    _projectDesignTemplateNoteRepository.Add(note);
                 }
 
                 projectDesignTemplate.ProjectDesignVisit = null;

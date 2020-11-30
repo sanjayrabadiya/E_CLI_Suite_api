@@ -33,6 +33,7 @@ namespace GSC.Respository.Project.Design
         {
             var template = _context.ProjectDesignTemplate.
                 Where(t => t.Id == id)
+                .Include(d => d.ProjectDesignTemplateNote)
                 .Include(d => d.Variables)
                 .ThenInclude(d => d.Values)
                 .AsNoTracking().FirstOrDefault();

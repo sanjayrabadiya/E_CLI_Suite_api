@@ -184,6 +184,9 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.ProjectDesignVariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
               .ForMember(x => x.VisitStatus, x => x.MapFrom(a => a.VisitStatusId.GetDescription()))
               .ReverseMap();
+
+            CreateMap<ProjectDesignTemplateNote, ProjectDesignTemplateNoteGridDto>()
+               .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName)).ReverseMap();
         }
     }
 }

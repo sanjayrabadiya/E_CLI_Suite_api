@@ -151,6 +151,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectDesignVariable> ProjectDesignVariable { get; set; }
         public DbSet<ProjectDesignVariableValue> ProjectDesignVariableValue { get; set; }
         public DbSet<ProjectDesignVariableRemarks> ProjectDesignVariableRemarks { get; set; }
+        public DbSet<ProjectDesignTemplateNote> ProjectDesignTemplateNote { get; set; }
         public DbSet<ProjectRight> ProjectRight { get; set; }
         public DbSet<ProjectDocument> ProjectDocument { get; set; }
         public DbSet<ProjectDocumentReview> ProjectDocumentReview { get; set; }

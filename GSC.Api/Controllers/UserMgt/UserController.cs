@@ -283,7 +283,8 @@ namespace GSC.Api.Controllers.UserMgt
             user.IsLogin = false;
             _userRepository.Update(user);
             _uow.Save();
-
+            _userPasswordRepository.CreatePassword(loginDto.NewPassword, user.Id);
+            _emailSenderRespository.SendRegisterEMail(user.Email, loginDto.NewPassword, user.UserName);
             return Ok();
         }
 

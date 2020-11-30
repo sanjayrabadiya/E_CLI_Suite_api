@@ -150,7 +150,8 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectDesignVariableRemarks, ProjectDesignVariableRemarksDto>().ReverseMap();
             CreateMap<ProjectDesignVariableValue, ProjectDesignVariableValueDropDown>().ReverseMap();
             CreateMap<ProjectDesignVariableRemarks, ProjectDesignVariableRemarksDropDown>().ReverseMap();
-
+            CreateMap<ProjectDesignTemplateNote, ProjectDesignTemplateNoteDto>().ReverseMap();
+            CreateMap<VariableTemplateNote, ProjectDesignTemplateNote>().ReverseMap();
             CreateMap<VariableTemplate, ProjectDesignTemplate>().ReverseMap();
             CreateMap<Variable, ProjectDesignVariable>().ReverseMap();
             CreateMap<VariableValue, ProjectDesignVariableValue>().ReverseMap();
