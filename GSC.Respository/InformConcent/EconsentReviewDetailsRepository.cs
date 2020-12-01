@@ -200,7 +200,7 @@ namespace GSC.Respository.InformConcent
         public List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId)
         {
 
-            var Econsentdocument = _econsentSetupRepository.FindByInclude(x => x.Id == documentId && x.DeletedBy == null && x.DeletedDate == null).ToList().FirstOrDefault();
+            var Econsentdocument = _econsentSetupRepository.FindByInclude(x => x.Id == documentId).ToList().FirstOrDefault();
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
@@ -288,7 +288,15 @@ namespace GSC.Respository.InformConcent
                     jsonobj.sections[0].blocks = blocks;
                 }
             }
-
+            List<Section> newsections = new List<Section>();
+            for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
+            {
+                if (jsonobj.sections[i].blocks.Count > 0)
+                {
+                    newsections.Add(jsonobj.sections[i]);
+                }
+            }
+            jsonobj.sections = newsections;
             string jsonnew = JsonConvert.SerializeObject(jsonobj,Formatting.None, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore

@@ -22,6 +22,9 @@ using GSC.Respository.InformConcent;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -77,21 +80,21 @@ namespace GSC.Api.Controllers.InformConcent
 
 
         [HttpGet]
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        [HttpGet("{projectid}/{isDeleted:bool?}")]
+        public IActionResult Get(int projectid,bool isDeleted)
         {
-            var econsentSetups = _econsentSetupRepository.FindByInclude(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderByDescending(x => x.Id).ToList();
+            var econsentSetups = _econsentSetupRepository.GetEconsentSetupList(projectid,isDeleted);
+                //_econsentSetupRepository.FindByInclude(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderByDescending(x => x.Id).ToList();
 
-            var econsentSetupsdto = _mapper.Map<IEnumerable<EconsentSetupDto>>(econsentSetups).ToList();
-            foreach (var item in econsentSetupsdto)
+            foreach (var item in econsentSetups)
             {
                 item.LanguageName = _languageRepository.Find(item.LanguageId).LanguageName;
                 item.ProjectName = _projectRepository.Find(item.ProjectId).ProjectCode;
-                item.DocumentTypeName = _documentTypeRepository.Find(item.DocumentTypeId).TypeName;
+                item.DocumentTypeName = "";//_documentTypeRepository.Find(item.DocumentTypeId).TypeName;
                 //item.PatientStatusName = _patientStatusRepository.Find(item.PatientStatusId).StatusName;
                 item.IsDeleted = isDeleted;
             }
-            return Ok(econsentSetupsdto);
+            return Ok(econsentSetups);
         }
 
 
@@ -154,6 +157,54 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok();
         }
 
+        string validateDocument(string path)
+        {
+            bool isheaderpresent = false;
+            bool isheaderblank = false;
+            Stream stream = System.IO.File.OpenRead(path);
+            string sfdtText = "";
+            EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+            wdocument.Dispose();
+            string json = sfdtText;
+            stream.Position = 0;
+            stream.Close();
+            JObject jsonstr = JObject.Parse(json);
+            Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
+            foreach (var e1 in jsonobj.sections)
+            {
+                foreach (var e2 in e1.blocks)
+                {
+                    string headerstring = "";
+                    if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
+                    {
+                        foreach (var e3 in e2.inlines)
+                        {
+                            if (e3.text != null)
+                            {
+                                headerstring = headerstring + e3.text;
+                            }
+                        }
+                        isheaderpresent = true;
+                        if (headerstring == "")
+                        {
+                            isheaderblank = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (isheaderpresent == false)
+            {
+                return "Please apply 'Heading 1' style in all headings in the document for proper sections.";
+            }
+            if (isheaderblank == true)
+            {
+                return "Please check all occurances of 'Heading 1' format in the document, content in 'Heading 1' format must be not empty";
+            }
+            return "";
+        }
+
 
         [HttpPost]
         public IActionResult Post([FromBody] EconsentSetupDto econsentSetupDto)
@@ -173,7 +224,19 @@ namespace GSC.Api.Controllers.InformConcent
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
             {
                 econsentSetupDto.DocumentPath = DocumentService.SaveEconsentFile(obj.FileModel, obj.Path, obj.FolderType, obj.RootName);
+                string fullpath = Path.Combine(obj.Path, econsentSetupDto.DocumentPath);
+                string isvaliddoc = validateDocument(fullpath);
+                if (isvaliddoc != "")
+                {
+                    ModelState.AddModelError("Message", isvaliddoc);
+                    if (Directory.Exists(fullpath))
+                    {
+                        Directory.Delete(fullpath, true);
+                    }
+                    return BadRequest(ModelState);
+                }
             }
+
 
             var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
 
@@ -184,6 +247,15 @@ namespace GSC.Api.Controllers.InformConcent
             econsent.PatientStatus.Add(econsentSetupPatientStatus);
 
             _econsentSetupRepository.Add(econsent);
+            for (int i = 0; i < econsent.PatientStatus.Count - 1; i++)
+            {
+                _econsentSetupPatientStatusRepository.Add(econsent.PatientStatus[i]);
+            }
+
+            for (int i = 0; i < econsent.Roles.Count -1; i++)
+            {
+                _econsentSetupRolesRepository.Add(econsent.Roles[i]);
+            }
             string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.RootName);
             if (_uow.Save() <= 0)
             {
@@ -257,6 +329,7 @@ namespace GSC.Api.Controllers.InformConcent
             document.Version = econsentSetupDto.Version;
             document.PatientStatus = econsentSetupDto.PatientStatus;
             document.Roles = econsentSetupDto.Roles;
+            document.OriginalFileName = econsentSetupDto.OriginalFileName;
             //document.PatientStatusId = econsentSetupDto.PatientStatusId;
 
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
@@ -276,7 +349,15 @@ namespace GSC.Api.Controllers.InformConcent
             {
                 _econsentSetupRolesRepository.Remove(item);
             }
+            for (int i = 0; i <= document.PatientStatus.Count - 1; i++)
+            {
+                _econsentSetupPatientStatusRepository.Add(document.PatientStatus[i]);
+            }
 
+            for (int i = 0; i <= document.Roles.Count - 1; i++)
+            {
+                _econsentSetupRolesRepository.Add(document.Roles[i]);
+            }
             _econsentSetupRepository.Update(document);
 
             if (_uow.Save() <= 0)

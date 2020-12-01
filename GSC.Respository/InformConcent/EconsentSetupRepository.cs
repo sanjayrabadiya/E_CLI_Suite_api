@@ -1,4 +1,6 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Master;
@@ -19,12 +21,17 @@ namespace GSC.Respository.InformConcent
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IPatientStatusRepository _patientStatusRepository;
+        private readonly IMapper _mapper;
+        private readonly IGSCContext _context;
         public EconsentSetupRepository(IGSCContext context, 
             IJwtTokenAccesser jwtTokenAccesser,
-            IPatientStatusRepository patientStatusRepository) : base(context)
+            IPatientStatusRepository patientStatusRepository,
+            IMapper mapper) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _patientStatusRepository = patientStatusRepository;
+            _mapper = mapper;
+            _context = context;
         }
 
         public string Duplicate(EconsentSetupDto objSave)
@@ -42,6 +49,14 @@ namespace GSC.Respository.InformConcent
                    x.ProjectId == projectId && x.DeletedDate == null)
                .Select(c => new DropDownDto { Id = c.Id, Value = c.DocumentName, IsDeleted = false }).OrderBy(o => o.Value)
                .ToList();
+        }
+
+        public List<EconsentSetupGridDto> GetEconsentSetupList(int projectid, bool isDeleted)
+        {
+            IList<int> intList = new List<int>();
+            intList = _context.Project.Where(x => x.ParentProjectId == projectid).Select(y => y.Id).ToList();
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && intList.Contains(x.ProjectId)).
+                   ProjectTo<EconsentSetupGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public List<DropDownDto> GetPatientStatusDropDown()
