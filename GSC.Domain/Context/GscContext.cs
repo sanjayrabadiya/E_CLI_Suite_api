@@ -42,9 +42,7 @@ namespace GSC.Domain.Context
 {
     public class GscContext : GSCBaseContext<GscContext>, IGSCContext, IGSCContextExtension
     {
-        public GscContext(DbContextOptions<GscContext> options,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IOptions<EnvironmentSetting> settings, IAuditTracker auditTracker) : base(options, jwtTokenAccesser, auditTracker)
+        public GscContext(DbContextOptions<GscContext> options, ICommonSharedService commonSharedService) : base(options, commonSharedService)
         {
 
         }
@@ -53,7 +51,7 @@ namespace GSC.Domain.Context
         public void ConfigureServices(string connectionString)
         {
             base.OnConfiguring(new DbContextOptionsBuilder(GetOptions(connectionString)));
-           
+
         }
 
         public static DbContextOptions GetOptions(string connectionString)
@@ -63,9 +61,18 @@ namespace GSC.Domain.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (_jwtTokenAccesser != null && ConfigurationMapping.EnvironmentSetting != null && !ConfigurationMapping.EnvironmentSetting.IsPremise)
-                optionsBuilder.UseSqlServer(@"data source=198.38.85.197;Initial Catalog=Cli_Development;user id=sa;password=Pushkar@7!;");
-            base.OnConfiguring(optionsBuilder);
+            if (ConfigurationMapping.EnvironmentSetting != null && !ConfigurationMapping.EnvironmentSetting.IsPremise && _commonSharedService.JwtTokenAccesser.CompanyId > 0)
+            {
+                string companyCode = $"CompanyId{_commonSharedService.JwtTokenAccesser.CompanyId}";
+                object connectionStrig;
+                _commonSharedService.GSCCaching.TryGetValue(companyCode, out connectionStrig);
+                if (connectionStrig != null)
+                {
+                    optionsBuilder.UseSqlServer(connectionStrig.ToString());
+                    base.OnConfiguring(optionsBuilder);
+
+                }
+            }
         }
 
         public DbSet<InvestigatorContact> InvestigatorContact { get; set; }

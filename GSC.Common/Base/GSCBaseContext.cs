@@ -13,15 +13,12 @@ namespace GSC.Common.Base
 {
     public class GSCBaseContext<TContext> : DbContext where TContext : DbContext
     {
-        public readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IAuditTracker _auditTracker;
 
-        protected GSCBaseContext(DbContextOptions<TContext> options, IJwtTokenAccesser jwtTokenAccesser,
-            IAuditTracker auditTracker)
+        public ICommonSharedService _commonSharedService { get; set; }
+        protected GSCBaseContext(DbContextOptions<TContext> options, ICommonSharedService commonSharedService)
          : base(options)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _auditTracker = auditTracker;
+            _commonSharedService = commonSharedService;
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
@@ -34,7 +31,7 @@ namespace GSC.Common.Base
 
             SetAuditInformation();
             var addChangeTracker = GetAuditTracker<ICommonAduit>();
-            var audits = _auditTracker.GetAuditTracker(addChangeTracker, this);
+            var audits = _commonSharedService.AuditTracker.GetAuditTracker(addChangeTracker, this);
             var result = base.SaveChangesAsync(cancellationToken);
             AduitSave(audits, addChangeTracker.ToList());
             return result;
@@ -50,7 +47,7 @@ namespace GSC.Common.Base
         {
             SetAuditInformation();
             var addChangeTracker = GetAuditTracker<ICommonAduit>();
-            var audits = _auditTracker.GetAuditTracker(addChangeTracker, this);
+            var audits = _commonSharedService.AuditTracker.GetAuditTracker(addChangeTracker, this);
             var result = base.SaveChanges();
             AduitSave(audits, addChangeTracker.ToList());
             return result;
@@ -97,7 +94,7 @@ namespace GSC.Common.Base
             foreach (var entry in ChangeTracker.Entries<BaseEntity>())
                 if (entry.State == EntityState.Added)
                 {
-                    entry.Entity.CreatedBy = _jwtTokenAccesser.UserId;
+                    entry.Entity.CreatedBy = _commonSharedService.JwtTokenAccesser.UserId;
                     entry.Entity.CreatedDate = DateTime.Now.ToUniversalTime();
                 }
                 else if (entry.State == EntityState.Modified)
@@ -107,12 +104,12 @@ namespace GSC.Common.Base
 
                     if (entry.Entity.AuditAction == AuditAction.Deleted)
                     {
-                        entry.Entity.DeletedBy = _jwtTokenAccesser.UserId;
+                        entry.Entity.DeletedBy = _commonSharedService.JwtTokenAccesser.UserId;
                         entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
                     }
                     else
                     {
-                        entry.Entity.ModifiedBy = _jwtTokenAccesser.UserId;
+                        entry.Entity.ModifiedBy = _commonSharedService.JwtTokenAccesser.UserId;
                         entry.Entity.ModifiedDate = DateTime.Now.ToUniversalTime();
                     }
                 }

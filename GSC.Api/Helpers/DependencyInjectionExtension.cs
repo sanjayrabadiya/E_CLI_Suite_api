@@ -38,6 +38,7 @@ using GSC.Shared.Extension;
 using GSC.Shared.Email;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Caching;
+using GSC.Common.Common;
 
 namespace GSC.Api.Helpers
 {
@@ -49,7 +50,8 @@ namespace GSC.Api.Helpers
             services.AddDbContext<GscContext>(o => o.UseSqlServer(connectionString));
             services.AddScoped<IGSCContext, GscContext>();
             services.AddScoped<IGSCContextExtension, GscContext>();
-                     
+            services.AddScoped<ICommonSharedService, CommonSharedService>();
+
             //services.AddScoped<IUnitOfWork, UnitOfWork<GscContext>>();
             //services.AddScoped(typeof(IUnitOfWork<GscContext>), typeof(UnitOfWork<GscContext>));
 
@@ -270,7 +272,6 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectSubSecArtificateDocumentCommentRepository, ProjectSubSecArtificateDocumentCommentRepository>();
             services.AddScoped<IProjectModuleRightsRepository, ProjectModuleRightsRepository>();
             services.AddScoped<IProjectDesignTemplateNoteRepository, ProjectDesignTemplateNoteRepository>();
-            //services.AddScoped<IAPICall, APICall>();
             services.AddHttpClient<IAPICall, APICall>();
             services.AddHttpClient<ICentreUserService, CentreUserService>();
             services.AddMemoryCache();
