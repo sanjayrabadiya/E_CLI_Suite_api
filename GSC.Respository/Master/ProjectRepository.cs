@@ -102,6 +102,10 @@ namespace GSC.Respository.Master
                 RoleId = _jwtTokenAccesser.RoleId
             });
             Add(project);
+            foreach (var item in project.ProjectRight)
+            {
+                _projectRightRepository.Add(item);
+            }
         }
 
         public string Duplicate(Data.Entities.Master.Project objSave)
