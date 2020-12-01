@@ -83,6 +83,14 @@ namespace GSC.Api.Controllers.Master
             }
 
             _variableRepository.Add(variable);
+            foreach (var item in variable.Values)
+            {
+                _variableValueRepository.Add(item);
+            }
+            foreach (var item in variable.Remarks)
+            {
+                _variableRemarksRepository.Add(item);
+            }
             if (_uow.Save() <= 0) throw new Exception("Creating Variable failed on save.");
             return Ok(variable.Id);
         }
@@ -121,11 +129,16 @@ namespace GSC.Api.Controllers.Master
         {
             var data = _variableValueRepository.FindBy(x => x.VariableId == variable.Id).ToList();
             var deleteValues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+            var addvariables = variable.Values.Where(x => x.Id == 0).ToList();
             //var deleteValues = _variableValueRepository.FindBy(x => x.VariableId == variable.Id
             //                                                        && !variable.Values.Any(c => c.Id == x.Id))
             //.ToList();
             foreach (var value in deleteValues)
                 _variableValueRepository.Remove(value);
+            foreach (var item in addvariables)
+            {
+                _variableValueRepository.Add(item);
+            }
 
         }
 
@@ -133,10 +146,14 @@ namespace GSC.Api.Controllers.Master
         {
             var data = _variableRemarksRepository.FindBy(x => x.VariableId == variable.Id).ToList();
             var deleteRemarks = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-
+            var addremarks = variable.Remarks.Where(x => x.Id == 0).ToList();
             foreach (var value in deleteRemarks)
                 _variableRemarksRepository.Remove(value);
 
+            foreach (var item in addremarks)
+            {
+                _variableRemarksRepository.Add(item);
+            }
         }
 
         [HttpDelete("{id}")]
