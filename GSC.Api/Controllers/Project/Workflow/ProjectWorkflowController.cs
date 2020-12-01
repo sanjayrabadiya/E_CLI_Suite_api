@@ -129,10 +129,15 @@ namespace GSC.Api.Controllers.Project.Workflow
                 x.ProjectWorkflowId == projectWorkflow.Id).ToList();
             //&& !projectWorkflow.Independents.Any(c => c.Id == x.Id)).ToList();
             var deleteIndependents = data.Where(t => projectWorkflow.Independents.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+            var addIndependents = projectWorkflow.Independents.Where(x => x.Id == 0).ToList();
             foreach (var item in deleteIndependents)
             {
                 item.DeletedDate = DateTime.Now;
                 _projectWorkflowIndependentRepository.Update(item);
+            }
+            foreach (var item in addIndependents)
+            {
+                _projectWorkflowIndependentRepository.Add(item);
             }
         }
 
@@ -141,10 +146,15 @@ namespace GSC.Api.Controllers.Project.Workflow
             var data = _projectWorkflowLevelRepository.FindBy(x => x.ProjectWorkflowId == projectWorkflow.Id).ToList();
             //&& !projectWorkflow.Levels.Any(c => c.Id == x.Id)).ToList();
             var deleteLevels = data.Where(t => projectWorkflow.Levels.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+            var addLevels = projectWorkflow.Levels.Where(x => x.Id == 0).ToList();
             foreach (var level in deleteLevels)
             {
                 level.DeletedDate = DateTime.Now;
                 _projectWorkflowLevelRepository.Update(level);
+            }
+            foreach (var level in addLevels)
+            {
+                _projectWorkflowLevelRepository.Add(level);
             }
         }
 

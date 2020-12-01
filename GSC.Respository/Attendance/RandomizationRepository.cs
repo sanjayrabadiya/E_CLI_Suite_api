@@ -287,11 +287,14 @@ namespace GSC.Respository.Attendance
                 DashboardPatientDto dashboardPatientDto = new DashboardPatientDto();
                 dashboardPatientDto.projectId = project.Id;
                 dashboardPatientDto.studycode = parentproject.ProjectCode;
+                dashboardPatientDto.studyname = parentproject.ProjectName;
                 dashboardPatientDto.sitecode = project.ProjectCode;
+                dashboardPatientDto.sitename = project.SiteName;
                 dashboardPatientDto.patientStatusId = (int)randomization.PatientStatusId;
                 dashboardPatientDto.patientStatus = randomization.PatientStatusId.GetDescription();
                 dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
                 dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
+                dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;
                 return dashboardPatientDto;
             }
             else

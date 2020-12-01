@@ -22,6 +22,8 @@ using GSC.Common.Base;
 using System;
 using System.Linq;
 using GSC.Shared.Extension;
+using GSC.Data.Entities.InformConcent;
+using GSC.Data.Dto.InformConcent;
 
 namespace GSC.Api.Helpers
 {
@@ -187,6 +189,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<ProjectDesignTemplateNote, ProjectDesignTemplateNoteGridDto>()
                .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName)).ReverseMap();
+            CreateMap<EconsentSetup, EconsentSetupGridDto>().ReverseMap();
         }
     }
 }

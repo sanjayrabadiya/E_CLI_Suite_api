@@ -73,6 +73,10 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             _projectDesignVariableRepository.Add(variable);
+            foreach (var item in variable.Values)
+            {
+                _projectDesignVariableValueRepository.Add(item);
+            }
             _uow.Save();
             return Ok(variable.Id);
         }
@@ -192,12 +196,18 @@ namespace GSC.Api.Controllers.Project.Design
             var data = _projectDesignVariableValueRepository.FindBy(x =>
                 x.ProjectDesignVariableId == variable.Id).ToList(); //&& !variable.Values.Any(c => c.Id == x.Id)).ToList();
             var deletevalues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+            var addvalues = variable.Values.Where(x => x.Id == 0).ToList();
             //!variable.Values.Any(c => c.Id == x.Id)).ToList();
             foreach (var value in deletevalues)
                 //value.DeletedDate = DateTime.Now;
                 //_projectDesignVariableValueRepository.Update(value);
 
                 _projectDesignVariableValueRepository.Remove(value);
+
+            foreach (var item in addvalues)
+            {
+                _projectDesignVariableValueRepository.Add(item);
+            }
         }
 
         // Merge with GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula} by vipul
