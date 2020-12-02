@@ -12,6 +12,6 @@ namespace GSC.Respository.Etmf
     {
         List<DropDownDto> GetProjectWorkPlaceArtificateDropDown(int sectionId);
         List<WorkplaceFolderDto> GetWorkPlaceFolder(int EtmfArtificateMasterLbraryId, int ProjectWorkplaceArtificateId);
-        WorkplaceChartDto GetRedChart(int id);
+        WorkplaceChartDto GetDocChart(WorkplaceChartFilterDto filters);
     }
 }

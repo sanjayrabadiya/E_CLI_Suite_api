@@ -54,11 +54,11 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(result);
         }
 
-        [Route("GetRedChart/{projectId}")]
+        [Route("GetDocChart")]
         [HttpGet]
-        public IActionResult GetRedChart(int projectId)
+        public IActionResult GetDocChart([FromQuery] WorkplaceChartFilterDto filters)
         {
-            var result = _projectWorkplaceArtificateRepository.GetRedChart(projectId);
+            var result = _projectWorkplaceArtificateRepository.GetDocChart(filters);
             return Ok(result);
         }
     }

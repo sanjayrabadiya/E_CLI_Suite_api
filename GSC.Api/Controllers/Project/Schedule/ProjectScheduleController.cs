@@ -147,7 +147,6 @@ namespace GSC.Api.Controllers.Project.Schedule
         [HttpPost]
         [TransactionRequired]
         public IActionResult Post([FromBody] ProjectScheduleDto projectScheduleDto)
-
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var number = _projectScheduleRepository.All.Count(x => x.ProjectDesignId == projectScheduleDto.ProjectDesignId);
@@ -159,6 +158,11 @@ namespace GSC.Api.Controllers.Project.Schedule
             _projectScheduleTemplateRepository.UpdateDesignTemplatesOrder(projectSchedule);
 
             _projectScheduleRepository.Add(projectSchedule);
+            foreach (var item in projectSchedule.Templates)
+            {
+                _projectScheduleTemplateRepository.Add(item);
+            }
+
             _uow.Save();
 
             _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(projectScheduleDto.ProjectDesignPeriodId);
@@ -180,7 +184,10 @@ namespace GSC.Api.Controllers.Project.Schedule
             _projectScheduleTemplateRepository.UpdateDesignTemplatesOrder(projectSchedule);
 
             _projectScheduleRepository.Update(projectSchedule);
-
+            foreach (var item in projectSchedule.Templates)
+            {
+                _projectScheduleTemplateRepository.Update(item);
+            }
             _uow.Save();
 
             _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(projectScheduleDto.ProjectDesignPeriodId);
