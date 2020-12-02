@@ -19,6 +19,9 @@ using GSC.Shared;
 using GSC.Shared.Security;
 using GSC.Shared.Generic;
 using GSC.Data.Entities;
+using GSC.Shared.Configuration;
+using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -33,10 +36,10 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IUserRoleRepository _userRoleRepository;      
-        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
+        private readonly IUserRoleRepository _userRoleRepository;             
         private readonly IAPICall _centerEndpoint;
-
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly ICentreUserService _centreUserService;
         public UserController(IUserRepository userRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -44,9 +47,10 @@ namespace GSC.Api.Controllers.UserMgt
             IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IUserRoleRepository userRoleRepository,
-            IProjectRepository projectRepository, 
-            Microsoft.Extensions.Configuration.IConfiguration configuration,
-            IAPICall centerEndpoint
+            IProjectRepository projectRepository,             
+            IAPICall centerEndpoint,
+            IOptions<EnvironmentSetting> environmentSetting,
+            ICentreUserService centreUserService
             )
         {
             _userRepository = userRepository;
@@ -57,9 +61,10 @@ namespace GSC.Api.Controllers.UserMgt
             _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
             _userRoleRepository = userRoleRepository;
-            _projectRepository = projectRepository;            
-            _configuration = configuration;
+            _projectRepository = projectRepository;  
             _centerEndpoint = centerEndpoint;
+            _environmentSetting = environmentSetting;
+            _centreUserService = centreUserService;
         }
 
 
@@ -114,7 +119,7 @@ namespace GSC.Api.Controllers.UserMgt
 
 
         [HttpPost]
-        public IActionResult Post([FromBody] UserDto userDto)
+        public async Task<IActionResult> Post([FromBody] UserDto userDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
@@ -125,15 +130,17 @@ namespace GSC.Api.Controllers.UserMgt
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.IsLocked = false;
             user.IsFirstTime = true;
-            bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
-            if (IsCloud)
+            bool IsPremise = _environmentSetting.Value.IsPremise;
+            if (!IsPremise)
             {
                 userDto.UserType = UserMasterUserType.User;
-                var response = _centerEndpoint.Post(userDto, $"{_configuration["EndPointURL"]}/User");
-                //if (!response.IsSuccessStatusCode)
-                //    return BadRequest(response.Content.ReadAsStringAsync().Result);
-                //var Id = response.Content.ReadAsStringAsync().Result;
-                user.Id = Convert.ToInt32(response);
+                CommonResponceView userdetails = await _centreUserService.SaveUser(userDto, _environmentSetting.Value.CentralApi);
+                if (!string.IsNullOrEmpty(userdetails.Message))
+                {
+                    ModelState.AddModelError("Message", userdetails.Message);
+                    return BadRequest(ModelState);
+                }                
+                user.Id = Convert.ToInt32(userdetails.Id);
             }
             else
             {
@@ -147,7 +154,7 @@ namespace GSC.Api.Controllers.UserMgt
             _userRepository.Add(user);
             if (_uow.Save() <= 0) throw new Exception("Creating a User  failed on save.");
 
-            if (!IsCloud)
+            if (IsPremise)
             {
                 var password = RandomPassword.CreateRandomPassword(6);
                 _userPasswordRepository.CreatePassword(password, user.Id);
@@ -157,7 +164,7 @@ namespace GSC.Api.Controllers.UserMgt
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] UserDto userDto)
+        public async Task<IActionResult> Put([FromBody] UserDto userDto)
         {
             if (userDto.Id <= 0) return BadRequest();
 
@@ -171,13 +178,16 @@ namespace GSC.Api.Controllers.UserMgt
             user.IsFirstTime = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsFirstTime ?? false;
             user.IsLocked = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsLocked ?? false;
 
-            bool IsCloud = Convert.ToBoolean(_configuration["IsCloud"]);
-            if (IsCloud)
+            bool IsPremise = _environmentSetting.Value.IsPremise;
+            if (!IsPremise)
             {
                 userDto.UserType = UserMasterUserType.User;
-                var response = _centerEndpoint.Put(userDto, $"{_configuration["EndPointURL"]}/User");
-                //if (!response.IsSuccessStatusCode)
-                //    return BadRequest(response.Content.ReadAsStringAsync().Result);
+                CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
+                if (!string.IsNullOrEmpty(userdetails.Message))
+                {
+                    ModelState.AddModelError("Message", userdetails.Message);
+                    return BadRequest(ModelState);
+                }                
             }
             else
             {
@@ -224,11 +234,9 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            if (Convert.ToBoolean(_configuration["IsCloud"]))
+            if (!_environmentSetting.Value.IsPremise)
             {
-                var response = _centerEndpoint.Delete($"{_configuration["EndPointURL"]}/User/{id}");
-                //if (!response.IsSuccessStatusCode)
-                //    return BadRequest(response.Content.ReadAsStringAsync().Result);              
+                 _centreUserService.DeleteUser(_environmentSetting.Value.CentralApi,id);
             }
             var user = _userRepository.Find(id);
             _userRepository.Delete(user);
@@ -240,36 +248,21 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         [Route("ChangePassword")]
         [AllowAnonymous]
-        public IActionResult ChangePassword([FromBody] ChangePasswordDto loginDto)
-        {
-            //var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
-            //    .FirstOrDefault();
-            //if (user == null)
-            //    return NotFound();
-
-            //if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(loginDto.OldPassword, user.Id)))
-            //{
-            //    ModelState.AddModelError("Message", "Current Password invalid!");
-            //    return BadRequest(ModelState);
-            //}
-
-            //user.IsFirstTime = false;
-            //user.IsLogin = false;
-            //_userRepository.Update(user);
-
-
-            //_uow.Save();
-            //harshil
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto loginDto)
+        {          
 
             var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
                 .FirstOrDefault();
             if (user == null)
                 return NotFound();
-            if (Convert.ToBoolean(_configuration["IsCloud"]))
+            if (!_environmentSetting.Value.IsPremise)
             {
-                var response = _centerEndpoint.Post(loginDto, $"{_configuration["EndPointURL"]}/User");
-                //if (!response.IsSuccessStatusCode)
-                //    return BadRequest(response.Content.ReadAsStringAsync().Result);
+                CommonResponceView userdetails = await _centreUserService.ChangePassword(loginDto, _environmentSetting.Value.CentralApi);
+                if (!string.IsNullOrEmpty(userdetails.Message))
+                {
+                    ModelState.AddModelError("Message", userdetails.Message);
+                    return BadRequest(ModelState);
+                }                
             }
             else
             {
@@ -289,17 +282,20 @@ namespace GSC.Api.Controllers.UserMgt
         }
 
         [HttpPatch("{id}")]
-        public ActionResult Active(int id)
+        public async Task<IActionResult> Active(int id)
         {
             var record = _userRepository.Find(id);
 
             if (record == null)
                 return NotFound();
-            if (Convert.ToBoolean(_configuration["IsCloud"]))
-            {               
-                var responce= _centerEndpoint.Patch($"{_configuration["EndPointURL"]}/User/{id}",null);
-                //if (!response.IsSuccessStatusCode)
-                //    return BadRequest(response.Content.ReadAsStringAsync().Result);
+            if (!_environmentSetting.Value.IsPremise)
+            {
+                CommonResponceView userdetails = await _centreUserService.ActiveUser(_environmentSetting.Value.CentralApi,id);
+                if (!string.IsNullOrEmpty(userdetails.Message))
+                {
+                    ModelState.AddModelError("Message", userdetails.Message);
+                    return BadRequest(ModelState);
+                }
             }
             else
             {

@@ -70,7 +70,6 @@ namespace GSC.Domain.Context
                 {
                     optionsBuilder.UseSqlServer(connectionStrig.ToString());
                     base.OnConfiguring(optionsBuilder);
-
                 }
             }
         }
@@ -197,9 +196,7 @@ namespace GSC.Domain.Context
         public DbSet<PharmacyTemplateValue> PharmacyTemplateValue { get; set; }
         public DbSet<PharmacyTemplateValueAudit> PharmacyTemplateValueAudit { get; set; }
         public DbSet<PharmacyTemplateValueChild> PharmacyTemplateValueChild { get; set; }
-
         public DbSet<PharmacyEntry> PharmacyEntry { get; set; }
-
         //public DbSet<PharmacyTemplate> PharmacyTemplate { get; set; }
         public DbSet<CustomTable> CustomTable { get; set; }
         public DbSet<CompanyData> CompanyData { get; set; }
@@ -207,8 +204,6 @@ namespace GSC.Domain.Context
         public DbSet<ProjectSubject> ProjectSubject { get; set; }
         public DbSet<EditCheck> EditCheck { get; set; }
         public DbSet<EditCheckDetail> EditCheckDetail { get; set; }
-
-
         public DbSet<Randomization> Randomization { get; set; }
         public DbSet<ReportSetting> ReportSetting { get; set; }
 

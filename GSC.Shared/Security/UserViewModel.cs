@@ -15,4 +15,10 @@ namespace GSC.Shared.Security
         public int FailedLoginAttempts { get; set; }
 
     }
+
+    public class CommonResponceView
+    {
+        public int Id { get; set; }       
+        public string Message { get; set; }
+    }
 }

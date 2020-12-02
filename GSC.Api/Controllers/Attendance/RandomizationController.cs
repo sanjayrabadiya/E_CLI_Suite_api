@@ -19,6 +19,10 @@ using GSC.Shared;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using GSC.Shared.Generic;
+using GSC.Respository.UserMgt;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using GSC.Shared.Configuration;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -35,7 +39,9 @@ namespace GSC.Api.Controllers.Attendance
         private readonly ICountryRepository _countryRepository;
         private readonly IAPICall _centeralendpoint;
         private readonly IConfiguration _configuration;
-
+        private readonly ICentreUserService _centreUserService;
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly IUserRepository _userRepository;
 
         public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -45,7 +51,10 @@ namespace GSC.Api.Controllers.Attendance
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
             IAPICall centeralendpoint,
-            IConfiguration configuration
+            IConfiguration configuration,
+            ICentreUserService centreUserService,
+            IOptions<EnvironmentSetting> environmentSetting,
+            IUserRepository userRepository
             )
         {
             _randomizationRepository = randomizationRepository;
@@ -58,6 +67,9 @@ namespace GSC.Api.Controllers.Attendance
             _countryRepository = countryRepository;
             _centeralendpoint = centeralendpoint;
             _configuration = configuration;
+            _centreUserService = centreUserService;
+            _environmentSetting = environmentSetting;
+            _userRepository = userRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -95,22 +107,24 @@ namespace GSC.Api.Controllers.Attendance
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] RandomizationDto randomizationDto)
+        public async Task<IActionResult> Post([FromBody] RandomizationDto randomizationDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var randomization = _mapper.Map<Randomization>(randomizationDto);
             randomization.PatientStatusId = ScreeningPatientStatus.PreScreening;
-            if (Convert.ToBoolean(_configuration["IsCloud"]))
+            if (!_environmentSetting.Value.IsPremise)
             {
                 var user = _mapper.Map<UserDto>(randomizationDto);
                 user.UserType = UserMasterUserType.Patient;
                 user.UserName = RandomPassword.CreateRandomNumericNumber(6);
-                var response = _centeralendpoint.Post(user, $"{_configuration["EndPointURL"]}/User");
-                //if (!response.IsSuccessStatusCode)
-                //    return BadRequest(response.Content.ReadAsStringAsync().Result);
-                int UserID = Convert.ToInt32(response);
-                randomization.UserId = UserID;
+                CommonResponceView userdetails = await _centreUserService.SaveUser(user, _environmentSetting.Value.CentralApi);
+                if (!string.IsNullOrEmpty(userdetails.Message))
+                {
+                    ModelState.AddModelError("Message", userdetails.Message);
+                    return BadRequest(ModelState);
+                }              
+                randomization.UserId = userdetails.Id;
             }
 
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
@@ -121,7 +135,7 @@ namespace GSC.Api.Controllers.Attendance
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] RandomizationDto RandomizationDto)
+        public async Task<IActionResult> Put([FromBody] RandomizationDto RandomizationDto)
         {
             if (RandomizationDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -129,16 +143,17 @@ namespace GSC.Api.Controllers.Attendance
             var details = _randomizationRepository.Find(RandomizationDto.Id);               
             var randomization = _mapper.Map<Randomization>(RandomizationDto);
             randomization.PatientStatusId = details.PatientStatusId;
-            if (Convert.ToBoolean(_configuration["IsCloud"]))
+            if (!_environmentSetting.Value.IsPremise)
             {
                 var user = _mapper.Map<UserDto>(RandomizationDto);
                 user.UserType = UserMasterUserType.Patient;
-                user.UserName = RandomPassword.CreateRandomNumericNumber(6);
-                var response = _centeralendpoint.Put(user, $"{_configuration["EndPointURL"]}/User");
-                //if (!response.IsSuccessStatusCode)
-                //    return BadRequest(response.Content.ReadAsStringAsync().Result);
-                int UserID = Convert.ToInt32(response);
-                randomization.UserId = UserID;
+                CommonResponceView userdetails = await _centreUserService.UpdateUser(user, _environmentSetting.Value.CentralApi);
+                if (!string.IsNullOrEmpty(userdetails.Message))
+                {
+                    ModelState.AddModelError("Message", userdetails.Message);
+                    return BadRequest(ModelState);
+                }              
+                randomization.UserId = userdetails.Id;
             }
             _randomizationRepository.Update(randomization);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");

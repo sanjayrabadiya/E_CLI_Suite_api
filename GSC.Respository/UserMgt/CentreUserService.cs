@@ -34,11 +34,11 @@ namespace GSC.Respository.UserMgt
             if (result != null)
             {
                 string companyCode = $"CompanyId{result.CompanyId}";
-                var user = _userRepository.Find(result.UserId);
+                //var user = _userRepository.Find(result.UserId);
                 if (result.IsValid)
                 {
-                    user.IsLocked = false;
-                    user.FailedLoginAttempts = 0;
+                    //user.IsLocked = false;
+                    //user.FailedLoginAttempts = 0;
                     await HttpService.Post<UserViewModel>(_httpClient, clientUrl + $"Login/LockStatus/{result.UserId}/{false}", "");
                     _gSCContextExtension.ConfigureServices(result.ConnectionString);
                     _gSCCaching.Remove(companyCode);
@@ -50,13 +50,41 @@ namespace GSC.Respository.UserMgt
                     if (result.FailedLoginAttempts > company.MaxLoginAttempt)
                     {
                         result.ValidateMessage = "User is locked, Please contact your administrator";
-                        user.IsLocked = true;
+                        //user.IsLocked = true;
                         await HttpService.Post<UserViewModel>(_httpClient, clientUrl + $"Login/LockStatus/{result.UserId}/{true}", "");
                     }
 
                 }
-                _userRepository.Update(user);
+                //_userRepository.Update(user);
             }
+            return result;
+        }
+
+       public async Task<CommonResponceView> SaveUser(UserDto userDto,string clientUrl)
+        {
+            var result = await HttpService.Post<CommonResponceView>(_httpClient, clientUrl + "User", userDto);
+            return result;
+        }
+
+        public async Task<CommonResponceView> UpdateUser(UserDto userDto, string clientUrl)
+        {
+            var result = await HttpService.Put<CommonResponceView>(_httpClient, clientUrl + "User", userDto);
+            return result;
+        }
+
+        public async void DeleteUser(string clientUrl,int Id)
+        {
+           await HttpService.Delete(_httpClient, clientUrl + "User/"+ Id);          
+        }
+        public async Task<CommonResponceView> ChangePassword(ChangePasswordDto loginDto, string clientUrl)
+        {
+            var result = await HttpService.Post<CommonResponceView>(_httpClient, clientUrl + "User/ChangePassword", loginDto);
+            return result;
+        }
+
+        public async Task<CommonResponceView> ActiveUser(string clientUrl,int Id)
+        {
+            var result = await HttpService.Get<CommonResponceView>(_httpClient, clientUrl + "User/Active/"+Id);
             return result;
         }
     }
