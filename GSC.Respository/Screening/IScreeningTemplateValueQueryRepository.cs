@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
@@ -33,6 +34,6 @@ namespace GSC.Respository.Screening
 
         IList<QueryManagementDto> GetQueryEntries(QuerySearchDto filters);
         IList<QueryManagementDto> GetGenerateQueryBy(int projectId);
-        IList<QueryManagementDto> GetDataEntryBy(int projectId);
+        IList<DropDownDto> GetDataEntryBy(int projectId);
     }
 }

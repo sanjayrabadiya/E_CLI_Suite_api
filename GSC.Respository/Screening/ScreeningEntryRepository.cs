@@ -528,9 +528,11 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetSubjectByProjecId(int projectId)
         {
+            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
 
-            return All.Where(a => a.DeletedDate == null && a.ProjectId == projectId).Select(
-                x => new DropDownDto
+            return All.Where(a => a.DeletedDate == null && ParentProject != null ? a.ProjectId == projectId : sites.Contains(a.ProjectId))
+                .Select(x => new DropDownDto
                 {
                     Id = x.Id,
                     Value = x.RandomizationId != null
