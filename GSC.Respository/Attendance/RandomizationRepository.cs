@@ -91,6 +91,60 @@ namespace GSC.Respository.Attendance
             Update(randomization);
         }
 
+        public RandomizationNumberDto GenerateRandomizationAndScreeningNumber(int id)
+        {
+            var randomization = Find(id);
+            var sitedata = _projectRepository.Find(randomization.ProjectId);
+            var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
+            RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
+            if (studydata.IsManualRandomNo == true)
+            {
+                randomizationNumberDto.RandomizationNumber = "";
+            } else
+            {
+                int latestno;
+                if (studydata.IsSiteDependentRandomNo == true)
+                {
+                    latestno = sitedata.RandomizationNoseries;
+                } else
+                {
+                    latestno = studydata.RandomizationNoseries;
+                }
+                if (studydata.IsAlphaNumRandomNo == true)
+                {
+                    randomizationNumberDto.RandomizationNumber = studydata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength - 1, '0');
+                } else
+                {
+                    randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                }
+            }
+            if (studydata.IsManualScreeningNo == true)
+            {
+                randomizationNumberDto.ScreeningNumber = "";
+            }
+            else
+            {
+                int latestno;
+                if (studydata.IsSiteDependentScreeningNo == true)
+                {
+                    latestno = sitedata.ScreeningNoseries;
+                }
+                else
+                {
+                    latestno = studydata.ScreeningNoseries;
+                }
+                if (studydata.IsAlphaNumScreeningNo == true)
+                {
+                    randomizationNumberDto.ScreeningNumber = studydata.PrefixScreeningNo + latestno.ToString().PadLeft((int)studydata.ScreeningLength - 1, '0');
+                }
+                else
+                {
+                    randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                }
+            }
+            return randomizationNumberDto;
+        }
+
         public List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted)
         {
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
@@ -353,6 +407,11 @@ namespace GSC.Respository.Attendance
                         }).ToList();
 
             return data;
+        }
+
+        public RandomizationNumberDto GetRandomizationAndScreeningNumber(int id)
+        {
+            return GenerateRandomizationAndScreeningNumber(id);
         }
     }
 }

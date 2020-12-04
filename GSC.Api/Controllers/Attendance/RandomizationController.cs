@@ -255,5 +255,11 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(data);
         }
 
+        [HttpGet("GetRandomizationAndScreeningNumber/{id}")]
+        public IActionResult GetRandomizationAndScreeningNumber(int id)
+        {
+            var data = _randomizationRepository.GetRandomizationAndScreeningNumber(id);
+            return Ok(data);
+        }
     }
 }

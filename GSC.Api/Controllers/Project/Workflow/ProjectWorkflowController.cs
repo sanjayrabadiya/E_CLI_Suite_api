@@ -100,6 +100,14 @@ namespace GSC.Api.Controllers.Project.Workflow
 
             var projectWorkflow = _mapper.Map<ProjectWorkflow>(projectWorkflowDto);
             _projectWorkflowRepository.Add(projectWorkflow);
+            foreach (var item in projectWorkflow.Independents)
+            {
+                _projectWorkflowIndependentRepository.Add(item);
+            }
+            foreach (var item in projectWorkflow.Levels)
+            {
+                _projectWorkflowLevelRepository.Add(item);
+            }
             _uow.Save();
             return Ok(projectWorkflow.Id);
         }

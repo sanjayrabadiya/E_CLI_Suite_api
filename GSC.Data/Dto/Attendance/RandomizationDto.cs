@@ -111,4 +111,10 @@ namespace GSC.Data.Dto.Attendance
         public int? ZipCode { get; set; }
 
     }
+
+    public class RandomizationNumberDto
+    {
+        public string RandomizationNumber { get; set; }
+        public string ScreeningNumber { get; set; }
+    }
 }
