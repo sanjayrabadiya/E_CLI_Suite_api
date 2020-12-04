@@ -271,7 +271,7 @@ namespace GSC.Respository.Screening
                                 (ParentProject != null ? t.ProjectId == filters.ProjectId : sites.Contains(t.ProjectId))
                                 && t.ProjectDesignPeriod.DeletedDate == null
                                 && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
-                                && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.AttendanceId)))
+                                && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.Id)))
                              join template in _context.ScreeningTemplate.Where(u =>
                                                 (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
                                                 && (filters.VisitIds == null || filters.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId))

@@ -297,7 +297,7 @@ namespace GSC.Respository.Screening
                 #region Main Query
                 var queryDtos = (from screening in _context.ScreeningEntry.Where(t => filters.ProjectId.Contains(t.ProjectId)
                                  && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
-                                 && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.AttendanceId))
+                                 && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.Id))
                                  && t.DeletedDate == null)
                                  join template in _context.ScreeningTemplate.Where(u => (filters.TemplateIds == null
                                      || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
@@ -433,7 +433,7 @@ namespace GSC.Respository.Screening
                 //filter from front
                            filters.ProjectId.Contains(t.ProjectId) &&
                            (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
-                           && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.AttendanceId)) &&
+                           && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.Id)) &&
                 //end filter
                            t.DeletedDate == null)
                                      join project in _context.Project.Where(x => filters.ProjectId.Contains(x.Id)) on se.ProjectId equals project.Id
