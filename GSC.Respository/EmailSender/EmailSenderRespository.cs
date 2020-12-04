@@ -170,6 +170,14 @@ namespace GSC.Respository.EmailSender
             return emailMessage;
         }
 
+        public void SendDBDSGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf)
+        {
+            var emailMessage = ConfigureEmail("DBDS", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPDF(emailMessage.MessageBody, userName, projectName, linkOfPdf);
+            _emailService.SendMail(emailMessage);
+        }
+
         private string ReplaceBody(string body, string userName, string password)
         {
             body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);

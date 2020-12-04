@@ -132,8 +132,8 @@ namespace GSC.Helper
         [Description("DossierReport")] DossierReport = 7,
         [Description("ExcleTemplate")] ExcleTemplate = 8,
         [Description("Project Worksplace")] ProjectWorksplace = 9,
-        [Description("Inform Consent")] InformConcent = 10
-
+        [Description("Inform Consent")] InformConcent = 10,
+        [Description("DBDS Report")] DBDSReport = 7
     }
 
     public enum AuditModule : short
@@ -441,13 +441,15 @@ namespace GSC.Helper
     public enum JobNameType : short
     {
         [Description("Dossier Report")] DossierReport = 1,
-        [Description("Medra")] Medra = 2
+        [Description("Medra")] Medra = 2,
+        [Description("DBDS Report")] DBDSReport = 3
     }
 
     public enum JobTypeEnum : short
     {
         [Description("Report")] Report = 1,
-        [Description("Excel")] Excel = 2
+        [Description("Excel")] Excel = 2,
+        [Description("Csv")] Csv = 3
     }
 
     public enum JobStatusType : short
@@ -533,6 +535,10 @@ namespace GSC.Helper
         [Description("SendBack")] SendBack = 2,
     }
 
-    
+    public enum DBDSReportFilter : short
+    {
+        [Description("DBDS")] DBDS = 1,
+        [Description("MedDRA")] MedDRA = 2
+    }
 
 }

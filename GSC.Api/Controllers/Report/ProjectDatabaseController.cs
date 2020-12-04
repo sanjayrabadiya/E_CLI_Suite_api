@@ -15,15 +15,14 @@ namespace GSC.Api.Controllers.Report
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetProjectDatabaseEntries")]
-        public IActionResult GetProjectDatabaseEntries([FromQuery] ProjectDatabaseSearchDto filters)
+        public IActionResult GetProjectDatabaseEntries([FromBody] ProjectDatabaseSearchDto filters)
         {
             if (filters.ProjectId.Length <= 0) return BadRequest();
 
-            var auditsDto = _screeningTemplateValueRepository.GetProjectDatabaseEntries(filters);
-
-            return Ok(auditsDto);
+            _screeningTemplateValueRepository.GetProjectDatabaseEntries(filters);
+            return Ok();
         }
     }
 }

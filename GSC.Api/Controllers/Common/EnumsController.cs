@@ -440,5 +440,17 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
         }
+
+        [HttpGet]
+        [Route("DBDSReportFilter")]
+        public IList<DropDownEnum> DBDSReportFilter()
+        {
+            return Enum.GetValues(typeof(DBDSReportFilter))
+                .Cast<DBDSReportFilter>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

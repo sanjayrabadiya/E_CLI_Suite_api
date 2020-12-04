@@ -18,6 +18,6 @@ namespace GSC.Respository.EmailSender
         void SendEmailOfPatientReviewedPDFtoInvestigator(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
         void SendEmailOfInvestigatorApprovedPDFtoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath);
         void SendEmailOfEconsentDocumentuploaded(string toMail, string userName, string documentName, string ProjectName);
-
+        void SendDBDSGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf);
     }
 }

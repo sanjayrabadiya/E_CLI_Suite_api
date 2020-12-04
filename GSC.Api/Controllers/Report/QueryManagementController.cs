@@ -10,13 +10,9 @@ namespace GSC.Api.Controllers.Report
     {
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
 
-        // private readonly IQueryManagementRepository _queryManagementRepository;
-
-        public QueryManagementController( //IQueryManagementRepository queryManagementRepository,
-            IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository)
+        public QueryManagementController(IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository)
         {
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
-            //_queryManagementRepository = queryManagementRepository;
         }
 
         [HttpGet]

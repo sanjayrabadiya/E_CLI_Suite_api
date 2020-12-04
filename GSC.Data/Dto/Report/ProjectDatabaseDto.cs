@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GSC.Data.Entities.Common;
+using GSC.Helper;
 using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Report
@@ -42,6 +43,78 @@ namespace GSC.Data.Dto.Report
         public List<ProjectDatabaseDto> LstProjectDataBaseVisit { get; set; }
         public List<ProjectDatabaseDto> LstProjectDataBaseitems { get; set; }
     }
+
+    public class ProjectDatabaseDomainDto
+    {
+        public string DomainName { get; set; }
+        public int TemplateId { get; set; }
+        public int DesignOrder { get; set; }
+        public string UnitAnnotation { get; set; }
+        public List<ProjectDatabaseVariableDto> LstVariable { get; set; }
+        public List<ProjectDatabaseInitialDto> LstProjectDataBase { get; set; }
+    }
+
+    public class ProjectDatabaseVariableDto
+    {
+        public string VariableName { get; set; }
+        public string Annotation { get; set; }
+        public string Unit { get; set; }
+        public int? UnitId { get; set; }
+        public int DesignOrderOfVariable { get; set; }
+        public string UnitAnnotation { get; set; }
+        public int TemplateId { get; set; }
+    }
+
+    public class ProjectDatabaseInitialDto
+    {
+        public string Initial { get; set; }
+        public int ProjectId { get; set; }
+        public string ProjectCode { get; set; }
+        public int? ParentProjectId { get; set; }
+        public string ProjectName { get; set; }
+        public string SubjectNo { get; set; }
+        public string RandomizationNumber { get; set; }
+        public List<ProjectDatabaseVisitDto> LstProjectDataBaseVisit { get; set; }
+    }
+
+    public class ProjectDatabaseVisitDto
+    {
+        public string Visit { get; set; }
+        public int DesignOrder { get; set; }
+        public string TemplateName { get; set; }
+        public List<ProjectDatabaseItemDto> LstProjectDataBaseitems { get; set; }
+    }
+
+    public class ProjectDatabaseItemDto
+    {
+        public int? ScreeningTemplateParentId { get; set; }
+        public string VariableName { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public int CollectionSource { get; set; }
+        public string VariableNameValue { get; set; }
+        public int? UnitId { get; set; }
+        public string Unit { get; set; }
+    }
+    public class ProjectDatabaseSearchDto : BaseDto
+    {
+        public int ParentProjectId { get; set; }
+        public int[] ProjectId { get; set; }
+        public int?[] PeriodIds { get; set; }
+        public int?[] SubjectIds { get; set; }
+        public int?[] VisitIds { get; set; }
+        public int?[] TemplateIds { get; set; }
+        public int?[] DomainIds { get; set; }
+        public bool ExcelFormat { get; set; }
+        public int SelectedProject { get; set; }
+        public DBDSReportFilter? FilterId { get; set; }
+    }
+
+    public class RepeatTemplateDto
+    {
+        public int TemplateId { get; set; }
+        public int? Parent { get; set; }
+        public int Row { get; set; }
+    }
     public class MeddraDetails
     {
         public string ProjectCode { get; set; }
@@ -77,24 +150,15 @@ namespace GSC.Data.Dto.Report
 
         public DateTime? CodedOn
         {
-            get => _codedOn?.UtcDateTime();
-            set => _codedOn = value?.UtcDateTime();
+            get => _codedOn?.UtcDate();
+            set => _codedOn = value?.UtcDate();
         }
     }
+
     public class CommonDto
     {
-        public List<ProjectDatabaseDto> Dbds { get; set; }
+        public List<ProjectDatabaseDomainDto> Dbds { get; set; }
         public List<MeddraDetails> Meddra { get; set; }
     }
-
-    public class ProjectDatabaseSearchDto : BaseDto
-    {
-        public int ParentProjectId { get; set; }
-        public int[] ProjectId { get; set; }
-        public int?[] PeriodIds { get; set; }
-        public int?[] SubjectIds { get; set; }
-        public int?[] VisitIds { get; set; }
-        public int?[] TemplateIds { get; set; }
-        public int?[] DomainIds { get; set; }
-    }
+    
 }

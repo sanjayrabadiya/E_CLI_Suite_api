@@ -28,7 +28,7 @@ namespace GSC.Respository.Screening
         int GetQueryCountByVisitId(int screeningVisitId);
 
         List<DashboardQueryStatusDto> GetQueryByProjectDesignId(int projectDesignId);
-        CommonDto GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters);
+        void GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters);
         List<QueryStatusDto> GetQueryStatusBySubject(int screeningEntryId);
     }
 }
