@@ -17,6 +17,7 @@ using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.InformConcent;
+using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
 using GSC.Data.Entities.Master;
@@ -286,7 +287,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectSubSecArtificateDocumentReview> ProjectSubSecArtificateDocumentReview { get; set; }
 
         public DbSet<ProjectModuleRights> ProjectModuleRights { get; set; }
-
+        public DbSet<VisitLanguage> VisitLanguage { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

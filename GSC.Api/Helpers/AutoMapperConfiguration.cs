@@ -9,6 +9,7 @@ using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Custom;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.InformConcent;
+using GSC.Data.Dto.LanguageSetup;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Medra;
@@ -31,6 +32,7 @@ using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.InformConcent;
+using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Medra;
@@ -282,6 +284,7 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
             CreateMap<Site, SiteDto>().ReverseMap();
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
+            CreateMap<VisitLanguage, VisitLanguageDto>().ReverseMap();
 
             //CreateMap<Users, UserDto>().ReverseMap();
 

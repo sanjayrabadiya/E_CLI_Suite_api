@@ -39,6 +39,7 @@ using GSC.Shared.Email;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Caching;
 using GSC.Common.Common;
+using GSC.Respository.LanguageSetup;
 
 namespace GSC.Api.Helpers
 {
@@ -272,6 +273,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectSubSecArtificateDocumentCommentRepository, ProjectSubSecArtificateDocumentCommentRepository>();
             services.AddScoped<IProjectModuleRightsRepository, ProjectModuleRightsRepository>();
             services.AddScoped<IProjectDesignTemplateNoteRepository, ProjectDesignTemplateNoteRepository>();
+            services.AddScoped<IVisitLanguageRepository, VisitLanguageRepository>();
             services.AddHttpClient<IAPICall, APICall>();
             services.AddHttpClient<ICentreUserService, CentreUserService>();
             services.AddMemoryCache();
