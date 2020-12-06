@@ -63,7 +63,8 @@ namespace GSC.Api.Controllers.UserMgt
             if (_environmentSetting.Value.IsPremise)
                 user = _userRepository.ValidateUser(dto.UserName, dto.Password);
             else
-                user = await _centreUserService.ValidateClient(dto, _environmentSetting.Value.CentralApi);
+                user = await _centreUserService.ValidateClient(dto);
+
 
             if (!user.IsValid)
             {
@@ -72,7 +73,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             var roles = _userRoleRepository.GetRoleByUserName(dto.UserName);
-
+            
             if (roles.Count <= 0)
             {
                 ModelState.AddModelError("UserName",
@@ -92,8 +93,8 @@ namespace GSC.Api.Controllers.UserMgt
                 return Ok(dto);
             }
 
-
             var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
+
             if (!string.IsNullOrEmpty(validatedUser.Token))
             {
                 _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);
@@ -155,7 +156,7 @@ namespace GSC.Api.Controllers.UserMgt
 
         [HttpPost]
         [Route("role")]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public IActionResult ValidateLoginWithRole([FromBody] LoginRoleDto loginDto)
         {
             Data.Entities.UserMgt.User user;
@@ -253,12 +254,13 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         [Route("Refresh")]
         [AllowAnonymous]
-        public IActionResult Refresh([FromBody] RefreshTokenDto token)
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto token)
         {
-            if (Convert.ToBoolean(_configuration["IsCloud"]))
-                _centeralApi.Post(token, $"{_configuration["EndPointURL"]}/Login/Refresh");
-            //_centeralRepository.Refresh(token.AccessToken, token.RefreshToken);
-            return Ok(_userRepository.Refresh(token.AccessToken, token.RefreshToken));
+            if (_environmentSetting.Value.IsPremise)
+                return Ok(await _userRepository.Refresh(token.AccessToken, token.RefreshToken));
+            else
+                return Ok(await _centreUserService.Refresh(token));
+
         }
 
         [HttpPost]

@@ -10,11 +10,11 @@ using System.Text;
 
 namespace GSC.Respository.EditCheckImpact
 {
-    public interface IImpactService: IGenericRepository<ScreeningTemplate>
+    public interface IImpactService : IGenericRepository<ScreeningTemplate>
     {
-        List<EditCheckValidateDto> GetEditCheck( ScreeningTemplateBasic screeningTemplateBasic);
+        List<EditCheckValidateDto> GetEditCheck(ScreeningTemplateBasic screeningTemplateBasic);
         ScreeningTemplate GetScreeningTemplate(int projectDesignTemplateId, int screeningEntryId, int screeningVisitId);
-        string GetVariableValue(EditCheckValidateDto editCheckValidateDto);
+        string GetVariableValue(EditCheckValidateDto editCheckValidateDto, out bool isNa);
         string CollectionValueAnnotation(string collectionValue, CollectionSources? collectionSource);
         List<EditCheckValidateDto> GetEditCheckByVaiableId(int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckIds> editCheckIds);
         string ScreeningValueAnnotation(string value, EditCheckRuleBy checkBy, CollectionSources? collectionSource);

@@ -1,9 +1,12 @@
 ﻿using GSC.Data.Dto.UserMgt;
 using GSC.Respository.Configuration;
+using GSC.Respository.LogReport;
 using GSC.Shared.Caching;
+using GSC.Shared.Configuration;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
 using GSC.Shared.Security;
+using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -15,32 +18,30 @@ namespace GSC.Respository.UserMgt
     {
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
         private readonly HttpClient _httpClient;
-        private readonly IGSCContextExtension _gSCContextExtension;
         private readonly IGSCCaching _gSCCaching;
-        private readonly IUserRepository _userRepository;
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly IUserLoginReportRespository _userLoginReportRepository;
         public CentreUserService(ILoginPreferenceRepository loginPreferenceRepository,
-            HttpClient httpClient, IGSCContextExtension gSCContextExtension,
-            IGSCCaching gSCCaching, IUserRepository userRepository)
+            HttpClient httpClient,
+            IGSCCaching gSCCaching, IUserLoginReportRespository userLoginReportRepository,
+            IOptions<EnvironmentSetting> environmentSetting)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
             _httpClient = httpClient;
-            _gSCContextExtension = gSCContextExtension;
             _gSCCaching = gSCCaching;
-            _userRepository = userRepository;
+            _userLoginReportRepository = userLoginReportRepository;
+            _environmentSetting = environmentSetting;
         }
-        public async Task<UserViewModel> ValidateClient(LoginDto loginDto, string clientUrl)
+        public async Task<UserViewModel> ValidateClient(LoginDto loginDto)
         {
-            var result = await HttpService.Post<UserViewModel>(_httpClient, clientUrl + "Login/ValidateUser", loginDto);
+            var result = await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
             if (result != null)
             {
                 string companyCode = $"CompanyId{result.CompanyId}";
-                //var user = _userRepository.Find(result.UserId);
+                _userLoginReportRepository.SetDbConnection(result.ConnectionString);
                 if (result.IsValid)
                 {
-                    //user.IsLocked = false;
-                    //user.FailedLoginAttempts = 0;
-                    await HttpService.Post<UserViewModel>(_httpClient, clientUrl + $"Login/LockStatus/{result.UserId}/{false}", "");
-                    _gSCContextExtension.ConfigureServices(result.ConnectionString);
+                    await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{false}", "");
                     _gSCCaching.Remove(companyCode);
                     _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
                 }
@@ -50,17 +51,22 @@ namespace GSC.Respository.UserMgt
                     if (result.FailedLoginAttempts > company.MaxLoginAttempt)
                     {
                         result.ValidateMessage = "User is locked, Please contact your administrator";
-                        //user.IsLocked = true;
-                        await HttpService.Post<UserViewModel>(_httpClient, clientUrl + $"Login/LockStatus/{result.UserId}/{true}", "");
+                        await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{true}", "");
                     }
-
+                    _userLoginReportRepository.SaveLog(result.ValidateMessage, result.UserId, loginDto.UserName);
                 }
-                //_userRepository.Update(user);
             }
             return result;
         }
 
-       public async Task<CommonResponceView> SaveUser(UserDto userDto,string clientUrl)
+
+        public async Task<RefreshTokenDto> Refresh(RefreshTokenDto tokenn)
+        {
+            var result = await HttpService.Post<RefreshTokenDto>(_httpClient, $"{_environmentSetting.Value.CentralApi}/Login/Refresh", tokenn);
+            return result;
+        }
+
+        public async Task<CommonResponceView> SaveUser(UserDto userDto, string clientUrl)
         {
             var result = await HttpService.Post<CommonResponceView>(_httpClient, clientUrl + "User", userDto);
             return result;
@@ -72,9 +78,9 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
-        public async void DeleteUser(string clientUrl,int Id)
+        public async void DeleteUser(string clientUrl, int Id)
         {
-           await HttpService.Delete(_httpClient, clientUrl + "User/"+ Id);          
+            await HttpService.Delete(_httpClient, clientUrl + "User/" + Id);
         }
         public async Task<CommonResponceView> ChangePassword(ChangePasswordDto loginDto, string clientUrl)
         {
@@ -82,9 +88,9 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
-        public async Task<CommonResponceView> ActiveUser(string clientUrl,int Id)
+        public async Task<CommonResponceView> ActiveUser(string clientUrl, int Id)
         {
-            var result = await HttpService.Get<CommonResponceView>(_httpClient, clientUrl + "User/Active/"+Id);
+            var result = await HttpService.Get<CommonResponceView>(_httpClient, clientUrl + "User/Active/" + Id);
             return result;
         }
     }

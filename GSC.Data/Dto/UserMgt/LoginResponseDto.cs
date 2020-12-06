@@ -32,5 +32,7 @@ namespace GSC.Data.Dto.UserMgt
         public IList<DropDownDto> Roles { get; set; }
         public PrefLanguage? Language { get; set; }
         public string LanguageShortName { get; set; }
+        public string ValidateMessage { get; set; }
+        public bool IsValid { get; set; }
     }
 }

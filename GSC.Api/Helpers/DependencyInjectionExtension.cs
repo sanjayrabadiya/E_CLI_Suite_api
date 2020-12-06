@@ -278,7 +278,7 @@ namespace GSC.Api.Helpers
             services.AddHttpClient<ICentreUserService, CentreUserService>();
             services.AddMemoryCache();
             services.AddSingleton(typeof(IGSCCaching), typeof(GSCCaching));
-
+            services.AddScoped<IGenerateToken, GenerateToken>();
         }
     }
 }

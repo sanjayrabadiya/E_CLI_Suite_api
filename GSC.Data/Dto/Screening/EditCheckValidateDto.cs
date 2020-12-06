@@ -33,6 +33,7 @@ namespace GSC.Data.Dto.Screening
         public bool IsFormula { get; set; }
         public bool IsOnlyTarget { get; set; }
         public string ScreeningTemplateValue { get; set; }
+        public bool IsNa { get; set; }
         public EditCheckValidateType ValidateType { get; set; }
         public string SampleResult { get; set; }
     }

@@ -19,6 +19,11 @@ namespace GSC.Common.GenericRespository
             _dbSet = Context.Set<TC>();
         }
 
+        public void SetDbConnection(string connectionString)
+        {
+            this.Context.SetDBConnection(connectionString);
+        }
+
         public IQueryable<TC> All => Context.Set<TC>();
 
         public virtual void Add(TC entity)

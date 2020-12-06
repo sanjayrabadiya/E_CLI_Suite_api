@@ -22,6 +22,9 @@ namespace GSC.Common.Base
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
+       
+
+
         public DbSet<UserAduit> UserAduit { get; set; }
         public DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
         public DbSet<AuditValue> AuditValue { get; set; }
@@ -87,6 +90,12 @@ namespace GSC.Common.Base
             Entry(entity).State = EntityState.Added;
         }
 
+        public void SetDBConnection (string connectionString)
+        {
+            var getConnection = this.Database.GetDbConnection();
+            getConnection.ConnectionString = connectionString;
+            this.Database.SetDbConnection(getConnection);
+        }
         public IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class => Set<TEntity>().FromSqlRaw(sql, parameters);
         #endregion
         void SetAuditInformation()
@@ -137,6 +146,8 @@ namespace GSC.Common.Base
             foreach (var entry in changedEntriesCopy)
                 entry.State = EntityState.Detached;
         }
+
+        
 
         async void AduitSave(List<AuditTrailCommon> audits, List<EntityEntry> entities)
         {

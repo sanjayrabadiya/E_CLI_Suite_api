@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
@@ -19,6 +20,7 @@ using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -152,39 +154,6 @@ namespace GSC.Respository.UserMgt
 
         }
 
-
-        private User ValidateCenteral(string userName, string password)
-        {
-            var user = All.Where(x =>
-              (x.UserName == userName || x.Email == userName)
-              && x.DeletedDate == null).FirstOrDefault();
-            if (user == null)
-            {
-                _userLoginReportRepository.SaveLog("Invalid User Name", null, userName);
-                return null;
-            }
-            var passDto = new ValidatepasswordDto();
-            passDto.UserID = user.Id;
-            passDto.Password = password;
-            string passstring = JsonConvert.DeserializeObject(_centeralApi.Post(passDto,$"{_configuration["EndPointURL"]}/User/VaidatePassword")).ToString();
-            if (!string.IsNullOrEmpty(passstring))
-            {
-                user.FailedLoginAttempts++;
-                var result = _loginPreferenceRepository.FindBy(x => x.CompanyId == user.CompanyId).FirstOrDefault();
-                if (result != null && user.FailedLoginAttempts > result.MaxLoginAttempt)
-                {
-                    user.IsLocked = true;
-                    Update(user);
-                }
-                _userLoginReportRepository.SaveLog("Invalid Password and Login Attempt : " + user.FailedLoginAttempts,
-                    user.Id, userName);
-                return null;
-            }
-            return user;
-        }
-
-
-
         public string DuplicateUserName(User objSave)
         {
             if (All.Any(x => x.Id != objSave.Id && x.FirstName == objSave.FirstName && x.MiddleName == objSave.MiddleName && x.LastName == objSave.LastName && x.Email == objSave.Email && x.DeletedDate == null))
@@ -297,12 +266,12 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
-        public RefreshTokenDto Refresh(string accessToken, string refreshToken)
+        public async Task<RefreshTokenDto> Refresh(string accessToken, string refreshToken)
         {
             var principal = GetPrincipalFromExpiredToken(accessToken);
 
-            var login = _context.RefreshToken.FirstOrDefault(t =>
-                t.Token == refreshToken && t.ExpiredOn > DateTime.UtcNow);
+            var login = await _context.RefreshToken.Where(t =>
+                t.Token == refreshToken && t.ExpiredOn > DateTime.UtcNow).FirstOrDefaultAsync();
 
             if (login == null) throw new SecurityTokenException("Refresh token not found or has been expired.");
 

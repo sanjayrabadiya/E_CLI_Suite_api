@@ -9,7 +9,6 @@ namespace GSC.Respository.UserMgt
     public interface IUserRoleRepository : IGenericRepository<UserRole>
     {
         IList<DropDownDto> GetRoleByUserName(string userName);
-        IList<MenuDto> GetMenuList();
 
         IList<DropDownDto> GetUserNameByRoleId(int roleId);
     }

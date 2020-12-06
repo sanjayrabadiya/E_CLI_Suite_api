@@ -167,17 +167,17 @@ namespace GSC.Respository.EditCheckImpact
                    }).FirstOrDefault();
         }
 
-        public string GetVariableValue(EditCheckValidateDto editCheckValidateDto)
+        public string GetVariableValue(EditCheckValidateDto editCheckValidateDto, out bool isNa)
         {
 
             var screeningValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(t =>
                          t.ProjectDesignVariableId == editCheckValidateDto.ProjectDesignVariableId
                          && t.ScreeningTemplate.Id == editCheckValidateDto.ScreeningTemplateId).FirstOrDefault();
-
+            isNa = false;
             if (screeningValue == null) return "";
 
             var variableValue = screeningValue?.Value;
-
+            isNa = screeningValue.IsNa;
             if (screeningValue != null && string.IsNullOrEmpty(variableValue) && screeningValue.IsNa)
                 return "NA";
 

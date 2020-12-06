@@ -101,7 +101,8 @@ namespace GSC.Respository.EditCheckImpact
                          r.CheckBy == EditCheckRuleBy.ByVariable ||
                          r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
                         {
-                            r.ScreeningTemplateValue = _impactService.GetVariableValue(r);
+                            r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
+                            r.IsNa = isNa;
                         }
                     }
                 }
@@ -152,7 +153,8 @@ namespace GSC.Respository.EditCheckImpact
                 else if (r.IsSameTemplate)
                 {
                     r.ScreeningTemplateId = screeningTemplateId;
-                    r.ScreeningTemplateValue = _impactService.GetVariableValue(r);
+                    r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
+                    r.IsNa = isNa;
                 }
                 else if (r.ProjectDesignTemplateId != null)
                 {
@@ -167,7 +169,8 @@ namespace GSC.Respository.EditCheckImpact
                         r.CheckBy == EditCheckRuleBy.ByVariable ||
                         r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
                         {
-                            r.ScreeningTemplateValue = _impactService.GetVariableValue(r);
+                            r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
+                            r.IsNa = isNa;
                         }
                     }
                 }
@@ -260,6 +263,13 @@ namespace GSC.Respository.EditCheckImpact
 
                     if ((r.Operator == Operator.Optional || r.Operator == Operator.SoftFetch) && r.ValidateType == EditCheckValidateType.ReferenceVerifed)
                         editCheckTarget.OriginalValidationType = ValidationType.Soft;
+
+
+                    if (r.IsNa)
+                    {
+                        editCheckTarget.HasQueries = false;
+                        editCheckTarget.isInfo = true;
+                    }
 
                     var editCheckMessage = new EditCheckMessage();
                     editCheckMessage.AutoNumber = r.AutoNumber;
@@ -593,8 +603,9 @@ namespace GSC.Respository.EditCheckImpact
                 if ((int)screeningTemplate.Status < 3)
                     return false;
 
-                var screeningTemplateValueQuery = _screeningTemplateValueQueryRepository.All.Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id).
-                    Select(t => new { t.IsSystem, t.EditCheckRefValue }).FirstOrDefault();
+                var screeningTemplateValueQuery = _screeningTemplateValueQueryRepository.All.
+                    Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id).OrderByDescending(t => t.Id).
+                    Select(t => new { t.IsSystem, t.EditCheckRefValue }).LastOrDefault();
 
                 if (screeningTemplateValueQuery != null && screeningTemplateValueQuery.IsSystem)
                 {

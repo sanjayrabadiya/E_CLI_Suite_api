@@ -9,11 +9,12 @@ namespace GSC.Respository.UserMgt
 {
     public interface ICentreUserService
     {
-        Task<UserViewModel> ValidateClient(LoginDto loginDto, string clientUrl);
+        Task<UserViewModel> ValidateClient(LoginDto loginDto);
         Task<CommonResponceView> SaveUser(UserDto userDto, string clientUrl);
         Task<CommonResponceView> UpdateUser(UserDto userDto, string clientUrl);
-        void DeleteUser(string clientUrl,int Id);
+        Task<RefreshTokenDto> Refresh(RefreshTokenDto tokenn);
+        void DeleteUser(string clientUrl, int Id);
         Task<CommonResponceView> ChangePassword(ChangePasswordDto loginDto, string clientUrl);
-        Task<CommonResponceView> ActiveUser(string clientUrl,int Id);
+        Task<CommonResponceView> ActiveUser(string clientUrl, int Id);
     }
 }

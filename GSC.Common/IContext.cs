@@ -25,6 +25,7 @@ namespace GSC.Common
         EntityEntry Entry(object entity);
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
         IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class;
+        void SetDBConnection(string connectionString);
         void DetachAllEntities();
         DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
     }

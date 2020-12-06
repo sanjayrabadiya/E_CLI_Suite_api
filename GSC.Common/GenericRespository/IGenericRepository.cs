@@ -18,7 +18,7 @@ namespace GSC.Common.GenericRespository
 
         Task<IEnumerable<TC>> FindByAsync(Expression<Func<TC, bool>> predicate);
         TC Find(int id);
-
+        void SetDbConnection(string connectionString);
         Task<TC> FindAsync(int id);
         void Add(TC entity);
         void Update(TC entity);

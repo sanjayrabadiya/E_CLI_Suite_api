@@ -113,10 +113,11 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpPost("VisitRepeat")]
+        [TransactionRequired]
         public IActionResult VisitRepeat([FromBody] ScreeningVisitDto screeningVisitDto)
         {
             _screeningVisitRepository.VisitRepeat(screeningVisitDto);
-            if (_uow.Save() <= 0) throw new Exception("Visit Repeat failed on save.");
+            _uow.Save();
             return Ok();
         }
     }

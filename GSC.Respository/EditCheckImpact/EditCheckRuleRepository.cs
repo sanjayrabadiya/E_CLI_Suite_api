@@ -342,7 +342,7 @@ namespace GSC.Respository.EditCheckImpact
                 displayRule = displayRule + $"{r.EndParens} {r.LogicalOperator} ";
 
                 var col = new DataColumn();
-                col.DefaultValue = r.InputValue;
+                col.DefaultValue = r.InputValue ?? "";
 
                 decimal value;
                 decimal.TryParse(r.InputValue, out value);

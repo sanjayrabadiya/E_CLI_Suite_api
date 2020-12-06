@@ -16,12 +16,6 @@ namespace GSC.Api.Controllers.UserMgt
             _userRoleRepository = userRoleRepository;
         }
 
-        [HttpGet]
-        [Route("GetMenuList")]
-        public IActionResult GetMenuList()
-        {
-            var result = _userRoleRepository.GetMenuList();
-            return Ok(result);
-        }
+      
     }
 }
