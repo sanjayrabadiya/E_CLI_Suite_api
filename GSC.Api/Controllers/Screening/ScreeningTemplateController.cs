@@ -70,7 +70,7 @@ namespace GSC.Api.Controllers.Screening
             if (screeningTemplateId <= 0) return BadRequest();
 
             var screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplateId);
-            if (_uow.Save() <= 0) throw new Exception("Repeat Template failed on save.");
+            _uow.Save();
             return Ok(screeningTemplate.Id);
         }
 

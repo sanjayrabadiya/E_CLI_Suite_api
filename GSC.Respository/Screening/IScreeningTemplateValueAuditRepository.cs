@@ -8,5 +8,6 @@ namespace GSC.Respository.Screening
     public interface IScreeningTemplateValueAuditRepository : IGenericRepository<ScreeningTemplateValueAudit>
     {
         IList<ScreeningAuditDto> GetAudits(int screeningTemplateValueId);
+        void Save(ScreeningTemplateValueAudit audit);
     }
 }

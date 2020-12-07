@@ -174,7 +174,7 @@ namespace GSC.Respository.Screening
                     Value = value,
                     Note = "Save value from open visit"
                 };
-                _screeningTemplateValueAuditRepository.Add(audit);
+                _screeningTemplateValueAuditRepository.Save(audit);
             }
 
 
@@ -408,6 +408,8 @@ namespace GSC.Respository.Screening
             Add(screeningVisit);
 
             _context.Save();
+
+            screeningVisitDto.ScreeningVisitId = screeningVisit.Id;
 
             FindOpenVisitVarible(screeningVisit.ProjectDesignVisitId, screeningVisit.Id, screeningVisitDto.VisitOpenDate, screeningVisit.ScreeningEntryId);
 

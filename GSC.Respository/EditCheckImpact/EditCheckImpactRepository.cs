@@ -445,14 +445,11 @@ namespace GSC.Respository.EditCheckImpact
                     {
                         OldValue = oldValue,
                         Value = "",
-                        ReasonId = null,
-                        UserId = _jwtTokenAccesser.UserId,
-                        UserRoleId = _jwtTokenAccesser.RoleId,
                         ScreeningTemplateValueId = x.Id,
                         Note = $"{editCheckValidateDto.AutoNumber} {editCheckValidateDto.Message}"
                     };
 
-                    _screeningTemplateValueAuditRepository.Add(screeningTemplateValueAudit);
+                    _screeningTemplateValueAuditRepository.Save(screeningTemplateValueAudit);
                     _meddraCodingRepository.UpdateEditCheck(x.Id);
                 }
                 _screeningTemplateValueRepository.Update(x);
@@ -581,7 +578,7 @@ namespace GSC.Respository.EditCheckImpact
                 OldValue = oldValueName,
                 Note = note
             };
-            _screeningTemplateValueAuditRepository.Add(aduit);
+            _screeningTemplateValueAuditRepository.Save(aduit);
 
             _context.Save();
             _context.DetachAllEntities();

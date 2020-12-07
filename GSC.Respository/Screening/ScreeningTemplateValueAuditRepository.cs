@@ -17,10 +17,12 @@ namespace GSC.Respository.Screening
             {"UNK", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
         private readonly IGSCContext _context;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ScreeningTemplateValueAuditRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
             _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public IList<ScreeningAuditDto> GetAudits(int screeningTemplateValueId)
@@ -75,6 +77,17 @@ namespace GSC.Respository.Screening
             var day = Convert.ToInt32(values[2]);
 
             return "";
+        }
+
+
+        public void Save(ScreeningTemplateValueAudit audit)
+        {
+            audit.IpAddress = _jwtTokenAccesser.IpAddress;
+            audit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
+            audit.UserId = _jwtTokenAccesser.UserId;
+            audit.UserRoleId = _jwtTokenAccesser.RoleId;
+
+            Add(audit);
         }
     }
 }

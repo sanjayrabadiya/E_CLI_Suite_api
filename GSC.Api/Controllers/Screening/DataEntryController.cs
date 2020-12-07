@@ -118,7 +118,7 @@ namespace GSC.Api.Controllers.Screening
         {
             _screeningVisitRepository.VisitRepeat(screeningVisitDto);
             _uow.Save();
-            return Ok();
+            return Ok(screeningVisitDto.ScreeningVisitId);
         }
     }
 }

@@ -86,11 +86,9 @@ namespace GSC.Respository.Screening
                     ScreeningTemplateValue= screeningTemplateValue,
                     Value = string.IsNullOrEmpty(variable.DefaultValue) ? "" : variable.DefaultValue,
                     OldValue = null,
-                    Note = "Submitted with default data",
-                    UserId = _jwtTokenAccesser.UserId,
-                    UserRoleId = _jwtTokenAccesser.RoleId
+                    Note = "Submitted with default data"
                 };
-                _screeningTemplateValueAuditRepository.Add(audit);
+                _screeningTemplateValueAuditRepository.Save(audit);
             }
         }
 

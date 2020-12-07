@@ -465,11 +465,9 @@ namespace GSC.Respository.Screening
                 OldValue = queryOldValue,
                 Value = queryValue,
                 Note = screeningTemplateValueQueryDto.Note + " " + status,
-                UserId = _jwtTokenAccesser.UserId,
-                UserRoleId = _jwtTokenAccesser.RoleId,
                 ReasonId = screeningTemplateValueQueryDto.ReasonId
             };
-            _screeningTemplateValueAuditRepository.Add(audit);
+            _screeningTemplateValueAuditRepository.Save(audit);
         }
     }
 }

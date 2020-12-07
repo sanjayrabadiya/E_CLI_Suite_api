@@ -123,7 +123,7 @@ namespace GSC.Respository.Screening
                     variable.HasComments = t.IsComment;
                     variable.HasQueries = t.QueryStatus != null ? true : false;
                     variable.IsNaValue = t.IsNa;
-                    variable.IsSystem = t.IsSystem;
+                    variable.IsSystem = t.QueryStatus == QueryStatus.Closed ? false : t.IsSystem;
                     variable.WorkFlowButton =
                         SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
 
@@ -159,7 +159,7 @@ namespace GSC.Respository.Screening
                 var template = Find(screeningTemplateBasic.Id);
                 template.IsDisable = false;
                 Update(template);
-                 _context.Save();
+                _context.Save();
             }
 
             if (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
