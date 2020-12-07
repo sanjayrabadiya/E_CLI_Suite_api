@@ -130,6 +130,7 @@ namespace GSC.Api.Controllers.UserMgt
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.IsLocked = false;
             user.IsFirstTime = true;
+            user.UserType = UserMasterUserType.User;
             bool IsPremise = _environmentSetting.Value.IsPremise;
             if (!IsPremise)
             {
@@ -177,7 +178,7 @@ namespace GSC.Api.Controllers.UserMgt
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.IsFirstTime = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsFirstTime ?? false;
             user.IsLocked = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsLocked ?? false;
-
+            user.UserType = UserMasterUserType.User;
             bool IsPremise = _environmentSetting.Value.IsPremise;
             if (!IsPremise)
             {

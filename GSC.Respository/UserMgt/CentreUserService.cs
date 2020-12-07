@@ -62,7 +62,7 @@ namespace GSC.Respository.UserMgt
 
         public async Task<RefreshTokenDto> Refresh(RefreshTokenDto tokenn)
         {
-            var result = await HttpService.Post<RefreshTokenDto>(_httpClient, $"{_environmentSetting.Value.CentralApi}/Login/Refresh", tokenn);
+            var result = await HttpService.Post<RefreshTokenDto>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/Refresh", tokenn);
             return result;
         }
 

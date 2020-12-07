@@ -184,7 +184,8 @@ namespace GSC.Respository.UserMgt
         public LoginResponseDto BuildUserAuthObject(UserViewModel userViewModel, int roleId)
         {
             var roleTokenId = new Guid().ToString();
-            var user = Find(userViewModel.UserId);
+            var user = All.Where(x => x.Id == userViewModel.UserId).FirstOrDefault();
+                //Find(userViewModel.UserId);
   
             var login = new LoginResponseDto
             {

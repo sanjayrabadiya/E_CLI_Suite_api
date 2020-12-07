@@ -23,6 +23,7 @@ using GSC.Respository.UserMgt;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using GSC.Shared.Configuration;
+using GSC.Data.Entities.UserMgt;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -42,6 +43,7 @@ namespace GSC.Api.Controllers.Attendance
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IUserRepository _userRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
 
         public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -54,7 +56,8 @@ namespace GSC.Api.Controllers.Attendance
             IConfiguration configuration,
             ICentreUserService centreUserService,
             IOptions<EnvironmentSetting> environmentSetting,
-            IUserRepository userRepository
+            IUserRepository userRepository,
+            IUserRoleRepository userRoleRepository
             )
         {
             _randomizationRepository = randomizationRepository;
@@ -70,6 +73,7 @@ namespace GSC.Api.Controllers.Attendance
             _centreUserService = centreUserService;
             _environmentSetting = environmentSetting;
             _userRepository = userRepository;
+            _userRoleRepository = userRoleRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -115,16 +119,25 @@ namespace GSC.Api.Controllers.Attendance
             randomization.PatientStatusId = ScreeningPatientStatus.PreScreening;
             if (!_environmentSetting.Value.IsPremise)
             {
-                var user = _mapper.Map<UserDto>(randomizationDto);
-                user.UserType = UserMasterUserType.Patient;
-                user.UserName = RandomPassword.CreateRandomNumericNumber(6);
-                CommonResponceView userdetails = await _centreUserService.SaveUser(user, _environmentSetting.Value.CentralApi);
+                var userDto = _mapper.Map<UserDto>(randomizationDto);
+                userDto.UserType = UserMasterUserType.Patient;
+                userDto.UserName = RandomPassword.CreateRandomNumericNumber(6);
+                userDto.CompanyId = _jwtTokenAccesser.CompanyId;
+                CommonResponceView userdetails = await _centreUserService.SaveUser(userDto, _environmentSetting.Value.CentralApi);
                 if (!string.IsNullOrEmpty(userdetails.Message))
                 {
                     ModelState.AddModelError("Message", userdetails.Message);
                     return BadRequest(ModelState);
-                }              
+                }
                 randomization.UserId = userdetails.Id;
+
+                var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
+                user.Id = userdetails.Id;
+                _userRepository.Add(user);
+                UserRole userRole = new UserRole();
+                userRole.UserId= userdetails.Id;
+                userRole.UserRoleId = 2;
+               _userRoleRepository.Add(userRole);
             }
 
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
@@ -140,20 +153,24 @@ namespace GSC.Api.Controllers.Attendance
             if (RandomizationDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             RandomizationDto.Initial = RandomizationDto.Initial.PadRight(3, '-');
-            var details = _randomizationRepository.Find(RandomizationDto.Id);               
+            var details = _randomizationRepository.Find(RandomizationDto.Id);
             var randomization = _mapper.Map<Randomization>(RandomizationDto);
             randomization.PatientStatusId = details.PatientStatusId;
             if (!_environmentSetting.Value.IsPremise)
             {
-                var user = _mapper.Map<UserDto>(RandomizationDto);
-                user.UserType = UserMasterUserType.Patient;
-                CommonResponceView userdetails = await _centreUserService.UpdateUser(user, _environmentSetting.Value.CentralApi);
-                if (!string.IsNullOrEmpty(userdetails.Message))
-                {
-                    ModelState.AddModelError("Message", userdetails.Message);
-                    return BadRequest(ModelState);
-                }              
-                randomization.UserId = userdetails.Id;
+                //var userDto = _mapper.Map<UserDto>(RandomizationDto);
+                //userDto.UserType = UserMasterUserType.Patient;
+                //CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
+                //if (!string.IsNullOrEmpty(userdetails.Message))
+                //{
+                //    ModelState.AddModelError("Message", userdetails.Message);
+                //    return BadRequest(ModelState);
+                //}
+                //randomization.UserId = userdetails.Id;
+
+                //var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
+                //user.Id = userdetails.Id;
+                //_userRepository.Update(user);
             }
             _randomizationRepository.Update(randomization);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");

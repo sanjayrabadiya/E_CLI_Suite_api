@@ -256,10 +256,11 @@ namespace GSC.Api.Controllers.UserMgt
         [AllowAnonymous]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto token)
         {
-            if (_environmentSetting.Value.IsPremise)
-                return Ok(await _userRepository.Refresh(token.AccessToken, token.RefreshToken));
-            else
-                return Ok(await _centreUserService.Refresh(token));
+            return Ok(await _userRepository.Refresh(token.AccessToken, token.RefreshToken));
+            //if (_environmentSetting.Value.IsPremise)
+            //    return Ok(await _userRepository.Refresh(token.AccessToken, token.RefreshToken));
+            //else
+            //    return Ok(await _centreUserService.Refresh(token));
 
         }
 
