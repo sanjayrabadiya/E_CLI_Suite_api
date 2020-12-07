@@ -552,29 +552,19 @@ namespace GSC.Respository.EditCheckImpact
 
             }
 
-            var aduits = new List<ScreeningTemplateValueAudit>
-            {
-                new ScreeningTemplateValueAudit
-                {
-                    Value = valueName,
-                    OldValue = oldValueName,
-                    Note = note
-                }
-            };
+         
             if (screeningTemplateValue == null)
             {
                 screeningTemplateValue = new ScreeningTemplateValue
                 {
                     ScreeningTemplateId = screeningTemplateId,
                     ProjectDesignVariableId = projectDesignVariableId,
-                    Value = value,
-                    Audits = aduits
+                    Value = value
                 };
                 _screeningTemplateValueRepository.Add(screeningTemplateValue);
             }
             else
             {
-                screeningTemplateValue.Audits = aduits;
                 screeningTemplateValue.Value = value;
 
                 if (isDisable && string.IsNullOrEmpty(value))
@@ -582,6 +572,17 @@ namespace GSC.Respository.EditCheckImpact
 
                 _screeningTemplateValueRepository.Update(screeningTemplateValue);
             }
+
+            var aduit = new ScreeningTemplateValueAudit
+            {
+                ScreeningTemplateValue= screeningTemplateValue,
+                ScreeningTemplateValueId= screeningTemplateValue.Id,
+                Value = valueName,
+                OldValue = oldValueName,
+                Note = note
+            };
+            _screeningTemplateValueAuditRepository.Add(aduit);
+
             _context.Save();
             _context.DetachAllEntities();
 

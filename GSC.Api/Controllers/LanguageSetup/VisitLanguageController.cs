@@ -56,44 +56,19 @@ namespace GSC.Api.Controllers.LanguageSetup
 
             foreach (var item in visitLanguageDto.visitLanguages)
             {
-                VisitLanguage language = new VisitLanguage();
-                language.ProjectDesignVisitId = item.ProjectDesignVisitId;
-                language.LanguageId = item.LanguageId;
-                language.Display = item.Display;
-                _visitLanguageRepository.Add(language);
+                if (item.Id == 0)
+                {
+                    VisitLanguage language = new VisitLanguage();
+                    language.ProjectDesignVisitId = item.ProjectDesignVisitId;
+                    language.LanguageId = item.LanguageId;
+                    language.Display = item.Display;
+                    _visitLanguageRepository.Add(language);
+                }
             }
             if (_uow.Save() <= 0) throw new Exception("Creating visit language failed on save.");
             return Ok();
         }
 
-        [HttpPut]
-        public IActionResult Put([FromBody] VisitLanguageDto visitLanguageDto)
-        {
-            if (visitLanguageDto.Id <= 0) return BadRequest();
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            UpdateLevels(visitLanguageDto);
-            _uow.Save();
-            return Ok();
-        }
-
-        private void UpdateLevels(VisitLanguageDto visitLanguageDto)
-        {
-            var data = _visitLanguageRepository.FindBy(x => x.ProjectDesignVisitId == visitLanguageDto.Id && x.DeletedDate == null);
-            foreach (var language in data)
-            {
-                var languages = _mapper.Map<VisitLanguage>(language);
-                languages.DeletedDate = DateTime.Now;
-                languages.DeletedBy = _jwtTokenAccesser.UserId;
-                _visitLanguageRepository.Update(languages);
-            }
-            _uow.Save();
-            foreach (var language in visitLanguageDto.visitLanguages)
-            {
-                var languages = _mapper.Map<VisitLanguage>(language);
-                languages.Id = 0;
-                _visitLanguageRepository.Add(languages);
-            }
-        }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)

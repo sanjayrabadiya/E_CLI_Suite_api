@@ -28,10 +28,12 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueScheduleRepository _screeningTemplateValueScheduleRepository;
         private WorkFlowLevelDto _workFlowLevelDto;
         private readonly IGSCContext _context;
+        private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         public ScreeningTemplateValueQueryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
-            IScreeningTemplateValueScheduleRepository screeningTemplateValueScheduleRepository)
+            IScreeningTemplateValueScheduleRepository screeningTemplateValueScheduleRepository,
+            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -39,6 +41,7 @@ namespace GSC.Respository.Screening
             _projectWorkflowRepository = projectWorkflowRepository;
             _screeningTemplateValueScheduleRepository = screeningTemplateValueScheduleRepository;
             _context = context;
+            _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
         }
 
         public IList<ScreeningTemplateValueQueryDto> GetQueries(int screeningTemplateValueId)
@@ -455,18 +458,18 @@ namespace GSC.Respository.Screening
 
             screeningTemplateValueQuery.Value = queryValue;
             screeningTemplateValueQuery.OldValue = queryOldValue;
-            screeningTemplateValue.Audits = new List<ScreeningTemplateValueAudit>
+                    
+            var audit = new ScreeningTemplateValueAudit
             {
-                new ScreeningTemplateValueAudit
-                {
-                    OldValue = queryOldValue,
-                    Value = queryValue,
-                    Note = screeningTemplateValueQueryDto.Note + " " + status,
-                    UserId = _jwtTokenAccesser.UserId,
-                    UserRoleId = _jwtTokenAccesser.RoleId,
-                    ReasonId = screeningTemplateValueQueryDto.ReasonId
-                }
+                ScreeningTemplateValueId= screeningTemplateValue.Id,
+                OldValue = queryOldValue,
+                Value = queryValue,
+                Note = screeningTemplateValueQueryDto.Note + " " + status,
+                UserId = _jwtTokenAccesser.UserId,
+                UserRoleId = _jwtTokenAccesser.RoleId,
+                ReasonId = screeningTemplateValueQueryDto.ReasonId
             };
+            _screeningTemplateValueAuditRepository.Add(audit);
         }
     }
 }
