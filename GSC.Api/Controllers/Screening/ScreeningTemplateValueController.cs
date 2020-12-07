@@ -24,14 +24,15 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public ScreeningTemplateValueController(IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IUploadSettingRepository uploadSettingRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -39,6 +40,7 @@ namespace GSC.Api.Controllers.Screening
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
         }
 
         [HttpGet("{id}")]
@@ -62,20 +64,20 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
             screeningTemplateValue.Id = 0;
-            screeningTemplateValue.Audits = new List<ScreeningTemplateValueAudit>
-            {
-                new ScreeningTemplateValueAudit
-                {
-                    Value = screeningTemplateValueDto.IsNa ? "N/A" : value,
-                    OldValue = screeningTemplateValueDto.OldValue,
-                    TimeZone = screeningTemplateValueDto.TimeZone,
-                    UserId = _jwtTokenAccesser.UserId,
-                    UserRoleId = _jwtTokenAccesser.RoleId,
-                    IpAddress = _jwtTokenAccesser.IpAddress
-                }
-            };
-
+           
             _screeningTemplateValueRepository.Add(screeningTemplateValue);
+
+            var aduit = new ScreeningTemplateValueAudit
+            {
+                ScreeningTemplateValue = screeningTemplateValue,
+                Value = screeningTemplateValueDto.IsNa ? "N/A" : value,
+                OldValue = screeningTemplateValueDto.OldValue,
+                TimeZone = screeningTemplateValueDto.TimeZone,
+                UserId = _jwtTokenAccesser.UserId,
+                UserRoleId = _jwtTokenAccesser.RoleId,
+                IpAddress = _jwtTokenAccesser.IpAddress
+            };
+            _screeningTemplateValueAuditRepository.Add(aduit);
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
@@ -110,19 +112,19 @@ namespace GSC.Api.Controllers.Screening
             var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
 
             var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
-            screeningTemplateValue.Audits = new List<ScreeningTemplateValueAudit>
+          
+            var aduit = new ScreeningTemplateValueAudit
             {
-                new ScreeningTemplateValueAudit
-                {
-                    Value = value,
-                    Note = screeningTemplateValueDto.IsDeleted ? "Clear Data" : null,
-                    OldValue = screeningTemplateValueDto.OldValue,
-                    TimeZone = screeningTemplateValueDto.TimeZone,
-                    UserId = _jwtTokenAccesser.UserId,
-                    UserRoleId = _jwtTokenAccesser.RoleId,
-                    IpAddress = _jwtTokenAccesser.IpAddress
-                }
+                ScreeningTemplateValueId = screeningTemplateValue.Id,
+                Value = value,
+                Note = screeningTemplateValueDto.IsDeleted ? "Clear Data" : null,
+                OldValue = screeningTemplateValueDto.OldValue,
+                TimeZone = screeningTemplateValueDto.TimeZone,
+                UserId = _jwtTokenAccesser.UserId,
+                UserRoleId = _jwtTokenAccesser.RoleId,
+                IpAddress = _jwtTokenAccesser.IpAddress
             };
+            _screeningTemplateValueAuditRepository.Add(aduit);
 
             if (screeningTemplateValueDto.IsDeleted)
                 _screeningTemplateValueRepository.DeleteChild(screeningTemplateValue.Id);

@@ -36,11 +36,13 @@ namespace GSC.Respository.Screening
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         public ScreeningTemplateValueRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IProjectDesignVariableRepository projectDesignVariableRepository, IAppSettingRepository appSettingRepository,
             IJobMonitoringRepository jobMonitoringRepository,
             IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
-            IUploadSettingRepository uploadSettingRepository)
+            IUploadSettingRepository uploadSettingRepository,
+            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository)
             : base(context)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
@@ -51,6 +53,7 @@ namespace GSC.Respository.Screening
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;
             _uploadSettingRepository = uploadSettingRepository;
+            _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
         }
 
         public void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId,
@@ -68,23 +71,26 @@ namespace GSC.Respository.Screening
                 if (projectDesignVariableId != null && projectDesignVariableId.Any(c => c == variable.Id))
                     continue;
 
-                Add(new ScreeningTemplateValue
+                var screeningTemplateValue = new ScreeningTemplateValue
                 {
                     ScreeningTemplateId = screeningTemplateId,
                     ProjectDesignVariableId = variable.Id,
                     Value = variable.DefaultValue,
-                    Audits = new List<ScreeningTemplateValueAudit>
-                    {
-                        new ScreeningTemplateValueAudit
-                        {
-                            Value = string.IsNullOrEmpty(variable.DefaultValue) ? "" : variable.DefaultValue,
-                            OldValue = null,
-                            Note = "Submitted with default data",
-                            UserId = _jwtTokenAccesser.UserId,
-                            UserRoleId = _jwtTokenAccesser.RoleId
-                        }
-                    }
-                });
+
+                };
+                Add(screeningTemplateValue);
+
+
+                var audit = new ScreeningTemplateValueAudit
+                {
+                    ScreeningTemplateValue= screeningTemplateValue,
+                    Value = string.IsNullOrEmpty(variable.DefaultValue) ? "" : variable.DefaultValue,
+                    OldValue = null,
+                    Note = "Submitted with default data",
+                    UserId = _jwtTokenAccesser.UserId,
+                    UserRoleId = _jwtTokenAccesser.RoleId
+                };
+                _screeningTemplateValueAuditRepository.Add(audit);
             }
         }
 

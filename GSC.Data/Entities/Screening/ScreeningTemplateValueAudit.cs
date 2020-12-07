@@ -7,6 +7,7 @@ namespace GSC.Data.Entities.Screening
     public class ScreeningTemplateValueAudit : BaseEntity
     {
         public int ScreeningTemplateValueId { get; set; }
+      
         public string Value { get; set; }
         public string Note { get; set; }
         public int? ReasonId { get; set; }
@@ -15,7 +16,7 @@ namespace GSC.Data.Entities.Screening
         public int? UserId { get; set; }
         public int? UserRoleId { get; set; }
         public string TimeZone { get; set; }
-
+        public ScreeningTemplateValue ScreeningTemplateValue { get; set; }
         [ForeignKey("ReasonId")] public AuditReason AuditReason { get; set; }
     }
 }

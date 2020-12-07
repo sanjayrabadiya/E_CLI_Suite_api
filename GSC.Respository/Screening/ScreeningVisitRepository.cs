@@ -32,7 +32,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningProgress _screeningProgress;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
         private readonly IImpactService _impactService;
-
+        private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         public ScreeningVisitRepository(IGSCContext context,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
@@ -45,6 +45,7 @@ namespace GSC.Respository.Screening
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningProgress screeningProgress,
             IScheduleRuleRespository scheduleRuleRespository,
+            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
             IImpactService impactService)
             : base(context)
         {
@@ -60,6 +61,7 @@ namespace GSC.Respository.Screening
             _screeningProgress = screeningProgress;
             _scheduleRuleRespository = scheduleRuleRespository;
             _impactService = impactService;
+            _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
         }
 
 
@@ -154,26 +156,25 @@ namespace GSC.Respository.Screening
 
             if (!_projectDesignVariableRepository.All.Any(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.Id == projectDesignVariableId))
                 return false;
-            var aduits = new List<ScreeningTemplateValueAudit>
-            {
-                new ScreeningTemplateValueAudit
-                {
-                    Value = value,
-                    Note = "Save value from open visit"
-                }
-            };
-
+           
             if (!_screeningTemplateValueRepository.All.Any(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ScreeningTemplateId == screeningTemplate.Id))
             {
                 var screeningTemplateValue = new ScreeningTemplateValue
                 {
                     ScreeningTemplateId = screeningTemplate.Id,
                     ProjectDesignVariableId = projectDesignVariableId,
-                    Value = value,
-                    Audits = aduits
+                    Value = value
                 };
 
                 _screeningTemplateValueRepository.Add(screeningTemplateValue);
+
+               var audit= new ScreeningTemplateValueAudit
+                {
+                   ScreeningTemplateValue= screeningTemplateValue,
+                    Value = value,
+                    Note = "Save value from open visit"
+                };
+                _screeningTemplateValueAuditRepository.Add(audit);
             }
 
 
