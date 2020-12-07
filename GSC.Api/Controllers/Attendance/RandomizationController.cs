@@ -123,6 +123,7 @@ namespace GSC.Api.Controllers.Attendance
                 userDto.UserType = UserMasterUserType.Patient;
                 userDto.UserName = RandomPassword.CreateRandomNumericNumber(6);
                 userDto.CompanyId = _jwtTokenAccesser.CompanyId;
+                userDto.IsFirstTime = true;
                 CommonResponceView userdetails = await _centreUserService.SaveUser(userDto, _environmentSetting.Value.CentralApi);
                 if (!string.IsNullOrEmpty(userdetails.Message))
                 {
@@ -158,19 +159,24 @@ namespace GSC.Api.Controllers.Attendance
             randomization.PatientStatusId = details.PatientStatusId;
             if (!_environmentSetting.Value.IsPremise)
             {
-                //var userDto = _mapper.Map<UserDto>(RandomizationDto);
-                //userDto.UserType = UserMasterUserType.Patient;
-                //CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
-                //if (!string.IsNullOrEmpty(userdetails.Message))
-                //{
-                //    ModelState.AddModelError("Message", userdetails.Message);
-                //    return BadRequest(ModelState);
-                //}
-                //randomization.UserId = userdetails.Id;
-
-                //var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
-                //user.Id = userdetails.Id;
-                //_userRepository.Update(user);
+                var userDetail = _userRepository.FindBy(x => x.Id == details.UserId).FirstOrDefault();
+                userDetail.FirstName = RandomizationDto.FirstName;
+                userDetail.MiddleName = RandomizationDto.LastName;
+                userDetail.LastName = RandomizationDto.LastName;
+                userDetail.DateOfBirth = RandomizationDto.DateOfBirth;
+                userDetail.Email = RandomizationDto.Email;
+                userDetail.Phone = RandomizationDto.PrimaryContactNumber;
+                var userDto = _mapper.Map<UserDto>(userDetail);
+                CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
+                if (!string.IsNullOrEmpty(userdetails.Message))
+                {
+                    ModelState.AddModelError("Message", userdetails.Message);
+                    return BadRequest(ModelState);
+                }
+                randomization.UserId = userdetails.Id;
+                var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
+                user.Id = userdetails.Id;
+                _userRepository.Update(user);
             }
             _randomizationRepository.Update(randomization);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
