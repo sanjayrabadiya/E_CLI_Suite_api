@@ -33,8 +33,8 @@ namespace GSC.Api.Controllers.LanguageSetup
         }
 
         [HttpGet]
-        [Route("GetVisit/{VisitId}")]
-        public IActionResult GetVisit(int VisitId)
+        [Route("GetVisitLanguage/{VisitId}")]
+        public IActionResult GetVisitLanguage(int VisitId)
         {
             var visitLanguage = _visitLanguageRepository.GetVisitLanguageList(VisitId);
             return Ok(visitLanguage);
