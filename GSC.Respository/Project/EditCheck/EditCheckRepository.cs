@@ -52,12 +52,15 @@ namespace GSC.Respository.Project.EditCheck
             if (projectList == null || projectList.Count == 0)
                 return new List<EditCheckDto>();
 
-            return All.Where(t => (t.CompanyId == null
+            var EditCheckData = All.Where(t => (t.CompanyId == null
                                    || t.CompanyId == _jwtTokenAccesser.CompanyId)
-                                  && isDeleted ? t.DeletedDate != null : t.DeletedDate == null
                                   && t.ProjectDesignId == projectDesignId
                                   && projectList.Any(c => c == t.ProjectDesign.ProjectId)
-            ).Select(r => new EditCheckDto
+                                  );
+
+            EditCheckData = EditCheckData.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null);
+
+            return EditCheckData.Select(r => new EditCheckDto
             {
                 Id = r.Id,
                 ProjectDesignId = r.ProjectDesignId,
@@ -231,7 +234,7 @@ namespace GSC.Respository.Project.EditCheck
 
             Update(editCheck);
 
-             _context.Save();
+            _context.Save();
 
             return editCheck;
         }
