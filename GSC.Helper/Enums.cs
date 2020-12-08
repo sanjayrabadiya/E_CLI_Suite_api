@@ -497,7 +497,7 @@ namespace GSC.Helper
     public enum ScreeningPatientStatus : int
     {
         [Description("Pre-Screening")] PreScreening = 1,
-        [Description("Screening")] Screening = 2,
+        [Description("Screened")] Screening = 2,
         [Description("Consent In Process")] ConsentInProcess = 3,
         [Description("Consent Completed")] ConsentCompleted = 4,
         [Description("Re-Consent in Process")] ReConsentInProcess = 5,

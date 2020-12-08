@@ -43,7 +43,7 @@ namespace GSC.Respository.Configuration
             var number = GetPrefix(result.PrefixFormat, separate);
             number += GetYear(result.YearFormat) + separate;
             number += GetMonth(result.MonthFormat) + separate;
-            number += (result.StartNumber + TotalSite + 1).ToString().PadLeft(result.NumberLength, '0');
+            number += (result.StartNumber - 1 + TotalSite + 1).ToString().PadLeft(result.NumberLength, '0');
             number = number.Replace(" ", "").Replace("//", "/").Replace("--", "-");
 
             return number.ToUpper();
