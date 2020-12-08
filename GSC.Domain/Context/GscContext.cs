@@ -288,6 +288,10 @@ namespace GSC.Domain.Context
 
         public DbSet<ProjectModuleRights> ProjectModuleRights { get; set; }
         public DbSet<VisitLanguage> VisitLanguage { get; set; }
+        public DbSet<TemplateLanguage> TemplateLanguage { get; set; }
+        public DbSet<VariableLanguage> VariableLanguage { get; set; }
+        public DbSet<VariableNoteLanguage> VariableNoteLanguage { get; set; }
+        public DbSet<TemplateNoteLanguage> TemplateNoteLanguage { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

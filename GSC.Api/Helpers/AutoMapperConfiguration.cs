@@ -285,6 +285,11 @@ namespace GSC.Api.Helpers
             CreateMap<Site, SiteDto>().ReverseMap();
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
             CreateMap<VisitLanguage, VisitLanguageDto>().ReverseMap();
+            CreateMap<TemplateLanguage, TemplateLanguageDto>().ReverseMap();
+            CreateMap<VariableLanguage, VariableLanguageDto>().ReverseMap();
+            CreateMap<VariableNoteLanguage, VariableNoteLanguageDto>().ReverseMap();
+            CreateMap<TemplateNoteLanguage, TemplateNoteLanguageDto>().ReverseMap();
+
 
             //CreateMap<Users, UserDto>().ReverseMap();
 

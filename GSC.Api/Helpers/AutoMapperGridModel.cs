@@ -197,6 +197,26 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
               .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
               .ReverseMap();
+
+            CreateMap<TemplateLanguage, TemplateLanguageGridDto>()
+             .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
+             .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
+             .ReverseMap();
+
+            CreateMap<VariableLanguage, VariableLanguageGridDto>()
+             .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
+             .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
+             .ReverseMap();
+
+            CreateMap<VariableNoteLanguage, VariableNoteLanguageGridDto>()
+             .ForMember(x => x.Note, x => x.MapFrom(a => a.ProjectDesignVariable.Note))
+             .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
+             .ReverseMap();
+
+            CreateMap<TemplateNoteLanguage, TemplateNoteLanguageGridDto>()
+            .ForMember(x => x.Note, x => x.MapFrom(a => a.ProjectDesignTemplateNote.Note))
+            .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
+            .ReverseMap();
         }
     }
 }
