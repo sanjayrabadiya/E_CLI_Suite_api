@@ -279,7 +279,7 @@ namespace GSC.Api.Controllers.Master
         [Route("CheckNumberFormat")]
         public IActionResult CheckNumberFormat()
         {
-            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "pro" && x.DeletedDate == null).FirstOrDefault();
+            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "project" && x.DeletedDate == null).FirstOrDefault();
             return Ok(numberFormat);
         }
 
@@ -287,7 +287,7 @@ namespace GSC.Api.Controllers.Master
         [Route("CheckSitesNumberFormat")]
         public IActionResult CheckSitesNumberFormat()
         {
-            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "prochild" && x.DeletedDate == null).FirstOrDefault();
+            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).FirstOrDefault();
             return Ok(numberFormat);
         }
 
