@@ -118,13 +118,6 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
-        [Route("GetVisitByLockedDropDown")]
-        public IActionResult GetVisitByLockedDropDown([FromQuery] LockUnlockDDDto lockUnlockDDDto)
-        {
-            return Ok(_projectDesignVisitRepository.GetVisitByLockedDropDown(lockUnlockDDDto));
-        }
-
-        [HttpGet]
         [Route("GetVisitsByProjectDesignId/{projectDesignId}")]
         public IActionResult GetVisitsByProjectDesignId(int projectDesignId)
         {

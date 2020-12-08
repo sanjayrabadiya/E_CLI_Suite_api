@@ -19,5 +19,7 @@ namespace GSC.Respository.Screening
         ScreeningSummaryDto GetSummary(int id);
         List<DropDownDto> GetProjectStatusAndLevelDropDown(int parentProjectId);
         IList<DropDownDto> GetSubjectByProjecId(int projectId);
+        IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock);
+        IList<DropDownDto> GetPeriodByProjectIdIsLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
     }
 }

@@ -29,6 +29,8 @@ namespace GSC.Api.Controllers.Screening
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IScreeningProgress _screeningProgress;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
+        private readonly IScreeningVisitRepository _screeningVisitRepository;
+
         public ScreeningEntryController(IScreeningEntryRepository screeningEntryRepository,
             IUnitOfWork uow, IMapper mapper,
             IUserRecentItemRepository userRecentItemRepository,
@@ -36,7 +38,8 @@ namespace GSC.Api.Controllers.Screening
             IAttendanceRepository attendanceRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
-            IScreeningProgress screeningProgress)
+            IScreeningProgress screeningProgress,
+            IScreeningVisitRepository screeningVisitRepository)
         {
             _screeningEntryRepository = screeningEntryRepository;
             _uow = uow;
@@ -46,6 +49,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningProgress = screeningProgress;
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
+            _screeningVisitRepository = screeningVisitRepository;
         }
 
         [HttpGet("{id}")]
@@ -191,6 +195,27 @@ namespace GSC.Api.Controllers.Screening
         public IActionResult GetSubjectByProjecId(int projectId)
         {
             return Ok(_screeningEntryRepository.GetSubjectByProjecId(projectId));
+        }
+
+        [HttpGet]
+        [Route("GetSubjectByProjecIdLocked/{projectId}/{isLock}")]
+        public IActionResult GetSubjectByProjecIdLocked(int projectId, bool isLock)
+        {
+            return Ok(_screeningEntryRepository.GetSubjectByProjecIdLocked(projectId, isLock));
+        }
+
+        [HttpGet]
+        [Route("GetPeriodByProjectIdIsLocked")]
+        public IActionResult GetPeriodByProjectIdIsLocked([FromQuery] LockUnlockDDDto lockUnlockDDDto)
+        {
+            return Ok(_screeningEntryRepository.GetPeriodByProjectIdIsLockedDropDown(lockUnlockDDDto));
+        }
+
+        [HttpGet]
+        [Route("GetVisitByLockedDropDown")]
+        public IActionResult GetVisitByLockedDropDown([FromQuery] LockUnlockDDDto lockUnlockDDDto)
+        {
+            return Ok(_screeningVisitRepository.GetVisitByLockedDropDown(lockUnlockDDDto));
         }
     }
 }

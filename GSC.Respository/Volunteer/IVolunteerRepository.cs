@@ -14,7 +14,7 @@ namespace GSC.Respository.Volunteer
         IList<VolunteerAttendaceDto> GetVolunteerForAttendance(VolunteerSearchDto search);
         
 
-        IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock);
+        //IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock);
 
     }
 }

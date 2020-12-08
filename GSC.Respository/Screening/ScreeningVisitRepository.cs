@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
@@ -414,6 +415,32 @@ namespace GSC.Respository.Screening
             FindOpenVisitVarible(screeningVisit.ProjectDesignVisitId, screeningVisit.Id, screeningVisitDto.VisitOpenDate, screeningVisit.ScreeningEntryId);
 
             PatientStatus(screeningVisit.ScreeningEntryId);
+        }
+
+        public IList<DropDownDto> GetVisitByLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
+        {
+            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ChildProjectId).ToList().Select(x => x.Id).ToList();
+
+            var Visit = _context.ScreeningVisit.Include(a => a.ScreeningEntry).Include(a => a.ProjectDesignVisit)
+                .Include(a => a.ScreeningTemplates)
+                .Where(a => a.DeletedDate == null && ParentProject != null ? a.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningEntry.ProjectId)
+                ).ToList();
+
+            if (lockUnlockDDDto.SubjectIds != null)
+                Visit = Visit.Where(a => lockUnlockDDDto.SubjectIds.Contains(a.ScreeningEntryId)).ToList();
+
+            if (lockUnlockDDDto.Id != null)
+                Visit = Visit.Where(a => lockUnlockDDDto.Id.Contains(a.ProjectDesignVisit.ProjectDesignPeriodId)).ToList();
+
+            Visit = Visit.Where(a => a.ScreeningTemplates.Where(t => t.IsLocked == !lockUnlockDDDto.IsLock).Count() > 0
+                  && a.ScreeningTemplates != null).ToList();
+
+            return Visit.GroupBy(x => x.ProjectDesignVisitId).Select(x => new DropDownDto
+            {
+                Id = x.Key,
+                Value = x.FirstOrDefault().ProjectDesignVisit.DisplayName
+            }).Distinct().ToList();
         }
     }
 }

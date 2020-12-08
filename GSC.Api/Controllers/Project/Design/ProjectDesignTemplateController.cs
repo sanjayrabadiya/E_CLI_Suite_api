@@ -305,13 +305,6 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
-        [Route("GetTemplateByLockedDropDown")]
-        public IActionResult GetTemplateByLockedDropDown([FromQuery] LockUnlockDDDto lockUnlockDDDto)
-        {
-            return Ok(_projectDesignTemplateRepository.GetTemplateByLockedDropDown(lockUnlockDDDto));
-        }
-
-        [HttpGet]
         [Route("GetTemplateDropDownForProjectSchedule/{projectDesignVisitId}/{collectionSource:int?}/{refVariable:int?}")]
         public IActionResult GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource = null, int? refVariable = null)
         {

@@ -12,6 +12,5 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetPeriodDropDown(int projectDesignId);
         IList<DropDownWithSeqDto> GetPeriodByProjectIdDropDown(int projectId);
 
-        IList<DropDownWithSeqDto> getPeriodByProjectIdIsLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
     }
 }

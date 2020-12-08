@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
@@ -27,5 +28,6 @@ namespace GSC.Respository.Screening
         int GetProjectDesignId(int screeningTemplateId);
         int GeScreeningEntryId(int screeningTemplateId);
         string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel);
+        IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
     }
 }

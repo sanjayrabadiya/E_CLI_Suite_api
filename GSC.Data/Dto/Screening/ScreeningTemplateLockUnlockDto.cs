@@ -44,7 +44,7 @@ namespace GSC.Data.Dto.Screening
 
     public class LockUnlockDDDto
     {
-        public int Id { get; set; }
+        public int?[] Id { get; set; }
         public int ProjectId { get; set; }
         public int ChildProjectId { get; set; }
         public int?[] SubjectIds { get; set; }

@@ -110,13 +110,6 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
-        [Route("getPeriodByProjectIdIsLockedDropDown")]
-        public IActionResult getPeriodByProjectIdIsLockedDropDown([FromQuery] LockUnlockDDDto lockUnlockDDDto)
-        {
-            return Ok(_projectDesignPeriodRepository.getPeriodByProjectIdIsLockedDropDown(lockUnlockDDDto));
-        }
-
-        [HttpGet]
         [Route("ClonePeriod/{id}/{noOfPeriods}")]
         public IActionResult ClonePeriod(int id, int noOfPeriods)
         {

@@ -549,5 +549,55 @@ namespace GSC.Respository.Screening
                 }).Distinct().ToList();
 
         }
+
+        public IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock)
+        {
+            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
+
+            var subject = All.Include(a => a.Randomization).Include(a => a.Attendance).Include(a => a.ScreeningVisit)
+                .ThenInclude(x => x.ScreeningTemplates).
+                Where(a => a.DeletedDate == null && ParentProject != null ? a.ProjectId == projectId : sites.Contains(a.ProjectId)
+               ).ToList();
+
+            subject = subject.Where(x => x.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == !isLock).Count() > 0 && z.ScreeningTemplates != null).Count() > 0
+                        && x.ScreeningVisit != null).ToList();
+
+            return subject.Select(x => new DropDownDto
+            {
+                Id = x.Id,
+                Value = x.RandomizationId != null
+                        ? Convert.ToString(x.Randomization.ScreeningNumber + " - " +
+                                           x.Randomization.Initial +
+                                           (x.Randomization.RandomizationNumber == null
+                                               ? ""
+                                               : " - " + x.Randomization.RandomizationNumber))
+                        : Convert.ToString(
+                            Convert.ToString(x.Attendance.ProjectSubject != null
+                                ? x.Attendance.ProjectSubject.Number
+                                : "") + " - " + x.Attendance.Volunteer.FullName),
+                Code = "Screening",
+            }).Distinct().ToList();
+        }
+
+        public IList<DropDownDto> GetPeriodByProjectIdIsLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
+        {
+            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ChildProjectId).ToList().Select(x => x.Id).ToList();
+
+            var Period = All.Include(a => a.ProjectDesignPeriod).Include(a => a.ScreeningVisit).ThenInclude(a => a.ScreeningTemplates)
+                .Where(a => a.DeletedDate == null && ParentProject != null ? a.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ProjectId)
+                && (lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(a.Id))).ToList();
+
+            Period = Period.Where(a => a.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == !lockUnlockDDDto.IsLock).Count() > 0
+                  && z.ScreeningTemplates != null).Count() > 0
+                && a.ScreeningVisit != null).ToList();
+
+            return Period.GroupBy(x => x.ProjectDesignPeriodId).Select(x => new DropDownDto
+            {
+                Id = x.Key,
+                Value = x.FirstOrDefault().ProjectDesignPeriod.DisplayName
+            }).Distinct().ToList();
+        }
     }
 }

@@ -95,74 +95,7 @@ namespace GSC.Respository.Project.Design
             return templates;
         }
 
-        public IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
-        {
-            var templates = new List<DropDownDto>();
-            var screeningEntryId = _context.ScreeningEntry.Where(x => lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(x.AttendanceId)).ToList();
-            var screeninglockAudit = new List<ScreeningTemplateLockUnlockAudit>();
-            if (lockUnlockDDDto.ChildProjectId != lockUnlockDDDto.ProjectId)
-                screeninglockAudit = _context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
-            else
-                screeninglockAudit = _context.ScreeningTemplateLockUnlockAudit.Include(t => t.ScreeningTemplate).Where(x => x.ProjectId == lockUnlockDDDto.ProjectId).ToList();
-
-            if (lockUnlockDDDto.IsLock)
-            {
-                var grplockedIn = screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
-                          .Select(y => new LockUnlockListDto()
-                          {
-                              Id = y.Key.ScreeningEntryId,
-                              ScreeningTemplateId = y.Key.ScreeningTemplateId,
-                              TemplateId = y.LastOrDefault(t => t.ScreeningTemplateId == y.Key.ScreeningTemplateId).ScreeningTemplate.ProjectDesignTemplateId,
-                              IsLocked = y.LastOrDefault().IsLocked,
-                              ProjectId = y.LastOrDefault().ProjectId
-                          }).ToList();
-
-                templates = All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == lockUnlockDDDto.Id).OrderBy(t => t.Id).Select(
-                t => new DropDownDto
-                {
-                    Id = t.Id,
-                    Value = t.TemplateName,
-                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
-                }).ToList();
-
-                if (lockUnlockDDDto.SubjectIds != null && lockUnlockDDDto.SubjectIds.Length == 1)
-                    templates.RemoveAll(r => grplockedIn.Where(x => screeningEntryId.Any(y => y.Id == x.Id)).Any(a => a.TemplateId == r.Id && a.IsLocked));
-            }
-            else
-            {
-                templates = (from template in _context.ProjectDesignTemplate.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == lockUnlockDDDto.Id)
-                             join locktemplate in screeninglockAudit.GroupBy(x => new { x.ScreeningEntryId, x.ScreeningTemplateId })
-                             .Select(y => new LockUnlockListDto
-                             {
-                                 Id = y.LastOrDefault().Id,
-                                 screeningEntryId = y.Key.ScreeningEntryId,
-                                 ScreeningTemplateId = y.Key.ScreeningTemplateId,
-                                 TemplateId = y.LastOrDefault(t => t.ScreeningTemplateId == y.Key.ScreeningTemplateId).ScreeningTemplate.ProjectDesignTemplateId,
-                                 IsLocked = y.LastOrDefault().IsLocked
-                             }).Where(x => x.IsLocked && screeningEntryId.Any(y => y.Id == x.screeningEntryId)).ToList()
-                             on template.Id equals locktemplate.TemplateId
-                             group template by template.Id into gcs
-                             select new DropDownDto
-                             {
-                                 Id = gcs.Key,
-                                 Value = gcs.FirstOrDefault().TemplateName
-                             }).Distinct().ToList();
-            }
-
-            // new optimization
-            //var screeningTemplates = _context.ScreeningTemplate.Include(x => x.ScreeningEntry).Where(x => x.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId).ToList();
-
-            //var templates = screeningTemplates.Where(x => (lockUnlockDDDto.SubjectIds == null
-            //    || lockUnlockDDDto.SubjectIds.Contains(x.ScreeningEntry.AttendanceId)) && x.IsLocked != lockUnlockDDDto.IsLock)
-            //    .Select(x => new DropDownDto
-            //    {
-            //        Id = x.ProjectDesignTemplate.Id,
-            //        Value = x.ProjectDesignTemplate.TemplateName
-            //    }).ToList();
-
-            return templates;
-        }
-
+       
         public IList<DropDownDto> GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource, int? refVariable)
         {
             var templates = All.Where(x => x.DeletedDate == null

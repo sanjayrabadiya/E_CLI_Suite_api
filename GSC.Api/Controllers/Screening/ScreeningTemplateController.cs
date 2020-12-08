@@ -312,6 +312,11 @@ namespace GSC.Api.Controllers.Screening
             return Ok();
         }
 
-
+        [HttpGet]
+        [Route("GetTemplateByLockedDropDown")]
+        public IActionResult GetTemplateByLockedDropDown([FromQuery] LockUnlockDDDto lockUnlockDDDto)
+        {
+            return Ok(_screeningTemplateRepository.GetTemplateByLockedDropDown(lockUnlockDDDto));
+        }
     }
 }

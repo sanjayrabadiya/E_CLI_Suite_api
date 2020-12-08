@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
@@ -22,5 +23,6 @@ namespace GSC.Respository.Screening
         string CheckOpenDate(ScreeningVisitDto screeningVisitDto);
         string CheckScheduleDate(ScreeningVisitHistoryDto screeningVisitDto);
         void ScheduleVisitUpdate(int screeningEntryId);
+        IList<DropDownDto> GetVisitByLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
     }
 }
