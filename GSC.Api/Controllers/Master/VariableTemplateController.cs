@@ -27,13 +27,15 @@ namespace GSC.Api.Controllers.Master
         private readonly IUnitOfWork _uow;
         private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
+        private readonly IVariableTemplateNoteRepository _variableTemplateNoteRepository;
 
         public VariableTemplateController(IVariableTemplateRepository variableTemplateRepository,
             IUnitOfWork uow, IMapper mapper,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
-            IVariableTemplateDetailRepository variableTemplateDetailRepository)
+            IVariableTemplateDetailRepository variableTemplateDetailRepository,
+            IVariableTemplateNoteRepository variableTemplateNoteRepository)
         {
             _variableTemplateRepository = variableTemplateRepository;
             _uow = uow;
@@ -42,6 +44,7 @@ namespace GSC.Api.Controllers.Master
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _variableTemplateDetailRepository = variableTemplateDetailRepository;
+            _variableTemplateNoteRepository = variableTemplateNoteRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -100,6 +103,14 @@ namespace GSC.Api.Controllers.Master
             }
 
             _variableTemplateRepository.Add(variableTemplate);
+            variableTemplate.VariableTemplateDetails.ForEach(item =>
+            {
+                _variableTemplateDetailRepository.Add(item);
+            });
+            variableTemplate.Notes.ToList().ForEach(item =>
+            {
+                _variableTemplateNoteRepository.Add(item);
+            });
             if (_uow.Save() <= 0) throw new Exception("Creating Variable Template failed on save.");
             return Ok(variableTemplate.Id);
         }
@@ -121,10 +132,24 @@ namespace GSC.Api.Controllers.Master
 
             UpdateTemplateDetail(variableTemplate);
 
-            for (var i = 0; i < variableTemplate.VariableTemplateDetails.Count; i++)
-                variableTemplate.VariableTemplateDetails[i].SeqNo = i + 1;
-
             _variableTemplateRepository.Update(variableTemplate);
+
+            for (var i = 0; i < variableTemplate.VariableTemplateDetails.Count; i++)
+            {
+                variableTemplate.VariableTemplateDetails[i].SeqNo = i + 1;
+                if (variableTemplate.VariableTemplateDetails[i].Id > 0)
+                    _variableTemplateDetailRepository.Update(variableTemplate.VariableTemplateDetails[i]);
+                else
+                    _variableTemplateDetailRepository.Add(variableTemplate.VariableTemplateDetails[i]);
+            }
+
+            for (var i = 0; i < variableTemplate.Notes.Count; i++)
+            {
+                if (variableTemplate.Notes[i].Id > 0)
+                    _variableTemplateNoteRepository.Update(variableTemplate.Notes[i]);
+                else
+                    _variableTemplateNoteRepository.Add(variableTemplate.Notes[i]);
+            }
 
             if (_uow.Save() <= 0) throw new Exception("Updating Variable Template failed on save.");
             return Ok(variableTemplate.Id);
