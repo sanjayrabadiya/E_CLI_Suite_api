@@ -97,12 +97,16 @@ namespace GSC.Respository.Attendance
             if (randomizationNumberDto.IsManualRandomNo == true)
             {
                 randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
-            } else
+            }
+            else
             {
                 randomization.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
             }
             randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
-            randomization.PatientStatusId = ScreeningPatientStatus.Screening;
+
+            if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening)
+                randomization.PatientStatusId = ScreeningPatientStatus.Screening;
+
             Update(randomization);
             int projectidforRandomNo = 0;
             if (randomizationNumberDto.IsSiteDependentRandomNo == true)
@@ -120,7 +124,8 @@ namespace GSC.Respository.Attendance
                 project.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
                 project.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
                 _projectRepository.Update(project);
-            } else
+            }
+            else
             {
                 var projectRandom = _projectRepository.Find(projectidforRandomNo);
                 projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
@@ -149,7 +154,8 @@ namespace GSC.Respository.Attendance
                     {
                         return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
                     }
-                } else
+                }
+                else
                 {
                     if (randomizationNumberDto.RandomizationNumber.Contains(randomizationNumberDto.PrefixRandomNo) == false)
                     {
@@ -202,14 +208,16 @@ namespace GSC.Respository.Attendance
             if (studydata.IsManualRandomNo == true)
             {
                 randomizationNumberDto.RandomizationNumber = "";
-            } else
+            }
+            else
             {
                 int latestno;
                 if (studydata.IsSiteDependentRandomNo == true)
                 {
                     latestno = sitedata.RandomizationNoseries;
                     randomizationNumberDto.RandomizationNoseries = sitedata.RandomizationNoseries;
-                } else
+                }
+                else
                 {
                     latestno = studydata.RandomizationNoseries;
                     randomizationNumberDto.RandomizationNoseries = studydata.RandomizationNoseries;
@@ -217,7 +225,8 @@ namespace GSC.Respository.Attendance
                 if (studydata.IsAlphaNumRandomNo == true)
                 {
                     randomizationNumberDto.RandomizationNumber = studydata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength - 1, '0');
-                } else
+                }
+                else
                 {
                     randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
                 }
