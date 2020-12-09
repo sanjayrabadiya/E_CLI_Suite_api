@@ -55,11 +55,11 @@ namespace GSC.Respository.Master
             {
                 detail.Variable = _context.Variable.Where(t => t.Id == detail.VariableId)
                     .Include(variable => variable.Values)
-                    .Include(r=> r.Remarks)
+                    .Include(r => r.Remarks)
                     .Include(t => t.Unit)
                     .FirstOrDefault();
 
-                detail.Variable.Values = detail.Variable.Values.Where(t => t.DeletedDate == null).ToList();
+                detail.Variable.Values = detail.Variable.Values.Where(t => t.DeletedDate == null).OrderBy(x => x.Id).ToList();
                 detail.Variable.Remarks = detail.Variable.Remarks.Where(t => t.DeletedDate == null).ToList();
                 detail.VariableCategoryName = detail.Variable.VariableCategoryId == null
                     ? ""

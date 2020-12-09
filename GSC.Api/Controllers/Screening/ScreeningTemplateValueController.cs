@@ -84,40 +84,40 @@ namespace GSC.Api.Controllers.Screening
             return Ok(result);
         }
 
-        [HttpPost]
-        [TransactionRequired]
-        public IActionResult MobilePost([FromBody] ScreeningTemplateValueMobileDto screeningTemplateValueMobileDto)
-        {
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+        //[HttpPost]
+        //[TransactionRequired]
+        //public IActionResult MobilePost([FromBody] ScreeningTemplateValueMobileDto screeningTemplateValueMobileDto)
+        //{
+        //    if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var screeningTemplateValueDto = _mapper.Map<ScreeningTemplateValueDto>(screeningTemplateValueMobileDto);
-            var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
+        //    var screeningTemplateValueDto = _mapper.Map<ScreeningTemplateValueDto>(screeningTemplateValueMobileDto);
+        //    var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
 
-            var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
-            screeningTemplateValue.Id = 0;
+        //    var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
+        //    screeningTemplateValue.Id = 0;
 
-            _screeningTemplateValueRepository.Add(screeningTemplateValue);
+        //    _screeningTemplateValueRepository.Add(screeningTemplateValue);
 
-            var aduit = new ScreeningTemplateValueAudit
-            {
-                ScreeningTemplateValue = screeningTemplateValue,
-                Value = screeningTemplateValueDto.IsNa ? "N/A" : value,
-                OldValue = screeningTemplateValueDto.OldValue,
-                TimeZone = screeningTemplateValueDto.TimeZone,
-                UserId = _jwtTokenAccesser.UserId,
-                UserRoleId = _jwtTokenAccesser.RoleId,
-                IpAddress = _jwtTokenAccesser.IpAddress
-            };
-            _screeningTemplateValueAuditRepository.Add(aduit);
+        //    var aduit = new ScreeningTemplateValueAudit
+        //    {
+        //        ScreeningTemplateValue = screeningTemplateValue,
+        //        Value = screeningTemplateValueDto.IsNa ? "N/A" : value,
+        //        OldValue = screeningTemplateValueDto.OldValue,
+        //        TimeZone = screeningTemplateValueDto.TimeZone,
+        //        UserId = _jwtTokenAccesser.UserId,
+        //        UserRoleId = _jwtTokenAccesser.RoleId,
+        //        IpAddress = _jwtTokenAccesser.IpAddress
+        //    };
+        //    _screeningTemplateValueAuditRepository.Add(aduit);
 
-            ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
+        //    ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
-            _uow.Save();
+        //    _uow.Save();
 
-            var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
+        //    var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
 
         private void ScreeningTemplateStatus(ScreeningTemplateValueDto screeningTemplateValueDto, int screeningTemplateId)
         {
