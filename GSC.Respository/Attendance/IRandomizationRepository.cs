@@ -25,5 +25,7 @@ namespace GSC.Respository.Attendance
         List<ProjectDesignVisitMobileDto> GetPatientVisits();
         List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId);
         RandomizationNumberDto GetRandomizationAndScreeningNumber(int id);
+        string ValidateRandomizationAndScreeningNumber(RandomizationDto randomization);
+        List<DropDownDto> GetRandomizationDropdown(int projectid);
     }
 }

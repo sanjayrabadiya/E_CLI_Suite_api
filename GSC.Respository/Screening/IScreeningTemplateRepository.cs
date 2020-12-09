@@ -29,5 +29,6 @@ namespace GSC.Respository.Screening
         int GeScreeningEntryId(int screeningTemplateId);
         string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel);
         IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
+        IList<VisitDeviationReport> GetVisitDeviationReport(VisitDeviationReportSearchDto filters);
     }
 }

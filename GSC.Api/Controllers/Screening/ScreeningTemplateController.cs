@@ -318,5 +318,16 @@ namespace GSC.Api.Controllers.Screening
         {
             return Ok(_screeningTemplateRepository.GetTemplateByLockedDropDown(lockUnlockDDDto));
         }
+
+        [HttpPost]
+        [Route("GetvisitdeviationReport")]
+        public IActionResult GetvisitdeviationReport([FromBody] VisitDeviationReportSearchDto filters)
+        {
+            if (filters.ProjectId <= 0) return BadRequest();
+
+            var auditsDto = _screeningTemplateRepository.GetVisitDeviationReport(filters);
+
+            return Ok(auditsDto);
+        }
     }
 }

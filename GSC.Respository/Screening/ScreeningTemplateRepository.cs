@@ -670,6 +670,246 @@ namespace GSC.Respository.Screening
                 Value = x.ProjectDesignTemplate.TemplateName
             }).Distinct().ToList();
         }
+
+        public IList<VisitDeviationReport> GetVisitDeviationReport(VisitDeviationReportSearchDto filters)
+        {
+            int? parentprojectid = 0;
+            var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            var parentIds = new List<int>();
+            if (parentId == null)
+            {
+                parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+                parentprojectid = filters.ProjectId;
+            }
+            else
+            {
+                parentIds.Add(filters.ProjectId);
+                parentprojectid = parentId;
+            }
+            var studycode = _context.Project.Where(x => x.Id == parentprojectid).FirstOrDefault().ProjectCode;
+
+            //    string sqlqry = @";with cts as(
+            //                        select *,ROW_NUMBER() OVER (ORDER BY SiteCode,Initial) Id,'" + studycode + @"' StudyCode,'' RefValueExcel,'' TargetValueExcel,'Date' Unit,
+            //                                case when TargetValue < DATEADD(day,(NoOfDay - NegativeDeviation) , RefValue) then DATEDIFF(DAY,DATEADD(day,(NoOfDay - NegativeDeviation) , RefValue), TargetValue) else
+            //                          case when TargetValue > DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue) then DATEDIFF(DAY, DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue), TargetValue) end end Deviation
+            //                        from
+            //                        (
+            //                         select NoneRegister.Initial,NoneRegister.ScreeningNumber ScreeningNo,ScreeningEntry.ScreeningDate,ProjectDesignVisit.DisplayName RefVisit,
+            //                         ProjectDesignTemplate.TemplateName RefTemplate,ProjectDesignVariable.VariableName RefVariable,
+            //                            convert(varchar,convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) RefValue,
+            //                         convert(varchar,convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value)))) TargetValue,
+            //                            tVisit.DisplayName TargetVisit,tDesignTemplate.TemplateName TargetTemplate,tvariable.VariableName TargetVariable,
+            //                         ProjectScheduleTemplate.NoOfDay,ProjectScheduleTemplate.PositiveDeviation,ProjectScheduleTemplate.NegativeDeviation,Project.ProjectCode SiteCode,
+            //                            CASE WHEN convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value))) >= DATEADD(day,(NoOfDay - NegativeDeviation) , convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) 
+            //                            AND  convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value))) <= DATEADD(day,(NoOfDay + PositiveDeviation) , convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) THEN 1 ELSE 0 END flag,
+            //                            ScreeningEntry.AttendanceId,ScreeningTemplateValue.ProjectDesignVariableId,ScreeningTemplate.ProjectDesignTemplateId,ScreeningTemplate.ProjectDesignVisitId,
+            //                            ProjectDesignVisit.ProjectDesignPeriodId,Project.Id ProjectId
+
+            //                         from
+            //                         ScreeningTemplateValue
+            //                         inner join
+            //                         ScreeningTemplate
+            //                         on
+            //                         ScreeningTemplateValue.ScreeningTemplateId = ScreeningTemplate.Id and
+            //                         ScreeningTemplate.DeletedDate is null and
+            //                         ScreeningTemplateValue.value is not null and
+            //                         isdate(ScreeningTemplateValue.value) = 1
+            //                         inner join
+            //                         ScreeningEntry
+            //                         on
+            //                         ScreeningTemplate.ScreeningEntryId = ScreeningEntry.Id
+            //                         inner join
+            //                         Attendance
+            //                         on
+            //                         ScreeningEntry.AttendanceId = Attendance.Id
+            //                         inner join 
+            //                         NoneRegister
+            //                         on
+            //                         Attendance.Id = NoneRegister.AttendanceId
+            //                         inner join
+            //                         ProjectDesignVariable
+            //                         on
+            //                         ScreeningTemplateValue.ProjectDesignVariableId = ProjectDesignVariable.id and
+            //                         ProjectDesignVariable.deleteddate is null
+            //                         inner join
+            //                         ProjectDesignTemplate
+            //                         on
+            //                         ProjectDesignVariable.projectdesigntemplateid = ProjectDesignTemplate.id and
+            //                         ProjectDesignTemplate.deleteddate is null
+            //                         inner join
+            //                         projectdesignvisit
+            //                         on
+            //                         ProjectDesignTemplate.projectdesignvisitid = projectdesignvisit.id and
+            //                         projectdesignvisit.deleteddate is null
+            //                         inner join
+            //                         projectschedule
+            //                         on
+            //                         projectschedule.projectdesignvariableid = ProjectDesignVariable.Id and
+            //                         projectschedule.projectdesigntemplateid = ProjectDesignTemplate.Id and
+            //                         projectschedule.deleteddate is null
+            //                         inner join
+            //                         ProjectScheduletemplate
+            //                         on
+            //                         projectscheduletemplate.projectscheduleid = ProjectSchedule.id and
+            //                         ProjectSchedule.deleteddate is null and
+            //                         projectscheduletemplate.operator = 2
+            //                         inner join
+            //                         ScreeningTemplateValue tvalue
+            //                         on
+            //                         tvalue.projectdesignvariableid = ProjectScheduletemplate.projectdesignvariableid and
+            //                         tvalue.DeletedDate is null and
+            //                         tvalue.Value is not null and
+            //                         ISDATE(tvalue.Value) = 1
+            //                         inner join
+            //                         ScreeningTemplate tTemplate
+            //                         on
+            //                         tvalue.ScreeningTemplateId = tTemplate.Id and
+            //                         tTemplate.ScreeningEntryId = ScreeningEntry.Id and
+            //                         tTemplate.ProjectDesignTemplateId = ProjectScheduletemplate.ProjectDesignTemplateId
+            //                         inner join
+            //                         ProjectDesignVariable tvariable
+            //                         on
+            //                         tvalue.ProjectDesignVariableId = tvariable.Id and
+            //                         tvariable.DeletedDate is null 
+            //                         inner join
+            //                         ProjectDesignTemplate tDesignTemplate
+            //                         on
+            //                         tvariable.ProjectDesignTemplateId = tDesignTemplate.Id and
+            //                         tDesignTemplate.DeletedDate is null 
+            //                         inner join
+            //                         ProjectDesignVisit tVisit
+            //                         on
+            //                         tDesignTemplate.ProjectDesignVisitId = tVisit.Id and
+            //                         tVisit.DeletedDate is null
+            //                         inner join
+            //                         Project 
+            //                         on
+            //                         Attendance.ProjectId = Project.Id
+            //                        ) a
+            //                        )
+            //select * from cts where flag=0
+            //                        ";
+            string sqlqry = @";with cts as(
+                                select *,ROW_NUMBER() OVER (ORDER BY SiteCode,Initial) Id,'" + studycode + @"' StudyCode,'' RefValueExcel,'' TargetValueExcel,'Date' Unit,
+                                        case when TargetValue < DATEADD(day,(NoOfDay - NegativeDeviation) , RefValue) then DATEDIFF(DAY,DATEADD(day,(NoOfDay - NegativeDeviation) , RefValue), TargetValue) else
+		                                case when TargetValue > DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue) then DATEDIFF(DAY, DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue), TargetValue) end end Deviation
+                                from
+                                (
+	                                select Randomization.Initial,Randomization.ScreeningNumber ScreeningNo,isnull(Randomization.RandomizationNumber,'') RandomizationNumber,
+									ScreeningEntry.ScreeningDate,ProjectDesignVisit.DisplayName RefVisit,
+	                                ProjectDesignTemplate.TemplateName RefTemplate,ProjectDesignVariable.VariableName RefVariable,
+                                    convert(varchar,convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) RefValue,
+	                                convert(varchar,convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value)))) TargetValue,
+                                    tVisit.DisplayName TargetVisit,tDesignTemplate.TemplateName TargetTemplate,tvariable.VariableName TargetVariable,
+	                                ProjectScheduleTemplate.NoOfDay,ProjectScheduleTemplate.PositiveDeviation,ProjectScheduleTemplate.NegativeDeviation,Project.ProjectCode SiteCode,
+                                    CASE WHEN convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value))) >= DATEADD(day,(NoOfDay - NegativeDeviation) , convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) 
+                                    AND  convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value))) <= DATEADD(day,(NoOfDay + PositiveDeviation) , convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) THEN 1 ELSE 0 END flag,
+                                    ScreeningEntry.RandomizationId,ScreeningTemplateValue.ProjectDesignVariableId,ScreeningTemplate.ProjectDesignTemplateId,ScreeningVisit.ProjectDesignVisitId,
+                                    ProjectDesignVisit.ProjectDesignPeriodId,Project.Id ProjectId
+	                                from
+	                                ScreeningTemplateValue
+	                                inner join
+	                                ScreeningTemplate
+	                                on
+	                                ScreeningTemplateValue.ScreeningTemplateId = ScreeningTemplate.Id and
+	                                ScreeningTemplate.DeletedDate is null and
+	                                ScreeningTemplateValue.value is not null and
+	                                isdate(ScreeningTemplateValue.value) = 1
+									inner join
+									ScreeningVisit 
+									on
+									ScreeningTemplate.ScreeningVisitId = ScreeningVisit.Id
+	                                inner join
+	                                ScreeningEntry
+	                                on
+	                                ScreeningVisit.ScreeningEntryId = ScreeningEntry.Id
+	                                inner join
+	                                Randomization
+	                                on
+	                                ScreeningEntry.RandomizationId = Randomization.Id
+	                                inner join
+	                                ProjectDesignVariable
+	                                on
+	                                ScreeningTemplateValue.ProjectDesignVariableId = ProjectDesignVariable.id and
+	                                ProjectDesignVariable.deleteddate is null
+	                                inner join
+	                                ProjectDesignTemplate
+	                                on
+	                                ProjectDesignVariable.projectdesigntemplateid = ProjectDesignTemplate.id and
+	                                ProjectDesignTemplate.deleteddate is null
+	                                inner join
+	                                projectdesignvisit
+	                                on
+	                                ProjectDesignTemplate.projectdesignvisitid = projectdesignvisit.id and
+	                                projectdesignvisit.deleteddate is null
+	                                inner join
+	                                projectschedule
+	                                on
+	                                projectschedule.projectdesignvariableid = ProjectDesignVariable.Id and
+	                                projectschedule.projectdesigntemplateid = ProjectDesignTemplate.Id and
+	                                projectschedule.deleteddate is null
+	                                inner join
+	                                ProjectScheduletemplate
+	                                on
+	                                projectscheduletemplate.projectscheduleid = ProjectSchedule.id and
+	                                ProjectSchedule.deleteddate is null and
+	                                projectscheduletemplate.operator = 2
+	                                inner join
+	                                ScreeningTemplateValue tvalue
+	                                on
+	                                tvalue.projectdesignvariableid = ProjectScheduletemplate.projectdesignvariableid and
+	                                tvalue.DeletedDate is null and
+	                                tvalue.Value is not null and
+	                                ISDATE(tvalue.Value) = 1
+	                                inner join
+	                                ScreeningTemplate tTemplate
+	                                on
+	                                tvalue.ScreeningTemplateId = tTemplate.Id and
+	                                --tTemplate.ScreeningEntryId = ScreeningEntry.Id and
+	                                tTemplate.ProjectDesignTemplateId = ProjectScheduletemplate.ProjectDesignTemplateId
+									inner join
+									ScreeningVisit tScreeningvisit
+									on
+									tTemplate.ScreeningVisitId = tScreeningvisit.Id and
+									tScreeningvisit.ScreeningEntryId = ScreeningEntry.Id
+	                                inner join
+	                                ProjectDesignVariable tvariable
+	                                on
+	                                tvalue.ProjectDesignVariableId = tvariable.Id and
+	                                tvariable.DeletedDate is null 
+	                                inner join
+	                                ProjectDesignTemplate tDesignTemplate
+	                                on
+	                                tvariable.ProjectDesignTemplateId = tDesignTemplate.Id and
+	                                tDesignTemplate.DeletedDate is null 
+	                                inner join
+	                                ProjectDesignVisit tVisit
+	                                on
+	                                tDesignTemplate.ProjectDesignVisitId = tVisit.Id and
+	                                tVisit.DeletedDate is null
+	                                inner join
+	                                Project 
+	                                on
+	                                Randomization.ProjectId = Project.Id
+                                ) a
+                                )
+								select * from cts where flag=0";
+            var finaldata = _context.FromSql<VisitDeviationReport>(sqlqry).ToList();
+
+            finaldata = finaldata.Where(x => parentIds.Contains(x.ProjectId)).ToList();
+            if (filters.PeriodIds != null && filters.PeriodIds.Length > 0) finaldata = finaldata.Where(x => filters.PeriodIds.Contains(x.ProjectDesignPeriodId)).ToList();
+            if (filters.VisitIds != null && filters.VisitIds.Length > 0) finaldata = finaldata.Where(x => filters.VisitIds.Contains(x.ProjectDesignVisitId)).ToList();
+            if (filters.SubjectIds != null && filters.SubjectIds.Length > 0) finaldata = finaldata.Where(x => filters.SubjectIds.Contains(x.RandomizationId)).ToList();
+            if (filters.TemplateIds != null && filters.TemplateIds.Length > 0) finaldata = finaldata.Where(x => filters.TemplateIds.Contains(x.ProjectDesignTemplateId)).ToList();
+            if (filters.VariableIds != null && filters.VariableIds.Length > 0) finaldata = finaldata.Where(x => filters.VariableIds.Contains(x.ProjectDesignVariableId)).ToList();
+            var dateformat = _context.AppSetting.Where(x => x.KeyName == "GeneralSettingsDto.DateFormat").ToList().FirstOrDefault().KeyValue;
+            for (int i = 0; i < finaldata.Count; i++)
+            {
+                finaldata[i].RefValueExcel = DateTime.Parse(finaldata[i].RefValue).ToString(dateformat);
+                finaldata[i].TargetValueExcel = DateTime.Parse(finaldata[i].TargetValue).ToString(dateformat);
+            }
+            return finaldata;
+        }
     }
 }
 
