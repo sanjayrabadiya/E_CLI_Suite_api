@@ -1,5 +1,6 @@
 ﻿using GSC.Common;
 using GSC.Common.Base;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Barcode;
@@ -248,6 +249,7 @@ namespace GSC.Domain.Context
         DbSet<ProjectSubSecArtificateDocumentReview> ProjectSubSecArtificateDocumentReview { get; set; }
 
         DbSet<ProjectModuleRights> ProjectModuleRights { get; set; }
+         DbSet<VisitDeviationReport> VisitDeviationReport { get; set; }
 
 
     }

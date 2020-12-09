@@ -235,9 +235,16 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest(ModelState);
             }
 
+            var validaterandomizationscreeningno = _randomizationRepository.ValidateRandomizationAndScreeningNumber(randomizationDto);
+            if (!string.IsNullOrEmpty(validaterandomizationscreeningno))
+            {
+                ModelState.AddModelError("Message", validaterandomizationscreeningno);
+                return BadRequest(ModelState);
+            }
+
             _randomizationRepository.SaveRandomization(randomization, randomizationDto);
 
-            _randomizationRepository.Update(randomization);
+            //_randomizationRepository.Update(randomization);
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
@@ -283,6 +290,13 @@ namespace GSC.Api.Controllers.Attendance
         {
             var data = _randomizationRepository.GetRandomizationAndScreeningNumber(id);
             return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("GetRandomizationDropdown/{projectId}")]
+        public IActionResult GetRandomizationDropdown(int projectId)
+        {
+            return Ok(_randomizationRepository.GetRandomizationDropdown(projectId));
         }
     }
 }

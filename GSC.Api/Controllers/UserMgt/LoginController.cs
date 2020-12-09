@@ -192,6 +192,29 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(_userRoleRepository.GetRoleByUserName(userName));
         }
 
+        [HttpGet]
+        [Route("MobileLogout/{userId}/{loginReportId}")]
+        public IActionResult MobileLogout(int userId, int loginReportId)
+        {
+            var user = _userRepository.Find(userId);
+            if (user == null)
+                return NotFound();
+            var userLoginReport = _userLoginReportRepository.Find(loginReportId);
+
+            if (userLoginReport == null)
+                return NotFound();
+
+            user.IsLogin = false;
+            _userRepository.Update(user);
+
+            userLoginReport.LogoutTime = DateTime.Now;
+            _userLoginReportRepository.Update(userLoginReport);
+
+            _uow.Save();
+
+            return Ok("Your Session is expired");
+        }
+
 
         [HttpGet]
         [Route("logout/{userId}/{loginReportId}")]
