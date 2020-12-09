@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.Screening
         public int EditCheckId { get; set; }
         public Operator? Operator { get; set; }
         public int? ProjectDesignTemplateId { get; set; }
+        public int? ProjectDesignVisitId { get; set; }
         public int? DomainId { get; set; }
         public string CollectionValue { get; set; }
         public string CollectionValue2 { get; set; }

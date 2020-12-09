@@ -67,6 +67,7 @@ namespace GSC.Respository.Screening
                    DomainId = c.ProjectDesignTemplate.DomainId,
                    ReviewLevel = c.ReviewLevel,
                    ScreeningVisitId = c.ScreeningVisitId,
+                   ProjectDesignVisitId = c.ScreeningVisit.ProjectDesignVisitId,
                    IsLocked = c.IsLocked,
                    IsDisable = c.IsDisable,
                    PatientStatus = c.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId,
@@ -629,11 +630,11 @@ namespace GSC.Respository.Screening
                     value = string.Join(",", _screeningTemplateValueChildRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
 
                 var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).
-                    Select(r => new { r.Id, r.ScreeningVisitId, r.ProjectDesignTemplateId, r.ScreeningVisit.ScreeningEntryId }).FirstOrDefault();
+                    Select(r => new { r.Id, r.ScreeningVisitId, r.ProjectDesignTemplateId, r.ScreeningVisit.ScreeningEntryId, r.ScreeningVisit.ProjectDesignVisitId }).FirstOrDefault();
 
                 var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningTemplate.ScreeningEntryId, screeningTemplateValue.ScreeningTemplateId,
                     screeningTemplateValue.IsNa ? "NA" : screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
-                    screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.ScreeningVisitId);
+                    screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.ScreeningVisitId, screeningTemplate.ProjectDesignVisitId);
 
                 var scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.Id,
                  screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,

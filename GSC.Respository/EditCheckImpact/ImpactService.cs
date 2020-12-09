@@ -95,6 +95,7 @@ namespace GSC.Respository.EditCheckImpact
                                   EditCheckId = checkDetail.EditCheckId,
                                   Operator = checkDetail.Operator,
                                   ProjectDesignTemplateId = variable.ProjectDesignTemplateId,
+                                  ProjectDesignVisitId = variable.ProjectDesignTemplate.ProjectDesignVisitId,
                                   CollectionValue = checkDetail.CollectionValue,
                                   CollectionValue2 = checkDetail.CollectionValue2,
                                   IsReferenceValue = checkDetail.IsReferenceValue,
@@ -145,12 +146,19 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        public ScreeningTemplate GetScreeningTemplate(int projectDesignTemplateId, int screeningEntryId, int screeningVisitId)
+        public ScreeningTemplate GetScreeningTemplate(int projectDesignTemplateId, int screeningEntryId, int? screeningVisitId)
         {
-            return All.AsNoTracking().Where(c =>
-                   c.ScreeningVisit.ScreeningEntryId == screeningEntryId
-                   && c.ProjectDesignTemplateId == projectDesignTemplateId)
-                   .ToList().Where(t => t.ParentId == null && t.ScreeningVisitId == screeningVisitId).FirstOrDefault();
+            var result = All.AsNoTracking().Where(c =>
+                    c.ScreeningVisit.ScreeningEntryId == screeningEntryId
+                    && c.ProjectDesignTemplateId == projectDesignTemplateId)
+                   .Where(t => t.ParentId == null);
+
+            if (screeningVisitId > 0)
+                result = result.Where(x => x.ScreeningVisitId == screeningVisitId);
+            else
+                result = result.Where(x => x.ScreeningVisit.ParentId == null);
+
+            return result.FirstOrDefault();
         }
 
         public ScheduleTemplateDto GetScreeningTemplateId(int projectDesignTemplateId, int screeningEntryId)

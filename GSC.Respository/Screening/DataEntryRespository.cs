@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;

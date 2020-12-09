@@ -57,7 +57,7 @@ namespace GSC.Data.Dto.Screening
         public short? ReviewLevel { get; set; }
         public bool IsLocked { get; set; }
         public bool IsDisable { get; set; }
-        public bool IsParticipantView { get; set; }
+        public int ProjectDesignVisitId { get; set; }
 
     }
 

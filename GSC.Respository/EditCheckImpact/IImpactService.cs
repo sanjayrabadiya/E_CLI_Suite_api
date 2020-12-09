@@ -13,7 +13,7 @@ namespace GSC.Respository.EditCheckImpact
     public interface IImpactService : IGenericRepository<ScreeningTemplate>
     {
         List<EditCheckValidateDto> GetEditCheck(ScreeningTemplateBasic screeningTemplateBasic);
-        ScreeningTemplate GetScreeningTemplate(int projectDesignTemplateId, int screeningEntryId, int screeningVisitId);
+        ScreeningTemplate GetScreeningTemplate(int projectDesignTemplateId, int screeningEntryId, int? screeningVisitId);
         string GetVariableValue(EditCheckValidateDto editCheckValidateDto, out bool isNa);
         string CollectionValueAnnotation(string collectionValue, CollectionSources? collectionSource);
         List<EditCheckValidateDto> GetEditCheckByVaiableId(int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckIds> editCheckIds);
