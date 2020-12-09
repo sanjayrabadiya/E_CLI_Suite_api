@@ -91,6 +91,10 @@ namespace GSC.Api.Controllers.Project.EditCheck
                 return NotFound();
 
             _editCheckRepository.Active(record);
+
+            var details = _editCheckDetailRepository.FindBy(x => x.EditCheckId == id).ToList();
+            details.ForEach(x => { _editCheckDetailRepository.Active(x); });
+
             _uow.Save();
 
             return Ok();
