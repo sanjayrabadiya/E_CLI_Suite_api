@@ -278,6 +278,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVariabeLanguageRepository, VariabeLanguageRepository>();
             services.AddScoped<IVariabeNoteLanguageRepository, VariabeNoteLanguageRepository>();
             services.AddScoped<ITemplateNoteLanguageRepository, TemplateNoteLanguageRepository>();
+            services.AddScoped<IVariabeValueLanguageRepository, VariabeValueLanguageRepository>();
             services.AddHttpClient<IAPICall, APICall>();
             services.AddHttpClient<ICentreUserService, CentreUserService>();
             services.AddMemoryCache();

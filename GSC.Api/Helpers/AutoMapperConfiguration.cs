@@ -12,6 +12,7 @@ using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.LanguageSetup;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Master.LanguageSetup;
 using GSC.Data.Dto.Medra;
 using GSC.Data.Dto.Pharmacy;
 using GSC.Data.Dto.Project.Design;
@@ -289,6 +290,8 @@ namespace GSC.Api.Helpers
             CreateMap<VariableLanguage, VariableLanguageDto>().ReverseMap();
             CreateMap<VariableNoteLanguage, VariableNoteLanguageDto>().ReverseMap();
             CreateMap<TemplateNoteLanguage, TemplateNoteLanguageDto>().ReverseMap();
+            CreateMap<VariableValueLanguage, VariableValueLanguageDto>().ReverseMap();
+
 
 
             //CreateMap<Users, UserDto>().ReverseMap();

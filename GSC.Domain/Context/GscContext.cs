@@ -294,6 +294,7 @@ namespace GSC.Domain.Context
         public DbSet<VariableNoteLanguage> VariableNoteLanguage { get; set; }
         public DbSet<TemplateNoteLanguage> TemplateNoteLanguage { get; set; }
         public DbSet<VisitDeviationReport> VisitDeviationReport { get; set; }
+        public DbSet<VariableValueLanguage> VariableValueLanguage { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

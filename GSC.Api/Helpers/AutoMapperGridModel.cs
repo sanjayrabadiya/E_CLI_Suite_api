@@ -26,6 +26,7 @@ using GSC.Data.Entities.InformConcent;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Dto.LanguageSetup;
+using GSC.Data.Dto.Master.LanguageSetup;
 
 namespace GSC.Api.Helpers
 {
@@ -215,6 +216,11 @@ namespace GSC.Api.Helpers
 
             CreateMap<TemplateNoteLanguage, TemplateNoteLanguageGridDto>()
             .ForMember(x => x.Note, x => x.MapFrom(a => a.ProjectDesignTemplateNote.Note))
+            .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
+            .ReverseMap();
+
+            CreateMap<VariableValueLanguage, VariableValueLanguageGridDto>()
+            .ForMember(x => x.ValueName, x => x.MapFrom(a => a.ProjectDesignVariableValue.ValueName))
             .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
             .ReverseMap();
         }
