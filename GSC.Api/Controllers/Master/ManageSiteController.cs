@@ -25,6 +25,7 @@ namespace GSC.Api.Controllers.Master
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
 
         public ManageSiteController(IManageSiteRepository manageSiteRepository,
             IUserRepository userRepository,
@@ -32,7 +33,7 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IStateRepository stateRepository,
             ICountryRepository countryRepository,
-            IUnitOfWork uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper, IGSCContext context)
         {
             _manageSiteRepository = manageSiteRepository;
             _cityRepository = cityRepository;
@@ -42,6 +43,7 @@ namespace GSC.Api.Controllers.Master
             _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
+            _context = context;
         }
 
         // GET: api/<controller>
@@ -86,6 +88,10 @@ namespace GSC.Api.Controllers.Master
             }
 
             _manageSiteRepository.Add(manageSite);
+            manageSite.ManageSiteRole.ForEach(x =>
+            {
+                _context.ManageSiteRole.Add(x);
+            });
             if (_uow.Save() <= 0) throw new Exception("Creating Site failed on save.");
             return Ok(manageSite.Id);
         }
@@ -107,12 +113,10 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            //manageSite.Id = manageSiteDto.Id;
-
             _manageSiteRepository.UpdateRole(manageSite);
             /* Added by Darshil for effective Date on 24-07-2020 */
             _manageSiteRepository.Update(manageSite);
-
+            
             if (_uow.Save() <= 0) throw new Exception("Updating Site failed on save.");
             return Ok(manageSite.Id);
         }

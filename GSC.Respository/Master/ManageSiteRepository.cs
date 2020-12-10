@@ -59,31 +59,38 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetManageSiteDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.Status == true)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.SiteName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
         public void UpdateRole(ManageSite ManageSite)
         {
-            var roleDelete = _context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.Id).ToList();
-            foreach (var item in roleDelete)
-            {
-                item.DeletedDate = DateTime.Now;
-                _context.ManageSiteRole.Update(item);
-            }
+            var siterole = _context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.Id
+                                                               && ManageSite.ManageSiteRole.Select(x => x.TrialTypeId).Contains(x.TrialTypeId)
+                                                               && x.DeletedDate == null).ToList();
 
-            for (var i = 0; i < ManageSite.ManageSiteRole.Count; i++)
+            ManageSite.ManageSiteRole.ForEach(z =>
             {
-                var i1 = i;
-                var siterole = _context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.ManageSiteRole[i1].ManageSiteId
-                                                               && x.TrialTypeId == ManageSite.ManageSiteRole[i1].TrialTypeId)
-                    .FirstOrDefault();
-                if (siterole != null)
+                var role = siterole.Where(x => x.ManageSiteId == z.ManageSiteId && x.TrialTypeId == z.TrialTypeId).FirstOrDefault();
+                if (role == null)
                 {
-                    siterole.DeletedDate = null;
-                    siterole.DeletedBy = null;
-                    ManageSite.ManageSiteRole[i] = siterole;
+                    _context.ManageSiteRole.Add(z);
                 }
-            }
+            });
+
+            var managesiteRole = _context.ManageSiteRole.Where(x => x.ManageSiteId == ManageSite.Id && x.DeletedDate == null)
+                .ToList();
+
+            managesiteRole.ForEach(t =>
+            {
+                var role = siterole.Where(x => x.ManageSiteId == t.ManageSiteId && x.TrialTypeId == t.TrialTypeId).FirstOrDefault();
+                if (role == null)
+                {
+                    //delete
+                    t.DeletedBy = _jwtTokenAccesser.UserId;
+                    t.DeletedDate = DateTime.UtcNow;
+                    _context.ManageSiteRole.Update(t);
+                }
+            });
         }
     }
 }

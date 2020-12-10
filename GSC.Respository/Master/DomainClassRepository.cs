@@ -32,8 +32,7 @@ namespace GSC.Respository.Master
                 return "Duplicate Domain Class Code : " + objSave.DomainClassCode;
 
             if (All.Any(x =>
-                x.Id != objSave.Id && x.DomainClassName == objSave.DomainClassName &&
-                x.DomainClassCode == objSave.DomainClassCode && x.DeletedDate == null))
+                x.Id != objSave.Id && x.DomainClassName == objSave.DomainClassName && x.DeletedDate == null))
                 return "Duplicate Domain Class Name : " + objSave.DomainClassName;
 
             return "";
