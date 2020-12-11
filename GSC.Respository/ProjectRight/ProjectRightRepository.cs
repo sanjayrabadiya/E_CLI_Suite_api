@@ -69,7 +69,7 @@ namespace GSC.Respository.ProjectRight
                     }).Where(x => x.IsSelected == false).ToList()
             }).ToList();
 
-            return roles;
+            return roles.Where(x=>x.users.Count() != 0).ToList();
         }
 
 
@@ -283,8 +283,9 @@ namespace GSC.Respository.ProjectRight
                 ProjectName = _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectName).FirstOrDefault(),
                 //Add By vipul on 14092020 for get study and site display on grid project access
                 ProjectNumber = _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? "" : _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
-                ParentProjectCode = _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault()
-                : _context.Project.Where(p => p.Id == x.project.ParentProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
+                ParentProjectCode = _context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault().ParentProjectId == null
+                ? _context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault().ProjectCode
+                : _context.Project.Where(p => p.Id == _context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault().ParentProjectId).FirstOrDefault().ProjectCode,
 
                 ProjectId = x.ProjectId,
                 UserId = x.UserId,
@@ -308,8 +309,7 @@ namespace GSC.Respository.ProjectRight
                                               DocumentPath = b.ProjectDocument.FileName
                                           }).ToList().OrderByDescending(y => y.AssignedDate).ToList(),
                 ProjectCreatedBy = x.CreatedBy
-            }
-            ).ToList();
+            }).ToList();
 
             //Changes by vipul for assign detail
 
