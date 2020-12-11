@@ -22,6 +22,7 @@ using GSC.Data.Entities;
 using GSC.Shared.Configuration;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -36,10 +37,12 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IUserRoleRepository _userRoleRepository;             
+        private readonly IUserRoleRepository _userRoleRepository;
         private readonly IAPICall _centerEndpoint;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
+        private readonly IGSCContext _context;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public UserController(IUserRepository userRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -47,10 +50,11 @@ namespace GSC.Api.Controllers.UserMgt
             IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IUserRoleRepository userRoleRepository,
-            IProjectRepository projectRepository,             
+            IProjectRepository projectRepository,
             IAPICall centerEndpoint,
             IOptions<EnvironmentSetting> environmentSetting,
-            ICentreUserService centreUserService
+            ICentreUserService centreUserService,
+            IGSCContext context, IJwtTokenAccesser jwtTokenAccesser
             )
         {
             _userRepository = userRepository;
@@ -61,10 +65,12 @@ namespace GSC.Api.Controllers.UserMgt
             _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
             _userRoleRepository = userRoleRepository;
-            _projectRepository = projectRepository;  
+            _projectRepository = projectRepository;
             _centerEndpoint = centerEndpoint;
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
+            _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
 
@@ -140,7 +146,7 @@ namespace GSC.Api.Controllers.UserMgt
                 {
                     ModelState.AddModelError("Message", userdetails.Message);
                     return BadRequest(ModelState);
-                }                
+                }
                 user.Id = Convert.ToInt32(userdetails.Id);
             }
             else
@@ -153,6 +159,10 @@ namespace GSC.Api.Controllers.UserMgt
                 }
             }
             _userRepository.Add(user);
+            user.UserRoles.ForEach(x =>
+            {
+                _userRoleRepository.Add(x);
+            });
             if (_uow.Save() <= 0) throw new Exception("Creating a User  failed on save.");
 
             if (IsPremise)
@@ -188,7 +198,7 @@ namespace GSC.Api.Controllers.UserMgt
                 {
                     ModelState.AddModelError("Message", userdetails.Message);
                     return BadRequest(ModelState);
-                }                
+                }
             }
             else
             {
@@ -209,27 +219,33 @@ namespace GSC.Api.Controllers.UserMgt
 
         private void UpdateRole(Data.Entities.UserMgt.User user)
         {
-            var roleDelete = _userRoleRepository.FindBy(x => x.UserId == user.Id)
-                .ToList();
-            foreach (var item in roleDelete)
-            {
-                item.DeletedDate = DateTime.Now;
-                _userRoleRepository.Update(item);
-            }
+            var userrole = _context.UserRole.Where(x => x.UserId == user.Id
+                                                               && user.UserRoles.Select(x => x.UserRoleId).Contains(x.UserRoleId)
+                                                               && x.DeletedDate == null).ToList();
 
-            for (var i = 0; i < user.UserRoles.Count; i++)
+            user.UserRoles.ForEach(z =>
             {
-                var i1 = i;
-                var userrole = _userRoleRepository.FindBy(x => x.UserRoleId == user.UserRoles[i1].UserRoleId
-                                                               && x.UserId == user.UserRoles[i1].UserId)
-                    .FirstOrDefault();
-                if (userrole != null)
+                var role = userrole.Where(x => x.UserId == user.Id && x.UserRoleId == z.UserRoleId).FirstOrDefault();
+                if (role == null)
                 {
-                    userrole.DeletedDate = null;
-                    userrole.DeletedBy = null;
-                    user.UserRoles[i] = userrole;
+                    _userRoleRepository.Add(z);
                 }
-            }
+            });
+
+            var userRoles = _context.UserRole.Where(x => x.UserId == user.Id && x.DeletedDate == null)
+                .ToList();
+
+            userRoles.ForEach(t =>
+            {
+                var role = userrole.Where(x => x.UserId == t.UserId && x.UserRoleId == t.UserRoleId).FirstOrDefault();
+                if (role == null)
+                {
+                    //delete
+                    t.DeletedBy = _jwtTokenAccesser.UserId;
+                    t.DeletedDate = DateTime.UtcNow;
+                    _userRoleRepository.Update(t);
+                }
+            });
         }
 
         [HttpDelete("{id}")]
@@ -237,7 +253,7 @@ namespace GSC.Api.Controllers.UserMgt
         {
             if (!_environmentSetting.Value.IsPremise)
             {
-                 _centreUserService.DeleteUser(_environmentSetting.Value.CentralApi,id);
+                _centreUserService.DeleteUser(_environmentSetting.Value.CentralApi, id);
             }
             var user = _userRepository.Find(id);
             _userRepository.Delete(user);
@@ -250,7 +266,7 @@ namespace GSC.Api.Controllers.UserMgt
         [Route("ChangePassword")]
         [AllowAnonymous]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto loginDto)
-        {          
+        {
 
             var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
                 .FirstOrDefault();
@@ -263,7 +279,7 @@ namespace GSC.Api.Controllers.UserMgt
                 {
                     ModelState.AddModelError("Message", userdetails.Message);
                     return BadRequest(ModelState);
-                }                
+                }
             }
             else
             {
@@ -291,7 +307,7 @@ namespace GSC.Api.Controllers.UserMgt
                 return NotFound();
             if (!_environmentSetting.Value.IsPremise)
             {
-                CommonResponceView userdetails = await _centreUserService.ActiveUser(_environmentSetting.Value.CentralApi,id);
+                CommonResponceView userdetails = await _centreUserService.ActiveUser(_environmentSetting.Value.CentralApi, id);
                 if (!string.IsNullOrEmpty(userdetails.Message))
                 {
                     ModelState.AddModelError("Message", userdetails.Message);

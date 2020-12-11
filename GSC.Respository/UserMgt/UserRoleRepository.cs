@@ -7,6 +7,7 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.UserMgt
 {
@@ -26,9 +27,9 @@ namespace GSC.Respository.UserMgt
 
         public IList<DropDownDto> GetRoleByUserName(string userName)
         {
-            return All.Where(x =>
-                    x.User.DeletedDate == null && x.User.UserName == userName && x.DeletedDate == null &&
-                    x.SecurityRole.DeletedDate == null)
+            return All.Include(x => x.User).Include(x => x.SecurityRole).Where(x =>
+                       x.User.DeletedDate == null && x.User.UserName == userName && x.DeletedDate == null &&
+                       x.SecurityRole.DeletedDate == null)
                 .Select(c => new DropDownDto { Id = c.SecurityRole.Id, Value = c.SecurityRole.RoleName })
                 .OrderBy(o => o.Value).ToList();
         }

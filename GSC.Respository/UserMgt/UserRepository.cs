@@ -34,7 +34,7 @@ namespace GSC.Respository.UserMgt
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
-        private readonly IOptions<JwtSettings> _settings;       
+        private readonly IOptions<JwtSettings> _settings;
         private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
         private readonly IGSCContext _context;
@@ -65,7 +65,7 @@ namespace GSC.Respository.UserMgt
             _userPasswordRepository = userPasswordRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _settings = settings;
-            _refreshTokenRepository = refreshTokenRepository;           
+            _refreshTokenRepository = refreshTokenRepository;
             _configuration = configuration;
             _centeralApi = centeralApi;
             _context = context;
@@ -93,6 +93,10 @@ namespace GSC.Respository.UserMgt
                 UserName = t.UserName,
                 IsLocked = t.IsLocked,
                 IsDeleted = t.DeletedDate != null,
+                Phone = t.Phone,
+                ValidFrom = t.ValidFrom,
+                ValidTo = t.ValidTo,
+                CompanyName = _context.Company.Where(x => x.Id == t.CompanyId).FirstOrDefault().CompanyName,
                 Role = string.Join(", ",
                     t.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
             }).OrderByDescending(x => x.Id).ToList();
@@ -127,7 +131,7 @@ namespace GSC.Respository.UserMgt
                 _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
                 return userViewModel;
             }
-           
+
             if (user.IsLocked)
             {
 
@@ -139,7 +143,7 @@ namespace GSC.Respository.UserMgt
             if (user.ValidFrom.HasValue && user.ValidFrom.Value > DateTime.Now ||
                 user.ValidTo.HasValue && user.ValidTo.Value < DateTime.Now)
             {
-              
+
                 userViewModel.ValidateMessage = "User not active, Please contact your administrator";
                 _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
                 return userViewModel;
@@ -185,8 +189,8 @@ namespace GSC.Respository.UserMgt
         {
             var roleTokenId = new Guid().ToString();
             var user = All.Where(x => x.Id == userViewModel.UserId).FirstOrDefault();
-                //Find(userViewModel.UserId);
-  
+            //Find(userViewModel.UserId);
+
             var login = new LoginResponseDto
             {
                 UserName = user.UserName,
@@ -231,7 +235,7 @@ namespace GSC.Respository.UserMgt
                     _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName);
             }
 
-            
+
             Update(user);
 
             return login;

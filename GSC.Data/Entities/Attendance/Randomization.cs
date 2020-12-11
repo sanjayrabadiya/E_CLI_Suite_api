@@ -14,13 +14,18 @@ namespace GSC.Data.Entities.Attendance
         private DateTime? _dateOfRandomization;
 
         private DateTime? _dateOfScreening;
+        private DateTime? _dateOfBirth { get; set; }
 
         public ScreeningPatientStatus? PatientStatusId { get; set; }
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
         public string Initial { get; set; }
-        public DateTime? DateOfBirth { get; set; }
+        public DateTime? DateOfBirth
+        {
+            get => _dateOfBirth.UtcDate();
+            set => _dateOfBirth = value.UtcDate();
+        }
         public int? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }

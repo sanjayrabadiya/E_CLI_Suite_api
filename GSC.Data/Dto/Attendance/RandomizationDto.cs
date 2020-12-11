@@ -14,7 +14,12 @@ namespace GSC.Data.Dto.Attendance
         public string MiddleName { get; set; }
         public string LastName { get; set; }
         public string Initial { get; set; }
-        public DateTime? DateOfBirth { get; set; }
+        public DateTime? _DateOfBirth { get; set; }
+        public DateTime? DateOfBirth
+        {
+            get => _DateOfBirth.UtcDate();
+            set => _DateOfBirth = value.UtcDate();
+        }
         public int? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
@@ -61,7 +66,12 @@ namespace GSC.Data.Dto.Attendance
         public string MiddleName { get; set; }
         public string LastName { get; set; }
         public string Initial { get; set; }
-        public DateTime? DateOfBirth { get; set; }
+        public DateTime? _DateOfBirth { get; set; }
+        public DateTime? DateOfBirth
+        {
+            get => _DateOfBirth.UtcDate();
+            set => _DateOfBirth = value.UtcDate();
+        }
         public int? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }

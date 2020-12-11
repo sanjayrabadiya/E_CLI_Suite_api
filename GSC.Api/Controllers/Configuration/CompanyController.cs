@@ -70,6 +70,7 @@ namespace GSC.Api.Controllers.Configuration
 
             var company = _mapper.Map<Company>(companyDto);
             company.Location = _locationRepository.SaveLocation(companyDto.Location);
+            _locationRepository.Add(company.Location);
             _companyRepository.Add(company);
             if (_uow.Save() <= 0) throw new Exception("Creating Company failed on save.");
 
@@ -89,6 +90,10 @@ namespace GSC.Api.Controllers.Configuration
 
             var company = _mapper.Map<Company>(companyDto);
             company.Location = _locationRepository.SaveLocation(companyDto.Location);
+            if (company.Location.Id > 0)
+                _locationRepository.Update(company.Location);
+            else
+                _locationRepository.Add(company.Location);
             _companyRepository.Update(company);
             if (_uow.Save() <= 0) throw new Exception("Updating Company failed on save.");
             return Ok(company.Id);
