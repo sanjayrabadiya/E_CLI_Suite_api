@@ -9,6 +9,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
+using GSC.Respository.LanguageSetup;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
@@ -23,6 +24,13 @@ namespace GSC.Api.Controllers.Master
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly ILanguageRepository _languageRepository;
+        private readonly IVisitLanguageRepository _visitLanguageRepository;
+        private readonly ITemplateLanguageRepository _templateLanguageRepository;
+        private readonly IVariabeLanguageRepository _variabeLanguageRepository;
+        private readonly IVariabeNoteLanguageRepository _variabeNoteLanguageRepository;
+        private readonly IVariabeValueLanguageRepository _variabeValueLanguageRepository;
+        private readonly ITemplateNoteLanguageRepository _templateNoteLanguageRepository;
+
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
@@ -30,12 +38,24 @@ namespace GSC.Api.Controllers.Master
             IUnitOfWork uow,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
+            IVisitLanguageRepository visitLanguageRepository,
+            ITemplateLanguageRepository templateLanguageRepository,
+            IVariabeLanguageRepository variabeLanguageRepository,
+            IVariabeNoteLanguageRepository variabeNoteLanguageRepository,
+            IVariabeValueLanguageRepository variabeValueLanguageRepository,
+            ITemplateNoteLanguageRepository templateNoteLanguageRepository,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _languageRepository = languageRepository;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
+            _visitLanguageRepository = visitLanguageRepository;
+            _templateLanguageRepository = templateLanguageRepository;
+            _variabeLanguageRepository = variabeLanguageRepository;
+            _variabeNoteLanguageRepository = variabeNoteLanguageRepository;
+            _variabeValueLanguageRepository = variabeValueLanguageRepository;
+            _templateNoteLanguageRepository = templateNoteLanguageRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
@@ -119,6 +139,54 @@ namespace GSC.Api.Controllers.Master
 
             if (record == null)
                 return NotFound();
+
+            //check language use in visit
+            var LangExistsInVisit = _visitLanguageRepository.IsLanguageExist(id);
+            if (!LangExistsInVisit)
+            {
+                ModelState.AddModelError("Message", "Language use in visit");
+                return BadRequest(ModelState);
+            }
+
+            //check language use in template
+            var LangExistsInTemplate = _templateLanguageRepository.IsLanguageExist(id);
+            if (!LangExistsInTemplate)
+            {
+                ModelState.AddModelError("Message", "Template use in template");
+                return BadRequest(ModelState);
+            }
+
+            //check language use in Variable
+            var LangExistsInVariable = _variabeLanguageRepository.IsLanguageExist(id);
+            if (!LangExistsInVisit)
+            {
+                ModelState.AddModelError("Message", "Variable use in variable");
+                return BadRequest(ModelState);
+            }
+
+            //check language use in Variable Note
+            var LangExistsInVariableNote = _variabeNoteLanguageRepository.IsLanguageExist(id);
+            if (!LangExistsInVariableNote)
+            {
+                ModelState.AddModelError("Message", "Language use in variable note");
+                return BadRequest(ModelState);
+            }
+
+            //check language use in Variable value
+            var LangExistsInVariableValue = _variabeValueLanguageRepository.IsLanguageExist(id);
+            if (!LangExistsInVariableValue)
+            {
+                ModelState.AddModelError("Message", "Language use in visit");
+                return BadRequest(ModelState);
+            }
+
+            //check language use in template note
+            var LangExistsInTemplateNote = _templateNoteLanguageRepository.IsLanguageExist(id);
+            if (!LangExistsInTemplateNote)
+            {
+                ModelState.AddModelError("Message", "Language use in template note");
+                return BadRequest(ModelState);
+            }
 
             _languageRepository.Delete(record);
             _uow.Save();

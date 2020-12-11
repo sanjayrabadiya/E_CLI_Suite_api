@@ -29,5 +29,15 @@ namespace GSC.Respository.LanguageSetup
             return All.Where(x => x.DeletedDate == null && x.ProjectDesignVariableValueId == VariableValueId).
                    ProjectTo<VariableValueLanguageGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
+
+        public bool IsLanguageExist(int LanguageId)
+        {
+            var check = All.Where(x => x.DeletedDate == null && x.LanguageId == LanguageId).
+                   ProjectTo<VariableValueLanguageGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            if (check != null)
+                return false;
+            return true;
+        }
     }
 }

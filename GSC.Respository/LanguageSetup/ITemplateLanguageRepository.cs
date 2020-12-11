@@ -8,5 +8,6 @@ namespace GSC.Respository.LanguageSetup
     public interface ITemplateLanguageRepository : IGenericRepository<TemplateLanguage>
     {
         List<TemplateLanguageGridDto> GetTemplateLanguageList(int TemplateId);
+        bool IsLanguageExist(int LanguageId);
     }
 }

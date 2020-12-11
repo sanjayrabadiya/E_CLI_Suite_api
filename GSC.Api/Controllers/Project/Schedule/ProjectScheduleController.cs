@@ -186,7 +186,10 @@ namespace GSC.Api.Controllers.Project.Schedule
             _projectScheduleRepository.Update(projectSchedule);
             foreach (var item in projectSchedule.Templates)
             {
+                if(item.Id>0)
                 _projectScheduleTemplateRepository.Update(item);
+                else
+                _projectScheduleTemplateRepository.Add(item);
             }
             _uow.Save();
 

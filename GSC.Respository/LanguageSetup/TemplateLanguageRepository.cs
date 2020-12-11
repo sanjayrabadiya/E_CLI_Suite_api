@@ -31,5 +31,15 @@ namespace GSC.Respository.LanguageSetup
             return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == TemplateId).
                    ProjectTo<TemplateLanguageGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
+
+        public bool IsLanguageExist(int LanguageId)
+        {
+            var check = All.Where(x => x.DeletedDate == null && x.LanguageId == LanguageId).
+                   ProjectTo<TemplateLanguageGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            if (check != null)
+                return false;
+            return true;
+        }
     }
 }

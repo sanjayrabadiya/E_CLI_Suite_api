@@ -8,5 +8,6 @@ namespace GSC.Respository.LanguageSetup
     public interface IVariabeNoteLanguageRepository : IGenericRepository<VariableNoteLanguage>
     {
         List<VariableNoteLanguageGridDto> GetVariableNoteLanguageList(int VariableId);
+        bool IsLanguageExist(int LanguageId);
     }
 }

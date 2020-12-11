@@ -8,5 +8,6 @@ namespace GSC.Respository.LanguageSetup
     public interface ITemplateNoteLanguageRepository : IGenericRepository<TemplateNoteLanguage>
     {
         List<TemplateNoteLanguageGridDto> GetTemplateNoteLanguageList(int TemplateNoteId);
+        bool IsLanguageExist(int LanguageId);
     }
 }

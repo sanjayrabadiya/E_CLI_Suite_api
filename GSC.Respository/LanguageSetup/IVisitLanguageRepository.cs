@@ -8,5 +8,6 @@ namespace GSC.Respository.LanguageSetup
     public interface IVisitLanguageRepository : IGenericRepository<VisitLanguage>
     {
         List<VisitLanguageGridDto> GetVisitLanguageList(int VisitId);
+        bool IsLanguageExist(int LanguageId);
     }
 }
