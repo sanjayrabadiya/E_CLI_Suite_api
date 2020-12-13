@@ -1,3 +1,5 @@
+using GSC.Shared.Generic;
+
 namespace GSC.Shared.JWTAuth
 {
     public interface IJwtTokenAccesser
@@ -8,6 +10,7 @@ namespace GSC.Shared.JWTAuth
         int RoleId { get; }
         string RoleName { get; }
         string IpAddress { get; }
+        PrefLanguage Language { get; }
         string GetHeader(string key);
     }
 }

@@ -1,8 +1,5 @@
-﻿using AutoMapper;
-using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
+﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
-using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -11,6 +8,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.Design;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -33,6 +31,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningProgress _screeningProgress;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
         private readonly IImpactService _impactService;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         public ScreeningVisitRepository(IGSCContext context,
             IProjectDesignVisitRepository projectDesignVisitRepository,
@@ -62,19 +61,23 @@ namespace GSC.Respository.Screening
             _screeningProgress = screeningProgress;
             _scheduleRuleRespository = scheduleRuleRespository;
             _impactService = impactService;
+            _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
         }
 
 
         public List<ScreeningVisitTree> GetVisitTree(int screeningEntryId)
         {
+
             var result = All.Where(s => s.ScreeningEntryId == screeningEntryId && s.DeletedDate == null
             && s.Status >= ScreeningVisitStatus.Open).Select(s => new ScreeningVisitTree
             {
                 ScreeningVisitId = s.Id,
                 VisitSeqNo = s.RepeatedVisitNumber,
                 ProjectDesignVisitId = s.ProjectDesignVisitId,
-                ProjectDesignVisitName = s.ProjectDesignVisit.DisplayName +
+                ProjectDesignVisitName = (_jwtTokenAccesser.Language != PrefLanguage.en ? 
+                s.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
+                : s.ProjectDesignVisit.DisplayName) +
                                          Convert.ToString(s.RepeatedVisitNumber == null ? "" : "_" + s.RepeatedVisitNumber),
                 VisitStatus = s.Status,
                 VisitStatusName = s.Status.GetDescription(),
@@ -251,7 +254,7 @@ namespace GSC.Respository.Screening
 
             var scheduleScreeningTemplate = _impactService.GetScreeningTemplateId(refrenceSchedule.FirstOrDefault().ProjectDesignTemplateId, visit.ScreeningEntryId);
             if (scheduleScreeningTemplate == null) return "";
-            var  refDate=  _impactService.GetVariableValue(scheduleScreeningTemplate.ScreeningTemplateId, refrenceSchedule.FirstOrDefault().ProjectDesignVariableId);
+            var refDate = _impactService.GetVariableValue(scheduleScreeningTemplate.ScreeningTemplateId, refrenceSchedule.FirstOrDefault().ProjectDesignVariableId);
 
             if (!_scheduleRuleRespository.Validate(scheduleTemplate, screeningVisitDto.StatusDate.ToString(), refDate.ToString()))
                 return scheduleTemplate.Message;

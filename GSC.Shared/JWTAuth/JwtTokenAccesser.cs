@@ -1,3 +1,4 @@
+using GSC.Shared.Generic;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
@@ -18,8 +19,10 @@ namespace GSC.Shared.JWTAuth
                 UserId = userInfo.UserId;
                 UserName = userInfo.UserName;
                 RoleName = userInfo.RoleName;
+                Language = userInfo.Language;
                 CompanyId = userInfo.CompanyId;
                 RoleId = userInfo.RoleId;
+
             }
             if (_httpContextAccessor != null && _httpContextAccessor.HttpContext != null)
                 IpAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
@@ -39,7 +42,7 @@ namespace GSC.Shared.JWTAuth
         public string UserName { get; }
 
         public int CompanyId { get; }
-
+        public PrefLanguage Language { get; }
         public int RoleId { get; }
         public string RoleName { get; }
 
@@ -53,5 +56,6 @@ namespace GSC.Shared.JWTAuth
         public int CompanyId { get; set; }
         public int RoleId { get; set; }
         public string RoleName { get; set; }
+        public PrefLanguage Language { get; set; }
     }
 }

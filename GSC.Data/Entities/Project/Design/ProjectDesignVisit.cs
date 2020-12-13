@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.LanguageSetup;
 
 namespace GSC.Data.Entities.Project.Design
 {
@@ -13,6 +14,6 @@ namespace GSC.Data.Entities.Project.Design
         public bool IsRepeated { get; set; }
         public bool? IsSchedule { get; set; }
         public IList<ProjectDesignTemplate> Templates { get; set; }
-       
+        public List<VisitLanguage> VisitLanguage { get; set; }
     }
 }

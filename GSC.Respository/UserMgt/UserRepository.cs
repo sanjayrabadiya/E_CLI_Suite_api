@@ -18,6 +18,7 @@ using GSC.Shared;
 using GSC.Shared.Configuration;
 using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.EntityFrameworkCore;
@@ -248,6 +249,7 @@ namespace GSC.Respository.UserMgt
             userInfo.UserName = user.UserName;
             userInfo.CompanyId = (int)user.CompanyId;
             userInfo.RoleId = roleId;
+            userInfo.Language = user.Language?? PrefLanguage.en;
             userInfo.RoleName = _roleRepository.All.Where(x => x.Id == roleId).Select(r => r.RoleShortName).FirstOrDefault();
             var claims = new List<Claim> { new Claim("gsc_user_token", userInfo.ToJsonString()) };
             return GenerateAccessToken(claims);
