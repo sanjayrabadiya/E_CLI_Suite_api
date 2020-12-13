@@ -157,7 +157,7 @@ namespace GSC.Respository.Screening
 
             if (!_projectDesignVariableRepository.All.Any(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.Id == projectDesignVariableId))
                 return false;
-           
+
             if (!_screeningTemplateValueRepository.All.Any(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ScreeningTemplateId == screeningTemplate.Id))
             {
                 var screeningTemplateValue = new ScreeningTemplateValue
@@ -169,9 +169,9 @@ namespace GSC.Respository.Screening
 
                 _screeningTemplateValueRepository.Add(screeningTemplateValue);
 
-               var audit= new ScreeningTemplateValueAudit
+                var audit = new ScreeningTemplateValueAudit
                 {
-                   ScreeningTemplateValue= screeningTemplateValue,
+                    ScreeningTemplateValue = screeningTemplateValue,
                     Value = value,
                     Note = "Save value from open visit"
                 };
@@ -192,6 +192,9 @@ namespace GSC.Respository.Screening
             var visit = Find(screeningVisitHistoryDto.ScreeningVisitId);
 
             visit.Status = screeningVisitHistoryDto.VisitStatusId;
+
+            if (screeningVisitHistoryDto.VisitStatusId == ScreeningVisitStatus.ReSchedule)
+                visit.ScheduleDate = screeningVisitHistoryDto.StatusDate;
 
             Update(visit);
 
@@ -216,8 +219,8 @@ namespace GSC.Respository.Screening
             var visit = Find(screeningVisitDto.ScreeningVisitId);
             if (visit != null
                 && (visit.Status == ScreeningVisitStatus.ReSchedule || visit.Status == ScreeningVisitStatus.Scheduled)
-                && visit.ScheduleDate != null && visit.ScheduleDate.Value.Date != screeningVisitDto.VisitOpenDate.Date)
-                return $"Schedule Date and visit open date can't matching!";
+                && visit.ScheduleDate != null && visit.ScheduleDate.Value.Date > screeningVisitDto.VisitOpenDate.Date)
+                return $"You cannot enter a date in the future!";
 
             return "";
 
@@ -238,11 +241,19 @@ namespace GSC.Respository.Screening
             if (openVariable == null) return "";
 
             var scheduleTemplates = _impactService.GetTargetSchedule(openVariable.ProjectDesignTemplateId, false);
+            var projectScheduleId = scheduleTemplates.Select(t => t.ProjectScheduleId).ToList();
+            var refrenceSchedule = _impactService.GetReferenceSchedule(projectScheduleId);
 
-            if (scheduleTemplates == null) return "";
+            if (scheduleTemplates == null || refrenceSchedule == null) return "";
+
             var scheduleTemplate = scheduleTemplates.FirstOrDefault(r => r.ProjectDesignVariableId == openVariable.Id);
             if (scheduleTemplate == null) return "";
-            if (!_scheduleRuleRespository.Validate(scheduleTemplate, visit.ScheduleDate.ToString(), screeningVisitDto.StatusDate.ToString()))
+
+            var scheduleScreeningTemplate = _impactService.GetScreeningTemplateId(refrenceSchedule.FirstOrDefault().ProjectDesignTemplateId, visit.ScreeningEntryId);
+            if (scheduleScreeningTemplate == null) return "";
+            var  refDate=  _impactService.GetVariableValue(scheduleScreeningTemplate.ScreeningTemplateId, refrenceSchedule.FirstOrDefault().ProjectDesignVariableId);
+
+            if (!_scheduleRuleRespository.Validate(scheduleTemplate, screeningVisitDto.StatusDate.ToString(), refDate.ToString()))
                 return scheduleTemplate.Message;
 
             return "";
@@ -290,7 +301,7 @@ namespace GSC.Respository.Screening
             var patientStatus = ScreeningPatientStatus.OnTrial;
 
 
-            if (visitStatus.Any(x => x == ScreeningVisitStatus.Missed || x == ScreeningVisitStatus.OnHold))
+            if (visitStatus.Any(x => x == ScreeningVisitStatus.OnHold))
                 patientStatus = ScreeningPatientStatus.OnHold;
 
             if (visitStatus.Any(x => x == ScreeningVisitStatus.Withdrawal))

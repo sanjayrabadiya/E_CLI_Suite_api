@@ -53,7 +53,7 @@ namespace GSC.Respository.EditCheckImpact
 
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, "", screeningTemplateBasic.ScreeningEntryId);
 
-             _context.Save();
+            _context.Save();
             _context.DetachAllEntities();
 
             return targetScheduleTemplate;
@@ -129,9 +129,15 @@ namespace GSC.Respository.EditCheckImpact
 
             targetValue = refrenceSchedule.FirstOrDefault(x => x.Value != null)?.Value;
 
+            if (!string.IsNullOrEmpty(targetValue) && refrenceSchedule.Count() > 0)
+            {
+                var screeningVisitId = All.Where(x => x.Id == refrenceSchedule.FirstOrDefault().ScreeningTemplateId).Select(t => t.ScreeningVisitId).FirstOrDefault();
+                VisitOpenDate(screeningVisitId, Convert.ToDateTime(targetValue));
+            }
+
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue, screeningEntryId);
 
-             _context.Save();
+            _context.Save();
 
             _context.DetachAllEntities();
 
@@ -323,7 +329,7 @@ namespace GSC.Respository.EditCheckImpact
                 VisitScheduleDate(screeningTemplate.ScreeningVisitId, (DateTime)target.ScheduleDate);
 
 
-             _context.Save();
+            _context.Save();
         }
 
         void VisitScheduleDate(int screeningVisitId, DateTime ScheduleDate)
@@ -331,16 +337,27 @@ namespace GSC.Respository.EditCheckImpact
             var screeningVisit = _context.ScreeningVisit.Find(screeningVisitId);
             if (screeningVisit == null) return;
 
+            if (screeningVisit.IsSchedule && screeningVisit.Status != ScreeningVisitStatus.ReSchedule)
+            {
+                screeningVisit.ScheduleDate = ScheduleDate;
+                _context.ScreeningVisit.Update(screeningVisit);
+                _context.Save();
+
+            }
+        }
+
+
+        void VisitOpenDate(int screeningVisitId, DateTime dateTime)
+        {
+            var screeningVisit = _context.ScreeningVisit.Find(screeningVisitId);
+            if (screeningVisit == null) return;
+
             if (_projectDesignVisitStatusRepository.All.Any(x => x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId
            && x.VisitStatusId == ScreeningVisitStatus.Open))
             {
-                if (screeningVisit.VisitStartDate != null)
-                    screeningVisit.VisitStartDate = ScheduleDate;
-
-                if (screeningVisit.IsSchedule && screeningVisit.Status != ScreeningVisitStatus.ReSchedule)
-                    screeningVisit.ScheduleDate = ScheduleDate;
-
+                screeningVisit.VisitStartDate = dateTime;
                 _context.ScreeningVisit.Update(screeningVisit);
+                _context.Save();
             }
 
 
@@ -382,7 +399,7 @@ namespace GSC.Respository.EditCheckImpact
                         ScreeningTemplateValueId = screeningTemplateValue.Id
                     }, screeningTemplateValue);
 
-                 _context.Save();
+                _context.Save();
                 _context.DetachAllEntities();
 
                 return true;

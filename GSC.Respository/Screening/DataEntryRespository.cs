@@ -199,7 +199,7 @@ namespace GSC.Respository.Screening
             result.Data.AddRange(randomizationData);
             result.Data.AddRange(screeningData);
 
-            result.Data = result.Data.OrderByDescending(t => t.Visit.Max(r => r.ActualDate)).ToList();
+            result.Data = result.Data.OrderByDescending(t => t.SubjectNo).ToList();
 
             return result;
 
