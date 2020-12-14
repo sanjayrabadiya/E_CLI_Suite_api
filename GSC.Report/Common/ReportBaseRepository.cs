@@ -29,16 +29,19 @@ namespace GSC.Report.Common
         private readonly IConfiguration _configuration;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly IJobMonitoringRepository _jobMonitoringRepository;
-        private readonly IUnitOfWork<GscContext> _uow;
+        //private readonly IUnitOfWork<GscContext> _uow;
+        private readonly IGSCContext _context;
 
         public ReportBaseRepository(IHostingEnvironment hostingEnvironment, IConfiguration configuration,
-            IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository, IUnitOfWork<GscContext> uow)
+            IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository,
+             IGSCContext context)
         {
             _hostingEnvironment = hostingEnvironment;
             _configuration = configuration;
             _jwtTokenAccesser = jwtTokenAccesser;
             _jobMonitoringRepository = jobMonitoringRepository;
-            _uow = uow;
+            //_uow = uow;
+            _context = context;
         }
 
 
@@ -475,7 +478,7 @@ namespace GSC.Report.Common
         {
             #region Update JobMonitoring            
             _jobMonitoringRepository.Update(jobMonitoring);
-            if (_uow.Save() <= 0) throw new Exception("updating Job Monitoring failed on save.");
+            if (_context.Save() <= 0) throw new Exception("updating Job Monitoring failed on save.");
             #endregion
             return "";
         }
