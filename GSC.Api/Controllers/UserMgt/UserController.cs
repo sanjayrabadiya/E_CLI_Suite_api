@@ -96,8 +96,8 @@ namespace GSC.Api.Controllers.UserMgt
 
             var userDto = _mapper.Map<UserDto>(user);
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
-            //userDto.ProfilePicPath = imageUrl + (userDto.ProfilePic ?? DocumentService.DefulatProfilePic);
-            userDto.ProfilePicPath = DocumentService.ConvertBase64Image(imageUrl + (userDto.ProfilePic ?? DocumentService.DefulatProfilePic));
+            userDto.ProfilePicPath = imageUrl + (userDto.ProfilePic ?? DocumentService.DefulatProfilePic);
+            //userDto.ProfilePicPath = DocumentService.ConvertBase64Image(imageUrl + (userDto.ProfilePic ?? DocumentService.DefulatProfilePic));
             return Ok(userDto);
         }
 

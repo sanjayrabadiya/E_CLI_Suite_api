@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.UserMgt;
 using GSC.Shared.DocumentService;
+using GSC.Shared.Extension;
 using GSC.Shared.Generic;
 
 namespace GSC.Data.Dto.UserMgt
@@ -13,7 +14,7 @@ namespace GSC.Data.Dto.UserMgt
         {
             UserRoles = new List<UserRole>();
         }
-
+       
         public int Id { get; set; }
 
         [Required(ErrorMessage = "User Name is required.")]
@@ -29,18 +30,31 @@ namespace GSC.Data.Dto.UserMgt
 
         [Required(ErrorMessage = "Email is required.")]
         public string Email { get; set; }
-
-        public DateTime? DateOfBirth { get; set; }
+        public DateTime? _DateOfBirth { get; set; }
+        public DateTime? DateOfBirth
+        {
+            get => _DateOfBirth?.UtcDate();
+            set => _DateOfBirth = value?.UtcDate();
+        }
 
         public string Role { get; set; }
 
         public string Phone { get; set; }
        
         public int? CompanyId { get; set; }
+        public DateTime? _ValidFrom { get; set; }
+        public DateTime? ValidFrom
+        {
+            get => _ValidFrom?.UtcDate();
+            set => _ValidFrom = value?.UtcDate();
+        }
+        public DateTime? _ValidTo { get; set; }
 
-        public DateTime? ValidFrom { get; set; }
-
-        public DateTime? ValidTo { get; set; }
+        public DateTime? ValidTo
+        {
+            get => _ValidTo?.UtcDate();
+            set => _ValidTo = value?.UtcDate();
+        }
 
         public int? FailedLoginAttempts { get; set; }
 
