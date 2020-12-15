@@ -164,10 +164,10 @@ namespace GSC.Respository.Screening
                 _context.Save();
             }
 
-            if (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
-                screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.Withdrawal ||
-                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
-                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold)
+            if (designTemplateDto.Status == ScreeningTemplateStatus.Pending && (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
+               screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.Withdrawal ||
+               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
+               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold))
                 designTemplateDto.IsSubmittedButton = false;
 
             return designTemplateDto;
