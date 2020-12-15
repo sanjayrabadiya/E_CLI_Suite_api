@@ -28,5 +28,6 @@ namespace GSC.Common
         void SetDBConnection(string connectionString);
         void DetachAllEntities();
         DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
+        string GetConnectionString();
     }
 }

@@ -56,6 +56,8 @@ namespace GSC.Domain.Context
 
         }
 
+        
+
         public static DbContextOptions GetOptions(string connectionString)
         {
             return SqlServerDbContextOptionsExtensions.UseSqlServer(new DbContextOptionsBuilder(), connectionString).Options;

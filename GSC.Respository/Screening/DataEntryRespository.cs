@@ -72,7 +72,7 @@ namespace GSC.Respository.Screening
             }).ToListAsync();
 
             var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
-             && x.PatientStatusId == ScreeningPatientStatus.Screening).Select(t => new DataCaptureGridData
+             && x.ScreeningEntry == null).Select(t => new DataCaptureGridData
              {
                  RandomizationId = t.Id,
                  VolunteerName = t.Initial,
@@ -139,7 +139,7 @@ namespace GSC.Respository.Screening
                     VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
                     VisitStatus = a.Status.GetDescription(),
                     VisitStatusId = (int)a.Status,
-                    ActualDate = a.VisitStartDate,
+                    ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
                     ScheduleDate = a.ScheduleDate
                 }).ToList()
 
@@ -159,7 +159,7 @@ namespace GSC.Respository.Screening
             {
                 r.Visit.ForEach(v =>
                 {
-                    if (v.VisitStatusId != 1)
+                    if (v.VisitStatusId > 3)
                     {
                         v.NotStarted = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.Pending).Sum(t => t.TotalTemplate);
                         v.InProgress = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.InProcess).Sum(t => t.TotalTemplate);

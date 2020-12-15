@@ -151,6 +151,9 @@ namespace GSC.Respository.Screening
                 x.IsVisitRepeated = x.ParentScreeningVisitId != null ? false :
                     workflowlevel.IsStartTemplate &&
                     templates.Any(t => t.Status > ScreeningTemplateStatus.Pending && t.ScreeningVisitId == x.ScreeningVisitId) && x.IsVisitRepeated ? true : false;
+
+                if (x.VisitStatus == ScreeningVisitStatus.Missed || x.VisitStatus == ScreeningVisitStatus.Missed)
+                    x.IsVisitRepeated = false;
             });
 
             myReview = templates.Any(x => x.MyReview);

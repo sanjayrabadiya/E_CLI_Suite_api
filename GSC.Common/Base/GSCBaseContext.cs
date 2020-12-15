@@ -96,6 +96,11 @@ namespace GSC.Common.Base
             getConnection.ConnectionString = connectionString;
             this.Database.SetDbConnection(getConnection);
         }
+        public string GetConnectionString()
+        {
+            return this.Database.GetConnectionString();
+        }
+
         public IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class => Set<TEntity>().FromSqlRaw(sql, parameters);
         #endregion
         void SetAuditInformation()

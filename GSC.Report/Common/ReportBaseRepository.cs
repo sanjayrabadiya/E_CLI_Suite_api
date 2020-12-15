@@ -26,21 +26,17 @@ namespace GSC.Report.Common
         bool? IsCompanyLogo;
         bool? IsClientLogo;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IConfiguration _configuration;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly IJobMonitoringRepository _jobMonitoringRepository;
-        //private readonly IUnitOfWork<GscContext> _uow;
         private readonly IGSCContext _context;
 
-        public ReportBaseRepository(IHostingEnvironment hostingEnvironment, IConfiguration configuration,
+        public ReportBaseRepository(IHostingEnvironment hostingEnvironment,
             IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository,
              IGSCContext context)
         {
             _hostingEnvironment = hostingEnvironment;
-            _configuration = configuration;
             _jwtTokenAccesser = jwtTokenAccesser;
             _jobMonitoringRepository = jobMonitoringRepository;
-            //_uow = uow;
             _context = context;
         }
 
@@ -48,7 +44,7 @@ namespace GSC.Report.Common
         public SqlDataSource DataSource(string strSql, SqlDataSourceParameterCollection parameter)
         {
             var sqlDataSource = new SqlDataSource();
-            sqlDataSource.ConnectionString = _configuration.GetConnectionString("dbConnectionString");
+            sqlDataSource.ConnectionString = _context.GetConnectionString();
             //sqlDataSource.SelectCommandType = SqlDataSourceCommandType.StoredProcedure;
             sqlDataSource.SelectCommandType = SqlDataSourceCommandType.Text;
             sqlDataSource.SelectCommand = strSql;

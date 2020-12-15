@@ -33,7 +33,7 @@ namespace GSC.Respository.Project.Design
         {
             var template = _context.ProjectDesignTemplate.
                 Where(t => t.Id == id)
-                .Include(d => d.ProjectDesignTemplateNote.Where(x => x.DeletedBy==null))
+                .Include(d => d.ProjectDesignTemplateNote.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.Values.Where(x => x.DeletedBy == null).OrderBy(c => c.SeqNo))
                 .AsNoTracking().FirstOrDefault();
@@ -57,8 +57,7 @@ namespace GSC.Respository.Project.Design
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
                     Variables = null,
-                    Notes = _context.VariableTemplateNote.
-                    Where(c => c.DeletedDate == null && c.VariableTemplateId == r.VariableTemplateId).Select(a => a.Note).ToList(),
+                    Notes = r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     DesignOrder = r.DesignOrder,
@@ -72,11 +71,9 @@ namespace GSC.Respository.Project.Design
                 result.Variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null)
                     .ProjectTo<DesignScreeningVariableDto>(_mapper.ConfigurationProvider).ToList().OrderBy(r => r.DesignOrder).ToList();
 
-                var variableNotes = _context.VariableTemplateDetail.Where(x => x.VariableTemplateId == result.VariableTemplateId).ToList();
                 result.Variables.ToList().ForEach(x =>
                 {
                     x.Values = x.Values.OrderBy(c => c.SeqNo).ToList();
-                    x.Note = variableNotes.FirstOrDefault(c => c.VariableId == x.VariableId)?.Note;
                 });
             }
 
@@ -97,7 +94,7 @@ namespace GSC.Respository.Project.Design
             return templates;
         }
 
-       
+
         public IList<DropDownDto> GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource, int? refVariable)
         {
             var templates = All.Where(x => x.DeletedDate == null
