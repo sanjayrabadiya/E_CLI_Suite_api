@@ -46,6 +46,7 @@ namespace GSC.Respository.Screening
                             ? "Default"
                             : audit.OldValue,
                         Reason = reason.ReasonName,
+                        ReasonOth = audit.ReasonOth,
                         Role = role.RoleName,
                         TimeZone = audit.TimeZone,
                         User = user.UserName
