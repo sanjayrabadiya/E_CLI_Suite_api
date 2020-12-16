@@ -71,14 +71,7 @@ namespace GSC.Api.Controllers.Screening
                 ModelState.AddModelError("Message", "You can't change visit status!");
                 return BadRequest(ModelState);
             }
-
-            var validation = _screeningVisitRepository.CheckOpenDate(screeningVisitDto);
-            if (!string.IsNullOrEmpty(validation))
-            {
-                ModelState.AddModelError("Message", validation);
-                return BadRequest(ModelState);
-            }
-
+                       
             _screeningVisitRepository.OpenVisit(screeningVisitDto);
             _uow.Save();
             return Ok();

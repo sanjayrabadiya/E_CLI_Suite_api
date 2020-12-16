@@ -26,13 +26,14 @@ namespace GSC.Api.Controllers.Screening
         private readonly IUnitOfWork _uow;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-
+        private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
         public ScreeningTemplateValueController(IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IUploadSettingRepository uploadSettingRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository)
+             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
+              IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -41,6 +42,7 @@ namespace GSC.Api.Controllers.Screening
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
+            _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
         }
 
         [HttpGet("{id}")]
@@ -64,7 +66,7 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
             screeningTemplateValue.Id = 0;
-           
+
             _screeningTemplateValueRepository.Add(screeningTemplateValue);
 
             var aduit = new ScreeningTemplateValueAudit
@@ -74,6 +76,8 @@ namespace GSC.Api.Controllers.Screening
                 OldValue = screeningTemplateValueDto.OldValue,
             };
             _screeningTemplateValueAuditRepository.Save(aduit);
+
+            _screeningTemplateValueChildRepository.Save(screeningTemplateValue);
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
@@ -143,7 +147,7 @@ namespace GSC.Api.Controllers.Screening
             var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
 
             var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
-          
+
             var aduit = new ScreeningTemplateValueAudit
             {
                 ScreeningTemplateValueId = screeningTemplateValue.Id,
@@ -156,6 +160,9 @@ namespace GSC.Api.Controllers.Screening
             if (screeningTemplateValueDto.IsDeleted)
                 _screeningTemplateValueRepository.DeleteChild(screeningTemplateValue.Id);
 
+
+            _screeningTemplateValueChildRepository.Save(screeningTemplateValue);
+
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
@@ -166,6 +173,7 @@ namespace GSC.Api.Controllers.Screening
 
             return Ok(result);
         }
+
 
 
         [HttpPut("UploadDocument")]

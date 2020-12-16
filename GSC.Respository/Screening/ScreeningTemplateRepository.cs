@@ -484,20 +484,19 @@ namespace GSC.Respository.Screening
 
                 if (workflowlevel.LevelNo == screeningValue.ReviewLevel &&
                     screeningValue.ReviewLevel == screeningValue.AcknowledgeLevel)
-                {
-                    workFlowButton.DeleteQuery = screeningValue.QueryStatus == QueryStatus.Open;
-                    workFlowButton.Review = screeningValue.QueryStatus == QueryStatus.Answered ||
-                                            screeningValue.QueryStatus == QueryStatus.Resolved;
-                }
+                    workFlowButton.Review = screeningValue.QueryStatus == QueryStatus.Answered || screeningValue.QueryStatus == QueryStatus.Resolved;
 
                 if (workflowlevel.LevelNo == 0 && workFlowButton.Review)
                     workFlowButton.Review = screeningValue.UserRoleId == _jwtTokenAccesser.RoleId;
 
-                if (screeningValue.IsSystem && screeningValue.QueryStatus == QueryStatus.Open &&
-                    workflowlevel.IsStartTemplate)
-                {
+                if (screeningValue.IsSystem && screeningValue.QueryStatus == QueryStatus.Open && workflowlevel.IsStartTemplate)
                     workFlowButton.Update = screeningValue.QueryStatus == QueryStatus.Open;
-                    workFlowButton.DeleteQuery = false;
+
+
+                if (!screeningValue.IsSystem && screeningValue.QueryStatus == QueryStatus.Open && screeningValue.UserRoleId == _jwtTokenAccesser.RoleId)
+                {
+                    workFlowButton.Update = false;
+                    workFlowButton.DeleteQuery = true;
                 }
 
                 if (!designTemplateDto.MyReview && workflowlevel.LevelNo == screeningValue.AcknowledgeLevel &&

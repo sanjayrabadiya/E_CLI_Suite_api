@@ -29,11 +29,13 @@ namespace GSC.Respository.Screening
         private WorkFlowLevelDto _workFlowLevelDto;
         private readonly IGSCContext _context;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
+        private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
         public ScreeningTemplateValueQueryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IScreeningTemplateValueScheduleRepository screeningTemplateValueScheduleRepository,
-            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository)
+            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
+            IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -42,6 +44,7 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueScheduleRepository = screeningTemplateValueScheduleRepository;
             _context = context;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
+            _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
         }
 
         public IList<ScreeningTemplateValueQueryDto> GetQueries(int screeningTemplateValueId)
@@ -124,6 +127,7 @@ namespace GSC.Respository.Screening
 
             Add(screeningTemplateValueQuery);
 
+            _screeningTemplateValueChildRepository.Save(screeningTemplateValue);
 
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
         }
@@ -257,6 +261,9 @@ namespace GSC.Respository.Screening
             screeningTemplateValue.UserRoleId = _jwtTokenAccesser.RoleId;
             QueryAudit(screeningTemplateValueQueryDto, screeningTemplateValue, QueryStatus.SelfCorrection.ToString(),
                 screeningTemplateValueQuery.Value, screeningTemplateValueQuery);
+
+            _screeningTemplateValueChildRepository.Save(screeningTemplateValue);
+
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
 
             screeningTemplateValueQuery.QueryLevel = workFlowLevel.LevelNo;
