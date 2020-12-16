@@ -13,7 +13,9 @@ namespace GSC.Respository.Attendance
     {
         string Duplicate(RandomizationDto objSave, int projectId);
         List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted);
-        void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto);
+        //void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto);
+        void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto);
+        void SaveScreeningNumber(Randomization randomization, RandomizationDto randomizationDto);
         void SendEmailOfStartEconsent(Randomization randomization);
         void ChangeStatustoConsentInProgress();
         void ChangeStatustoConsentCompleted(int id);
@@ -24,8 +26,12 @@ namespace GSC.Respository.Attendance
         //List<ProjectDesignVisitMobileDto> GetPatientVisits();
         List<ProjectDesignVisitMobileDto> GetPatientVisits();
         List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId);
-        RandomizationNumberDto GetRandomizationAndScreeningNumber(int id);
-        string ValidateRandomizationAndScreeningNumber(RandomizationDto randomization);
+        //RandomizationNumberDto GetRandomizationAndScreeningNumber(int id);
+        RandomizationNumberDto GetRandomizationNumber(int id);
+        RandomizationNumberDto GetScreeningNumber(int id);
+        //string ValidateRandomizationAndScreeningNumber(RandomizationDto randomization);
+        string ValidateScreeningNumber(RandomizationDto randomization);
+        string ValidateRandomizationNumber(RandomizationDto randomization);
         List<DropDownDto> GetRandomizationDropdown(int projectid);
     }
 }

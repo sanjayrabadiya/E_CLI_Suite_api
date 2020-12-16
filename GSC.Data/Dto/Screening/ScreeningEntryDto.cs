@@ -56,6 +56,7 @@ namespace GSC.Data.Dto.Screening
         public string OldValue { get; set; }
         public string NewValue { get; set; }
         public string Reason { get; set; }
+        public string ReasonOth { get; set; }
         public string Note { get; set; }
         public string User { get; set; }
         public string Role { get; set; }

@@ -107,6 +107,7 @@ namespace GSC.Api.Helpers
             CreateMap<ClientAddress, ClientAddressDto>().ReverseMap();
             CreateMap<ClientContact, ClientContactDto>().ReverseMap();
             CreateMap<Project, ProjectDto>().ReverseMap();
+            CreateMap<Project, RandomizationAndScreeningNumberFormatDto>().ReverseMap();
             CreateMap<UserRole, UserRoleDto>().ReverseMap();
             CreateMap<PopulationType, PopulationTypeDto>().ReverseMap();
             CreateMap<ProductType, ProductTypeDto>().ReverseMap();
@@ -291,6 +292,7 @@ namespace GSC.Api.Helpers
             CreateMap<VariableNoteLanguage, VariableNoteLanguageDto>().ReverseMap();
             CreateMap<TemplateNoteLanguage, TemplateNoteLanguageDto>().ReverseMap();
             CreateMap<VariableValueLanguage, VariableValueLanguageDto>().ReverseMap();
+            CreateMap<SiteTeam, SiteTeamDto>().ReverseMap();
 
 
 

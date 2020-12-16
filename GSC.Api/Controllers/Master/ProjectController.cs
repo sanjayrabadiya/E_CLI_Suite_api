@@ -119,6 +119,28 @@ namespace GSC.Api.Controllers.Master
             return Ok(project);
         }
 
+        [HttpPut("UpdateRandomizationAndScreeningNumberFormat")]
+        public IActionResult UpdateRandomizationAndScreeningNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
+        {
+            if (projectDto.Id <= 0) return BadRequest();
+
+            var project = _projectRepository.Find(projectDto.Id);
+            project.RandomNoLength = projectDto.RandomNoLength;
+            project.IsManualRandomNo = projectDto.IsManualRandomNo;
+            project.IsAlphaNumRandomNo = projectDto.IsAlphaNumRandomNo;
+            project.PrefixRandomNo = projectDto.PrefixRandomNo;
+            project.IsSiteDependentRandomNo = projectDto.IsSiteDependentRandomNo;
+            project.ScreeningLength = projectDto.ScreeningLength;
+            project.IsManualScreeningNo = projectDto.IsManualScreeningNo;
+            project.IsAlphaNumScreeningNo = projectDto.IsAlphaNumScreeningNo;
+            project.PrefixScreeningNo = projectDto.PrefixScreeningNo;
+            project.IsSiteDependentScreeningNo = projectDto.IsSiteDependentScreeningNo;
+
+            _projectRepository.Update(project);
+            if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
+            return Ok(project.Id);
+        }
+
         // PUT api/<controller>/5
         [HttpPut]
         public IActionResult Put([FromBody] ProjectDto projectDto)

@@ -110,6 +110,20 @@ namespace GSC.Api.Controllers.ProjectRight
         }
 
         [HttpGet]
+        [Route("GetParentProjectDropDownProjectRight")]
+        public IActionResult GetParentProjectDropDownProjectRight()
+        {
+            return Ok(_projectDocumentReviewRepository.GetParentProjectDropDownProjectRight());
+        }
+
+        [HttpGet]
+        [Route("GetChildProjectDropDownProjectRight/{ParentProjectId}")]
+        public IActionResult GetChildProjectDropDownProjectRight(int ParentProjectId)
+        {
+            return Ok(_projectDocumentReviewRepository.GetChildProjectDropDownProjectRight(ParentProjectId));
+        }
+
+        [HttpGet]
         [Route("GetCompleteTrainingDashboard/{id}")]
         public IActionResult GetCompleteTrainingDashboard(int id)
         {

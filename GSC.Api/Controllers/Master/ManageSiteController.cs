@@ -70,6 +70,9 @@ namespace GSC.Api.Controllers.Master
             manageSiteDto.StateId = manageSite.City.State.Id;
             manageSiteDto.CountryId = manageSite.City.State.Country.Id;
 
+            manageSiteDto.CityName = manageSite.City.CityName;
+            manageSiteDto.StateName = manageSite.City.State.StateName;
+            manageSiteDto.CountryName = manageSite.City.State.Country.CountryName;
             return Ok(manageSiteDto);
         }
 

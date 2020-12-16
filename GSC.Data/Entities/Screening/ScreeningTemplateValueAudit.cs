@@ -11,6 +11,7 @@ namespace GSC.Data.Entities.Screening
         public string Value { get; set; }
         public string Note { get; set; }
         public int? ReasonId { get; set; }
+        public string ReasonOth { get; set; }
         public string OldValue { get; set; }
         public string IpAddress { get; set; }
         public int? UserId { get; set; }

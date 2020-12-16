@@ -206,7 +206,8 @@ namespace GSC.Respository.UserMgt
                 Email = user.Email,
                 RoleId = roleId,
                 Language = userViewModel.Language,
-                LanguageShortName = userViewModel.Language.ToString()
+                LanguageShortName = userViewModel.Language.ToString(),
+                UserType = user.UserType
             };
 
             var imageUrl = _uploadSettingRepository

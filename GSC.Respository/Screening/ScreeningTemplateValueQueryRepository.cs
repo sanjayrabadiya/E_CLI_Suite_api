@@ -472,7 +472,8 @@ namespace GSC.Respository.Screening
                 OldValue = queryOldValue,
                 Value = queryValue,
                 Note = screeningTemplateValueQueryDto.Note + " " + status,
-                ReasonId = screeningTemplateValueQueryDto.ReasonId
+                ReasonId = screeningTemplateValueQueryDto.ReasonId,
+                ReasonOth = screeningTemplateValueQueryDto.ReasonOth
             };
             _screeningTemplateValueAuditRepository.Save(audit);
         }
