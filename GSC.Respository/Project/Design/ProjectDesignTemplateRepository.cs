@@ -120,7 +120,7 @@ namespace GSC.Respository.Project.Design
                                                ).ToList()
                 }).ToList();
 
-            return templates.Where(x => ((List<ProjectDesignVariable>)x.ExtraData).ToList().Count > 0).ToList();
+            return templates.ToList();
         }
 
 
