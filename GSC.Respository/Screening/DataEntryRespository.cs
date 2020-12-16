@@ -255,59 +255,157 @@ namespace GSC.Respository.Screening
         }
 
 
-        public List<DataEntryTemplateCountDisplayDto> GetTemplateVisitQuery(int screeningVisitId, QueryStatus queryStatus)
+        public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitQuery(int screeningVisitId, QueryStatus queryStatus)
         {
 
-            return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
-            && x.ScreeningTemplateValues.Any(r => r.QueryStatus == queryStatus && r.DeletedDate == null) && x.DeletedDate == null).
-                Select(t => new DataEntryTemplateCountDisplayDto
-                {
-                    ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
-                    ScreeningTemplateId = t.Id,
-                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                    TemplateName = t.ProjectDesignTemplate.TemplateName,
-                    VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                    SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                                ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                                : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                }).ToList();
+            WorkFlowLevelDto workFlowLevel = new WorkFlowLevelDto();
+            List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues = new List<Data.Dto.Screening.ScreeningTemplateValueBasic>();
+
+            var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.ScreeningTemplateValues.Any(r => r.QueryStatus == queryStatus && r.DeletedDate == null))
+                 .Select(t => new DataEntryTemplateCountDisplayTree
+                 {
+                     Id = t.Id,
+                     ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                     ScreeningVisitId = t.ScreeningVisitId,
+                     ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                     Status = t.Status,
+                     ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                     DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                     Progress = t.Progress ?? 0,
+                     ReviewLevel = t.ReviewLevel,
+                     IsLocked = t.IsLocked,
+                     MyReview = false,
+                     ParentId = t.ParentId,
+                     TemplateName = t.ProjectDesignTemplate.TemplateName,
+                     VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                     SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                                         ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                 }).ToList();
+
+            result.ForEach(a =>
+            {
+                a.StatusName = _screeningTemplateRepository.GetStatusName(new ScreeningTemplateBasic { ReviewLevel = a.ReviewLevel, Status = a.Status }, workFlowLevel.LevelNo == a.ReviewLevel, workFlowLevel);
+                a.TemplateQueryStatus = _screeningTemplateValueRepository.GetQueryStatusByModel(templateValues, a.Id);
+            });
+
+            return result;
+
+            //return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
+            //&& x.ScreeningTemplateValues.Any(r => r.QueryStatus == queryStatus && r.DeletedDate == null) && x.DeletedDate == null).
+            //    Select(t => new DataEntryTemplateCountDisplayDto
+            //    {
+            //        ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+            //        ScreeningTemplateId = t.Id,
+            //        ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+            //        TemplateName = t.ProjectDesignTemplate.TemplateName,
+            //        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+            //        SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+            //                    ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+            //                    : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+            //    }).ToList();
         }
 
-        public List<DataEntryTemplateCountDisplayDto> GetTemplateVisitMyQuery(int screeningVisitId, short myLevel)
+        public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitMyQuery(int screeningVisitId, short myLevel)
         {
 
-            return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
-            && x.ScreeningTemplateValues.Any(r => r.AcknowledgeLevel == myLevel && r.DeletedDate == null) && x.DeletedDate == null).
-                Select(t => new DataEntryTemplateCountDisplayDto
-                {
-                    ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
-                    ScreeningTemplateId = t.Id,
-                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                    TemplateName = t.ProjectDesignTemplate.TemplateName,
-                    VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                    SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                                ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                                : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                }).ToList();
+            WorkFlowLevelDto workFlowLevel = new WorkFlowLevelDto();
+            List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues = new List<Data.Dto.Screening.ScreeningTemplateValueBasic>();
+
+            var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.ScreeningTemplateValues.Any(r => r.AcknowledgeLevel == myLevel && r.DeletedDate == null))
+                 .Select(t => new DataEntryTemplateCountDisplayTree
+                 {
+                     Id = t.Id,
+                     ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                     ScreeningVisitId = t.ScreeningVisitId,
+                     ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                     Status = t.Status,
+                     ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                     DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                     Progress = t.Progress ?? 0,
+                     ReviewLevel = t.ReviewLevel,
+                     IsLocked = t.IsLocked,
+                     MyReview = false,
+                     ParentId = t.ParentId,
+                     TemplateName = t.ProjectDesignTemplate.TemplateName,
+                     VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                     SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                                         ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                 }).ToList();
+
+            result.ForEach(a =>
+            {
+                a.StatusName = _screeningTemplateRepository.GetStatusName(new ScreeningTemplateBasic { ReviewLevel = a.ReviewLevel, Status = a.Status }, workFlowLevel.LevelNo == a.ReviewLevel, workFlowLevel);
+                a.TemplateQueryStatus = _screeningTemplateValueRepository.GetQueryStatusByModel(templateValues, a.Id);
+            });
+
+            return result;
+
+            //return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
+            //&& x.ScreeningTemplateValues.Any(r => r.AcknowledgeLevel == myLevel && r.DeletedDate == null) && x.DeletedDate == null).
+            //    Select(t => new DataEntryTemplateCountDisplayDto
+            //    {
+            //        ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+            //        ScreeningTemplateId = t.Id,
+            //        ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+            //        TemplateName = t.ProjectDesignTemplate.TemplateName,
+            //        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+            //        SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+            //                    ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+            //                    : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+            //    }).ToList();
         }
 
 
-        public List<DataEntryTemplateCountDisplayDto> GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel)
+        public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel)
         {
+            WorkFlowLevelDto workFlowLevel = new WorkFlowLevelDto();
+            List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues = new List<Data.Dto.Screening.ScreeningTemplateValueBasic>();
 
-            return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
-            && x.ReviewLevel == reviewLevel && x.DeletedDate == null).
-                Select(t => new DataEntryTemplateCountDisplayDto
-                {
-                    ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
-                    ScreeningTemplateId = t.Id,
-                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                    TemplateName = t.ProjectDesignTemplate.TemplateName,
-                    VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                    SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
-                                ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                                : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                }).ToList();
+            var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.ReviewLevel == reviewLevel)
+                 .Select(t => new DataEntryTemplateCountDisplayTree
+                 {
+                     Id = t.Id,
+                     ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                     ScreeningVisitId = t.ScreeningVisitId,
+                     ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                     Status = t.Status,
+                     ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                     DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                     Progress = t.Progress ?? 0,
+                     ReviewLevel = t.ReviewLevel,
+                     IsLocked = t.IsLocked,
+                     MyReview = false,
+                     ParentId = t.ParentId,
+                     TemplateName = t.ProjectDesignTemplate.TemplateName,
+                     VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                     SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                                         ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                 }).ToList();
+
+            result.ForEach(a =>
+            {
+                a.StatusName = _screeningTemplateRepository.GetStatusName(new ScreeningTemplateBasic { ReviewLevel = a.ReviewLevel, Status = a.Status }, workFlowLevel.LevelNo == a.ReviewLevel, workFlowLevel);
+                a.TemplateQueryStatus = _screeningTemplateValueRepository.GetQueryStatusByModel(templateValues, a.Id);
+            });
+
+            return result;
+
+            //return _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId
+            //&& x.ReviewLevel == reviewLevel && x.DeletedDate == null).
+            //    Select(t => new DataEntryTemplateCountDisplayDto
+            //    {
+            //        ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+            //        ScreeningTemplateId = t.Id,
+            //        ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+            //        TemplateName = t.ProjectDesignTemplate.TemplateName,
+            //        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+            //        SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+            //                    ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+            //                    : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+            //    }).ToList();
         }
 
     }
