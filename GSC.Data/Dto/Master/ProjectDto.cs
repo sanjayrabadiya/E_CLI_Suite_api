@@ -64,7 +64,24 @@ namespace GSC.Data.Dto.Master
         public int? ScreeningLength { get; set; }
         public bool? IsAlphaNumScreeningNo { get; set; }
         public string? PrefixScreeningNo { get; set; }
+        public int? ManageSiteId { get; set; }
     }
+
+    public class RandomizationAndScreeningNumberFormatDto : BaseDto
+    {
+        public bool? IsManualRandomNo { get; set; }
+        public bool? IsSiteDependentRandomNo { get; set; }
+        public int? RandomNoLength { get; set; }
+        public bool? IsAlphaNumRandomNo { get; set; }
+        public string? PrefixRandomNo { get; set; }
+        public bool? IsManualScreeningNo { get; set; }
+        public bool? IsSiteDependentScreeningNo { get; set; }
+        public int? ScreeningLength { get; set; }
+        public bool? IsAlphaNumScreeningNo { get; set; }
+        public string? PrefixScreeningNo { get; set; }
+    }
+
+
 
     public class ProjectGridDto : BaseAuditDto
     {

@@ -210,14 +210,14 @@ namespace GSC.Api.Controllers.Attendance
             return Ok();
         }
 
+
         [HttpPut]
-        [Route("SaveRandomization")]
-        public IActionResult SaveRandomization([FromBody] RandomizationDto randomizationDto)
+        [Route("saveScreeningNumber")]
+        public IActionResult SaveScreeningNumber([FromBody] RandomizationDto randomizationDto)
         {
             if (randomizationDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
 
             if (_projectDesignRepository.All.Any(x => x.DeletedDate == null && x.ProjectId == randomizationDto.ParentProjectId && !x.IsCompleteDesign))
             {
@@ -225,9 +225,7 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest(ModelState);
             }
 
-
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
-     
 
             var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
             if (!string.IsNullOrEmpty(validate))
@@ -236,14 +234,14 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest(ModelState);
             }
 
-            var validaterandomizationscreeningno = _randomizationRepository.ValidateRandomizationAndScreeningNumber(randomizationDto);
-            if (!string.IsNullOrEmpty(validaterandomizationscreeningno))
+            var validatescreeningno = _randomizationRepository.ValidateScreeningNumber(randomizationDto);
+            if (!string.IsNullOrEmpty(validatescreeningno))
             {
-                ModelState.AddModelError("Message", validaterandomizationscreeningno);
+                ModelState.AddModelError("Message", validatescreeningno);
                 return BadRequest(ModelState);
             }
 
-            _randomizationRepository.SaveRandomization(randomization, randomizationDto);
+            _randomizationRepository.SaveScreeningNumber(randomization, randomizationDto);
 
             //_randomizationRepository.Update(randomization);
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
@@ -252,6 +250,90 @@ namespace GSC.Api.Controllers.Attendance
 
             return Ok(randomization.Id);
         }
+
+
+        [HttpPut]
+        [Route("saveRandomizationNumber")]
+        public IActionResult SaveRandomizationNumber([FromBody] RandomizationDto randomizationDto)
+        {
+            if (randomizationDto.Id <= 0) return BadRequest();
+
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            if (_projectDesignRepository.All.Any(x => x.DeletedDate == null && x.ProjectId == randomizationDto.ParentProjectId && !x.IsCompleteDesign))
+            {
+                ModelState.AddModelError("Message", "Design is not complete");
+                return BadRequest(ModelState);
+            }
+
+            var randomization = _randomizationRepository.Find(randomizationDto.Id);
+
+            var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            var validaterandomizationno = _randomizationRepository.ValidateRandomizationNumber(randomizationDto);
+            if (!string.IsNullOrEmpty(validaterandomizationno))
+            {
+                ModelState.AddModelError("Message", validaterandomizationno);
+                return BadRequest(ModelState);
+            }
+
+            _randomizationRepository.SaveRandomizationNumber(randomization, randomizationDto);
+
+            //_randomizationRepository.Update(randomization);
+            //_randomizationRepository.SendEmailOfStartEconsent(randomization);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
+
+            return Ok(randomization.Id);
+        }
+
+        //[HttpPut]
+        //[Route("SaveRandomization")]
+        //public IActionResult SaveRandomization([FromBody] RandomizationDto randomizationDto)
+        //{
+        //    if (randomizationDto.Id <= 0) return BadRequest();
+
+        //    if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+
+        //    if (_projectDesignRepository.All.Any(x => x.DeletedDate == null && x.ProjectId == randomizationDto.ParentProjectId && !x.IsCompleteDesign))
+        //    {
+        //        ModelState.AddModelError("Message", "Design is not complete");
+        //        return BadRequest(ModelState);
+        //    }
+
+
+        //    var randomization = _randomizationRepository.Find(randomizationDto.Id);
+
+
+        //    var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
+        //    if (!string.IsNullOrEmpty(validate))
+        //    {
+        //        ModelState.AddModelError("Message", validate);
+        //        return BadRequest(ModelState);
+        //    }
+
+        //    var validaterandomizationscreeningno = _randomizationRepository.ValidateRandomizationAndScreeningNumber(randomizationDto);
+        //    if (!string.IsNullOrEmpty(validaterandomizationscreeningno))
+        //    {
+        //        ModelState.AddModelError("Message", validaterandomizationscreeningno);
+        //        return BadRequest(ModelState);
+        //    }
+
+        //    _randomizationRepository.SaveRandomization(randomization, randomizationDto);
+
+        //    //_randomizationRepository.Update(randomization);
+        //    _randomizationRepository.SendEmailOfStartEconsent(randomization);
+
+        //    if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
+
+        //    return Ok(randomization.Id);
+        //}
 
         [HttpPut]
         [Route("ChangeStatustoConsentInProgress")]
@@ -286,10 +368,24 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(data);
         }
 
-        [HttpGet("GetRandomizationAndScreeningNumber/{id}")]
-        public IActionResult GetRandomizationAndScreeningNumber(int id)
+        //[HttpGet("GetRandomizationAndScreeningNumber/{id}")]
+        //public IActionResult GetRandomizationAndScreeningNumber(int id)
+        //{
+        //    var data = _randomizationRepository.GetRandomizationAndScreeningNumber(id);
+        //    return Ok(data);
+        //}
+
+        [HttpGet("GetRandomizationNumber/{id}")]
+        public IActionResult GetRandomizationNumber(int id)
         {
-            var data = _randomizationRepository.GetRandomizationAndScreeningNumber(id);
+            var data = _randomizationRepository.GetRandomizationNumber(id);
+            return Ok(data);
+        }
+
+        [HttpGet("GetScreeningNumber/{id}")]
+        public IActionResult GetScreeningNumber(int id)
+        {
+            var data = _randomizationRepository.GetScreeningNumber(id);
             return Ok(data);
         }
 

@@ -223,6 +223,8 @@ namespace GSC.Api.Helpers
             .ForMember(x => x.ValueName, x => x.MapFrom(a => a.ProjectDesignVariableValue.ValueName))
             .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
             .ReverseMap();
+
+            CreateMap<SiteTeam, SiteTeamGridDto>().ReverseMap();
         }
     }
 }

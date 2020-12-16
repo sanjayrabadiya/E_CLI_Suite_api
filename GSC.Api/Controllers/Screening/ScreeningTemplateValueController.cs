@@ -13,6 +13,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Shared.JWTAuth;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GSC.Api.Controllers.Screening
 {

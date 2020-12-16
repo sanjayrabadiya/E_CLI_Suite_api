@@ -34,5 +34,6 @@ namespace GSC.Data.Dto.UserMgt
         public string LanguageShortName { get; set; }
         public string ValidateMessage { get; set; }
         public bool IsValid { get; set; }
+        public UserMasterUserType? UserType { get; set; }
     }
 }

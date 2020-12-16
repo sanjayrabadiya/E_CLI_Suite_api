@@ -84,5 +84,6 @@ namespace GSC.Data.Entities.Master
         public string? PrefixScreeningNo { get; set; }
         public int ScreeningNoseries { get; set; }
         public int RandomizationNoseries { get; set; }
+        public int? ManageSiteId { get; set; }
     }
 }

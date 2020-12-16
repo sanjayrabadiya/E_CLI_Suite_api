@@ -17,6 +17,9 @@ namespace GSC.Data.Dto.Master
         public int CountryId { get; set; }
         public int? CompanyId { get; set; }
         public List<ManageSiteRole> ManageSiteRole { get; set; }
+        public string CityName { get; set; }
+        public string StateName { get; set; }
+        public string CountryName { get; set; }
     }
 
      public class ManageSiteGridDto : BaseAuditDto
