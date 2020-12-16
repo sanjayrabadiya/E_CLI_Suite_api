@@ -307,6 +307,48 @@ namespace GSC.Respository.ProjectRight
             return projectList;
         }
 
+        public List<DropDownDto> GetParentProjectDropDownProjectRight()
+        {
+            // changes by swati for child project
+            var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == null
+                                             && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
+                                                                              && a.UserId == _jwtTokenAccesser.UserId &&
+                                                                              a.RoleId == _jwtTokenAccesser.RoleId
+                                                                              && !x.IsReview && a.DeletedDate == null &&
+                                                                              a.RollbackReason == null) &&
+                                             x.DeletedDate == null).Select(c => new DropDownDto
+                                             {
+                                                 Id = c.ProjectId,
+                                                 Value = c.Project.ProjectCode,
+                                                 Code = c.Project.ProjectCode,
+                                                 ExtraData = c.Project.ParentProjectId
+                                             }).OrderBy(o => o.Value).Distinct().ToList();
+
+            if (projectList == null || projectList.Count == 0) return null;
+            return projectList;
+        }
+
+        public List<DropDownDto> GetChildProjectDropDownProjectRight(int ParentProjectId)
+        {
+            // changes by swati for child project
+            var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == ParentProjectId
+                                             && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
+                                                                              && a.UserId == _jwtTokenAccesser.UserId &&
+                                                                              a.RoleId == _jwtTokenAccesser.RoleId
+                                                                              && !x.IsReview && a.DeletedDate == null &&
+                                                                              a.RollbackReason == null) &&
+                                             x.DeletedDate == null).Select(c => new DropDownDto
+                                             {
+                                                 Id = c.ProjectId,
+                                                 Value = c.Project.ProjectCode,
+                                                 Code = c.Project.ProjectCode,
+                                                 ExtraData = c.Project.ParentProjectId
+                                             }).OrderBy(o => o.Value).Distinct().ToList();
+
+            if (projectList == null || projectList.Count == 0) return null;
+            return projectList;
+        }
+
         public ProjectDashBoardDto GetCompleteTrainingDashboard(int id)
         {
             var projectDashBoardDto = new ProjectDashBoardDto();
