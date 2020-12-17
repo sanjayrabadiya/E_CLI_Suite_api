@@ -27,7 +27,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(ClientType objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ClientTypeName == objSave.ClientTypeName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ClientTypeName == objSave.ClientTypeName.Trim() && x.DeletedDate == null))
                 return "Duplicate Client Type name : " + objSave.ClientTypeName;
             return "";
         }
