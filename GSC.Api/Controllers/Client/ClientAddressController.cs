@@ -47,6 +47,7 @@ namespace GSC.Api.Controllers.Client
             clientAddressDto.Id = 0;
             var clientAddress = _mapper.Map<ClientAddress>(clientAddressDto);
             clientAddress.Location = _locationRepository.SaveLocation(clientAddress.Location);
+            _locationRepository.Add(clientAddress.Location);
             _clientAddressRepository.Add(clientAddress);
             if (_uow.Save() <= 0) throw new Exception("Creating client address failed on save.");
             var returnClientAddressDto = _mapper.Map<ClientAddressDto>(clientAddress);
@@ -64,9 +65,11 @@ namespace GSC.Api.Controllers.Client
 
             clientAddress.Location = _locationRepository.SaveLocation(clientAddress.Location);
 
-            //if (clientAddress.LocationId == 0)
-            //    _locationRepository.Add(clientAddress.Location);
-            
+            if (clientAddress.Location.Id > 0)
+                _locationRepository.Update(clientAddress.Location);
+            else
+                _locationRepository.Add(clientAddress.Location);
+
             /* Added by swati for effective Date on 02-06-2019 */
             _clientAddressRepository.Update(clientAddress);
 
