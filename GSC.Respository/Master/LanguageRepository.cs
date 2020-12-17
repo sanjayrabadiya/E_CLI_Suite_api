@@ -38,6 +38,9 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.LanguageName == objSave.LanguageName && x.DeletedDate == null))
                 return "Duplicate Language name : " + objSave.LanguageName;
 
+            if (All.Any(x => x.Id != objSave.Id && x.shortName == objSave.shortName && x.DeletedDate == null))
+                return "Duplicate Short name : " + objSave.shortName;
+
             return "";
         }
 

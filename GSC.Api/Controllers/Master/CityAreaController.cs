@@ -52,19 +52,8 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-
             var cityAreas = _cityAreaRepository.GetCityAreaList(isDeleted);
-            cityAreas.ForEach(b =>
-            {
-                b.CityName = _cityRepository.Find((int)b.CityId).CityName;
-                b.StateName = _stateRepository.Find(b.City.StateId).StateName;
-                b.CountryName = _countryRepository.Find(b.City.State.CountryId).CountryName;
-            });
             return Ok(cityAreas);
-            ////  return Ok(_cityAreaRepository.GetCitiesArea(isDeleted));
-            //var cityAreas = _cityAreaRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //    , t => t.City,t=>t.City.State,t=>t.City.State.Country).OrderByDescending(x => x.Id).ToList();
-            //return Ok(cityAreasDto);
         }
 
 

@@ -52,7 +52,10 @@ namespace GSC.Api.Helpers
             CreateMap<Drug, DrugGridDto>().ReverseMap();
             CreateMap<AuditReason, AuditReasonGridDto>().ReverseMap();
             CreateMap<BlockCategory, BlockCategoryGridDto>().ReverseMap();
-            CreateMap<CityArea, CityAreaGridDto>().ReverseMap();
+            CreateMap<CityArea, CityAreaGridDto>()
+                .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
+                .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName)).ReverseMap(); ;
             CreateMap<City, CityGridDto>()
                 .ForMember(x => x.StateName, x => x.MapFrom(a => a.State.StateName))
                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.State.Country.CountryName)).ReverseMap();
