@@ -107,6 +107,7 @@ namespace GSC.Data.Dto.Master
         public string ClientName { get; set; }
         public string DrugName { get; set; }
         public string InvestigatorContactName { get; set; }
+        public string TherapeuticIndication { get; set; }
     }
 
     public class ProjectDetailsDto 

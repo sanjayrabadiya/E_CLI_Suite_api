@@ -554,5 +554,13 @@ namespace GSC.Respository.Master
         }
 
 
+        public ProjectGridDto GetProjectDetailForDashboard(int ProjectId)
+        {
+            var projects = All.Where(x => x.ParentProjectId == null && x.Id == ProjectId).
+                 ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
+
+            return projects;
+        }
+
     }
 }

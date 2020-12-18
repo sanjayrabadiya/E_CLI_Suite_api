@@ -132,6 +132,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.AreaName, x => x.MapFrom(a => a.CityArea.AreaName))
                 .ForMember(x => x.StateName, x => x.MapFrom(a => a.State.StateName))
                 .ForMember(x => x.ClientName, x => x.MapFrom(a => a.Client.ClientName))
+                .ForMember(x => x.TherapeuticIndication, x => x.MapFrom(a => a.DesignTrial.TrialType.TrialTypeName))
                 .ForMember(x => x.DesignTrialName, x => x.MapFrom(a => a.DesignTrial.DesignTrialName))
                 .ForMember(x => x.ClientName, x => x.MapFrom(a => a.Client.ClientName))
                 .ForMember(x => x.DrugName, x => x.MapFrom(a => a.Drug.DrugName))
@@ -139,8 +140,8 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.RegulatoryTypeName, x => x.MapFrom(a => a.RegulatoryType.RegulatoryTypeName))
                 .ForMember(x => x.ProjectDesignId, x => x.MapFrom(a => a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.Id).FirstOrDefault()))
                 .ForMember(x => x.Locked, x => x.MapFrom(a => !a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.IsUnderTesting).FirstOrDefault()))
-                .ForMember(x => x.ParentProjectCode, x => x.MapFrom(a => a.ChildProject.Select(r => r.ProjectCode).FirstOrDefault()))
-                .ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.Count()))
+                .ForMember(x => x.ParentProjectCode, x => x.MapFrom(a => a.ChildProject.Where(x=>x.DeletedDate == null).Select(r => r.ProjectCode).FirstOrDefault()))
+                .ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.Where(x => x.DeletedDate == null).Count()))
                 .ReverseMap();
 
             CreateMap<ManageSite, ManageSiteGridDto>()
