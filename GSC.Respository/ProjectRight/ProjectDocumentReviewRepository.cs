@@ -314,7 +314,7 @@ namespace GSC.Respository.ProjectRight
                                              && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
                                                                               && a.UserId == _jwtTokenAccesser.UserId &&
                                                                               a.RoleId == _jwtTokenAccesser.RoleId
-                                                                              && !x.IsReview && a.DeletedDate == null &&
+                                                                              && a.DeletedDate == null &&
                                                                               a.RollbackReason == null) &&
                                              x.DeletedDate == null).Select(c => new DropDownDto
                                              {
