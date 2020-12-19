@@ -126,17 +126,14 @@ namespace GSC.Respository.UserMgt
                     user.IsLocked = true;
                     Update(user);
                     _context.Save();
+                    userViewModel.ValidateMessage = "User is locked, Please contact your administrator";
+                    _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
+                    return userViewModel;
                 }
 
+                Update(user);
+                _context.Save();
                 userViewModel.ValidateMessage = "Invalid Password and Login Attempt : " + user.FailedLoginAttempts;
-                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
-                return userViewModel;
-            }
-
-            if (user.IsLocked)
-            {
-
-                userViewModel.ValidateMessage = "User is locked, Please contact your administrator";
                 _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
                 return userViewModel;
             }
@@ -250,7 +247,7 @@ namespace GSC.Respository.UserMgt
             userInfo.UserName = user.UserName;
             userInfo.CompanyId = (int)user.CompanyId;
             userInfo.RoleId = roleId;
-            userInfo.Language = user.Language?? PrefLanguage.en;
+            userInfo.Language = user.Language ?? PrefLanguage.en;
             userInfo.RoleName = _roleRepository.All.Where(x => x.Id == roleId).Select(r => r.RoleShortName).FirstOrDefault();
             var claims = new List<Claim> { new Claim("gsc_user_token", userInfo.ToJsonString()) };
             return GenerateAccessToken(claims);
