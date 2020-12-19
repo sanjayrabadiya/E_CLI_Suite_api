@@ -75,7 +75,7 @@ namespace GSC.Respository.Screening
                 ScreeningVisitId = s.Id,
                 VisitSeqNo = s.RepeatedVisitNumber,
                 ProjectDesignVisitId = s.ProjectDesignVisitId,
-                ProjectDesignVisitName = (_jwtTokenAccesser.Language != PrefLanguage.en ? 
+                ProjectDesignVisitName = (_jwtTokenAccesser.Language != PrefLanguage.en ?
                 s.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
                 : s.ProjectDesignVisit.DisplayName) +
                                          Convert.ToString(s.RepeatedVisitNumber == null ? "" : "_" + s.RepeatedVisitNumber),
@@ -161,26 +161,32 @@ namespace GSC.Respository.Screening
             if (!_projectDesignVariableRepository.All.Any(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.Id == projectDesignVariableId))
                 return false;
 
-            if (!_screeningTemplateValueRepository.All.Any(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ScreeningTemplateId == screeningTemplate.Id))
+            var screeningValue = _screeningTemplateValueRepository.All.Where(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ScreeningTemplateId == screeningTemplate.Id).FirstOrDefault();
+
+            if (screeningValue == null)
             {
-                var screeningTemplateValue = new ScreeningTemplateValue
+                screeningValue = new ScreeningTemplateValue
                 {
                     ScreeningTemplateId = screeningTemplate.Id,
                     ProjectDesignVariableId = projectDesignVariableId,
                     Value = value
                 };
-
-                _screeningTemplateValueRepository.Add(screeningTemplateValue);
-
-                var audit = new ScreeningTemplateValueAudit
-                {
-                    ScreeningTemplateValue = screeningTemplateValue,
-                    Value = value,
-                    Note = "Save value from open visit"
-                };
-                _screeningTemplateValueAuditRepository.Save(audit);
+                _screeningTemplateValueRepository.Add(screeningValue);
+            }
+            else
+            {
+                screeningValue.Value = value;
+                _screeningTemplateValueRepository.Update(screeningValue);
             }
 
+            var audit = new ScreeningTemplateValueAudit
+            {
+                ScreeningTemplateValue = screeningValue,
+                ScreeningTemplateValueId = screeningValue.Id,
+                Value = value,
+                Note = "Save value from open visit"
+            };
+            _screeningTemplateValueAuditRepository.Save(audit);
 
             _context.Save();
 
