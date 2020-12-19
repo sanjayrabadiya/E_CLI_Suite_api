@@ -76,8 +76,21 @@ namespace GSC.Respository.Project.Design
                     x.Values = x.Values.OrderBy(c => c.SeqNo).ToList();
                 });
             }
-
+            result = ValidateVariables(result);
             return result;
+        }
+
+        private DesignScreeningTemplateDto ValidateVariables(DesignScreeningTemplateDto designScreeningTemplateDto)
+        {
+            designScreeningTemplateDto.Variables.ToList().ForEach(x =>
+            {
+                if (x.ValidationType == ValidationType.Required)
+                {
+                    x.ValidationMessage = "This field is required";
+                }
+                else x.ValidationMessage = "";
+            });
+            return designScreeningTemplateDto;
         }
 
         public IList<DropDownDto> GetTemplateDropDown(int projectDesignVisitId)

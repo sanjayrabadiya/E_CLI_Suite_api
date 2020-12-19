@@ -112,6 +112,7 @@ namespace GSC.Data.Dto.Project.Design
         public string Note { get; set; }
         public List<EditCheckIds> editCheckIds { get; set; }
         public EditCheckTargetValidation EditCheckValidation { get; set; }
+        public string ValidationMessage { get; set; }
     }
 
     public class EditCheckIds

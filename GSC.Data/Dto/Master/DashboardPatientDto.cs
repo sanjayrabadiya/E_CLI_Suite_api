@@ -13,8 +13,11 @@ namespace GSC.Data.Dto.Master
         public string sitename { get; set; }
         public int patientStatusId { get; set; }
         public string patientStatus { get; set; }
-        public string investigatorName { get; set; }
-        public string investigatorcontact { get; set; }
-        public string investigatorEmail { get; set; }
+        public List<SiteTeamDto> siteTeams { get; set; }
+        public string siteAddress { get; set; }
+        public string hospitalName { get; set; }
+        //public string investigatorName { get; set; }
+        //public string investigatorcontact { get; set; }
+        //public string investigatorEmail { get; set; }
     }
 }

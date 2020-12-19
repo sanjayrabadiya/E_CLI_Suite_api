@@ -47,6 +47,7 @@ namespace GSC.Respository.Attendance
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly ISiteTeamRepository _siteTeamRepository;
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -61,7 +62,8 @@ namespace GSC.Respository.Attendance
              IEmailSenderRespository emailSenderRespository,
             IProjectRepository projectRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
-            IProjectRightRepository projectRightRepository)
+            IProjectRightRepository projectRightRepository,
+            ISiteTeamRepository siteTeamRepository)
             : base(context)
         {
             _userRepository = userRepository;
@@ -79,6 +81,7 @@ namespace GSC.Respository.Attendance
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
+            _siteTeamRepository = siteTeamRepository;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -203,20 +206,20 @@ namespace GSC.Respository.Attendance
                 {
                     return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
                 }
-                if (randomizationNumberDto.IsAlphaNumScreeningNo == true)
-                {
-                    if (randomizationNumberDto.ScreeningNumber.All(char.IsDigit))
-                    {
-                        return "Please add Prefix " + randomizationNumberDto.PrefixScreeningNo + " in Screening Number";
-                    }
-                }
-                else
-                {
-                    if (randomizationNumberDto.ScreeningNumber.Contains(randomizationNumberDto.PrefixScreeningNo) == false)
-                    {
-                        return "Please add Prefix " + randomizationNumberDto.PrefixScreeningNo + " in Screening Number";
-                    }
-                }
+                //if (randomizationNumberDto.IsAlphaNumScreeningNo == true)
+                //{
+                //    if (randomizationNumberDto.ScreeningNumber.All(char.IsDigit))
+                //    {
+                //        return "Please add Prefix " + randomizationNumberDto.PrefixScreeningNo + " in Screening Number";
+                //    }
+                //}
+                //else
+                //{
+                //    if (randomizationNumberDto.ScreeningNumber.Contains(randomizationNumberDto.PrefixScreeningNo) == false)
+                //    {
+                //        return "Please add Prefix " + randomizationNumberDto.PrefixScreeningNo + " in Screening Number";
+                //    }
+                //}
             }
             return "";
         }
@@ -233,20 +236,20 @@ namespace GSC.Respository.Attendance
                 {
                     return "Please add " + randomizationNumberDto.RandomNoLength.ToString() + " characters in Randomization Number";
                 }
-                if (randomizationNumberDto.IsAlphaNumRandomNo == true)
-                {
-                    if (randomizationNumberDto.RandomizationNumber.All(char.IsDigit))
-                    {
-                        return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
-                    }
-                }
-                else
-                {
-                    if (randomizationNumberDto.RandomizationNumber.Contains(randomizationNumberDto.PrefixRandomNo) == false)
-                    {
-                        return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
-                    }
-                }
+                //if (randomizationNumberDto.IsAlphaNumRandomNo == true)
+                //{
+                //    if (randomizationNumberDto.RandomizationNumber.All(char.IsDigit))
+                //    {
+                //        return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
+                //    }
+                //}
+                //else
+                //{
+                //    if (randomizationNumberDto.RandomizationNumber.Contains(randomizationNumberDto.PrefixRandomNo) == false)
+                //    {
+                //        return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
+                //    }
+                //}
             }
             return "";
         }
@@ -313,7 +316,7 @@ namespace GSC.Respository.Attendance
             randomizationNumberDto.IsManualRandomNo = studydata.IsManualRandomNo;
             randomizationNumberDto.IsSiteDependentRandomNo = studydata.IsSiteDependentRandomNo;
             randomizationNumberDto.RandomNoLength = studydata.RandomNoLength;
-            randomizationNumberDto.PrefixRandomNo = studydata.PrefixRandomNo;
+            //randomizationNumberDto.PrefixRandomNo = studydata.PrefixRandomNo;
             if (studydata.IsManualRandomNo == true)
             {
                 randomizationNumberDto.RandomizationNumber = "";
@@ -331,14 +334,8 @@ namespace GSC.Respository.Attendance
                     latestno = studydata.RandomizationNoseries;
                     randomizationNumberDto.RandomizationNoseries = studydata.RandomizationNoseries;
                 }
-                if (studydata.IsAlphaNumRandomNo == true)
-                {
-                    randomizationNumberDto.RandomizationNumber = studydata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength - 1, '0');
-                }
-                else
-                {
+                
                     randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
-                }
             }
             return randomizationNumberDto;
         }
@@ -354,7 +351,7 @@ namespace GSC.Respository.Attendance
             randomizationNumberDto.IsManualScreeningNo = studydata.IsManualScreeningNo;
             randomizationNumberDto.IsSiteDependentScreeningNo = studydata.IsSiteDependentScreeningNo;
             randomizationNumberDto.ScreeningLength = studydata.ScreeningLength;
-            randomizationNumberDto.PrefixScreeningNo = studydata.PrefixScreeningNo;
+            //randomizationNumberDto.PrefixScreeningNo = studydata.PrefixScreeningNo;
             if (studydata.IsManualScreeningNo == true)
             {
                 randomizationNumberDto.ScreeningNumber = "";
@@ -372,14 +369,7 @@ namespace GSC.Respository.Attendance
                     latestno = studydata.ScreeningNoseries;
                     randomizationNumberDto.ScreeningNoseries = studydata.ScreeningNoseries;
                 }
-                if (studydata.IsAlphaNumScreeningNo == true)
-                {
-                    randomizationNumberDto.ScreeningNumber = studydata.PrefixScreeningNo + latestno.ToString().PadLeft((int)studydata.ScreeningLength - 1, '0');
-                }
-                else
-                {
                     randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
-                }
             }
             return randomizationNumberDto;
         }
@@ -657,9 +647,10 @@ namespace GSC.Respository.Attendance
                 dashboardPatientDto.sitename = project.SiteName;
                 dashboardPatientDto.patientStatusId = (int)randomization.PatientStatusId;
                 dashboardPatientDto.patientStatus = randomization.PatientStatusId.GetDescription();
-                dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
-                dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
-                dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;
+
+                //dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
+                //dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
+                //dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;
                 return dashboardPatientDto;
             }
             else

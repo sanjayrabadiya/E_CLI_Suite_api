@@ -119,8 +119,8 @@ namespace GSC.Api.Controllers.Master
             return Ok(project);
         }
 
-        [HttpPut("UpdateRandomizationAndScreeningNumberFormat")]
-        public IActionResult UpdateRandomizationAndScreeningNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
+        [HttpPut("UpdateRandomizationNumberFormat")]
+        public IActionResult UpdateRandomizationNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
         {
             if (projectDto.Id <= 0) return BadRequest();
 
@@ -128,14 +128,68 @@ namespace GSC.Api.Controllers.Master
             project.RandomNoLength = projectDto.RandomNoLength;
             project.IsManualRandomNo = projectDto.IsManualRandomNo;
             project.IsAlphaNumRandomNo = projectDto.IsAlphaNumRandomNo;
-            project.PrefixRandomNo = projectDto.PrefixRandomNo;
+            project.RandomNoStartsWith = projectDto.RandomNoStartsWith;
             project.IsSiteDependentRandomNo = projectDto.IsSiteDependentRandomNo;
+            //project.ScreeningLength = projectDto.ScreeningLength;
+            //project.IsManualScreeningNo = projectDto.IsManualScreeningNo;
+            //project.IsAlphaNumScreeningNo = projectDto.IsAlphaNumScreeningNo;
+            //project.ScreeningNoStartsWith = projectDto.ScreeningNoStartsWith;
+            //project.IsSiteDependentScreeningNo = projectDto.IsSiteDependentScreeningNo;
+
+            if (project.IsManualRandomNo == false)
+            {
+                if (project.IsSiteDependentRandomNo == true)
+                {
+                    var projects = _projectRepository.FindBy(x => x.ParentProjectId == project.Id).ToList();
+                    for (int i = 0; i < projects.Count; i++)
+                    {
+                        projects[i].RandomizationNoseries = (int)project.RandomNoStartsWith;
+                        _projectRepository.Update(projects[i]);
+                    }
+                }
+                else
+                {
+                    project.RandomizationNoseries = (int)project.RandomNoStartsWith;
+                }
+            }
+            _projectRepository.Update(project);
+            if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
+            return Ok(project.Id);
+        }
+
+        [HttpPut("UpdateScreeningNumberFormat")]
+        public IActionResult UpdateScreeningNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
+        {
+            if (projectDto.Id <= 0) return BadRequest();
+
+            var project = _projectRepository.Find(projectDto.Id);
+            //project.RandomNoLength = projectDto.RandomNoLength;
+            //project.IsManualRandomNo = projectDto.IsManualRandomNo;
+            //project.IsAlphaNumRandomNo = projectDto.IsAlphaNumRandomNo;
+            //project.RandomNoStartsWith = projectDto.RandomNoStartsWith;
+            //project.IsSiteDependentRandomNo = projectDto.IsSiteDependentRandomNo;
             project.ScreeningLength = projectDto.ScreeningLength;
             project.IsManualScreeningNo = projectDto.IsManualScreeningNo;
             project.IsAlphaNumScreeningNo = projectDto.IsAlphaNumScreeningNo;
-            project.PrefixScreeningNo = projectDto.PrefixScreeningNo;
+            project.ScreeningNoStartsWith = projectDto.ScreeningNoStartsWith;
             project.IsSiteDependentScreeningNo = projectDto.IsSiteDependentScreeningNo;
 
+            if (project.IsManualScreeningNo == false)
+            {
+                if (project.IsSiteDependentScreeningNo == true)
+                {
+                    var projects = _projectRepository.FindBy(x => x.ParentProjectId == project.Id).ToList();
+                    for (int i = 0; i < projects.Count; i++)
+                    {
+                        projects[i].ScreeningNoseries = (int)project.ScreeningNoStartsWith;
+                        _projectRepository.Update(projects[i]);
+                    }
+                }
+                else
+                {
+                    project.ScreeningNoseries = (int)project.ScreeningNoStartsWith;
+                }
+            }
             _projectRepository.Update(project);
             if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
             return Ok(project.Id);

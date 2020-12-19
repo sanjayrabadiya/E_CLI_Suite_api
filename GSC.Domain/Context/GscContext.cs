@@ -298,6 +298,7 @@ namespace GSC.Domain.Context
         public DbSet<VisitDeviationReport> VisitDeviationReport { get; set; }
         public DbSet<VariableValueLanguage> VariableValueLanguage { get; set; }
         public DbSet<SiteTeam> SiteTeam { get; set; }
+        public DbSet<AppScreenPatientRights> AppScreenPatientRights { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
