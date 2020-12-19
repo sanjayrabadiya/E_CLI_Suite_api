@@ -162,6 +162,7 @@ namespace GSC.Api.Controllers.Project.Design
                 });
 
                 visit.DisplayName = "Visit " + ++saved;
+                visit.IsSchedule = false;
                 _projectDesignVisitRepository.Add(visit);
 
                 visitStatus.ForEach(e =>
