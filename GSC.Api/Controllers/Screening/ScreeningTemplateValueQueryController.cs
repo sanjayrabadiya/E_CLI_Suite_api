@@ -191,7 +191,7 @@ namespace GSC.Api.Controllers.Screening
             var projectDesignVisitId = _screeningVisitRepository.All.Where(x => x.Id == screeningTemplate.ScreeningVisitId).Select(t => t.ProjectDesignVisitId).FirstOrDefault();
             var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningEntryId, screeningTemplate.Id,
                 screeningTemplateValueQueryDto.IsNa ? "NA" : screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
-                screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.ScreeningVisitId, projectDesignVisitId);
+                screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.ScreeningVisitId, projectDesignVisitId, screeningTemplateValueQueryDto.IsNa);
 
             List<ScheduleCheckValidateDto> scheduleResult = null;
             if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Date ||

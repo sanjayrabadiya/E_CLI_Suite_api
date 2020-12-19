@@ -79,13 +79,15 @@ namespace GSC.Respository.EditCheckImpact
             {
                 r.ScreeningEntryId = screeningTemplateBasic.ScreeningEntryId;
 
-                if ((r.IsSameTemplate && r.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId) ||
-                (r.IsTarget && r.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId))
+                if ((r.IsSameTemplate || r.IsTarget) && r.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId)
                 {
                     r.ScreeningTemplateId = screeningTemplateBasic.Id;
                     var screeningValue = values.FirstOrDefault(c => c.ProjectDesignVariableId == r.ProjectDesignVariableId);
-                    r.ScreeningTemplateValue = screeningValue?.Value;
-
+                    if (screeningValue != null)
+                    {
+                        r.ScreeningTemplateValue = screeningValue?.Value;
+                        r.IsNa = screeningValue.IsNa;
+                    }
                     if (screeningValue != null && screeningValue.Children != null && screeningValue.Children.Count > 0)
                         r.ScreeningTemplateValue = string.Join(",", screeningValue.Children.Where(x => x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
                 }
@@ -120,7 +122,7 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        public List<EditCheckTargetValidationList> VariableValidateProcess(int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckIds> editCheckIds, bool isQueryRaise, int screeningVisitId, int? projectDesignVisitId)
+        public List<EditCheckTargetValidationList> VariableValidateProcess(int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckIds> editCheckIds, bool isQueryRaise, int screeningVisitId, int? projectDesignVisitId, bool isNa)
         {
             if (editCheckIds == null || editCheckIds.Count == 0)
                 return new List<EditCheckTargetValidationList>();
@@ -136,20 +138,21 @@ namespace GSC.Respository.EditCheckImpact
             }
 
             var editTargetValidation = new List<EditCheckTargetValidationList>();
-            VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId);
-            VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId);
+            VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa);
+            VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa);
 
             return editTargetValidation;
         }
 
-        private void VariableProcess(List<EditCheckValidateDto> result, int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckTargetValidationList> editTargetValidation, bool isQueryRaise, int screeningVisitId, int? projectDesignVisitId)
+        private void VariableProcess(List<EditCheckValidateDto> result, int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckTargetValidationList> editTargetValidation, bool isQueryRaise, int screeningVisitId, int? projectDesignVisitId, bool isNa)
         {
             result.ForEach(r =>
             {
                 r.ScreeningEntryId = screeningEntryId;
-                if (r.IsSameTemplate && r.ProjectDesignTemplateId == projectDesignTemplateId && r.ProjectDesignVariableId == projectDesignVariableId)
+                if ((r.IsSameTemplate || r.IsTarget) && r.ProjectDesignTemplateId == projectDesignTemplateId && r.ProjectDesignVariableId == projectDesignVariableId)
                 {
                     r.ScreeningTemplateValue = value;
+                    r.IsNa = isNa;
                     r.ScreeningTemplateId = screeningTemplateId;
                 }
                 else if (r.IsSameTemplate)
@@ -271,6 +274,7 @@ namespace GSC.Respository.EditCheckImpact
                     {
                         editCheckTarget.HasQueries = false;
                         editCheckTarget.isInfo = true;
+                        r.ValidateType = EditCheckValidateType.NotProcessed;
                     }
 
                     var editCheckMessage = new EditCheckMessage();
@@ -291,7 +295,7 @@ namespace GSC.Respository.EditCheckImpact
                     if (editCheckTarget.HasQueries)
                     {
                         editCheckTarget.HasQueries = SystemQuery(r.ScreeningTemplateId,
-                            r.ProjectDesignVariableId, r.AutoNumber, r.Message, r.SampleResult);
+                            r.ProjectDesignVariableId, r.AutoNumber, r.Message, r.SampleResult, r.IsTarget);
                         editCheckMessage.HasQueries = editCheckTarget.HasQueries;
                     }
 
@@ -501,7 +505,7 @@ namespace GSC.Respository.EditCheckImpact
                                 if (t.Operator != Operator.Enable)
                                     t.ScreeningTemplateValue = singleTarget.Result;
 
-                                t.SampleResult = singleTarget.ResultMessage ?? singleTarget.SampleText;
+                                t.SampleResult = targetResult.RefAndTarget;
                                 t.ValidateType = singleTarget.IsValid ? EditCheckValidateType.RuleValidated : EditCheckValidateType.Failed; t.ValidateType = singleTarget.IsValid ? EditCheckValidateType.RuleValidated : EditCheckValidateType.Failed;
                             }
 
@@ -588,7 +592,7 @@ namespace GSC.Respository.EditCheckImpact
             return screeningTemplateValue.Id;
         }
 
-        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message, string sampleResult)
+        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message, string sampleResult, bool isTaget)
         {
             var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where
             (t => t.ScreeningTemplateId == screeningTemplateId
@@ -596,7 +600,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (screeningTemplateValue != null)
             {
-                if (screeningTemplateValue.IsSystem || screeningTemplateValue.IsNa)
+                if ((!isTaget && screeningTemplateValue.IsSystem) || screeningTemplateValue.IsNa)
                     return false;
 
                 var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateId).FirstOrDefault();

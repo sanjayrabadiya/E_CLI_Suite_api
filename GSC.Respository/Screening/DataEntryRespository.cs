@@ -63,6 +63,7 @@ namespace GSC.Respository.Screening
 
             var projectDesignVisit = await _projectDesignVisitRepository.All.
                 Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
+                OrderBy(a => a.Id).
             Select(t => new DataEntryVisitTemplateDto
             {
                 ProjectDesignVisitId = t.Id,
@@ -141,7 +142,7 @@ namespace GSC.Respository.Screening
                     VisitStatusId = (int)a.Status,
                     ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
                     ScheduleDate = a.ScheduleDate
-                }).ToList()
+                }).OrderBy(b => b.VisitName).ToList()
 
             }).ToListAsync();
 

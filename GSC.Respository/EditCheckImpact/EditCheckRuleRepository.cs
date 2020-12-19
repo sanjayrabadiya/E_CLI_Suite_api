@@ -357,6 +357,7 @@ namespace GSC.Respository.EditCheckImpact
             var result = ValidateDataTable(dt, ruleStr, isFromValidate, editCheck.Any(r => r.IsTarget));
 
             result.SampleText = displayRule;
+            result.RefAndTarget = displayRule + ruleStr;
             return result;
         }
 
