@@ -79,7 +79,8 @@ namespace GSC.Respository.EditCheckImpact
             {
                 r.ScreeningEntryId = screeningTemplateBasic.ScreeningEntryId;
 
-                if (r.IsSameTemplate && r.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId)
+                if ((r.IsSameTemplate && r.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId) ||
+                (r.IsTarget && r.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId))
                 {
                     r.ScreeningTemplateId = screeningTemplateBasic.Id;
                     var screeningValue = values.FirstOrDefault(c => c.ProjectDesignVariableId == r.ProjectDesignVariableId);
@@ -595,7 +596,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (screeningTemplateValue != null)
             {
-                if (screeningTemplateValue.IsSystem)
+                if (screeningTemplateValue.IsSystem || screeningTemplateValue.IsNa)
                     return false;
 
                 var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateId).FirstOrDefault();
