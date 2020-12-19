@@ -81,6 +81,16 @@ namespace GSC.Api.Controllers.UserMgt
                 return BadRequest(ModelState);
             }
 
+            var loginUser = await CheckifAlreadyLogin(user.UserId);
+            if (loginUser.IsLogin)
+            {
+                var errorResult = new ObjectResult(dto.UserName)
+                {
+                    StatusCode = 409
+                };
+                return errorResult;
+            }
+
             if (roles.Count == 1)
                 dto.RoleId = roles.First().Id;
 
@@ -127,6 +137,16 @@ namespace GSC.Api.Controllers.UserMgt
                 ModelState.AddModelError("UserName",
                     "You have not assigned any role, Please contact your administrator");
                 return BadRequest(ModelState);
+            }
+
+            var loginUser = await CheckifAlreadyLogin(user.UserId);
+            if (loginUser.IsLogin)
+            {
+                var errorResult = new ObjectResult(dto.UserName)
+                {
+                    StatusCode = 409
+                };
+                return errorResult;
             }
 
             if (roles.Count == 1)
@@ -258,7 +278,7 @@ namespace GSC.Api.Controllers.UserMgt
                 _userRepository.Update(user);
 
                 _uow.Save();
-
+                
                 await _notificationHubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
             }
             else
@@ -269,9 +289,9 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok();
         }
 
-        private async Task<Data.Entities.UserMgt.User> CheckifAlreadyLogin(Data.Entities.UserMgt.User user)
+        private async Task<Data.Entities.UserMgt.User> CheckifAlreadyLogin(int userId)
         {
-            return await _userRepository.FindAsync(user.Id);
+            return await _userRepository.FindAsync(userId);
         }
 
         [HttpPost]
