@@ -25,6 +25,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
@@ -34,7 +35,8 @@ namespace GSC.Api.Controllers.Screening
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
              IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
-              IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository)
+              IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
+              IScreeningVisitRepository screeningVisitRepository)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -42,6 +44,7 @@ namespace GSC.Api.Controllers.Screening
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _screeningVisitRepository = screeningVisitRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
         }
@@ -133,7 +136,16 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
                 screeningTemplate.IsDisable = false;
                 _screeningTemplateRepository.Update(screeningTemplate);
+
+                var screeningVisit = _screeningVisitRepository.Find(screeningTemplate.ScreeningVisitId);
+                if (screeningVisit != null)
+                {
+                    screeningVisit.Status = ScreeningVisitStatus.InProgress;
+                    _screeningVisitRepository.Update(screeningVisit);
+                }
             }
+
+
         }
 
 
