@@ -160,14 +160,7 @@ namespace GSC.Api.Controllers.Screening
             return Ok(result);
         }
 
-        [HttpGet]
-        [Route("GetAuditHistory/{id}")]
-        public IActionResult GetAuditHistory(int id)
-        {
-            var auditHistory = _screeningEntryRepository.GetAuditHistory(id);
-
-            return Ok(auditHistory);
-        }
+       
 
         [HttpGet("Summary/{id}")]
         public IActionResult Summary(int id)

@@ -27,66 +27,59 @@ namespace GSC.Respository.Screening
 
         public IList<ScreeningAuditDto> GetAudits(int screeningTemplateValueId)
         {
-            var auditDtos =
-                (from audit in _context.ScreeningTemplateValueAudit.Where(t =>
-                        t.ScreeningTemplateValueId == screeningTemplateValueId)
-                    join reasonTemp in _context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
-                    from reason in reasonDt.DefaultIfEmpty()
-                    join userTemp in _context.Users on audit.UserId equals userTemp.Id into userDto
-                    from user in userDto.DefaultIfEmpty()
-                    join roleTemp in _context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
-                    from role in roleDto.DefaultIfEmpty()
-                    select new ScreeningAuditDto
-                    {
-                        CreatedDate = audit.CreatedDate,
-                        IpAddress = audit.IpAddress,
-                        NewValue = audit.Value,
-                        Note = audit.Note,
-                        OldValue = !string.IsNullOrEmpty(audit.Value) && string.IsNullOrEmpty(audit.OldValue)
+
+            return All.Where(x => x.ScreeningTemplateValueId == screeningTemplateValueId).Select(r => new ScreeningAuditDto
+            {
+                CreatedDate = r.CreatedDate,
+                IpAddress = r.IpAddress,
+                NewValue = r.Value,
+                Note = r.Note,
+                OldValue = !string.IsNullOrEmpty(r.Value) && string.IsNullOrEmpty(r.OldValue)
                             ? "Default"
-                            : audit.OldValue,
-                        Reason = reason.ReasonName,
-                        ReasonOth = audit.ReasonOth,
-                        Role = role.RoleName,
-                        TimeZone = audit.TimeZone,
-                        User = user.UserName
-                    }).OrderByDescending(t => t.CreatedDate).ToList();
+                            : r.OldValue,
+                Reason = r.AuditReason.ReasonName,
+                ReasonOth = r.ReasonOth,
+                Role = r.UserRole,
+                TimeZone = r.TimeZone,
+                User = r.UserName
+            }).OrderByDescending(t => t.CreatedDate).ToList();
 
-            //var projectDesignVariableId = _context.ScreeningTemplateValue.First(t => t.Id == screeningTemplateValueId).ProjectDesignVariableId;
-            //var collectionSource = _context.ProjectDesignVariable.First(t => t.Id == projectDesignVariableId).CollectionSource;
-            //if (collectionSource == CollectionSources.PartialDate)
-            //{
-            //    auditDtos.ForEach(data =>
-            //    {
-
-            //        data.OldValue = GetPartialDateDisplayText(data.OldValue);
-            //        data.NewValue = GetPartialDateDisplayText(data.NewValue);
-
-            //    });
-            //}
-
-            return auditDtos;
         }
 
-        private string GetPartialDateDisplayText(string value)
+        public IList<ScreeningAuditDto> GetAuditHistoryByScreeningEntry(int id)
         {
-            if (string.IsNullOrWhiteSpace(value) || value.ToLower() == "default") return value;
-
-            var values = value.Split("-");
-            var year = Convert.ToInt32(values[0]);
-            var month = Convert.ToInt32(values[1]);
-            var day = Convert.ToInt32(values[2]);
-
-            return "";
+            return All.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == id).Select(r => new ScreeningAuditDto
+            {
+                CreatedDate = r.CreatedDate,
+                IpAddress = r.IpAddress,
+                NewValue = r.Value,
+                Note = r.Note,
+                OldValue = !string.IsNullOrEmpty(r.Value) && string.IsNullOrEmpty(r.OldValue)
+                                     ? "Default"
+                                     : r.OldValue,
+                Reason = r.AuditReason.ReasonName,
+                Role = r.UserRole,
+                Template = r.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
+                TimeZone = r.TimeZone,
+                User = r.UserName,
+                Variable = r.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
+                Visit = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                Convert.ToString(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber)
+            }).OrderByDescending(t => t.CreatedDate).ToList();
         }
-
 
         public void Save(ScreeningTemplateValueAudit audit)
         {
             audit.IpAddress = _jwtTokenAccesser.IpAddress;
             audit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
-            audit.UserId = _jwtTokenAccesser.UserId;
-            audit.UserRoleId = _jwtTokenAccesser.RoleId;
+            audit.UserName = _jwtTokenAccesser.UserName;
+            audit.UserRole = _jwtTokenAccesser.RoleName;
+
+            var clientDate = _jwtTokenAccesser.GetHeader("clientDateTime");
+            DateTime createdDate;
+            var isSucess = DateTime.TryParse(clientDate, out createdDate);
+            if (!isSucess) createdDate = System.DateTime.Now;
+            audit.CreatedDate = createdDate;
 
             Add(audit);
         }

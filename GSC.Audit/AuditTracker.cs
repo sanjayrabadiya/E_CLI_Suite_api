@@ -50,6 +50,9 @@ namespace GSC.Audit
                     var action = Enum.GetName(typeof(EntityState), dbEntry.State);
                     var tableName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString();
 
+                    if (dbEntry.Entity as BaseEntity == null)
+                        continue;
+
                     var recordId = (dbEntry.Entity as BaseEntity).Id;
 
                     if ((dbEntry.Entity as BaseEntity).AuditAction == AuditAction.Deleted || (dbEntry.Entity as BaseEntity).AuditAction == AuditAction.Activated)

@@ -29,7 +29,6 @@ namespace GSC.Data.Dto.Report
         public string ReasonName { get; set; }
         public QueryStatus? QueryStatus { get; set; }
         public string CreatedByName { get; set; }
-        public int? CreatedById { get; set; }
         public int ProjectDesignVariableId { get; set; }
         public string ModifieedByName { get; set; }
         public string ClosedByName { get; set; }

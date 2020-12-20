@@ -15,7 +15,6 @@ namespace GSC.Respository.Screening
         ScreeningEntry SaveScreeningRandomization(SaveRandomizationDto saveRandomizationDto);
         IList<DropDownDto> AutoCompleteSearch(string searchText);
         List<AttendanceScreeningGridDto> GetScreeningList(ScreeningSearhParamDto searchParam);
-        IList<ScreeningAuditDto> GetAuditHistory(int id);
         ScreeningSummaryDto GetSummary(int id);
         List<DropDownDto> GetProjectStatusAndLevelDropDown(int parentProjectId);
         IList<DropDownDto> GetSubjectByProjecId(int projectId);

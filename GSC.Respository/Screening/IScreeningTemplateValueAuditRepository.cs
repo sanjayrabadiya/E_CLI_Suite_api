@@ -9,5 +9,6 @@ namespace GSC.Respository.Screening
     {
         IList<ScreeningAuditDto> GetAudits(int screeningTemplateValueId);
         void Save(ScreeningTemplateValueAudit audit);
+        IList<ScreeningAuditDto> GetAuditHistoryByScreeningEntry(int id);
     }
 }

@@ -24,5 +24,14 @@ namespace GSC.Api.Controllers.Screening
 
             return Ok(auditsDto);
         }
+
+        [HttpGet]
+        [Route("GetAuditHistory/{id}")]
+        public IActionResult GetAuditHistory(int id)
+        {
+            var auditHistory = _screeningTemplateValueAuditRepository.GetAuditHistoryByScreeningEntry(id);
+
+            return Ok(auditHistory);
+        }
     }
 }

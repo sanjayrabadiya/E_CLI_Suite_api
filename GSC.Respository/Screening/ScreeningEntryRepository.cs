@@ -14,7 +14,6 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
-using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
@@ -345,46 +344,7 @@ namespace GSC.Respository.Screening
             return query;
         }
 
-        public IList<ScreeningAuditDto> GetAuditHistory(int id)
-        {
-            var auditDtos = (from screening in _context.ScreeningEntry.Where(t => t.Id == id)
-                             join template in _context.ScreeningTemplate on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                             join value in _context.ScreeningTemplateValue on template.Id equals value.ScreeningTemplateId
-                             join audit in _context.ScreeningTemplateValueAudit on value.Id equals audit.ScreeningTemplateValueId
-                             join reasonTemp in _context.AuditReason on audit.ReasonId equals reasonTemp.Id into reasonDt
-                             from reason in reasonDt.DefaultIfEmpty()
-                             join designVerialbe in _context.ProjectDesignVariable on value.ProjectDesignVariableId equals
-                                 designVerialbe.Id
-                             join designTemplate in _context.ProjectDesignTemplate on template.ProjectDesignTemplateId equals
-                                 designTemplate.Id
-                             join designVisit in _context.ProjectDesignVisit on designTemplate.ProjectDesignVisitId equals
-                                 designVisit
-                                     .Id
-                             join userTemp in _context.Users on audit.UserId equals userTemp.Id into userDto
-                             from user in userDto.DefaultIfEmpty()
-                             join roleTemp in _context.SecurityRole on audit.UserRoleId equals roleTemp.Id into roleDto
-                             from role in roleDto.DefaultIfEmpty()
-                             select new ScreeningAuditDto
-                             {
-                                 CreatedDate = audit.CreatedDate,
-                                 IpAddress = audit.IpAddress,
-                                 NewValue = audit.Value,
-                                 Note = audit.Note,
-                                 OldValue = !string.IsNullOrEmpty(audit.Value) && string.IsNullOrEmpty(audit.OldValue)
-                                     ? "Default"
-                                     : audit.OldValue,
-                                 Reason = reason.ReasonName,
-                                 Role = role.RoleName,
-                                 Template = designTemplate.TemplateName,
-                                 TimeZone = audit.TimeZone,
-                                 User = user.UserName,
-                                 Variable = designVerialbe.VariableName,
-                                 Visit = designVisit.DisplayName
-                             }).OrderBy(t => t.Visit).ThenBy(t => t.Template).ThenBy(t => t.Variable)
-                .ThenByDescending(t => t.CreatedDate).ToList();
-
-            return auditDtos;
-        }
+      
 
         public ScreeningSummaryDto GetSummary(int id)
         {

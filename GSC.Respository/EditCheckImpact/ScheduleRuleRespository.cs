@@ -303,6 +303,9 @@ namespace GSC.Respository.EditCheckImpact
             target.ScheduleDate = scheduleDate;
 
             var screeningTemplate = _impactService.GetScreeningTemplateId(target.ProjectDesignTemplateId, screeningEntryId);
+
+            if (screeningTemplate == null) return;
+
             var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(x =>
                 x.ProjectDesignVariableId == target.ProjectDesignVariableId &&
                 x.ScreeningTemplateId == screeningTemplate.ScreeningTemplateId).FirstOrDefault();
