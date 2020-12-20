@@ -138,13 +138,24 @@ namespace GSC.Respository.EditCheckImpact
             }
 
             var editTargetValidation = new List<EditCheckTargetValidationList>();
-            VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa);
-            VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa);
+            VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, false);
+            VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, false);
+
+            if (isQueryRaise)
+            {
+                var targetScreeningTemplates = result.Where(x => x.IsTarget).Select(x => x.ScreeningTemplateId).Distinct().ToList();
+                var repeatTemplateIds = All.Where(x => x.Status > ScreeningTemplateStatus.InProcess && targetScreeningTemplates.Contains((int)x.ParentId)).Select(t => t.Id).ToList();
+                repeatTemplateIds.ForEach(t =>
+                {
+                    var editTargetValidation = new List<EditCheckTargetValidationList>();
+                    VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, t, value, projectDesignTemplateId, 0, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, true);
+                });
+            }
 
             return editTargetValidation;
         }
 
-        private void VariableProcess(List<EditCheckValidateDto> result, int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckTargetValidationList> editTargetValidation, bool isQueryRaise, int screeningVisitId, int? projectDesignVisitId, bool isNa)
+        private void VariableProcess(List<EditCheckValidateDto> result, int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckTargetValidationList> editTargetValidation, bool isQueryRaise, int screeningVisitId, int? projectDesignVisitId, bool isNa, bool isRepated)
         {
             result.ForEach(r =>
             {
@@ -155,13 +166,13 @@ namespace GSC.Respository.EditCheckImpact
                     r.IsNa = isNa;
                     r.ScreeningTemplateId = screeningTemplateId;
                 }
-                else if (r.IsSameTemplate)
+                else if (r.IsSameTemplate || (isRepated && r.IsTarget))
                 {
                     r.ScreeningTemplateId = screeningTemplateId;
                     r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
                     r.IsNa = isNa;
                 }
-                else if (r.ProjectDesignTemplateId != null)
+                else if (r.ProjectDesignTemplateId != null && !isRepated)
                 {
                     var refTemplate = _impactService.GetScreeningTemplate((int)r.ProjectDesignTemplateId, screeningEntryId, projectDesignVisitId == r.ProjectDesignVisitId ? screeningVisitId : (int?)null);
                     if (refTemplate != null)
@@ -179,7 +190,7 @@ namespace GSC.Respository.EditCheckImpact
                         }
                     }
                 }
-                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && !isRepated)
                 {
                     r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
                     r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
@@ -600,6 +611,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (screeningTemplateValue != null)
             {
+
                 if ((!isTaget && screeningTemplateValue.IsSystem) || screeningTemplateValue.IsNa)
                     return false;
 
