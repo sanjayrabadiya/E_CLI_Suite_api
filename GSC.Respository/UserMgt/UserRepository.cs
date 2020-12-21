@@ -220,6 +220,7 @@ namespace GSC.Respository.UserMgt
 
             login.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(user.CompanyId);
             login.Rights = _rolePermissionRepository.GetByUserId(user.Id, roleId);
+            login.PatientRights = _rolePermissionRepository.GetPatientUserRights(user.Id);
             login.Roles = _userRoleRepository.GetRoleByUserName(user.UserName);
             login.RoleName = login.Roles.FirstOrDefault(t => t.Id == roleId)?.Value;
 

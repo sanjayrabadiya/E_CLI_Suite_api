@@ -19,5 +19,6 @@ namespace GSC.Data.Dto.UserMgt
         public int ProjectId { get; set; }
         public string StudyName { get; set; }
         public string PatientModules { get; set; }
+        public List<AppScreenPatientRightsDto> appScreenPatientRights { get; set; }
     }
 }
