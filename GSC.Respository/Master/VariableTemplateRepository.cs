@@ -108,5 +108,30 @@ namespace GSC.Respository.Master
 
             return new List<Variable>();
         }
+
+        //remove this
+        public List<DropDownDto> GetDomainByCRFDropDown(bool isNonCRF)
+        {
+            if (isNonCRF)
+                return All.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ActivityMode == Helper.ActivityMode.Generic)
+                    .Select(c => new DropDownDto { Id = c.Id, Value = c.Domain.DomainName, Code = c.Domain.DomainCode, IsDeleted = c.DeletedDate != null })
+                    .OrderBy(o => o.Value).ToList();
+            else
+                return All.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ActivityMode == Helper.ActivityMode.SubjectSpecific)
+                    .Select(c => new DropDownDto { Id = c.Id, Value = c.Domain.DomainName, Code = c.Domain.DomainCode, IsDeleted = c.DeletedDate != null })
+                    .OrderBy(o => o.Value).ToList();
+        }
+
+        public List<DropDownDto> GetVariableTemplateByCRFByDomainId(bool isNonCRF, int domainId)
+        {
+            return All.Where(x =>
+                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null &&
+                x.DomainId == domainId && (isNonCRF ? x.ActivityMode == Helper.ActivityMode.Generic : x.ActivityMode == Helper.ActivityMode.SubjectSpecific))
+            .Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode })
+            .OrderBy(o => o.Value).ToList();
+        }
+
     }
 }

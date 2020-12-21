@@ -14,6 +14,7 @@ namespace GSC.Data.Dto.Project.Design
         public string Description { get; set; }
         public bool IsRepeated { get; set; }
         public bool? IsSchedule { get; set; }
+        public bool IsNonCRF { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
     }
 
@@ -23,6 +24,7 @@ namespace GSC.Data.Dto.Project.Design
         public int Id { get; set; }
         public bool IsRepeated { get; set; }
         public bool? IsSchedule { get; set; }
+        public bool IsNonCRF { get; set; }
         public List<int> Templates { get; set; }
     }
 }

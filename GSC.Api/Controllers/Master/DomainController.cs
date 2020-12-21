@@ -24,11 +24,13 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
+        private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IUnitOfWork _uow;
 
         public DomainController(IDomainRepository domainRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
+            IVariableTemplateRepository variableTemplateRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser, IProjectDesignRepository projectDesignRepository)
         {
@@ -39,6 +41,7 @@ namespace GSC.Api.Controllers.Master
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectDesignRepository = projectDesignRepository;
+            _variableTemplateRepository = variableTemplateRepository;
         }
 
 
@@ -166,6 +169,13 @@ namespace GSC.Api.Controllers.Master
             var projectDesignId = _projectDesignRepository
                 .FindBy(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
             return Ok(_domainRepository.GetDomainByProjectDesignDropDown(projectDesignId.Id));
+        }
+
+        [HttpGet]
+        [Route("GetDomainByCRFDropDown/{isNonCRF:bool?}")]
+        public IActionResult GetDomainByCRFDropDown(bool isNonCRF)
+        {
+            return Ok(_domainRepository.GetDomainByCRFDropDown(isNonCRF));
         }
     }
 }

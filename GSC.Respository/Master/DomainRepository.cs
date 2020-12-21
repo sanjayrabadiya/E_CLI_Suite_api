@@ -88,5 +88,19 @@ namespace GSC.Respository.Master
 
             return domains;
         }
+
+        public List<DropDownDto> GetDomainByCRFDropDown(bool isNonCRF)
+        {
+            if (!isNonCRF)
+                return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && _context.VariableTemplate.Where(a => a.DeletedDate == null
+                     && a.ActivityMode == Helper.ActivityMode.SubjectSpecific).Any())
+                    .Select(c => new DropDownDto { Id = c.Id, Value = c.DomainName, Code = c.DomainCode, IsDeleted = c.DeletedDate != null })
+                    .OrderBy(o => o.Value).ToList();
+            else
+                return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && _context.VariableTemplate.Where(a => a.DeletedDate == null
+                && a.ActivityMode == Helper.ActivityMode.Generic).Any())
+                    .Select(c => new DropDownDto { Id = c.Id, Value = c.DomainName, Code = c.DomainCode, IsDeleted = c.DeletedDate != null })
+                    .OrderBy(o => o.Value).ToList();
+        }
     }
 }
