@@ -36,11 +36,11 @@ namespace GSC.Respository.Master
         public string Duplicate(ProductType objSave)
         {
             if (All.Any(
-                x => x.Id != objSave.Id && x.ProductTypeCode == objSave.ProductTypeCode && x.DeletedDate == null))
+                x => x.Id != objSave.Id && x.ProductTypeCode == objSave.ProductTypeCode.Trim() && x.DeletedDate == null))
                 return "Duplicate ProductType code : " + objSave.ProductTypeCode;
 
             if (All.Any(
-                x => x.Id != objSave.Id && x.ProductTypeName == objSave.ProductTypeName && x.DeletedDate == null))
+                x => x.Id != objSave.Id && x.ProductTypeName == objSave.ProductTypeName.Trim() && x.DeletedDate == null))
                 return "Duplicate ProductType name : " + objSave.ProductTypeName;
 
 

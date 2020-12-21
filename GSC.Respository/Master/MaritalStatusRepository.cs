@@ -35,7 +35,7 @@ namespace GSC.Respository.Master
         public string Duplicate(MaritalStatus objSave)
         {
             if (All.Any(x =>
-                x.Id != objSave.Id && x.MaritalStatusName == objSave.MaritalStatusName && x.DeletedDate == null))
+                x.Id != objSave.Id && x.MaritalStatusName == objSave.MaritalStatusName.Trim() && x.DeletedDate == null))
                 return "Duplicate MaritalStatus name : " + objSave.MaritalStatusName;
             return "";
         }

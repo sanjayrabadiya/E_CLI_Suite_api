@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Freezer objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.FreezerName == objSave.FreezerName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.FreezerName == objSave.FreezerName.Trim() && x.DeletedDate == null))
                 return "Duplicate Freezer name : " + objSave.FreezerName;
 
             return "";

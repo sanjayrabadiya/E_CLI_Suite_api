@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Religion objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ReligionName == objSave.ReligionName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ReligionName == objSave.ReligionName.Trim() && x.DeletedDate == null))
                 return "Duplicate Religion name : " + objSave.ReligionName;
             return "";
         }

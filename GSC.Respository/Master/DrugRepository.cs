@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Drug objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.DrugName == objSave.DrugName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.DrugName == objSave.DrugName.Trim() && x.DeletedDate == null))
                 return "Duplicate Drug name : " + objSave.DrugName;
             return "";
         }

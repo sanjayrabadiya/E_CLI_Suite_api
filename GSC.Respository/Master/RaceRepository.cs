@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Race objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.RaceName == objSave.RaceName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.RaceName == objSave.RaceName.Trim() && x.DeletedDate == null))
                 return "Duplicate Race name : " + objSave.RaceName;
             return "";
         }

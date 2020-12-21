@@ -35,10 +35,10 @@ namespace GSC.Respository.Master
 
         public string Duplicate(BlockCategory objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.BlockCode == objSave.BlockCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.BlockCode == objSave.BlockCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Block code : " + objSave.BlockCode;
             if (All.Any(x =>
-                x.Id != objSave.Id && x.BlockCategoryName == objSave.BlockCategoryName && x.DeletedDate == null))
+                x.Id != objSave.Id && x.BlockCategoryName == objSave.BlockCategoryName.Trim() && x.DeletedDate == null))
                 return "Duplicate Block Category name : " + objSave.BlockCategoryName;
             return "";
         }

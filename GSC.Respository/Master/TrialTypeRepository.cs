@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(TrialType objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.TrialTypeName == objSave.TrialTypeName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TrialTypeName == objSave.TrialTypeName.Trim() && x.DeletedDate == null))
                 return "Duplicate TrialType code : " + objSave.TrialTypeName;
             return "";
         }

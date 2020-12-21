@@ -39,7 +39,7 @@ namespace GSC.Respository.Master
         public string Duplicate(AuditReason objSave)
         {
             if (All.Any(x =>
-                x.Id != objSave.Id && x.ReasonName == objSave.ReasonName && x.ModuleId == objSave.ModuleId &&
+                x.Id != objSave.Id && x.ReasonName == objSave.ReasonName.Trim() && x.ModuleId == objSave.ModuleId &&
                 x.DeletedDate == null)) return "Duplicate Audit reason name : " + objSave.ReasonName;
             return "";
         }

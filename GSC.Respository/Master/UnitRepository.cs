@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Unit objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.UnitName == objSave.UnitName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.UnitName == objSave.UnitName.Trim() && x.DeletedDate == null))
                 return "Duplicate Unit name : " + objSave.UnitName;
             return "";
         }
