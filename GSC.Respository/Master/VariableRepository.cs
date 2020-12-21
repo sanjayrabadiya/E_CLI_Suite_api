@@ -51,11 +51,11 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Variable objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.VariableCode == objSave.VariableCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.VariableCode == objSave.VariableCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Variable code : " + objSave.VariableCode;
 
             if (All.Any(x =>
-                x.Id != objSave.Id && x.VariableName == objSave.VariableName && x.DomainId == objSave.DomainId &&
+                x.Id != objSave.Id && x.VariableName == objSave.VariableName.Trim() && x.DomainId == objSave.DomainId &&
                 x.AnnotationTypeId == objSave.AnnotationTypeId && x.DeletedDate == null))
                 return "Duplicate Variable name and Domain : " + objSave.VariableName;
 

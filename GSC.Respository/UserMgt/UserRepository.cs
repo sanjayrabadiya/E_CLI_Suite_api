@@ -158,10 +158,10 @@ namespace GSC.Respository.UserMgt
 
         public string DuplicateUserName(User objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.FirstName == objSave.FirstName && x.MiddleName == objSave.MiddleName && x.LastName == objSave.LastName && x.Email == objSave.Email && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.FirstName == objSave.FirstName.Trim() && x.MiddleName == objSave.MiddleName.Trim() && x.LastName == objSave.LastName.Trim() && x.Email == objSave.Email && x.DeletedDate == null))
                 return "Duplicate User";
 
-            if (All.Any(x => x.Id != objSave.Id && x.UserName == objSave.UserName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.UserName == objSave.UserName.Trim() && x.DeletedDate == null))
                 return "Duplicate User Name : " + objSave.UserName;
 
             return "";

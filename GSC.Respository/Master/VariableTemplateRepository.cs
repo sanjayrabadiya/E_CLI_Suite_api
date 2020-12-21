@@ -71,13 +71,13 @@ namespace GSC.Respository.Master
 
         public string Duplicate(VariableTemplate objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Template code : " + objSave.TemplateCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.ActivityName == objSave.ActivityName && x.DeletedDate == null && !string.IsNullOrEmpty(x.ActivityName)))
+            if (All.Any(x => x.Id != objSave.Id && x.ActivityName == objSave.ActivityName.Trim() && x.DeletedDate == null && !string.IsNullOrEmpty(x.ActivityName)))
                 return "Duplicate Activity name : " + objSave.ActivityName;
 
-            if (All.Any(x => x.Id != objSave.Id && x.TemplateName == objSave.TemplateName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TemplateName == objSave.TemplateName.Trim() && x.DeletedDate == null))
                 return "Duplicate Template name : " + objSave.TemplateName;
 
             return "";

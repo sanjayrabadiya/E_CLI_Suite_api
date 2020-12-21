@@ -27,10 +27,10 @@ namespace GSC.Respository.Master
 
         public string ValidateDomain(Data.Entities.Master.Domain objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.DomainCode == objSave.DomainCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.DomainCode == objSave.DomainCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Domain Code : " + objSave.DomainCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.DomainName == objSave.DomainName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.DomainName == objSave.DomainName.Trim() && x.DeletedDate == null))
                 return "Duplicate Domain Name : " + objSave.DomainName;
 
             return "";
