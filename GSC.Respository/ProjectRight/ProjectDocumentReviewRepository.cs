@@ -153,7 +153,7 @@ namespace GSC.Respository.ProjectRight
                 }
             }
 
-             _context.Save();
+            _context.Save();
         }
 
 
@@ -247,7 +247,7 @@ namespace GSC.Respository.ProjectRight
                     DocumentPath = c.ProjectDocument.PathName,
                     FileName = c.ProjectDocument.FileName,
                     MimeType = c.ProjectDocument.MimeType,
-                    ParentProjectCode = _context.Project.Where(x=>x.Id == project.ParentProjectId).FirstOrDefault().ProjectCode
+                    ParentProjectCode = _context.Project.Where(x => x.Id == project.ParentProjectId).FirstOrDefault().ProjectCode
                 }).ToList();
 
             projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
@@ -255,7 +255,7 @@ namespace GSC.Respository.ProjectRight
                 if (project.ParentProjectId == null)
                 {
                     projectDocumentReview.ParentProjectCode = projectDocumentReview.ProjectNumber;
-                    projectDocumentReview.ProjectNumber = null;                    
+                    projectDocumentReview.ProjectNumber = null;
                 }
                 var projectRight = _context.ProjectRight.Where(a =>
                     a.ProjectId == projectDocumentReview.ProjectId
@@ -296,27 +296,6 @@ namespace GSC.Respository.ProjectRight
                                                                               && !x.IsReview && a.DeletedDate == null &&
                                                                               a.RollbackReason == null) &&
                                              x.DeletedDate == null).Select(c => new DropDownDto
-            {
-                Id = c.ProjectId,
-                Value = c.Project.ProjectCode,
-                Code = c.Project.ProjectCode,
-                ExtraData = c.Project.ParentProjectId
-            }).OrderBy(o => o.Value).Distinct().ToList();
-
-            if (projectList == null || projectList.Count == 0) return null;
-            return projectList;
-        }
-
-        public List<DropDownDto> GetParentProjectDropDownProjectRight()
-        {
-            // changes by swati for child project
-            var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == null
-                                             && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
-                                                                              && a.UserId == _jwtTokenAccesser.UserId &&
-                                                                              a.RoleId == _jwtTokenAccesser.RoleId
-                                                                              && a.DeletedDate == null &&
-                                                                              a.RollbackReason == null) &&
-                                             x.DeletedDate == null).Select(c => new DropDownDto
                                              {
                                                  Id = c.ProjectId,
                                                  Value = c.Project.ProjectCode,
@@ -326,6 +305,48 @@ namespace GSC.Respository.ProjectRight
 
             if (projectList == null || projectList.Count == 0) return null;
             return projectList;
+        }
+
+        public List<DropDownDto> GetParentProjectDropDownProjectRight()
+        {
+            // changes by swati for child project
+            var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == null
+                                             && _context.ProjectRight.Any(a => (a.project.ParentProjectId == x.ProjectId || a.ProjectId == x.ProjectId)
+                                                                              && a.UserId == _jwtTokenAccesser.UserId &&
+                                                                              a.RoleId == _jwtTokenAccesser.RoleId
+                                                                              && a.DeletedDate == null &&
+                                                                              a.RollbackReason == null) &&
+                                             x.DeletedDate == null)
+                .Select(c => new DropDownDto
+                {
+                    Id = c.ProjectId,
+                    Value = c.Project.ProjectCode,
+                    Code = c.Project.ProjectCode,
+                    ExtraData = c.Project.ParentProjectId
+                }).OrderBy(o => o.Value).Distinct().ToList();
+
+            var childParentList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId != null
+                                            && _context.ProjectRight.Any(a => (a.project.ParentProjectId == x.ProjectId || a.ProjectId == x.ProjectId)
+                                                                             && a.UserId == _jwtTokenAccesser.UserId &&
+                                                                             a.RoleId == _jwtTokenAccesser.RoleId
+                                                                             && a.DeletedDate == null &&
+                                                                             a.RollbackReason == null) &&
+                                            x.DeletedDate == null).Select(c => new DropDownDto
+                                            {
+                                                Id = (int)c.Project.ParentProjectId,
+                                                Value = _context.Project.Where(x => x.Id == c.Project.ParentProjectId).FirstOrDefault().ProjectCode,
+                                                ExtraData = c.Project.ParentProjectId
+                                            }).OrderBy(o => o.Value).Distinct().ToList();
+            projectList.AddRange(childParentList);
+
+            if (projectList == null || projectList.Count == 0) return null;
+            return projectList.GroupBy(d => d.Id).Select(c => new DropDownDto
+            {
+                Id = c.FirstOrDefault().Id,
+                Value = c.FirstOrDefault().Value,
+                Code = c.FirstOrDefault().Code,
+                ExtraData = c.FirstOrDefault().ExtraData
+            }).ToList();
         }
 
         public List<DropDownDto> GetChildProjectDropDownProjectRight(int ParentProjectId)
@@ -390,7 +411,7 @@ namespace GSC.Respository.ProjectRight
             });
 
             projectDashBoardDto.ProjectList = projectDashBoardDto.ProjectList.Where(x => x.ProjectId == id).ToList();
-       
+
             projectDashBoardDto.ProjectReviewed = All.Count(x => x.UserId == _jwtTokenAccesser.UserId
                                                                  && x.IsReview && _context.ProjectRight.Any(a =>
                                                                      a.ProjectId == x.ProjectId
