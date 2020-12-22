@@ -117,6 +117,13 @@ namespace GSC.Respository.UserMgt
                 return userViewModel;
             }
 
+            if (user.IsLocked)
+            {
+                userViewModel.ValidateMessage = "User is locked, Please contact your administrator";
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, null, userName);
+                return userViewModel;
+            }
+
             if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
             {
                 user.FailedLoginAttempts++;
