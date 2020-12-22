@@ -47,7 +47,7 @@ namespace GSC.Respository.Master
 
         public List<DomainGridDto> GetDomainList(bool isDeleted)
         {
-         
+
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<DomainGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
@@ -91,14 +91,16 @@ namespace GSC.Respository.Master
 
         public List<DropDownDto> GetDomainByCRFDropDown(bool isNonCRF)
         {
+            //Get Only CRF template
             if (!isNonCRF)
                 return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && _context.VariableTemplate.Where(a => a.DeletedDate == null
-                     && a.ActivityMode == Helper.ActivityMode.SubjectSpecific).Any())
+                     && a.ActivityMode == Helper.ActivityMode.SubjectSpecific && a.DomainId == x.Id).Any())
                     .Select(c => new DropDownDto { Id = c.Id, Value = c.DomainName, Code = c.DomainCode, IsDeleted = c.DeletedDate != null })
                     .OrderBy(o => o.Value).ToList();
+            //Get Only Non-CRF template
             else
                 return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && _context.VariableTemplate.Where(a => a.DeletedDate == null
-                && a.ActivityMode == Helper.ActivityMode.Generic).Any())
+                && a.ActivityMode == Helper.ActivityMode.Generic && a.DomainId == x.Id).Any())
                     .Select(c => new DropDownDto { Id = c.Id, Value = c.DomainName, Code = c.DomainCode, IsDeleted = c.DeletedDate != null })
                     .OrderBy(o => o.Value).ToList();
         }
