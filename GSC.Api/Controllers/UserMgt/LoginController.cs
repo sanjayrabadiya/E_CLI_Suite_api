@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
@@ -9,6 +10,7 @@ using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
 using GSC.Shared;
 using GSC.Shared.Configuration;
+using GSC.Shared.Generic;
 using GSC.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +31,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
-        private readonly ICentreUserService _centreUserService;
+        private readonly ICentreUserService _centreUserService;    
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
@@ -48,7 +50,7 @@ namespace GSC.Api.Controllers.UserMgt
             _configuration = configuration;
             _centeralApi = centerlApi;
             _environmentSetting = environmentSetting;
-            _centreUserService = centreUserService;
+            _centreUserService = centreUserService;         
         }
 
         [HttpPost]
@@ -259,34 +261,91 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok();
         }
 
+
         [HttpGet]
         [Route("logOutFromEveryWhere/{userName}")]
         [AllowAnonymous]
         public async Task<IActionResult> LogOutFromEveryWhere(string userName)
         {
-            var user = _userRepository.All.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
-            if (user != null)
+            //var user = _userRepository.All.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
+            //if (user != null)
+            //{
+            //    var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == user.Id && t.LogoutTime == null).ToList();
+            //    userLoginReports.ForEach(t =>
+            //    {
+            //        t.LogoutTime = DateTime.Now;
+            //        _userLoginReportRepository.Update(t);
+            //    });
+
+            //    user.IsLogin = false;
+            //    _userRepository.Update(user);
+
+            //    _uow.Save();
+
+            //    await _notificationHubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
+            //}
+            //else
+            //{
+            //    return NotFound();
+            //}
+            bool IsPremise = _environmentSetting.Value.IsPremise;
+            if (!IsPremise)
             {
-                var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == user.Id && t.LogoutTime == null).ToList();
-                userLoginReports.ForEach(t =>
+                var result = new UserViewModel();
+                //var result = await HttpService.Get<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/logOutFromEveryWhere/{userName}");
+                result = await _centreUserService.LogoutEverywhere($"{_environmentSetting.Value.CentralApi}Login/logOutFromEveryWhere/{userName}");
+                if (result != null)
                 {
-                    t.LogoutTime = DateTime.Now;
-                    _userLoginReportRepository.Update(t);
-                });
+                    string companyCode = $"CompanyId{result.CompanyId}";
+                    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
 
-                user.IsLogin = false;
-                _userRepository.Update(user);
+                    var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == result.UserId && t.LogoutTime == null).ToList();
+                    userLoginReports.ForEach(t =>
+                    {
+                        t.LogoutTime = DateTime.Now;
+                        _userLoginReportRepository.Update(t);
+                    });
 
-                _uow.Save();
-                
-                await _notificationHubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
+                    var user = _userRepository.All.Where(x => x.Id == result.UserId && x.DeletedDate == null).FirstOrDefault();
+                    user.IsLogin = false;
+                    _userRepository.Update(user);
+
+                    _uow.Save();
+
+                    await _notificationHubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             else
             {
-                return NotFound();
+                var user = _userRepository.All.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
+                if (user != null)
+                {
+                    var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == user.Id && t.LogoutTime == null).ToList();
+                    userLoginReports.ForEach(t =>
+                    {
+                        t.LogoutTime = DateTime.Now;
+                        _userLoginReportRepository.Update(t);
+                    });
+
+                    user.IsLogin = false;
+                    _userRepository.Update(user);
+
+                    _uow.Save();
+
+                    await _notificationHubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
 
-            return Ok();
         }
 
         private async Task<Data.Entities.UserMgt.User> CheckifAlreadyLogin(int userId)

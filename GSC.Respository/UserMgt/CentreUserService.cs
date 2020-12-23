@@ -93,5 +93,11 @@ namespace GSC.Respository.UserMgt
             var result = await HttpService.Get<CommonResponceView>(_httpClient, clientUrl + "User/Active/" + Id);
             return result;
         }
+
+        public async Task<UserViewModel> LogoutEverywhere(string clientUrl)
+        {
+            var result = await HttpService.Get<UserViewModel>(_httpClient, clientUrl);
+            return result;
+        }
     }
 }

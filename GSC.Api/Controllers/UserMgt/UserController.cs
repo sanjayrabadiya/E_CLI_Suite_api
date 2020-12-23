@@ -37,8 +37,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IUserRoleRepository _userRoleRepository;
-        private readonly IAPICall _centerEndpoint;
+        private readonly IUserRoleRepository _userRoleRepository;    
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
         private readonly IGSCContext _context;
@@ -50,8 +49,7 @@ namespace GSC.Api.Controllers.UserMgt
             IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IUserRoleRepository userRoleRepository,
-            IProjectRepository projectRepository,
-            IAPICall centerEndpoint,
+            IProjectRepository projectRepository,          
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService,
             IGSCContext context, IJwtTokenAccesser jwtTokenAccesser
@@ -65,8 +63,7 @@ namespace GSC.Api.Controllers.UserMgt
             _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
             _userRoleRepository = userRoleRepository;
-            _projectRepository = projectRepository;
-            _centerEndpoint = centerEndpoint;
+            _projectRepository = projectRepository;          
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
             _context = context;

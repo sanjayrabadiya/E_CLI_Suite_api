@@ -16,5 +16,8 @@ namespace GSC.Respository.UserMgt
         void DeleteUser(string clientUrl, int Id);
         Task<CommonResponceView> ChangePassword(ChangePasswordDto loginDto, string clientUrl);
         Task<CommonResponceView> ActiveUser(string clientUrl, int Id);
+
+
+        Task<UserViewModel> LogoutEverywhere(string clientUrl);
     }
 }
