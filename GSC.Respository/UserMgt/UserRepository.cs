@@ -45,6 +45,8 @@ namespace GSC.Respository.UserMgt
         private readonly IRoleRepository _roleRepository;
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly ICentreUserService _centreUserService;
         public UserRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
@@ -58,7 +60,7 @@ namespace GSC.Respository.UserMgt
              IUploadSettingRepository uploadSettingRepository,
              IRoleRepository roleRepository,
              IRolePermissionRepository rolePermissionRepository,
-             IUserRoleRepository userRoleRepository)
+             IUserRoleRepository userRoleRepository, IOptions<EnvironmentSetting> environmentSetting, ICentreUserService centreUserService)
             : base(context)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
@@ -76,6 +78,8 @@ namespace GSC.Respository.UserMgt
             _roleRepository = roleRepository;
             _rolePermissionRepository = rolePermissionRepository;
             _userRoleRepository = userRoleRepository;
+            _environmentSetting = environmentSetting;
+            _centreUserService = centreUserService;
         }
 
         public List<UserDto> GetUsers(bool isDeleted)
@@ -282,10 +286,19 @@ namespace GSC.Respository.UserMgt
         public async Task<RefreshTokenDto> Refresh(string accessToken, string refreshToken)
         {
             var principal = GetPrincipalFromExpiredToken(accessToken);
-
-            var login = await _context.RefreshToken.Where(t =>
+            var login = new RefreshToken();
+            if (_environmentSetting.Value.IsPremise)
+            {
+                login = await _context.RefreshToken.Where(t =>
                 t.Token == refreshToken && t.ExpiredOn > DateTime.UtcNow).FirstOrDefaultAsync();
-
+            }
+            else
+            {
+                RefreshTokenDto _refreshdto = new RefreshTokenDto();
+                _refreshdto.AccessToken = accessToken;
+                _refreshdto.RefreshToken = refreshToken;
+                login =await _centreUserService.RefreshToken(_refreshdto);
+            }
             if (login == null) throw new SecurityTokenException("Refresh token not found or has been expired.");
 
             return new RefreshTokenDto

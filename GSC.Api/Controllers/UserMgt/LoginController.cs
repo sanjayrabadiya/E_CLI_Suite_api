@@ -31,7 +31,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
-        private readonly ICentreUserService _centreUserService;    
+        private readonly ICentreUserService _centreUserService;
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
@@ -50,7 +50,7 @@ namespace GSC.Api.Controllers.UserMgt
             _configuration = configuration;
             _centeralApi = centerlApi;
             _environmentSetting = environmentSetting;
-            _centreUserService = centreUserService;         
+            _centreUserService = centreUserService;
         }
 
         [HttpPost]
@@ -75,7 +75,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             var roles = _userRoleRepository.GetRoleByUserName(dto.UserName);
-            
+
             if (roles.Count <= 0)
             {
                 ModelState.AddModelError("UserName",
@@ -109,7 +109,17 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (!string.IsNullOrEmpty(validatedUser.Token))
             {
-                _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);
+                if (_environmentSetting.Value.IsPremise)
+                {
+                    _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);
+                }
+                else
+                {
+                    UpdateRefreshTokanDto _refreshtoken = new UpdateRefreshTokanDto();
+                    _refreshtoken.UserID = validatedUser.UserId;
+                    _refreshtoken.RefreshToken = validatedUser.RefreshToken;
+                    _centreUserService.UpdateRefreshToken(_refreshtoken);
+                }
             }
 
             _uow.Save();

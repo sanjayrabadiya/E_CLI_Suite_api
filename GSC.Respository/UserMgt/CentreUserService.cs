@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Dto.UserMgt;
+using GSC.Data.Entities.UserMgt;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using GSC.Shared.Caching;
@@ -60,9 +61,9 @@ namespace GSC.Respository.UserMgt
         }
 
 
-        public async Task<RefreshTokenDto> Refresh(RefreshTokenDto tokenn)
+        public async Task<RefreshToken> RefreshToken(RefreshTokenDto tokenn)
         {
-            var result = await HttpService.Post<RefreshTokenDto>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/Refresh", tokenn);
+            var result = await HttpService.Post<RefreshToken>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/RefreshToken", tokenn);
             return result;
         }
 
@@ -98,6 +99,10 @@ namespace GSC.Respository.UserMgt
         {
             var result = await HttpService.Get<UserViewModel>(_httpClient, clientUrl);
             return result;
+        }
+        public async void UpdateRefreshToken(UpdateRefreshTokanDto refreshTokanDto)
+        {
+            await HttpService.Post(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/UpdateRefreshToken", refreshTokanDto);
         }
     }
 }

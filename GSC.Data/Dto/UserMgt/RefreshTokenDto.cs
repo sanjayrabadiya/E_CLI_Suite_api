@@ -8,4 +8,10 @@ namespace GSC.Data.Dto.UserMgt
         public DateTime? ExpiredAfter { get; set; }
         public string RefreshToken { get; set; }
     }
+
+    public class UpdateRefreshTokanDto
+    {
+        public int UserID { get; set; }
+        public string RefreshToken { get; set; }
+    }
 }

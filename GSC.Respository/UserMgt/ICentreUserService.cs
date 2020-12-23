@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Dto.UserMgt;
+using GSC.Data.Entities.UserMgt;
 using GSC.Shared.Security;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,13 @@ namespace GSC.Respository.UserMgt
         Task<UserViewModel> ValidateClient(LoginDto loginDto);
         Task<CommonResponceView> SaveUser(UserDto userDto, string clientUrl);
         Task<CommonResponceView> UpdateUser(UserDto userDto, string clientUrl);
-        Task<RefreshTokenDto> Refresh(RefreshTokenDto tokenn);
+        Task<RefreshToken> RefreshToken(RefreshTokenDto tokenn);
         void DeleteUser(string clientUrl, int Id);
         Task<CommonResponceView> ChangePassword(ChangePasswordDto loginDto, string clientUrl);
         Task<CommonResponceView> ActiveUser(string clientUrl, int Id);
 
 
         Task<UserViewModel> LogoutEverywhere(string clientUrl);
+        void UpdateRefreshToken(UpdateRefreshTokanDto refreshTokanDto);
     }
 }
