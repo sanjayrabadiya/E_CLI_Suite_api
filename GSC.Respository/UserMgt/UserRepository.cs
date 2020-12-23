@@ -117,6 +117,13 @@ namespace GSC.Respository.UserMgt
                 return userViewModel;
             }
 
+            if (user.IsLocked)
+            {
+                userViewModel.ValidateMessage = "User is locked, Please contact your administrator";
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, null, userName);
+                return userViewModel;
+            }
+
             if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(password, user.Id)))
             {
                 user.FailedLoginAttempts++;
@@ -158,10 +165,10 @@ namespace GSC.Respository.UserMgt
 
         public string DuplicateUserName(User objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.FirstName == objSave.FirstName && x.MiddleName == objSave.MiddleName && x.LastName == objSave.LastName && x.Email == objSave.Email && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.FirstName == objSave.FirstName.Trim() && x.MiddleName == objSave.MiddleName.Trim() && x.LastName == objSave.LastName.Trim() && x.Email == objSave.Email && x.DeletedDate == null))
                 return "Duplicate User";
 
-            if (All.Any(x => x.Id != objSave.Id && x.UserName == objSave.UserName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.UserName == objSave.UserName.Trim() && x.DeletedDate == null))
                 return "Duplicate User Name : " + objSave.UserName;
 
             return "";
@@ -220,6 +227,7 @@ namespace GSC.Respository.UserMgt
 
             login.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(user.CompanyId);
             login.Rights = _rolePermissionRepository.GetByUserId(user.Id, roleId);
+            login.PatientRights = _rolePermissionRepository.GetPatientUserRights(user.Id);
             login.Roles = _userRoleRepository.GetRoleByUserName(user.UserName);
             login.RoleName = login.Roles.FirstOrDefault(t => t.Id == roleId)?.Value;
 

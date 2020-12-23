@@ -66,7 +66,8 @@ namespace GSC.Respository.Project.Design
                 t => new DropDownDto
                 {
                     Id = t.Id,
-                    Value = t.DisplayName
+                    Value = t.DisplayName,
+                    ExtraData = t.IsNonCRF
                 }).ToList();
 
             return visits;

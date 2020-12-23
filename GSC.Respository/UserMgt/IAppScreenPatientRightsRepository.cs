@@ -10,6 +10,6 @@ namespace GSC.Respository.UserMgt
     public interface IAppScreenPatientRightsRepository : IGenericRepository<AppScreenPatientRights>
     {
        List<AppScreenPatientRightsGridDto> GetAppScreenPatientList(int projectid);
-        //List<AppScreenPatientRightsDto> GetAppScreenPatientModules(int projectid);
+       List<AppScreenPatientRightsDto> GetAppScreenPatientModules(int projectid);
     }
 }

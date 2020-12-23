@@ -232,6 +232,13 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
+        [Route("GetVariableTemplateByCRFByDomainId/{isNonCRF}/{domainId}")]
+        public IActionResult GetVariableTemplateByCRFByDomainId(bool isNonCRF, int domainId)
+        {
+            return Ok(_variableTemplateRepository.GetVariableTemplateByCRFByDomainId(isNonCRF, domainId));
+        }
+
+        [HttpGet]
         [Route("GetVariableNotAddedinTemplate/{variableTemplateId}")]
         public IActionResult GetVariableNotAddedinTemplate(int variableTemplateId)
         {

@@ -35,10 +35,10 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Language objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.LanguageName == objSave.LanguageName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.LanguageName == objSave.LanguageName.Trim() && x.DeletedDate == null))
                 return "Duplicate Language name : " + objSave.LanguageName;
 
-            if (All.Any(x => x.Id != objSave.Id && x.shortName == objSave.shortName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.shortName == objSave.shortName.Trim() && x.DeletedDate == null))
                 return "Duplicate Short name : " + objSave.shortName;
 
             return "";

@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(DocumentType objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.TypeName == objSave.TypeName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TypeName == objSave.TypeName.Trim() && x.DeletedDate == null))
                 return "Duplicate Document type name : " + objSave.TypeName;
 
             return "";

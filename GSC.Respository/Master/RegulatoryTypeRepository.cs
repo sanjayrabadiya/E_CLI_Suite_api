@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(RegulatoryType objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.RegulatoryTypeName == objSave.RegulatoryTypeName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.RegulatoryTypeName == objSave.RegulatoryTypeName.Trim() && x.DeletedDate == null))
                 return "Duplicate Regulatory name : " + objSave.RegulatoryTypeName;
             return "";
         }

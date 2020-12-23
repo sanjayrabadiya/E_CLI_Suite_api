@@ -28,11 +28,11 @@ namespace GSC.Respository.Master
         public string ValidateDomainClass(DomainClass objSave)
         {
             if (All.Any(
-                x => x.Id != objSave.Id && x.DomainClassCode == objSave.DomainClassCode && x.DeletedDate == null))
+                x => x.Id != objSave.Id && x.DomainClassCode == objSave.DomainClassCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Domain Class Code : " + objSave.DomainClassCode;
 
             if (All.Any(x =>
-                x.Id != objSave.Id && x.DomainClassName == objSave.DomainClassName && x.DeletedDate == null))
+                x.Id != objSave.Id && x.DomainClassName == objSave.DomainClassName.Trim() && x.DeletedDate == null))
                 return "Duplicate Domain Class Name : " + objSave.DomainClassName;
 
             return "";

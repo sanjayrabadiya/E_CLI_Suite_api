@@ -35,9 +35,9 @@ namespace GSC.Respository.Master
 
         public string Duplicate(ContactType objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ContactCode == objSave.ContactCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ContactCode == objSave.ContactCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Contact code : " + objSave.ContactCode;
-            if (All.Any(x => x.Id != objSave.Id && x.TypeName == objSave.TypeName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TypeName == objSave.TypeName.Trim() && x.DeletedDate == null))
                 return "Duplicate ContactType name : " + objSave.TypeName;
             return "";
         }

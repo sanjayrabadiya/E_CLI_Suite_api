@@ -122,6 +122,25 @@ namespace GSC.Respository.UserMgt
             return screens;
         }
 
+        public List<AppScreenPatient> GetPatientUserRights(int userId)
+        {
+            if (userId == 0) return new List<AppScreenPatient>();
+            var screens = _context.AppScreenPatient.Where(x => x.DeletedDate == null).ToList();
+
+            var usertype = _context.Users.Find(userId).UserType;
+
+            if (usertype == Shared.Generic.UserMasterUserType.Patient)
+            {
+                var siteId = _context.Randomization.Where(x => x.UserId == userId).ToList().FirstOrDefault().ProjectId;
+                var studyId = _context.Project.Where(x => x.Id == siteId).ToList().FirstOrDefault().ParentProjectId;
+
+                var accessRights = _context.AppScreenPatientRights.Where(x => x.ProjectId == studyId).ToList().Select(x => x.AppScreenPatientId);
+                screens = screens.Where(x => accessRights.Contains(x.Id)).ToList();
+            } else new List<AppScreenPatient>();
+
+            return screens;
+        }
+
         public RolePermission GetRolePermissionByScreenCode(string screenCode)
         {
             var isPowerAdmin = _context.Users.Find(_jwtTokenAccesser.UserId).IsPowerAdmin;

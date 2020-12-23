@@ -36,7 +36,7 @@ namespace GSC.Respository.Master
 
         public string DuplicateState(State objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.StateName == objSave.StateName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.StateName == objSave.StateName.Trim() && x.DeletedDate == null))
                 return "Duplicate State name : " + objSave.StateName;
 
             return "";

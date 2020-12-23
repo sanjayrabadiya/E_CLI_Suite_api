@@ -50,15 +50,15 @@ namespace GSC.Respository.Master
 
         public string DuplicateCountry(Country objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.CountryCode == objSave.CountryCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.CountryCode == objSave.CountryCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Country code : " + objSave.CountryCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.CountryName == objSave.CountryName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.CountryName == objSave.CountryName.Trim() && x.DeletedDate == null))
                 return "Duplicate Country name : " + objSave.CountryName;
 
             if (!string.IsNullOrEmpty(objSave.CountryCallingCode))
                 if (All.Any(x =>
-                    x.Id != objSave.Id && x.CountryCallingCode == objSave.CountryCallingCode && x.DeletedDate == null))
+                    x.Id != objSave.Id && x.CountryCallingCode == objSave.CountryCallingCode.Trim() && x.DeletedDate == null))
                     return "Duplicate Country calling code : " + objSave.CountryCallingCode;
 
             return "";

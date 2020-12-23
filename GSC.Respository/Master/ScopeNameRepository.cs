@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(ScopeName objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.Name == objSave.Name && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.Name == objSave.Name.Trim() && x.DeletedDate == null))
                 return "Duplicate Scope name : " + objSave.Name;
             return "";
         }

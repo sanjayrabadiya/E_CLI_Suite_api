@@ -313,7 +313,7 @@ namespace GSC.Helper
 
         [Description("By Variable Annotation")]
         ByVariableAnnotation = 2,
-        [Description("By Template")] ByTemplate = 3,
+        [Description("By Form")] ByTemplate = 3,
 
         [Description("By Template Annotation")]
         ByTemplateAnnotation = 4

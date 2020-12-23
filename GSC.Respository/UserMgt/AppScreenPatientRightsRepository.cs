@@ -18,34 +18,54 @@ namespace GSC.Respository.UserMgt
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProjectRepository _projectRepository;
+        private readonly IGSCContext _context;
         public AppScreenPatientRightsRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IProjectRepository projectRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _projectRepository = projectRepository;
+            _context = context;
         }
 
         public List<AppScreenPatientRightsGridDto> GetAppScreenPatientList(int projectid)
         {
             var patientrights = FindByInclude(x => x.ProjectId == projectid && x.DeletedDate == null, x=> x.AppScreenPatient).ToList();
-            List<AppScreenPatientRightsGridDto> appScreenPatientRightsGridDtos = new List<AppScreenPatientRightsGridDto>();
-            AppScreenPatientRightsGridDto appScreenPatientRightsGridDto = new AppScreenPatientRightsGridDto();
-            appScreenPatientRightsGridDto.ProjectId = projectid;
-            appScreenPatientRightsGridDto.StudyName = _projectRepository.Find(projectid).ProjectName;
-            string patientModules = "";
-            for (int i = 0; i < patientrights.Count; i++)
+            if (patientrights.Count > 0)
             {
-                patientModules = patientModules + patientrights[i].AppScreenPatient.ScreenName + " , ";
+                List<AppScreenPatientRightsGridDto> appScreenPatientRightsGridDtos = new List<AppScreenPatientRightsGridDto>();
+                AppScreenPatientRightsGridDto appScreenPatientRightsGridDto = new AppScreenPatientRightsGridDto();
+                appScreenPatientRightsGridDto.ProjectId = projectid;
+                appScreenPatientRightsGridDto.StudyName = _projectRepository.Find(projectid).ProjectName;
+                string patientModules = "";
+                for (int i = 0; i < patientrights.Count; i++)
+                {
+                    patientModules = patientModules + patientrights[i].AppScreenPatient.ScreenName + " , ";
+                }
+                appScreenPatientRightsGridDto.PatientModules = patientModules.Substring(0,patientModules.Length - 3);
+                appScreenPatientRightsGridDtos.Add(appScreenPatientRightsGridDto);
+                return appScreenPatientRightsGridDtos;
             }
-            appScreenPatientRightsGridDto.PatientModules = patientModules;
-            appScreenPatientRightsGridDtos.Add(appScreenPatientRightsGridDto);
-            return appScreenPatientRightsGridDtos;
+            else
+            {
+                return new List<AppScreenPatientRightsGridDto>();
+            }
         }
 
-        //public List<AppScreenPatientRightsDto> GetAppScreenPatientModules(int projectid)
-        //{
-            
-        //}
+        public List<AppScreenPatientRightsDto> GetAppScreenPatientModules(int projectid)
+        {
+            var data = (from a in _context.AppScreenPatient
+                                     join b in _context.AppScreenPatientRights.Where(x => x.ProjectId == projectid) on a.Id equals b.AppScreenPatientId into ps
+                                     from p in ps.DefaultIfEmpty()
+                                     select new AppScreenPatientRightsDto
+                                     {
+                                         ProjectId = projectid,
+                                         AppScreenPatientId = a.Id,
+                                         IsChecked = (p == null) ? false : true,
+                                         AppScreenPatientScreenName = a.ScreenName,
+                                     }).ToList();
+
+            return data;
+        }
     }
 }

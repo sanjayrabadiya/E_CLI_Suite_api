@@ -35,7 +35,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(PopulationType objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.PopulationName == objSave.PopulationName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.PopulationName == objSave.PopulationName.Trim() && x.DeletedDate == null))
                 return "Duplicate Population name : " + objSave.PopulationName;
 
             return "";

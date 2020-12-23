@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
         {
             if (All.Any(x => x.Id != objSave.Id && x.RoleId == objSave.RoleId && x.ProjectId == objSave.ProjectId && x.UserId == objSave.UserId && x.DeletedDate == null))
             {
-                return "Duplicate Record";
+                return "Duplicate Record User";
             }
             return "";
         }

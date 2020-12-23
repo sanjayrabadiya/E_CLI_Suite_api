@@ -28,10 +28,10 @@ namespace GSC.Respository.Master
 
         public string DuplicateCity(City objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.CityCode == objSave.CityCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.CityCode == objSave.CityCode.Trim() && x.DeletedDate == null))
                 return "Duplicate City code : " + objSave.CityCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.CityName == objSave.CityName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.CityName == objSave.CityName.Trim() && x.DeletedDate == null))
                 return "Duplicate City name : " + objSave.CityName;
 
             return "";

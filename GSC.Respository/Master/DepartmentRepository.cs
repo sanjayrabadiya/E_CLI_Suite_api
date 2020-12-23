@@ -36,10 +36,10 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Department objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.DepartmentCode == objSave.DepartmentCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.DepartmentCode == objSave.DepartmentCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Department code : " + objSave.DepartmentCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.DepartmentName == objSave.DepartmentName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.DepartmentName == objSave.DepartmentName.Trim() && x.DeletedDate == null))
                 return "Duplicate Department name : " + objSave.DepartmentName;
 
             return "";

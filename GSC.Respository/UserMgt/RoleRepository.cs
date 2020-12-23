@@ -42,10 +42,10 @@ namespace GSC.Respository.UserMgt
 
         public string ValidateRole(SecurityRole objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.RoleShortName == objSave.RoleShortName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.RoleShortName == objSave.RoleShortName.Trim() && x.DeletedDate == null))
                 return "Duplicate Short Role Name : " + objSave.RoleShortName;
 
-            if (All.Any(x => x.Id != objSave.Id && x.RoleName == objSave.RoleName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.RoleName == objSave.RoleName.Trim() && x.DeletedDate == null))
                 return "Duplicate Role Name : " + objSave.RoleName;
 
             return "";

@@ -143,7 +143,7 @@ namespace GSC.Respository.Project.Design
                                            && x.ParentId == id).OrderBy(t => t.Id).Select(t => new DropDownDto
                                            {
                                                Id = t.Id,
-                                               Value = t.TemplateName
+                                               Value = t.TemplateName +" - "+ t.ProjectDesignVisit.DisplayName,
                                            }).ToList();
 
             return templates;

@@ -31,7 +31,7 @@ namespace GSC.Respository.Etmf
 
         public string Duplicate(ProjectWorkplaceSubSection objSave)
         {
-            if (All.Any(x => x.ProjectWorkplaceSectionId == objSave.ProjectWorkplaceSectionId && x.Id != objSave.Id && x.SubSectionName == objSave.SubSectionName && x.DeletedDate == null))
+            if (All.Any(x => x.ProjectWorkplaceSectionId == objSave.ProjectWorkplaceSectionId && x.Id != objSave.Id && x.SubSectionName == objSave.SubSectionName.Trim() && x.DeletedDate == null))
                 return "Duplicate Sub Section name : " + objSave.SubSectionName;
             return "";
         }

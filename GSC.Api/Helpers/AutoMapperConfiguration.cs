@@ -293,6 +293,8 @@ namespace GSC.Api.Helpers
             CreateMap<TemplateNoteLanguage, TemplateNoteLanguageDto>().ReverseMap();
             CreateMap<VariableValueLanguage, VariableValueLanguageDto>().ReverseMap();
             CreateMap<SiteTeam, SiteTeamDto>().ReverseMap();
+            CreateMap<AppScreenPatient, AppScreenPatientDto>().ReverseMap();
+            CreateMap<AppScreenPatientRights, AppScreenPatientRightsDto>().ReverseMap();
 
 
 

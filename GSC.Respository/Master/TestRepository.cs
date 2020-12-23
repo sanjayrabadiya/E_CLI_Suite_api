@@ -40,7 +40,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Test objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.TestName == objSave.TestName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TestName == objSave.TestName.Trim() && x.DeletedDate == null))
                 return "Duplicate Test name : " + objSave.TestName;
             return "";
         }

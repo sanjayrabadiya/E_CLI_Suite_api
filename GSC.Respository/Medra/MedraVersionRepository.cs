@@ -31,7 +31,7 @@ namespace GSC.Respository.Medra
 
         public string Duplicate(MedraVersion objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.DictionaryId == objSave.DictionaryId && x.Version == objSave.Version && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.DictionaryId == objSave.DictionaryId && x.Version == objSave.Version.Trim() && x.DeletedDate == null))
             {
                 return "Duplicate Dictionary and version name : " + objSave.Version;
             }

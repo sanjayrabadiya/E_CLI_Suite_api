@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(FoodType objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.TypeName == objSave.TypeName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TypeName == objSave.TypeName.Trim() && x.DeletedDate == null))
                 return "Duplicate FoodType name : " + objSave.TypeName;
             return "";
         }

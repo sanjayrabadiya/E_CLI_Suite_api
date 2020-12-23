@@ -71,13 +71,13 @@ namespace GSC.Respository.Master
 
         public string Duplicate(VariableTemplate objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Template code : " + objSave.TemplateCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.ActivityName == objSave.ActivityName && x.DeletedDate == null && !string.IsNullOrEmpty(x.ActivityName)))
+            if (All.Any(x => x.Id != objSave.Id && x.ActivityName == objSave.ActivityName.Trim() && x.DeletedDate == null && !string.IsNullOrEmpty(x.ActivityName)))
                 return "Duplicate Activity name : " + objSave.ActivityName;
 
-            if (All.Any(x => x.Id != objSave.Id && x.TemplateName == objSave.TemplateName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TemplateName == objSave.TemplateName.Trim() && x.DeletedDate == null))
                 return "Duplicate Template name : " + objSave.TemplateName;
 
             return "";
@@ -108,5 +108,15 @@ namespace GSC.Respository.Master
 
             return new List<Variable>();
         }
+
+        public List<DropDownDto> GetVariableTemplateByCRFByDomainId(bool isNonCRF, int domainId)
+        {
+            return All.Where(x =>
+                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null &&
+                x.DomainId == domainId && (isNonCRF ? x.ActivityMode == Helper.ActivityMode.Generic : x.ActivityMode == Helper.ActivityMode.SubjectSpecific))
+            .Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode })
+            .OrderBy(o => o.Value).ToList();
+        }
+
     }
 }

@@ -251,6 +251,7 @@ namespace GSC.Domain.Context
         DbSet<ProjectModuleRights> ProjectModuleRights { get; set; }
          DbSet<VisitDeviationReport> VisitDeviationReport { get; set; }
          DbSet<SiteTeam> SiteTeam { get; set; }
+        DbSet<AppScreenPatient> AppScreenPatient { get; set; }
         DbSet<AppScreenPatientRights> AppScreenPatientRights { get; set; }
 
 

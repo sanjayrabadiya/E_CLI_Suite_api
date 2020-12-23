@@ -206,7 +206,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             var record = _projectScheduleRepository.FindByInclude(x => x.Id == id, x => x.ProjectDesign)
                 .FirstOrDefault();
 
-            var recordTemplate = _projectScheduleTemplateRepository.FindByInclude(x => x.ProjectScheduleId == id).FirstOrDefault();
+            var recordTemplate = _projectScheduleTemplateRepository.FindByInclude(x => x.ProjectScheduleId == id && x.DeletedDate == null).ToList();
 
             if (record == null && recordTemplate == null)
                 return NotFound();
@@ -218,9 +218,12 @@ namespace GSC.Api.Controllers.Project.Schedule
             }
 
             _projectScheduleRepository.Delete(record);
-            _projectScheduleTemplateRepository.Delete(recordTemplate);
-            _uow.Save();
+            recordTemplate.ForEach(x =>
+            {
+                _projectScheduleTemplateRepository.Delete(x);
+            });
 
+            _uow.Save();
             return Ok();
         }
 

@@ -34,7 +34,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(VisitStatus objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.StatusName == objSave.StatusName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.StatusName == objSave.StatusName.Trim() && x.DeletedDate == null))
                 return "Duplicate Status name : " + objSave.StatusName;
             return "";
         }
