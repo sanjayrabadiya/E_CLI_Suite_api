@@ -272,10 +272,13 @@ namespace GSC.Api.Controllers.UserMgt
             if (!_environmentSetting.Value.IsPremise)
             {
                 CommonResponceView userdetails = await _centreUserService.ChangePassword(loginDto, _environmentSetting.Value.CentralApi);
-                if (!string.IsNullOrEmpty(userdetails.Message))
+                if (userdetails != null)
                 {
-                    ModelState.AddModelError("Message", userdetails.Message);
-                    return BadRequest(ModelState);
+                    if (!string.IsNullOrEmpty(userdetails.Message))
+                    {
+                        ModelState.AddModelError("Message", userdetails.Message);
+                        return BadRequest(ModelState);
+                    }
                 }
             }
             else
