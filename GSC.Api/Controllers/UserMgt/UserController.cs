@@ -267,11 +267,11 @@ namespace GSC.Api.Controllers.UserMgt
 
             var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
                 .FirstOrDefault();
-            if (user == null)
-                return NotFound();
+            
             if (!_environmentSetting.Value.IsPremise)
             {
                 CommonResponceView userdetails = await _centreUserService.ChangePassword(loginDto, _environmentSetting.Value.CentralApi);
+                
                 if (userdetails != null)
                 {
                     if (!string.IsNullOrEmpty(userdetails.Message))
@@ -280,22 +280,25 @@ namespace GSC.Api.Controllers.UserMgt
                         return BadRequest(ModelState);
                     }
                 }
+                return Ok();
             }
             else
             {
+                if (user == null)
+                    return NotFound();
                 if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(loginDto.OldPassword, user.Id)))
                 {
                     ModelState.AddModelError("Message", "Current Password invalid!");
                     return BadRequest(ModelState);
                 }
+                user.IsFirstTime = false;
+                user.IsLogin = false;
+                _userRepository.Update(user);
+                _uow.Save();
+                _userPasswordRepository.CreatePassword(loginDto.NewPassword, user.Id);
+                _emailSenderRespository.SendRegisterEMail(user.Email, loginDto.NewPassword, user.UserName);
+                return Ok();
             }
-            user.IsFirstTime = false;
-            user.IsLogin = false;
-            _userRepository.Update(user);
-            _uow.Save();
-            _userPasswordRepository.CreatePassword(loginDto.NewPassword, user.Id);
-            _emailSenderRespository.SendRegisterEMail(user.Email, loginDto.NewPassword, user.UserName);
-            return Ok();
         }
 
         [HttpPatch("{id}")]
