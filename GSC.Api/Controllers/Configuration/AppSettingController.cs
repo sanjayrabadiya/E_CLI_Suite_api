@@ -30,7 +30,7 @@ namespace GSC.Api.Controllers.Configuration
         [HttpGet("GetGeneralSettings")]
         public IActionResult GetGeneralSettings()
         {
-            var commonSettiongs = _appSettingRepository.Get<GeneralSettingsDto>(1);
+            var commonSettiongs = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             return Ok(commonSettiongs);
         }
 
