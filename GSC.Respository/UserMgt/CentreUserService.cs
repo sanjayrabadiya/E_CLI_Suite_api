@@ -126,6 +126,11 @@ namespace GSC.Respository.UserMgt
         {
             string result = await HttpService.Post(_httpClient, clientUrl, userOtpDto);
             return result;
+        }        
+        public async Task<UserOtp> GetUserOtpDetails(string clientUrl)
+        {
+            var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
+            return result;
         }
     }
 }

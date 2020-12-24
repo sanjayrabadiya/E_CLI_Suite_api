@@ -27,6 +27,8 @@ using System.Linq.Dynamic.Core;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using GSC.Respository.Project.Workflow;
+using GSC.Shared.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace GSC.Respository.Attendance
 {
@@ -52,6 +54,8 @@ namespace GSC.Respository.Attendance
         private readonly IUserOtpRepository _userOtpRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IManageSiteRepository _manageSiteRepository;
+        private readonly ICentreUserService _centreUserService;
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -70,7 +74,7 @@ namespace GSC.Respository.Attendance
             ISiteTeamRepository siteTeamRepository,
             IUserOtpRepository userOtpRepository,
             IRoleRepository roleRepository,
-            IManageSiteRepository manageSiteRepository)
+            IManageSiteRepository manageSiteRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting)
             : base(context)
         {
             _userRepository = userRepository;
@@ -92,6 +96,8 @@ namespace GSC.Respository.Attendance
             _userOtpRepository = userOtpRepository;
             _roleRepository = roleRepository;
             _manageSiteRepository = manageSiteRepository;
+            _centreUserService = centreUserService;
+            _environmentSetting = environmentSetting;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -521,13 +527,13 @@ namespace GSC.Respository.Attendance
             return "";
         }
 
-        public void SendEmailOfScreenedtoPatient(Randomization randomization)
+        public async void SendEmailOfScreenedtoPatient(Randomization randomization)
         {
             var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             var studydata = _projectRepository.Find((int)studyId);
             var userdata = _userRepository.Find((int)randomization.UserId);
-            var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
-
+            //var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
+            var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
                 _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp,studydata.ProjectName,randomization.PrimaryContactNumber);
         }
 
@@ -723,7 +729,7 @@ namespace GSC.Respository.Attendance
             //            }).ToList();
 
             var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
-                        Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && x.ScreeningTemplates.Any(x => x.IsParticipantView == true)).
+                        Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && x.ScreeningTemplates.Any(x => x.ProjectDesignTemplate.IsParticipantView == true)).
                         Select(r => new ProjectDesignVisitMobileDto
                         {
                             Id = r.Id,
@@ -735,7 +741,7 @@ namespace GSC.Respository.Attendance
 
         public List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId)
         {
-            var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Where(x => x.ScreeningVisitId == screeningVisitId && x.IsParticipantView == true).
+            var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Where(x => x.ScreeningVisitId == screeningVisitId && x.ProjectDesignTemplate.IsParticipantView == true).
                         Select(r => new ProjectDesignTemplateMobileDto
                         {
                             ScreeningTemplateId = r.Id,
