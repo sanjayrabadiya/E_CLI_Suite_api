@@ -6,6 +6,7 @@ using GSC.Data.Entities.Attendance;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.Attendance
 {
@@ -17,7 +18,7 @@ namespace GSC.Respository.Attendance
         void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto);
         void SaveScreeningNumber(Randomization randomization, RandomizationDto randomizationDto);
         void SendEmailOfStartEconsent(Randomization randomization);
-        void SendEmailOfScreenedtoPatient(Randomization randomization); 
+        Task SendEmailOfScreenedtoPatient(Randomization randomization); 
         void ChangeStatustoConsentInProgress();
         void ChangeStatustoConsentCompleted(int id);
         void ChangeStatustoReConsentInProgress(int id);

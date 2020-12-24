@@ -29,6 +29,7 @@ using GSC.Shared.JWTAuth;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Configuration;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.Attendance
 {
@@ -527,7 +528,7 @@ namespace GSC.Respository.Attendance
             return "";
         }
 
-        public async void SendEmailOfScreenedtoPatient(Randomization randomization)
+        public async Task SendEmailOfScreenedtoPatient(Randomization randomization)
         {
             var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             var studydata = _projectRepository.Find((int)studyId);
