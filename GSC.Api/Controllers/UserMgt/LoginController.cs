@@ -117,8 +117,11 @@ namespace GSC.Api.Controllers.UserMgt
                     _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);
                 }
                 else
-                {                 
+                {
                     var _refreshtoken = _mapper.Map<UpdateRefreshTokanDto>(validatedUser);
+                    //UpdateRefreshTokanDto _refreshtoken = new UpdateRefreshTokanDto();
+                    //_refreshtoken.UserID = validatedUser.UserId;
+                    //_refreshtoken.RefreshToken = validatedUser.RefreshToken;
                     _centreUserService.UpdateRefreshToken(_refreshtoken);
                 }
             }
