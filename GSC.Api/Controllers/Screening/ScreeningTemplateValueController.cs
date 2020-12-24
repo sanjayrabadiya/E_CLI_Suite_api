@@ -207,7 +207,8 @@ namespace GSC.Api.Controllers.Screening
             }
 
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-            screeningTemplateValueDto.DocPath = documentUrl + screeningTemplateValue.DocPath;
+            screeningTemplateValueDto.DocPath = screeningTemplateValue.DocPath;
+            screeningTemplateValueDto.DocFullPath = documentUrl + screeningTemplateValue.DocPath;
             screeningTemplateValue.DocPath = screeningTemplateValue.DocPath;
 
             _screeningTemplateValueRepository.Update(screeningTemplateValue);

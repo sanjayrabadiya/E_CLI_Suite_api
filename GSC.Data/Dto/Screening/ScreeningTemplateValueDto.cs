@@ -15,6 +15,7 @@ namespace GSC.Data.Dto.Screening
         public int ProjectDesignVariableId { get; set; }
         public string Value { get; set; }
         public string DocPath { get; set; }
+        public string DocFullPath { get; set; }
         public string Text { get; set; }
         public FileModel FileModel { get; set; }
         public string OldValue { get; set; }
