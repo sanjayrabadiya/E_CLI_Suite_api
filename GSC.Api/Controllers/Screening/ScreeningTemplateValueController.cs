@@ -196,20 +196,23 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplateValue = _screeningTemplateValueRepository.Find(screeningTemplateValueDto.Id);
 
-            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            var documentPath = _uploadSettingRepository.GetDocumentPath();
 
             if (screeningTemplateValueDto.FileModel?.Base64?.Length > 0)
             {
                 var documentCategory = "Template";
                 screeningTemplateValue.DocPath = DocumentService.SaveDocument(screeningTemplateValueDto.FileModel,
-                    documentUrl, FolderType.Screening, documentCategory);
+                    documentPath, FolderType.Screening, documentCategory);
                 screeningTemplateValue.MimeType = screeningTemplateValueDto.FileModel.Extension;
             }
 
-            _uow.Save();
-
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             screeningTemplateValueDto.DocPath = documentUrl + screeningTemplateValue.DocPath;
+            screeningTemplateValue.DocPath = screeningTemplateValue.DocPath;
 
+            _screeningTemplateValueRepository.Update(screeningTemplateValue);
+            _uow.Save();
+            
             return Ok(screeningTemplateValueDto);
         }
 
