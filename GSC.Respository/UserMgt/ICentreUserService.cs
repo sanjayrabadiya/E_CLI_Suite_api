@@ -20,10 +20,13 @@ namespace GSC.Respository.UserMgt
 
 
         Task<UserViewModel> GetUserDetails(string clientUrl);
+        Task<UserViewModel> LogOutFromEveryWhere(string clientUrl);
         void UpdateRefreshToken(UpdateRefreshTokanDto refreshTokanDto);
         Task<string> InsertOtpCenteral(string clientUrl);
         Task<string> VerifyOtpCenteral(string clientUrl, UserOtpDto userOtpDto);
         Task<string> ChangePasswordByOtpCenteral(string clientUrl, UserOtpDto userOtpDto);
-        
+        Task<UserOtp> GetUserOtpDetails(string clientUrl);
+
+
     }
 }

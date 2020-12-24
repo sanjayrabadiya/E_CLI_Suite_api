@@ -101,6 +101,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool HasComments { get; set; }
         public bool HasQueries { get; set; }
         public string DocPath { get; set; }
+        public string DocFullPath { get; set; }
         public QueryStatus? QueryStatus { get; set; }
         public string VariableCategoryName { get; set; }
         public WorkFlowButton WorkFlowButton { get; set; }

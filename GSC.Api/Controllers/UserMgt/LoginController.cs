@@ -118,7 +118,7 @@ namespace GSC.Api.Controllers.UserMgt
                 }
                 else
                 {
-                    // var _refreshtoken = _mapper.Map<UpdateRefreshTokanDto>(validatedUser);
+                    //  var _refreshtoken = _mapper.Map<UpdateRefreshTokanDto>(validatedUser);
                     UpdateRefreshTokanDto _refreshtoken = new UpdateRefreshTokanDto();
                     _refreshtoken.UserID = validatedUser.UserId;
                     _refreshtoken.RefreshToken = validatedUser.RefreshToken;
@@ -307,7 +307,7 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 var result = new UserViewModel();
                 //var result = await HttpService.Get<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/logOutFromEveryWhere/{userName}");
-                result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userName}");
+                result = await _centreUserService.LogOutFromEveryWhere($"{_environmentSetting.Value.CentralApi}Login/LogOutFromEveryWhere/{userName}");
                 if (result != null)
                 {
                     string companyCode = $"CompanyId{result.CompanyId}";

@@ -129,7 +129,8 @@ namespace GSC.Respository.Screening
                     variable.WorkFlowButton =
                         SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
 
-                    variable.DocPath = t.DocPath != null ? documentUrl + t.DocPath : null;
+                    variable.DocPath = t.DocPath != null ? t.DocPath : null;
+                    variable.DocFullPath = t.DocPath != null ? documentUrl + t.DocPath : null;
                     if (!string.IsNullOrWhiteSpace(variable.ScreeningValue) || variable.IsNaValue)
                         variable.IsValid = true;
 

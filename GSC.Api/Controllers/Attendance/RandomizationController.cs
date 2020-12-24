@@ -213,8 +213,9 @@ namespace GSC.Api.Controllers.Attendance
 
         [HttpPut]
         [Route("saveScreeningNumber")]
-        public IActionResult SaveScreeningNumber([FromBody] RandomizationDto randomizationDto)
+        public async Task<IActionResult> SaveScreeningNumber([FromBody] RandomizationDto randomizationDto)
         {
+            
             if (randomizationDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -245,7 +246,7 @@ namespace GSC.Api.Controllers.Attendance
 
             //_randomizationRepository.Update(randomization);
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
-            _randomizationRepository.SendEmailOfScreenedtoPatient(randomization);
+           await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization);
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 

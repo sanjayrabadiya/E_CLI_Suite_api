@@ -176,7 +176,7 @@ namespace GSC.Respository.EmailSender
 
         private EmailMessage ConfigureEmail(string keyName, string userName)
         {
-            var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
+    //        var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
             var result = All.Include(x => x.EmailSetting).FirstOrDefault(x =>
                x.DeletedDate == null && x.KeyName == keyName);
             var emailMessage = new EmailMessage();

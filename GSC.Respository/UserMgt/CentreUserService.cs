@@ -100,6 +100,12 @@ namespace GSC.Respository.UserMgt
             var result = await HttpService.Get<UserViewModel>(_httpClient, clientUrl);
             return result;
         }
+
+        public async Task<UserViewModel> LogOutFromEveryWhere(string clientUrl)
+        {
+            var result = await HttpService.Get<UserViewModel>(_httpClient, clientUrl);
+            return result;
+        }
         public async void UpdateRefreshToken(UpdateRefreshTokanDto refreshTokanDto)
         {
             await HttpService.Post(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/UpdateRefreshToken", refreshTokanDto);
@@ -119,6 +125,11 @@ namespace GSC.Respository.UserMgt
         public async Task<string> ChangePasswordByOtpCenteral(string clientUrl, UserOtpDto userOtpDto)
         {
             string result = await HttpService.Post(_httpClient, clientUrl, userOtpDto);
+            return result;
+        }        
+        public async Task<UserOtp> GetUserOtpDetails(string clientUrl)
+        {
+            var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
             return result;
         }
     }
