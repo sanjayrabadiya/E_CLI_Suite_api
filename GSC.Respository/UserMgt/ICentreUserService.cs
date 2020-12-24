@@ -21,5 +21,9 @@ namespace GSC.Respository.UserMgt
 
         Task<UserViewModel> LogoutEverywhere(string clientUrl);
         void UpdateRefreshToken(UpdateRefreshTokanDto refreshTokanDto);
+        Task<string> InsertOtpCenteral(string clientUrl);
+        Task<string> VerifyOtpCenteral(string clientUrl, UserOtpDto userOtpDto);
+        Task<string> ChangePasswordByOtpCenteral(string clientUrl, UserOtpDto userOtpDto);
+        
     }
 }

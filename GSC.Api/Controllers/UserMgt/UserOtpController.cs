@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation.Resources;
 using GSC.Api.Controllers.Common;
@@ -10,9 +11,11 @@ using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Configuration;
 using GSC.Shared.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -25,24 +28,31 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUnitOfWork _uow;
         private readonly IUserOtpRepository _userOtpRepository;
         private readonly IUserRepository _userRepository;
-
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly ICentreUserService _centreUserService;
         public UserOtpController(IUserOtpRepository userOtpRepository,
             IUnitOfWork uow,
             IUserRepository userRepository,
-            IMapper mapper)
+            IMapper mapper, IOptions<EnvironmentSetting> environmentSetting, ICentreUserService centreUserService)
         {
             _userOtpRepository = userOtpRepository;
             _uow = uow;
             _mapper = mapper;
             _userRepository = userRepository;
+            _environmentSetting = environmentSetting;
+            _centreUserService = centreUserService;
         }
 
         [HttpPost]
         [AllowAnonymous]
         [Route("InsertOtp/{userName}")]
-        public IActionResult InsertOtp(string userName)
+        public async Task<IActionResult> InsertOtp(string userName)
         {
-            var validateMessage = _userOtpRepository.InsertOtp(userName);
+            var validateMessage = "";
+            if (_environmentSetting.Value.IsPremise)
+                 validateMessage = _userOtpRepository.InsertOtp(userName);
+            else
+                validateMessage = await _centreUserService.InsertOtpCenteral($"{_environmentSetting.Value.CentralApi}UserOtp/InsertOtp/{userName}");
 
             if (!string.IsNullOrEmpty(validateMessage))
             {
@@ -57,9 +67,13 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         [Route("VerifyOtp")]
         [AllowAnonymous]
-        public IActionResult VerifyOtp([FromBody] UserOtpDto userOtpDto)
+        public async Task<IActionResult> VerifyOtp([FromBody] UserOtpDto userOtpDto)
         {
-            var validateMessage = _userOtpRepository.VerifyOtp(userOtpDto);
+            var validateMessage = "";
+            if (_environmentSetting.Value.IsPremise)
+                 validateMessage = _userOtpRepository.VerifyOtp(userOtpDto);
+            else
+                validateMessage = await _centreUserService.VerifyOtpCenteral($"{_environmentSetting.Value.CentralApi}UserOtp/VerifyOtp", userOtpDto);
 
             if (!string.IsNullOrEmpty(validateMessage))
             {
@@ -74,22 +88,30 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         [Route("ChangePasswordByOtp")]
         [AllowAnonymous]
-        public IActionResult ChangePasswordByOtp([FromBody] UserOtpDto userOtpDto)
+        public async Task<IActionResult> ChangePasswordByOtp([FromBody] UserOtpDto userOtpDto)
         {
-            var validateMessage = _userOtpRepository.ChangePasswordByOtp(userOtpDto);
-            if (validateMessage == "")
+            var validateMessage = "";
+            if (_environmentSetting.Value.IsPremise)
             {
-                var user = _userRepository.FindBy(x => x.UserName == userOtpDto.UserName && x.DeletedDate == null)
-                    .FirstOrDefault();
-                if (user != null)
+                validateMessage = _userOtpRepository.ChangePasswordByOtp(userOtpDto);
+                if (validateMessage == "")
                 {
-                    user.IsFirstTime = false;
-                    var userupdate = _mapper.Map<Data.Entities.UserMgt.User>(user);
+                    var user = _userRepository.FindBy(x => x.UserName == userOtpDto.UserName && x.DeletedDate == null)
+                        .FirstOrDefault();
+                    if (user != null)
+                    {
+                        user.IsFirstTime = false;
+                        var userupdate = _mapper.Map<Data.Entities.UserMgt.User>(user);
 
-                    _userRepository.Update(userupdate);
+                        _userRepository.Update(userupdate);
+                    }
+
+                    if (_uow.Save() <= 0) throw new Exception("Updating user failed on change password.");
                 }
-
-                if (_uow.Save() <= 0) throw new Exception("Updating user failed on change password.");
+            }
+            else
+            {
+                validateMessage = await _centreUserService.ChangePasswordByOtpCenteral($"{_environmentSetting.Value.CentralApi}UserOtp/ChangePasswordByOtp", userOtpDto);
             }
 
             if (!string.IsNullOrEmpty(validateMessage))

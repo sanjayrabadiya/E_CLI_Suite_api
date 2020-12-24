@@ -104,5 +104,22 @@ namespace GSC.Respository.UserMgt
         {
             await HttpService.Post(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/UpdateRefreshToken", refreshTokanDto);
         }
+
+        public async Task<string> InsertOtpCenteral(string clientUrl)
+        {
+            string result = await HttpService.Post(_httpClient, clientUrl, null);
+            return result;
+        }
+
+        public async Task<string> VerifyOtpCenteral(string clientUrl, UserOtpDto userOtpDto)
+        {
+            string result = await HttpService.Post(_httpClient, clientUrl, userOtpDto);
+            return result;
+        }
+        public async Task<string> ChangePasswordByOtpCenteral(string clientUrl, UserOtpDto userOtpDto)
+        {
+            string result = await HttpService.Post(_httpClient, clientUrl, userOtpDto);
+            return result;
+        }
     }
 }
