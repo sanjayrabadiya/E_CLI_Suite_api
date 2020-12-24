@@ -17,6 +17,7 @@ namespace GSC.Respository.Attendance
         void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto);
         void SaveScreeningNumber(Randomization randomization, RandomizationDto randomizationDto);
         void SendEmailOfStartEconsent(Randomization randomization);
+        void SendEmailOfScreenedtoPatient(Randomization randomization); 
         void ChangeStatustoConsentInProgress();
         void ChangeStatustoConsentCompleted(int id);
         void ChangeStatustoReConsentInProgress(int id);

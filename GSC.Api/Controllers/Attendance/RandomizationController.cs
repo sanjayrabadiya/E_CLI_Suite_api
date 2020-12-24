@@ -245,6 +245,7 @@ namespace GSC.Api.Controllers.Attendance
 
             //_randomizationRepository.Update(randomization);
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
+            _randomizationRepository.SendEmailOfScreenedtoPatient(randomization);
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
