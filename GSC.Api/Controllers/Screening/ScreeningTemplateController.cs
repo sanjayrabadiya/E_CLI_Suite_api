@@ -5,10 +5,8 @@ using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
@@ -190,13 +188,8 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplate.StartLevel = -1;
             }
             screeningTemplate.IsDisable = false;
-            screeningTemplate.ScreeningTemplateReview = new List<ScreeningTemplateReview>();
-            screeningTemplate.ScreeningTemplateReview.Add(new ScreeningTemplateReview
-            {
-                Status = ScreeningTemplateStatus.Submitted,
-                ReviewLevel = 0,
-                RoleId = _jwtTokenAccesser.RoleId
-            });
+
+            _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, 0);
 
             _screeningTemplateValueRepository.UpdateVariableOnSubmit(screeningTemplate.ProjectDesignTemplateId,
                 screeningTemplate.Id, null);
@@ -237,13 +230,8 @@ namespace GSC.Api.Controllers.Screening
 
             screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
 
-            screeningTemplate.ScreeningTemplateReview = new List<ScreeningTemplateReview>();
-            screeningTemplate.ScreeningTemplateReview.Add(new ScreeningTemplateReview
-            {
-                Status = ScreeningTemplateStatus.Reviewed,
-                ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel),
-                RoleId = _jwtTokenAccesser.RoleId
-            });
+            _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, (short)screeningTemplate.ReviewLevel);
+
             screeningTemplate.ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel + 1);
 
             var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(screeningTemplate.Id);
@@ -258,7 +246,7 @@ namespace GSC.Api.Controllers.Screening
 
             _uow.Save();
 
-         
+
 
             return Ok(id);
         }

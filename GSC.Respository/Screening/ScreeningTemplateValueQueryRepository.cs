@@ -103,6 +103,7 @@ namespace GSC.Respository.Screening
 
             screeningTemplateValue.QueryStatus = updateQueryStatus;
             screeningTemplateValue.Value = screeningTemplateValueQueryDto.Value;
+            screeningTemplateValue.IsNa = screeningTemplateValueQueryDto.IsNa;
             if (updateQueryStatus == QueryStatus.Resolved)
             {
                 var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);

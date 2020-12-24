@@ -6,6 +6,7 @@ using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Screening
@@ -14,10 +15,12 @@ namespace GSC.Respository.Screening
         IScreeningTemplateReviewRepository
     {
         private readonly IGSCContext _context;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ScreeningTemplateReviewRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
             _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public List<ScreeningTemplateReviewDto> GetTemplateReviewHistory(int id)
@@ -31,6 +34,16 @@ namespace GSC.Respository.Screening
                     OfficerName = r.CreatedByUser.UserName,
                     RoleName = r.Role.RoleName
                 }).ToList();
+        }
+
+        public void Save(int screeningTemplateId, ScreeningTemplateStatus status,short reviewLevel)
+        {
+            var screeningTemplateReview = new ScreeningTemplateReview();
+            screeningTemplateReview.ScreeningTemplateId = screeningTemplateId;
+            screeningTemplateReview.Status = status;
+            screeningTemplateReview.ReviewLevel = reviewLevel;
+            screeningTemplateReview.RoleId = _jwtTokenAccesser.RoleId;
+            Add(screeningTemplateReview);
         }
 
         public IList<ReviewDto> GetReviewLevel(int projectId)

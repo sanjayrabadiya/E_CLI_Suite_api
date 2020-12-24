@@ -25,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace GSC.Respository.UserMgt
 {
@@ -299,7 +300,12 @@ namespace GSC.Respository.UserMgt
                 _refreshdto.RefreshToken = refreshToken;
                 login =await _centreUserService.RefreshToken(_refreshdto);
             }
-            if (login == null) throw new SecurityTokenException("Refresh token not found or has been expired.");
+            if (login == null)
+            {
+                Log.Logger.Information("refreshToken " + refreshToken);
+                throw new SecurityTokenException("Refresh token not found or has been expired.");
+            }
+                
 
             return new RefreshTokenDto
             {

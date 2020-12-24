@@ -3,6 +3,7 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
+using GSC.Helper;
 
 namespace GSC.Respository.Screening
 {
@@ -11,5 +12,6 @@ namespace GSC.Respository.Screening
         List<ScreeningTemplateReviewDto> GetTemplateReviewHistory(int id);
 
         IList<ReviewDto> GetReviewLevel(int projectId);
+        void Save(int screeningTemplateId, ScreeningTemplateStatus status, short reviewLevel);
     }
 }
