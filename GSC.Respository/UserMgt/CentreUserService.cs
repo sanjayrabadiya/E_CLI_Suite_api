@@ -107,7 +107,7 @@ namespace GSC.Respository.UserMgt
 
         public async Task<string> InsertOtpCenteral(string clientUrl)
         {
-            string result = await HttpService.Post(_httpClient, clientUrl, null);
+            string result = await HttpService.Get(_httpClient, clientUrl, null);
             return result;
         }
 

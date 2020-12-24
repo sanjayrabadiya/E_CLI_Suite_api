@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
@@ -32,6 +33,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IAPICall _centeralApi;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
+        private readonly IMapper _mapper;
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
@@ -40,7 +42,7 @@ namespace GSC.Api.Controllers.UserMgt
             IHubContext<Notification> notificationHubContext,
             IConfiguration configuration, IAPICall centerlApi,
             IOptions<EnvironmentSetting> environmentSetting,
-            ICentreUserService centreUserService)
+            ICentreUserService centreUserService,IMapper mapper)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -51,6 +53,7 @@ namespace GSC.Api.Controllers.UserMgt
             _centeralApi = centerlApi;
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
+            _mapper = mapper;
         }
 
         [HttpPost]
@@ -114,10 +117,8 @@ namespace GSC.Api.Controllers.UserMgt
                     _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);
                 }
                 else
-                {
-                    UpdateRefreshTokanDto _refreshtoken = new UpdateRefreshTokanDto();
-                    _refreshtoken.UserID = validatedUser.UserId;
-                    _refreshtoken.RefreshToken = validatedUser.RefreshToken;
+                {                 
+                    var _refreshtoken = _mapper.Map<UpdateRefreshTokanDto>(validatedUser);
                     _centreUserService.UpdateRefreshToken(_refreshtoken);
                 }
             }
