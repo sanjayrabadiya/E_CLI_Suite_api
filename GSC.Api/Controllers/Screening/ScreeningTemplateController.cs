@@ -212,6 +212,10 @@ namespace GSC.Api.Controllers.Screening
         [TransactionRequired]
         public IActionResult ReviewedTemplate(int id)
         {
+            _screeningTemplateRepository.SubmitReviewTemplate(id, false);
+
+            _uow.Save();
+
             var screeningTemplate = _screeningTemplateRepository.Find(id);
 
             var validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(id);
@@ -252,11 +256,9 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateRepository.Update(screeningTemplate);
 
-            if (_uow.Save() <= 0) throw new Exception("Failed Template Review");
-
-            _screeningTemplateRepository.SubmitReviewTemplate(screeningTemplate.Id, false);
-
             _uow.Save();
+
+         
 
             return Ok(id);
         }

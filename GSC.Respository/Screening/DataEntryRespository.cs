@@ -60,6 +60,7 @@ namespace GSC.Respository.Screening
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
             result.WorkFlowText = workflowlevel.WorkFlowText;
             result.ReviewLevel = workflowlevel.LevelNo;
+            result.IsStartTemplate = workflowlevel.IsStartTemplate;
 
             var projectDesignVisit = await _projectDesignVisitRepository.All.
                 Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
