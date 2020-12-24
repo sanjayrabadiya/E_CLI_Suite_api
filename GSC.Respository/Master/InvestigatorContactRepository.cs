@@ -33,7 +33,7 @@ namespace GSC.Respository.Master
         public string Duplicate(InvestigatorContact objSave)
         {
             if (All.Any(x =>
-                x.Id != objSave.Id && x.RegistrationNumber == objSave.RegistrationNumber && x.DeletedDate == null))
+                x.Id != objSave.Id && x.RegistrationNumber == objSave.RegistrationNumber.Trim() && x.DeletedDate == null))
                 return "Duplicate RegistrationNumber : " + objSave.RegistrationNumber;
             return "";
         }

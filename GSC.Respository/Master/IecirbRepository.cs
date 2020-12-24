@@ -22,7 +22,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Iecirb objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ManageSiteId == objSave.ManageSiteId && x.RegistrationNumber == objSave.RegistrationNumber && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ManageSiteId == objSave.ManageSiteId && x.RegistrationNumber == objSave.RegistrationNumber.Trim() && x.DeletedDate == null))
                 return "Duplicate registration number : " + objSave.RegistrationNumber;
 
             return "";

@@ -35,7 +35,7 @@ namespace GSC.Respository.Etmf
 
         public string Duplicate(ProjectWorkplaceSubSectionArtifact objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ArtifactName == objSave.ArtifactName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ArtifactName == objSave.ArtifactName.Trim() && x.DeletedDate == null))
                 return "Duplicate Artifact Name: " + objSave.ArtifactName;
             return "";
         }
