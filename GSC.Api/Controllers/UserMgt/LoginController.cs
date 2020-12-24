@@ -304,7 +304,7 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 var result = new UserViewModel();
                 //var result = await HttpService.Get<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/logOutFromEveryWhere/{userName}");
-                result = await _centreUserService.LogoutEverywhere($"{_environmentSetting.Value.CentralApi}Login/logOutFromEveryWhere/{userName}");
+                result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userName}");
                 if (result != null)
                 {
                     string companyCode = $"CompanyId{result.CompanyId}";

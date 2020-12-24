@@ -95,7 +95,7 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
-        public async Task<UserViewModel> LogoutEverywhere(string clientUrl)
+        public async Task<UserViewModel> GetUserDetails(string clientUrl)
         {
             var result = await HttpService.Get<UserViewModel>(_httpClient, clientUrl);
             return result;

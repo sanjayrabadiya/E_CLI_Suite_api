@@ -134,7 +134,7 @@ namespace GSC.Api.Controllers.Configuration
             if (!IsPremise)
             {
                 var result = new UserViewModel();
-                result = await _centreUserService.LogoutEverywhere($"{_environmentSetting.Value.CentralApi}Login/logOutFromEveryWhere/{username}");
+                result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{username}");
                 if (result != null)
                 {
                     string companyCode = $"CompanyId{result.CompanyId}";
