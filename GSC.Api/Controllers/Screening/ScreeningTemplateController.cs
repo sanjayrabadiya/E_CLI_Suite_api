@@ -122,11 +122,11 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [Route("GetProjectDesignVariableList/{projectDesignTemplateId}")]
-        public IActionResult GetProjectDesignVariableList([FromRoute] int projectDesignTemplateId)
+        [Route("GetProjectDesignVariableList/{id}/{projectDesignTemplateId}")]
+        public IActionResult GetProjectDesignVariableList([FromRoute] int id, int projectDesignTemplateId)
         {
             var designTemplate = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
-            return Ok(designTemplate);
+            return Ok(_screeningTemplateRepository.GetScreeningTemplate(designTemplate, id));
         }
 
         [HttpGet]

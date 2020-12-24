@@ -26,6 +26,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using GSC.Respository.Project.Workflow;
 
 namespace GSC.Respository.Attendance
 {
@@ -48,6 +49,9 @@ namespace GSC.Respository.Attendance
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly ISiteTeamRepository _siteTeamRepository;
+        private readonly IUserOtpRepository _userOtpRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IManageSiteRepository _manageSiteRepository;
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -63,7 +67,10 @@ namespace GSC.Respository.Attendance
             IProjectRepository projectRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IProjectRightRepository projectRightRepository,
-            ISiteTeamRepository siteTeamRepository)
+            ISiteTeamRepository siteTeamRepository,
+            IUserOtpRepository userOtpRepository,
+            IRoleRepository roleRepository,
+            IManageSiteRepository manageSiteRepository)
             : base(context)
         {
             _userRepository = userRepository;
@@ -82,6 +89,9 @@ namespace GSC.Respository.Attendance
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _siteTeamRepository = siteTeamRepository;
+            _userOtpRepository = userOtpRepository;
+            _roleRepository = roleRepository;
+            _manageSiteRepository = manageSiteRepository;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -511,6 +521,16 @@ namespace GSC.Respository.Attendance
             return "";
         }
 
+        public void SendEmailOfScreenedtoPatient(Randomization randomization)
+        {
+            var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
+            var studydata = _projectRepository.Find((int)studyId);
+            var userdata = _userRepository.Find((int)randomization.UserId);
+            var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
+
+                _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp,studydata.ProjectName,randomization.PrimaryContactNumber);
+        }
+
         public void SendEmailOfStartEconsent(Randomization randomization)
         {
             var projectname = _projectRepository.Find(randomization.ProjectId).ProjectCode;
@@ -647,7 +667,23 @@ namespace GSC.Respository.Attendance
                 dashboardPatientDto.sitename = project.SiteName;
                 dashboardPatientDto.patientStatusId = (int)randomization.PatientStatusId;
                 dashboardPatientDto.patientStatus = randomization.PatientStatusId.GetDescription();
-
+                var siteteams = _siteTeamRepository.FindBy(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null).ToList();
+                var siteteamdtos = _mapper.Map<List<SiteTeamDto>>(siteteams);
+                siteteamdtos.ForEach(x =>
+                {
+                    x.ContactEmail = _userRepository.Find(x.UserId).Email;
+                    x.ContactMobile = _userRepository.Find(x.UserId).Phone;
+                    x.UserName = _userRepository.Find(x.UserId).UserName;
+                    x.Role = _roleRepository.Find(x.RoleId).RoleName;
+                }
+                    ) ;
+                dashboardPatientDto.siteTeams = siteteamdtos;
+                if (project.ManageSiteId != null)
+                {
+                    dashboardPatientDto.hospitalName = _manageSiteRepository.Find((int)project.ManageSiteId).SiteName;
+                    
+                    dashboardPatientDto.siteAddress = _manageSiteRepository.Find((int)project.ManageSiteId).SiteAddress;
+                }
                 //dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
                 //dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
                 //dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;
@@ -707,8 +743,16 @@ namespace GSC.Respository.Attendance
                             TemplateName = r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status
                         }).ToList();
-
+            //data.ForEach(x =>
+            //{
+            //    var screening = _context.ScreeningTemplate.Where(x => x.Id == x.Id).Include(x => x.ScreeningVisit).ThenInclude(x => x.ScreeningEntry).ToList().FirstOrDefault();
+            //    var projectdesignid = screening.ScreeningVisit.ScreeningEntry.ProjectDesignId;
+            //    var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectdesignid);
+            //    x.IsSubmittedButton = (int)x.Status < 3 && workflowlevel.IsStartTemplate;
+            //});
             return data;
+
+          
         }
 
         //public RandomizationNumberDto GetRandomizationAndScreeningNumber(int id)

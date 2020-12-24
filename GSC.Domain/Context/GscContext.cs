@@ -300,6 +300,7 @@ namespace GSC.Domain.Context
         public DbSet<SiteTeam> SiteTeam { get; set; }
         public DbSet<AppScreenPatientRights> AppScreenPatientRights { get; set; }
         public DbSet<AppScreenPatient> AppScreenPatient { get; set; }
+        public DbSet<SMSSetting> SMSSetting { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

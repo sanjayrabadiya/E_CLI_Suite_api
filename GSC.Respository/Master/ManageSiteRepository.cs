@@ -59,7 +59,7 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetManageSiteDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.Status == true && x.DeletedDate == null)
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.Status == true)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.SiteName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
         public void UpdateRole(ManageSite ManageSite)

@@ -8,10 +8,14 @@ using GSC.Data.Dto.Configuration;
 using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
+using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Configuration;
 using GSC.Shared.JWTAuth;
+using GSC.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace GSC.Api.Controllers.Configuration
 {
@@ -20,20 +24,29 @@ namespace GSC.Api.Controllers.Configuration
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
+        private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IUserRepository _userRepository;
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly ICentreUserService _centreUserService;
 
         public LoginPreferenceController(IUserRepository userRepository,
             ILoginPreferenceRepository loginPreferenceRepository,
+            IUserLoginReportRespository userLoginReportRepository,
+            IOptions<EnvironmentSetting> environmentSetting,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            ICentreUserService centreUserService)
         {
             _userRepository = userRepository;
             _loginPreferenceRepository = loginPreferenceRepository;
+            _userLoginReportRepository = userLoginReportRepository;
             _uow = uow;
+            _environmentSetting = environmentSetting;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _centreUserService = centreUserService;
         }
 
         // GET: api/<controller>
@@ -115,15 +128,33 @@ namespace GSC.Api.Controllers.Configuration
 
         [HttpGet("GetLoginPreferencebyUsername/{username}")]
         [AllowAnonymous]
-        public IActionResult GetLoginPreferencebyUsername(string username)
+        public async System.Threading.Tasks.Task<IActionResult> GetLoginPreferencebyUsernameAsync(string username)
         {
-            var userFDetail = _userRepository.All.Where(x => x.UserName == username).FirstOrDefault();
+            bool IsPremise = _environmentSetting.Value.IsPremise;
+            if (!IsPremise)
+            {
+                var result = new UserViewModel();
+                result = await _centreUserService.LogoutEverywhere($"{_environmentSetting.Value.CentralApi}Login/logOutFromEveryWhere/{username}");
+                if (result != null)
+                {
+                    string companyCode = $"CompanyId{result.CompanyId}";
+                    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
+                }
+                var loginPreferences = _loginPreferenceRepository.All.Where(x => x.CompanyId == result.CompanyId).FirstOrDefault();
+                var loginPreferenceDto = _mapper.Map<LoginPreferenceDto>(loginPreferences);
+                return Ok(loginPreferenceDto);
+            }
+            else
+            {
 
-            var loginPreferences = _loginPreferenceRepository.All.Where(x =>
-                x.CompanyId == userFDetail.CompanyId
-            ).FirstOrDefault();
-            var loginPreferenceDto = _mapper.Map<LoginPreferenceDto>(loginPreferences);
-            return Ok(loginPreferenceDto);
+                var userFDetail = _userRepository.All.Where(x => x.UserName == username).FirstOrDefault();
+
+                var loginPreferences = _loginPreferenceRepository.All.Where(x =>
+                    x.CompanyId == userFDetail.CompanyId
+                ).FirstOrDefault();
+                var loginPreferenceDto = _mapper.Map<LoginPreferenceDto>(loginPreferences);
+                return Ok(loginPreferenceDto);
+            }
         }
     }
 }

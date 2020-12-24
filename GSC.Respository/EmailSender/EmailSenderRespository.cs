@@ -7,6 +7,8 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
+using GSC.Respository.Configuration;
+using GSC.Shared;
 using GSC.Shared.Email;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -17,14 +19,20 @@ namespace GSC.Respository.EmailSender
     {
         private readonly IGSCContext _context;
         private readonly IEmailService _emailService;
+        private readonly IAPICall _aPICall;
+        private readonly ISMSSettingRepository _iSMSSettingRepository;
 
         public EmailSenderRespository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IEmailService emailService)
+            IEmailService emailService,
+            IAPICall aPICall,
+            ISMSSettingRepository iSMSSettingRepository)
             : base(context)
         {
             _emailService = emailService;
             _context = context;
+            _aPICall = aPICall;
+            _iSMSSettingRepository = iSMSSettingRepository;
         }
 
         public void SendRegisterEMail(string toMail, string password, string userName)
@@ -131,6 +139,26 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile)
+        {
+            var emailMessage = ConfigureEmail("PatientScreened", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientScreened(emailMessage.MessageBody, userName, patientName, ProjectName,password);
+            emailMessage.Subject = ReplaceSubjectForPatientScreened(emailMessage.Subject, ProjectName);
+            _emailService.SendMail(emailMessage);
+            if (mobile != "")
+            {
+                var smssetting = _iSMSSettingRepository.FindBy(x => x.KeyName == "msg91").ToList().FirstOrDefault();
+                var url = smssetting.SMSurl;
+                url = url.Replace("##AuthKey##", smssetting.AuthKey);
+                url = url.Replace("##Mobile##", "91"+mobile);
+                url = url.Replace("##senderid##", smssetting.SenderId);
+                url = url.Replace("##route##", "1");
+                url = url.Replace("##message##", emailMessage.MessageBody);
+                var responseresult = _aPICall.Get(url);
+            }
+        }
+
         private string ReplaceBodyForPDF(string body, string userName, string project, string linkOfPdf)
         {
             body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
@@ -144,6 +172,8 @@ namespace GSC.Respository.EmailSender
                 RegexOptions.IgnoreCase);
             return body;
         }
+
+
         private EmailMessage ConfigureEmail(string keyName, string userName)
         {
             var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
@@ -277,6 +307,38 @@ namespace GSC.Respository.EmailSender
 
             body = Regex.Replace(body, "##patientname##", patientName, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceSubjectForPatientScreened(string body, string studyName)
+        {
+            body = Regex.Replace(body, "##studyName##", studyName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>studyName</strong>##", "<strong>" + studyName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceBodyForPatientScreened(string body, string userName, string patientname, string projectName, string password)
+        {
+            body = Regex.Replace(body, "##username##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##patientname##", patientname, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientname + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##studyName##", projectName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>studyName</strong>##", "<strong>" + projectName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##username##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##password##", password, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>password</strong>##", "<strong>" + password + "</strong>",
                 RegexOptions.IgnoreCase);
             return body;
         }

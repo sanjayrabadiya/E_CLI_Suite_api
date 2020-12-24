@@ -253,6 +253,7 @@ namespace GSC.Domain.Context
          DbSet<SiteTeam> SiteTeam { get; set; }
         DbSet<AppScreenPatient> AppScreenPatient { get; set; }
         DbSet<AppScreenPatientRights> AppScreenPatientRights { get; set; }
+        DbSet<SMSSetting> SMSSetting { get; set; }
 
 
     }
