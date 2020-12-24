@@ -36,7 +36,7 @@ namespace GSC.Respository.Medra
 
         public string Duplicate(MedraLanguage objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.LanguageName == objSave.LanguageName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.LanguageName == objSave.LanguageName.Trim() && x.DeletedDate == null))
                 return "Duplicate Language name : " + objSave.LanguageName;
 
             return "";

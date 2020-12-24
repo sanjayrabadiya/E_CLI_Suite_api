@@ -47,7 +47,7 @@ ProjectTo<HolidayGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => 
 
         public string DuplicateHoliday(Holiday objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.InvestigatorContactId == objSave.InvestigatorContactId && x.HolidayName == objSave.HolidayName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.InvestigatorContactId == objSave.InvestigatorContactId && x.HolidayName == objSave.HolidayName.Trim() && x.DeletedDate == null))
                 return "Duplicate Holiday : " + objSave.HolidayName;
 
             return "";

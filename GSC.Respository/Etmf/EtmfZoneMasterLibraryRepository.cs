@@ -76,7 +76,7 @@ namespace GSC.Respository.Etmf
 
         public string Duplicate(EtmfZoneMasterLibrary objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ZonName == objSave.ZonName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ZonName == objSave.ZonName.Trim() && x.DeletedDate == null))
                 return "Duplicate Zone name : " + objSave.ZonName;
             return "";
         }

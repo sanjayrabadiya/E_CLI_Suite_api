@@ -19,7 +19,7 @@ namespace GSC.Respository.Etmf
         }
         public string Duplicate(EtmfSectionMasterLibrary objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.SectionName == objSave.SectionName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.SectionName == objSave.SectionName.Trim() && x.DeletedDate == null))
                 return "Duplicate Section name : " + objSave.SectionName;
             return "";
         }

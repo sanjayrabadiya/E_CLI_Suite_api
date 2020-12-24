@@ -29,7 +29,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(MProductForm objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.FormName == objSave.FormName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.FormName == objSave.FormName.Trim() && x.DeletedDate == null))
                 return "Duplicate Form name : " + objSave.FormName;
             return "";
         }

@@ -20,7 +20,7 @@ namespace GSC.Respository.ProjectRight
         public string Duplicate(ProjectDocument objSave)
         {
             if (All.Any(x =>
-                x.Id != objSave.Id && x.FileName == objSave.FileName && x.ProjectId == objSave.ProjectId &&
+                x.Id != objSave.Id && x.FileName == objSave.FileName.Trim() && x.ProjectId == objSave.ProjectId &&
                 x.DeletedDate == null)) return "Duplicate Document name : " + objSave.FileName;
             return "";
         }

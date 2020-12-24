@@ -30,10 +30,10 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Product objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ProductCode == objSave.ProductCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ProductCode == objSave.ProductCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Product code : " + objSave.ProductCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.ProductName == objSave.ProductName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ProductName == objSave.ProductName.Trim() && x.DeletedDate == null))
                 return "Duplicate Product name : " + objSave.ProductName;
 
             return "";

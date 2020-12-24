@@ -27,7 +27,7 @@ namespace GSC.Respository.Master
 
         public string DuplicateContact(InvestigatorContactDetail objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ContactNo == objSave.ContactNo && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ContactNo == objSave.ContactNo.Trim() && x.DeletedDate == null))
                 return "Duplicate Contact No : " + objSave.ContactNo;
 
             return "";

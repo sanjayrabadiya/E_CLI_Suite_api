@@ -29,7 +29,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(TemplateRights objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Template Rights name : " + objSave.TemplateCode;
             return "";
         }

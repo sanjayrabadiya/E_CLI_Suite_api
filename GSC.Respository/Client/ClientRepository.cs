@@ -39,7 +39,7 @@ namespace GSC.Respository.Client
 
         public string DuplicateClient(Data.Entities.Client.Client objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ClientCode == objSave.ClientCode && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ClientCode == objSave.ClientCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Client code : " + objSave.ClientCode;
 
             return "";
