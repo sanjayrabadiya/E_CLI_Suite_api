@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Configuration;
@@ -10,6 +12,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Shared;
 using GSC.Shared.Email;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,15 +23,18 @@ namespace GSC.Respository.EmailSender
         private readonly IGSCContext _context;
         private readonly IEmailService _emailService;      
         private readonly ISMSSettingRepository _iSMSSettingRepository;
+        private readonly HttpClient _httpClient;
 
         public EmailSenderRespository(IGSCContext context,
+            HttpClient httpClient,
             IJwtTokenAccesser jwtTokenAccesser,
             IEmailService emailService,          
             ISMSSettingRepository iSMSSettingRepository)
             : base(context)
         {
             _emailService = emailService;
-            _context = context;          
+            _context = context;
+            _httpClient = httpClient;
             _iSMSSettingRepository = iSMSSettingRepository;
         }
 
@@ -136,7 +142,7 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-        public void SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile)
+        public async Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile)
         {
             var emailMessage = ConfigureEmail("PatientScreened", userName);
             emailMessage.SendTo = toMail;
@@ -152,6 +158,7 @@ namespace GSC.Respository.EmailSender
                 url = url.Replace("##senderid##", smssetting.SenderId);
                 url = url.Replace("##route##", "4");
                 url = url.Replace("##message##", emailMessage.MessageBody);
+                string result = await HttpService.Get(_httpClient, url, null);
                 //var responseresult = _aPICall.Get(url);
             }
         }

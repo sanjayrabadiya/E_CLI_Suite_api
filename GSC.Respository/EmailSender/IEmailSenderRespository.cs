@@ -1,5 +1,6 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Entities.Configuration;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.EmailSender
 {
@@ -19,6 +20,6 @@ namespace GSC.Respository.EmailSender
         void SendEmailOfInvestigatorApprovedPDFtoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath);
         void SendEmailOfEconsentDocumentuploaded(string toMail, string userName, string documentName, string ProjectName);
         void SendDBDSGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf);
-        void SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile);
+        Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile);
     }
 }

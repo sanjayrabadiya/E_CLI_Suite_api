@@ -14,6 +14,8 @@ namespace GSC.Data.Dto.Master
         public string ContactMobile { get; set; }
         public string UserName { get; set; }
         public string Role { get; set; }
+        public string UserPicUrl { get; set; }
+        
     }
     public class SiteTeamGridDto : BaseAuditDto
     {

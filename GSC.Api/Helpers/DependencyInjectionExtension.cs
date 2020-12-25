@@ -280,6 +280,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ITemplateNoteLanguageRepository, TemplateNoteLanguageRepository>();
             services.AddScoped<IVariabeValueLanguageRepository, VariabeValueLanguageRepository>();            
             services.AddHttpClient<ICentreUserService, CentreUserService>();
+            services.AddHttpClient<IEmailSenderRespository, EmailSenderRespository>();
             services.AddMemoryCache();
             services.AddSingleton(typeof(IGSCCaching), typeof(GSCCaching));
             services.AddScoped<ISiteTeamRepository, SiteTeamRepository>();

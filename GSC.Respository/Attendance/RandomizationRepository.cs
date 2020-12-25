@@ -535,7 +535,7 @@ namespace GSC.Respository.Attendance
             var userdata = _userRepository.Find((int)randomization.UserId);
             //var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
             var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
-                _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp,studydata.ProjectName,randomization.PrimaryContactNumber);
+            await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp, studydata.ProjectName, randomization.PrimaryContactNumber);
         }
 
         public void SendEmailOfStartEconsent(Randomization randomization)
@@ -680,8 +680,9 @@ namespace GSC.Respository.Attendance
                 {
                     x.ContactEmail = _userRepository.Find(x.UserId).Email;
                     x.ContactMobile = _userRepository.Find(x.UserId).Phone;
-                    x.UserName = _userRepository.Find(x.UserId).UserName;
+                    x.UserName = _userRepository.Find(x.UserId).FirstName + " " + _userRepository.Find(x.UserId).LastName;
                     x.Role = _roleRepository.Find(x.RoleId).RoleName;
+                    x.UserPicUrl = _context.UploadSetting.FirstOrDefault().ImageUrl + (_userRepository.Find(x.UserId).ProfilePic ?? DocumentService.DefulatProfilePic);
                 }
                     ) ;
                 dashboardPatientDto.siteTeams = siteteamdtos;
