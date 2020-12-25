@@ -37,8 +37,7 @@ namespace GSC.Api.Controllers.Attendance
         private readonly IUnitOfWork _uow;
         private readonly ICityRepository _cityRepository;
         private readonly IStateRepository _stateRepository;
-        private readonly ICountryRepository _countryRepository;
-        private readonly IAPICall _centeralendpoint;
+        private readonly ICountryRepository _countryRepository;       
         private readonly IConfiguration _configuration;
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
@@ -51,8 +50,7 @@ namespace GSC.Api.Controllers.Attendance
             IJwtTokenAccesser jwtTokenAccesser,
             ICityRepository cityRepository,
             IStateRepository stateRepository,
-            ICountryRepository countryRepository,
-            IAPICall centeralendpoint,
+            ICountryRepository countryRepository,           
             IConfiguration configuration,
             ICentreUserService centreUserService,
             IOptions<EnvironmentSetting> environmentSetting,
@@ -67,8 +65,7 @@ namespace GSC.Api.Controllers.Attendance
             _projectDesignRepository = projectDesignRepository;
             _cityRepository = cityRepository;
             _stateRepository = stateRepository;
-            _countryRepository = countryRepository;
-            _centeralendpoint = centeralendpoint;
+            _countryRepository = countryRepository;          
             _configuration = configuration;
             _centreUserService = centreUserService;
             _environmentSetting = environmentSetting;

@@ -26,6 +26,7 @@ namespace GSC.Respository.UserMgt
         Task<string> VerifyOtpCenteral(string clientUrl, UserOtpDto userOtpDto);
         Task<string> ChangePasswordByOtpCenteral(string clientUrl, UserOtpDto userOtpDto);
         Task<UserOtp> GetUserOtpDetails(string clientUrl);
+        Task Logout(string clientUrl);
 
 
     }

@@ -48,13 +48,15 @@ namespace GSC.Respository.UserMgt
                 }
                 else
                 {
-                    var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == result.CompanyId).FirstOrDefault();
-                    if (result.FailedLoginAttempts > company.MaxLoginAttempt)
-                    {
-                        result.ValidateMessage = "User is locked, Please contact your administrator";
-                        await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{true}", "");
+                    if (result.ConnectionString != null) {
+                        var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == result.CompanyId).FirstOrDefault();
+                        if (result.FailedLoginAttempts > company.MaxLoginAttempt)
+                        {
+                            result.ValidateMessage = "User is locked, Please contact your administrator";
+                            await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{true}", "");
+                        }
+                        _userLoginReportRepository.SaveLog(result.ValidateMessage, result.UserId, loginDto.UserName);
                     }
-                    _userLoginReportRepository.SaveLog(result.ValidateMessage, result.UserId, loginDto.UserName);
                 }
             }
             return result;
@@ -131,6 +133,11 @@ namespace GSC.Respository.UserMgt
         {
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
             return result;
+        }
+
+        public async Task Logout(string clientUrl)
+        {
+            var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);           
         }
     }
 }

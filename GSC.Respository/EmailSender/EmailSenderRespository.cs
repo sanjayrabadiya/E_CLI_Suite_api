@@ -18,20 +18,17 @@ namespace GSC.Respository.EmailSender
     public class EmailSenderRespository : GenericRespository<EmailTemplate>, IEmailSenderRespository
     {
         private readonly IGSCContext _context;
-        private readonly IEmailService _emailService;
-        private readonly IAPICall _aPICall;
+        private readonly IEmailService _emailService;      
         private readonly ISMSSettingRepository _iSMSSettingRepository;
 
         public EmailSenderRespository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IEmailService emailService,
-            IAPICall aPICall,
+            IEmailService emailService,          
             ISMSSettingRepository iSMSSettingRepository)
             : base(context)
         {
             _emailService = emailService;
-            _context = context;
-            _aPICall = aPICall;
+            _context = context;          
             _iSMSSettingRepository = iSMSSettingRepository;
         }
 
@@ -155,7 +152,7 @@ namespace GSC.Respository.EmailSender
                 url = url.Replace("##senderid##", smssetting.SenderId);
                 url = url.Replace("##route##", "4");
                 url = url.Replace("##message##", emailMessage.MessageBody);
-                var responseresult = _aPICall.Get(url);
+                //var responseresult = _aPICall.Get(url);
             }
         }
 

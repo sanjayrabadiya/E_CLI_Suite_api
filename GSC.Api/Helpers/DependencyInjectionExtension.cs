@@ -278,14 +278,14 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVariabeLanguageRepository, VariabeLanguageRepository>();
             services.AddScoped<IVariabeNoteLanguageRepository, VariabeNoteLanguageRepository>();
             services.AddScoped<ITemplateNoteLanguageRepository, TemplateNoteLanguageRepository>();
-            services.AddScoped<IVariabeValueLanguageRepository, VariabeValueLanguageRepository>();
-            services.AddHttpClient<IAPICall, APICall>();
+            services.AddScoped<IVariabeValueLanguageRepository, VariabeValueLanguageRepository>();            
             services.AddHttpClient<ICentreUserService, CentreUserService>();
             services.AddMemoryCache();
             services.AddSingleton(typeof(IGSCCaching), typeof(GSCCaching));
             services.AddScoped<ISiteTeamRepository, SiteTeamRepository>();
             services.AddScoped<IAppScreenPatientRightsRepository, AppScreenPatientRightsRepository>();
-            services.AddScoped<ISMSSettingRepository, SMSSettingRepository>();
+            services.AddScoped<ISMSSettingRepository, SMSSettingRepository>();           
+            
         }
     }
 }

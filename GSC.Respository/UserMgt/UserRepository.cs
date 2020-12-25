@@ -37,8 +37,7 @@ namespace GSC.Respository.UserMgt
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IOptions<JwtSettings> _settings;
-        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
-        private readonly IAPICall _centeralApi;
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;        
         private readonly IGSCContext _context;
         private readonly ICompanyRepository _companyRepository;
         private readonly IAppSettingRepository _appSettingRepository;
@@ -54,8 +53,7 @@ namespace GSC.Respository.UserMgt
             IUserPasswordRepository userPasswordRepository,
             IRefreshTokenRepository refreshTokenRepository,
             IOptions<JwtSettings> settings,
-            Microsoft.Extensions.Configuration.IConfiguration configuration,
-            IAPICall centeralApi,
+            Microsoft.Extensions.Configuration.IConfiguration configuration,            
             ICompanyRepository companyRepository,
              IAppSettingRepository appSettingRepository,
              IUploadSettingRepository uploadSettingRepository,
@@ -70,8 +68,7 @@ namespace GSC.Respository.UserMgt
             _jwtTokenAccesser = jwtTokenAccesser;
             _settings = settings;
             _refreshTokenRepository = refreshTokenRepository;
-            _configuration = configuration;
-            _centeralApi = centeralApi;
+            _configuration = configuration;           
             _context = context;
             _companyRepository = companyRepository;
             _uploadSettingRepository = uploadSettingRepository;
