@@ -22,5 +22,6 @@ namespace GSC.Respository.UserMgt
         List<UserDto> GetUsers(bool isDeleted);
         List<DropDownDto> GetUserNameDropdown();
         LoginResponseDto BuildUserAuthObject(UserViewModel userViewModel, int roleId);
+        void UpdateIsLogin(int id, bool isLogin);
     }
 }

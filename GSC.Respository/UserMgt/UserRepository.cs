@@ -37,7 +37,7 @@ namespace GSC.Respository.UserMgt
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IOptions<JwtSettings> _settings;
-        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;        
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly IGSCContext _context;
         private readonly ICompanyRepository _companyRepository;
         private readonly IAppSettingRepository _appSettingRepository;
@@ -53,7 +53,7 @@ namespace GSC.Respository.UserMgt
             IUserPasswordRepository userPasswordRepository,
             IRefreshTokenRepository refreshTokenRepository,
             IOptions<JwtSettings> settings,
-            Microsoft.Extensions.Configuration.IConfiguration configuration,            
+            Microsoft.Extensions.Configuration.IConfiguration configuration,
             ICompanyRepository companyRepository,
              IAppSettingRepository appSettingRepository,
              IUploadSettingRepository uploadSettingRepository,
@@ -68,7 +68,7 @@ namespace GSC.Respository.UserMgt
             _jwtTokenAccesser = jwtTokenAccesser;
             _settings = settings;
             _refreshTokenRepository = refreshTokenRepository;
-            _configuration = configuration;           
+            _configuration = configuration;
             _context = context;
             _companyRepository = companyRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -295,14 +295,14 @@ namespace GSC.Respository.UserMgt
                 RefreshTokenDto _refreshdto = new RefreshTokenDto();
                 _refreshdto.AccessToken = accessToken;
                 _refreshdto.RefreshToken = refreshToken;
-                login =await _centreUserService.RefreshToken(_refreshdto);
+                login = await _centreUserService.RefreshToken(_refreshdto);
             }
             if (login == null)
             {
                 Log.Logger.Information("refreshToken " + refreshToken);
                 throw new SecurityTokenException("Refresh token not found or has been expired.");
             }
-                
+
 
             return new RefreshTokenDto
             {
@@ -375,6 +375,15 @@ namespace GSC.Respository.UserMgt
                 throw new SecurityTokenException("Invalid token");
 
             return principal;
+        }
+
+        public void UpdateIsLogin(int id, bool isLogin)
+        {
+            var user = Find(id);
+            user.IsLogin = isLogin;
+            Update(user);
+            _context.Save();
+
         }
     }
 }

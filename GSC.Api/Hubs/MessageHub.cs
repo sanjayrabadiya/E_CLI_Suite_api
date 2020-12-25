@@ -1,5 +1,7 @@
 ﻿using GSC.Data.Entities.InformConcent;
+using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.SignalR;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,12 @@ namespace GSC.Api.Hubs
     [AllowAnonymous]
     public class MessageHub : Hub
     {
+        private readonly IUserRepository _userRepository;
+        public MessageHub(IUserRepository userRepository)
+        {
+            _userRepository = userRepository;
+        }
+
         public async Task NewMessage(EconsentChat msg)
         {
             // ------------ send to multiple -----------------
@@ -55,12 +63,15 @@ namespace GSC.Api.Hubs
                     signalRUser.connectionId = Context.ConnectionId;
                     signalRUser.userId = Convert.ToInt32(value);
                     ConnectedUser.Ids.Add(signalRUser);
+
                     await base.OnConnectedAsync();
                     await Clients.All.SendAsync("UserLogIn", Convert.ToInt32(value));
+                    var isLogin = ConnectedUser.Ids.Any(x => x.userId == signalRUser.userId);
+                    _userRepository.UpdateIsLogin(signalRUser.userId, isLogin);
                 }
-            } catch (Exception)
+            } catch (Exception ex)
             {
-
+                Log.Error(ex, "");
             }
         }
 
@@ -74,10 +85,16 @@ namespace GSC.Api.Hubs
                 {
                     ConnectedUser.Ids.Remove(user);
                     await Clients.All.SendAsync("UserLogOut", Convert.ToInt32(user.userId));
+                    var isLogin = ConnectedUser.Ids.Any(x => x.userId == user.userId);
+                    _userRepository.UpdateIsLogin(user.userId, isLogin);
                 }
             }
-            catch(Exception) { }
+            catch(Exception ex) {
+                Log.Error(ex, "");
+            }
         }
+
+       
 
     }
 
