@@ -38,7 +38,9 @@ namespace GSC.Respository.Master
         {
             if (All.Any(x => x.Id != objSave.Id && x.CategoryCode == objSave.CategoryCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Variable Category code : " + objSave.CategoryCode;
-            if (All.Any(x => x.Id != objSave.Id && x.CategoryName == objSave.CategoryName.Trim() && x.DeletedDate == null))
+
+            if (!string.IsNullOrEmpty(objSave.CategoryName))
+                if (All.Any(x => x.Id != objSave.Id && x.CategoryName == objSave.CategoryName.Trim() && x.DeletedDate == null))
                 return "Duplicate Variable Category name : " + objSave.CategoryName;
             return "";
         }
