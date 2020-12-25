@@ -136,9 +136,9 @@ namespace GSC.Api.Controllers.Attendance
                 user.Id = userdetails.Id;
                 _userRepository.Add(user);
                 UserRole userRole = new UserRole();
-                userRole.UserId= userdetails.Id;
+                userRole.UserId = userdetails.Id;
                 userRole.UserRoleId = 2;
-               _userRoleRepository.Add(userRole);
+                _userRoleRepository.Add(userRole);
             }
 
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
@@ -215,7 +215,7 @@ namespace GSC.Api.Controllers.Attendance
         [Route("saveScreeningNumber")]
         public async Task<IActionResult> SaveScreeningNumber([FromBody] RandomizationDto randomizationDto)
         {
-            
+
             if (randomizationDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -246,7 +246,8 @@ namespace GSC.Api.Controllers.Attendance
 
             //_randomizationRepository.Update(randomization);
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
-           await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization);
+            if (!_environmentSetting.Value.IsPremise)
+                await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization);
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
