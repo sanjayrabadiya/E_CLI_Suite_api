@@ -282,22 +282,55 @@ namespace GSC.Api.Controllers.UserMgt
         [AllowAnonymous]
         public async Task<IActionResult> LogOutFromEveryWhere(string userName)
         {
-            var users = _userRepository.All.FirstOrDefault(x => x.UserName == userName && x.DeletedDate == null);
-
-            if (users != null)
+            bool IsPremise = _environmentSetting.Value.IsPremise;
+            if (!IsPremise)
             {
-                await _hubContext.Clients.All.SendAsync("logofffromeverywhere", users.Id);
-                users.IsLogin = false;
-                _userRepository.Update(users);
-                _uow.Save();
+                var result = new UserViewModel();
+                result = await _centreUserService.LogOutFromEveryWhere($"{_environmentSetting.Value.CentralApi}Login/LogOutFromEveryWhere/{userName}");
+                if (result != null)
+                {
+                    string companyCode = $"CompanyId{result.CompanyId}";
+                    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
+
+                    var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == result.UserId && t.LogoutTime == null).ToList();
+                    userLoginReports.ForEach(t =>
+                    {
+                        t.LogoutTime = DateTime.Now;
+                        _userLoginReportRepository.Update(t);
+                    });
+
+                    var user = _userRepository.All.Where(x => x.Id == result.UserId && x.DeletedDate == null).FirstOrDefault();
+                    user.IsLogin = false;
+                    _userRepository.Update(user);
+
+                    _uow.Save();
+
+                    await _hubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             else
             {
-                return NotFound();
+                var users = _userRepository.All.FirstOrDefault(x => x.UserName == userName && x.DeletedDate == null);
+
+                if (users != null)
+                {
+                    await _hubContext.Clients.All.SendAsync("logofffromeverywhere", users.Id);
+                    users.IsLogin = false;
+                    _userRepository.Update(users);
+                    _uow.Save();
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+                return Ok();
             }
-
-            return Ok();
-
         }
 
         private async Task<Data.Entities.UserMgt.User> CheckifAlreadyLogin(int userId)
