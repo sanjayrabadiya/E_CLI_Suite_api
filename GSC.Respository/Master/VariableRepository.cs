@@ -54,17 +54,20 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.VariableCode == objSave.VariableCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Variable code : " + objSave.VariableCode;
 
-            if (All.Any(x =>
+            
+                if (All.Any(x =>
                 x.Id != objSave.Id && x.VariableName == objSave.VariableName.Trim() && x.DomainId == objSave.DomainId &&
                 x.AnnotationTypeId == objSave.AnnotationTypeId && x.DeletedDate == null))
                 return "Duplicate Variable name and Domain : " + objSave.VariableName;
 
-            if (All.Any(x =>
+            if (!string.IsNullOrEmpty(objSave.Annotation))
+                if (All.Any(x =>
                 x.Id != objSave.Id && x.DomainId == objSave.DomainId && x.Annotation == objSave.Annotation &&
                 !string.IsNullOrEmpty(x.Annotation) && x.DeletedDate == null))
                 return "Duplicate Variable Annotation: " + objSave.Annotation;
 
-            if (All.Any(x =>
+            if (!string.IsNullOrEmpty(objSave.VariableAlias))
+                if (All.Any(x =>
                 x.Id != objSave.Id && x.DomainId == objSave.DomainId && x.VariableAlias == objSave.VariableAlias &&
                 !string.IsNullOrEmpty(x.VariableAlias) && x.DeletedDate == null))
                 return "Duplicate Variable Alias: " + objSave.VariableAlias;
