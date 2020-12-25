@@ -153,7 +153,7 @@ namespace GSC.Respository.EmailSender
                 url = url.Replace("##AuthKey##", smssetting.AuthKey);
                 url = url.Replace("##Mobile##", "91"+mobile);
                 url = url.Replace("##senderid##", smssetting.SenderId);
-                url = url.Replace("##route##", "1");
+                url = url.Replace("##route##", "4");
                 url = url.Replace("##message##", emailMessage.MessageBody);
                 var responseresult = _aPICall.Get(url);
             }
