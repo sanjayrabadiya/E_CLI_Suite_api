@@ -110,11 +110,11 @@ namespace GSC.Respository.Master
 
         public string Duplicate(Data.Entities.Master.Project objSave)
         {
-            if (objSave.ParentProjectId != null || objSave.ParentProjectId <= 0)
-            {
-                if (All.Any(x => x.Id != objSave.Id && x.ParentProjectId == objSave.ParentProjectId && x.ProjectCode == objSave.ProjectCode.Trim() && x.DeletedDate == null))
-                    return "Duplicate Site Code : " + objSave.ProjectCode;
-            }
+            //if (objSave.ParentProjectId != null || objSave.ParentProjectId <= 0)
+            //{
+            //    if (All.Any(x => x.Id != objSave.Id && x.ParentProjectId == objSave.ParentProjectId && x.ProjectCode == objSave.ProjectCode.Trim() && x.DeletedDate == null))
+            //        return "Duplicate Site Code : " + objSave.ProjectCode;
+            //}
 
             if (objSave.ParentProjectId == null || objSave.ParentProjectId <= 0)
             {
