@@ -3,8 +3,6 @@ using System.Reflection;
 using AutoMapper;
 using GSC.Api.Helpers;
 using GSC.Api.Hubs;
-using GSC.Audit;
-using GSC.Data.Dto.UserMgt;
 using GSC.Domain.Context;
 using GSC.Shared.Configuration;
 using GSC.Shared.Filter;
@@ -13,7 +11,6 @@ using GSC.Shared.JWTAuth;
 using GSC.Shared.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -44,11 +41,6 @@ namespace GSC.Api
         {
          
             services.AddAuth(_configuration);
-            //services.AddDbContext<GscContext>(options =>
-            //{
-            //    options.UseSqlServer(_configuration.GetConnectionString("dbConnectionString"));
-            //});
-
             services.AddConfig(_configuration);
 
             services.AddDependencyInjection<IGSCContext>(_configuration);

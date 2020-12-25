@@ -1,9 +1,4 @@
-﻿using GSC.Common.UnitOfWork;
-using GSC.Data.Entities.InformConcent;
-using GSC.Domain.Context;
-using GSC.Helper;
-using GSC.Respository.InformConcent;
-using Microsoft.AspNetCore.Http;
+﻿using GSC.Data.Entities.InformConcent;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
+using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
 using GSC.Respository.LogReport;
@@ -28,7 +29,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
-        private readonly IHubContext<Notification> _notificationHubContext;
+        private readonly IHubContext<MessageHub> _hubContext;
         private readonly IConfiguration _configuration;
         private readonly IAPICall _centeralApi;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
@@ -39,16 +40,16 @@ namespace GSC.Api.Controllers.UserMgt
             IUserRepository userRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUnitOfWork uow,
-            IHubContext<Notification> notificationHubContext,
+            IHubContext<MessageHub> hubContext,
             IConfiguration configuration, IAPICall centerlApi,
             IOptions<EnvironmentSetting> environmentSetting,
-            ICentreUserService centreUserService,IMapper mapper)
+            ICentreUserService centreUserService, IMapper mapper)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
             _uow = uow;
             _userLoginReportRepository = userLoginReportRepository;
-            _notificationHubContext = notificationHubContext;
+            _hubContext = hubContext;
             _configuration = configuration;
             _centeralApi = centerlApi;
             _environmentSetting = environmentSetting;
@@ -125,7 +126,7 @@ namespace GSC.Api.Controllers.UserMgt
                     _centreUserService.UpdateRefreshToken(_refreshtoken);
                 }
             }
-
+            await _hubContext.Clients.All.SendAsync("logofffromeverywhere", user.UserId);
             _uow.Save();
 
             return Ok(validatedUser);
@@ -281,84 +282,21 @@ namespace GSC.Api.Controllers.UserMgt
         [AllowAnonymous]
         public async Task<IActionResult> LogOutFromEveryWhere(string userName)
         {
-            //var user = _userRepository.All.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
-            //if (user != null)
-            //{
-            //    var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == user.Id && t.LogoutTime == null).ToList();
-            //    userLoginReports.ForEach(t =>
-            //    {
-            //        t.LogoutTime = DateTime.Now;
-            //        _userLoginReportRepository.Update(t);
-            //    });
+            var users = _userRepository.All.FirstOrDefault(x => x.UserName == userName && x.DeletedDate == null);
 
-            //    user.IsLogin = false;
-            //    _userRepository.Update(user);
-
-            //    _uow.Save();
-
-            //    await _notificationHubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
-            //}
-            //else
-            //{
-            //    return NotFound();
-            //}
-            bool IsPremise = _environmentSetting.Value.IsPremise;
-            if (!IsPremise)
+            if (users != null)
             {
-                var result = new UserViewModel();
-                //var result = await HttpService.Get<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/logOutFromEveryWhere/{userName}");
-                result = await _centreUserService.LogOutFromEveryWhere($"{_environmentSetting.Value.CentralApi}Login/LogOutFromEveryWhere/{userName}");
-                if (result != null)
-                {
-                    string companyCode = $"CompanyId{result.CompanyId}";
-                    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
-
-                    var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == result.UserId && t.LogoutTime == null).ToList();
-                    userLoginReports.ForEach(t =>
-                    {
-                        t.LogoutTime = DateTime.Now;
-                        _userLoginReportRepository.Update(t);
-                    });
-
-                    var user = _userRepository.All.Where(x => x.Id == result.UserId && x.DeletedDate == null).FirstOrDefault();
-                    user.IsLogin = false;
-                    _userRepository.Update(user);
-
-                    _uow.Save();
-
-                    await _notificationHubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
-                    return Ok();
-                }
-                else
-                {
-                    return NotFound();
-                }
+                await _hubContext.Clients.All.SendAsync("logofffromeverywhere", users.Id);
+                users.IsLogin = false;
+                _userRepository.Update(users);
+                _uow.Save();
             }
             else
             {
-                var user = _userRepository.All.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
-                if (user != null)
-                {
-                    var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == user.Id && t.LogoutTime == null).ToList();
-                    userLoginReports.ForEach(t =>
-                    {
-                        t.LogoutTime = DateTime.Now;
-                        _userLoginReportRepository.Update(t);
-                    });
-
-                    user.IsLogin = false;
-                    _userRepository.Update(user);
-
-                    _uow.Save();
-
-                    await _notificationHubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
-                    return Ok();
-                }
-                else
-                {
-                    return NotFound();
-                }
+                return NotFound();
             }
+
+            return Ok();
 
         }
 
@@ -373,11 +311,6 @@ namespace GSC.Api.Controllers.UserMgt
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto token)
         {
             return Ok(await _userRepository.Refresh(token.AccessToken, token.RefreshToken));
-            //if (_environmentSetting.Value.IsPremise)
-            //    return Ok(await _userRepository.Refresh(token.AccessToken, token.RefreshToken));
-            //else
-            //    return Ok(await _centreUserService.Refresh(token));
-
         }
 
         [HttpPost]
