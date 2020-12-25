@@ -30,8 +30,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IHubContext<MessageHub> _hubContext;
-        private readonly IConfiguration _configuration;
-        private readonly IAPICall _centeralApi;
+        private readonly IConfiguration _configuration;       
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
         private readonly IMapper _mapper;
@@ -41,7 +40,7 @@ namespace GSC.Api.Controllers.UserMgt
             IUserLoginReportRespository userLoginReportRepository,
             IUnitOfWork uow,
             IHubContext<MessageHub> hubContext,
-            IConfiguration configuration, IAPICall centerlApi,
+            IConfiguration configuration,
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService, IMapper mapper)
         {
@@ -50,8 +49,7 @@ namespace GSC.Api.Controllers.UserMgt
             _uow = uow;
             _userLoginReportRepository = userLoginReportRepository;
             _hubContext = hubContext;
-            _configuration = configuration;
-            _centeralApi = centerlApi;
+            _configuration = configuration;         
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
             _mapper = mapper;
