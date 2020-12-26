@@ -30,7 +30,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IHubContext<MessageHub> _hubContext;
-        private readonly IConfiguration _configuration;       
+        private readonly IConfiguration _configuration;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
         private readonly IMapper _mapper;
@@ -49,7 +49,7 @@ namespace GSC.Api.Controllers.UserMgt
             _uow = uow;
             _userLoginReportRepository = userLoginReportRepository;
             _hubContext = hubContext;
-            _configuration = configuration;         
+            _configuration = configuration;
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
             _mapper = mapper;
@@ -124,7 +124,7 @@ namespace GSC.Api.Controllers.UserMgt
                     _centreUserService.UpdateRefreshToken(_refreshtoken);
                 }
             }
-          
+
             _uow.Save();
 
             return Ok(validatedUser);
@@ -346,16 +346,15 @@ namespace GSC.Api.Controllers.UserMgt
 
         [HttpPost]
         [Route("ValidateUserForSignature")]
-        [AllowAnonymous]
         public IActionResult ValidateUserForSignature([FromBody] LoginDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var user = _userRepository.ValidateUser(dto.UserName, dto.Password);
-            if (user == null)
+            if (!user.IsValid)
             {
-                ModelState.AddModelError("UserName", "Invalid password");
+                ModelState.AddModelError("UserName", user.ValidateMessage);
                 return BadRequest(ModelState);
             }
 
