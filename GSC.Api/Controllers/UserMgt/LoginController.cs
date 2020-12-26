@@ -1,18 +1,14 @@
 using System;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Api.Helpers;
 using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
 using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
-using GSC.Shared;
 using GSC.Shared.Configuration;
-using GSC.Shared.Generic;
 using GSC.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -111,23 +107,29 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (!string.IsNullOrEmpty(validatedUser.Token))
             {
-                if (_environmentSetting.Value.IsPremise)
-                {
-                    _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);
-                }
-                else
-                {
-                    //  var _refreshtoken = _mapper.Map<UpdateRefreshTokanDto>(validatedUser);
-                    UpdateRefreshTokanDto _refreshtoken = new UpdateRefreshTokanDto();
-                    _refreshtoken.UserID = validatedUser.UserId;
-                    _refreshtoken.RefreshToken = validatedUser.RefreshToken;
-                    _centreUserService.UpdateRefreshToken(_refreshtoken);
-                }
+                TokenProcess(validatedUser.UserId, validatedUser.RefreshToken);
             }
 
             _uow.Save();
 
             return Ok(validatedUser);
+        }
+
+        void TokenProcess(int userId, string refreshToken)
+        {
+            if (_environmentSetting.Value.IsPremise)
+            {
+                _userRepository.UpdateRefreshToken(userId, refreshToken);
+            }
+            else
+            {
+                UpdateRefreshTokanDto _refreshtoken = new UpdateRefreshTokanDto();
+                _refreshtoken.UserID = userId;
+                _refreshtoken.RefreshToken = refreshToken;
+                _centreUserService.UpdateRefreshToken(_refreshtoken);
+            }
+
+            _uow.Save();
         }
 
         [Route("MobileLogIn")]
@@ -191,7 +193,6 @@ namespace GSC.Api.Controllers.UserMgt
 
         [HttpPost]
         [Route("role")]
-        //[AllowAnonymous]
         public IActionResult ValidateLoginWithRole([FromBody] LoginRoleDto loginDto)
         {
             Data.Entities.UserMgt.User user;
@@ -215,6 +216,8 @@ namespace GSC.Api.Controllers.UserMgt
             userViewModel.Language = user.Language;
             userViewModel.IsValid = true;
             var validatedUser = _userRepository.BuildUserAuthObject(userViewModel, loginDto.RoleId);
+
+            TokenProcess(validatedUser.UserId, validatedUser.RefreshToken);
 
             return Ok(validatedUser);
         }
