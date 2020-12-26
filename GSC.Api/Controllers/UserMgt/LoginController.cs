@@ -124,7 +124,7 @@ namespace GSC.Api.Controllers.UserMgt
                     _centreUserService.UpdateRefreshToken(_refreshtoken);
                 }
             }
-            await _hubContext.Clients.All.SendAsync("logofffromeverywhere", user.UserId);
+          
             _uow.Save();
 
             return Ok(validatedUser);

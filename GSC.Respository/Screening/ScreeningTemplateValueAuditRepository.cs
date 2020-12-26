@@ -41,8 +41,9 @@ namespace GSC.Respository.Screening
                 ReasonOth = r.ReasonOth,
                 Role = r.UserRole,
                 TimeZone = r.TimeZone,
-                User = r.UserName
-            }).OrderByDescending(t => t.CreatedDate).ToList();
+                User = r.UserName,
+                Id = r.Id
+            }).OrderByDescending(t => t.Id).ToList();
 
         }
 

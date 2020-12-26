@@ -108,7 +108,7 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        public List<ScheduleCheckValidateDto> ValidateByVariable(int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, bool isQuery)
+        public List<ScheduleCheckValidateDto> ValidateByVariable(int screeningEntryId, int screeningVisitId, string value, int projectDesignTemplateId, int projectDesignVariableId, bool isQuery)
         {
             var targetScheduleTemplate = _impactService.GetTargetScheduleByVariableId(projectDesignVariableId);
 
@@ -129,10 +129,9 @@ namespace GSC.Respository.EditCheckImpact
 
             targetValue = refrenceSchedule.FirstOrDefault(x => x.Value != null)?.Value;
 
-            if (!string.IsNullOrEmpty(targetValue) && refrenceSchedule.Count() > 0)
+            if (!string.IsNullOrEmpty(value))
             {
-                var screeningVisitId = All.Where(x => x.Id == refrenceSchedule.FirstOrDefault().ScreeningTemplateId).Select(t => t.ScreeningVisitId).FirstOrDefault();
-                VisitOpenDate(screeningVisitId, Convert.ToDateTime(targetValue));
+                VisitOpenDate(screeningVisitId, Convert.ToDateTime(value), projectDesignVariableId);
             }
 
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue, screeningEntryId);
@@ -350,13 +349,13 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        void VisitOpenDate(int screeningVisitId, DateTime dateTime)
+        void VisitOpenDate(int screeningVisitId, DateTime dateTime, int projectDesignVariableId)
         {
             var screeningVisit = _context.ScreeningVisit.Find(screeningVisitId);
             if (screeningVisit == null) return;
 
             if (_projectDesignVisitStatusRepository.All.Any(x => x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId
-           && x.VisitStatusId == ScreeningVisitStatus.Open))
+           && x.VisitStatusId == ScreeningVisitStatus.Open && x.ProjectDesignVariableId == projectDesignVariableId))
             {
                 screeningVisit.VisitStartDate = dateTime;
                 _context.ScreeningVisit.Update(screeningVisit);

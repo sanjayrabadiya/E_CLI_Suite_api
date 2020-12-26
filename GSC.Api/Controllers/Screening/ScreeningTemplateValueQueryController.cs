@@ -194,11 +194,11 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.ScreeningVisitId, projectDesignVisitId, screeningTemplateValueQueryDto.IsNa);
 
             List<ScheduleCheckValidateDto> scheduleResult = null;
-            if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Date ||
+            if (screeningTemplate.ParentId == null && (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Date ||
                 screeningTemplateValueQueryDto.CollectionSource == CollectionSources.DateTime ||
-                screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Time)
+                screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Time))
             {
-                scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id,
+                scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.ScreeningVisitId,
                    screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
                    screeningTemplateValue.ProjectDesignVariableId, true);
             }

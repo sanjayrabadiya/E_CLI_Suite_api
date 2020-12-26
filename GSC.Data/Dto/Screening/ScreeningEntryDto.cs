@@ -49,6 +49,7 @@ namespace GSC.Data.Dto.Screening
 
     public class ScreeningAuditDto
     {
+        public int Id { get; set; }
         private DateTime? _createdDate;
         public string Visit { get; set; }
         public string Template { get; set; }

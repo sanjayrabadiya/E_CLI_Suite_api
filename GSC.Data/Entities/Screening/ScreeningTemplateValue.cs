@@ -25,10 +25,8 @@ namespace GSC.Data.Entities.Screening
         public short? AcknowledgeLevel { get; set; }
         public ScreeningTemplate ScreeningTemplate { get; set; }
         public ProjectDesignVariable ProjectDesignVariable { get; set; }
-        public ICollection<ScreeningTemplateValueAudit> Audits { get; set; }
         public ICollection<ScreeningTemplateValueComment> Comments { get; set; }
         public List<ScreeningTemplateValueChild> Children { get; set; }
-        public ICollection<ScreeningTemplateValueQuery> Queries { get; set; }
         public bool IsNa { get; set; }
         public int? UserRoleId { get; set; }
         public bool IsSystem { get; set; }

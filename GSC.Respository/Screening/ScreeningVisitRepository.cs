@@ -190,7 +190,8 @@ namespace GSC.Respository.Screening
 
             _context.Save();
 
-            _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.Id, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, true);
+            if (screeningTemplate.ParentId == null)
+                _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.ScreeningVisitId, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, true);
 
             return true;
 

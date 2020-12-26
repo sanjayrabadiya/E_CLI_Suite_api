@@ -293,7 +293,7 @@ namespace GSC.Api.Controllers.Screening
         public IActionResult SubmitDiscontinueTemplate(int id)
         {
             var attendanceId = _screeningTemplateRepository.All.Where(x => x.Id == id).Select(r => r.ScreeningVisit.ScreeningEntry.AttendanceId).FirstOrDefault();
-            SubmitTemplate(id);
+            SubmittedTemplate(id);
 
             _projectSubjectRepository.DiscontinueProjectSubject((int)attendanceId, id);
 

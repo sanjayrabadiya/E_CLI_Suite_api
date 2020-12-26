@@ -61,7 +61,7 @@ namespace GSC.Respository.Screening
                 StatusName = t.QueryStatus.GetDescription(),
                 QueryStatus = t.QueryStatus,
                 OldValue = t.OldValue
-            }).OrderByDescending(a => a.CreatedDate).ToList();
+            }).OrderByDescending(a => a.Id).ToList();
         }
 
         public void Save(ScreeningTemplateValueQuery screeningTemplateValueQuery)

@@ -636,7 +636,7 @@ namespace GSC.Respository.Screening
                     screeningTemplateValue.IsNa ? "NA" : screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
                     screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.ScreeningVisitId, screeningTemplate.ProjectDesignVisitId, screeningTemplateValue.IsNa);
 
-                var scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.Id,
+                var scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.ScreeningVisitId,
                  screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
                  screeningTemplateValue.ProjectDesignVariableId, true);
 
