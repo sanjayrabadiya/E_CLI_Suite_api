@@ -193,7 +193,7 @@ namespace GSC.Api.Controllers.UserMgt
 
         [HttpPost]
         [Route("role")]
-        public IActionResult ValidateLoginWithRole([FromBody] LoginRoleDto loginDto)
+        public async Task<IActionResult> ValidateLoginWithRole([FromBody] LoginRoleDto loginDto)
         {
             Data.Entities.UserMgt.User user;
             if (loginDto.UserId > 0)
@@ -218,6 +218,8 @@ namespace GSC.Api.Controllers.UserMgt
             var validatedUser = _userRepository.BuildUserAuthObject(userViewModel, loginDto.RoleId);
 
             TokenProcess(validatedUser.UserId, validatedUser.RefreshToken);
+
+            await _hubContext.Clients.All.SendAsync("roleChanged", new { userId = user.Id, roleId = loginDto.RoleId });
 
             return Ok(validatedUser);
         }
