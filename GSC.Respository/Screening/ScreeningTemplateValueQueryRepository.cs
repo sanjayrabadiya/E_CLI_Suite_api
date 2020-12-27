@@ -174,9 +174,7 @@ namespace GSC.Respository.Screening
                 if (workFlowLevel.IsWorkFlowBreak) screeningTemplateValue.AcknowledgeLevel = workFlowLevel.StartLevel;
             }
             else
-            {
                 screeningTemplateValue.AcknowledgeLevel = null;
-            }
 
             Save(screeningTemplateValueQuery);
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
@@ -192,6 +190,9 @@ namespace GSC.Respository.Screening
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
 
             screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
+            if (workFlowLevel.IsNoCRF)
+                screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+
             screeningTemplateValueQuery.QueryLevel = workFlowLevel.LevelNo;
             screeningTemplateValueQuery.QueryStatus = QueryStatus.Acknowledge;
             screeningTemplateValueQuery.Note = screeningTemplateValueQuery.Note + " " +
@@ -203,9 +204,8 @@ namespace GSC.Respository.Screening
 
             ClosedSelfCorrection(screeningTemplateValue, (short)screeningTemplate.ReviewLevel);
 
-            if (screeningTemplateValue.QueryStatus == QueryStatus.SelfCorrection
-                && screeningTemplateValue.AcknowledgeLevel == screeningTemplateValue.ReviewLevel)
-                screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(screeningTemplateValue.AcknowledgeLevel + 1);
+            if (screeningTemplateValue.QueryStatus == QueryStatus.SelfCorrection && screeningTemplateValue.AcknowledgeLevel == screeningTemplateValue.ReviewLevel)
+                screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, (short)screeningTemplateValue.AcknowledgeLevel);
 
             ClosedSelfCorrection(screeningTemplateValue, screeningTemplateValue.ReviewLevel);
 
@@ -216,55 +216,56 @@ namespace GSC.Respository.Screening
 
         private void ClosedSelfCorrection(ScreeningTemplateValue screeningTemplateValue, short reviewLevel)
         {
-            if (screeningTemplateValue.AcknowledgeLevel == reviewLevel)
-            {
-                screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
-                if (screeningTemplateValue.QueryStatus == QueryStatus.SelfCorrection)
-                    screeningTemplateValue.QueryStatus = QueryStatus.Closed;
-            }
+            if (screeningTemplateValue.AcknowledgeLevel == reviewLevel && screeningTemplateValue.QueryStatus == QueryStatus.SelfCorrection)
+                screeningTemplateValue.QueryStatus = QueryStatus.Closed;
         }
 
-        public void SelfGenerate(ScreeningTemplateValueQuery screeningTemplateValueQuery,
-            ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto,
-            ScreeningTemplateValue screeningTemplateValue,
-            ScreeningTemplate screeningTemplate)
+        public void SelfGenerate(ScreeningTemplateValueQuery screeningTemplateValueQuery, ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto,
+            ScreeningTemplateValue screeningTemplateValue, ScreeningTemplate screeningTemplate)
         {
 
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
+
             screeningTemplateValueQuery.QueryStatus = QueryStatus.SelfCorrection;
 
             if (screeningTemplate.ReviewLevel > 1)
             {
+                screeningTemplateValue.QueryStatus = QueryStatus.SelfCorrection;
+                screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
+                if (workFlowLevel.IsNoCRF)
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
+                else
+                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 2 : 1);
+
                 if (workFlowLevel.IsWorkFlowBreak)
                 {
+                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo);
                     if (workFlowLevel.LevelNo != screeningTemplate.ReviewLevel)
                     {
-                        screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
-                        screeningTemplateValue.QueryStatus = QueryStatus.SelfCorrection;
+                        if (workFlowLevel.IsNoCRF)
+                            screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                        else
+                            screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
                     }
-                }
-                else
-                {
-                    screeningTemplateValue.QueryStatus = QueryStatus.SelfCorrection;
-                    screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
-                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 2 : 1);
                 }
 
                 if (screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
                     screeningTemplateValue.QueryStatus = QueryStatus.Closed;
             }
+
             screeningTemplateValue.IsSystem = false;
             screeningTemplateValue.Value = screeningTemplateValueQueryDto.Value;
             screeningTemplateValue.IsNa = screeningTemplateValueQueryDto.IsNa;
             screeningTemplateValue.UserRoleId = _jwtTokenAccesser.RoleId;
-            QueryAudit(screeningTemplateValueQueryDto, screeningTemplateValue, QueryStatus.SelfCorrection.ToString(),
-                screeningTemplateValueQuery.Value, screeningTemplateValueQuery);
+
+            QueryAudit(screeningTemplateValueQueryDto, screeningTemplateValue, QueryStatus.SelfCorrection.ToString(), screeningTemplateValueQuery.Value, screeningTemplateValueQuery);
 
             _screeningTemplateValueChildRepository.Save(screeningTemplateValue);
 
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
 
             screeningTemplateValueQuery.QueryLevel = workFlowLevel.LevelNo;
+
             Save(screeningTemplateValueQuery);
         }
 
@@ -403,6 +404,7 @@ namespace GSC.Respository.Screening
             {
                 r.ScreeningVisit.ScreeningEntryId,
                 r.ScreeningVisit.ScreeningEntry.ProjectDesignId,
+                r.ScreeningVisit.ProjectDesignVisit.IsNonCRF,
                 r.StartLevel
             }).FirstOrDefault();
 
@@ -415,7 +417,10 @@ namespace GSC.Respository.Screening
 
             _workFlowLevelDto = workFlowLevel;
 
-            return _workFlowLevelDto;
+            _workFlowLevelDto.IsNoCRF = templateData.IsNonCRF;
+            _workFlowLevelDto.ProjectDesignId = templateData.ProjectDesignId;
+
+            return _workFlowLevelDto; ;
         }
 
         private void QueryAudit(ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto,
@@ -527,7 +532,7 @@ namespace GSC.Respository.Screening
 
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId)
         {
-        
+
             return All.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId).GroupBy(
                 t => new { t.ScreeningTemplateValue.QueryStatus, t.UserRole }).Select(g => new DashboardQueryStatusDto
                 {

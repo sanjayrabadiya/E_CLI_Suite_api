@@ -29,6 +29,7 @@ namespace GSC.Data.Dto.Project.Workflow
         public short LevelNo { get; set; }
         public bool IsNoCRF { get; set; }
         public int TotalLevel { get; set; }
+        public int ProjectDesignId { get; set; }
         public short StartLevel { get; set; }
         public bool IsElectricSignature { get; set; }
         public List<WorkFlowText> WorkFlowText { get; set; }

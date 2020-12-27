@@ -68,6 +68,7 @@ namespace GSC.Respository.Screening
                    ReviewLevel = c.ReviewLevel,
                    ScreeningVisitId = c.ScreeningVisitId,
                    ProjectDesignVisitId = c.ScreeningVisit.ProjectDesignVisitId,
+                   IsNoCRF = c.ScreeningVisit.ProjectDesignVisit.IsNonCRF,
                    IsLocked = c.IsLocked,
                    IsDisable = c.IsDisable,
                    PatientStatus = c.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId,
@@ -82,8 +83,7 @@ namespace GSC.Respository.Screening
                     .ProjectTo<Data.Dto.Screening.ScreeningTemplateValueBasic>(_mapper.ConfigurationProvider).ToList();
         }
 
-        public Data.Dto.Project.Design.DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto,
-            int screeningTemplateId)
+        public DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId)
         {
 
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
@@ -506,6 +506,13 @@ namespace GSC.Respository.Screening
                                                  screeningValue.QueryStatus == QueryStatus.SelfCorrection;
 
 
+                if (templateBasic.IsNoCRF && !workflowlevel.IsNoCRF)
+                {
+                    workFlowButton.Generate = false;
+                    workFlowButton.SelfCorrection = false;
+                    workFlowButton.Update = false;
+                    workFlowButton.Acknowledge = false;
+                }
             }
 
             workFlowButton.Clear = designTemplateDto.IsSubmittedButton;

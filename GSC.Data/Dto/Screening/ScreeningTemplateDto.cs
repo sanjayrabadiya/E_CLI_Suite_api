@@ -56,6 +56,7 @@ namespace GSC.Data.Dto.Screening
         public int ProjectDesignId { get; set; }
         public short? ReviewLevel { get; set; }
         public bool IsLocked { get; set; }
+        public bool IsNoCRF { get; set; }
         public bool IsDisable { get; set; }
         public int ProjectDesignVisitId { get; set; }
 
