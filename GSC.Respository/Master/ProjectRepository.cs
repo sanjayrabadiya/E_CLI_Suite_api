@@ -122,7 +122,7 @@ namespace GSC.Respository.Master
                     x.Id != objSave.Id && x.ProjectName == objSave.ProjectName.Trim() && x.DeletedDate == null && x.ParentProjectId == null))
                     return "Duplicate Study name : " + objSave.ProjectName;
 
-                if (All.Any(x => x.Id != objSave.Id && x.ProjectCode == objSave.ProjectCode.Trim() && x.DeletedDate == null))
+                if (All.Any(x => x.Id != objSave.Id && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
                     return "Duplicate Study Code : " + objSave.ProjectCode;
             }
 
