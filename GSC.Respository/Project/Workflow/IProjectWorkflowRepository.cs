@@ -10,5 +10,7 @@ namespace GSC.Respository.Project.Workflow
         WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId);
         int GetMaxWorkFlowLevel(int projectDesignId);
         bool IsElectronicsSignatureComplete(int ProjectDesignId);
+
+        short GetNoCRFLevel(int projectDesignId, short levelNo);
     }
 }

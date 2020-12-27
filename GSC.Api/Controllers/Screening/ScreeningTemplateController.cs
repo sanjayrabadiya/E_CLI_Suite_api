@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
@@ -22,11 +20,9 @@ namespace GSC.Api.Controllers.Screening
     public class ScreeningTemplateController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IProjectSubjectRepository _projectSubjectRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
-        private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateReviewRepository _screeningTemplateReviewRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
@@ -34,21 +30,17 @@ namespace GSC.Api.Controllers.Screening
         private readonly IUnitOfWork _uow;
 
         public ScreeningTemplateController(IScreeningTemplateRepository screeningTemplateRepository,
-            IScreeningEntryRepository screeningEntryRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUnitOfWork uow, IMapper mapper,
             IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IProjectSubjectRepository projectSubjectRepository,
             IScreeningVisitRepository screeningVisitRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IUnitOfWork uow)
         {
             _screeningTemplateRepository = screeningTemplateRepository;
-            _screeningEntryRepository = screeningEntryRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _uow = uow;
-            _mapper = mapper;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateReviewRepository = screeningTemplateReviewRepository;
@@ -56,11 +48,6 @@ namespace GSC.Api.Controllers.Screening
             _projectSubjectRepository = projectSubjectRepository;
             _screeningVisitRepository = screeningVisitRepository;
         }
-
-
-
-
-
 
         [HttpPost("Repeat/{screeningTemplateId}")]
         public IActionResult Repeat(int screeningTemplateId)
@@ -71,7 +58,6 @@ namespace GSC.Api.Controllers.Screening
             _uow.Save();
             return Ok(screeningTemplate.Id);
         }
-
 
 
         [HttpDelete("{id}")]
@@ -174,9 +160,11 @@ namespace GSC.Api.Controllers.Screening
             }
 
             var screeningTemplate = _screeningTemplateRepository.Find(id);
+
+
             var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(id);
-            screeningTemplate.Status = ScreeningTemplateStatus.Submitted;
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
+
             if (workflowlevel.IsWorkFlowBreak)
             {
                 screeningTemplate.ReviewLevel = Convert.ToInt16(workflowlevel.LevelNo + 1);
@@ -187,12 +175,20 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplate.ReviewLevel = 1;
                 screeningTemplate.StartLevel = -1;
             }
+
+            var isNonCRF = _screeningTemplateRepository.All.Any(x => x.Id == id && x.ScreeningVisit.ProjectDesignVisit.IsNonCRF);
+            if (isNonCRF)
+                screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetNoCRFLevel(projectDesignId, (short)screeningTemplate.StartLevel);
+
+            screeningTemplate.Status = ScreeningTemplateStatus.Submitted;
             screeningTemplate.IsDisable = false;
 
             _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, 0);
 
             _screeningTemplateValueRepository.UpdateVariableOnSubmit(screeningTemplate.ProjectDesignTemplateId,
                 screeningTemplate.Id, null);
+
+            CheckCompletedStatus(screeningTemplate, projectDesignId);
 
             _screeningTemplateRepository.Update(screeningTemplate);
 
@@ -231,23 +227,30 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, (short)screeningTemplate.ReviewLevel);
 
-            screeningTemplate.ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel + 1);
-
             var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(screeningTemplate.Id);
 
-            if (screeningTemplate.ReviewLevel > _projectWorkflowRepository.GetMaxWorkFlowLevel(projectDesignId))
-            {
-                screeningTemplate.IsCompleteReview = true;
-                screeningTemplate.Status = ScreeningTemplateStatus.Completed;
-            }
+            var isNonCRF = _screeningTemplateRepository.All.Any(x => x.Id == id && x.ScreeningVisit.ProjectDesignVisit.IsNonCRF);
+            if (isNonCRF)
+                screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetNoCRFLevel(projectDesignId, (short)screeningTemplate.ReviewLevel);
+            else
+                screeningTemplate.ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel + 1);
+
+            CheckCompletedStatus(screeningTemplate, projectDesignId);
 
             _screeningTemplateRepository.Update(screeningTemplate);
 
             _uow.Save();
 
-
-
             return Ok(id);
+        }
+
+        void CheckCompletedStatus(ScreeningTemplate screeningTemplate, int projectDesignId)
+        {
+            if (screeningTemplate.ReviewLevel > _projectWorkflowRepository.GetMaxWorkFlowLevel(projectDesignId))
+            {
+                screeningTemplate.IsCompleteReview = true;
+                screeningTemplate.Status = ScreeningTemplateStatus.Completed;
+            }
         }
 
 

@@ -39,6 +39,21 @@ namespace GSC.Respository.Project.Workflow
                                                             && x.DeletedDate == null).Max(t => t.LevelNo);
         }
 
+        public short GetNoCRFLevel(int projectDesignId, short levelNo)
+        {
+            var result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
+                                                                          && x.SecurityRoleId ==
+                                                                          _jwtTokenAccesser.RoleId
+                                                                          && x.DeletedDate == null && x.IsNoCRF
+                                                                          && levelNo > x.LevelNo).Select(t => t.LevelNo).FirstOrDefault();
+
+            if (result == 0)
+                return (short)(GetMaxWorkFlowLevel(projectDesignId) + 1);
+
+            return result;
+
+        }
+
         public WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId)
         {
             short levelNo = -1;
