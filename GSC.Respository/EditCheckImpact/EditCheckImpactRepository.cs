@@ -631,7 +631,7 @@ namespace GSC.Respository.EditCheckImpact
             if (screeningTemplateValue != null)
             {
 
-                if ((!isTaget && screeningTemplateValue.IsSystem) || screeningTemplateValue.IsNa)
+                if ((screeningTemplateValue.QueryStatus != null && screeningTemplateValue.QueryStatus != QueryStatus.Closed) || screeningTemplateValue.IsNa)
                     return false;
 
                 var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateId).FirstOrDefault();
@@ -639,7 +639,7 @@ namespace GSC.Respository.EditCheckImpact
                     return false;
 
                 var screeningTemplateValueQuery = _screeningTemplateValueQueryRepository.All.
-                    Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id).OrderByDescending(t => t.Id).
+                    Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.IsSystem).OrderByDescending(t => t.Id).
                     Select(t => new { t.IsSystem, t.EditCheckRefValue }).FirstOrDefault();
 
                 if (screeningTemplateValueQuery != null && screeningTemplateValueQuery.IsSystem)

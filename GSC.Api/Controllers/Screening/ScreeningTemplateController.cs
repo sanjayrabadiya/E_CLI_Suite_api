@@ -202,7 +202,6 @@ namespace GSC.Api.Controllers.Screening
 
         [HttpPut]
         [Route("ReviewedTemplate/{id}")]
-        [TransactionRequired]
         public IActionResult ReviewedTemplate(int id)
         {
             _screeningTemplateRepository.SubmitReviewTemplate(id, false);
