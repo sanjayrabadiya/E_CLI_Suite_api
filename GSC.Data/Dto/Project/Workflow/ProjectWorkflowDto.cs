@@ -27,6 +27,7 @@ namespace GSC.Data.Dto.Project.Workflow
         public bool IsGenerateQuery { get; set; }
         public bool IsLock { get; set; }
         public short LevelNo { get; set; }
+        public bool IsNoCRF { get; set; }
         public int TotalLevel { get; set; }
         public short StartLevel { get; set; }
         public bool IsElectricSignature { get; set; }

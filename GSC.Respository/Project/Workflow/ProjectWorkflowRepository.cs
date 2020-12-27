@@ -99,6 +99,7 @@ namespace GSC.Respository.Project.Workflow
                 return new WorkFlowLevelDto
                 {
                     IsLock = level.IsLock,
+                    IsNoCRF = level.IsNoCRF,
                     WorkFlowText = workFlowText,
                     TotalLevel = totalLevel,
                     IsStartTemplate = level.IsStartTemplate,

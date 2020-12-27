@@ -17,5 +17,6 @@ namespace GSC.Data.Dto.Project.Workflow
         public bool IsWorkFlowBreak { get; set; }
         public bool IsGenerateQuery { get; set; }
         public bool IsLock { get; set; }
+        public bool IsNoCRF { get; set; }
     }
 }
