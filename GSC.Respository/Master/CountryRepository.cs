@@ -11,6 +11,7 @@ using GSC.Data.Entities.Location;
 using GSC.Domain.Context;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
@@ -64,18 +65,19 @@ namespace GSC.Respository.Master
             return "";
         }
 
-       
+
 
         public List<DropDownDto> GetCountryByProjectIdDropDown(int ParentProjectId)
         {
 
-            return _context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == ParentProjectId || x.Id == ParentProjectId)).Select(r => new DropDownDto
-            {
-                Id = r.CountryId,
-                Value = r.Country.CountryName,
-                Code = r.Country.CountryCode
-            }).Distinct().OrderBy(o => o.Value).ToList();
-
+            var country = _context.Project.Include(x => x.ManageSite).Include(x => x.City).Include(x => x.State).Include(x => x.Country)
+                .Where(x => x.DeletedDate == null && x.ParentProjectId == ParentProjectId).Select(r => new DropDownDto
+                {
+                    Id = (int)r.ManageSite.City.State.CountryId,
+                    Value = r.ManageSite.City.State.Country.CountryName,
+                    Code = r.ManageSite.City.State.Country.CountryCode
+                }).Distinct().OrderBy(o => o.Value).ToList();
+            return country;
         }
 
         public List<CountryGridDto> GetCountryList(bool isDeleted)

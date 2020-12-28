@@ -40,6 +40,7 @@ namespace GSC.Data.Entities.Master
         public bool IsStatic { get; set; }
         public int? RegulatoryTypeId { get; set; }
         public RegulatoryType? RegulatoryType { get; set; }
+        public ManageSite? ManageSite { get; set; }
 
         public DateTime? FromDate
         {

@@ -349,7 +349,7 @@ namespace GSC.Respository.ProjectRight
             }).ToList();
         }
 
-        public List<DropDownDto> GetChildProjectDropDownProjectRight(int ParentProjectId)
+        public List<ProjectDropDown> GetChildProjectDropDownProjectRight(int ParentProjectId)
         {
             // changes by swati for child project
             var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == ParentProjectId
@@ -358,12 +358,13 @@ namespace GSC.Respository.ProjectRight
                                                                               a.RoleId == _jwtTokenAccesser.RoleId
                                                                               && a.DeletedDate == null &&
                                                                               a.RollbackReason == null) &&
-                                             x.DeletedDate == null).Select(c => new DropDownDto
+                                             x.DeletedDate == null).Select(c => new ProjectDropDown
                                              {
                                                  Id = c.ProjectId,
                                                  Value = c.Project.ProjectCode,
                                                  Code = c.Project.ProjectCode,
-                                                 ExtraData = c.Project.ParentProjectId
+                                                 ParentProjectId = (int)c.Project.ParentProjectId,
+                                                 CountryId = c.Project.ManageSite.City.State.CountryId
                                              }).OrderBy(o => o.Value).Distinct().ToList();
 
             if (projectList == null || projectList.Count == 0) return null;
