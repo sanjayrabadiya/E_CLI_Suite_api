@@ -489,7 +489,7 @@ namespace GSC.Helper
         [Description("In Progress")] InProgress = 5,
         [Description("Missed")] Missed = 6,
         [Description("Withdrawal")] Withdrawal = 7,
-        [Description("OnHold")] OnHold = 8,
+        [Description("On Hold")] OnHold = 8,
         [Description("Screening Failure")] ScreeningFailure = 9,
         [Description("Completed")] Completed = 10
     }
@@ -502,8 +502,8 @@ namespace GSC.Helper
         [Description("Consent Completed")] ConsentCompleted = 4,
         [Description("Re-Consent in Process")] ReConsentInProcess = 5,
         [Description("Screening Failure")] ScreeningFailure = 6,
-        [Description("OnTrial")] OnTrial = 7,
-        [Description("OnHold")] OnHold = 8,
+        [Description("On Trial")] OnTrial = 7,
+        [Description("On Hold")] OnHold = 8,
         [Description("Completed")] Completed = 9,
         [Description("Withdrawal")] Withdrawal = 10,
     }

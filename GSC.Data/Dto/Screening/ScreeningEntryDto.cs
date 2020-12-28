@@ -38,6 +38,7 @@ namespace GSC.Data.Dto.Screening
         public List<ScreeningVisitTree> ScreeningVisits { get; set; }
         public string VolunteerName { get; set; }
         public string PatientStatusName { get; set; }
+        public ScreeningPatientStatus? PatientStatusId { get; set; }
         public bool IsMultipleVisits { get; set; }
         public bool MyReview { get; set; }
         public string LevelName1 { get; set; }

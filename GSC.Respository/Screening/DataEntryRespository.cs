@@ -80,6 +80,7 @@ namespace GSC.Respository.Screening
                  VolunteerName = t.Initial,
                  IsRandomization = true,
                  SubjectNo = t.ScreeningNumber,
+                 PatientStatusId = t.PatientStatusId,
                  PatientStatusName = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
@@ -132,6 +133,7 @@ namespace GSC.Respository.Screening
                 IsRandomization = x.RandomizationId != null,
                 SubjectNo = x.RandomizationId != null ? x.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
                 ScreeningPatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId : ScreeningPatientStatus.Screening,
+                PatientStatusId = x.RandomizationId != null ? x.Randomization.PatientStatusId : 0,
                 PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
