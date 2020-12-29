@@ -234,7 +234,7 @@ namespace GSC.Respository.Screening
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                 }).ToList();
+                 }).ToList().OrderBy(t=> t.DesignOrder).ToList();
 
             result.ForEach(a =>
             {
@@ -285,7 +285,7 @@ namespace GSC.Respository.Screening
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                 }).ToList();
+                 }).ToList().OrderBy(t => t.DesignOrder).ToList();
 
             result.ForEach(a =>
             {
@@ -336,7 +336,7 @@ namespace GSC.Respository.Screening
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                 }).ToList();
+                 }).ToList().OrderBy(t => t.DesignOrder).ToList();
 
             result.ForEach(a =>
             {
@@ -387,7 +387,7 @@ namespace GSC.Respository.Screening
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                 }).ToList();
+                 }).ToList().OrderBy(t => t.DesignOrder).ToList();
 
             result.ForEach(a =>
             {
