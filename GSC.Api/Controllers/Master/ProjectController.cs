@@ -124,6 +124,15 @@ namespace GSC.Api.Controllers.Master
         {
             if (projectDto.Id <= 0) return BadRequest();
 
+            if (projectDto.IsManualRandomNo == false)
+            {
+                if (projectDto.RandomNoStartsWith == null)
+                {
+                    ModelState.AddModelError("Message", "Please add valid Starts with number");
+                    return BadRequest(ModelState);
+                }
+            }
+
             var project = _projectRepository.Find(projectDto.Id);
             project.RandomNoLength = projectDto.RandomNoLength;
             project.IsManualRandomNo = projectDto.IsManualRandomNo;
@@ -161,6 +170,15 @@ namespace GSC.Api.Controllers.Master
         public IActionResult UpdateScreeningNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
         {
             if (projectDto.Id <= 0) return BadRequest();
+
+            if (projectDto.IsManualScreeningNo == false)
+            {
+                if (projectDto.ScreeningNoStartsWith == null)
+                {
+                    ModelState.AddModelError("Message", "Please add valid Starts with number");
+                    return BadRequest(ModelState);
+                }
+            }
 
             var project = _projectRepository.Find(projectDto.Id);
             //project.RandomNoLength = projectDto.RandomNoLength;

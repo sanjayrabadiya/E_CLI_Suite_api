@@ -749,18 +749,16 @@ namespace GSC.Respository.Attendance
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
                             TemplateName = r.ProjectDesignTemplate.TemplateName,
-                            Status = r.Status
+                            Status = r.Status,
                         }).ToList();
-            //data.ForEach(x =>
-            //{
-            //    var screening = _context.ScreeningTemplate.Where(x => x.Id == x.Id).Include(x => x.ScreeningVisit).ThenInclude(x => x.ScreeningEntry).ToList().FirstOrDefault();
-            //    var projectdesignid = screening.ScreeningVisit.ScreeningEntry.ProjectDesignId;
-            //    var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectdesignid);
-            //    x.IsSubmittedButton = (int)x.Status < 3 && workflowlevel.IsStartTemplate;
-            //});
+            data.ForEach(x =>
+            {
+                if (x.Status == ScreeningTemplateStatus.Submitted)
+                {
+                    x.SubmittedDate = _context.ScreeningTemplateReview.Where(t => t.ScreeningTemplateId == x.ScreeningTemplateId && t.Status == ScreeningTemplateStatus.Submitted).ToList().FirstOrDefault().CreatedDate;
+                }
+            });
             return data;
-
-          
         }
 
         //public RandomizationNumberDto GetRandomizationAndScreeningNumber(int id)

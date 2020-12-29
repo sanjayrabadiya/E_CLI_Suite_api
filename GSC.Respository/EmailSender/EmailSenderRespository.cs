@@ -151,13 +151,18 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
             if (mobile != "")
             {
+                var smstemplate = emailMessage.MessageBody;
+                smstemplate = smstemplate.Replace("<p>", "");
+                smstemplate = smstemplate.Replace("</p>", "");
+                smstemplate = smstemplate.Replace("<strong>", "");
+                smstemplate = smstemplate.Replace("</strong>", "");
                 var smssetting = _iSMSSettingRepository.FindBy(x => x.KeyName == "msg91").ToList().FirstOrDefault();
                 var url = smssetting.SMSurl;
                 url = url.Replace("##AuthKey##", smssetting.AuthKey);
                 url = url.Replace("##Mobile##", "91"+mobile);
                 url = url.Replace("##senderid##", smssetting.SenderId);
                 url = url.Replace("##route##", "4");
-                url = url.Replace("##message##", emailMessage.MessageBody);
+                url = url.Replace("##message##", smstemplate);//emailMessage.MessageBody
                 string result = await HttpService.Get(_httpClient, url, null);
                 //var responseresult = _aPICall.Get(url);
             }
