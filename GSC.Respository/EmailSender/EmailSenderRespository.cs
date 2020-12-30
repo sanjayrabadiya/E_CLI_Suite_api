@@ -153,7 +153,7 @@ namespace GSC.Respository.EmailSender
             {
                 var smstemplate = emailMessage.MessageBody;
                 smstemplate = smstemplate.Replace("<p>", "");
-                smstemplate = smstemplate.Replace("</p>", "");
+                smstemplate = smstemplate.Replace("</p>", "\r\n");
                 smstemplate = smstemplate.Replace("<strong>", "");
                 smstemplate = smstemplate.Replace("</strong>", "");
                 var smssetting = _iSMSSettingRepository.FindBy(x => x.KeyName == "msg91").ToList().FirstOrDefault();
