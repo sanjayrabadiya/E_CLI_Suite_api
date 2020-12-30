@@ -313,7 +313,8 @@ namespace GSC.Respository.Screening
                                  VolunteerName = screening.RandomizationId != null ? randomization.Initial : screening.Attendance.Volunteer.AliasName,
                                  SubjectNo = screening.RandomizationId != null ? randomization.ScreeningNumber : screening.Attendance.Volunteer.VolunteerNo,
                                  RandomizationNumber = screening.RandomizationId != null ? randomization.RandomizationNumber : "",
-                                 ScreeningTemplateValueId = query.ScreeningTemplateValueId
+                                 ScreeningTemplateValueId = query.ScreeningTemplateValueId,
+                                 CollectionSource = (int)value.ProjectDesignVariable.CollectionSource,
                              }).OrderBy(x => x.Id).ToList();
 
             var groupbytemp = queryDtos.GroupBy(x => x.ScreeningTemplateValueId).Select(y => new QueryManagementDto
@@ -335,9 +336,9 @@ namespace GSC.Respository.Screening
                 Value = y.Last().Value,
                 CreatedByName = y.Where(a => a.QueryStatus == QueryStatus.Open).LastOrDefault()?.CreatedByName,
                 ModifieedByName = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedByName,
-            }).Where(q =>
-                (filters.Status == null || q.QueryStatus.GetDescription() == ((QueryStatus)filters.Status).GetDescription())
-              ).ToList();
+                CollectionSource = y.Last().CollectionSource,
+            }).Where(q => filters.Status == null
+                || q.QueryStatus.GetDescription() == ((QueryStatus)filters.Status).GetDescription()).ToList();
 
             return groupbytemp;
         }
