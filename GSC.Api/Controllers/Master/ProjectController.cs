@@ -223,6 +223,19 @@ namespace GSC.Api.Controllers.Master
 
             var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
             project.Id = projectDto.Id;
+            var details = _projectRepository.Find(projectDto.Id);
+            project.ScreeningNoseries = details.ScreeningNoseries;
+            project.RandomizationNoseries = details.RandomizationNoseries;
+            project.ScreeningNoStartsWith = details.ScreeningNoStartsWith;
+            project.RandomNoStartsWith = details.RandomNoStartsWith;
+            project.ScreeningLength = details.ScreeningLength;
+            project.RandomNoLength = details.RandomNoLength;
+            project.IsManualScreeningNo = details.IsManualScreeningNo;
+            project.IsManualRandomNo = details.IsManualRandomNo;
+            project.IsSiteDependentScreeningNo = details.IsSiteDependentScreeningNo;
+            project.IsSiteDependentRandomNo = details.IsSiteDependentRandomNo;
+            project.IsAlphaNumScreeningNo = details.IsAlphaNumScreeningNo;
+            project.IsAlphaNumRandomNo = details.IsAlphaNumRandomNo;
 
             if (projectDto.ParentProjectId > 0)
             {
