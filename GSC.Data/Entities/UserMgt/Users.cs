@@ -80,7 +80,7 @@ namespace GSC.Data.Entities.UserMgt
 
         public bool IsPowerAdmin { get; set; }
 
-        public PrefLanguage? Language { get; set; }
+        public int? Language { get; set; }
         public string SignaturePath { get; set; }
         public UserMasterUserType? UserType { get; set; }
 

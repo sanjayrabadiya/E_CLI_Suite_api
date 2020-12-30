@@ -10,7 +10,7 @@ namespace GSC.Shared.JWTAuth
         int RoleId { get; }
         string RoleName { get; }
         string IpAddress { get; }
-        PrefLanguage Language { get; }
+        int? Language { get; }
         string GetHeader(string key);
     }
 }

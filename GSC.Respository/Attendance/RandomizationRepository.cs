@@ -351,8 +351,8 @@ namespace GSC.Respository.Attendance
                     latestno = studydata.RandomizationNoseries;
                     randomizationNumberDto.RandomizationNoseries = studydata.RandomizationNoseries;
                 }
-                
-                    randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+
+                randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
             }
             return randomizationNumberDto;
         }
@@ -386,7 +386,7 @@ namespace GSC.Respository.Attendance
                     latestno = studydata.ScreeningNoseries;
                     randomizationNumberDto.ScreeningNoseries = studydata.ScreeningNoseries;
                 }
-                    randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
             }
             return randomizationNumberDto;
         }
@@ -684,12 +684,12 @@ namespace GSC.Respository.Attendance
                     x.Role = _roleRepository.Find(x.RoleId).RoleName;
                     x.UserPicUrl = _context.UploadSetting.FirstOrDefault().ImageUrl + (_userRepository.Find(x.UserId).ProfilePic ?? DocumentService.DefulatProfilePic);
                 }
-                    ) ;
+                    );
                 dashboardPatientDto.siteTeams = siteteamdtos;
                 if (project.ManageSiteId != null)
                 {
                     dashboardPatientDto.hospitalName = _manageSiteRepository.Find((int)project.ManageSiteId).SiteName;
-                    
+
                     dashboardPatientDto.siteAddress = _manageSiteRepository.Find((int)project.ManageSiteId).SiteAddress;
                 }
                 //dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
@@ -735,7 +735,8 @@ namespace GSC.Respository.Attendance
                         Select(r => new ProjectDesignVisitMobileDto
                         {
                             Id = r.Id,
-                            DisplayName = r.ProjectDesignVisit.DisplayName,
+                            DisplayName = (_jwtTokenAccesser.Language != null ?
+                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignVisit.DisplayName) //r.ProjectDesignVisit.DisplayName,
                         }).ToList();
 
             return data;
@@ -748,7 +749,8 @@ namespace GSC.Respository.Attendance
                         {
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
-                            TemplateName = r.ProjectDesignTemplate.TemplateName,
+                            TemplateName = (_jwtTokenAccesser.Language != null ?
+                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                         }).ToList();
             data.ForEach(x =>

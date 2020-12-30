@@ -12,6 +12,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,9 +23,11 @@ namespace GSC.Respository.Project.Design
     {
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ProjectDesignTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
         {
+            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }
@@ -53,7 +56,8 @@ namespace GSC.Respository.Project.Design
                     Id = r.Id,
                     ProjectDesignTemplateId = r.Id,
                     ProjectDesignVisitId = r.ProjectDesignVisitId,
-                    TemplateName = r.TemplateName,
+                    TemplateName = (_jwtTokenAccesser.Language != null ?
+                r.TemplateLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : r.TemplateName),// r.TemplateName,
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
                     Variables = null,
@@ -73,7 +77,24 @@ namespace GSC.Respository.Project.Design
 
                 result.Variables.ToList().ForEach(x =>
                 {
+                    // For Variable multilanguage
+                    x.VariableName = (_jwtTokenAccesser.Language != null ?
+                x.VariableLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : x.VariableName);
+
+                    // For VariableNote multilanguage
+                    if (x.Note != null)
+                        x.Note = (_jwtTokenAccesser.Language != null ?
+                   x.VariableNoteLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : x.Note);
+
                     x.Values = x.Values.OrderBy(c => c.SeqNo).ToList();
+
+                    // For VariableValue multilanguage
+                //    if (x.Values.Count > 0)
+                //        x.Values.ToList().ForEach(r =>
+                //    {
+                //        r.ValueName = (_jwtTokenAccesser.Language != 1 ?
+                //r.VariableValueLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : r.ValueName);
+                //    });
                 });
             }
             result = ValidateVariables(result);
@@ -143,7 +164,7 @@ namespace GSC.Respository.Project.Design
                                            && x.ParentId == id).OrderBy(t => t.Id).Select(t => new DropDownDto
                                            {
                                                Id = t.Id,
-                                               Value = t.TemplateName +" - "+ t.ProjectDesignVisit.DisplayName,
+                                               Value = t.TemplateName + " - " + t.ProjectDesignVisit.DisplayName,
                                            }).ToList();
 
             return templates;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.LanguageSetup;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using DataType = GSC.Helper.DataType;
@@ -114,6 +115,8 @@ namespace GSC.Data.Dto.Project.Design
         public List<EditCheckIds> editCheckIds { get; set; }
         public EditCheckTargetValidation EditCheckValidation { get; set; }
         public string ValidationMessage { get; set; }
+        public List<VariableLanguage> VariableLanguage { get; set; }
+        public List<VariableNoteLanguage> VariableNoteLanguage { get; set; }
     }
 
     public class EditCheckIds

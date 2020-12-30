@@ -30,7 +30,7 @@ namespace GSC.Data.Dto.UserMgt
         public GeneralSettingsDto GeneralSettings { get; set; }
         public List<AppScreen> Rights { get; set; }
         public IList<DropDownDto> Roles { get; set; }
-        public PrefLanguage? Language { get; set; }
+        public int? Language { get; set; }
         public string LanguageShortName { get; set; }
         public string ValidateMessage { get; set; }
         public bool IsValid { get; set; }

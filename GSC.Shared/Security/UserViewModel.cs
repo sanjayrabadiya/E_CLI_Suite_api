@@ -11,7 +11,7 @@ namespace GSC.Shared.Security
         public string ValidateMessage { get; set; }
         public bool IsValid { get; set; }
         public bool IsFirstTime { get; set; }
-        public PrefLanguage? Language { get; set; }
+        public int? Language { get; set; }
         public int FailedLoginAttempts { get; set; }
 
     }

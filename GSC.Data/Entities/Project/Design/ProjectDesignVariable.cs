@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
 
@@ -48,5 +49,6 @@ namespace GSC.Data.Entities.Project.Design
         public DateValidateType? DateValidate { get; set; }
         public Domain Domain { get; set; }
         public string Note { get; set; }
+        public List<VariableLanguage> VariableLanguage { get; set; }
     }
 }

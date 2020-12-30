@@ -121,6 +121,7 @@ namespace GSC.Api.Controllers.Attendance
                 userDto.UserName = RandomPassword.CreateRandomNumericNumber(6);
                 userDto.CompanyId = _jwtTokenAccesser.CompanyId;
                 userDto.IsFirstTime = true;
+                userDto.Language = randomizationDto.LanguageId;
                 CommonResponceView userdetails = await _centreUserService.SaveUser(userDto, _environmentSetting.Value.CentralApi);
                 if (!string.IsNullOrEmpty(userdetails.Message))
                 {
@@ -162,6 +163,7 @@ namespace GSC.Api.Controllers.Attendance
                 userDetail.LastName = RandomizationDto.LastName;
                 userDetail.DateOfBirth = RandomizationDto.DateOfBirth;
                 userDetail.Email = RandomizationDto.Email;
+                userDetail.Language = RandomizationDto.LanguageId;
                 userDetail.Phone = RandomizationDto.PrimaryContactNumber;
                 var userDto = _mapper.Map<UserDto>(userDetail);
                 CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);

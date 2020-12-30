@@ -75,7 +75,7 @@ namespace GSC.Respository.Screening
                 ScreeningVisitId = s.Id,
                 VisitSeqNo = s.RepeatedVisitNumber,
                 ProjectDesignVisitId = s.ProjectDesignVisitId,
-                ProjectDesignVisitName = (_jwtTokenAccesser.Language != PrefLanguage.en ?
+                ProjectDesignVisitName = (_jwtTokenAccesser.Language != null ?
                 s.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
                 : s.ProjectDesignVisit.DisplayName) +
                                          Convert.ToString(s.RepeatedVisitNumber == null ? "" : "_" + s.RepeatedVisitNumber),

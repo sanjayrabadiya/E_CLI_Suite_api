@@ -138,7 +138,7 @@ namespace GSC.Api.Controllers.UserMgt
 
             var userDto = _mapper.Map<UserDto>(userExists);
             if (userDto.Language == null)
-                userDto.LanguageShortName = PrefLanguage.en.ToString();
+                userDto.LanguageShortName = null;
             else
                 userDto.LanguageShortName = userDto.Language.ToString();
 
@@ -200,7 +200,7 @@ namespace GSC.Api.Controllers.UserMgt
                 userDto.IsDeleted = "User is deleted, Please contact your administrator";
             }
             if (userDto.Language == null)
-                userDto.LanguageShortName = PrefLanguage.en.ToString();
+                userDto.LanguageShortName = null;
             else
                 userDto.LanguageShortName = userDto.Language.ToString();
 

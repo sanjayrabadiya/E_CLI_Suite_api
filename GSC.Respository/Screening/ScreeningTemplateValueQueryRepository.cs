@@ -534,13 +534,37 @@ namespace GSC.Respository.Screening
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId)
         {
 
-            return All.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId).GroupBy(
-                t => new { t.ScreeningTemplateValue.QueryStatus, t.UserRole }).Select(g => new DashboardQueryStatusDto
-                {
-                    DisplayName = g.Key.UserRole,
-                    QueryStatus = g.Key.QueryStatus.GetDescription(),
-                    Total = g.Count()
-                }).ToList();
+            var queryStatus = (from stvq in _context.ScreeningTemplateValueQuery
+                               join stv in _context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
+                                   templatevalue
+                               from stv in templatevalue.DefaultIfEmpty()
+                               join st in _context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
+                               from st in stemplate.DefaultIfEmpty()
+                               join se in _context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
+                               from sEntry in entry.DefaultIfEmpty()
+                               join p in _context.Project on sEntry.ProjectId equals p.Id into project
+                               from p in project.DefaultIfEmpty()
+                                   //join sr in _context.SecurityRole on stvq.UserRoleId equals sr.Id into role
+                                   //from sr in role.DefaultIfEmpty()
+                               where p.Id == projectId || p.ParentProjectId == projectId
+                               group new { stvq } by new { stvq.UserRole, stvq.QueryStatus }
+                   into g
+                               select new DashboardQueryStatusDto
+                               {
+                                   DisplayName = g.Key.UserRole,
+                                   QueryStatus = g.Key.QueryStatus.GetDescription(),
+                                   Total = g.Count()
+                               }
+               ).ToList();
+            return queryStatus;
+
+            //return All.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId).GroupBy(
+            //    t => new { t.ScreeningTemplateValue.QueryStatus, t.UserRole }).Select(g => new DashboardQueryStatusDto
+            //    {
+            //        DisplayName = g.Key.UserRole,
+            //        QueryStatus = g.Key.QueryStatus.GetDescription(),
+            //        Total = g.Count()
+            //    }).ToList();
 
         }
 

@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.LanguageSetup;
 
 namespace GSC.Data.Dto.Project.Design
 {
@@ -29,6 +31,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ScreeningTemplateValueChildId { get; set; }
         public string ScreeningValueOld { get; set; }
         public int SeqNo { get; set; }
+        public List<VariableValueLanguage> VariableValueLanguage { get; set; }
     }
 
     public class ProjectDesignVariableValueDropDown 

@@ -42,7 +42,7 @@ namespace GSC.Shared.JWTAuth
         public string UserName { get; }
 
         public int CompanyId { get; }
-        public PrefLanguage Language { get; }
+        public int? Language { get; }
         public int RoleId { get; }
         public string RoleName { get; }
 
@@ -56,6 +56,6 @@ namespace GSC.Shared.JWTAuth
         public int CompanyId { get; set; }
         public int RoleId { get; set; }
         public string RoleName { get; set; }
-        public PrefLanguage Language { get; set; }
+        public int? Language { get; set; }
     }
 }

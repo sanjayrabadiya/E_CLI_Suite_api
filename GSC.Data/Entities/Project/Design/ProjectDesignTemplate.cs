@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Master;
 
 namespace GSC.Data.Entities.Project.Design
@@ -23,5 +24,6 @@ namespace GSC.Data.Entities.Project.Design
         public VariableTemplate VariableTemplate { get; set; }
 
         public IList<ProjectDesignTemplateNote> ProjectDesignTemplateNote { get; set; }
+        public List<TemplateLanguage> TemplateLanguage { get; set; }
     }
 }

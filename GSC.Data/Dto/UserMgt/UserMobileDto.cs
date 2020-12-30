@@ -38,7 +38,7 @@ namespace GSC.Data.Dto.UserMgt
         public string IsDeleted { get; set; }
 
         public bool IsFirstTime { get; set; }
-        public PrefLanguage? Language { get; set; }
+        public int? Language { get; set; }
 
         public string LanguageShortName { get; set; }
     }
