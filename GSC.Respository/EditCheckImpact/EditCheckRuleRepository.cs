@@ -94,6 +94,7 @@ namespace GSC.Respository.EditCheckImpact
 
                     var result = ValidateRuleReference(new List<EditCheckValidate> { c }, isFromValidate);
                     result.Id = c.Id;
+                    editCheckResult.RefAndTarget = result.RefAndTarget;
                     result.Result = result.IsValid ? "Passed" : "Failed";
                     if (isFromValidate && string.IsNullOrEmpty(c.CollectionValue))
                         editCheckResult.IsValid = result.IsValid;

@@ -56,7 +56,7 @@ namespace GSC.Respository.Screening
                 ReasonOth = t.ReasonOth,
                 Note = string.IsNullOrEmpty(t.Note) ? t.ReasonOth : t.Note,
                 CreatedDate = t.CreatedDate,
-                CreatedByName = t.UserName +
+                CreatedByName = t.UserName + "(" + t.UserRole + ")" +
                             Convert.ToString(t.IsSystem ? " - System" : ""),
                 StatusName = t.QueryStatus.GetDescription(),
                 QueryStatus = t.QueryStatus,
