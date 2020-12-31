@@ -506,7 +506,7 @@ namespace GSC.Respository.Screening
                                                  screeningValue.QueryStatus == QueryStatus.SelfCorrection;
 
 
-                if (templateBasic.IsNoCRF && !workflowlevel.IsNoCRF)
+                if (workflowlevel.LevelNo > 0 && templateBasic.IsNoCRF && !workflowlevel.IsNoCRF)
                 {
                     workFlowButton.Generate = false;
                     workFlowButton.SelfCorrection = false;
