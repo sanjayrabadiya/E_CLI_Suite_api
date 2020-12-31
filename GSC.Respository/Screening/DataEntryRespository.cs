@@ -167,7 +167,7 @@ namespace GSC.Respository.Screening
                     {
                         v.NotStarted = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.Pending).Sum(t => t.TotalTemplate);
                         v.InProgress = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.InProcess).Sum(t => t.TotalTemplate);
-                        v.MyQuery = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel == workflowlevel.LevelNo).Sum(t => t.TotalQuery);
+                        v.MyQuery = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel == workflowlevel.LevelNo && x.QueryStatus != QueryStatus.Closed).Sum(t => t.TotalQuery);
                         v.ReOpen = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Reopened).Sum(t => t.TotalQuery);
                         v.Open = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Open).Sum(t => t.TotalQuery);
                         v.Answered = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Answered).Sum(t => t.TotalQuery);
@@ -234,7 +234,7 @@ namespace GSC.Respository.Screening
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                 }).ToList().OrderBy(t=> t.DesignOrder).ToList();
+                 }).ToList().OrderBy(t => t.DesignOrder).ToList();
 
             result.ForEach(a =>
             {
