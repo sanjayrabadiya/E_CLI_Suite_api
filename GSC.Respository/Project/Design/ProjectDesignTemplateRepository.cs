@@ -57,10 +57,11 @@ namespace GSC.Respository.Project.Design
                     ProjectDesignTemplateId = r.Id,
                     ProjectDesignVisitId = r.ProjectDesignVisitId,
                     TemplateName = (_jwtTokenAccesser.Language != null ?
-                r.TemplateLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : r.TemplateName),// r.TemplateName,
+                r.TemplateLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.TemplateName),// r.TemplateName,
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
                     Variables = null,
+                    // Templatenote for multilanguage
                     Notes = r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
@@ -79,22 +80,21 @@ namespace GSC.Respository.Project.Design
                 {
                     // For Variable multilanguage
                     x.VariableName = (_jwtTokenAccesser.Language != null ?
-                x.VariableLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : x.VariableName);
+                x.VariableLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName);
 
                     // For VariableNote multilanguage
                     if (x.Note != null)
                         x.Note = (_jwtTokenAccesser.Language != null ?
-                   x.VariableNoteLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : x.Note);
+                   x.VariableNoteLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note);
 
                     x.Values = x.Values.OrderBy(c => c.SeqNo).ToList();
 
                     // For VariableValue multilanguage
-                //    if (x.Values.Count > 0)
-                //        x.Values.ToList().ForEach(r =>
-                //    {
-                //        r.ValueName = (_jwtTokenAccesser.Language != 1 ?
-                //r.VariableValueLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : r.ValueName);
-                //    });
+                    //if (x.Values.Count > 0)
+                    //    x.Values.ToList().ForEach(r => {
+                    //    r.ValueName = (_jwtTokenAccesser.Language != null ?
+                    //    r.VariableValueLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ValueName);
+                    //});
                 });
             }
             result = ValidateVariables(result);

@@ -736,7 +736,7 @@ namespace GSC.Respository.Attendance
                         {
                             Id = r.Id,
                             DisplayName = (_jwtTokenAccesser.Language != null ?
-                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignVisit.DisplayName) //r.ProjectDesignVisit.DisplayName,
+                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignVisit.DisplayName) //r.ProjectDesignVisit.DisplayName,
                         }).ToList();
 
             return data;
@@ -750,7 +750,7 @@ namespace GSC.Respository.Attendance
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
                             TemplateName = (_jwtTokenAccesser.Language != null ?
-                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
+                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                         }).ToList();
             data.ForEach(x =>
