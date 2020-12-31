@@ -68,7 +68,7 @@ namespace GSC.Data.Dto.Screening
             get => _createdDate?.UtcDateTime();
             set => _createdDate = value?.UtcDateTime();
         }
-
+        public CollectionSources? CollectionSource { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
     }

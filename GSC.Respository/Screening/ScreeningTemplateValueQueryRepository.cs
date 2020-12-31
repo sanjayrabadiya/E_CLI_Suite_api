@@ -60,7 +60,8 @@ namespace GSC.Respository.Screening
                             Convert.ToString(t.IsSystem ? " - System" : ""),
                 StatusName = t.QueryStatus.GetDescription(),
                 QueryStatus = t.QueryStatus,
-                OldValue = t.OldValue
+                OldValue = t.OldValue,
+                CollectionSource = t.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource
             }).OrderByDescending(a => a.Id).ToList();
         }
 
