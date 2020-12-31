@@ -397,7 +397,6 @@ namespace GSC.Respository.EditCheckImpact
                         QueryStatus = QueryStatus.Open,
                         IsSystem = true,
                         Note = note,
-                        EditCheckRefValue = sampleResult,
                         ScreeningTemplateValueId = screeningTemplateValue.Id
                     }, screeningTemplateValue);
 

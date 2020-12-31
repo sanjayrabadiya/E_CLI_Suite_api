@@ -36,6 +36,7 @@ namespace GSC.Respository.EditCheckImpact
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IScreeningTemplateLockUnlockRepository _screeningTemplateLockUnlockRepository;
+        private readonly IScreeningTemplateEditCheckValueRepository _screeningTemplateEditCheckValueRepository;
         public EditCheckImpactRepository(IImpactService editCheckImpactService,
             IMapper mapper, IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -47,7 +48,8 @@ namespace GSC.Respository.EditCheckImpact
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
-            IEditCheckRuleRepository editCheckRuleRepository) : base(context)
+            IEditCheckRuleRepository editCheckRuleRepository,
+            IScreeningTemplateEditCheckValueRepository screeningTemplateEditCheckValueRepository) : base(context)
         {
             _impactService = editCheckImpactService;
             _mapper = mapper;
@@ -62,6 +64,7 @@ namespace GSC.Respository.EditCheckImpact
             _meddraCodingRepository = meddraCodingRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
+            _screeningTemplateEditCheckValueRepository = screeningTemplateEditCheckValueRepository;
         }
 
         public List<EditCheckValidateDto> CheckValidation(List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic, bool isQuery)
@@ -238,7 +241,7 @@ namespace GSC.Respository.EditCheckImpact
         {
             if (_editCheckTargetValidationLists == null)
                 _editCheckTargetValidationLists = new List<EditCheckTargetValidationList>();
-            var variableIds = editCheckValidateDto.Select(c => c.ProjectDesignVariableId).Distinct().ToList();
+            var variableIds = editCheckValidateDto.Where(a => a.ScreeningTemplateId > 0).Select(c => c.ProjectDesignVariableId).Distinct().ToList();
             variableIds.ForEach(t =>
             {
                 EditCheckTargetValidationList editCheckTarget = _editCheckTargetValidationLists.
@@ -322,10 +325,15 @@ namespace GSC.Respository.EditCheckImpact
                             editCheckTarget.IsSoftFetch, r.CollectionSource, editCheckTarget.EditCheckDisable);
                     }
 
-                    if (editCheckTarget.HasQueries)
+                    var isEditCheckRefValue = false;
+
+                    if (isQueryRaise)
+                        isEditCheckRefValue = _screeningTemplateEditCheckValueRepository.CheckUpdateEditCheckRefValue(r.ScreeningTemplateId,
+                                r.ProjectDesignVariableId, r.EditCheckDetailId, r.ValidateType, r.SampleResult);
+
+                    if (editCheckTarget.HasQueries && isEditCheckRefValue)
                     {
-                        editCheckTarget.HasQueries = SystemQuery(r.ScreeningTemplateId,
-                            r.ProjectDesignVariableId, r.AutoNumber, r.Message, r.SampleResult, r.IsTarget);
+                        editCheckTarget.HasQueries = SystemQuery(r.ScreeningTemplateId, r.ProjectDesignVariableId, r.AutoNumber, r.Message);
                         editCheckMessage.HasQueries = editCheckTarget.HasQueries;
                     }
 
@@ -622,7 +630,7 @@ namespace GSC.Respository.EditCheckImpact
             return screeningTemplateValue.Id;
         }
 
-        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message, string sampleResult, bool isTaget)
+        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message)
         {
             var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where
             (t => t.ScreeningTemplateId == screeningTemplateId
@@ -631,21 +639,21 @@ namespace GSC.Respository.EditCheckImpact
             if (screeningTemplateValue != null)
             {
 
-                if ((screeningTemplateValue.QueryStatus != null && screeningTemplateValue.QueryStatus != QueryStatus.Closed) || screeningTemplateValue.IsNa)
+                if (screeningTemplateValue.IsNa)
+                    return false;
+
+                if (screeningTemplateValue.QueryStatus == QueryStatus.Acknowledge ||
+                    screeningTemplateValue.QueryStatus == QueryStatus.Open ||
+                    screeningTemplateValue.QueryStatus == QueryStatus.Reopened ||
+                    screeningTemplateValue.QueryStatus == QueryStatus.Reopened ||
+                    screeningTemplateValue.QueryStatus == QueryStatus.Resolved)
                     return false;
 
                 var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateId).FirstOrDefault();
+
+
                 if ((int)screeningTemplate.Status < 3)
                     return false;
-
-                var screeningTemplateValueQuery = _screeningTemplateValueQueryRepository.All.
-                    Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.IsSystem).OrderByDescending(t => t.Id).
-                    Select(t => new { t.IsSystem, t.EditCheckRefValue }).FirstOrDefault();
-
-                if (screeningTemplateValueQuery != null && screeningTemplateValueQuery.IsSystem)
-                {
-                    if (screeningTemplateValueQuery.EditCheckRefValue == sampleResult) return false;
-                }
 
                 string note = $"{"Reference by "} {autoNumber} {message}";
                 screeningTemplateValue.IsSystem = true;
@@ -663,7 +671,6 @@ namespace GSC.Respository.EditCheckImpact
                         QueryStatus = QueryStatus.Open,
                         IsSystem = true,
                         Note = note,
-                        EditCheckRefValue = sampleResult,
                         ScreeningTemplateValueId = screeningTemplateValue.Id
                     }, screeningTemplateValue);
 

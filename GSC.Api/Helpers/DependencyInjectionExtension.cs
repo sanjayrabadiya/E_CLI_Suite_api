@@ -285,8 +285,9 @@ namespace GSC.Api.Helpers
             services.AddSingleton(typeof(IGSCCaching), typeof(GSCCaching));
             services.AddScoped<ISiteTeamRepository, SiteTeamRepository>();
             services.AddScoped<IAppScreenPatientRightsRepository, AppScreenPatientRightsRepository>();
-            services.AddScoped<ISMSSettingRepository, SMSSettingRepository>();           
-            
+            services.AddScoped<ISMSSettingRepository, SMSSettingRepository>();
+            services.AddScoped<IScreeningTemplateEditCheckValueRepository, ScreeningTemplateEditCheckValueRepository>();
+
         }
     }
 }

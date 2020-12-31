@@ -27,7 +27,6 @@ namespace GSC.Data.Entities.Screening
 
         public string OldValue { get; set; }
         public bool IsSystem { get; set; }
-        public string EditCheckRefValue { get; set; }
 
         public string UserName { get; set; }
         public string UserRole { get; set; }

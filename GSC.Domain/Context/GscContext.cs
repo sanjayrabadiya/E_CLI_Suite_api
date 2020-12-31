@@ -301,7 +301,7 @@ namespace GSC.Domain.Context
         public DbSet<AppScreenPatientRights> AppScreenPatientRights { get; set; }
         public DbSet<AppScreenPatient> AppScreenPatient { get; set; }
         public DbSet<SMSSetting> SMSSetting { get; set; }
-
+        public DbSet<ScreeningTemplateEditCheckValue> ScreeningTemplateEditCheckValue { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

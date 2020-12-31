@@ -255,6 +255,7 @@ namespace GSC.Domain.Context
         DbSet<AppScreenPatientRights> AppScreenPatientRights { get; set; }
         DbSet<SMSSetting> SMSSetting { get; set; }
 
+        DbSet<ScreeningTemplateEditCheckValue> ScreeningTemplateEditCheckValue { get; set; }
 
     }
 }
