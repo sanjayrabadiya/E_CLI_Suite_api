@@ -752,7 +752,8 @@ namespace GSC.Respository.Attendance
                             TemplateName = (_jwtTokenAccesser.Language != null ?
                 r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
-                        }).ToList();
+                            DesignOrder = r.ProjectDesignTemplate.DesignOrder,
+                        }).OrderBy(r => r.DesignOrder).ToList();
             data.ForEach(x =>
             {
                 if (x.Status == ScreeningTemplateStatus.Submitted)

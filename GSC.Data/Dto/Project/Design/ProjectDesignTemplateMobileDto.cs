@@ -13,5 +13,6 @@ namespace GSC.Data.Dto.Project.Design
         public string TemplateName { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public DateTime? SubmittedDate { get; set; }
+        public int DesignOrder { get; set; }
     }
 }
