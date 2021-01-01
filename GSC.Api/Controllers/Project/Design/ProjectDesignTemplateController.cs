@@ -103,7 +103,7 @@ namespace GSC.Api.Controllers.Project.Design
             if (variableTemplate == null) return NotFound();
 
             var designOrder = 0;
-            if (_projectDesignTemplateRepository.All.Any(t => t.ProjectDesignVisitId == projectDesignVisitId))
+            if (_projectDesignTemplateRepository.All.Any(t => t.ProjectDesignVisitId == projectDesignVisitId && t.DeletedDate == null))
                 designOrder = _projectDesignTemplateRepository.All.Where(t => t.ProjectDesignVisitId == projectDesignVisitId
                 && t.DeletedDate == null).Max(t => t.DesignOrder);
 
