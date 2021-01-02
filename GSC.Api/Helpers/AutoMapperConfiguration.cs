@@ -177,6 +177,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.AutoNumber, x => x.MapFrom(a => a.EditCheck.AutoNumber))
                 .ForMember(x => x.CollectionSource, y => y.MapFrom(a => a.ProjectDesignVariable.CollectionSource))
                 .ForMember(x => x.DataType, x => x.MapFrom(a => a.ProjectDesignVariable.DataType))
+                 .ForMember(x => x.ProjectDesignVisitId, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisitId))
                 .ForMember(x => x.EditCheckDetailId, x => x.MapFrom(a => a.Id))
                 .ForMember(x => x.EditCheckId, x => x.MapFrom(a => a.EditCheckId))
                 .ForMember(x => x.IsOnlyTarget, x => x.MapFrom(a => a.EditCheck.IsOnlyTarget))

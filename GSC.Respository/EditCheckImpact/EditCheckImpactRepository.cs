@@ -97,7 +97,7 @@ namespace GSC.Respository.EditCheckImpact
                 else if (r.ProjectDesignTemplateId != null && !r.IsSkip)
                 {
                     var refTemplate = _impactService.GetScreeningTemplate((int)r.ProjectDesignTemplateId, screeningTemplateBasic.ScreeningEntryId,
-                       r.ProjectDesignVisitId == screeningTemplateBasic.ScreeningVisitId ? screeningTemplateBasic.ScreeningVisitId : (int?)null);
+                       r.ProjectDesignVisitId == screeningTemplateBasic.ProjectDesignVisitId ? screeningTemplateBasic.ScreeningVisitId : (int?)null);
                     if (refTemplate != null)
                     {
                         r.ScreeningTemplateId = refTemplate.Id;
