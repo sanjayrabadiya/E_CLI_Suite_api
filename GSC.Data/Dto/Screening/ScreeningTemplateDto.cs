@@ -1,8 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using GSC.Data.Dto.Project.Design;
-using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Screening;
 using GSC.Helper;
 
 namespace GSC.Data.Dto.Screening

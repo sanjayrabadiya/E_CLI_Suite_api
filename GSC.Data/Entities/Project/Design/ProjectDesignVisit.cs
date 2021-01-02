@@ -16,5 +16,6 @@ namespace GSC.Data.Entities.Project.Design
         public bool? IsSchedule { get; set; }
         public IList<ProjectDesignTemplate> Templates { get; set; }
         public List<VisitLanguage> VisitLanguage { get; set; }
+        public List<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GSC.Helper;
+﻿using GSC.Data.Entities.Screening;
+using GSC.Helper;
 using GSC.Shared.Extension;
 using System;
 
@@ -54,7 +55,6 @@ namespace GSC.Data.Dto.Screening
         public string Message { get; set; }
         public string Value { get; set; }
         public string AutoNumber { get; set; }
-        public int ScreeningTemplateId { get; set; }
         public CollectionSources? CollectionSource { get; set; }
         private DateTime? _scheduleDate { get; set; }
         public DateTime? ScheduleDate
@@ -70,8 +70,9 @@ namespace GSC.Data.Dto.Screening
         public ProjectScheduleOperator? Operator { get; set; }
         public bool IsTarget { get; set; }
         public bool HasQueries { get; set; }
-        public ScreeningTemplateStatus? Status { get; set; }
+
         public int ScreeningTemplateValueId { get; set; }
         public EditCheckValidateType ValidateType { get; set; }
+        public ScreeningTemplate ScreeningTemplate { get; set; }
     }
 }

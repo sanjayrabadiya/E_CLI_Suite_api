@@ -128,7 +128,8 @@ namespace GSC.Respository.Screening
 
         public void FindOpenVisitVarible(int projectDesignVisitId, int screeningVisitId, DateTime visitDate, int screeningEntryId)
         {
-            var openVariable = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.VisitStatusId == ScreeningVisitStatus.Open).
+            var openVariable = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId
+            && x.VisitStatusId == ScreeningVisitStatus.Open && x.DeletedDate == null).
               Select(t => new
               {
                   t.ProjectDesignVariable.Id,
@@ -245,7 +246,7 @@ namespace GSC.Respository.Screening
                 return "";
 
             var openVariable = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == visit.ProjectDesignVisitId
-            && x.VisitStatusId == ScreeningVisitStatus.Open).
+            && x.VisitStatusId == ScreeningVisitStatus.Open && x.DeletedDate == null).
               Select(t => new { t.ProjectDesignVariable.Id, t.ProjectDesignVariable.ProjectDesignTemplateId }).FirstOrDefault();
 
             if (openVariable == null) return "";

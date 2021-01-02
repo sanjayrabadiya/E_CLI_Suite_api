@@ -24,7 +24,6 @@ namespace GSC.Respository.Screening
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IScreeningTemplateValueScheduleRepository _screeningTemplateValueScheduleRepository;
         private WorkFlowLevelDto _workFlowLevelDto;
         private readonly IGSCContext _context;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
@@ -32,7 +31,6 @@ namespace GSC.Respository.Screening
         public ScreeningTemplateValueQueryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
-            IScreeningTemplateValueScheduleRepository screeningTemplateValueScheduleRepository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository)
             : base(context)
@@ -40,7 +38,6 @@ namespace GSC.Respository.Screening
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
-            _screeningTemplateValueScheduleRepository = screeningTemplateValueScheduleRepository;
             _context = context;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
@@ -93,8 +90,6 @@ namespace GSC.Respository.Screening
             if (screeningTemplateValue.IsSystem)
             {
                 updateQueryStatus = QueryStatus.Closed;
-                _screeningTemplateValueScheduleRepository.CloseSystemQuery(screeningTemplateValue.ScreeningTemplateId,
-                    screeningTemplateValue.ProjectDesignVariableId);
             }
 
             screeningTemplateValueQuery.IsSystem = false;
