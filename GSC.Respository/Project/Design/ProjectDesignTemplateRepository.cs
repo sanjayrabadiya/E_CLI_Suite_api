@@ -56,7 +56,7 @@ namespace GSC.Respository.Project.Design
                     Id = r.Id,
                     ProjectDesignTemplateId = r.Id,
                     ProjectDesignVisitId = r.ProjectDesignVisitId,
-                    TemplateName = (_jwtTokenAccesser.Language != null ?
+                    TemplateName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
                 r.TemplateLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.TemplateName),// r.TemplateName,
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
@@ -79,12 +79,12 @@ namespace GSC.Respository.Project.Design
                 result.Variables.ToList().ForEach(x =>
                 {
                     // For Variable multilanguage
-                    x.VariableName = (_jwtTokenAccesser.Language != null ?
+                    x.VariableName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
                 x.VariableLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName);
 
                     // For VariableNote multilanguage
                     if (x.Note != null)
-                        x.Note = (_jwtTokenAccesser.Language != null ?
+                        x.Note = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
                    x.VariableNoteLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note);
 
                     x.Values = x.Values.OrderBy(c => c.SeqNo).ToList();

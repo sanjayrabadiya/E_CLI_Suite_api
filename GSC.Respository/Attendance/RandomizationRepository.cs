@@ -735,7 +735,7 @@ namespace GSC.Respository.Attendance
                         Select(r => new ProjectDesignVisitMobileDto
                         {
                             Id = r.Id,
-                            DisplayName = (_jwtTokenAccesser.Language != null ?
+                            DisplayName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
                 r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignVisit.DisplayName) //r.ProjectDesignVisit.DisplayName,
                         }).ToList();
 
@@ -749,7 +749,7 @@ namespace GSC.Respository.Attendance
                         {
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
-                            TemplateName = (_jwtTokenAccesser.Language != null ?
+                            TemplateName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
                 r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
