@@ -94,9 +94,24 @@ namespace GSC.Respository.EditCheckImpact
                 }
 
                 InsertScheduleDate(x, targetSchDate);
-                _context.Save();
-                _context.DetachAllEntities();
+
             });
+
+            var screeningTemplateIds= targetList.Select(x => x.ScreeningTemplate.Id).Distinct().ToList();
+
+            screeningTemplateIds.ForEach(x =>
+            {
+                var screeningTemplate = targetList.Where(t => t.ScreeningTemplate.Id == x).Select(c => c.ScreeningTemplate).FirstOrDefault();
+                if (screeningTemplate!=null)
+                {
+                    screeningTemplate.ScheduleDate = targetList.Where(t => t.ScreeningTemplate.Id == x).Max(x => x.ScheduleDate);
+                    Update(screeningTemplate);
+                }
+            });
+
+
+            _context.Save();
+            _context.DetachAllEntities();
 
             if (targetList != null && targetList.Count > 0 && !string.IsNullOrEmpty(targetSchDate))
                 VisitScheduleDate(screeningVisitId, targetList);
@@ -129,8 +144,6 @@ namespace GSC.Respository.EditCheckImpact
             SetValue(targetScheduleTemplate, null, screeningTemplateBasic);
 
             targetValue = refrenceSchedule.FirstOrDefault(x => x.Value != null)?.Value;
-
-          
 
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue, screeningVisitId);
 
@@ -318,14 +331,6 @@ namespace GSC.Respository.EditCheckImpact
                 _screeningTemplateValueRepository.Update(screeningTemplateValue);
             }
 
-            if (!target.ScreeningTemplate.IsProcess)
-            {
-                target.ScreeningTemplate.ScheduleDate = scheduleDate;
-                target.ScreeningTemplate.IsProcess = true;
-                Update(target.ScreeningTemplate);
-            }
-
-
             target.ScreeningTemplateValueId = screeningTemplateValue.Id;
         }
 
@@ -344,12 +349,8 @@ namespace GSC.Respository.EditCheckImpact
 
         void TemplateActualDate(ScreeningTemplate screeningTemplate, DateTime date)
         {
-            if (screeningTemplate != null && !screeningTemplate.IsProcess)
-            {
-                screeningTemplate.ActualDate = date;
-                screeningTemplate.IsProcess = true;
-                Update(screeningTemplate);
-            }
+            screeningTemplate.ActualDate = date;
+            Update(screeningTemplate);
         }
 
         void VisitOpenDate(int screeningVisitId, DateTime dateTime, int projectDesignVariableId)

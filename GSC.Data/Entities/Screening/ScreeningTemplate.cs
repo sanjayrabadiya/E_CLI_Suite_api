@@ -42,8 +42,6 @@ namespace GSC.Data.Entities.Screening
         public bool IsCompleteReview { get; set; }
         public bool IsDisable { get; set; }
         public int? RepeatSeqNo { get; set; }
-        [NotMapped]
-        public bool IsProcess { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
 
     }

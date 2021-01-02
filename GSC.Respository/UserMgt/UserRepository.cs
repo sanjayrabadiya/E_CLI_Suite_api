@@ -257,7 +257,7 @@ namespace GSC.Respository.UserMgt
             userInfo.UserName = user.UserName;
             userInfo.CompanyId = (int)user.CompanyId;
             userInfo.RoleId = roleId;
-            userInfo.Language = user.Language;
+            userInfo.Language = user.Language == 0 || user.Language == null ? 1 : (int)user.Language;
             userInfo.RoleName = _roleRepository.All.Where(x => x.Id == roleId).Select(r => r.RoleShortName).FirstOrDefault();
             var claims = new List<Claim> { new Claim("gsc_user_token", userInfo.ToJsonString()) };
             return GenerateAccessToken(claims);

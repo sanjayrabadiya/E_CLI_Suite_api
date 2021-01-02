@@ -101,8 +101,6 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.ParentId != null)
                 designTemplateDto.IsRepeated = false;
 
-
-
             designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
             designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
             designTemplateDto.IsLocked = screeningTemplateBasic.IsLocked;
@@ -126,8 +124,7 @@ namespace GSC.Respository.Screening
                     variable.HasQueries = t.QueryStatus != null ? true : false;
                     variable.IsNaValue = t.IsNa;
                     variable.IsSystem = t.QueryStatus == QueryStatus.Closed ? false : t.IsSystem;
-                    variable.WorkFlowButton =
-                        SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
+                    variable.WorkFlowButton = SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
 
                     variable.DocPath = t.DocPath != null ? t.DocPath : null;
                     variable.DocFullPath = t.DocPath != null ? documentUrl + t.DocPath : null;
