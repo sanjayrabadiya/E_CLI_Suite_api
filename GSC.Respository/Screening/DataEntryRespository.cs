@@ -229,6 +229,7 @@ namespace GSC.Respository.Screening
                      IsLocked = t.IsLocked,
                      MyReview = false,
                      ParentId = t.ParentId,
+                     ScheduleDate = t.ScheduleDate,
                      TemplateName = t.ProjectDesignTemplate.TemplateName,
                      VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
@@ -280,6 +281,7 @@ namespace GSC.Respository.Screening
                      IsLocked = t.IsLocked,
                      MyReview = false,
                      ParentId = t.ParentId,
+                     ScheduleDate = t.ScheduleDate,
                      TemplateName = t.ProjectDesignTemplate.TemplateName,
                      VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
@@ -331,6 +333,7 @@ namespace GSC.Respository.Screening
                      IsLocked = t.IsLocked,
                      MyReview = false,
                      ParentId = t.ParentId,
+                     ScheduleDate = t.ScheduleDate,
                      TemplateName = t.ProjectDesignTemplate.TemplateName,
                      VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
@@ -382,6 +385,7 @@ namespace GSC.Respository.Screening
                      IsLocked = t.IsLocked,
                      MyReview = false,
                      ParentId = t.ParentId,
+                     ScheduleDate = t.ScheduleDate,
                      TemplateName = t.ProjectDesignTemplate.TemplateName,
                      VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null

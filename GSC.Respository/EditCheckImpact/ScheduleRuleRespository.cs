@@ -98,8 +98,6 @@ namespace GSC.Respository.EditCheckImpact
                 _context.DetachAllEntities();
             });
 
-            _context.Save();
-
             if (targetList != null && targetList.Count > 0 && !string.IsNullOrEmpty(targetSchDate))
                 VisitScheduleDate(screeningVisitId, targetList);
 
@@ -132,14 +130,15 @@ namespace GSC.Respository.EditCheckImpact
 
             targetValue = refrenceSchedule.FirstOrDefault(x => x.Value != null)?.Value;
 
-            var currentReference = refrenceSchedule.FirstOrDefault(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ProjectDesignTemplateId == projectDesignTemplateId);
-            if (currentReference != null && !string.IsNullOrEmpty(value))
-                TemplateActualDate(currentReference.ScreeningTemplate, Convert.ToDateTime(value));
-
-            VisitOpenDate(screeningVisitId, Convert.ToDateTime(value), projectDesignVariableId);
+          
 
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue, screeningVisitId);
 
+            var currentTarget = targetScheduleTemplate.FirstOrDefault(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ProjectDesignTemplateId == projectDesignTemplateId);
+            if (currentTarget != null && !string.IsNullOrEmpty(value))
+                TemplateActualDate(currentTarget.ScreeningTemplate, Convert.ToDateTime(value));
+
+            VisitOpenDate(screeningVisitId, Convert.ToDateTime(value), projectDesignVariableId);
 
             return targetScheduleTemplate;
         }

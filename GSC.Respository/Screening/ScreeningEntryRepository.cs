@@ -85,7 +85,7 @@ namespace GSC.Respository.Screening
                         : t.Attendance.Volunteer.AliasName,
                     IsFitnessFit = t.IsFitnessFit,
                     IsEnrolled = t.IsEnrolled,
-                    ProjectNo = t.ProjectNo,
+                    ProjectNo = t.Project.ProjectCode,
                     ProjectDesignId = t.ProjectDesignId,
                     FitnessReason = t.FitnessReason,
                     FitnessNotes = t.FitnessNotes,
@@ -345,7 +345,7 @@ namespace GSC.Respository.Screening
             return query;
         }
 
-      
+
 
         public ScreeningSummaryDto GetSummary(int id)
         {
