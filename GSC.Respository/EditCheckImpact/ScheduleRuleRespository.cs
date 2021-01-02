@@ -61,7 +61,7 @@ namespace GSC.Respository.EditCheckImpact
         void SetValue(List<ScheduleCheckValidateDto> scheduleCheckValidateDto, List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic)
         {
             var projectDesignTemplateIds = scheduleCheckValidateDto.Select(t => t.ProjectDesignTemplateId).Distinct().ToList();
-          
+
             var screeningTempaltes = All.Where(x => projectDesignTemplateIds.Contains(x.ProjectDesignTemplateId) && x.ParentId == null &&
             x.ScreeningVisit.ScreeningEntryId == screeningTemplateBasic.ScreeningEntryId && x.ScreeningVisit.ParentId == null);
 
@@ -90,11 +90,12 @@ namespace GSC.Respository.EditCheckImpact
                 if (isQuery && x.ValidateType == EditCheckValidateType.Failed && reference != null)
                 {
                     if (x.ScreeningTemplate != null && x.ScreeningTemplate.Status > ScreeningTemplateStatus.Pending)
-                        x.HasQueries = SystemQuery(x.ScreeningTemplate.Id, x.ProjectDesignVariableId, x.AutoNumber, x.Message, "");
+                        x.HasQueries = SystemQuery(x.ScreeningTemplate.Id, x.ProjectDesignVariableId, x.AutoNumber, x.Message);
                 }
 
                 InsertScheduleDate(x, targetSchDate);
-
+                _context.Save();
+                _context.DetachAllEntities();
             });
 
             _context.Save();
@@ -281,8 +282,6 @@ namespace GSC.Respository.EditCheckImpact
             DateTime scheduleDate;
             DateTime.TryParse(targetSchDate, out scheduleDate);
 
-            _context.DetachAllEntities();
-
             if (target.CollectionSource == CollectionSources.Date)
             {
                 if (target.NoOfDay.HasValue)
@@ -368,7 +367,7 @@ namespace GSC.Respository.EditCheckImpact
             }
         }
 
-        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message, string sampleResult)
+        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message)
         {
             var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where
             (t => t.ScreeningTemplateId == screeningTemplateId
@@ -404,7 +403,6 @@ namespace GSC.Respository.EditCheckImpact
                     }, screeningTemplateValue);
 
                 _context.Save();
-                _context.DetachAllEntities();
 
                 return true;
             }
