@@ -68,10 +68,8 @@ namespace GSC.Data.Dto.Project.Design
 
     public class DesignScreeningVariableDto
     {
-        public int Id { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public int? ProjectDesignVariableId { get; set; }
-        public int? VariableId { get; set; }
         public string VariableName { get; set; }
         public string VariableCode { get; set; }
         public CollectionSources CollectionSource { get; set; }
@@ -115,8 +113,7 @@ namespace GSC.Data.Dto.Project.Design
         public List<EditCheckIds> editCheckIds { get; set; }
         public EditCheckTargetValidation EditCheckValidation { get; set; }
         public string ValidationMessage { get; set; }
-        public List<VariableLanguage> VariableLanguage { get; set; }
-        public List<VariableNoteLanguage> VariableNoteLanguage { get; set; }
+
     }
 
     public class EditCheckIds

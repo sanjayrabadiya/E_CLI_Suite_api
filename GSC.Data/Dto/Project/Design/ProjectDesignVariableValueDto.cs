@@ -31,7 +31,6 @@ namespace GSC.Data.Dto.Project.Design
         public int ScreeningTemplateValueChildId { get; set; }
         public string ScreeningValueOld { get; set; }
         public int SeqNo { get; set; }
-        public List<VariableValueLanguage> VariableValueLanguage { get; set; }
     }
 
     public class ProjectDesignVariableValueDropDown 

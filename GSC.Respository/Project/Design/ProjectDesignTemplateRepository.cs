@@ -1,18 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
-using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Project.Design;
-using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,12 +36,10 @@ namespace GSC.Respository.Project.Design
                 .ThenInclude(d => d.Values.Where(x => x.DeletedBy == null).OrderBy(c => c.SeqNo))
                 .AsNoTracking().FirstOrDefault();
 
-
             return template;
 
 
         }
-
 
         public DesignScreeningTemplateDto GetTemplate(int id)
         {
@@ -56,12 +49,11 @@ namespace GSC.Respository.Project.Design
                     Id = r.Id,
                     ProjectDesignTemplateId = r.Id,
                     ProjectDesignVisitId = r.ProjectDesignVisitId,
-                    TemplateName = ((_jwtTokenAccesser.Language == 1) ?
+                    TemplateName = ((_jwtTokenAccesser.Language != 1) ?
                         r.TemplateLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.TemplateName),
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
-                    // Templatenote for multilanguage
-                    Notes = r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
+                    Notes = _jwtTokenAccesser.Language != 1 ? r.TemplateLanguage.Where(c => c.DeletedDate == null && c.LanguageId == _jwtTokenAccesser.Language).Select(a => a.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     DesignOrder = r.DesignOrder,
@@ -72,46 +64,55 @@ namespace GSC.Respository.Project.Design
 
             if (result != null)
             {
-                result.Variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null)
-                    .ProjectTo<DesignScreeningVariableDto>(_mapper.ConfigurationProvider).ToList().OrderBy(r => r.DesignOrder).ToList();
 
-                result.Variables.ToList().ForEach(x =>
+                var variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null)
+                    .Select(x => new DesignScreeningVariableDto
+                    {
+                        ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+                        ProjectDesignVariableId = x.Id,
+                        VariableName = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName),
+                        VariableCode = x.VariableCode,
+                        CollectionSource = x.CollectionSource,
+                        ValidationType = x.ValidationType,
+                        DataType = x.DataType,
+                        Length = x.Length,
+                        DefaultValue = x.DefaultValue,
+                        LowRangeValue = x.LowRangeValue,
+                        HighRangeValue = x.HighRangeValue,
+                        PrintType = x.PrintType,
+                        Values = x.Values.Where(x => x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
+                        {
+                            Id = c.Id,
+                            ProjectDesignVariableId = c.ProjectDesignVariableId,
+                            ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
+                            SeqNo = c.SeqNo
+                        }).ToList(),
+                        Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
+                        UnitName = x.Unit.UnitName,
+                        DesignOrder = x.DesignOrder,
+                        IsDocument = x.IsDocument,
+                        VariableCategoryName = x.VariableCategory.CategoryName ?? "",
+                        SystemType = x.SystemType,
+                        IsNa = x.IsNa,
+                        DateValidate = x.DateValidate,
+                        Note = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
+                        ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
+                    }).OrderBy(r => r.DesignOrder).ToList();
+
+
+                variables.ForEach(x =>
                 {
-                    // For Variable multilanguage
-                    x.VariableName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
-                x.VariableLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName);
-
-                    // For VariableNote multilanguage
-                    if (x.Note != null)
-                        x.Note = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
-                   x.VariableNoteLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note);
-
                     x.Values = x.Values.OrderBy(c => c.SeqNo).ToList();
-
-                    // For VariableValue multilanguage
-                    //if (x.Values.Count > 0)
-                    //    x.Values.ToList().ForEach(r => {
-                    //    r.ValueName = (_jwtTokenAccesser.Language != null ?
-                    //    r.VariableValueLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ValueName);
-                    //});
                 });
+
+                result.Variables = variables;
             }
-            result = ValidateVariables(result);
+
             return result;
         }
 
-        private DesignScreeningTemplateDto ValidateVariables(DesignScreeningTemplateDto designScreeningTemplateDto)
-        {
-            designScreeningTemplateDto.Variables.ToList().ForEach(x =>
-            {
-                if (x.ValidationType == ValidationType.Required)
-                {
-                    x.ValidationMessage = "This field is required";
-                }
-                else x.ValidationMessage = "";
-            });
-            return designScreeningTemplateDto;
-        }
 
         public IList<DropDownDto> GetTemplateDropDown(int projectDesignVisitId)
         {

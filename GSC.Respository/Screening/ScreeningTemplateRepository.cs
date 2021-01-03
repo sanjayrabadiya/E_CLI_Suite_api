@@ -112,7 +112,7 @@ namespace GSC.Respository.Screening
 
             values.ForEach(t =>
             {
-                var variable = designTemplateDto.Variables.FirstOrDefault(v => v.Id == t.ProjectDesignVariableId);
+                var variable = designTemplateDto.Variables.FirstOrDefault(v => v.ProjectDesignVariableId == t.ProjectDesignVariableId);
                 if (variable != null)
                 {
                     variable.ScreeningValue = t.Value;

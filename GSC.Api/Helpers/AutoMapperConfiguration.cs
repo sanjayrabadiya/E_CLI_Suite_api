@@ -143,10 +143,6 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectDesignPeriod, ProjectDesignPeriodDto>().ReverseMap();
             CreateMap<ProjectDesignVisit, ProjectDesignVisitDto>().ReverseMap();
             CreateMap<ProjectDesignTemplate, ProjectDesignTemplateDto>().ReverseMap();
-            CreateMap<ProjectDesignVariable, DesignScreeningVariableDto>()
-           .ForMember(x => x.UnitName, opt => opt.MapFrom(y => y.Unit.UnitName))
-           .ForMember(x => x.ProjectDesignVariableId, opt => opt.MapFrom(y => y.Id))
-           .ForMember(x => x.VariableCategoryName, opt => opt.MapFrom(y => y.VariableCategory.CategoryName ?? ""));
             CreateMap<ProjectDesignVariableValue, ScreeningVariableValueDto>().ReverseMap();
             CreateMap<ProjectDesignVariableRemarks, ScreeningVariableRemarksDto>().ReverseMap();
             CreateMap<ProjectDesignVariable, ProjectDesignVariableDto>().ReverseMap();

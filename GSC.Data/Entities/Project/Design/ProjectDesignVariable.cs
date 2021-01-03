@@ -50,5 +50,6 @@ namespace GSC.Data.Entities.Project.Design
         public Domain Domain { get; set; }
         public string Note { get; set; }
         public List<VariableLanguage> VariableLanguage { get; set; }
+        public List<VariableNoteLanguage> VariableNoteLanguage { get; set; }
     }
 }
