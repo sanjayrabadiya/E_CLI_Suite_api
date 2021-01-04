@@ -68,6 +68,7 @@ namespace GSC.Data.Dto.Project.Design
 
     public class DesignScreeningVariableDto
     {
+        public int Id { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public int? ProjectDesignVariableId { get; set; }
         public string VariableName { get; set; }
