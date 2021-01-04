@@ -70,6 +70,7 @@ namespace GSC.Respository.Project.Design
                     {
                         ProjectDesignTemplateId = x.ProjectDesignTemplateId,
                         ProjectDesignVariableId = x.Id,
+                        Id = x.Id,
                         VariableName = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName),
                         VariableCode = x.VariableCode,
