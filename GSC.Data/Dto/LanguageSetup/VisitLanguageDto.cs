@@ -10,20 +10,13 @@ namespace GSC.Data.Dto.LanguageSetup
 {
     public class VisitLanguageDto : BaseDto
     {
-       // [Required(ErrorMessage = "Visit is required.")]
         public int ProjectDesignVisitId { get; set; }
-
-       // [Required(ErrorMessage = "Language is required.")]
         public int LanguageId { get; set; }
-
-     //   [Required(ErrorMessage = "Display is required.")]
         public string Display { get; set; }
-
         public string DefaultDisplay { get; set; }
         public IList<VisitLanguageDto> visitLanguages { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public Language Language { get; set; }
-        public int? CompanyId { get; set; }
     }
 
     public class VisitLanguageGridDto : BaseAuditDto

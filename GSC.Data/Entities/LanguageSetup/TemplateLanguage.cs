@@ -11,7 +11,6 @@ namespace GSC.Data.Entities.LanguageSetup
         public int ProjectDesignTemplateId { get; set; }
         public int LanguageId { get; set; }
         public string Display { get; set; }
-        public int? CompanyId { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public Language Language { get; set; }
     }

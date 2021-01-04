@@ -17,7 +17,6 @@ namespace GSC.Data.Dto.LanguageSetup
         public IList<TemplateLanguageDto> templateLanguages { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public Language Language { get; set; }
-        public int? CompanyId { get; set; }
     }
 
     public class TemplateLanguageGridDto : BaseAuditDto

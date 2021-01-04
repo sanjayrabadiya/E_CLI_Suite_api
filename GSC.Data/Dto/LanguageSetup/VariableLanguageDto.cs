@@ -17,7 +17,6 @@ namespace GSC.Data.Dto.LanguageSetup
         public IList<VariableLanguageDto> variableLanguages { get; set; }
         public ProjectDesignVariable ProjectDesignVariable { get; set; }
         public Language Language { get; set; }
-        public int? CompanyId { get; set; }
     }
 
     public class VariableLanguageGridDto : BaseAuditDto
