@@ -145,7 +145,7 @@ namespace GSC.Respository.Screening
                     VisitStatusId = (int)a.Status,
                     ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
                     ScheduleDate = a.ScheduleDate
-                }).OrderBy(b => b.VisitName).ToList()
+                }).OrderBy(b => b.ProjectDesignVisitId).ToList()
 
             }).ToListAsync();
 
