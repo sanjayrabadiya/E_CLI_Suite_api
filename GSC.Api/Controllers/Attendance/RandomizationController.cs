@@ -209,6 +209,27 @@ namespace GSC.Api.Controllers.Attendance
             return Ok();
         }
 
+        [HttpPost]
+        [Route("ResendSMSandEmail/{id}/{type}")]
+        public async Task<IActionResult> ResendSMSandEmail(int id,int type)
+        {
+            if (id <= 0) return BadRequest();
+            var randomization = _randomizationRepository.Find(id);
+            if (!_environmentSetting.Value.IsPremise)
+            {
+                var user = _userRepository.Find((int)randomization.UserId);
+                if (user.IsFirstTime == true)
+                {
+                    await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
+                } else
+                {
+                    ModelState.AddModelError("Message", "Patient already logged in");
+                    return BadRequest(ModelState);
+                }
+            }
+            return Ok(id);
+        }
+
 
         [HttpPut]
         [Route("saveScreeningNumber")]
@@ -246,7 +267,7 @@ namespace GSC.Api.Controllers.Attendance
             //_randomizationRepository.Update(randomization);
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
             if (!_environmentSetting.Value.IsPremise)
-                await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization);
+                await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization,2);
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
