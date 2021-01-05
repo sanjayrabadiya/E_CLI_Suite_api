@@ -113,8 +113,14 @@ namespace GSC.Respository.EditCheckImpact
 
             _context.Save();
 
-            if (targetList != null && targetList.Count > 0 && !string.IsNullOrEmpty(targetSchDate))
-                VisitScheduleDate(screeningVisitId, targetList);
+            var screeningVisitIds = targetList.Select(x => x.ScreeningTemplate.ScreeningVisitId).Distinct().ToList();
+
+            screeningVisitIds.ForEach(x =>
+            {
+                VisitScheduleDate(x, targetList);
+            });
+
+
 
         }
 
@@ -341,7 +347,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (screeningVisit.IsSchedule && screeningVisit.Status != ScreeningVisitStatus.ReSchedule)
             {
-                screeningVisit.ScheduleDate = targetList.Min(x => x.ScheduleDate);
+                screeningVisit.ScheduleDate = targetList.Where(a => a.ScreeningTemplate.ScreeningVisitId == screeningVisitId).Min(x => x.ScheduleDate);
                 _context.ScreeningVisit.Update(screeningVisit);
                 _context.Save();
             }
