@@ -121,7 +121,7 @@ namespace GSC.Respository.EditCheckImpact
             });
 
 
-
+            _context.Save();
         }
 
         public List<ScheduleCheckValidateDto> ValidateByVariable(int screeningEntryId, int screeningVisitId, string value, int projectDesignTemplateId, int projectDesignVariableId, bool isQuery)
@@ -158,7 +158,7 @@ namespace GSC.Respository.EditCheckImpact
                 TemplateActualDate(currentTarget.ScreeningTemplate, Convert.ToDateTime(value));
 
             VisitOpenDate(screeningVisitId, Convert.ToDateTime(value), projectDesignVariableId);
-
+            _context.Save();
             return targetScheduleTemplate;
         }
 
