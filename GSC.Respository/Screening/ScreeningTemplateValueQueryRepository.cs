@@ -448,7 +448,7 @@ namespace GSC.Respository.Screening
             else
             {
                 queryOldValue = screeningTemplateValueQueryDto.OldValue;
-                queryValue = value;
+                queryValue = screeningTemplateValueQueryDto.IsNa ? "N/A" : value;
             }
 
             screeningTemplateValueQuery.Value = queryValue;

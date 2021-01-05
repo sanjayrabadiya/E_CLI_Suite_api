@@ -49,7 +49,7 @@ namespace GSC.Respository.EditCheckImpact
             SetValue(refrenceSchedule, values, screeningTemplateBasic);
             SetValue(targetScheduleTemplate, values, screeningTemplateBasic);
 
-            CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, "", screeningTemplateBasic.ScreeningVisitId);
+            CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, "");
 
             _context.Save();
             _context.DetachAllEntities();
@@ -75,7 +75,7 @@ namespace GSC.Respository.EditCheckImpact
             });
         }
 
-        void CheckValidationProcess(List<ScheduleCheckValidateDto> targetList, List<ScheduleCheckValidateDto> referenceList, bool isQuery, string targetSchDate, int screeningVisitId)
+        void CheckValidationProcess(List<ScheduleCheckValidateDto> targetList, List<ScheduleCheckValidateDto> referenceList, bool isQuery, string targetSchDate)
         {
             targetList.ForEach(x =>
             {
@@ -99,29 +99,31 @@ namespace GSC.Respository.EditCheckImpact
 
             _context.Save();
 
-            var screeningTemplateIds = targetList.Select(x => x.ScreeningTemplate.Id).Distinct().ToList();
-
-            screeningTemplateIds.ForEach(x =>
+            if (!string.IsNullOrEmpty(targetSchDate))
             {
-                var screeningTemplate = targetList.Where(t => t.ScreeningTemplate.Id == x).Select(c => c.ScreeningTemplate).FirstOrDefault();
-                if (screeningTemplate != null)
+                var screeningTemplateIds = targetList.Select(x => x.ScreeningTemplate.Id).Distinct().ToList();
+
+                screeningTemplateIds.ForEach(x =>
                 {
-                    screeningTemplate.ScheduleDate = targetList.Where(t => t.ScreeningTemplate.Id == x).Min(x => x.ScheduleDate);
-                    Update(screeningTemplate);
-                }
-            });
+                    var screeningTemplate = targetList.Where(t => t.ScreeningTemplate.Id == x).Select(c => c.ScreeningTemplate).FirstOrDefault();
+                    if (screeningTemplate != null)
+                    {
+                        screeningTemplate.ScheduleDate = targetList.Where(t => t.ScreeningTemplate.Id == x).Min(x => x.ScheduleDate);
+                        Update(screeningTemplate);
+                    }
+                });
 
-            _context.Save();
+                _context.Save();
 
-            var screeningVisitIds = targetList.Select(x => x.ScreeningTemplate.ScreeningVisitId).Distinct().ToList();
+                var screeningVisitIds = targetList.Select(x => x.ScreeningTemplate.ScreeningVisitId).Distinct().ToList();
 
-            screeningVisitIds.ForEach(x =>
-            {
-                VisitScheduleDate(x, targetList);
-            });
+                screeningVisitIds.ForEach(x =>
+                {
+                    VisitScheduleDate(x, targetList);
+                });
 
-
-            _context.Save();
+                _context.Save();
+            }
         }
 
         public List<ScheduleCheckValidateDto> ValidateByVariable(int screeningEntryId, int screeningVisitId, string value, int projectDesignTemplateId, int projectDesignVariableId, bool isQuery)
@@ -151,7 +153,7 @@ namespace GSC.Respository.EditCheckImpact
 
             targetValue = refrenceSchedule.FirstOrDefault(x => x.Value != null)?.Value;
 
-            CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue, screeningVisitId);
+            CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue);
 
             var currentTarget = targetScheduleTemplate.FirstOrDefault(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ProjectDesignTemplateId == projectDesignTemplateId);
             if (currentTarget != null && !string.IsNullOrEmpty(value))
