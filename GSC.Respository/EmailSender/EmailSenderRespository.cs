@@ -142,14 +142,17 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-        public async Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile)
+        public async Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile,int sendtype)
         {
             var emailMessage = ConfigureEmail("PatientScreened", userName);
             emailMessage.SendTo = toMail;
             emailMessage.MessageBody = ReplaceBodyForPatientScreened(emailMessage.MessageBody, userName, patientName, ProjectName,password);
             emailMessage.Subject = ReplaceSubjectForPatientScreened(emailMessage.Subject, ProjectName);
-            _emailService.SendMail(emailMessage);
-            if (mobile != "")
+            if (sendtype == 1 || sendtype == 2)
+            {
+                _emailService.SendMail(emailMessage);
+            }
+            if (mobile != "" && (sendtype == 0 || sendtype == 2))
             {
                 var smstemplate = emailMessage.MessageBody;
                 smstemplate = smstemplate.Replace("<p>", "");

@@ -528,14 +528,14 @@ namespace GSC.Respository.Attendance
             return "";
         }
 
-        public async Task SendEmailOfScreenedtoPatient(Randomization randomization)
+        public async Task SendEmailOfScreenedtoPatient(Randomization randomization, int sendtype)
         {
             var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             var studydata = _projectRepository.Find((int)studyId);
             var userdata = _userRepository.Find((int)randomization.UserId);
             //var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
             var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
-            await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp, studydata.ProjectName, randomization.PrimaryContactNumber);
+            await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp, studydata.ProjectName, randomization.PrimaryContactNumber, sendtype);
         }
 
         public void SendEmailOfStartEconsent(Randomization randomization)
@@ -744,15 +744,16 @@ namespace GSC.Respository.Attendance
 
         public List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId)
         {
-            var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Where(x => x.ScreeningVisitId == screeningVisitId && x.ProjectDesignTemplate.IsParticipantView == true).
+            var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Include(x => x.ScreeningVisit).Where(x => x.ScreeningVisitId == screeningVisitId && x.ProjectDesignTemplate.IsParticipantView == true).
                         Select(r => new ProjectDesignTemplateMobileDto
                         {
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
-                            TemplateName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
+                            TemplateName = (_jwtTokenAccesser.Language != null ?
                 r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
+                            ScheduleDate = r.ScreeningVisit.ScheduleDate,
                         }).OrderBy(r => r.DesignOrder).ToList();
             data.ForEach(x =>
             {

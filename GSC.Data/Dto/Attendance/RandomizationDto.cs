@@ -119,6 +119,7 @@ namespace GSC.Data.Dto.Attendance
         public List<EconsentReviewDetailsDto> EconsentReviewDetails { get; set; }
         public bool IsmultipleEconsentReviewDetails { get; set; }
         public int? ZipCode { get; set; }
+        public int? UserId { get; set; }
 
     }
 
