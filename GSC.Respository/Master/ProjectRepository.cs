@@ -209,11 +209,18 @@ namespace GSC.Respository.Master
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
+            var project = new List<int>();
+            projectList.ForEach(x =>
+            {
+                x = (int)All.Where(y => y.Id == x).Select(z => z.ParentProjectId == null ? z.Id : z.ParentProjectId).FirstOrDefault();
+                project.Add(x);
+            });
+
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                     && x.ParentProjectId == null && x.IsStatic == true
                     && x.ProjectCode != null
-                    && projectList.Any(c => c == x.Id))
+                    && project.Any(c => c == x.Id))
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
@@ -222,7 +229,7 @@ namespace GSC.Respository.Master
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? c.Id,
                     IsDeleted = c.DeletedDate != null
-                }).OrderBy(o => o.Value).ToList();
+                }).Distinct().OrderBy(o => o.Value).ToList();
         }
 
         public IList<ProjectDropDown> GetProjectsForDataEntry()
