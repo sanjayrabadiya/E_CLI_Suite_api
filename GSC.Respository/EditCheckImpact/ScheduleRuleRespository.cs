@@ -97,21 +97,21 @@ namespace GSC.Respository.EditCheckImpact
 
             });
 
-            var screeningTemplateIds= targetList.Select(x => x.ScreeningTemplate.Id).Distinct().ToList();
+            _context.Save();
+
+            var screeningTemplateIds = targetList.Select(x => x.ScreeningTemplate.Id).Distinct().ToList();
 
             screeningTemplateIds.ForEach(x =>
             {
                 var screeningTemplate = targetList.Where(t => t.ScreeningTemplate.Id == x).Select(c => c.ScreeningTemplate).FirstOrDefault();
-                if (screeningTemplate!=null)
+                if (screeningTemplate != null)
                 {
-                    screeningTemplate.ScheduleDate = targetList.Where(t => t.ScreeningTemplate.Id == x).Max(x => x.ScheduleDate);
+                    screeningTemplate.ScheduleDate = targetList.Where(t => t.ScreeningTemplate.Id == x).Min(x => x.ScheduleDate);
                     Update(screeningTemplate);
                 }
             });
 
-
             _context.Save();
-            _context.DetachAllEntities();
 
             if (targetList != null && targetList.Count > 0 && !string.IsNullOrEmpty(targetSchDate))
                 VisitScheduleDate(screeningVisitId, targetList);
