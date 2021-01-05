@@ -351,12 +351,15 @@ namespace GSC.Api.Controllers.UserMgt
 
         [HttpPost]
         [Route("ValidateUserForSignature")]
-        public IActionResult ValidateUserForSignature([FromBody] LoginDto dto)
+        public async Task<IActionResult> ValidateUserForSignature([FromBody] LoginDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-
-            var user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+            var user = new UserViewModel();
+            if (_environmentSetting.Value.IsPremise)
+                user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+            else
+                user = await _centreUserService.ValidateClient(dto);
             if (!user.IsValid)
             {
                 ModelState.AddModelError("UserName", user.ValidateMessage);
