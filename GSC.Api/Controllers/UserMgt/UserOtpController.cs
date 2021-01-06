@@ -161,9 +161,17 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         [AllowAnonymous]
         [Route("VerifyingMobileUser/{userName}")]
-        public IActionResult VerifyingMobileUser(string userName)
+        public async Task<IActionResult> VerifyingMobileUser(string userName)
         {
-            var userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
+            User userExists = new User();
+            if (!_environmentSetting.Value.IsPremise)
+            {
+                 userExists = await _centreUserService.GetUserData($"{_environmentSetting.Value.CentralApi}Login/GetUserData/{userName}");//_userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
+            } else
+            {
+                userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
+            }
+                
             if (userExists == null)
             {
                 ModelState.AddModelError("Message", "UserName not valid");

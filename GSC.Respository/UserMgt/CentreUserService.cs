@@ -103,6 +103,12 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
+        public async Task<User> GetUserData(string clientUrl)
+        {
+            var result = await HttpService.Get<User>(_httpClient, clientUrl);
+            return result;
+        }
+
         public async Task<UserViewModel> LogOutFromEveryWhere(string clientUrl)
         {
             var result = await HttpService.Get<UserViewModel>(_httpClient, clientUrl);
@@ -139,5 +145,7 @@ namespace GSC.Respository.UserMgt
         {
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);           
         }
+
+       
     }
 }
