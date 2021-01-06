@@ -140,7 +140,7 @@ namespace GSC.Respository.EditCheckImpact
             var projectScheduleId = targetScheduleTemplate.Select(t => t.ProjectScheduleId).ToList();
             var refrenceSchedule = _impactService.GetReferenceSchedule(projectScheduleId);
             if (refrenceSchedule == null || refrenceSchedule.Count == 0) return null;
-            string targetValue = "";
+
 
             var screeningTemplateBasic = new ScreeningTemplateBasic
             {
@@ -151,7 +151,7 @@ namespace GSC.Respository.EditCheckImpact
             SetValue(refrenceSchedule, null, screeningTemplateBasic);
             SetValue(targetScheduleTemplate, null, screeningTemplateBasic);
 
-            targetValue = refrenceSchedule.FirstOrDefault(x => x.Value != null)?.Value;
+            string targetValue = _impactService.CheckReferenceVariable(projectDesignVariableId) ? value : "";
 
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue);
 
