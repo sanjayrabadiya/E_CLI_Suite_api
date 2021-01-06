@@ -154,14 +154,6 @@ namespace GSC.Respository.Screening
                 CheckSchedule(designTemplateDto, values, screeningTemplateBasic);
             }
 
-            if (screeningTemplateBasic.IsDisable && string.IsNullOrEmpty(designTemplateDto.EditCheckMessage))
-            {
-                var template = Find(screeningTemplateBasic.Id);
-                template.IsDisable = false;
-                Update(template);
-                _context.Save();
-            }
-
             if (designTemplateDto.Status == ScreeningTemplateStatus.Pending && (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Withdrawal ||
                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
