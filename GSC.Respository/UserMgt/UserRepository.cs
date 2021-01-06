@@ -6,6 +6,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
@@ -47,6 +49,7 @@ namespace GSC.Respository.UserMgt
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
+        private readonly IMapper _mapper;
         public UserRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
@@ -59,7 +62,8 @@ namespace GSC.Respository.UserMgt
              IUploadSettingRepository uploadSettingRepository,
              IRoleRepository roleRepository,
              IRolePermissionRepository rolePermissionRepository,
-             IUserRoleRepository userRoleRepository, IOptions<EnvironmentSetting> environmentSetting, ICentreUserService centreUserService)
+             IUserRoleRepository userRoleRepository, IOptions<EnvironmentSetting> environmentSetting, ICentreUserService centreUserService,
+             IMapper mapper)
             : base(context)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
@@ -78,31 +82,34 @@ namespace GSC.Respository.UserMgt
             _userRoleRepository = userRoleRepository;
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
+            _mapper = mapper;
         }
 
-        public List<UserDto> GetUsers(bool isDeleted)
+        public List<UserGridDto> GetUsers(bool isDeleted)
         {
-            return All.Where(x =>
+            //return All.Where(x =>
 
-              isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).Select(t => new UserDto
-            {
-                FirstName = t.FirstName,
-                MiddleName = t.MiddleName,
-                LastName = t.LastName,
-                Email = t.Email,
-                ProfilePic = t.ProfilePic,
-                Id = t.Id,
-                UserName = t.UserName,
-                IsLocked = t.IsLocked,
-                IsDeleted = t.DeletedDate != null,
-                Phone = t.Phone,
-                ValidFrom = t.ValidFrom,
-                ValidTo = t.ValidTo,
-                CompanyName = _context.Company.Where(x => x.Id == t.CompanyId).FirstOrDefault().CompanyName,
-                Role = string.Join(", ",
-                    t.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
-            }).OrderByDescending(x => x.Id).ToList();
+            //  isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+            //).Select(t => new UserDto
+            //{
+            //    FirstName = t.FirstName,
+            //    MiddleName = t.MiddleName,
+            //    LastName = t.LastName,
+            //    Email = t.Email,
+            //    ProfilePic = t.ProfilePic,
+            //    Id = t.Id,
+            //    UserName = t.UserName,
+            //    IsLocked = t.IsLocked,
+            //    IsDeleted = t.DeletedDate != null,
+            //    Phone = t.Phone,
+            //    ValidFrom = t.ValidFrom,
+            //    ValidTo = t.ValidTo,
+            //    CompanyName = _context.Company.Where(x => x.Id == t.CompanyId).FirstOrDefault().CompanyName,
+            //    Role = string.Join(", ",
+            //        t.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
+            //}).OrderByDescending(x => x.Id).ToList();
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<UserGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public UserViewModel ValidateUser(string userName, string password)

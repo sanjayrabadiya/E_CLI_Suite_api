@@ -109,6 +109,10 @@ namespace GSC.Api.Helpers
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
             CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
             CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
+            CreateMap<User, UserGridDto>()
+                .ForMember(x => x.Role, x => x.MapFrom(a => string.Join(", ",a.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())))
+                .ForMember(x => x.CompanyName, x => x.MapFrom(a => a.Company.CompanyName))
+                .ReverseMap();
 
             CreateMap<Randomization, RandomizationGridDto>()
                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))

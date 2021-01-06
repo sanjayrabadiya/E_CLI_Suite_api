@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using GSC.Data.Entities.Common;
 using GSC.Data.Entities.UserMgt;
 using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
@@ -14,7 +15,7 @@ namespace GSC.Data.Dto.UserMgt
         {
             UserRoles = new List<UserRole>();
         }
-       
+
         public int Id { get; set; }
 
         [Required(ErrorMessage = "User Name is required.")]
@@ -40,7 +41,7 @@ namespace GSC.Data.Dto.UserMgt
         public string Role { get; set; }
 
         public string Phone { get; set; }
-       
+
         public int? CompanyId { get; set; }
         public DateTime? _ValidFrom { get; set; }
         public DateTime? ValidFrom
@@ -90,4 +91,19 @@ namespace GSC.Data.Dto.UserMgt
         public UserMasterUserType? UserType { get; set; }
     }
 
+    public class UserGridDto : BaseAuditDto
+    {
+        public string UserName { get; set; }
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string Email { get; set; }
+        public string ProfilePic { get; set; }
+        public bool IsLocked { get; set; }
+        public string Role { get; set; }
+        public string Phone { get; set; }
+        public DateTime? ValidFrom { get; set; }
+        public DateTime? ValidTo { get; set; }
+        public string ProfilePicPath { get; set; }
+    }
 }

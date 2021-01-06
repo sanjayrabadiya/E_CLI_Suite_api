@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Configuration;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
@@ -83,6 +84,6 @@ namespace GSC.Data.Entities.UserMgt
         public int? Language { get; set; }
         public string SignaturePath { get; set; }
         public UserMasterUserType? UserType { get; set; }
-
+        public Company Company { get; set; }
     }
 }
