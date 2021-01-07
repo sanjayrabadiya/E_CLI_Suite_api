@@ -139,8 +139,14 @@ namespace GSC.Api.Controllers.UserMgt
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            var user = new UserViewModel();
+            //var user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+            if (_environmentSetting.Value.IsPremise)
+                user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+            else
+                user = await _centreUserService.ValidateClient(dto);
 
-            var user = _userRepository.ValidateUser(dto.UserName, dto.Password);
+
             if (!user.IsValid)
             {
                 ModelState.AddModelError("UserName", user.ValidateMessage);
