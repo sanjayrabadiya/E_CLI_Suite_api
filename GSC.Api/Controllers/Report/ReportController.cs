@@ -34,10 +34,11 @@ namespace GSC.Api.Controllers.Report
         private readonly IJobMonitoringRepository _jobMonitoringRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IMapper _mapper;
+        private readonly IReportSyncfusion _reportSuncfusion;
         public ReportController(IProjectDesignReportSettingRepository projectDesignReportSettingRepository, IGscReport gscReport
             , IUnitOfWork uow, IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository,
             IProjectDesignRepository projectDesignRepository,
-            IMapper mapper)
+            IMapper mapper, IReportSyncfusion reportSuncfusion)
         {
             _uow = uow;
             _gscReport = gscReport;
@@ -46,6 +47,7 @@ namespace GSC.Api.Controllers.Report
             _jobMonitoringRepository = jobMonitoringRepository;
             _mapper = mapper;
             _projectDesignRepository = projectDesignRepository;
+            _reportSuncfusion = reportSuncfusion;
         }
 
         [HttpGet]
@@ -68,55 +70,13 @@ namespace GSC.Api.Controllers.Report
 
         [HttpPost]
         [Route("GetProjectDesignWithFliter")]
-        //public IActionResult GetProjectDesignWithFliter([FromBody]ReportSettingNew reportSetting)
-        public async Task<string> GetProjectDesignWithFliter([FromBody] ReportSettingNew reportSetting)
+        public async Task<IActionResult> GetProjectDesignWithFliter([FromBody] ReportSettingNew reportSetting)
         {
-            var projectId = _projectDesignRepository.Find(reportSetting.ProjectId).ProjectId;
-            #region Report Setting Save
-            var reportSettingForm = _projectDesignReportSettingRepository.All.Where(x => x.ProjectDesignId == reportSetting.ProjectId && x.CompanyId == reportSetting.CompanyId && x.DeletedBy == null).FirstOrDefault();
-            if (reportSettingForm == null)
-            {
-                ProjectDesignReportSetting objNew = new ProjectDesignReportSetting();
-
-                objNew.ProjectDesignId = reportSetting.ProjectId;
-                objNew.IsClientLogo = reportSetting.IsClientLogo;
-                objNew.IsCompanyLogo = reportSetting.IsCompanyLogo;
-                objNew.IsInitial = reportSetting.IsInitial;
-                objNew.IsScreenNumber = reportSetting.IsScreenNumber;
-                objNew.IsSponsorNumber = reportSetting.IsSponsorNumber;
-                objNew.IsSubjectNumber = reportSetting.IsSubjectNumber;
-                objNew.LeftMargin = reportSetting.LeftMargin;
-                objNew.RightMargin = reportSetting.RightMargin;
-                objNew.TopMargin = reportSetting.TopMargin;
-                objNew.BottomMargin = reportSetting.BottomMargin;
-                _projectDesignReportSettingRepository.Add(objNew);
-            }
-            else
-            {
-                reportSettingForm.ProjectDesignId = reportSetting.ProjectId;
-                reportSettingForm.IsClientLogo = reportSetting.IsClientLogo;
-                reportSettingForm.IsCompanyLogo = reportSetting.IsCompanyLogo;
-                reportSettingForm.IsInitial = reportSetting.IsInitial;
-                reportSettingForm.IsScreenNumber = reportSetting.IsScreenNumber;
-                reportSettingForm.IsSponsorNumber = reportSetting.IsSponsorNumber;
-                reportSettingForm.IsSubjectNumber = reportSetting.IsSubjectNumber;
-                reportSettingForm.LeftMargin = reportSetting.LeftMargin;
-                reportSettingForm.RightMargin = reportSetting.RightMargin;
-                reportSettingForm.TopMargin = reportSetting.TopMargin;
-                reportSettingForm.BottomMargin = reportSetting.BottomMargin;
-
-                _projectDesignReportSettingRepository.Update(reportSettingForm);
-            }
-            if (_uow.Save() <= 0)
-            {
-                throw new Exception($"Creating Report Setting failed on save.");
-            }
-            #endregion
-
-            #region Job Monitoring Save - Inprocess Status
+            //var projectdesign = _projectDesignRepository.FindBy(x => x.ProjectId == reportSetting.ProjectId).SingleOrDefault();
+           
             JobMonitoringDto jobMonitoringDto = new JobMonitoringDto();
             jobMonitoringDto.JobName = JobNameType.DossierReport;
-            jobMonitoringDto.JobDescription = projectId;
+            jobMonitoringDto.JobDescription = reportSetting.ProjectId;
             jobMonitoringDto.JobType = JobTypeEnum.Report;
             jobMonitoringDto.JobStatus = JobStatusType.InProcess;
             jobMonitoringDto.SubmittedBy = _jwtTokenAccesser.UserId;
@@ -126,17 +86,12 @@ namespace GSC.Api.Controllers.Report
             _jobMonitoringRepository.Add(jobMonitoring);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Job Monitoring failed on save.");
-            #endregion
 
-            #region Get Data for Company
-            var sqlquery = _projectDesignReportSettingRepository.GetProjectDesignWithFliter(reportSetting);
-            #endregion
+            _reportSuncfusion.BlankReportGenerate(reportSetting, jobMonitoring);
 
-            #region Print Report
-            var result = _gscReport.GetProjectDesignWithFliter(reportSetting, sqlquery.FirstOrDefault(), jobMonitoring);
-            #endregion
-
-            return result.FileDownloadName.ToString();
+            //return result;
+           // return result.FileDownloadName.ToString();
+             return Ok();
         }
     }
 }

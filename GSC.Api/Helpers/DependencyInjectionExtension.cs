@@ -286,6 +286,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IAppScreenPatientRightsRepository, AppScreenPatientRightsRepository>();
             services.AddScoped<ISMSSettingRepository, SMSSettingRepository>();
             services.AddScoped<IScreeningTemplateEditCheckValueRepository, ScreeningTemplateEditCheckValueRepository>();
+            services.AddScoped<IReportSyncfusion, ReportSyncfusion>();
 
         }
     }

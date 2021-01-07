@@ -426,14 +426,14 @@ namespace GSC.Report.Common
                     #region filesave
                     string fileName = fileInfo.FileName + "." + result.Extension;
                     string filePath = string.Empty;
-                    if (reportSettingNew.PdfStatus == 1)
+                    if (reportSettingNew.PdfStatus == DossierPdfStatus.Blank)
                         filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileName);
                     else
                         filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
 
                     bool exists = Directory.Exists(filePath);
                     if (!exists)
-                        if (reportSettingNew.PdfStatus == 1)
+                        if (reportSettingNew.PdfStatus == DossierPdfStatus.Blank)
                             System.IO.Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
                         else
                             System.IO.Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName));

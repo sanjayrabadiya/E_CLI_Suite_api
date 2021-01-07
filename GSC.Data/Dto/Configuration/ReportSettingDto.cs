@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -29,7 +30,7 @@ namespace GSC.Data.Dto.Configuration
         public int[] TemplateIds { get; set; }
         public int[] PeriodIds { get; set; }
         public int PdfType { get; set; }
-        public int PdfStatus { get; set; }
+        public DossierPdfStatus PdfStatus { get; set; }
         public bool AnnotationType { get; set; }
         public bool? IsClientLogo { get; set; }
         public bool? IsCompanyLogo { get; set; }

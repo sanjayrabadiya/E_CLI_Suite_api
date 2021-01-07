@@ -117,14 +117,14 @@ namespace GSC.Report
             FileStreamResult result = null;
             try
             {
-                if (reportSettingNew.PdfStatus == 1)
+                if (reportSettingNew.PdfStatus == DossierPdfStatus.Blank)
                 {
                     #region Blank PDF
                     logStatus = DateTime.Now + "===1. FileStart ===";
                     fileInfo.FolderType = Enum.GetName(typeof(DossierPdfStatus), jobMonitoring.JobDetails);
                     fileInfo.ParentFolderName = _projectRepository.Find(projectId).ProjectCode + "-" + _projectRepository.Find(projectId).ProjectName + "_" + DateTime.Now.Ticks;
-                    fileInfo.FileName = fileInfo.ParentFolderName;
-                    parentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "");
+                    fileInfo.FileName = fileInfo.ParentFolderName.Replace("/","");
+                    parentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/","");
                     fileInfo.ParentFolderName = parentFolderName;
                     SqlDataSourceParameterCollection parameter = new SqlDataSourceParameterCollection();
                     parameter.Add(new SqlDataSourceParameter("@id", DbType.String, reportSettingNew.ProjectId));
