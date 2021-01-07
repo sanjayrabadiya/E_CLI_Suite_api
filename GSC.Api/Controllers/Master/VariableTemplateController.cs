@@ -161,6 +161,7 @@ namespace GSC.Api.Controllers.Master
             if (details != null)
                 foreach (var varItem in details)
                 {
+                    varItem.DeletedBy = _jwtTokenAccesser.UserId;
                     varItem.DeletedDate = DateTime.Now;
                     _variableTemplateDetailRepository.Update(varItem);
                 }
@@ -179,6 +180,7 @@ namespace GSC.Api.Controllers.Master
                 }
 
                 variableTemplate.VariableTemplateDetails[i].SeqNo = i + 1;
+                _variableTemplateDetailRepository.Update(result);
             }
         }
 
