@@ -36,7 +36,7 @@ namespace GSC.Respository.UserMgt
         public async Task<UserViewModel> ValidateClient(LoginDto loginDto)
         {
             var result = await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
-            if (result != null)
+            if (result != null && result.CompanyId!=null)
             {
                 string companyCode = $"CompanyId{result.CompanyId}";
                 _userLoginReportRepository.SetDbConnection(result.ConnectionString);

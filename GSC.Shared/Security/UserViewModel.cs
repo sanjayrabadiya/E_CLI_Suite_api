@@ -7,7 +7,7 @@ namespace GSC.Shared.Security
     {
         public int UserId { get; set; }
         public string ConnectionString { get; set; }
-        public int CompanyId { get; set; }
+        public int? CompanyId { get; set; }
         public string ValidateMessage { get; set; }
         public bool IsValid { get; set; }
         public bool IsFirstTime { get; set; }
