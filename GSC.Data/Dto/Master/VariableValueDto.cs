@@ -12,6 +12,7 @@ namespace GSC.Data.Dto.Master
         public string ValueName { get; set; }
 
         public int SeqNo { get; set; }
+        public string Label { get; set; }
         public bool IsDefault { get; set; }
     }
 }

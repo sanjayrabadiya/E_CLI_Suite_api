@@ -9,6 +9,7 @@ namespace GSC.Data.Entities.Master
         public string ValueCode { get; set; }
         public string ValueName { get; set; }
         public int SeqNo { get; set; }
+        public string Label { get; set; }
         public bool IsDefault { get; set; }
     }
 }

@@ -111,7 +111,8 @@ namespace GSC.Helper
         [Description("Multiline Text Box")] MultilineTextBox = 10,
         [Description("PartialDate")] PartialDate = 11,
         [Description("Scale Horizontal")] HorizontalScale = 12,
-        [Description("Scale Vertical")] VerticalScale = 13
+        [Description("Scale Vertical")] VerticalScale = 13,
+        [Description("Numeric Scale")] NumericScale = 14
     }
 
     public enum VolunteerStatus : short
@@ -157,7 +158,7 @@ namespace GSC.Helper
         [Description("Inform Consent")] InformConsent = 19
     }
 
-   
+
 
     public enum AuditTable : short
     {
@@ -479,7 +480,7 @@ namespace GSC.Helper
         [Description("Supersede")] Supersede = 3,
     }
 
-   
+
     public enum ScreeningVisitStatus : int
     {
         [Description("Not Started")] NotStarted = 1,
