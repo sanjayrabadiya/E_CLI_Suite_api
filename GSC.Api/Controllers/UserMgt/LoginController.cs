@@ -266,23 +266,31 @@ namespace GSC.Api.Controllers.UserMgt
         [Route("logout/{userId}/{loginReportId}")]
         public IActionResult Logout(int userId, int loginReportId)
         {
-            var user = _userRepository.Find(userId);
-            if (user == null)
-                return NotFound();
-            var userLoginReport = _userLoginReportRepository.Find(loginReportId);
+            if (!_environmentSetting.Value.IsPremise)
+            {
+                _centreUserService.Logout($"{ _environmentSetting.Value.CentralApi}Login/Logout/{userId}/{loginReportId}");
+                return Ok();
+            }
+            else
+            {
+                var user = _userRepository.Find(userId);
+                if (user == null)
+                    return NotFound();
+                var userLoginReport = _userLoginReportRepository.Find(loginReportId);
 
-            if (userLoginReport == null)
-                return NotFound();
+                if (userLoginReport == null)
+                    return NotFound();
 
-            user.IsLogin = false;
-            _userRepository.Update(user);
+                user.IsLogin = false;
+                _userRepository.Update(user);
 
-            userLoginReport.LogoutTime = DateTime.Now;
-            _userLoginReportRepository.Update(userLoginReport);
+                userLoginReport.LogoutTime = DateTime.Now;
+                _userLoginReportRepository.Update(userLoginReport);
 
-            _uow.Save();
+                _uow.Save();
 
-            return Ok();
+                return Ok();
+            }
         }
 
 
