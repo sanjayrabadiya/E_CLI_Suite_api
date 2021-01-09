@@ -56,7 +56,7 @@ namespace GSC.Respository.Screening
                 VolunteerName = x.ScreeningEntry.RandomizationId != null ? x.ScreeningEntry.Randomization.Initial : x.ScreeningEntry.Attendance.Volunteer.FullName,
                 VolunteerNumber = x.ScreeningEntry.RandomizationId != null ? x.ScreeningEntry.Randomization.ScreeningNumber : x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
                 RandomizationNumber = x.ScreeningEntry.RandomizationId != null ? x.ScreeningEntry.Randomization.RandomizationNumber : x.ScreeningEntry.Attendance.ProjectSubject.Number,
-                AttendanceId = x.ScreeningEntry.Attendance.Id,
+                //AttendanceId = x.ScreeningEntry.Attendance.Id,
                 ProjectDesignTemplateId = x.ScreeningTemplate.ScreeningVisit.Id,
                 VisitId = x.ScreeningTemplate.ScreeningVisitId,
                 VisitName = x.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
