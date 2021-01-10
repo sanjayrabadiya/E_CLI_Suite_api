@@ -55,6 +55,7 @@ namespace GSC.Respository.Project.Design
                     Notes = _jwtTokenAccesser.Language != 1 ? r.TemplateLanguage.Where(c => c.DeletedDate == null && c.LanguageId == _jwtTokenAccesser.Language).Select(a => a.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
+                    IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,
                     DesignOrder = r.DesignOrder,
                     VariableTemplateId = r.VariableTemplateId,
                     DomainName = r.Domain.DomainName

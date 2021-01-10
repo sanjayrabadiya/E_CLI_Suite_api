@@ -153,7 +153,8 @@ namespace GSC.Respository.Screening
                 CheckSchedule(designTemplateDto, values, screeningTemplateBasic);
             }
 
-            if (designTemplateDto.Status == ScreeningTemplateStatus.Pending && (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
+            if (designTemplateDto.Status == ScreeningTemplateStatus.Pending && designTemplateDto.IsSchedule &&
+                (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Withdrawal ||
                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold))

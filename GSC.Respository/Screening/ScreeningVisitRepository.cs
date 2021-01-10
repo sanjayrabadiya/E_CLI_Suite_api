@@ -218,7 +218,15 @@ namespace GSC.Respository.Screening
 
         public bool IsPatientScreeningFailure(int screeningVisitId)
         {
-            var visit = Find(screeningVisitId);
+            var visit = All.Where(x => x.Id == screeningVisitId).Select(t => new
+            {
+                t.ScreeningEntryId,
+                t.ProjectDesignVisit.IsSchedule
+            }).FirstOrDefault();
+
+            if (visit == null || visit.IsSchedule == false)
+                return false;
+
             return All.Any(t => t.ScreeningEntryId == visit.ScreeningEntryId && (
            t.ScreeningEntry.Randomization.PatientStatusId == ScreeningPatientStatus.ScreeningFailure ||
            t.ScreeningEntry.Randomization.PatientStatusId == ScreeningPatientStatus.Withdrawal));
