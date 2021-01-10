@@ -165,7 +165,7 @@ namespace GSC.Respository.Screening
 
         void EditCheckProcess(DesignScreeningTemplateDto projectDesignTemplateDto, List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic)
         {
-            var result = _editCheckImpactRepository.CheckValidation(values, screeningTemplateBasic, false);
+            var result = _editCheckImpactRepository.CheckValidation(projectDesignTemplateDto, values, screeningTemplateBasic, false);
 
 
             result.Where(t => t.IsTarget && t.ProjectDesignTemplateId == projectDesignTemplateDto.ProjectDesignTemplateId &&
@@ -284,7 +284,7 @@ namespace GSC.Respository.Screening
             _context.DetachAllEntities();
             var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
             var values = GetScreeningValues(screeningTemplateBasic.Id);
-            var result = _editCheckImpactRepository.CheckValidation(values, screeningTemplateBasic, true);
+            var result = _editCheckImpactRepository.CheckValidation(null, values, screeningTemplateBasic, true);
             _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), true, true);
             if (!isLockUnLock)
                 _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, true);

@@ -24,5 +24,6 @@ namespace GSC.Respository.EditCheckImpact
         List<ScheduleCheckValidateDto> GetTargetScheduleByVariableId(int ProjectDesignVariableId);
         ScheduleTemplateDto GetScreeningTemplateId(int projectDesignTemplateId, int screeningEntryId);
         bool CheckReferenceVariable(int projectDesignVariableId);
+        int CollectionValue(string id);
     }
 }

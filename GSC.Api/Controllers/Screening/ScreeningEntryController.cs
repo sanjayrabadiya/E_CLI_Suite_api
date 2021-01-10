@@ -160,17 +160,6 @@ namespace GSC.Api.Controllers.Screening
             return Ok(result);
         }
 
-       
-
-        [HttpGet("Summary/{id}")]
-        public IActionResult Summary(int id)
-        {
-            if (id <= 0) return BadRequest();
-
-            var screeningSummaryDto = _screeningEntryRepository.GetSummary(id);
-
-            return Ok(screeningSummaryDto);
-        }
 
         [HttpGet("GetProjectStatusAndLevelDropDown/{parentProjectId}")]
         public IActionResult GetProjectStatusAndLevelDropDown(int parentProjectId)

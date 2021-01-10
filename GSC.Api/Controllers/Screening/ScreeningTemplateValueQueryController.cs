@@ -77,6 +77,7 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplateValueQuery = _mapper.Map<ScreeningTemplateValueQuery>(screeningTemplateValueQueryDto);
 
+            screeningTemplateValue.IsSystem = false;
             _screeningTemplateValueQueryRepository.GenerateQuery(screeningTemplateValueQueryDto,
                 screeningTemplateValueQuery, screeningTemplateValue);
 

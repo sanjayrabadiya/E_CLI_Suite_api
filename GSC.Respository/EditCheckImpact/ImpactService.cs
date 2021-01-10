@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
-using GSC.Data.Entities.Project.Schedule;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -230,6 +228,22 @@ namespace GSC.Respository.EditCheckImpact
                     Select(a => a.ValueName).ToList());
         }
 
+        public int CollectionValue(string id)
+        {
+            int projectDesignVariableValueId;
+
+            int.TryParse(id, out projectDesignVariableValueId);
+
+            var result = _projectDesignVariableValueRepository.All.
+                Where(x => x.Id == projectDesignVariableValueId).Select(t => t.ValueName).FirstOrDefault();
+
+            int value;
+
+            int.TryParse(result, out value);
+
+            return value;
+        }
+
         public string ScreeningValueAnnotation(string value, EditCheckRuleBy checkBy, CollectionSources? collectionSource)
         {
             if (string.IsNullOrEmpty(value)) return "";
@@ -241,7 +255,7 @@ namespace GSC.Respository.EditCheckImpact
                 return CollectionValueAnnotation(value, collectionSource);
 
             var variableValueId = Convert.ToInt32(value);
-            return _projectDesignVariableValueRepository.All.Where(x => x.Id == variableValueId).FirstOrDefault()?.ValueName;
+            return _projectDesignVariableValueRepository.All.Where(x => x.Id == variableValueId).Select(t => t.ValueName).FirstOrDefault();
         }
 
         bool IsNotDropDown(CollectionSources? collectionSource)

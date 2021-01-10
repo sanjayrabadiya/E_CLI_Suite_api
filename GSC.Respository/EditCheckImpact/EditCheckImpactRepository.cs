@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
 using GSC.Data.Dto.Screening;
-using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -14,7 +12,6 @@ using GSC.Respository.Screening;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using GSC.Common.Base;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 
@@ -67,7 +64,7 @@ namespace GSC.Respository.EditCheckImpact
             _screeningTemplateEditCheckValueRepository = screeningTemplateEditCheckValueRepository;
         }
 
-        public List<EditCheckValidateDto> CheckValidation(List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic, bool isQuery)
+        public List<EditCheckValidateDto> CheckValidation(DesignScreeningTemplateDto projectDesignTemplateDto, List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic, bool isQuery)
         {
 
             var result = _impactService.GetEditCheck(screeningTemplateBasic);
@@ -119,6 +116,28 @@ namespace GSC.Respository.EditCheckImpact
                     r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
                     r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
                 }
+
+                if (r.CollectionSource == CollectionSources.NumericScale && !r.IsSkip && !string.IsNullOrEmpty(r.ScreeningTemplateValue))
+                {
+                    if (projectDesignTemplateDto == null)
+                        r.NumberScale = _impactService.CollectionValue(r.ScreeningTemplateValue);
+                    else
+                    {
+                        var projectVariable = projectDesignTemplateDto.Variables.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
+                        if (projectVariable != null)
+                        {
+                            int projectVariableValueId;
+                            int.TryParse(r.ScreeningTemplateValue, out projectVariableValueId);
+                            var valueName = projectVariable.Values.Where(x => x.Id == projectVariableValueId).Select(t => t.ValueName).FirstOrDefault();
+                            int.TryParse(valueName, out projectVariableValueId);
+                            r.NumberScale = projectVariableValueId;
+
+                            if (projectVariableValueId == 0)
+                                r.NumberScale = _impactService.CollectionValue(r.ScreeningTemplateValue);
+                        }
+                    }
+                }
+
             });
 
             return TargetValidateProcess(result);
@@ -190,9 +209,19 @@ namespace GSC.Respository.EditCheckImpact
                 }
                 else if (r.IsSameTemplate || (isRepated && r.IsTarget))
                 {
-                    r.ScreeningTemplateId = screeningTemplateId;
-                    r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
-                    r.IsNa = isNa;
+                    if (!r.ValueApply)
+                    {
+                        r.ScreeningTemplateId = screeningTemplateId;
+                        r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
+                        r.IsNa = isNa;
+                        result.Where(t => t.ProjectDesignVariableId == r.ProjectDesignVariableId && t.ProjectDesignTemplateId == r.ProjectDesignTemplateId).
+                        ToList().ForEach(t =>
+                        {
+                            t.ScreeningTemplateValue = r.ScreeningTemplateValue;
+                            t.IsNa = r.IsNa;
+                            t.ValueApply = true;
+                        });
+                    }
                 }
                 else if (r.ProjectDesignTemplateId != null && !isRepated)
                 {
@@ -217,6 +246,9 @@ namespace GSC.Respository.EditCheckImpact
                     r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
                     r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
                 }
+
+                if (r.IsFormula && r.CollectionSource == CollectionSources.NumericScale && !string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.NumberScale == 0)
+                    r.NumberScale = _impactService.CollectionValue(r.ScreeningTemplateValue);
             });
 
             var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget).ToList();
@@ -524,7 +556,7 @@ namespace GSC.Respository.EditCheckImpact
                     StartParens = x.StartParens,
                     CollectionSource = x.CollectionSource,
                     DataType = x.DataType,
-                    InputValue = x.ScreeningTemplateValue,
+                    InputValue = x.IsFormula && x.CollectionSource == CollectionSources.NumericScale ? x.NumberScale.ToString() : x.ScreeningTemplateValue,
                     IsReferenceValue = x.IsReferenceValue,
                     Operator = x.Operator,
                     IsFormula = x.IsFormula,
@@ -585,6 +617,7 @@ namespace GSC.Respository.EditCheckImpact
             if (collectionSource == CollectionSources.RadioButton ||
                  collectionSource == CollectionSources.CheckBox ||
                  collectionSource == CollectionSources.MultiCheckBox ||
+                 collectionSource == CollectionSources.NumericScale ||
                  collectionSource == CollectionSources.ComboBox)
             {
                 decimal id;

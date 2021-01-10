@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Master;
@@ -15,7 +14,6 @@ namespace GSC.Respository.Screening
         ScreeningEntry SaveScreeningRandomization(SaveRandomizationDto saveRandomizationDto);
         IList<DropDownDto> AutoCompleteSearch(string searchText);
         List<AttendanceScreeningGridDto> GetScreeningList(ScreeningSearhParamDto searchParam);
-        ScreeningSummaryDto GetSummary(int id);
         List<DropDownDto> GetProjectStatusAndLevelDropDown(int parentProjectId);
         IList<DropDownDto> GetSubjectByProjecId(int projectId);
         IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock);

@@ -169,7 +169,8 @@ namespace GSC.Respository.Pharmacy
                 if (objVariable != null)
                 {
                     if (objVariable.CollectionSource == CollectionSources.ComboBox ||
-                        objVariable.CollectionSource == CollectionSources.RadioButton)
+                        objVariable.CollectionSource == CollectionSources.RadioButton ||
+                        objVariable.CollectionSource == CollectionSources.NumericScale)
                     {
                         var varvalue = _context.VariableValue.Where(x => x.Id == Convert.ToInt32(item.Value))
                             .FirstOrDefault();

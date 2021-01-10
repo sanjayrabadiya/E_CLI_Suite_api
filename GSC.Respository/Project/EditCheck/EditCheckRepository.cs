@@ -280,6 +280,7 @@ namespace GSC.Respository.Project.EditCheck
         {
             return collectionSources != null & (collectionSources == CollectionSources.ComboBox ||
                                    collectionSources == CollectionSources.RadioButton ||
+                                   collectionSources == CollectionSources.NumericScale ||
                                    collectionSources == CollectionSources.CheckBox ||
                                    collectionSources == CollectionSources.MultiCheckBox);
         }

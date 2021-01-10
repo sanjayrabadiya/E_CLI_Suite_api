@@ -34,7 +34,7 @@ namespace GSC.Respository.Pharmacy
 
         public PharmacyEntryDto GetDetails(int id)
         {
-         
+
 
             var pharmacyEntryDto = _context.PharmacyEntry.Where(t => t.Id == id && t.DeletedDate == null)
                 .Select(t => new PharmacyEntryDto
@@ -71,22 +71,22 @@ namespace GSC.Respository.Pharmacy
         public List<PharmacyEntryDto> GetpharmacyList()
         {
             var pharmacyEntry = (from pharmacyentry in _context.PharmacyEntry.Where(t => t.DeletedDate == null)
-                join project in _context.Project.Where(t => t.DeletedDate == null) on pharmacyentry.ProjectId equals
-                    project.Id
-                join config in _context.PharmacyConfig.Where(t => t.DeletedDate == null) on pharmacyentry.FormId equals
-                    config.FormId
-                select new PharmacyEntryDto
-                {
-                    IsDeleted = pharmacyentry.DeletedDate != null,
-                    Id = pharmacyentry.Id,
-                    ProjectId = pharmacyentry.ProjectId,
-                    PharmacyNo = pharmacyentry.PharmacyNo,
-                    PharmacyDate = pharmacyentry.PharmacyDate,
-                    FormId = config.FormId,
-                    ProjectName = project.ProjectName,
-                    FormName = config.FormName,
-                    ProjectCode = project.ProjectCode
-                }).ToList();
+                                 join project in _context.Project.Where(t => t.DeletedDate == null) on pharmacyentry.ProjectId equals
+                                     project.Id
+                                 join config in _context.PharmacyConfig.Where(t => t.DeletedDate == null) on pharmacyentry.FormId equals
+                                     config.FormId
+                                 select new PharmacyEntryDto
+                                 {
+                                     IsDeleted = pharmacyentry.DeletedDate != null,
+                                     Id = pharmacyentry.Id,
+                                     ProjectId = pharmacyentry.ProjectId,
+                                     PharmacyNo = pharmacyentry.PharmacyNo,
+                                     PharmacyDate = pharmacyentry.PharmacyDate,
+                                     FormId = config.FormId,
+                                     ProjectName = project.ProjectName,
+                                     FormName = config.FormName,
+                                     ProjectCode = project.ProjectCode
+                                 }).ToList();
 
             return pharmacyEntry;
         }
@@ -94,36 +94,36 @@ namespace GSC.Respository.Pharmacy
         public PharmacyTemplateValueListDto GetpharmacyTemplateValueList(int? projectId, int domainId,
             int? productTypeId)
         {
-            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int) IsFormType.IsReceipt)
+            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsReceipt)
                 .FirstOrDefault();
             var pharmacyVariable = (from variable in _context.Variable
-                join variabletemplateDetail in _context.VariableTemplateDetail.Where(
-                    vv => vv.DeletedBy == null && vv.VariableTemplateId == receiptTemlId.VariableTemplateId
-                ).OrderBy(a => a.SeqNo) on variable.Id equals variabletemplateDetail.VariableId
-                select new VariableDto
-                {
-                    IsDeleted = variable.DeletedDate!=null,
-                    Id = variable.Id,
-                    VariableName = variable.VariableName,
-                    VariableCode = variable.VariableCode
-                }).ToList();
+                                    join variabletemplateDetail in _context.VariableTemplateDetail.Where(
+                                        vv => vv.DeletedBy == null && vv.VariableTemplateId == receiptTemlId.VariableTemplateId
+                                    ).OrderBy(a => a.SeqNo) on variable.Id equals variabletemplateDetail.VariableId
+                                    select new VariableDto
+                                    {
+                                        IsDeleted = variable.DeletedDate != null,
+                                        Id = variable.Id,
+                                        VariableName = variable.VariableName,
+                                        VariableCode = variable.VariableCode
+                                    }).ToList();
 
             var pharmacyEntry = (from pharmacyentry in _context.PharmacyEntry.Where(t =>
                     t.DeletedDate == null &&
                     (projectId == null || projectId == 0 || projectId > 0 && t.ProjectId == projectId) &&
                     (productTypeId == null || productTypeId == 0 ||
                      productTypeId != null && t.ProductTypeId == productTypeId)).OrderByDescending(x => x.Id)
-                join productType in _context.ProductType.Where(t => t.DeletedBy == null) on pharmacyentry.ProductTypeId
-                    equals productType.Id
-                select new PharmacyEntryDto
-                {
-                    IsDeleted = pharmacyentry.DeletedDate != null,
-                    Id = pharmacyentry.Id,
-                    Status = pharmacyentry.Status,
-                    PharmacyDate = pharmacyentry.PharmacyDate,
-                    PharmacyNo = pharmacyentry.PharmacyNo,
-                    ProductTypeName = productType.ProductTypeName
-                }).ToList();
+                                 join productType in _context.ProductType.Where(t => t.DeletedBy == null) on pharmacyentry.ProductTypeId
+                                     equals productType.Id
+                                 select new PharmacyEntryDto
+                                 {
+                                     IsDeleted = pharmacyentry.DeletedDate != null,
+                                     Id = pharmacyentry.Id,
+                                     Status = pharmacyentry.Status,
+                                     PharmacyDate = pharmacyentry.PharmacyDate,
+                                     PharmacyNo = pharmacyentry.PharmacyNo,
+                                     ProductTypeName = productType.ProductTypeName
+                                 }).ToList();
 
             foreach (var item in pharmacyEntry) item.PharmacyTemplateValues = GetpharmacyTemplateListByEntry(item.Id);
 
@@ -137,21 +137,21 @@ namespace GSC.Respository.Pharmacy
 
         public List<PharmacyTemplateValueDto> GetpharmacyTemplateListByEntry(int entryId)
         {
-            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int) IsFormType.IsReceipt)
+            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsReceipt)
                 .FirstOrDefault();
             var pharmacyValue = (from p in _context.VariableTemplateDetail.Where(vv => vv.DeletedBy == null)
-                from ptv in _context.PharmacyTemplateValue.Where(x =>
-                        x.DeletedBy == null && x.VariableId == p.VariableId && x.PharmacyEntryId == entryId)
-                    .DefaultIfEmpty()
-                where p.VariableTemplateId == receiptTemlId.VariableTemplateId
-                select new PharmacyTemplateValueDto
-                {
-                    TempId = ptv.Id,
-                    VariableId = p.VariableId,
-                    Value = ptv.Value,
-                    ValueId = ptv.Value,
-                    PharmacyEntryId = entryId
-                }).OrderBy(x => x.VariableId).ToList();
+                                 from ptv in _context.PharmacyTemplateValue.Where(x =>
+                                         x.DeletedBy == null && x.VariableId == p.VariableId && x.PharmacyEntryId == entryId)
+                                     .DefaultIfEmpty()
+                                 where p.VariableTemplateId == receiptTemlId.VariableTemplateId
+                                 select new PharmacyTemplateValueDto
+                                 {
+                                     TempId = ptv.Id,
+                                     VariableId = p.VariableId,
+                                     Value = ptv.Value,
+                                     ValueId = ptv.Value,
+                                     PharmacyEntryId = entryId
+                                 }).OrderBy(x => x.VariableId).ToList();
 
             foreach (var item in pharmacyValue)
             {
@@ -159,7 +159,8 @@ namespace GSC.Respository.Pharmacy
                 if (objVariable != null)
                 {
                     if (objVariable.CollectionSource == CollectionSources.ComboBox ||
-                        objVariable.CollectionSource == CollectionSources.RadioButton)
+                        objVariable.CollectionSource == CollectionSources.RadioButton ||
+                        objVariable.CollectionSource == CollectionSources.NumericScale)
                     {
                         var varvalue = _context.VariableValue.Where(x => x.Id == Convert.ToInt32(item.Value))
                             .FirstOrDefault();
@@ -188,7 +189,7 @@ namespace GSC.Respository.Pharmacy
 
         public VariableTemplate GetTemplate(int id)
         {
-            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int) IsFormType.IsReceipt)
+            var receiptTemlId = _context.PharmacyConfig.Where(x => x.FormId == (int)IsFormType.IsReceipt)
                 .FirstOrDefault();
             var template = _context.VariableTemplate.Where(t => t.Id == receiptTemlId.VariableTemplateId)
                 .Include(d => d.VariableTemplateDetails)
