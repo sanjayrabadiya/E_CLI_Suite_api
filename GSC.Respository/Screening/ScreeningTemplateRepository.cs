@@ -4,7 +4,6 @@ using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
@@ -161,6 +160,12 @@ namespace GSC.Respository.Screening
                 designTemplateDto.IsSubmittedButton = false;
 
             return designTemplateDto;
+        }
+
+        public bool IsRepated(int screeningTemplateId)
+        {
+            return All.Any(x => x.DeletedDate == null &&
+                                x.Id == screeningTemplateId && (x.ParentId != null || x.ScreeningVisit.ParentId != null));
         }
 
         void EditCheckProcess(DesignScreeningTemplateDto projectDesignTemplateDto, List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic)
@@ -448,7 +453,7 @@ namespace GSC.Respository.Screening
             var workFlowButton = new WorkFlowButton();
             var statusId = (int)templateBasic.Status;
 
-            if (templateBasic.Status == ScreeningTemplateStatus.Completed)
+            if (templateBasic.IsLocked == true)
             {
                 designTemplateDto.MyReview = false;
                 designTemplateDto.IsSubmittedButton = false;
@@ -467,7 +472,7 @@ namespace GSC.Respository.Screening
                     workFlowButton.Update = screeningValue.QueryStatus == QueryStatus.Open ||
                                             screeningValue.QueryStatus == QueryStatus.Reopened;
 
-                if (workflowlevel.IsGenerateQuery && (designTemplateDto.MyReview || workflowlevel.LevelNo == 0))
+                if (templateBasic.Status != ScreeningTemplateStatus.Completed && workflowlevel.IsGenerateQuery && (designTemplateDto.MyReview || workflowlevel.LevelNo == 0))
                     workFlowButton.Generate = screeningValue.QueryStatus == null ||
                                               screeningValue.QueryStatus == QueryStatus.Closed;
 
@@ -627,17 +632,22 @@ namespace GSC.Respository.Screening
                     value = string.Join(",", _screeningTemplateValueChildRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
 
                 var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).
-                    Select(r => new { r.Id, r.ScreeningVisitId, r.ProjectDesignTemplateId, r.ScreeningVisit.ScreeningEntryId, r.ScreeningVisit.ProjectDesignVisitId }).FirstOrDefault();
+                    Select(r => new { r.Id, r.ScreeningVisitId, r.ParentId, VisitParent = r.ScreeningVisit.ParentId, r.ProjectDesignTemplateId, r.ScreeningVisit.ScreeningEntryId, r.ScreeningVisit.ProjectDesignVisitId }).FirstOrDefault();
 
                 var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningTemplate.ScreeningEntryId, screeningTemplateValue.ScreeningTemplateId,
                     screeningTemplateValue.IsNa ? "NA" : screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
                     screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.ScreeningVisitId, screeningTemplate.ProjectDesignVisitId, screeningTemplateValue.IsNa);
 
-                var scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.ScreeningVisitId,
-                 screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
-                 screeningTemplateValue.ProjectDesignVariableId, true);
+                if (screeningTemplate.ParentId == null && screeningTemplate.VisitParent == null)
+                {
+                    var scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningTemplate.ScreeningEntryId, screeningTemplate.ScreeningVisitId,
+                                       screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
+                                       screeningTemplateValue.ProjectDesignVariableId, true);
 
-                result.EditCheckResult = _scheduleRuleRespository.VariableResultProcess(editResult, scheduleResult);
+                    result.EditCheckResult = _scheduleRuleRespository.VariableResultProcess(editResult, scheduleResult);
+                }
+                else
+                    result.EditCheckResult = _scheduleRuleRespository.VariableResultProcess(editResult, null);
             }
 
             return result;

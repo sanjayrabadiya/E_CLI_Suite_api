@@ -331,42 +331,45 @@ namespace GSC.Respository.Screening
 
         public ScreeningVisitStatus? AutomaticStatusUpdate(int screeningTemplateId)
         {
-            var screeningVisit = _screeningTemplateRepository.All.AsNoTracking().Where(x => x.Id == screeningTemplateId).Select(t => new
+            var screeningTemplate = _screeningTemplateRepository.All.AsNoTracking().Where(x => x.Id == screeningTemplateId).Select(t => new
             {
                 t.ProjectDesignTemplate.ProjectDesignVisitId,
                 t.ScreeningVisitId,
                 t.Status,
-                t.ScreeningVisit.ScreeningEntryId
+                t.ScreeningVisit.ScreeningEntryId,
+                VisitStatus = t.ScreeningVisit.Status,
+
             }).FirstOrDefault();
 
-            if (screeningVisit == null) return null;
+            if (screeningTemplate == null) return null;
 
+            if (screeningTemplate.VisitStatus == ScreeningVisitStatus.Missed ||
+            screeningTemplate.VisitStatus == ScreeningVisitStatus.OnHold)
+                return screeningTemplate.VisitStatus;
 
             var designVisitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.DeletedDate == null
-            && x.ProjectDesignVisitId == screeningVisit.ProjectDesignVisitId &&
-            (x.VisitStatusId == ScreeningVisitStatus.ScreeningFailure || x.VisitStatusId == ScreeningVisitStatus.Withdrawal)).Select(
-                  t => new { t.ProjectDesignVariableId, t.VisitStatusId }).ToList();
+                && x.ProjectDesignVisitId == screeningTemplate.ProjectDesignVisitId &&
+                (x.VisitStatusId == ScreeningVisitStatus.ScreeningFailure || x.VisitStatusId == ScreeningVisitStatus.Withdrawal)).Select(
+                t => new { t.ProjectDesignVariableId, t.VisitStatusId }).ToList();
 
 
-            DateTime? statusDate = null;
-            ScreeningVisitStatus? visitStatus = null;
+            DateTime? statusDate = System.DateTime.Now;
+            ScreeningVisitStatus? visitStatus = ScreeningVisitStatus.InProgress;
 
-
-            if (screeningVisit.Status == ScreeningTemplateStatus.Submitted)
+            if (screeningTemplate.Status >= ScreeningTemplateStatus.Submitted)
             {
-                if (!_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningVisit.ScreeningEntryId
-                && x.ScreeningVisitId == screeningVisit.ScreeningVisitId && x.Status < ScreeningTemplateStatus.Submitted))
+                if (!_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningTemplate.ScreeningEntryId
+                && x.ScreeningVisitId == screeningTemplate.ScreeningVisitId && !x.IsDisable && x.Status < ScreeningTemplateStatus.Submitted))
                 {
                     statusDate = System.DateTime.Now;
                     visitStatus = ScreeningVisitStatus.Completed;
                 }
             }
 
-
             designVisitStatus.ForEach(x =>
             {
                 var screeningValue = _screeningTemplateValueRepository.All.Where(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId
-                      && t.ScreeningTemplateId == screeningTemplateId).Select(r => r.Value).FirstOrDefault();
+                      && t.ScreeningTemplate.ScreeningVisitId == screeningTemplate.ScreeningVisitId).Select(r => r.Value).FirstOrDefault();
 
                 if (!string.IsNullOrEmpty(screeningValue))
                 {
@@ -382,12 +385,12 @@ namespace GSC.Respository.Screening
             });
 
 
-            if (visitStatus != null && statusDate != null)
+            if (visitStatus != null && statusDate != null && screeningTemplate.VisitStatus != visitStatus)
             {
                 StatusUpdate(new ScreeningVisitHistoryDto
                 {
                     VisitStatusId = (ScreeningVisitStatus)visitStatus,
-                    ScreeningVisitId = screeningVisit.ScreeningVisitId,
+                    ScreeningVisitId = screeningTemplate.ScreeningVisitId,
                     StatusDate = statusDate
                 });
             }

@@ -189,16 +189,19 @@ namespace GSC.Api.Controllers.Screening
             if (screeningTemplateValue.Children != null && screeningTemplateValue.Children.Count > 0)
                 screeningTemplateValueQueryDto.Value = string.Join(",", _context.ScreeningTemplateValueChild.Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
 
-            var projectDesignVisitId = _screeningVisitRepository.All.Where(x => x.Id == screeningTemplate.ScreeningVisitId).Select(t => t.ProjectDesignVisitId).FirstOrDefault();
+            var screeningVisit = _screeningVisitRepository.All.Where(x => x.Id == screeningTemplate.ScreeningVisitId).
+                Select(t => new { t.ProjectDesignVisitId, t.ParentId }).FirstOrDefault();
+
             var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningEntryId, screeningTemplate.Id,
                 screeningTemplateValueQueryDto.IsNa ? "NA" : screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
-                screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.ScreeningVisitId, projectDesignVisitId, screeningTemplateValueQueryDto.IsNa);
+                screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.ScreeningVisitId, screeningVisit.ProjectDesignVisitId, screeningTemplateValueQueryDto.IsNa);
 
             List<ScheduleCheckValidateDto> scheduleResult = null;
-            if (screeningTemplate.ParentId == null && (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Date ||
+            if (screeningTemplate.ParentId == null && screeningVisit.ParentId == null && (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Date ||
                 screeningTemplateValueQueryDto.CollectionSource == CollectionSources.DateTime ||
                 screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Time))
             {
+
                 scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.ScreeningVisitId,
                    screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
                    screeningTemplateValue.ProjectDesignVariableId, true);
