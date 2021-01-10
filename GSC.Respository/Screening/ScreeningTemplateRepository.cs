@@ -533,8 +533,10 @@ namespace GSC.Respository.Screening
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(ProjectDesignId);
 
-            var screeningEntry = lockUnlockParams.Status == false ? _context.ScreeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId)
-                : _context.ScreeningEntry.Where(r => r.ProjectDesignId == ProjectDesignId);
+            //var screeningEntry = lockUnlockParams.Status == false ? _context.ScreeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId)
+            //    : _context.ScreeningEntry.Where(r => r.ProjectDesignId == ProjectDesignId);
+
+            var screeningEntry = _context.ScreeningEntry.Where(r => r.ProjectDesignId == ProjectDesignId);
 
             if (lockUnlockParams.ParentProjectId != lockUnlockParams.ProjectId)
                 screeningEntry = screeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId);
