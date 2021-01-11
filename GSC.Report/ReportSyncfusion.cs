@@ -71,35 +71,29 @@ namespace GSC.Report
 
         public void BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
         {
-            // int ProjectDesignID = 62;
-            // int ProjectDesignID = 77;
-            //int ProjectDesignID = 1;
-
-
             var projectdetails = _projectDesignRepository.FindByInclude(i => i.ProjectId == reportSetting.ProjectId, i => i.Project).SingleOrDefault();
             var projectDesignvisit = _projectDesignVisitRepository.GetVisitsByProjectDesignId(projectdetails.Id);
 
-
             PdfDocument document = new PdfDocument();
-            //document.PageSettings.Margins.Left = 50;
-            //document.PageSettings.Margins.Right = 50;
+            document.PageSettings.Margins.Left = 50;
+            document.PageSettings.Margins.Right = 50;
             //document.PageSettings.Margins.Top = 200;
-            //document.PageSettings.Margins.Bottom = 100;
+            document.PageSettings.Margins.Bottom = 100;
 
             var designvisit = DesignVisit(projectDesignvisit, reportSetting);
 
-            PdfLoadedDocument loadedDocument = new PdfLoadedDocument(designvisit);
+            PdfLoadedDocument loadedDocument = new PdfLoadedDocument(designvisit,true);
 
             //Disable the incremental update
-            loadedDocument.FileStructure.IncrementalUpdate = false;
+           loadedDocument.FileStructure.IncrementalUpdate = false;
             //Set the compression level
             loadedDocument.Compression = PdfCompressionLevel.Best;
 
             //margin
-            //document.PageSettings.Margins.Left = 40;
-            //document.PageSettings.Margins.Right = 40;
-            //document.PageSettings.Margins.Top = 20;
-            //document.PageSettings.Margins.Bottom = 50;
+            //document.PageSettings.Margins.Left = 0;
+            //document.PageSettings.Margins.Right = 0;
+            //document.PageSettings.Margins.Top = 0;
+            //document.PageSettings.Margins.Bottom = 0;
             //for (int i = 0; i < loadedDocument.Pages.Count; i++)
             //{
             //    //Get loaded page as template
@@ -111,7 +105,6 @@ namespace GSC.Report
             //    //Draw template with the size as loaded page size
             //    g.DrawPdfTemplate(template, new PointF(0, 0), new SizeF(page.GetClientSize().Width, page.GetClientSize().Height));
             //}
-
             //end margin
 
             document.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
@@ -145,7 +138,8 @@ namespace GSC.Report
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
 
             fileInfo.FolderType = Enum.GetName(typeof(DossierPdfStatus), jobMonitoring.JobDetails);
-            fileInfo.ParentFolderName = projectdetails.Project.ProjectCode + "-" + projectdetails.Project.ProjectName + "_" + DateTime.Now.Ticks;
+            //fileInfo.ParentFolderName = projectdetails.Project.ProjectCode + "-" + projectdetails.Project.ProjectName + "_" + DateTime.Now.Ticks;
+            fileInfo.ParentFolderName = projectdetails.Project.ProjectCode+ "_" + DateTime.Now.Ticks;
             fileInfo.FileName = fileInfo.ParentFolderName.Replace("/", "") + ".pdf";
             fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
 
@@ -315,8 +309,8 @@ namespace GSC.Report
                 var designtemplate = DesignTemplate(projecttemplate, reportSetting);
                 PdfDocument subdocument = new PdfDocument();
 
-                PdfLoadedDocument loadedDocument = new PdfLoadedDocument(designtemplate);
-                //document.Append(loadedDocument);
+                PdfLoadedDocument loadedDocument = new PdfLoadedDocument(designtemplate,true);
+                // document.Append(loadedDocument);
                 subdocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
                 //document.Template.Top = VisitTemplateHeader(document, "Hello", "1234");
                 // document.Template.Top = AddHeader(document);   
@@ -328,7 +322,7 @@ namespace GSC.Report
                     // page.Section.Pages.Add();
 
                     page1.Graphics.DrawString($"Visit Name :-", headerfont, PdfBrushes.Black, new PointF(0, 120));
-                    page1.Graphics.DrawString($"{template.Value}", regularfont, PdfBrushes.Black, new PointF(110, 121), format);
+                    page1.Graphics.DrawString($"{template.Value}", regularfont, PdfBrushes.Black, new PointF(100, 121), format);
 
                     page1.Graphics.DrawString("Subject No :-", headerfont, PdfBrushes.Black, new PointF(350, 120));
 
@@ -341,7 +335,7 @@ namespace GSC.Report
                 document.Save(submemoryStream);
                 subdocument.Save(submemoryStream);
 
-                PdfLoadedDocument sloadedDocument = new PdfLoadedDocument(submemoryStream);
+                PdfLoadedDocument sloadedDocument = new PdfLoadedDocument(submemoryStream, true);
                 //document.Append(loadedDocument);
                 document.ImportPageRange(sloadedDocument, 0, sloadedDocument.Pages.Count - 1);
             }
@@ -360,17 +354,18 @@ namespace GSC.Report
             document.PageSettings.Margins.Left = 0;
             document.PageSettings.Margins.Right = 0;
             document.PageSettings.Margins.Top = 170;
-            document.PageSettings.Margins.Bottom = 5;
+            document.PageSettings.Margins.Bottom = 0;
 
-            document.PageSettings.Size = PdfPageSize.A4;
+            //document.PageSettings.Size = PdfPageSize.A4;
             PdfPage page = document.Pages.Add();
             RectangleF bounds = new RectangleF(new PointF(0, 0), new SizeF(0, 0));
             PdfLayoutResult result = new PdfLayoutResult(page, bounds);
             int index = 1;
 
             PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-            //layoutFormat.Break = PdfLayoutBreakType.FitPage;
+            layoutFormat.Break = PdfLayoutBreakType.FitPage;
             layoutFormat.Layout = PdfLayoutType.Paginate;
+           
 
 
 
@@ -392,16 +387,18 @@ namespace GSC.Report
                 foreach (var variable in variabledetails)
                 {
                     result = AddString($"{index}.{level2index}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                    result = AddString(variable.Value, result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                   // result = AddString(variable.Value, result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                     var variabled = _projectDesignVariableRepository.FindByInclude(t => t.Id == variable.Id, t => t.Values, t => t.Remarks, t => t.Unit).FirstOrDefault();
 
+                    string annotation = String.IsNullOrEmpty(variabled.Annotation) ? "" : $"[{variabled.Annotation}]";
+                    string CollectionAnnotation = String.IsNullOrEmpty(variabled.CollectionAnnotation) ? "" : $"({variabled.CollectionAnnotation})";
                     if (reportSetting.AnnotationType == true)
-                    {
-                        string annotation = String.IsNullOrEmpty(variabled.Annotation) ? "" : $"[{variabled.Annotation}]";
-                        string CollectionAnnotation = String.IsNullOrEmpty(variabled.CollectionAnnotation) ? "" : $"({variabled.CollectionAnnotation})";
-                        AddString($"{annotation}   {CollectionAnnotation}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                    }
+                        result = AddString($"{variable.Value}\n {annotation}   {CollectionAnnotation}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    else
+                        result = AddString($"{variable.Value}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+
                     PdfLayoutResult secondresult = result;
 
                     if (variabled.Unit != null)
@@ -416,16 +413,10 @@ namespace GSC.Report
                     }
                     else if (variabled.CollectionSource == CollectionSources.MultilineTextBox)
                     {
-                        //PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Multilinetextbox");
-                        //textBoxField.Bounds = new RectangleF(350, result.Bounds.Y, 100, 20);
-                        //textBoxField.ToolTip = "Multi Line textbox";
-                        //textBoxField.Multiline = true;
-                        //document.Form.Fields.Add(textBoxField);
-                        //result = AddString("-------multiline", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "multipletextbox");
-                        textBoxField.Bounds = new RectangleF(350, result.Bounds.Y, 100, 20);
+                        textBoxField.Bounds = new RectangleF(350, result.Bounds.Y, 500, 20);
                         textBoxField.ToolTip = "Multi line";
+                        textBoxField.Multiline = true;
                         document.Form.Fields.Add(textBoxField);
                         result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
@@ -445,15 +436,14 @@ namespace GSC.Report
                     }
                     else if (variabled.CollectionSource == CollectionSources.RadioButton)
                     {
-                        PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, "radiobutton");
+                        PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, $"{index}{level2index}Radio");
                         foreach (var value in variabled.Values)
-                        {
-
+                        {                            
                             document.Form.Fields.Add(radioList);
-                            PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueName);
-                            radioItem1.Bounds = new RectangleF(350, result.Bounds.Y, 16, 16);
+                            PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueCode.ToString());
+                            radioItem1.Bounds = new RectangleF(350, result.Bounds.Y, 15, 15);
                             radioList.Items.Add(radioItem1);
-                            AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                         result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -466,7 +456,7 @@ namespace GSC.Report
                             checkField.Bounds = new RectangleF(350, result.Bounds.Y, 10, 10);
                             checkField.Style = PdfCheckBoxStyle.Check;
                             document.Form.Fields.Add(checkField);
-                            AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                         result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -491,6 +481,15 @@ namespace GSC.Report
                         textBoxField.ToolTip = "Date Field";
                         document.Form.Fields.Add(textBoxField);
                         AddString("MM/dd/yyyy", result.Page, new Syncfusion.Drawing.RectangleF(460, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                        result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    }
+                    else if (variabled.CollectionSource == CollectionSources.DateTime)
+                    {
+                        PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "DatetimeField");
+                        textBoxField.Bounds = new RectangleF(350, result.Bounds.Y, 100, 20);
+                        textBoxField.ToolTip = "Date Time";
+                        document.Form.Fields.Add(textBoxField);
+                        AddString("", result.Page, new Syncfusion.Drawing.RectangleF(460, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                         result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     else if (variabled.CollectionSource == CollectionSources.PartialDate)
@@ -518,19 +517,11 @@ namespace GSC.Report
 
                     }
 
-                    //PdfLayoutResult thirdresult = result;
-                    //if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
-                    //{
-                    //    result = secondresult;
-                    //    result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                    //}
                     PdfLayoutResult thirdresult = result;
                     if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
-                    {
-                        //result = secondresult;
                         result = AddString("", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom + 20, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        // result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                    }
+                      
+                    
                     ++level2index;
                 }
                 ++index;
