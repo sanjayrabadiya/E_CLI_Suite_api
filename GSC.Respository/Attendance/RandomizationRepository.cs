@@ -508,7 +508,12 @@ namespace GSC.Respository.Attendance
             });
 
             var projectCode = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId).ProjectCode;
-            result.ForEach(x => { x.ParentProjectCode = projectCode; });
+            result.ForEach(x =>
+            {
+                x.ParentProjectCode = projectCode;
+                var screeningTemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
+                x.IsLocked = screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false) ? false : true;
+            });
 
             return result;
         }
