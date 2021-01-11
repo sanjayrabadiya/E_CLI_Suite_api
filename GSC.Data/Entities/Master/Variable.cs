@@ -39,5 +39,6 @@ namespace GSC.Data.Entities.Master
         public bool IsNa { get; set; }
         public DateValidateType? DateValidate { get; set; }
         public IList<VariableRemarks> Remarks { get; set; } = null;
+        public Alignment? Alignment { get; set; }
     }
 }
