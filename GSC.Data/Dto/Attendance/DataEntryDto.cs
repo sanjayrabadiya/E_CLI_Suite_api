@@ -102,7 +102,12 @@ namespace GSC.Data.Dto.Attendance
         public string SubjectName { get; set; }
         public int ScreeningVisitId { get; set; }
         public int Id { get; set; }
-        public DateTime? ScheduleDate { get; set; }
+        private DateTime? _scheduleDate { get; set; }
+        public DateTime? ScheduleDate
+        {
+            get => _scheduleDate?.UtcDateTime();
+            set => _scheduleDate = value?.UtcDateTime();
+        }
         public int? ParentId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public string ProjectDesignTemplateName { get; set; }

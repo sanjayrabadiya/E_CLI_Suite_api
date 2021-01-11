@@ -155,7 +155,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (!isQueryRaise)
             {
-                var Ids = result.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).ToList();
+                var Ids = result.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
                 result = result.Where(t => Ids.Contains(t.EditCheckId)).ToList();
             }
 
@@ -217,6 +217,7 @@ namespace GSC.Respository.EditCheckImpact
                         result.Where(t => t.ProjectDesignVariableId == r.ProjectDesignVariableId && t.ProjectDesignTemplateId == r.ProjectDesignTemplateId).
                         ToList().ForEach(t =>
                         {
+                            t.ScreeningTemplateId = screeningTemplateId;
                             t.ScreeningTemplateValue = r.ScreeningTemplateValue;
                             t.IsNa = r.IsNa;
                             t.ValueApply = true;
@@ -251,7 +252,7 @@ namespace GSC.Respository.EditCheckImpact
                     r.NumberScale = _impactService.CollectionValue(r.ScreeningTemplateValue);
             });
 
-            var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget).ToList();
+            var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget && r.ScreeningTemplateId > 0).ToList();
             targetResult.Where(r => (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
              {
                  if (r.ValidateType == EditCheckValidateType.RuleValidated)
@@ -262,7 +263,7 @@ namespace GSC.Respository.EditCheckImpact
              });
             _context.Save();
 
-            var variableResult = UpdateVariale(targetResult.Where(r => r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation).ToList(), true, isQueryRaise);
+            var variableResult = UpdateVariale(targetResult.Where(r => r.ScreeningTemplateId > 0 && (r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)).ToList(), true, isQueryRaise);
 
             if (variableResult != null)
                 editTargetValidation.AddRange(variableResult);
@@ -293,7 +294,7 @@ namespace GSC.Respository.EditCheckImpact
                         if (editCheckTarget.EditCheckDisable)
                         {
                             editCheckTarget.Value = "";
-                            editCheckTarget.IsValueSet = true;
+                            if (!string.IsNullOrEmpty(r.ScreeningTemplateValue)) editCheckTarget.IsValueSet = true;
                             editCheckTarget.Note = note;
                         }
                         if (string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.ValidateType == EditCheckValidateType.RuleValidated)

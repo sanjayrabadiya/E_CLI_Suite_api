@@ -107,6 +107,23 @@ namespace GSC.Respository.EditCheckImpact
             }
             else
             {
+                var logicalOperator = editCheck.Where(x => !x.IsTarget && (x.LogicalOperator != null || x.LogicalOperator != "")).Select(t => t.LogicalOperator).FirstOrDefault();
+                if (editCheck.Count(x => !x.IsTarget) == 2 && string.IsNullOrEmpty(logicalOperator))
+                {
+
+                    var refEditCheck = editCheck.Where(x => !x.IsTarget).ToList();
+                    if (isFromValidate)
+                        refEditCheck[0].CollectionValue = refEditCheck[1].InputValue;
+                    else
+                    {
+                        refEditCheck[0].CollectionValue = "1";
+                        refEditCheck[0].InputValue = "1";
+                        refEditCheck[0].RefernceFieldName = refEditCheck[1]?.FieldName;
+                    }
+                    editCheck = editCheck.Where(t => t.IsTarget).ToList();
+                    editCheck.Add(refEditCheck[0]);
+                }
+
                 return TargetAndReference(editCheck, isFromValidate);
             }
         }

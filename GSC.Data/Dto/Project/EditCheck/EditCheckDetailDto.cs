@@ -66,6 +66,7 @@ namespace GSC.Data.Dto.Project.EditCheck
         public bool IsReferenceValue { get; set; }
         public Operator? Operator { get; set; }
         public bool IsFormula { get; set; }
+        public bool IsSkip { get; set; }
         public bool IsTarget { get; set; }
     }
 
