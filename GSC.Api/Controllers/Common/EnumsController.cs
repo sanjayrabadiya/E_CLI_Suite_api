@@ -452,5 +452,17 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
         }
+
+        [HttpGet]
+        [Route("GetAlignment")]
+        public IList<DropDownEnum> GetAlignment()
+        {
+            return Enum.GetValues(typeof(Alignment))
+                .Cast<Alignment>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

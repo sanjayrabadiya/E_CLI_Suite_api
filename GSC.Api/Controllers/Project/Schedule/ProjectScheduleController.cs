@@ -224,6 +224,10 @@ namespace GSC.Api.Controllers.Project.Schedule
             });
 
             _uow.Save();
+
+            _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(record.ProjectDesignPeriodId);
+            _uow.Save();
+
             return Ok();
         }
 

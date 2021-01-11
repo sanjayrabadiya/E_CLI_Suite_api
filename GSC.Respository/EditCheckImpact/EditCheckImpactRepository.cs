@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
 using GSC.Data.Dto.Screening;
-using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -14,7 +12,6 @@ using GSC.Respository.Screening;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using GSC.Common.Base;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 
@@ -67,7 +64,7 @@ namespace GSC.Respository.EditCheckImpact
             _screeningTemplateEditCheckValueRepository = screeningTemplateEditCheckValueRepository;
         }
 
-        public List<EditCheckValidateDto> CheckValidation(List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic, bool isQuery)
+        public List<EditCheckValidateDto> CheckValidation(DesignScreeningTemplateDto projectDesignTemplateDto, List<Data.Dto.Screening.ScreeningTemplateValueBasic> values, ScreeningTemplateBasic screeningTemplateBasic, bool isQuery)
         {
 
             var result = _impactService.GetEditCheck(screeningTemplateBasic);
@@ -119,6 +116,28 @@ namespace GSC.Respository.EditCheckImpact
                     r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
                     r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
                 }
+
+                if (r.CollectionSource == CollectionSources.NumericScale && !r.IsSkip && !string.IsNullOrEmpty(r.ScreeningTemplateValue))
+                {
+                    if (projectDesignTemplateDto == null)
+                        r.NumberScale = _impactService.CollectionValue(r.ScreeningTemplateValue);
+                    else
+                    {
+                        var projectVariable = projectDesignTemplateDto.Variables.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
+                        if (projectVariable != null)
+                        {
+                            int projectVariableValueId;
+                            int.TryParse(r.ScreeningTemplateValue, out projectVariableValueId);
+                            var valueName = projectVariable.Values.Where(x => x.Id == projectVariableValueId).Select(t => t.ValueName).FirstOrDefault();
+                            int.TryParse(valueName, out projectVariableValueId);
+                            r.NumberScale = projectVariableValueId;
+
+                            if (projectVariableValueId == 0)
+                                r.NumberScale = _impactService.CollectionValue(r.ScreeningTemplateValue);
+                        }
+                    }
+                }
+
             });
 
             return TargetValidateProcess(result);
@@ -136,7 +155,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (!isQueryRaise)
             {
-                var Ids = result.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.IsTarget).Select(t => t.EditCheckId).ToList();
+                var Ids = result.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).ToList();
                 result = result.Where(t => Ids.Contains(t.EditCheckId)).ToList();
             }
 
@@ -190,9 +209,19 @@ namespace GSC.Respository.EditCheckImpact
                 }
                 else if (r.IsSameTemplate || (isRepated && r.IsTarget))
                 {
-                    r.ScreeningTemplateId = screeningTemplateId;
-                    r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
-                    r.IsNa = isNa;
+                    if (!r.ValueApply)
+                    {
+                        r.ScreeningTemplateId = screeningTemplateId;
+                        r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
+                        r.IsNa = isNa;
+                        result.Where(t => t.ProjectDesignVariableId == r.ProjectDesignVariableId && t.ProjectDesignTemplateId == r.ProjectDesignTemplateId).
+                        ToList().ForEach(t =>
+                        {
+                            t.ScreeningTemplateValue = r.ScreeningTemplateValue;
+                            t.IsNa = r.IsNa;
+                            t.ValueApply = true;
+                        });
+                    }
                 }
                 else if (r.ProjectDesignTemplateId != null && !isRepated)
                 {
@@ -217,16 +246,20 @@ namespace GSC.Respository.EditCheckImpact
                     r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
                     r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
                 }
+
+                if (r.IsFormula && r.CollectionSource == CollectionSources.NumericScale && !string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.NumberScale == 0)
+                    r.NumberScale = _impactService.CollectionValue(r.ScreeningTemplateValue);
             });
 
             var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget).ToList();
-            targetResult.Where(r => r.ValidateType != EditCheckValidateType.RuleValidated && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
-            {
-                if (r.CheckBy == EditCheckRuleBy.ByTemplate)
-                    UpdateEnableTemplate((int)r.ProjectDesignTemplateId, 0, screeningEntryId, r, editTargetValidation, isQueryRaise);
-                else
-                    UpdateEnableTemplate(0, (int)r.DomainId, screeningEntryId, r, editTargetValidation, isQueryRaise);
-            });
+            targetResult.Where(r => (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
+             {
+                 if (r.ValidateType == EditCheckValidateType.RuleValidated)
+                     UpdateTemplateDisable(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId);
+                 else
+                     UpdateEnableTemplate(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r, editTargetValidation, isQueryRaise);
+
+             });
             _context.Save();
 
             var variableResult = UpdateVariale(targetResult.Where(r => r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation).ToList(), true, isQueryRaise);
@@ -349,70 +382,87 @@ namespace GSC.Respository.EditCheckImpact
             return _editCheckTargetValidationLists;
         }
 
-        private void UpdateEnableTemplate(int projectDesignTemplateId, int domainId, int screeningEntryId, EditCheckValidateDto editCheckValidateDto, List<EditCheckTargetValidationList> editCheckTarget, bool isQueryRaise)
+
+        private List<ScreeningTemplate> GetEnableTemplate(int projectDesignTemplateId, int domainId, int screeningVisitId)
         {
             List<ScreeningTemplate> screeningTemplates = null;
             if (projectDesignTemplateId > 0)
                 screeningTemplates = All.AsNoTracking().
                     Where(r => r.ProjectDesignTemplateId == projectDesignTemplateId &&
-                    r.ScreeningVisit.ScreeningEntryId == screeningEntryId
-                    && r.Status > ScreeningTemplateStatus.Pending).ToList();
+                    r.ScreeningVisitId == screeningVisitId).ToList();
             else
                 screeningTemplates = All.AsNoTracking().
                     Where(r => r.ProjectDesignTemplate.DomainId == domainId
-                    && r.ScreeningVisit.ScreeningEntryId == screeningEntryId
-                    && r.Status > ScreeningTemplateStatus.Pending).ToList();
+                    && r.ScreeningVisitId == screeningVisitId).ToList();
+
+            return screeningTemplates;
+        }
+
+
+        private void UpdateTemplateDisable(int projectDesignTemplateId, int domainId, int screeningVisitId)
+        {
+            List<ScreeningTemplate> screeningTemplates = GetEnableTemplate(projectDesignTemplateId, domainId, screeningVisitId);
+            screeningTemplates.ForEach(r =>
+            {
+                r.IsDisable = false;
+                Update(r);
+            });
+            _context.Save();
+        }
+
+        private void UpdateEnableTemplate(int projectDesignTemplateId, int domainId, int screeningVisitId, EditCheckValidateDto editCheckValidateDto, List<EditCheckTargetValidationList> editCheckTarget, bool isQueryRaise)
+        {
+            List<ScreeningTemplate> screeningTemplates = GetEnableTemplate(projectDesignTemplateId, domainId, screeningVisitId);
 
             screeningTemplates.ForEach(r =>
             {
+                r.IsDisable = true;
+
+                bool isReviewed = _screeningTemplateReviewRepository.All.AsNoTracking().Any(x => x.ScreeningTemplateId == r.Id && x.Status == ScreeningTemplateStatus.Reviewed);
+                bool isFound = false;
                 var isTemplateQuery = false;
 
-                if (!r.IsDisable)
+                if (isReviewed && isQueryRaise)
                 {
-                    var screeningTemplateReview = _screeningTemplateReviewRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateId == r.Id).ToList();
-                    screeningTemplateReview.ForEach(c =>
+                    if (r.Status > ScreeningTemplateStatus.Submitted)
                     {
-                        c.IsRepeat = true;
-                        _screeningTemplateReviewRepository.Update(c);
-                    });
+                        var screeningTemplateReview = _screeningTemplateReviewRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateId == r.Id).ToList();
 
-                    if (r.Status == ScreeningTemplateStatus.Submitted || r.Status == ScreeningTemplateStatus.InProcess)
-                        TemplateValueAduit(r.Id, editCheckValidateDto);
-                    else
-                        isTemplateQuery = TemplateQuery(r.Id, editCheckValidateDto);
+                        screeningTemplateReview.ForEach(c =>
+                        {
+                            c.IsRepeat = true;
+                            _screeningTemplateReviewRepository.Update(c);
+                        });
 
-                    if (r.Status == ScreeningTemplateStatus.InProcess || r.Status == ScreeningTemplateStatus.Submitted)
-                    {
-                        r.ReviewLevel = null;
-                        r.Progress = 0;
-                        r.Status = ScreeningTemplateStatus.Pending;
-                    }
-                    else
-                    {
                         r.ReviewLevel = 1;
                         r.Status = ScreeningTemplateStatus.Submitted;
                     }
+                    TemplateQuery(r.Id, editCheckValidateDto);
+                    isFound = true;
+                }
+                else if (r.Status == ScreeningTemplateStatus.InProcess || r.Status == ScreeningTemplateStatus.Submitted)
+                {
+                    r.ReviewLevel = null;
+                    r.Progress = 0;
+                    r.Status = ScreeningTemplateStatus.Pending;
+                    TemplateValueAduit(r.Id, editCheckValidateDto);
+                    isFound = true;
+                }
+
+                if (isFound)
+                {
                     editCheckTarget.Add(new EditCheckTargetValidationList
                     {
                         ScreeningTemplateId = r.Id,
                         Status = r.Status
                     });
-                    r.IsDisable = true;
-
-                    Update(r);
-                    _context.Save();
-
-                }
-                else if (isQueryRaise && r.Status > ScreeningTemplateStatus.InProcess)
-                {
-                    isTemplateQuery = TemplateQuery(r.Id, editCheckValidateDto);
                 }
 
                 if (isTemplateQuery)
                     UnLockTemplate(r);
 
-
-
+                Update(r);
+                _context.Save();
             });
         }
 
@@ -524,7 +574,7 @@ namespace GSC.Respository.EditCheckImpact
                     StartParens = x.StartParens,
                     CollectionSource = x.CollectionSource,
                     DataType = x.DataType,
-                    InputValue = x.ScreeningTemplateValue,
+                    InputValue = x.IsFormula && x.CollectionSource == CollectionSources.NumericScale ? x.NumberScale.ToString() : x.ScreeningTemplateValue,
                     IsReferenceValue = x.IsReferenceValue,
                     Operator = x.Operator,
                     IsFormula = x.IsFormula,
@@ -585,6 +635,7 @@ namespace GSC.Respository.EditCheckImpact
             if (collectionSource == CollectionSources.RadioButton ||
                  collectionSource == CollectionSources.CheckBox ||
                  collectionSource == CollectionSources.MultiCheckBox ||
+                 collectionSource == CollectionSources.NumericScale ||
                  collectionSource == CollectionSources.ComboBox)
             {
                 decimal id;

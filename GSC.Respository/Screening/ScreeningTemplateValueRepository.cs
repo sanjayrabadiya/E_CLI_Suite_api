@@ -83,7 +83,7 @@ namespace GSC.Respository.Screening
 
                 var audit = new ScreeningTemplateValueAudit
                 {
-                    ScreeningTemplateValue= screeningTemplateValue,
+                    ScreeningTemplateValue = screeningTemplateValue,
                     Value = string.IsNullOrEmpty(variable.DefaultValue) ? "" : variable.DefaultValue,
                     OldValue = null,
                     Note = "Submitted with default data"
@@ -223,6 +223,8 @@ namespace GSC.Respository.Screening
                                 x.ProjectDesignVariable.Values.Any(r => r.ValueCode == "Dis01"));
         }
 
+       
+
         public string GetValueForAudit(ScreeningTemplateValueDto screeningTemplateValueDto)
         {
             if (screeningTemplateValueDto.IsDeleted) return null;
@@ -359,7 +361,8 @@ namespace GSC.Respository.Screening
                                             value.IsNa && string.IsNullOrEmpty(value.Value)
                                               ? "NA"
                                            : value.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
-                                                value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton
+                                                value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton ||
+                                                value.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale
                                                   ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                                       b.ProjectDesignVariableId == value.ProjectDesignVariable.Id &&
                                                       b.Id == Convert.ToInt32(value.Value)).ValueName
@@ -519,7 +522,8 @@ namespace GSC.Respository.Screening
                                         : value.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
                                         value.IsNa && string.IsNullOrEmpty(value.Value) ? "NA"
                                         : value.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
-                                        value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton
+                                        value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton ||
+                                        value.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale
                                         ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                         b.ProjectDesignVariableId == value.ProjectDesignVariable.Id &&
                                         b.Id == Convert.ToInt32(value.Value)).ValueName

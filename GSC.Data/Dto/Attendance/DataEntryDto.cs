@@ -73,7 +73,7 @@ namespace GSC.Data.Dto.Attendance
             get => _scheduleDate.UtcDate();
             set => _scheduleDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
-
+        public bool IsSchedule { get; set; }
         private DateTime? _actualDate { get; set; }
         public DateTime? ActualDate
         {

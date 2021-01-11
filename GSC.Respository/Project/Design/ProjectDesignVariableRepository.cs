@@ -45,7 +45,7 @@ namespace GSC.Respository.Project.Design
                                   && x.ProjectDesignTemplateId == projectDesignTemplateId);
 
             if (isFormula)
-                result = result.Where(x => x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character);
+                result = result.Where(x => (x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character) || (x.CollectionSource == CollectionSources.NumericScale));
 
             return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownVaribleDto
             {
@@ -176,7 +176,7 @@ namespace GSC.Respository.Project.Design
                                             .ProjectDesignId == projectDesignId);
 
             if (isFormula)
-                result = result.Where(x => x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character);
+                result = result.Where(x => (x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character) || (x.CollectionSource == CollectionSources.NumericScale));
 
             var variableResult = result.Select(c => new DropDownVaribleDto
             {
@@ -231,7 +231,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownVaribleDto> GetVariabeAnnotationDropDownForVisitStatus(int projectDesignTemplateId)
         {
             var result = All.Where(x => x.DeletedDate == null
-                                  && x.ProjectDesignTemplateId == projectDesignTemplateId && 
+                                  && x.ProjectDesignTemplateId == projectDesignTemplateId &&
                                   (x.CollectionSource == CollectionSources.Date || x.CollectionSource == CollectionSources.DateTime));
 
             return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownVaribleDto

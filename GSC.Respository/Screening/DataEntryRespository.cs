@@ -89,7 +89,8 @@ namespace GSC.Respository.Screening
                  }).ToList()
              }).ToListAsync();
 
-            var templates = await _screeningTemplateRepository.All.Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).
+            var templates = await _screeningTemplateRepository.All.
+                Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && !r.IsDisable && r.DeletedDate == null).
                 GroupBy(c => new
                 {
                     c.ScreeningVisit.ScreeningEntryId,
@@ -144,7 +145,8 @@ namespace GSC.Respository.Screening
                     VisitStatus = a.Status.GetDescription(),
                     VisitStatusId = (int)a.Status,
                     ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
-                    ScheduleDate = a.ScheduleDate
+                    ScheduleDate = a.ScheduleDate,
+                    IsSchedule = a.IsSchedule
                 }).OrderBy(b => b.ProjectDesignVisitId).ToList()
 
             }).ToListAsync();

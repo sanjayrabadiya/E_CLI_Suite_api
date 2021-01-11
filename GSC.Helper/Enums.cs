@@ -542,4 +542,12 @@ namespace GSC.Helper
         [Description("MedDRA")] MedDRA = 2
     }
 
+    public enum Alignment : short
+    {
+        [Description("Left")] Left = 1,
+        [Description("Right")] Right = 2,
+        [Description("Top")] Top = 3,
+        [Description("Bottom")] Bottom = 4
+    }
+
 }

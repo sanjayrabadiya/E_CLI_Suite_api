@@ -63,6 +63,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsSubmittedButton { get; set; }
         public int ScreeningTemplateId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
+        public bool IsSchedule { get; set; }
         public string EditCheckMessage { get; set; }
         public bool IsWarning { get; set; }
         public bool IsLocked { get; set; }

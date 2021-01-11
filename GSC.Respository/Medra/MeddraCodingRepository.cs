@@ -78,7 +78,7 @@ namespace GSC.Respository.Medra
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
 
-            var Exists = All.Where(x => x.ScreeningTemplateValue.ProjectDesignVariableId == meddraCodingDto.ProjectDesignVariableId 
+            var Exists = All.Where(x => x.ScreeningTemplateValue.ProjectDesignVariableId == meddraCodingDto.ProjectDesignVariableId
             && projectList.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) && x.DeletedDate == null && x.MeddraSocTermId != null);
 
             if (meddraCodingDto.ProjectId != 0)
@@ -278,7 +278,8 @@ namespace GSC.Respository.Medra
                                         : value.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
                                         value.IsNa && string.IsNullOrEmpty(value.Value) ? "NA"
                                         : value.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
-                                        value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton
+                                        value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton ||
+                                         value.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale
                                         ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                         b.ProjectDesignVariableId == value.ProjectDesignVariable.Id &&
                                         b.Id == Convert.ToInt32(value.Value)).ValueName

@@ -59,6 +59,7 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
 
         public IList<VariableRemarks> Remarks { get; set; } = null;
+        public Alignment? Alignment { get; set; }
     }
 
     public class VariableGridDto : BaseAuditDto
