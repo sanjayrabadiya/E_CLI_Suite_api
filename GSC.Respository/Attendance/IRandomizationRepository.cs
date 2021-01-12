@@ -35,5 +35,7 @@ namespace GSC.Respository.Attendance
         string ValidateScreeningNumber(RandomizationDto randomization);
         string ValidateRandomizationNumber(RandomizationDto randomization);
         List<DropDownDto> GetRandomizationDropdown(int projectid);
+        bool IsScreeningFormatSetInStudy(int id);
+        bool IsRandomFormatSetInStudy(int id);
     }
 }
