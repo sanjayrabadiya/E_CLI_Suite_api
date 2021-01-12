@@ -357,6 +357,30 @@ namespace GSC.Respository.Attendance
             return randomizationNumberDto;
         }
 
+        public bool IsScreeningFormatSetInStudy(int id)
+        {
+            var randomization = Find(id);
+            var sitedata = _projectRepository.Find(randomization.ProjectId);
+            var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
+            if (studydata.IsManualScreeningNo == null || studydata.ScreeningLength == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public bool IsRandomFormatSetInStudy(int id)
+        {
+            var randomization = Find(id);
+            var sitedata = _projectRepository.Find(randomization.ProjectId);
+            var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
+            if (studydata.IsManualRandomNo == null || studydata.RandomNoLength == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public RandomizationNumberDto GenerateScreeningNumber(int id)
         {
             var randomization = Find(id);
@@ -676,7 +700,7 @@ namespace GSC.Respository.Attendance
                 dashboardPatientDto.studycode = parentproject.ProjectCode;
                 dashboardPatientDto.studyname = parentproject.ProjectName;
                 dashboardPatientDto.sitecode = project.ProjectCode;
-                dashboardPatientDto.sitename = project.SiteName;
+                dashboardPatientDto.sitename = project.ProjectName;
                 dashboardPatientDto.patientStatusId = (int)randomization.PatientStatusId;
                 dashboardPatientDto.patientStatus = randomization.PatientStatusId.GetDescription();
                 var siteteams = _siteTeamRepository.FindBy(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null).ToList();
@@ -758,7 +782,7 @@ namespace GSC.Respository.Attendance
                 r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
-                            ScheduleDate = r.ScreeningVisit.ScheduleDate,
+                            ScheduleDate = r.ScheduleDate,
                         }).OrderBy(r => r.DesignOrder).ToList();
             data.ForEach(x =>
             {

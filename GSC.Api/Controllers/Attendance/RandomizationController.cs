@@ -401,15 +401,33 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("GetRandomizationNumber/{id}")]
         public IActionResult GetRandomizationNumber(int id)
         {
-            var data = _randomizationRepository.GetRandomizationNumber(id);
-            return Ok(data);
+            var isvalid = _randomizationRepository.IsRandomFormatSetInStudy(id);
+            if (isvalid == true)
+            {
+                var data = _randomizationRepository.GetRandomizationNumber(id);
+                return Ok(data);
+            } else
+            {
+                ModelState.AddModelError("Message", "Please set Randomization Number format in Study Setup");
+                return BadRequest(ModelState);
+            }
+            
         }
 
         [HttpGet("GetScreeningNumber/{id}")]
         public IActionResult GetScreeningNumber(int id)
         {
-            var data = _randomizationRepository.GetScreeningNumber(id);
-            return Ok(data);
+            var isvalid = _randomizationRepository.IsScreeningFormatSetInStudy(id);
+            if (isvalid == true)
+            {
+                var data = _randomizationRepository.GetScreeningNumber(id);
+                return Ok(data);
+            } else
+            {
+                ModelState.AddModelError("Message", "Please set Screening Number format in Study Setup");
+                return BadRequest(ModelState);
+            }
+            
         }
 
         [HttpGet]
