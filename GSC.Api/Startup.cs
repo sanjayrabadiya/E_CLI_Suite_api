@@ -107,6 +107,7 @@ namespace GSC.Api
                 e.MapHub<MessageHub>("/MessageHub");
             });
             //app.UseSpa(spa => { spa.Options.SourcePath = "wwwroot"; });
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzgxNjc2QDMxMzgyZTM0MmUzMG9ETm5BR0xPZzdMbjN0dTcwbjJhUmw2SUtqNUxYaEc4WFNrNXcwUzZvdEk9");
         }
 
 
