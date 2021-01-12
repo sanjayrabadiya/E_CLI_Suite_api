@@ -321,5 +321,12 @@ namespace GSC.Api.Controllers.Screening
 
             return Ok(auditsDto);
         }
+
+        [HttpGet]
+        [Route("CheckLockedProject/{ProjectId}")]
+        public IActionResult CheckLockedProject(int ProjectId)
+        {
+            return Ok(_screeningTemplateRepository.CheckLockedProject(ProjectId));
+        }
     }
 }

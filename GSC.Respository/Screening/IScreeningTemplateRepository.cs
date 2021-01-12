@@ -30,5 +30,7 @@ namespace GSC.Respository.Screening
         string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel);
         IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
         IList<VisitDeviationReport> GetVisitDeviationReport(VisitDeviationReportSearchDto filters);
+
+        bool CheckLockedProject(int ProjectId);
     }
 }

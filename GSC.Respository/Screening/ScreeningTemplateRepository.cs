@@ -918,6 +918,18 @@ namespace GSC.Respository.Screening
             }
             return finaldata;
         }
+
+        public bool CheckLockedProject(int ProjectId)
+        {
+            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == ProjectId).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == ProjectId).ToList().Select(x => x.Id).ToList();
+
+            var ScreeningTemplates = All.Where(y => y.DeletedDate == null && ParentProject != null ? y.ScreeningVisit.ScreeningEntry.ProjectId == ProjectId
+            : sites.Contains(y.ScreeningVisit.ScreeningEntry.ProjectId)).ToList();
+
+            var IsLocked = ScreeningTemplates.Count() <= 0 || ScreeningTemplates.Any(y => y.IsLocked == false) ? false : true;
+            return IsLocked;
+        }
     }
 }
 
