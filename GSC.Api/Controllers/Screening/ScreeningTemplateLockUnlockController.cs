@@ -15,6 +15,7 @@ using GSC.Respository.Screening;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GSC.Api.Controllers.Screening
@@ -75,34 +76,37 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpPut]
-        [Route("LockUnlockTemplateList/{status}")]
+        [Route("LockUnlockTemplateList")]
         [TransactionRequired]
-        public IActionResult LockUnlockTemplateList([FromBody] ScreeningTemplateLockUnlockAuditDto item, ScreeningTemplateStatus status)
+        public IActionResult LockUnlockTemplateList([FromBody] List<ScreeningTemplateLockUnlockAuditDto> AuditList)
         {
-            var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.Id == item.ScreeningTemplateId && x.DeletedDate == null).FirstOrDefault();
-
-            if (item.IsLocked)
-                CheckEditCheck(item.ScreeningTemplateId);
-
-            string validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(item.ScreeningTemplateId);
-
-            if (!string.IsNullOrEmpty(validateMsg))
+            foreach (var item in AuditList)
             {
-                ModelState.AddModelError("Message", validateMsg);
-                return BadRequest(ModelState);
-            }
+                var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.Id == item.ScreeningTemplateId && x.DeletedDate == null).FirstOrDefault();
 
-            var screeningTemplateLockUnlock = _mapper.Map<ScreeningTemplateLockUnlockAudit>(item);
-            _screeningTemplateLockUnlockRepository.Insert(screeningTemplateLockUnlock);
-            screeningTemplate.IsLocked = item.IsLocked;
-            _screeningTemplateRepository.Update(screeningTemplate);
-            if (_uow.Save() <= 0)
-            {
-                throw new Exception($"Failed Lock Unlock Template");
-            }
+                if (item.IsLocked)
+                    CheckEditCheck(item.ScreeningTemplateId);
 
-            if (!item.IsLocked)
-                CheckEditCheck(item.ScreeningTemplateId);
+                string validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(item.ScreeningTemplateId);
+
+                if (!string.IsNullOrEmpty(validateMsg))
+                {
+                    ModelState.AddModelError("Message", validateMsg);
+                    return BadRequest(ModelState);
+                }
+
+                var screeningTemplateLockUnlock = _mapper.Map<ScreeningTemplateLockUnlockAudit>(item);
+                _screeningTemplateLockUnlockRepository.Insert(screeningTemplateLockUnlock);
+                screeningTemplate.IsLocked = item.IsLocked;
+                _screeningTemplateRepository.Update(screeningTemplate);
+                if (_uow.Save() <= 0)
+                {
+                    throw new Exception($"Failed Lock Unlock Template");
+                }
+
+                if (!item.IsLocked)
+                    CheckEditCheck(item.ScreeningTemplateId);
+            }
             return Ok();
         }
 
