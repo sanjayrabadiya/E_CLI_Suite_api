@@ -49,10 +49,10 @@ namespace GSC.Respository.Project.Design
                     ProjectDesignTemplateId = r.Id,
                     ProjectDesignVisitId = r.ProjectDesignVisitId,
                     TemplateName = ((_jwtTokenAccesser.Language != 1) ?
-                        r.TemplateLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.TemplateName),
+                        r.TemplateLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && r.DeletedDate == null && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.TemplateName),
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
-                    Notes = _jwtTokenAccesser.Language != 1 ? r.TemplateLanguage.Where(c => c.DeletedDate == null && c.LanguageId == _jwtTokenAccesser.Language).Select(a => a.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
+                    Notes = _jwtTokenAccesser.Language != 1 ? r.TemplateLanguage.Where(c => c.DeletedDate == null && r.DeletedDate == null && c.LanguageId == _jwtTokenAccesser.Language).Select(a => a.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,
@@ -72,7 +72,7 @@ namespace GSC.Respository.Project.Design
                         ProjectDesignVariableId = x.Id,
                         Id = x.Id,
                         VariableName = (_jwtTokenAccesser.Language != 1 ?
-                        x.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName),
+                        x.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName),
                         VariableCode = x.VariableCode,
                         CollectionSource = x.CollectionSource,
                         ValidationType = x.ValidationType,
@@ -86,7 +86,7 @@ namespace GSC.Respository.Project.Design
                         {
                             Id = c.Id,
                             ProjectDesignVariableId = c.ProjectDesignVariableId,
-                            ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
+                            ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
                             SeqNo = c.SeqNo,
                             Label = c.Label,
                         }).ToList(),
@@ -99,7 +99,7 @@ namespace GSC.Respository.Project.Design
                         IsNa = x.IsNa,
                         DateValidate = x.DateValidate,
                         Note = (_jwtTokenAccesser.Language != 1 ?
-                        x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
+                        x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
                     }).OrderBy(r => r.DesignOrder).ToList();
 
