@@ -291,6 +291,7 @@ namespace GSC.Api.Helpers
             CreateMap<SiteTeam, SiteTeamDto>().ReverseMap();
             CreateMap<AppScreenPatient, AppScreenPatientDto>().ReverseMap();
             CreateMap<AppScreenPatientRights, AppScreenPatientRightsDto>().ReverseMap();
+            CreateMap<VariableCategory, VariableCategoryDto>().ReverseMap();
 
 
 

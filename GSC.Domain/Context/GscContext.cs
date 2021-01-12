@@ -301,6 +301,7 @@ namespace GSC.Domain.Context
         public DbSet<AppScreenPatient> AppScreenPatient { get; set; }
         public DbSet<SMSSetting> SMSSetting { get; set; }
         public DbSet<ScreeningTemplateEditCheckValue> ScreeningTemplateEditCheckValue { get; set; }
+        public DbSet<VariableCategoryLanguage> VariableCategoryLanguage { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

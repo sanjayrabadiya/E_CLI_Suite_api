@@ -232,6 +232,11 @@ namespace GSC.Api.Helpers
             .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
             .ReverseMap();
 
+            CreateMap<VariableCategoryLanguage, VariableCategoryLanguageGridDto>()
+           .ForMember(x => x.CategoryName, x => x.MapFrom(a => a.VariableCategory.CategoryName))
+           .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
+           .ReverseMap();
+
             CreateMap<SiteTeam, SiteTeamGridDto>().ReverseMap();
         }
     }
