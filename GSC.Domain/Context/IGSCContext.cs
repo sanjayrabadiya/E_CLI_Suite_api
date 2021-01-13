@@ -1,6 +1,7 @@
 ﻿using GSC.Common;
 using GSC.Common.Base;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Entities.AdverseEvent;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Barcode;
@@ -256,6 +257,7 @@ namespace GSC.Domain.Context
         DbSet<SMSSetting> SMSSetting { get; set; }
         DbSet<VariableCategoryLanguage> VariableCategoryLanguage { get; set; }
         DbSet<ScreeningTemplateEditCheckValue> ScreeningTemplateEditCheckValue { get; set; }
+        DbSet<AEReporting> AEReporting { get; set; }
 
     }
 }

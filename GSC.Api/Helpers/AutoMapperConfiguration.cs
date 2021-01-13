@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Audit;
 using GSC.Data.Dto.Barcode;
@@ -23,6 +24,7 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Dto.Volunteer;
+using GSC.Data.Entities.AdverseEvent;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Barcode;
@@ -292,6 +294,7 @@ namespace GSC.Api.Helpers
             CreateMap<AppScreenPatient, AppScreenPatientDto>().ReverseMap();
             CreateMap<AppScreenPatientRights, AppScreenPatientRightsDto>().ReverseMap();
             CreateMap<VariableCategory, VariableCategoryDto>().ReverseMap();
+            CreateMap<AEReporting, AEReportingDto>().ReverseMap();
 
 
 

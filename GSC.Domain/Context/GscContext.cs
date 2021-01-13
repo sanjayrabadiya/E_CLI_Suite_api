@@ -8,6 +8,7 @@ using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Entities.AdverseEvent;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Barcode;
@@ -302,6 +303,7 @@ namespace GSC.Domain.Context
         public DbSet<SMSSetting> SMSSetting { get; set; }
         public DbSet<ScreeningTemplateEditCheckValue> ScreeningTemplateEditCheckValue { get; set; }
         public DbSet<VariableCategoryLanguage> VariableCategoryLanguage { get; set; }
+        public DbSet<AEReporting> AEReporting { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

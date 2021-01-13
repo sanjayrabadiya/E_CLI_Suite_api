@@ -40,6 +40,7 @@ using GSC.Shared.JWTAuth;
 using GSC.Shared.Caching;
 using GSC.Common.Common;
 using GSC.Respository.LanguageSetup;
+using GSC.Respository.AdverseEvent;
 
 namespace GSC.Api.Helpers
 {
@@ -288,6 +289,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IScreeningTemplateEditCheckValueRepository, ScreeningTemplateEditCheckValueRepository>();
             services.AddScoped<IReportSyncfusion, ReportSyncfusion>();
             services.AddScoped<IVariableCategoryLanguageRepository, VariableCategoryLanguageRepository>();
+            services.AddScoped<IAEReportingRepository, AEReportingRepository>();
 
         }
     }

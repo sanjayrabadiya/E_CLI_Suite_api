@@ -4,6 +4,7 @@ using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Entities.AdverseEvent;
 using GSC.Domain.Context;
 using GSC.Respository.Attendance;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,10 @@ namespace GSC.Respository.AdverseEvent
             if (randomization == null) return new List<AEReportingDto>();
             var data = FindBy(x => x.RandomizationId == randomization.Id).ToList();
             var datadtos = _mapper.Map<List<AEReportingDto>>(data);
+            datadtos.ForEach(x =>
+            {
+                x.EventEffectName = x.EventEffect.GetDescription();
+            });
             return datadtos;
         }
     }
