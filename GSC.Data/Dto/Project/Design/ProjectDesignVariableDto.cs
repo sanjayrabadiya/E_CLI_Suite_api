@@ -64,7 +64,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsSystem { get; set; }
         public string Note { get; set; }
         public EditCheckTargetValidation EditCheckValidation { get; set; }
-        public Alignment Alignment { get; set; }
+        public Alignment? Alignment { get; set; }
     }
 
     public class DesignScreeningVariableDto
