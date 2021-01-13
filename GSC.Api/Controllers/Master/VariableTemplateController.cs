@@ -177,10 +177,15 @@ namespace GSC.Api.Controllers.Master
                     result.Note = variableTemplate.VariableTemplateDetails[i].Note;
                     result.DeletedBy = null;
                     variableTemplate.VariableTemplateDetails[i] = result;
+                    variableTemplate.VariableTemplateDetails[i].SeqNo = i + 1;
+                    _variableTemplateDetailRepository.Update(result);
+                }
+                else
+                {
+                    variableTemplate.VariableTemplateDetails[i].SeqNo = i + 1;
+                    _variableTemplateDetailRepository.Add(variableTemplate.VariableTemplateDetails[i]);
                 }
 
-                variableTemplate.VariableTemplateDetails[i].SeqNo = i + 1;
-                _variableTemplateDetailRepository.Update(result);
             }
         }
 
