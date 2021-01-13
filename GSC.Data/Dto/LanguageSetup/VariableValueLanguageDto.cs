@@ -10,6 +10,7 @@ namespace GSC.Data.Dto.Master.LanguageSetup
         public int ProjectDesignVariableValueId { get; set; }
         public int LanguageId { get; set; }
         public string Display { get; set; }
+        public string LabelName { get; set; }
         public string DefaultDisplay { get; set; }
         public IList<VariableValueLanguageDto> VariableValueLanguages { get; set; }
         public ProjectDesignVariableValue ProjectDesignVariableValue { get; set; }
@@ -20,6 +21,7 @@ namespace GSC.Data.Dto.Master.LanguageSetup
     {
         public int ProjectDesignVariableValueId { get; set; }
         public string ValueName { get; set; }
+        public string LabelName { get; set; }
         public string LanguageName { get; set; }
         public int LanguageId { get; set; }
         public string Display { get; set; }

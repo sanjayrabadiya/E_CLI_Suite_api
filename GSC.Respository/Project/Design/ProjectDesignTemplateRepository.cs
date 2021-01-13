@@ -30,9 +30,16 @@ namespace GSC.Respository.Project.Design
         {
             var template = _context.ProjectDesignTemplate.
                 Where(t => t.Id == id)
+                .Include(d=>d.TemplateLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.ProjectDesignTemplateNote.Where(x => x.DeletedBy == null))
+                .ThenInclude(d => d.TemplateNoteLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.Values.Where(x => x.DeletedBy == null).OrderBy(c => c.SeqNo))
+                .ThenInclude(d=>d.VariableValueLanguage.Where(x => x.DeletedBy == null))
+                .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
+                .ThenInclude(d => d.VariableLanguage.Where(x => x.DeletedBy == null))
+                .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
+                .ThenInclude(d => d.VariableNoteLanguage.Where(x => x.DeletedBy == null))
                 .AsNoTracking().FirstOrDefault();
 
             return template;
@@ -94,7 +101,8 @@ namespace GSC.Respository.Project.Design
                         UnitName = x.Unit.UnitName,
                         DesignOrder = x.DesignOrder,
                         IsDocument = x.IsDocument,
-                        VariableCategoryName = x.VariableCategory.CategoryName ?? "",
+                        VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
                         SystemType = x.SystemType,
                         IsNa = x.IsNa,
                         DateValidate = x.DateValidate,

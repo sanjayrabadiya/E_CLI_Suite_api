@@ -11,6 +11,7 @@ namespace GSC.Data.Entities.LanguageSetup
         public int ProjectDesignVariableValueId { get; set; }
         public int LanguageId { get; set; }
         public string Display { get; set; }
+        public string LabelName { get; set; }
         public ProjectDesignVariableValue ProjectDesignVariableValue { get; set; }
         public Language Language { get; set; }
     }

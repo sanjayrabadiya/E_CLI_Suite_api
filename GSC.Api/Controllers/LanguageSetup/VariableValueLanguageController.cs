@@ -60,6 +60,7 @@ namespace GSC.Api.Controllers.LanguageSetup
                     language.ProjectDesignVariableValueId = item.ProjectDesignVariableValueId;
                     language.LanguageId = item.LanguageId;
                     language.Display = item.Display;
+                    language.LabelName = item.LabelName;
                     _variableValueLanguageRepository.Add(language);
                 }
             }
