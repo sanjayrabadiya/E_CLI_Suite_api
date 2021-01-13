@@ -409,8 +409,8 @@ namespace GSC.Respository.Master
             schedulesDetailsDto.NoofVisit = _context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignVisitId).Select(t => t.Key).Count();
             schedulesDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteSchedule == true);
 
-            editCheckDetailsDto.NoofFormulas = GetNoOfFormulas(projectDeisgnId);
-            editCheckDetailsDto.NoofRules = projectDeisgnId == null ? 0 : _context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).ToList().Count();
+            editCheckDetailsDto.NoofFormulas = projectDeisgnId == null ? 0 : _context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsFormula == true).ToList().Count();
+            editCheckDetailsDto.NoofRules = projectDeisgnId == null ? 0 : _context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsFormula == false).ToList().Count();
             editCheckDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteEditCheck == true);
 
             projectDetailsDto.siteDetails = siteDetailsDto;
