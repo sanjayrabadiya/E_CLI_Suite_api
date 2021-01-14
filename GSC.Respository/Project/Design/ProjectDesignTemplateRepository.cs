@@ -30,12 +30,12 @@ namespace GSC.Respository.Project.Design
         {
             var template = _context.ProjectDesignTemplate.
                 Where(t => t.Id == id)
-                .Include(d=>d.TemplateLanguage.Where(x => x.DeletedBy == null))
+                .Include(d => d.TemplateLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.ProjectDesignTemplateNote.Where(x => x.DeletedBy == null))
                 .ThenInclude(d => d.TemplateNoteLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.Values.Where(x => x.DeletedBy == null).OrderBy(c => c.SeqNo))
-                .ThenInclude(d=>d.VariableValueLanguage.Where(x => x.DeletedBy == null))
+                .ThenInclude(d => d.VariableValueLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.VariableLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
@@ -106,6 +106,7 @@ namespace GSC.Respository.Project.Design
                         SystemType = x.SystemType,
                         IsNa = x.IsNa,
                         DateValidate = x.DateValidate,
+                        Alignment = x.Alignment??Alignment.Right,
                         Note = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
