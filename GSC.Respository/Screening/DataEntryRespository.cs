@@ -273,29 +273,35 @@ namespace GSC.Respository.Screening
 
         public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitQuery(int screeningVisitId, QueryStatus queryStatus)
         {
+            var tempResult = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null);
+            if (queryStatus == QueryStatus.Acknowledge)
+            {
+                tempResult = tempResult.Where(s => s.ScreeningTemplateValues.Any(r => r.AcknowledgeLevel != r.ReviewLevel && (r.QueryStatus == QueryStatus.Resolved || r.QueryStatus == QueryStatus.SelfCorrection) && r.DeletedDate == null));
+            }
+            else
+                tempResult = tempResult.Where(s => s.ScreeningTemplateValues.Any(r => r.QueryStatus == queryStatus && r.DeletedDate == null));
 
-            var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.ScreeningTemplateValues.Any(r => r.QueryStatus == queryStatus && r.DeletedDate == null))
-                 .Select(t => new DataEntryTemplateCountDisplayTree
-                 {
-                     Id = t.Id,
-                     ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
-                     ScreeningVisitId = t.ScreeningVisitId,
-                     ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                     Status = t.Status,
-                     ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                     DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
-                     Progress = t.Progress ?? 0,
-                     ReviewLevel = t.ReviewLevel,
-                     IsLocked = t.IsLocked,
-                     MyReview = false,
-                     ParentId = t.ParentId,
-                     ScheduleDate = t.ScheduleDate,
-                     TemplateName = t.ProjectDesignTemplate.TemplateName,
-                     VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                     SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+            var result = tempResult.Select(t => new DataEntryTemplateCountDisplayTree
+            {
+                Id = t.Id,
+                ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                ScreeningVisitId = t.ScreeningVisitId,
+                ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                Status = t.Status,
+                ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                Progress = t.Progress ?? 0,
+                ReviewLevel = t.ReviewLevel,
+                IsLocked = t.IsLocked,
+                MyReview = false,
+                ParentId = t.ParentId,
+                ScheduleDate = t.ScheduleDate,
+                TemplateName = t.ProjectDesignTemplate.TemplateName,
+                VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                 }).ToList().OrderBy(t => t.DesignOrder).ToList();
+            }).ToList().OrderBy(t => t.DesignOrder).ToList();
 
 
             return result;
