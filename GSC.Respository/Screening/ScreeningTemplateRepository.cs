@@ -464,21 +464,15 @@ namespace GSC.Respository.Screening
             if (statusId > 2)
             {
                 if (workflowlevel.LevelNo <= templateBasic.ReviewLevel || workflowlevel.LevelNo == 0)
-                    workFlowButton.SelfCorrection = workflowlevel.SelfCorrection &&
-                                                    screeningValue.QueryStatus != QueryStatus.SelfCorrection;
+                    workFlowButton.SelfCorrection = workflowlevel.SelfCorrection && screeningValue.QueryStatus != QueryStatus.SelfCorrection;
 
-
-                if (workflowlevel.LevelNo == screeningValue.AcknowledgeLevel ||
-                    workflowlevel.LevelNo == 0 && workflowlevel.IsStartTemplate)
-                    workFlowButton.Update = screeningValue.QueryStatus == QueryStatus.Open ||
-                                            screeningValue.QueryStatus == QueryStatus.Reopened;
+                if (workflowlevel.LevelNo == screeningValue.AcknowledgeLevel || (workflowlevel.LevelNo == 0 && workflowlevel.IsStartTemplate))
+                    workFlowButton.Update = screeningValue.QueryStatus == QueryStatus.Open || screeningValue.QueryStatus == QueryStatus.Reopened;
 
                 if (templateBasic.Status != ScreeningTemplateStatus.Completed && workflowlevel.IsGenerateQuery && (designTemplateDto.MyReview || workflowlevel.LevelNo == 0))
-                    workFlowButton.Generate = screeningValue.QueryStatus == null ||
-                                              screeningValue.QueryStatus == QueryStatus.Closed;
+                    workFlowButton.Generate = screeningValue.QueryStatus == null || screeningValue.QueryStatus == QueryStatus.Closed;
 
-                if (workflowlevel.LevelNo == screeningValue.ReviewLevel &&
-                    screeningValue.ReviewLevel == screeningValue.AcknowledgeLevel)
+                if (workflowlevel.LevelNo == screeningValue.AcknowledgeLevel)
                     workFlowButton.Review = screeningValue.QueryStatus == QueryStatus.Answered || screeningValue.QueryStatus == QueryStatus.Resolved;
 
                 if (workflowlevel.LevelNo == 0 && workFlowButton.Review)
@@ -494,11 +488,8 @@ namespace GSC.Respository.Screening
                     workFlowButton.DeleteQuery = true;
                 }
 
-                if (!designTemplateDto.MyReview && workflowlevel.LevelNo == screeningValue.AcknowledgeLevel &&
-                  screeningValue.AcknowledgeLevel != screeningValue.ReviewLevel)
-                    workFlowButton.Acknowledge = screeningValue.QueryStatus == QueryStatus.Resolved ||
-                                                 screeningValue.QueryStatus == QueryStatus.SelfCorrection;
-
+                if (screeningValue.AcknowledgeLevel != workflowlevel.LevelNo)
+                    workFlowButton.Acknowledge = screeningValue.QueryStatus == QueryStatus.Resolved || screeningValue.QueryStatus == QueryStatus.SelfCorrection;
 
                 if (workflowlevel.LevelNo > 0 && templateBasic.IsNoCRF && !workflowlevel.IsNoCRF)
                 {

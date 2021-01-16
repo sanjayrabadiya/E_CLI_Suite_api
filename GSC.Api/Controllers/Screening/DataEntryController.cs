@@ -85,10 +85,10 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [Route("GetTemplateVisitMyQuery/{screeningVisitId}/{myLevel}")]
-        public IActionResult GetTemplateVisitMyQuery(int screeningVisitId, short myLevel)
+        [Route("GetTemplateVisitMyQuery/{screeningVisitId}/{parentProjectId}")]
+        public IActionResult GetTemplateVisitMyQuery(int screeningVisitId, int parentProjectId)
         {
-            return Ok(_dataEntryRespository.GetTemplateVisitMyQuery(screeningVisitId, myLevel));
+            return Ok(_dataEntryRespository.GetTemplateVisitMyQuery(screeningVisitId, parentProjectId));
         }
 
         [HttpGet]

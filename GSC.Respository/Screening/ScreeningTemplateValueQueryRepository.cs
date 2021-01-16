@@ -82,13 +82,14 @@ namespace GSC.Respository.Screening
             var value = string.IsNullOrEmpty(screeningTemplateValueQueryDto.ValueName)
                 ? screeningTemplateValueQueryDto.Value
                 : screeningTemplateValueQueryDto.ValueName;
-            var updateQueryStatus = new QueryStatus();
-            updateQueryStatus = screeningTemplateValueQueryDto.Value == screeningTemplateValue.Value
+
+            var updateQueryStatus = screeningTemplateValueQueryDto.Value == screeningTemplateValue.Value
                 ? QueryStatus.Answered
                 : QueryStatus.Resolved;
 
             if (screeningTemplateValue.IsSystem)
             {
+                screeningTemplateValue.AcknowledgeLevel = null;
                 updateQueryStatus = QueryStatus.Closed;
             }
 
@@ -100,26 +101,23 @@ namespace GSC.Respository.Screening
             screeningTemplateValue.QueryStatus = updateQueryStatus;
             screeningTemplateValue.Value = screeningTemplateValueQueryDto.Value;
             screeningTemplateValue.IsNa = screeningTemplateValueQueryDto.IsNa;
-            if (updateQueryStatus == QueryStatus.Resolved)
-            {
-                var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
-                if (screeningTemplate.ReviewLevel == 1)
-                    screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
-                else if (screeningTemplateValue.AcknowledgeLevel != null &&
-                         screeningTemplateValue.AcknowledgeLevel == -1)
-                    screeningTemplateValue.AcknowledgeLevel = 1;
-                else
-                    screeningTemplateValue.AcknowledgeLevel =
-                        Convert.ToInt16(screeningTemplateValue.AcknowledgeLevel + 1);
-            }
-            else
+
+            var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
+
+            if (updateQueryStatus == QueryStatus.Answered || screeningTemplate.ReviewLevel == 1)
             {
                 screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
             }
+            else if (updateQueryStatus == QueryStatus.Resolved)
+            {
+                var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
+                if (workFlowLevel.IsWorkFlowBreak)
+                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(screeningTemplate.StartLevel + 1);
+                else
+                    screeningTemplateValue.AcknowledgeLevel = 1;
+            }
 
-
-            QueryAudit(screeningTemplateValueQueryDto, screeningTemplateValue, updateQueryStatus.ToString(), value,
-                screeningTemplateValueQuery);
+            QueryAudit(screeningTemplateValueQueryDto, screeningTemplateValue, updateQueryStatus.ToString(), value, screeningTemplateValueQuery);
 
             Save(screeningTemplateValueQuery);
 
@@ -145,12 +143,6 @@ namespace GSC.Respository.Screening
             screeningTemplateValueQuery.OldValue = screeningTemplateValueQueryDto.OldValue;
 
             screeningTemplateValue.AcknowledgeLevel = -1;
-            if (workFlowLevel.IsWorkFlowBreak)
-            {
-                var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
-                screeningTemplateValue.AcknowledgeLevel = screeningTemplate.StartLevel;
-            }
-
             screeningTemplateValue.UserRoleId = _jwtTokenAccesser.RoleId;
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
 
@@ -165,10 +157,7 @@ namespace GSC.Respository.Screening
             screeningTemplateValueQuery.QueryLevel = workFlowLevel.LevelNo;
 
             if (screeningTemplateValue.QueryStatus == QueryStatus.Reopened)
-            {
                 screeningTemplateValue.AcknowledgeLevel = -1;
-                if (workFlowLevel.IsWorkFlowBreak) screeningTemplateValue.AcknowledgeLevel = workFlowLevel.StartLevel;
-            }
             else
                 screeningTemplateValue.AcknowledgeLevel = null;
 
@@ -178,10 +167,8 @@ namespace GSC.Respository.Screening
 
         public void AcknowledgeQuery(ScreeningTemplateValueQuery screeningTemplateValueQuery)
         {
-            var screeningTemplateValue =
-                _screeningTemplateValueRepository.Find(screeningTemplateValueQuery.ScreeningTemplateValueId);
+            var screeningTemplateValue = _screeningTemplateValueRepository.Find(screeningTemplateValueQuery.ScreeningTemplateValueId);
             var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
-
 
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
 
@@ -205,6 +192,8 @@ namespace GSC.Respository.Screening
 
             ClosedSelfCorrection(screeningTemplateValue, screeningTemplateValue.ReviewLevel);
 
+            if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.ReviewLevel == workFlowLevel.LevelNo)
+                screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
 
             Save(screeningTemplateValueQuery);
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
@@ -213,7 +202,11 @@ namespace GSC.Respository.Screening
         private void ClosedSelfCorrection(ScreeningTemplateValue screeningTemplateValue, short reviewLevel)
         {
             if (screeningTemplateValue.AcknowledgeLevel == reviewLevel && screeningTemplateValue.QueryStatus == QueryStatus.SelfCorrection)
+            {
                 screeningTemplateValue.QueryStatus = QueryStatus.Closed;
+                screeningTemplateValue.AcknowledgeLevel = null;
+            }
+
         }
 
         public void SelfGenerate(ScreeningTemplateValueQuery screeningTemplateValueQuery, ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto,
@@ -246,7 +239,11 @@ namespace GSC.Respository.Screening
                 }
 
                 if (screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
+                {
                     screeningTemplateValue.QueryStatus = QueryStatus.Closed;
+                    screeningTemplateValue.AcknowledgeLevel = null;
+                }
+                    
             }
 
             screeningTemplateValue.IsSystem = false;
