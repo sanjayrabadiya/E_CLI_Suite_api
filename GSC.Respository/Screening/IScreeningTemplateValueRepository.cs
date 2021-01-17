@@ -12,10 +12,7 @@ namespace GSC.Respository.Screening
         void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId,
             List<int> projectDesignVariableId);
 
-        QueryStatusDto GetQueryStatusCount(int screeningTemplateId);
-
-        QueryStatusDto GetQueryStatusByModel(List<Data.Dto.Screening.ScreeningTemplateValueBasic> screeningTemplateValue,
-            int screeningTemplateId);
+        int GetQueryStatusCount(int screeningTemplateId);
 
         void DeleteChild(int screeningTemplateValueId);
         void UpdateChild(List<ScreeningTemplateValueChild> children);
@@ -23,12 +20,10 @@ namespace GSC.Respository.Screening
         string GetValueForAudit(ScreeningTemplateValueDto screeningTemplateValueDto);
         bool IsFitness(int screeningTemplateId);
         bool IsDiscontinued(int screeningTemplateId);
-        List<PeriodQueryStatusDto> GetQueryStatusByPeridId(int projectDesignPeriodId);
 
-        int GetQueryCountByVisitId(int screeningVisitId);
-
-        List<DashboardQueryStatusDto> GetQueryByProjectDesignId(int projectDesignId);
         void GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters);
-        List<QueryStatusDto> GetQueryStatusBySubject(int screeningEntryId);
+        List<TemplateTotalQueryDto> GetQueryStatusBySubject(int screeningEntryId);
+
+        List<VariableQueryDto> GetTemplateQueryList(int screeningTemplateId);
     }
 }

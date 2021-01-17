@@ -242,5 +242,11 @@ namespace GSC.Api.Controllers.Screening
         {
             return Ok(_screeningTemplateValueRepository.GetQueryStatusBySubject(id));
         }
+
+        [HttpGet("GetTemplateQueryList/{id}")]
+        public IActionResult GetTemplateQueryList(int id)
+        {
+            return Ok(_screeningTemplateValueRepository.GetTemplateQueryList(id));
+        }
     }
 }

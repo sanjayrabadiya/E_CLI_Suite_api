@@ -2,6 +2,7 @@
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
@@ -12,6 +13,7 @@ using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Project.Workflow;
 using GSC.Respository.Reports;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
@@ -37,12 +39,13 @@ namespace GSC.Respository.Screening
         private readonly IUserRepository _userRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
+        private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         public ScreeningTemplateValueRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IProjectDesignVariableRepository projectDesignVariableRepository, IAppSettingRepository appSettingRepository,
             IJobMonitoringRepository jobMonitoringRepository,
             IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
-            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository)
+            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository, IProjectWorkflowRepository projectWorkflowRepository)
             : base(context)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
@@ -54,6 +57,7 @@ namespace GSC.Respository.Screening
             _userRepository = userRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
+            _projectWorkflowRepository = projectWorkflowRepository;
         }
 
         public void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId,
@@ -92,94 +96,79 @@ namespace GSC.Respository.Screening
             }
         }
 
-        public QueryStatusDto GetQueryStatusCount(int screeningTemplateId)
+        public int GetQueryStatusCount(int screeningTemplateId)
         {
+            return All.Where(x => x.DeletedDate == null
+                    && x.ProjectDesignVariable.DeletedDate == null
+                    && x.ScreeningTemplateId == screeningTemplateId
+                    && x.QueryStatus != null
+                    && x.QueryStatus != QueryStatus.Closed).Count();
+
+        }
+
+        public List<VariableQueryDto> GetTemplateQueryList(int screeningTemplateId)
+        {
+            var projectDesignId = _context.ScreeningTemplate.Where(x => x.Id == screeningTemplateId).Select(t => t.ScreeningVisit.ScreeningEntry.ProjectDesignId).FirstOrDefault();
+
+            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
+
+            var workText = workflowlevel.WorkFlowText ?? new List<WorkFlowText>();
+
+            workText.Add(new WorkFlowText
+            {
+                LevelNo = -1,
+                RoleName = "Operator"
+            });
+
+            workText.Add(new WorkFlowText
+            {
+                LevelNo = 0,
+                RoleName = "Independent"
+            });
+
             var result = All.Where(x => x.DeletedDate == null
-                                        && x.ProjectDesignVariable.DeletedDate == null
-                                        && x.ScreeningTemplateId == screeningTemplateId).
-                                        Select(r => new
-                                        Data.Dto.Screening.ScreeningTemplateValueBasic
-                                        {
-                                            ScreeningTemplateId = r.ScreeningTemplateId,
-                                            QueryStatus = r.QueryStatus,
-                                            AcknowledgeLevel = r.AcknowledgeLevel
-                                        }).ToList();
-            if (result != null) return GetQueryStatusByModel(result, screeningTemplateId);
-
-            return null;
-        }
-
-        public QueryStatusDto GetQueryStatusByModel(List<Data.Dto.Screening.ScreeningTemplateValueBasic> screeningTemplateValue,
-            int screeningTemplateId)
-        {
-            if (screeningTemplateValue == null) return null;
-
-            var result = screeningTemplateValue.Where(x => x.ScreeningTemplateId == screeningTemplateId
-            && x.QueryStatus != QueryStatus.Closed && x.QueryStatus != null).ToList();
-            if (result != null && result.Count > 0)
-            {
-                var queryStatusDto = new QueryStatusDto();
-                queryStatusDto.Items = result.GroupBy(r => new { r.QueryStatus, r.AcknowledgeLevel }).Select(t => new QueryStatusCount
-                {
-                    QueryStatus = ((QueryStatus)t.Key.QueryStatus).GetDescription(),
-                    ReviewLevel = t.Key.AcknowledgeLevel == null ? -1 : t.Key.AcknowledgeLevel,
-                    Total = t.Count()
-                }).ToList();
-                queryStatusDto.TotalQuery = queryStatusDto.Items.Sum(x => x.Total);
-                return queryStatusDto;
-            }
-
-            return null;
-        }
-
-        public List<QueryStatusDto> GetQueryStatusBySubject(int screeningEntryId)
-        {
-            var result = All.Where(x => x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId &&
-                                                           x.QueryStatus != QueryStatus.Closed && x.QueryStatus != null)
-                .Select(r => new { r.ScreeningTemplateId, r.QueryStatus, r.AcknowledgeLevel }).ToList();
-
-            if (result != null && result.Count > 0)
-            {
-                var queryStatusDto = result.GroupBy(x => x.ScreeningTemplateId).
-                    Select(a => new QueryStatusDto
+                     && x.ProjectDesignVariable.DeletedDate == null
+                     && x.ScreeningTemplateId == screeningTemplateId
+                     && x.QueryStatus != null
+                     && x.QueryStatus != QueryStatus.Closed).Select(t => new
+                     {
+                         VariableName = (_jwtTokenAccesser.Language != 1 ?
+                         t.ProjectDesignVariable.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && t.ProjectDesignVariable.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : t.ProjectDesignVariable.VariableName),
+                         t.QueryStatus,
+                         t.ReviewLevel
+                     }).GroupBy(a => new { a.QueryStatus, a.VariableName, a.ReviewLevel }).
+                    Select(b => new VariableQueryDto
                     {
-                        ScreeningTemplateId = a.Key,
-                        TotalQuery = a.Count(),
-                        Items = result.Where(r => r.ScreeningTemplateId == a.Key).GroupBy(r => new { r.AcknowledgeLevel, r.QueryStatus }).
-                        Select(t => new QueryStatusCount
-                        {
-                            QueryStatus = ((QueryStatus)t.Key.QueryStatus).GetDescription(),
-                            ReviewLevel = t.Key.AcknowledgeLevel == null ? -1 : t.Key.AcknowledgeLevel,
-                            Total = t.Count()
-                        }).ToList()
+                        QueryStatus = b.Key.QueryStatus.GetDescription(),
+                        VariableName = b.Key.VariableName,
+                        Level = b.Key.ReviewLevel,
+                        Total = b.Count()
                     }).ToList();
 
-                return queryStatusDto;
-            }
+            result.ForEach(x => x.LevelName = workText.FirstOrDefault(a => a.LevelNo == x.Level)?.RoleName);
 
-            return null;
+            return result;
+
         }
 
-        public List<PeriodQueryStatusDto> GetQueryStatusByPeridId(int projectDesignPeriodId)
+
+
+        public List<TemplateTotalQueryDto> GetQueryStatusBySubject(int screeningEntryId)
         {
-            return All.Where(x => x.DeletedDate == null &&
-                                  x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId == projectDesignPeriodId
-                                  && x.QueryStatus != null).Select(r =>
-            new PeriodQueryStatusDto
-            {
-                ScreeningEntryId = r.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
-                AcknowledgeLevel = r.AcknowledgeLevel,
-                QueryStatus = r.QueryStatus
-            }).ToList();
+            var totalQueries = All.Where(x => x.DeletedDate == null
+                && x.ProjectDesignVariable.DeletedDate == null
+                && x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId
+                && x.QueryStatus != null
+                && x.QueryStatus != QueryStatus.Closed).GroupBy(t => t.ScreeningTemplateId)
+                .Select(r => new TemplateTotalQueryDto
+                {
+                    ScreeningTemplateId = r.Key,
+                    Total = r.Count()
+                }).ToList();
+
+            return totalQueries;
         }
 
-
-        public int GetQueryCountByVisitId(int screeningVisitId)
-        {
-            return All.Count(x => x.DeletedDate == null &&
-                                  x.ScreeningTemplate.ScreeningVisitId == screeningVisitId
-                                  && x.QueryStatus != null && x.QueryStatus != QueryStatus.Closed);
-        }
 
         public void DeleteChild(int screeningTemplateValueId)
         {
@@ -223,7 +212,7 @@ namespace GSC.Respository.Screening
                                 x.ProjectDesignVariable.Values.Any(r => r.ValueCode == "Dis01"));
         }
 
-       
+
 
         public string GetValueForAudit(ScreeningTemplateValueDto screeningTemplateValueDto)
         {
@@ -259,21 +248,6 @@ namespace GSC.Respository.Screening
                 : screeningTemplateValueDto.ValueName;
         }
 
-        public List<DashboardQueryStatusDto> GetQueryByProjectDesignId(int projectDesignId)
-        {
-
-
-            return All.Where(x => x.DeletedDate == null &&
-                                  x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignId == projectDesignId
-                                  && x.QueryStatus != null)
-                .GroupBy(c => new { c.ScreeningTemplate.ScreeningVisit.ScreeningEntryId, c.QueryStatus }).Select(r =>
-                      new DashboardQueryStatusDto
-                      {
-                          ScreeningEntryId = r.Key.ScreeningEntryId,
-                          Status = r.Key.QueryStatus,
-                          Total = r.Count()
-                      }).ToList();
-        }
 
         public void GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters)
         {

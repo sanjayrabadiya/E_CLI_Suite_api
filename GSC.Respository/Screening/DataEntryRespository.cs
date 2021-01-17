@@ -120,12 +120,14 @@ namespace GSC.Respository.Screening
                     c.ScreeningTemplate.ScreeningVisitId,
                     c.AcknowledgeLevel,
                     c.UserRoleId,
+                    c.ReviewLevel,
                     c.QueryStatus
                 }).Select(t => new
                 {
                     t.Key.ScreeningEntryId,
                     t.Key.AcknowledgeLevel,
                     t.Key.ScreeningVisitId,
+                    t.Key.ReviewLevel,
                     t.Key.UserRoleId,
                     t.Key.QueryStatus,
                     TotalQuery = t.Count()
@@ -204,7 +206,7 @@ namespace GSC.Respository.Screening
                         v.Resolved = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Resolved).Sum(t => t.TotalQuery);
                         v.Closed = closeQueries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId).Sum(t => t.TotalQuery);
                         v.SelfCorrection = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.SelfCorrection).Sum(t => t.TotalQuery);
-                        v.Acknowledge = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel != workflowlevel.LevelNo && (x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.SelfCorrection)).Sum(t => t.TotalQuery);
+                        v.Acknowledge = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel != x.ReviewLevel && (x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.SelfCorrection)).Sum(t => t.TotalQuery);
                         v.TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                         {
                             LevelNo = x.LevelNo,
@@ -269,6 +271,7 @@ namespace GSC.Respository.Screening
 
 
         }
+
 
 
         public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitQuery(int screeningVisitId, QueryStatus queryStatus)

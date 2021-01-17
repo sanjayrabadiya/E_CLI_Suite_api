@@ -110,16 +110,6 @@ namespace GSC.Respository.Screening
 
             if (workflowlevel != null && workflowlevel.WorkFlowText != null)
             {
-                screeningEntryDto.WorkFlowText = new List<WorkFlowText>
-                {
-                    new WorkFlowText { LevelNo=-1,RoleName="Operator"}
-                };
-                screeningEntryDto.WorkFlowText.AddRange(workflowlevel.WorkFlowText);
-                screeningEntryDto.WorkFlowText.Add(new WorkFlowText
-                {
-                    LevelNo = 0,
-                    RoleName = "Independent"
-                });
                 screeningEntryDto.LevelName1 = workflowlevel.WorkFlowText.Where(r => r.LevelNo == 1).Select(t => t.RoleName).FirstOrDefault();
                 screeningEntryDto.IsSystemQueryUpdate = workflowlevel.IsStartTemplate;
             }
@@ -129,19 +119,8 @@ namespace GSC.Respository.Screening
 
         private List<ScreeningVisitTree> VisitTemplateProcess(int screeningEntryId, WorkFlowLevelDto workflowlevel, ref bool myReview)
         {
-            var screeningTemplateValue = _screeningTemplateValueRepository
-                .FindBy(x => x.DeletedDate == null
-                && x.ProjectDesignVariable.DeletedDate == null
-                && x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId).
-                Select(r => new Data.Dto.Screening.ScreeningTemplateValueBasic
-                {
-                    ScreeningTemplateId = r.ScreeningTemplateId,
-                    QueryStatus = r.QueryStatus
-                }).ToList();
-
-
             var visits = _screeningVisitRepository.GetVisitTree(screeningEntryId);
-            var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryId, screeningTemplateValue, workflowlevel);
+            var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryId, workflowlevel);
 
             visits.ForEach(x =>
             {

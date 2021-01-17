@@ -127,10 +127,5 @@ namespace GSC.Api.Controllers.Pharmacy
             return Ok(pharmacyTemplateValueDto);
         }
 
-        //[HttpGet("GetQueryStatusCount/{id}")]
-        //public IActionResult GetQueryStatusCount(int id)
-        //{
-        //    return Ok(_pharmacyTemplateValueRepository.GetQueryStatusCount(id));
-        //}
     }
 }

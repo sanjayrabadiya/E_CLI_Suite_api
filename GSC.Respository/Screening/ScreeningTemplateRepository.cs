@@ -308,7 +308,7 @@ namespace GSC.Respository.Screening
 
 
 
-        public List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel)
+        public List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, WorkFlowLevelDto workFlowLevel)
         {
 
             var result = All.Where(s => s.ScreeningVisit.ScreeningEntryId == screeningEntryId && s.DeletedDate == null
@@ -327,10 +327,12 @@ namespace GSC.Respository.Screening
                 ParentId = t.ParentId,
             }).ToList();
 
+            var templateValues = _screeningTemplateValueRepository.GetQueryStatusBySubject(screeningEntryId);
+
             result.ForEach(a =>
             {
                 a.StatusName = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = a.ReviewLevel, Status = a.Status }, workFlowLevel.LevelNo == a.ReviewLevel, workFlowLevel);
-                a.TemplateQueryStatus = _screeningTemplateValueRepository.GetQueryStatusByModel(templateValues, a.Id);
+                a.TotalQueries = templateValues.Where(t => t.ScreeningTemplateId == a.Id).Select(c => c.Total).FirstOrDefault();
             });
 
             return result;
@@ -472,7 +474,7 @@ namespace GSC.Respository.Screening
                 if (templateBasic.Status != ScreeningTemplateStatus.Completed && workflowlevel.IsGenerateQuery && (designTemplateDto.MyReview || workflowlevel.LevelNo == 0))
                     workFlowButton.Generate = screeningValue.QueryStatus == null || screeningValue.QueryStatus == QueryStatus.Closed;
 
-                if (workflowlevel.LevelNo == screeningValue.AcknowledgeLevel)
+                if (workflowlevel.LevelNo == screeningValue.ReviewLevel)
                     workFlowButton.Review = screeningValue.QueryStatus == QueryStatus.Answered || screeningValue.QueryStatus == QueryStatus.Resolved;
 
                 if (workflowlevel.LevelNo == 0 && workFlowButton.Review)
@@ -488,7 +490,7 @@ namespace GSC.Respository.Screening
                     workFlowButton.DeleteQuery = true;
                 }
 
-                if (screeningValue.AcknowledgeLevel != workflowlevel.LevelNo)
+                if (workflowlevel.LevelNo > 0 && screeningValue.AcknowledgeLevel != screeningValue.ReviewLevel)
                     workFlowButton.Acknowledge = screeningValue.QueryStatus == QueryStatus.Resolved || screeningValue.QueryStatus == QueryStatus.SelfCorrection;
 
                 if (workflowlevel.LevelNo > 0 && templateBasic.IsNoCRF && !workflowlevel.IsNoCRF)

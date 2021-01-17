@@ -15,7 +15,7 @@ namespace GSC.Respository.Screening
     {
         List<MyReviewDto> GetScreeningTemplateReview();
         ScreeningTemplate TemplateRepeat(int id);
-        List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, List<Data.Dto.Screening.ScreeningTemplateValueBasic> templateValues, WorkFlowLevelDto workFlowLevel);
+        List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, WorkFlowLevelDto workFlowLevel);
         DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto,
             int screeningTemplateId);
         IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters);
@@ -23,7 +23,7 @@ namespace GSC.Respository.Screening
 
         ScreeningTemplateValueSaveBasics ValidateVariableValue(ScreeningTemplateValue screeningTemplateValue, List<EditCheckIds> EditCheckIds, CollectionSources? collectionSource);
 
-        void SubmitReviewTemplate(int screeningTemplateId,bool isLockUnLock);
+        void SubmitReviewTemplate(int screeningTemplateId, bool isLockUnLock);
         bool IsRepated(int screeningTemplateId);
         int GetProjectDesignId(int screeningTemplateId);
         int GeScreeningEntryId(int screeningTemplateId);

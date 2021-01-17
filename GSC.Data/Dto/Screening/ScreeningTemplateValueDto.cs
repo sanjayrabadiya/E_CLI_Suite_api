@@ -41,27 +41,26 @@ namespace GSC.Data.Dto.Screening
         public List<EditCheckTargetValidationList> EditCheckResult { get; set; }
         public List<ScreeningTemplateValueChildBasic> Children { get; set; }
     }
-    public class QueryStatusDto
+
+
+    public class TemplateTotalQueryDto
     {
         public int ScreeningTemplateId { get; set; }
-        public int TotalQuery { get; set; }
-        public List<QueryStatusCount> Items { get; set; }
-    }
-
-    public class QueryStatusCount
-    {
         public int Total { get; set; }
-        public short? ReviewLevel { get; set; }
-        public string QueryStatus { get; set; }
     }
 
-    public class PeriodQueryStatusDto
+
+    public class VariableQueryDto
     {
-        public int ScreeningEntryId { get; set; }
-        public short? AcknowledgeLevel { get; set; }
-        public QueryStatus? QueryStatus { get; set; }
+        public string QueryStatus { get; set; }
+        public string VariableName { get; set; }
+        public int Total { get; set; }
+        public short Level { get; set; }
+        public string LevelName { get; set; }
     }
 
+
+    //public QueryStatus? QueryStatus { get; set; }
 
     public class ScreeningTemplateValueBasic
     {

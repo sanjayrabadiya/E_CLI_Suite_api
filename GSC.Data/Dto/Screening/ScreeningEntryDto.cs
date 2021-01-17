@@ -45,7 +45,6 @@ namespace GSC.Data.Dto.Screening
         public bool IsSystemQueryUpdate { get; set; }
         public List<int> ProjectAttendanceTemplateIds { get; set; }
         public bool IsElectronicSignature { get; set; }
-        public List<WorkFlowText> WorkFlowText { get; set; }
     }
 
     public class ScreeningAuditDto

@@ -33,7 +33,7 @@ namespace GSC.Data.Dto.Screening
         public ICollection<ScreeningTemplateTree> Children { get; set; }
         public bool MyReview { get; set; }
         public bool IsLocked { get; set; }
-        public QueryStatusDto TemplateQueryStatus { get; set; }
+        public int TotalQueries { get; set; }
 
     }
 
