@@ -490,7 +490,7 @@ namespace GSC.Respository.Screening
                     workFlowButton.DeleteQuery = true;
                 }
 
-                if (workflowlevel.LevelNo > 0 && screeningValue.AcknowledgeLevel != screeningValue.ReviewLevel)
+                if (workflowlevel.LevelNo == screeningValue.AcknowledgeLevel && screeningValue.AcknowledgeLevel != screeningValue.ReviewLevel)
                     workFlowButton.Acknowledge = screeningValue.QueryStatus == QueryStatus.Resolved || screeningValue.QueryStatus == QueryStatus.SelfCorrection;
 
                 if (workflowlevel.LevelNo > 0 && templateBasic.IsNoCRF && !workflowlevel.IsNoCRF)

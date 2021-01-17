@@ -135,13 +135,13 @@ namespace GSC.Respository.Screening
                          VariableName = (_jwtTokenAccesser.Language != 1 ?
                          t.ProjectDesignVariable.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && t.ProjectDesignVariable.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : t.ProjectDesignVariable.VariableName),
                          t.QueryStatus,
-                         t.ReviewLevel
-                     }).GroupBy(a => new { a.QueryStatus, a.VariableName, a.ReviewLevel }).
+                         t.AcknowledgeLevel
+                     }).GroupBy(a => new { a.QueryStatus, a.VariableName, a.AcknowledgeLevel }).
                     Select(b => new VariableQueryDto
                     {
                         QueryStatus = b.Key.QueryStatus.GetDescription(),
                         VariableName = b.Key.VariableName,
-                        Level = b.Key.ReviewLevel,
+                        Level = b.Key.AcknowledgeLevel ?? 0,
                         Total = b.Count()
                     }).ToList();
 
