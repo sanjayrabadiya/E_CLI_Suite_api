@@ -29,9 +29,22 @@ namespace GSC.Respository.Project.Design
         public ProjectDesignVisit GetVisit(int id)
         {
             var visit = _context.ProjectDesignVisit.Where(t => t.Id == id)
+                 .Include(d => d.VisitLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Templates)
+                 .ThenInclude(d => d.TemplateLanguage.Where(x => x.DeletedBy == null))
+                .Include(d => d.Templates)
+                  .ThenInclude(d => d.ProjectDesignTemplateNote.Where(x => x.DeletedBy == null))
+                .ThenInclude(d => d.TemplateNoteLanguage.Where(x => x.DeletedBy == null))
+                 .Include(d => d.Templates)
+                .ThenInclude(d => d.Variables)
+                .ThenInclude(d => d.VariableLanguage.Where(x => x.DeletedBy == null))
+                  .Include(d => d.Templates)
+                .ThenInclude(d => d.Variables)
+                  .ThenInclude(d => d.VariableNoteLanguage.Where(x => x.DeletedBy == null))
+                   .Include(d => d.Templates)
                 .ThenInclude(d => d.Variables)
                 .ThenInclude(d => d.Values)
+                .ThenInclude(d => d.VariableValueLanguage.Where(x => x.DeletedBy == null))
                 .AsNoTracking().FirstOrDefault();
 
             return visit;

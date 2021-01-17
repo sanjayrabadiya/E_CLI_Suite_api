@@ -7,6 +7,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
+using GSC.Respository.LanguageSetup;
 using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,23 +20,44 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         private readonly IUnitOfWork _uow;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        private readonly IProjectDesignTemplateNoteRepository _projectDesignTemplateNoteRepository;
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
+        private readonly IVisitLanguageRepository _visitLanguageRepository;
+        private readonly ITemplateLanguageRepository _templateLanguageRepository;
+        private readonly ITemplateNoteLanguageRepository _templateNoteLanguageRepository;
+        private readonly IVariabeLanguageRepository _variableLanguageRepository;
+        private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
+        private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         public ProjectDesignVisitController(IProjectDesignVisitRepository projectDesignVisitRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
+            IProjectDesignTemplateNoteRepository projectDesignTemplateNoteRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
-            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository)
+            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
+            IVisitLanguageRepository visitLanguageRepository,
+            ITemplateLanguageRepository templateLanguageRepository,
+            ITemplateNoteLanguageRepository templateNoteLanguageRepository,
+            IVariabeLanguageRepository variableLanguageRepository,
+            IVariabeNoteLanguageRepository variableNoteLanguageRepository,
+            IVariabeValueLanguageRepository variableValueLanguageRepository)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _uow = uow;
             _mapper = mapper;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _projectDesignTemplateNoteRepository = projectDesignTemplateNoteRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
+            _visitLanguageRepository = visitLanguageRepository;
+            _templateLanguageRepository = templateLanguageRepository;
+            _templateNoteLanguageRepository = templateNoteLanguageRepository;
+            _variableLanguageRepository = variableLanguageRepository;
+            _variableNoteLanguageRepository = variableNoteLanguageRepository;
+            _variableValueLanguageRepository = variableValueLanguageRepository;
         }
 
         [HttpGet("{id}/{projectDesignPeriodId}")]
@@ -155,15 +177,68 @@ namespace GSC.Api.Controllers.Project.Design
                         {
                             value.Id = 0;
                             _projectDesignVariableValueRepository.Add(value);
+
+                        //For variable value clone language
+                        value.VariableValueLanguage.ToList().ForEach(x =>
+                    {
+                                x.Id = 0;
+                                _variableValueLanguageRepository.Add(x);
+                            });
+
                         });
                         _projectDesignVariableRepository.Add(variable);
+
+                    //For variable clone language
+                    variable.VariableLanguage.ToList().ForEach(r =>
+                {
+                            r.Id = 0;
+                            _variableLanguageRepository.Add(r);
+                        });
+
+                    //For variable note clone language
+                    variable.VariableNoteLanguage.ToList().ForEach(r =>
+                {
+                            r.Id = 0;
+                            _variableNoteLanguageRepository.Add(r);
+                        });
+
                     });
+
+
+                    template.ProjectDesignTemplateNote.ToList().ForEach(templateNote =>
+                    {
+                        templateNote.Id = 0;
+                        _projectDesignTemplateNoteRepository.Add(templateNote);
+
+                        //For template note clone language
+                        templateNote.TemplateNoteLanguage.ToList().ForEach(x =>
+                        {
+                            x.Id = 0;
+                            _templateNoteLanguageRepository.Add(x);
+                        });
+                    });
+
                     _projectDesignTemplateRepository.Add(template);
+
+                    //For template clone language
+                    template.TemplateLanguage.ToList().ForEach(x =>
+                    {
+                        x.Id = 0;
+                        _templateLanguageRepository.Add(x);
+                    });
+
                 });
 
                 visit.DisplayName = "Visit " + ++saved;
                 visit.IsSchedule = false;
                 _projectDesignVisitRepository.Add(visit);
+
+                //For visit clone language
+                visit.VisitLanguage.ToList().ForEach(x =>
+                {
+                    x.Id = 0;
+                    _visitLanguageRepository.Add(x);
+                });
 
                 visitStatus.ForEach(e =>
                 {

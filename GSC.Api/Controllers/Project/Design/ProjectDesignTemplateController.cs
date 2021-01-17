@@ -6,9 +6,11 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.LanguageSetup;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Schedule;
@@ -31,6 +33,11 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IProjectDesignTemplateNoteRepository _projectDesignTemplateNoteRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+        private readonly ITemplateLanguageRepository _templateLanguageRepository;
+        private readonly ITemplateNoteLanguageRepository _templateNoteLanguageRepository;
+        private readonly IVariabeLanguageRepository _variableLanguageRepository;
+        private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
+        private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
 
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
@@ -41,6 +48,12 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignTemplateNoteRepository projectDesignTemplateNoteRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+            ITemplateLanguageRepository templateLanguageRepository,
+            ITemplateNoteLanguageRepository templateNoteLanguageRepository,
+            IVariabeLanguageRepository variableLanguageRepository,
+            IVariabeNoteLanguageRepository variableNoteLanguageRepository,
+            IVariabeValueLanguageRepository variableValueLanguageRepository,
+
             IUnitOfWork uow, IMapper mapper)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
@@ -52,6 +65,11 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
+            _templateLanguageRepository = templateLanguageRepository;
+            _templateNoteLanguageRepository = templateNoteLanguageRepository;
+            _variableLanguageRepository = variableLanguageRepository;
+            _variableNoteLanguageRepository = variableNoteLanguageRepository;
+            _variableValueLanguageRepository = variableValueLanguageRepository;
             _projectDesignTemplateNoteRepository = projectDesignTemplateNoteRepository;
             _domainRepository = domainRepository;
         }
@@ -192,6 +210,7 @@ namespace GSC.Api.Controllers.Project.Design
                 projectDesignTemplate.VariableTemplate = null;
                 projectDesignTemplate.Domain = null;
                 projectDesignTemplate.TemplateName = projectDesignTemplate.TemplateName + "_" + designOrder;
+
                 foreach (var variable in projectDesignTemplate.Variables)
                 {
                     variable.Id = 0;
@@ -199,10 +218,31 @@ namespace GSC.Api.Controllers.Project.Design
                     variable.VariableCategory = null;
                     variable.ProjectDesignTemplate = null;
                     _projectDesignVariableRepository.Add(variable);
+
+                    //For variable clone language
+                    variable.VariableLanguage.ToList().ForEach(r =>
+                     {
+                         r.Id = 0;
+                         _variableLanguageRepository.Add(r);
+                     });
+
+                    //For variable note clone language
+                    variable.VariableNoteLanguage.ToList().ForEach(r =>
+                    {
+                        r.Id = 0;
+                        _variableNoteLanguageRepository.Add(r);
+                    });
+
                     variable.Values.ToList().ForEach(r =>
                     {
                         r.Id = 0;
                         _projectDesignVariableValueRepository.Add(r);
+                        //For variable value clone language
+                        r.VariableValueLanguage.ToList().ForEach(x =>
+                        {
+                            x.Id = 0;
+                            _variableValueLanguageRepository.Add(x);
+                        });
                     });
                 }
 
@@ -210,11 +250,26 @@ namespace GSC.Api.Controllers.Project.Design
                 {
                     note.Id = 0;
                     _projectDesignTemplateNoteRepository.Add(note);
+
+                    //For template note clone language
+                    note.TemplateNoteLanguage.ToList().ForEach(x =>
+                    {
+                        x.Id = 0;
+                        _templateNoteLanguageRepository.Add(x);
+                    });
+
                 }
 
                 projectDesignTemplate.ProjectDesignVisit = null;
 
                 _projectDesignTemplateRepository.Add(projectDesignTemplate);
+
+                //For template clone language
+                temp.TemplateLanguage.ToList().ForEach(x =>
+                {
+                    x.Id = 0;
+                    _templateLanguageRepository.Add(x);
+                });
             }
 
             _uow.Save();
