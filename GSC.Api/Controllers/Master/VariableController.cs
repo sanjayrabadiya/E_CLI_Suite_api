@@ -138,11 +138,15 @@ namespace GSC.Api.Controllers.Master
             var data = _variableValueRepository.FindBy(x => x.VariableId == variable.Id).ToList();
             var deleteValues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             var addvariables = variable.Values.Where(x => x.Id == 0).ToList();
+            var updatevariables = variable.Values.Where(x => x.Id > 0).ToList();
             //var deleteValues = _variableValueRepository.FindBy(x => x.VariableId == variable.Id
             //                                                        && !variable.Values.Any(c => c.Id == x.Id))
             //.ToList();
             foreach (var value in deleteValues)
                 _variableValueRepository.Remove(value);
+
+            foreach (var value in updatevariables)
+                _variableValueRepository.Update(value);
             foreach (var item in addvariables)
             {
                 _variableValueRepository.Add(item);
