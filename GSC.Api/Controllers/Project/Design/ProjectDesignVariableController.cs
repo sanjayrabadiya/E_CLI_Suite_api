@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values, t => t.Remarks)
+            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x=>x.SeqNo), t => t.Remarks)
                 .FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             return Ok(variableDto);
