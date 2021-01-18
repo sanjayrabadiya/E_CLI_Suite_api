@@ -26,6 +26,7 @@ namespace GSC.Api.Controllers.Master
         private readonly ILanguageRepository _languageRepository;
         private readonly IVisitLanguageRepository _visitLanguageRepository;
         private readonly ITemplateLanguageRepository _templateLanguageRepository;
+        private readonly IVariableCategoryLanguageRepository _variabeCategoryLanguageRepository;
         private readonly IVariabeLanguageRepository _variabeLanguageRepository;
         private readonly IVariabeNoteLanguageRepository _variabeNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variabeValueLanguageRepository;
@@ -40,6 +41,7 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IVisitLanguageRepository visitLanguageRepository,
             ITemplateLanguageRepository templateLanguageRepository,
+            IVariableCategoryLanguageRepository variabeCategoryLanguageRepository,
             IVariabeLanguageRepository variabeLanguageRepository,
             IVariabeNoteLanguageRepository variabeNoteLanguageRepository,
             IVariabeValueLanguageRepository variabeValueLanguageRepository,
@@ -52,6 +54,7 @@ namespace GSC.Api.Controllers.Master
             _companyRepository = companyRepository;
             _visitLanguageRepository = visitLanguageRepository;
             _templateLanguageRepository = templateLanguageRepository;
+            _variabeCategoryLanguageRepository = variabeCategoryLanguageRepository;
             _variabeLanguageRepository = variabeLanguageRepository;
             _variabeNoteLanguageRepository = variabeNoteLanguageRepository;
             _variabeValueLanguageRepository = variabeValueLanguageRepository;
@@ -140,6 +143,15 @@ namespace GSC.Api.Controllers.Master
             if (record == null)
                 return NotFound();
 
+
+            //check language use in variable category
+            var LangExistsInVariableCategory = _variabeCategoryLanguageRepository.IsLanguageExist(id);
+            if (!LangExistsInVariableCategory)
+            {
+                ModelState.AddModelError("Message", "Language use in variable category");
+                return BadRequest(ModelState);
+            }
+
             //check language use in visit
             var LangExistsInVisit = _visitLanguageRepository.IsLanguageExist(id);
             if (!LangExistsInVisit)
@@ -152,7 +164,7 @@ namespace GSC.Api.Controllers.Master
             var LangExistsInTemplate = _templateLanguageRepository.IsLanguageExist(id);
             if (!LangExistsInTemplate)
             {
-                ModelState.AddModelError("Message", "Template use in template");
+                ModelState.AddModelError("Message", "Language use in template");
                 return BadRequest(ModelState);
             }
 
@@ -160,7 +172,7 @@ namespace GSC.Api.Controllers.Master
             var LangExistsInVariable = _variabeLanguageRepository.IsLanguageExist(id);
             if (!LangExistsInVisit)
             {
-                ModelState.AddModelError("Message", "Variable use in variable");
+                ModelState.AddModelError("Message", "Language use in variable");
                 return BadRequest(ModelState);
             }
 

@@ -37,7 +37,7 @@ namespace GSC.Respository.LanguageSetup
             var check = All.Where(x => x.DeletedDate == null && x.LanguageId == LanguageId).
                    ProjectTo<TemplateLanguageGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
-            if (check != null)
+            if (check.Count != 0)
                 return false;
             return true;
         }
