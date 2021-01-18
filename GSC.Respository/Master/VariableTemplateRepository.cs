@@ -15,12 +15,15 @@ namespace GSC.Respository.Master
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
+        private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
         public VariableTemplateRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IVariableTemplateDetailRepository variableTemplateDetailRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
+            _variableTemplateDetailRepository = variableTemplateDetailRepository;
         }
 
         public List<DropDownDto> GetVariableTemplateDropDown()
@@ -74,9 +77,9 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Template code : " + objSave.TemplateCode;
 
-            if(!string.IsNullOrEmpty(objSave.ActivityName))
-            if (All.Any(x => x.Id != objSave.Id && x.DeletedDate == null && !string.IsNullOrEmpty(x.ActivityName) && x.ActivityName == objSave.ActivityName.Trim()))
-                return "Duplicate Activity name : " + objSave.ActivityName;
+            if (!string.IsNullOrEmpty(objSave.ActivityName))
+                if (All.Any(x => x.Id != objSave.Id && x.DeletedDate == null && !string.IsNullOrEmpty(x.ActivityName) && x.ActivityName == objSave.ActivityName.Trim()))
+                    return "Duplicate Activity name : " + objSave.ActivityName;
 
             if (All.Any(x => x.Id != objSave.Id && x.TemplateName == objSave.TemplateName.Trim() && x.DeletedDate == null))
                 return "Duplicate Template name : " + objSave.TemplateName;
@@ -119,5 +122,19 @@ namespace GSC.Respository.Master
             .OrderBy(o => o.Value).ToList();
         }
 
+        public void AddRequieredTemplate(Variable variable)
+        {
+            var template = All.Where(x => x.DomainId == variable.DomainId).ToList();
+            foreach (var item in template)
+            {
+                var templateDetails = _variableTemplateDetailRepository.FindByInclude(x => x.VariableTemplateId == item.Id).ToList();
+                VariableTemplateDetail VariableTemplateDetail = new VariableTemplateDetail();
+                VariableTemplateDetail.VariableTemplateId = item.Id;
+                VariableTemplateDetail.VariableId = variable.Id;
+                VariableTemplateDetail.SeqNo = templateDetails.LastOrDefault().SeqNo + 1;
+                _variableTemplateDetailRepository.Add(VariableTemplateDetail);
+                _context.Save();
+            }
+        }
     }
 }

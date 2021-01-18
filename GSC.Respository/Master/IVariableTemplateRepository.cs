@@ -13,5 +13,6 @@ namespace GSC.Respository.Master
         string Duplicate(VariableTemplate objSave);
         List<Variable> GetVariableNotAddedinTemplate(int variableTemplateId);
         List<DropDownDto> GetVariableTemplateByCRFByDomainId(bool isNonCRF, int domainId);
+        void AddRequieredTemplate(Variable variable);
     }
 }

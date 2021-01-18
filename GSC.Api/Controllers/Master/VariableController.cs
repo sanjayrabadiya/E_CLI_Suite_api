@@ -27,6 +27,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IVariableRepository _variableRepository;
         private readonly IVariableValueRepository _variableValueRepository;
         private readonly IVariableRemarksRepository _variableRemarksRepository;
+        private readonly IVariableTemplateRepository _variableTemplateRepository;
 
         public VariableController(IVariableRepository variableRepository,
             IVariableValueRepository variableValueRepository,
@@ -34,8 +35,10 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-            IVariableRemarksRepository variableRemarksRepository)
+            IVariableRemarksRepository variableRemarksRepository,
+            IVariableTemplateRepository variableTemplateRepository)
         {
+            _variableTemplateRepository = variableTemplateRepository;
             _variableRepository = variableRepository;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
@@ -92,6 +95,11 @@ namespace GSC.Api.Controllers.Master
                 _variableRemarksRepository.Add(item);
             }
             if (_uow.Save() <= 0) throw new Exception("Creating Variable failed on save.");
+
+            if (variableDto.CoreVariableType == Helper.CoreVariableType.Required)
+            {
+                _variableTemplateRepository.AddRequieredTemplate(variable);
+            }
             return Ok(variable.Id);
         }
 
@@ -211,6 +219,6 @@ namespace GSC.Api.Controllers.Master
             return Ok(_variableRepository.GetVariableListByDomainId(domainId));
         }
 
-       
+
     }
 }
