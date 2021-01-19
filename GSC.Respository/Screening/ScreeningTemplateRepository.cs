@@ -182,7 +182,8 @@ namespace GSC.Respository.Screening
                     projectDesignTemplateDto.IsWarning = true;
                     projectDesignTemplateDto.EditCheckMessage = $"{r.AutoNumber} {r.Message}";
                 }
-                else if (r.Operator == Operator.Enable && r.ValidateType != EditCheckValidateType.RuleValidated)
+
+                if (r.Operator == Operator.Enable && r.ValidateType != EditCheckValidateType.RuleValidated)
                 {
                     projectDesignTemplateDto.IsRepeated = false;
                     projectDesignTemplateDto.IsSubmittedButton = false;
@@ -215,7 +216,7 @@ namespace GSC.Respository.Screening
                         r.ValidationType = (ValidationType)singleResult.OriginalValidationType;
 
                     r.EditCheckValidation.EditCheckMsg = singleResult.EditCheckMsg;
-                    r.EditCheckValidation.isInfo = singleResult.isInfo;
+                    r.EditCheckValidation.InfoType = singleResult.InfoType;
                     r.EditCheckValidation.EditCheckDisable = singleResult.EditCheckDisable;
                 }
                 r.editCheckIds = GetEditCheckIds(result, (int)r.ProjectDesignVariableId);
@@ -239,11 +240,11 @@ namespace GSC.Respository.Screening
                             if (r.EditCheckValidation == null)
                             {
                                 r.EditCheckValidation = new EditCheckTargetValidation();
-                                r.EditCheckValidation.isInfo = true;
+                                r.EditCheckValidation.InfoType = EditCheckInfoType.Info;
                             }
 
                             if (scheduleVariable.Any(x => x.ValidateType == EditCheckValidateType.Failed))
-                                r.EditCheckValidation.isInfo = false;
+                                r.EditCheckValidation.InfoType = EditCheckInfoType.Failed;
 
                             if (scheduleVariable.Any(x => x.HasQueries))
                                 r.EditCheckValidation.HasQueries = true;

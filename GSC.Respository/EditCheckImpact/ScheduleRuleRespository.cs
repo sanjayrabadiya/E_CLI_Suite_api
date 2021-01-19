@@ -179,12 +179,12 @@ namespace GSC.Respository.EditCheckImpact
                 if (editcheck == null)
                 {
                     editcheck = new EditCheckTargetValidationList();
-                    editcheck.isInfo = true;
+                    editcheck.InfoType = EditCheckInfoType.Info;
                     editCheckResult.Add(editcheck);
                 }
 
                 if (scheduleResult.Any(c => c.ProjectDesignVariableId == x && c.ValidateType == EditCheckValidateType.Failed))
-                    editcheck.isInfo = false;
+                    editcheck.InfoType = EditCheckInfoType.Failed;
 
                 if (scheduleResult.Any(c => c.ProjectDesignVariableId == x && c.HasQueries))
                     editcheck.HasQueries = true;

@@ -98,6 +98,13 @@ namespace GSC.Helper
         [Description("Required")] Required = 4
     }
 
+    public enum EditCheckInfoType : short
+    {
+        [Description("Failed")] Failed = 1,
+        [Description("Info")] Info = 2,
+        [Description("Warning")] Warning = 3
+    }
+
     public enum CollectionSources : short
     {
         [Description("Text Box")] TextBox = 1,

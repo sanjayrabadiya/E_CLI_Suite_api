@@ -133,9 +133,11 @@ namespace GSC.Data.Dto.Project.Design
         public ValidationType? OriginalValidationType { get; set; }
         public bool EditCheckDisable { get; set; }
         public List<EditCheckMessage> EditCheckMsg { get; set; }
-        public bool isInfo { get; set; }
+        public EditCheckInfoType InfoType { get; set; }
         public bool HasQueries { get; set; }
     }
+
+   
 
     public class EditCheckMessage
     {
@@ -144,7 +146,7 @@ namespace GSC.Data.Dto.Project.Design
         public string ValidateType { get; set; }
         public string SampleResult { get; set; }
         public bool HasQueries { get; set; }
-        public bool isInfo { get; set; }
+        public EditCheckInfoType InfoType { get; set; }
     }
 
     public class EditCheckTargetValidationList : EditCheckTargetValidation

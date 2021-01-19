@@ -253,14 +253,14 @@ namespace GSC.Respository.EditCheckImpact
             });
 
             var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget && r.ScreeningTemplateId > 0).ToList();
-            targetResult.Where(r => (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
-             {
-                 if (r.ValidateType == EditCheckValidateType.RuleValidated)
-                     UpdateTemplateDisable(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId);
-                 else
-                     UpdateEnableTemplate(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r, editTargetValidation, isQueryRaise);
+            targetResult.Where(r => r.Operator == Operator.Enable && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
+              {
+                  if (r.ValidateType == EditCheckValidateType.RuleValidated)
+                      UpdateTemplateDisable(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId);
+                  else
+                      UpdateEnableTemplate(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r, editTargetValidation, isQueryRaise);
 
-             });
+              });
             _context.Save();
 
             var variableResult = UpdateVariale(targetResult.Where(r => r.ScreeningTemplateId > 0 && (r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)).ToList(), true, isQueryRaise);
@@ -302,14 +302,14 @@ namespace GSC.Respository.EditCheckImpact
                             if (isQueryRaise) editCheckTarget.HasQueries = true;
                             r.ValidateType = EditCheckValidateType.Failed;
                         }
-                        editCheckTarget.isInfo = r.ValidateType != EditCheckValidateType.Failed;
+                        editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
                     }
                     else if (r.IsFormula || r.Operator == Operator.HardFetch)
                     {
                         editCheckTarget.Value = r.ScreeningTemplateValue;
                         editCheckTarget.IsValueSet = true;
                         editCheckTarget.Note = note;
-                        editCheckTarget.isInfo = true;
+                        editCheckTarget.InfoType = EditCheckInfoType.Info;
                         editCheckTarget.OriginalValidationType = ValidationType.None;
                         editCheckTarget.EditCheckDisable = true;
                     }
@@ -319,7 +319,7 @@ namespace GSC.Respository.EditCheckImpact
                     }
                     else if (r.Operator == Operator.SoftFetch)
                     {
-                        editCheckTarget.isInfo = true;
+                        editCheckTarget.InfoType = EditCheckInfoType.Info;
                         editCheckTarget.Value = r.ScreeningTemplateValue;
                         editCheckTarget.IsSoftFetch = true;
                         editCheckTarget.Note = note;
@@ -327,7 +327,7 @@ namespace GSC.Respository.EditCheckImpact
                     else
                     {
                         if (isQueryRaise) editCheckTarget.HasQueries = r.ValidateType == EditCheckValidateType.Failed;
-                        editCheckTarget.isInfo = r.ValidateType != EditCheckValidateType.Failed;
+                        editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
                     }
 
                     if (r.Operator == Operator.Required && r.ValidateType == EditCheckValidateType.ReferenceVerifed)
@@ -340,14 +340,20 @@ namespace GSC.Respository.EditCheckImpact
                     if (r.IsNa)
                     {
                         editCheckTarget.HasQueries = false;
-                        editCheckTarget.isInfo = true;
+                        editCheckTarget.InfoType = EditCheckInfoType.Info;
                         r.ValidateType = EditCheckValidateType.NotProcessed;
+                    }
+
+                    if (r.Operator == Operator.Warning)
+                    {
+                        editCheckTarget.HasQueries = false;
+                        editCheckTarget.InfoType = EditCheckInfoType.Warning;
                     }
 
                     var editCheckMessage = new EditCheckMessage();
                     editCheckMessage.AutoNumber = r.AutoNumber;
                     editCheckMessage.Message = r.Message;
-                    editCheckMessage.isInfo = editCheckTarget.isInfo;
+                    editCheckMessage.InfoType = editCheckTarget.InfoType;
                     editCheckMessage.ValidateType = r.ValidateType.GetDescription();
                     editCheckMessage.SampleResult = r.SampleResult;
                     editCheckTarget.EditCheckMsg.Add(editCheckMessage);
@@ -372,7 +378,12 @@ namespace GSC.Respository.EditCheckImpact
                     }
 
                 });
-                editCheckTarget.isInfo = !editCheckTarget.EditCheckMsg.Any(r => !r.isInfo);
+
+                if (editCheckTarget.EditCheckMsg.Any(r => r.InfoType == EditCheckInfoType.Warning))
+                    editCheckTarget.InfoType = EditCheckInfoType.Warning;
+
+                if (editCheckTarget.EditCheckMsg.Any(r => r.InfoType == EditCheckInfoType.Failed))
+                    editCheckTarget.InfoType = EditCheckInfoType.Failed;
 
                 if (editCheckTarget.EditCheckMsg != null)
                     editCheckTarget.HasQueries = editCheckTarget.EditCheckMsg.Any(x => x.HasQueries);
