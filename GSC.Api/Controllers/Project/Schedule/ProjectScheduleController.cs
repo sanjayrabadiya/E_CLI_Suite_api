@@ -36,6 +36,7 @@ namespace GSC.Api.Controllers.Project.Schedule
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
 
         public ProjectScheduleController(IProjectScheduleRepository projectScheduleRepository,
             IUserRepository userRepository,
@@ -49,7 +50,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository,
             INumberFormatRepository numberFormatRepository,
-            IProjectDesignVisitRepository projectDesignVisitRepository)
+            IProjectDesignVisitRepository projectDesignVisitRepository, IGSCContext context)
         {
             _projectScheduleRepository = projectScheduleRepository;
             _userRepository = userRepository;
@@ -61,6 +62,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _uow = uow;
             _mapper = mapper;
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -270,6 +272,10 @@ namespace GSC.Api.Controllers.Project.Schedule
                     VariableName = x.ProjectDesignVariable.VariableName,
                     IsDeleted = x.DeletedDate != null,
                     IsLock = !x.ProjectDesign.IsUnderTesting,
+                    CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy).FirstOrDefault().UserName,
+                    CreatedDate = x.CreatedDate,
+                    ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy).FirstOrDefault().UserName,
+                    ModifiedDate = x.ModifiedDate
                 }).OrderByDescending(x => x.Id).ToList();
             //return Ok(projectSchedules);
             return projectSchedules;

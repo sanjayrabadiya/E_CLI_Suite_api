@@ -5,7 +5,7 @@ using GSC.Data.Entities.Common;
 
 namespace GSC.Data.Dto.Project.Schedule
 {
-    public class ProjectScheduleDto : BaseDto
+    public class ProjectScheduleDto : BaseAuditDto
     {
         public int? ProjectId { get; set; }
 
