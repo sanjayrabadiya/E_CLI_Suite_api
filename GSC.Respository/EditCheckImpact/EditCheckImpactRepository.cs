@@ -309,7 +309,7 @@ namespace GSC.Respository.EditCheckImpact
                         editCheckTarget.Value = r.ScreeningTemplateValue;
                         editCheckTarget.IsValueSet = true;
                         editCheckTarget.Note = note;
-                        editCheckTarget.InfoType = EditCheckInfoType.Info;
+                        editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
                         editCheckTarget.OriginalValidationType = ValidationType.None;
                         editCheckTarget.EditCheckDisable = true;
                     }
