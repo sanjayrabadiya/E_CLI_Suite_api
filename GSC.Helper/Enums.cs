@@ -374,7 +374,7 @@ namespace GSC.Helper
     {
         NotProcessed = 1,
         ReferenceVerifed = 2,
-        RuleValidated = 3,
+        Passed = 3,
         Failed = 4,
         Warning = 5
     }

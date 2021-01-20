@@ -255,7 +255,7 @@ namespace GSC.Respository.EditCheckImpact
             var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget && r.ScreeningTemplateId > 0).ToList();
             targetResult.Where(r => r.Operator == Operator.Enable && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
               {
-                  if (r.ValidateType == EditCheckValidateType.RuleValidated)
+                  if (r.ValidateType == EditCheckValidateType.Passed)
                       UpdateTemplateDisable(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId);
                   else
                       UpdateEnableTemplate(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r, editTargetValidation, isQueryRaise);
@@ -289,7 +289,7 @@ namespace GSC.Respository.EditCheckImpact
 
                     if (r.Operator == Operator.Enable)
                     {
-                        editCheckTarget.EditCheckDisable = r.ValidateType != EditCheckValidateType.RuleValidated;
+                        editCheckTarget.EditCheckDisable = r.ValidateType != EditCheckValidateType.Passed;
                         editCheckTarget.OriginalValidationType = editCheckTarget.EditCheckDisable ? ValidationType.None : ValidationType.Required;
                         if (editCheckTarget.EditCheckDisable)
                         {
@@ -297,7 +297,7 @@ namespace GSC.Respository.EditCheckImpact
                             if (!string.IsNullOrEmpty(r.ScreeningTemplateValue)) editCheckTarget.IsValueSet = true;
                             editCheckTarget.Note = note;
                         }
-                        if (string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.ValidateType == EditCheckValidateType.RuleValidated)
+                        if (string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.ValidateType == EditCheckValidateType.Passed)
                         {
                             if (isQueryRaise) editCheckTarget.HasQueries = true;
                             r.ValidateType = EditCheckValidateType.Failed;
@@ -344,7 +344,7 @@ namespace GSC.Respository.EditCheckImpact
                         r.ValidateType = EditCheckValidateType.NotProcessed;
                     }
 
-                    if (r.Operator == Operator.Warning)
+                    if (r.Operator == Operator.Warning && (r.ValidateType == EditCheckValidateType.Failed || editCheckTarget.HasQueries))
                     {
                         editCheckTarget.HasQueries = false;
                         editCheckTarget.InfoType = EditCheckInfoType.Warning;
@@ -597,25 +597,31 @@ namespace GSC.Respository.EditCheckImpact
                     IsTarget = x.IsTarget
                 }).ToList();
 
-                var targetResult = _editCheckRuleRepository.ValidateEditCheck(editCheckValidates);
+                var validateResult = _editCheckRuleRepository.ValidateEditCheck(editCheckValidates);
 
-                if (targetResult != null)
+                if (validateResult != null)
                 {
                     result.Where(c => c.EditCheckId == r && c.IsTarget).ToList().ForEach(
                     t =>
                     {
-
-                        t.ValidateType = targetResult.IsValid ? EditCheckValidateType.ReferenceVerifed : EditCheckValidateType.NotProcessed;
-                        if (targetResult.IsValid && targetResult.Target != null)
+                        t.ValidateType = validateResult.IsValid ? EditCheckValidateType.ReferenceVerifed : EditCheckValidateType.NotProcessed;
+                        if (validateResult.IsValid && validateResult.Target != null)
                         {
-                            var singleTarget = targetResult.Target.FirstOrDefault(a => a.Id == t.EditCheckDetailId);
+                            var singleTarget = validateResult.Target.FirstOrDefault(a => a.Id == t.EditCheckDetailId);
                             if (singleTarget != null)
                             {
                                 if (t.Operator != Operator.Enable)
                                     t.ScreeningTemplateValue = singleTarget.Result;
 
-                                t.SampleResult = targetResult.RefAndTarget;
-                                t.ValidateType = singleTarget.IsValid ? EditCheckValidateType.RuleValidated : EditCheckValidateType.Failed; t.ValidateType = singleTarget.IsValid ? EditCheckValidateType.RuleValidated : EditCheckValidateType.Failed;
+                                t.SampleResult = validateResult.RefAndTarget;
+
+                                if (singleTarget.IsValid && validateResult.IsValid)
+                                    t.ValidateType = EditCheckValidateType.Passed;
+                                else if (!singleTarget.IsValid && !validateResult.IsValid)
+                                    t.ValidateType = EditCheckValidateType.NotProcessed;
+                                else
+                                    t.ValidateType = EditCheckValidateType.Failed;
+
                             }
 
                         }

@@ -142,7 +142,7 @@ namespace GSC.Respository.EditCheckImpact
                     editCheck.Where(x => x.IsTarget).ToList().ForEach(r =>
                     {
                         var editCheckResult = new EditCheckResult();
-                        editCheckResult.Result = "failed";
+                        editCheckResult.Result = "Failed";
                         editCheckResult.Id = r.Id;
                         result.Target.Add(editCheckResult);
                     });

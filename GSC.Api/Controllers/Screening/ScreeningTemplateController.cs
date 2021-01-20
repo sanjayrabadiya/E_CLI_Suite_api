@@ -136,7 +136,7 @@ namespace GSC.Api.Controllers.Screening
             else
                 SubmittedTemplate(id);
 
-            if (_uow.Save() <= 0) throw new Exception("SubmitTemplate Failed!");
+            _uow.Save();
 
             _screeningTemplateRepository.SubmitReviewTemplate(id, false);
 

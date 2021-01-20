@@ -177,13 +177,13 @@ namespace GSC.Respository.Screening
             result.Where(t => t.IsTarget && t.ProjectDesignTemplateId == projectDesignTemplateDto.ProjectDesignTemplateId &&
             (t.CheckBy == EditCheckRuleBy.ByTemplate || t.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
             {
-                if (r.Operator == Operator.Warning && r.ValidateType != EditCheckValidateType.RuleValidated)
+                if (r.Operator == Operator.Warning && r.ValidateType == EditCheckValidateType.Passed)
                 {
                     projectDesignTemplateDto.IsWarning = true;
                     projectDesignTemplateDto.EditCheckMessage = $"{r.AutoNumber} {r.Message}";
                 }
 
-                if (r.Operator == Operator.Enable && r.ValidateType != EditCheckValidateType.RuleValidated)
+                if (r.Operator == Operator.Enable && r.ValidateType != EditCheckValidateType.Passed)
                 {
                     projectDesignTemplateDto.IsRepeated = false;
                     projectDesignTemplateDto.IsSubmittedButton = false;

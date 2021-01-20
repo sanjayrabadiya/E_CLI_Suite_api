@@ -85,7 +85,7 @@ namespace GSC.Respository.EditCheckImpact
                 if (string.IsNullOrEmpty(reference?.Value))
                     x.ValidateType = EditCheckValidateType.NotProcessed;
                 else
-                    x.ValidateType = Validate(x, x.Value, reference.Value) ? EditCheckValidateType.RuleValidated : EditCheckValidateType.Failed;
+                    x.ValidateType = Validate(x, x.Value, reference.Value) ? EditCheckValidateType.Passed : EditCheckValidateType.Failed;
 
                 if (isQuery && x.ValidateType == EditCheckValidateType.Failed && reference != null)
                 {
