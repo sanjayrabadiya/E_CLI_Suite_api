@@ -146,6 +146,9 @@ namespace GSC.Respository.UserMgt
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);           
         }
 
-       
+        public async Task GetBlockedUser(string clientUrl)
+        {
+            var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
+        }
     }
 }

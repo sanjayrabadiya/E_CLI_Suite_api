@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IUserRoleRepository _userRoleRepository;    
+        private readonly IUserRoleRepository _userRoleRepository;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
         private readonly IGSCContext _context;
@@ -49,7 +49,7 @@ namespace GSC.Api.Controllers.UserMgt
             IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IUserRoleRepository userRoleRepository,
-            IProjectRepository projectRepository,          
+            IProjectRepository projectRepository,
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService,
             IGSCContext context, IJwtTokenAccesser jwtTokenAccesser
@@ -63,7 +63,7 @@ namespace GSC.Api.Controllers.UserMgt
             _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
             _userRoleRepository = userRoleRepository;
-            _projectRepository = projectRepository;          
+            _projectRepository = projectRepository;
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
             _context = context;
@@ -101,11 +101,19 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpGet("GetBlockedUser/{id}")]
         public IActionResult GetBlockedUser(int id)
         {
+            if (!_environmentSetting.Value.IsPremise)
+            {
+                _centreUserService.GetBlockedUser($"{_environmentSetting.Value.CentralApi}User/GetBlockedUser/{id}");                
+            }
             if (id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var user = _userRepository.FindBy(i => i.Id == id).FirstOrDefault();
-            if (user != null && user.IsLocked) user.IsLocked = false;
+            if (user != null && user.IsLocked)
+            {
+                user.FailedLoginAttempts = 0;
+                user.IsLocked = false;
+            }
 
             _userRepository.Update(user);
 
@@ -267,11 +275,11 @@ namespace GSC.Api.Controllers.UserMgt
 
             var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
                 .FirstOrDefault();
-            
+
             if (!_environmentSetting.Value.IsPremise)
             {
                 CommonResponceView userdetails = await _centreUserService.ChangePassword(loginDto, _environmentSetting.Value.CentralApi);
-                
+
                 if (userdetails != null)
                 {
                     if (!string.IsNullOrEmpty(userdetails.Message))
