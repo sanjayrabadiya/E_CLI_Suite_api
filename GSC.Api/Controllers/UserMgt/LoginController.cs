@@ -269,28 +269,27 @@ namespace GSC.Api.Controllers.UserMgt
             if (!_environmentSetting.Value.IsPremise)
             {
                 _centreUserService.Logout($"{ _environmentSetting.Value.CentralApi}Login/Logout/{userId}/{loginReportId}");
-                return Ok();
+              //  return Ok();
             }
-            else
-            {
-                var user = _userRepository.Find(userId);
-                if (user == null)
-                    return NotFound();
-                var userLoginReport = _userLoginReportRepository.Find(loginReportId);
 
-                if (userLoginReport == null)
-                    return NotFound();
+            var user = _userRepository.Find(userId);
+            if (user == null)
+                return NotFound();
+            var userLoginReport = _userLoginReportRepository.Find(loginReportId);
 
-                user.IsLogin = false;
-                _userRepository.Update(user);
+            if (userLoginReport == null)
+                return NotFound();
 
-                userLoginReport.LogoutTime = DateTime.Now;
-                _userLoginReportRepository.Update(userLoginReport);
+            user.IsLogin = false;
+            _userRepository.Update(user);
 
-                _uow.Save();
+            userLoginReport.LogoutTime = DateTime.Now;
+            _userLoginReportRepository.Update(userLoginReport);
 
-                return Ok();
-            }
+            _uow.Save();
+
+            return Ok();
+
         }
 
 
