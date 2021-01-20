@@ -355,6 +355,10 @@ namespace GSC.Respository.EditCheckImpact
                     editCheckMessage.Message = r.Message;
                     editCheckMessage.InfoType = editCheckTarget.InfoType;
                     editCheckMessage.ValidateType = r.ValidateType.GetDescription();
+
+                    if (r.Operator == Operator.Warning && r.ValidateType == EditCheckValidateType.Failed)
+                        editCheckMessage.ValidateType = EditCheckValidateType.Warning.GetDescription();
+
                     editCheckMessage.SampleResult = r.SampleResult;
                     editCheckTarget.EditCheckMsg.Add(editCheckMessage);
 

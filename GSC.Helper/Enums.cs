@@ -375,7 +375,8 @@ namespace GSC.Helper
         NotProcessed = 1,
         ReferenceVerifed = 2,
         RuleValidated = 3,
-        Failed = 4
+        Failed = 4,
+        Warning = 5
     }
 
     public enum DossierPdfType : short
