@@ -605,7 +605,7 @@ namespace GSC.Respository.EditCheckImpact
                     t =>
                     {
                         t.ValidateType = validateResult.IsValid ? EditCheckValidateType.ReferenceVerifed : EditCheckValidateType.NotProcessed;
-                        if (validateResult.IsValid && validateResult.Target != null)
+                        if (validateResult.Target != null)
                         {
                             var singleTarget = validateResult.Target.FirstOrDefault(a => a.Id == t.EditCheckDetailId);
                             if (singleTarget != null)
