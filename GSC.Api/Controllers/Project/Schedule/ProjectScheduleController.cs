@@ -272,9 +272,9 @@ namespace GSC.Api.Controllers.Project.Schedule
                     VariableName = x.ProjectDesignVariable.VariableName,
                     IsDeleted = x.DeletedDate != null,
                     IsLock = !x.ProjectDesign.IsUnderTesting,
-                    CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy).FirstOrDefault().UserName,
+                    CreatedByUser = x.CreatedBy == null ? null : _context.Users.Where(y => y.Id == x.CreatedBy).FirstOrDefault().UserName,
                     CreatedDate = x.CreatedDate,
-                    ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy).FirstOrDefault().UserName,
+                    ModifiedByUser = x.ModifiedBy == null ? null : _context.Users.Where(y => y.Id == x.ModifiedBy).FirstOrDefault().UserName,
                     ModifiedDate = x.ModifiedDate
                 }).OrderByDescending(x => x.Id).ToList();
             //return Ok(projectSchedules);
