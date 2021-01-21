@@ -217,7 +217,9 @@ namespace GSC.Api.Controllers.Attendance
             var randomization = _randomizationRepository.Find(id);
             if (!_environmentSetting.Value.IsPremise)
             {
-                var user = _userRepository.Find((int)randomization.UserId);
+                var userdata = _userRepository.Find((int)randomization.UserId);
+                var user = new UserViewModel();
+                user = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userdata.UserName}");
                 if (user.IsFirstTime == true)
                 {
                     await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);

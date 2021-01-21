@@ -9,6 +9,7 @@ using GSC.Data.Entities.AdverseEvent;
 using GSC.Respository.AdverseEvent;
 using GSC.Respository.Attendance;
 using GSC.Shared.JWTAuth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,6 +42,13 @@ namespace GSC.Api.Controllers.AdverseEvent
         public IActionResult GetAEReportingList()
         {
             var data = _iAEReportingRepository.GetAEReportingList();
+            return Ok(data);
+        }
+
+        [HttpGet("GetAEReportingGridData/{projectId}")]
+        public IActionResult GetAEReportingGridData(int projectId)
+        {
+            var data = _iAEReportingRepository.GetAEReportingGridData(projectId);
             return Ok(data);
         }
 

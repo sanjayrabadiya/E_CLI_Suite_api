@@ -36,5 +36,7 @@ namespace GSC.Respository.Master
         void UpdateProject(Data.Entities.Master.Project details);
         List<ProjectDropDown> GetParentStaticProjectDropDown();
         ProjectGridDto GetProjectDetailForDashboard(int ProjectId);
+        List<ProjectDropDown> GetParentProjectDropDownforAE();
+        List<ProjectDropDown> GetChildProjectDropDownforAE(int parentProjectId);
     }
 }

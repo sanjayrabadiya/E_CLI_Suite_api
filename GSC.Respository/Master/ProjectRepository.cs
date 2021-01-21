@@ -34,6 +34,7 @@ namespace GSC.Respository.Master
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly ISiteTeamRepository _siteTeamRepository;
 
         public ProjectRepository(IGSCContext context,
             IUserRepository userRepository,
@@ -45,7 +46,8 @@ namespace GSC.Respository.Master
             IProjectRightRepository projectRightRepository,
             IAttendanceRepository attendanceRepository,
             IVolunteerRepository volunteerRepository,
-            IMapper mapper)
+            IMapper mapper,
+            ISiteTeamRepository siteTeamRepository)
             : base(context)
         {
             _numberFormatRepository = numberFormatRepository;
@@ -59,6 +61,7 @@ namespace GSC.Respository.Master
             _volunteerRepository = volunteerRepository;
             _mapper = mapper;
             _context = context;
+            _siteTeamRepository = siteTeamRepository;
         }
 
         public IList<ProjectGridDto> GetProjectList(bool isDeleted)
@@ -576,5 +579,39 @@ namespace GSC.Respository.Master
             return projects;
         }
 
+        public List<ProjectDropDown> GetParentProjectDropDownforAE()
+        {
+            var siteteams = _siteTeamRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null).ToList();
+            var childproject = siteteams.Select(x => x.ProjectId).Distinct().ToList();
+            var project = All.Where(x => childproject.Contains(x.Id) && x.DeletedDate == null).Select(z => z.ParentProjectId).ToList();
+            var data = All.Where(x => project.Contains(x.Id) && x.DeletedDate == null)
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).Distinct().ToList();
+            return data;
+        }
+
+        public List<ProjectDropDown> GetChildProjectDropDownforAE(int parentProjectId)
+        {
+            var siteteams = _siteTeamRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null).ToList();
+            var childproject = siteteams.Select(x => x.ProjectId).Distinct().ToList();
+            var data = All.Where(x => childproject.Contains(x.Id) && x.ParentProjectId == parentProjectId && x.DeletedDate == null)
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).Distinct().ToList();
+            return data;
+        }
     }
 }

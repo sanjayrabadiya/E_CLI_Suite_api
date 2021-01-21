@@ -6,6 +6,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Attendance;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,23 @@ namespace GSC.Respository.AdverseEvent
             _randomizationRepository = randomizationRepository;
             _mapper = mapper;
         }
+
+        public List<AEReportingGridDto> GetAEReportingGridData(int projectId)
+        {
+            var aEData = All.Include(x => x.Randomization).Where(x => x.Randomization.ProjectId == projectId && x.DeletedDate == null).ToList();//FindByInclude(x => x.Randomization.ProjectId == projectId && x.DeletedDate == null).ToList();
+            var aEGridData = aEData.Select(c => new AEReportingGridDto
+            {
+                Id = c.Id,
+                SubjectName = c.Randomization.FirstName + " " + c.Randomization.LastName,
+                CreatedDate = c.CreatedDate,
+                EventDescription = c.EventDescription,
+                EventEffectName = c.EventEffect.GetDescription(),
+                StartDate = c.StartDate,
+                IsReviewedDone = c.IsReviewedDone
+            }).ToList();
+            return aEGridData;
+        }
+
         public List<AEReportingDto> GetAEReportingList()
         {
             var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();

@@ -10,5 +10,6 @@ namespace GSC.Respository.AdverseEvent
     public interface IAEReportingRepository : IGenericRepository<AEReporting>
     {
         List<AEReportingDto> GetAEReportingList();
+        List<AEReportingGridDto> GetAEReportingGridData(int projectId);
     }
 }

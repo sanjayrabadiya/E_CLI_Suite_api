@@ -428,5 +428,19 @@ namespace GSC.Api.Controllers.Master
             var projectsDto = _projectRepository.GetProjectDetailForDashboard(ProjectId);
             return Ok(projectsDto);
         }
+
+        [HttpGet]
+        [Route("GetParentProjectDropDownforAE")]
+        public IActionResult GetParentProjectDropDownforAE()
+        {
+            return Ok(_projectRepository.GetParentProjectDropDownforAE());
+        }
+
+        [HttpGet]
+        [Route("GetChildProjectDropDownforAE/{parentProjectId}")]
+        public IActionResult GetChildProjectDropDownforAE(int parentProjectId)
+        {
+            return Ok(_projectRepository.GetChildProjectDropDownforAE(parentProjectId));
+        }
     }
 }

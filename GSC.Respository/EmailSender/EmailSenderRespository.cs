@@ -154,21 +154,36 @@ namespace GSC.Respository.EmailSender
             }
             if (mobile != "" && (sendtype == 0 || sendtype == 2))
             {
-                var smstemplate = emailMessage.MessageBody;
-                smstemplate = smstemplate.Replace("<p>", "");
-                smstemplate = smstemplate.Replace("</p>", "\r\n");
-                smstemplate = smstemplate.Replace("<strong>", "");
-                smstemplate = smstemplate.Replace("</strong>", "");
-                var smssetting = _iSMSSettingRepository.FindBy(x => x.KeyName == "msg91").ToList().FirstOrDefault();
-                var url = smssetting.SMSurl;
-                url = url.Replace("##AuthKey##", smssetting.AuthKey);
-                url = url.Replace("##Mobile##", "91"+mobile);
-                url = url.Replace("##senderid##", smssetting.SenderId);
-                url = url.Replace("##route##", "4");
-                url = url.Replace("##message##", smstemplate);//emailMessage.MessageBody
-                string result = await HttpService.Get(_httpClient, url, null);
-                //var responseresult = _aPICall.Get(url);
+                await SendSMS(mobile, emailMessage.MessageBody);
             }
+        }
+
+        public async Task SendAdverseEventAlertEMailtoInvestigator(string toMail, string mobile, string userName, string projectName, string patientname, string reportdate)
+        {
+            var emailMessage = ConfigureEmail("AdverseEventAlerttoInvestigator", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForAdverseEventAlerttoInvestigator(emailMessage.MessageBody, userName, patientname, projectName, reportdate);
+            emailMessage.Subject = ReplaceSubjectForAdverseEventAlerttoInvestigator(emailMessage.Subject, patientname);
+            _emailService.SendMail(emailMessage);
+            await SendSMS(mobile, emailMessage.MessageBody);
+        }
+
+        public async Task SendSMS(string mobile,string messagebody)
+        {
+            var smstemplate = messagebody;//emailMessage.MessageBody;
+            smstemplate = smstemplate.Replace("<p>", "");
+            smstemplate = smstemplate.Replace("</p>", "\r\n");
+            smstemplate = smstemplate.Replace("<strong>", "");
+            smstemplate = smstemplate.Replace("</strong>", "");
+            var smssetting = _iSMSSettingRepository.FindBy(x => x.KeyName == "msg91").ToList().FirstOrDefault();
+            var url = smssetting.SMSurl;
+            url = url.Replace("##AuthKey##", smssetting.AuthKey);
+            url = url.Replace("##Mobile##", "91" + mobile);
+            url = url.Replace("##senderid##", smssetting.SenderId);
+            url = url.Replace("##route##", "4");
+            url = url.Replace("##message##", smstemplate);//emailMessage.MessageBody
+             await HttpService.Get(_httpClient, url, null);
+            //var responseresult = _aPICall.Get(url);
         }
 
         private string ReplaceBodyForPDF(string body, string userName, string project, string linkOfPdf)
@@ -351,6 +366,38 @@ namespace GSC.Respository.EmailSender
 
             body = Regex.Replace(body, "##password##", password, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>password</strong>##", "<strong>" + password + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceBodyForAdverseEventAlerttoInvestigator(string body, string userName, string patientname, string projectName, string reportdate)
+        {
+            body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##patientname##", patientname, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientname + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##studyname##", projectName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>studyName</strong>##", "<strong>" + projectName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##username##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##reportdate##", reportdate, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>reportdate</strong>##", "<strong>" + reportdate + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceSubjectForAdverseEventAlerttoInvestigator(string body, string patientname)
+        {
+            body = Regex.Replace(body, "##patientname##", patientname, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientname + "</strong>",
                 RegexOptions.IgnoreCase);
             return body;
         }
