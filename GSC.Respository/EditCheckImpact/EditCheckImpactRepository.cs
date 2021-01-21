@@ -597,6 +597,7 @@ namespace GSC.Respository.EditCheckImpact
                     IsTarget = x.IsTarget
                 }).ToList();
 
+
                 var validateResult = _editCheckRuleRepository.ValidateEditCheck(editCheckValidates);
 
                 if (validateResult != null)
@@ -613,7 +614,7 @@ namespace GSC.Respository.EditCheckImpact
                                 if (t.Operator != Operator.Enable)
                                     t.ScreeningTemplateValue = singleTarget.Result;
 
-                                t.SampleResult = validateResult.RefAndTarget;
+                                t.SampleResult = singleTarget.SampleText + " " + validateResult.SampleText;
 
                                 if (singleTarget.IsValid && validateResult.IsValid)
                                     t.ValidateType = EditCheckValidateType.Passed;

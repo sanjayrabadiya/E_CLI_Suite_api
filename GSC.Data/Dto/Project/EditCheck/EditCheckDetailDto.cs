@@ -75,7 +75,6 @@ namespace GSC.Data.Dto.Project.EditCheck
         public int Id { get; set; }
         public bool IsValid { get; set; }
         public string SampleText { get; set; }
-        public string RefAndTarget { get; set; }
         public string Result { get; set; }
         public string ResultMessage { get; set; }
         public string ErrorMessage { get; set; } = "";

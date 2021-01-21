@@ -94,7 +94,6 @@ namespace GSC.Respository.EditCheckImpact
 
                     var result = ValidateRuleReference(new List<EditCheckValidate> { c }, isFromValidate);
                     result.Id = c.Id;
-                    editCheckResult.RefAndTarget = result.RefAndTarget;
                     result.Result = result.IsValid ? "Passed" : "Failed";
                     if (isFromValidate && string.IsNullOrEmpty(c.CollectionValue))
                         editCheckResult.IsValid = result.IsValid;
@@ -177,7 +176,12 @@ namespace GSC.Respository.EditCheckImpact
                 else
                 {
                     var target = ValidateRuleReference(new List<EditCheckValidate> { r }, isFromValidate);
-                    target.Result = target.IsValid ? "Passed" : "Failed";
+                    if (result.IsValid && target.IsValid)
+                        target.Result = "Passed";
+                    else if (!result.IsValid && !target.IsValid)
+                        target.Result = "Not Processed";
+                    else
+                        target.Result = "Failed";
                     target.Id = r.Id;
                     result.Target.Add(target);
                 }
@@ -375,7 +379,6 @@ namespace GSC.Respository.EditCheckImpact
             var result = ValidateDataTable(dt, ruleStr, isFromValidate, editCheck.Any(r => r.IsTarget));
 
             result.SampleText = displayRule;
-            result.RefAndTarget = displayRule + ruleStr;
             return result;
         }
 
