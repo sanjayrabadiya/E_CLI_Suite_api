@@ -10,6 +10,7 @@ using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using GSC.Shared.Security;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -67,6 +68,7 @@ namespace GSC.Respository.Etmf
             {
 
                 pvListObj.Id = b.Id;
+                pvListObj.RandomId = RandomPassword.CreateRandomPassword(6);
                 pvListObj.Text = _context.Project.Where(x => x.Id == b.ProjectId).FirstOrDefault().ProjectCode;
                 pvListObj.Level = 1;
                 pvListObj.Item = new List<TreeValue>();
@@ -75,6 +77,7 @@ namespace GSC.Respository.Etmf
 
                 TreeValue TrialFol = new TreeValue();
                 TrialFol.Id = 11111111;
+                TrialFol.RandomId = RandomPassword.CreateRandomPassword(6);
                 TrialFol.Text = "Trial";
                 TrialFol.Level = 2;
                 TrialFol.Icon = "folder";
@@ -82,6 +85,7 @@ namespace GSC.Respository.Etmf
 
                 TreeValue CountryFol = new TreeValue();
                 CountryFol.Id = 11111112;
+                CountryFol.RandomId = RandomPassword.CreateRandomPassword(6);
                 CountryFol.Text = "Country";
                 CountryFol.Level = 2;
                 CountryFol.Icon = "folder";
@@ -89,6 +93,7 @@ namespace GSC.Respository.Etmf
 
                 TreeValue SiteFol = new TreeValue();
                 SiteFol.Id = 11111113;
+                SiteFol.RandomId = RandomPassword.CreateRandomPassword(6);
                 SiteFol.Text = "Site";
                 SiteFol.Level = 2;
                 SiteFol.Icon = "folder";
@@ -102,6 +107,7 @@ namespace GSC.Respository.Etmf
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Item = new List<TreeValue>();
                     pvListdetaiObj.Id = 22222222;
+                    pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
                     pvListdetaiObj.Text = c.ItemName;
                     pvListdetaiObj.Level = 3;
                     pvListdetaiObj.Icon = "folder";
@@ -113,6 +119,7 @@ namespace GSC.Respository.Etmf
 
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
+                        pvListZoneObj.RandomId = RandomPassword.CreateRandomPassword(6);
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
                         pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
                         pvListZoneObj.Level = 4;
@@ -127,6 +134,7 @@ namespace GSC.Respository.Etmf
 
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
+                            pvListSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
                             pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
                             pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
                             pvListSectionObj.Level = 5;
@@ -142,6 +150,7 @@ namespace GSC.Respository.Etmf
                                 f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
                                 pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
                                 pvListArtificateObj.Level = 6;
@@ -165,6 +174,7 @@ namespace GSC.Respository.Etmf
 
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = s.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
                                 pvListArtificateObj.Text = s.SubSectionName;
                                 pvListArtificateObj.Level = 5.1;
 
@@ -182,6 +192,7 @@ namespace GSC.Respository.Etmf
                                 {
                                     TreeValue pvListartifactsubsectionobj = new TreeValue();
                                     pvListartifactsubsectionobj.Id = itemartifact.Id;
+                                    pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
                                     pvListartifactsubsectionobj.Text = itemartifact.ArtifactName;
                                     pvListartifactsubsectionobj.Level = 5.2;
                                     pvListartifactsubsectionobj.CountryId = c.Id;
@@ -221,6 +232,7 @@ namespace GSC.Respository.Etmf
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Item = new List<TreeValue>();
                     pvListdetaiObj.Id = 232323232;
+                    pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
                     pvListdetaiObj.Text = c.ItemName;
                     pvListdetaiObj.Level = 3;
                     pvListdetaiObj.Icon = "folder";
@@ -233,6 +245,7 @@ namespace GSC.Respository.Etmf
 
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
+                        pvListZoneObj.RandomId = RandomPassword.CreateRandomPassword(6);
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
                         pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
                         pvListZoneObj.Level = 4;
@@ -247,6 +260,7 @@ namespace GSC.Respository.Etmf
 
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
+                            pvListSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
                             pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
                             pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
                             pvListSectionObj.Level = 5;
@@ -263,6 +277,7 @@ namespace GSC.Respository.Etmf
                                 f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
                                 pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
                                 pvListArtificateObj.Level = 6;
@@ -286,6 +301,7 @@ namespace GSC.Respository.Etmf
 
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = s.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
                                 pvListArtificateObj.Text = s.SubSectionName;
                                 pvListArtificateObj.Level = 5.1;
 
@@ -304,6 +320,7 @@ namespace GSC.Respository.Etmf
                                 {
                                     TreeValue pvListartifactsubsectionobj = new TreeValue();
                                     pvListartifactsubsectionobj.Id = itemartifact.Id;
+                                    pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
                                     pvListartifactsubsectionobj.Text = itemartifact.ArtifactName;
                                     pvListartifactsubsectionobj.Level = 5.2;
 
@@ -343,6 +360,7 @@ namespace GSC.Respository.Etmf
                 {
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Id = 333333333;
+                    pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
                     pvListdetaiObj.Text = c.ItemName;
                     pvListdetaiObj.Level = 3;
                     pvListdetaiObj.Icon = "folder";
@@ -356,6 +374,7 @@ namespace GSC.Respository.Etmf
 
                         TreeValue pvListZoneObj = new TreeValue();
                         pvListZoneObj.Id = d.Id;
+                        pvListZoneObj.RandomId = RandomPassword.CreateRandomPassword(6);
                         pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
                         pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
                         pvListZoneObj.Level = 4;
@@ -370,6 +389,7 @@ namespace GSC.Respository.Etmf
 
                             TreeValue pvListSectionObj = new TreeValue();
                             pvListSectionObj.Id = e.Id;
+                            pvListSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
                             pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
                             pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
                             pvListSectionObj.Level = 5;
@@ -384,6 +404,7 @@ namespace GSC.Respository.Etmf
                                 f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = f.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
                                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
                                 pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
                                 pvListArtificateObj.Level = 6;
@@ -407,6 +428,7 @@ namespace GSC.Respository.Etmf
 
                                 TreeValue pvListArtificateObj = new TreeValue();
                                 pvListArtificateObj.Id = s.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
                                 pvListArtificateObj.Text = s.SubSectionName;
                                 pvListArtificateObj.Level = 5.1;
 
@@ -426,6 +448,7 @@ namespace GSC.Respository.Etmf
                                 {
                                     TreeValue pvListartifactsubsectionobj = new TreeValue();
                                     pvListartifactsubsectionobj.Id = itemartifact.Id;
+                                    pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
                                     pvListartifactsubsectionobj.Text = itemartifact.ArtifactName;
                                     pvListartifactsubsectionobj.Level = 5.2;
                                     pvListartifactsubsectionobj.CountryId = 0;
@@ -693,5 +716,6 @@ namespace GSC.Respository.Etmf
         public int SubSectionArtificateId { get; set; }
         public WorkPlaceFolder WorkPlaceFolderId { get; set; }
         public string Icon { get; set; }
+        public string RandomId { get; set; }
     }
 }
