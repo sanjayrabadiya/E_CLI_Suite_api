@@ -35,6 +35,9 @@ namespace GSC.Data.Dto.Medra
         public int? ReasonId { get; set; }
         public string ReasonOth { get; set; }
         public string ReasonName { get; set; }
+        public long? LLT { get; set; }
+        public string Code { get; set; }
+        public string PrimarySoc { get; set; }
 
     }
 }

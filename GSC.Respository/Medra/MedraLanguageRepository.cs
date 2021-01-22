@@ -29,8 +29,7 @@ namespace GSC.Respository.Medra
 
         public List<DropDownDto> GetLanguageDropDown()
         {
-            return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
+            return All.Where(x => x.DeletedDate == null)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.LanguageName }).OrderBy(o => o.Value).ToList();
         }
 

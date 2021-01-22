@@ -128,7 +128,7 @@ namespace GSC.Data.Dto.Medra
 
         public int SocId { get; set; }
         public string SocCode { get; set; }
-        public int LLT { get; set; }
+        public long LLT { get; set; }
         public string LLTValue { get; set; }
         public string PT { get; set; }
         public string HLT { get; set; }

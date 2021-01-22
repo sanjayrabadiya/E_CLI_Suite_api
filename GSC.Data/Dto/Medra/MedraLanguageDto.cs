@@ -5,9 +5,6 @@ namespace GSC.Data.Dto.Medra
     public class MedraLanguageDto : BaseDto
     {
         public string LanguageName { get; set; }
-
-        public string Culture { get; set; }
-        public int? CompanyId { get; set; }
     }
 
     public class MedraLanguageGridDto : BaseAuditDto

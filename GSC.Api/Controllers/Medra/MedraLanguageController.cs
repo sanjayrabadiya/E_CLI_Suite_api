@@ -44,19 +44,19 @@ namespace GSC.Api.Controllers.Master
             _mapper = mapper;
         }
 
-        [HttpGet("list")]
-        public IActionResult GetList()
-        {
-            var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
-            var existing = _medraLanguageRepository.All.Select(x => x.Culture.ToLower());
-            var languages = cultures.Where(x => !existing.Contains(x.Name.ToLower()))
-                .Select(x => new MedraLanguageDto
-                {
-                    LanguageName = x.DisplayName,
-                    Culture = x.Name
-                });
-            return Ok(languages);
-        }
+        //[HttpGet("list")]
+        //public IActionResult GetList()
+        //{
+        //    var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+        //    var existing = _medraLanguageRepository.All.Select(x => x.Culture.ToLower());
+        //    var languages = cultures.Where(x => !existing.Contains(x.Name.ToLower()))
+        //        .Select(x => new MedraLanguageDto
+        //        {
+        //            LanguageName = x.DisplayName,
+        //            Culture = x.Name
+        //        });
+        //    return Ok(languages);
+        //}
 
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)

@@ -23,9 +23,7 @@ namespace GSC.Api.Controllers.Medra
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMeddraCodingRepository _meddraCodingRepository;
-        //private readonly IMeddraSocTermRepository _meddraSocTermRepository;
         private readonly IMeddraCodingAuditRepository _meddraCodingAuditRepository;
-      //  private readonly IStudyScopingRepository _studyScopingRepository;
         private readonly IMeddraCodingCommentRepository _meddraCodingCommentRepository;
         private readonly IMeddraMdHierarchyRepository _meddraMdHierarchyRepository;
         private readonly IMapper _mapper;
@@ -34,8 +32,6 @@ namespace GSC.Api.Controllers.Medra
         public MeddraCodingCommentController(IMeddraCodingRepository meddraCodingRepository,
             IMeddraCodingCommentRepository meddraCodingCommentRepository,
             IMeddraCodingAuditRepository meddraCodingAuditRepository,
-          //  IStudyScopingRepository studyScopingRepository,
-          //  IMeddraSocTermRepository meddraSocTermRepository,
             IMeddraMdHierarchyRepository meddraMdHierarchyRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -45,8 +41,6 @@ namespace GSC.Api.Controllers.Medra
             _meddraCodingCommentRepository = meddraCodingCommentRepository;
             _meddraMdHierarchyRepository = meddraMdHierarchyRepository;
             _meddraCodingAuditRepository = meddraCodingAuditRepository;
-        //    _studyScopingRepository = studyScopingRepository;
-           // _meddraSocTermRepository = meddraSocTermRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;

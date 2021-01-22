@@ -45,6 +45,8 @@ namespace GSC.Respository.Medra
         public IList<MeddraCodingAuditDto> GetMeddraAuditDetails(int MeddraCodingId)
         {
             var result = (from MCA in _context.MeddraCodingAudit
+                          join medraConding in _context.MeddraCoding on MCA.MeddraCodingId equals medraConding.Id
+                          join medraConfig in _context.MedraConfig on medraConding.MeddraConfigId equals medraConfig.Id
                           join soc in _context.MeddraSocTerm on MCA.MeddraSocTermId equals soc.Id into socDto
                           from meddraSoc in socDto.DefaultIfEmpty()
                           join mllt in _context.MeddraLowLevelTerm on MCA.MeddraLowLevelTermId equals mllt.Id into mlltDto
@@ -58,8 +60,12 @@ namespace GSC.Respository.Medra
                           join roles in _context.SecurityRole on MCA.UserRoleId equals roles.Id into roleDto
                           from role in roleDto.DefaultIfEmpty()
                           where MCA.MeddraCodingId == MeddraCodingId && meddraLLT.pt_code == meddraMD.pt_code
+                          && meddraLLT.MedraConfigId == medraConfig.Id && meddraSoc.MedraConfigId == medraConfig.Id
+                          && meddraMD.MedraConfigId == medraConfig.Id
                           select new MeddraCodingAuditDto
                           {
+                              Code = meddraLLT.llt_name,
+                              LLT = meddraLLT.llt_code,
                               Value = meddraLLT.llt_name,
                               CreatedDate = MCA.CreatedDate,
                               CreateUser = user.UserName + " (" + role.RoleName + ")",
@@ -73,7 +79,8 @@ namespace GSC.Respository.Medra
                               Action = MCA.Action,
                               Note = MCA.Note,
                               ReasonName = reason.ReasonName,
-                              ReasonOth = MCA.ReasonOth
+                              ReasonOth = MCA.ReasonOth,
+                              PrimarySoc = meddraMD.primary_soc_fg,
                           }).OrderByDescending(o => o.CreatedDate).ToList();
             return result;
         }
