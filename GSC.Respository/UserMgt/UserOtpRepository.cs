@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
@@ -29,7 +30,7 @@ namespace GSC.Respository.UserMgt
             _userPasswordRepository = userPasswordRepository;
         }
 
-        public string InsertOtp(string username)
+        public async Task<string> InsertOtp(string username)
         {
             var user = _userRepository.FindBy(x => x.UserName == username && x.DeletedDate == null).FirstOrDefault();
             if (user == null) return "Invalid user name!";
@@ -41,7 +42,7 @@ namespace GSC.Respository.UserMgt
             userOtp.CreatedDate = DateTime.Now;
             Add(userOtp);
 
-            _emailSenderRespository.SendForgotPasswordEMail(user.Email, opt, user.UserName);
+            await _emailSenderRespository.SendForgotPasswordEMail(user.Email,user.Phone, opt, user.UserName);
             return "";
         }
 

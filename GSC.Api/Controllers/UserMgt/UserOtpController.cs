@@ -50,7 +50,7 @@ namespace GSC.Api.Controllers.UserMgt
         {
             var validateMessage = "";
             if (_environmentSetting.Value.IsPremise)
-                 validateMessage = _userOtpRepository.InsertOtp(userName);
+                 validateMessage = await _userOtpRepository.InsertOtp(userName);
             else
                 validateMessage = await _centreUserService.InsertOtpCenteral($"{_environmentSetting.Value.CentralApi}UserOtp/InsertOtp/{userName}");
 
@@ -127,7 +127,7 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         [AllowAnonymous]
         [Route("VerifyingUser/{userName}")]
-        public IActionResult VerifyingUser(string userName)
+        public async Task<IActionResult> VerifyingUser(string userName)
         {
             var userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
             if (userExists == null)
@@ -144,7 +144,7 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (userExists.IsFirstTime)
             {
-                var validateMessage = _userOtpRepository.InsertOtp(userName);
+                var validateMessage = await _userOtpRepository.InsertOtp(userName);
 
                 if (!string.IsNullOrEmpty(validateMessage))
                 {
@@ -214,7 +214,7 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (userExists.IsFirstTime)
             {
-                var validateMessage = _userOtpRepository.InsertOtp(userName);
+                var validateMessage = await _userOtpRepository.InsertOtp(userName);
 
                 if (!string.IsNullOrEmpty(validateMessage))
                 {

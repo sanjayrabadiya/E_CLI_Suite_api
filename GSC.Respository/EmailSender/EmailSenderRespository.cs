@@ -55,12 +55,21 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-        public void SendForgotPasswordEMail(string toMail, string password, string userName)
+        public async Task SendForgotPasswordEMail(string toMail, string mobile, string password, string userName)
+            //void SendForgotPasswordEMail(string toMail, string password, string userName)
         {
             var emailMessage = ConfigureEmail("forgotpass", userName);
             emailMessage.SendTo = toMail;
             emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password);
-            _emailService.SendMail(emailMessage);
+            if (toMail != null && toMail != "")
+            {
+                _emailService.SendMail(emailMessage);
+            }
+            if (mobile != null && mobile != "")
+            {
+                await SendSMS(mobile, emailMessage.MessageBody);
+            }
+                
         }
 
         public void SendPdfGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf)
@@ -175,6 +184,7 @@ namespace GSC.Respository.EmailSender
             smstemplate = smstemplate.Replace("</p>", "\r\n");
             smstemplate = smstemplate.Replace("<strong>", "");
             smstemplate = smstemplate.Replace("</strong>", "");
+            smstemplate = Regex.Replace(smstemplate, "<.*?>", String.Empty);
             var smssetting = _iSMSSettingRepository.FindBy(x => x.KeyName == "msg91").ToList().FirstOrDefault();
             var url = smssetting.SMSurl;
             url = url.Replace("##AuthKey##", smssetting.AuthKey);

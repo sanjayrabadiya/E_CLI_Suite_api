@@ -29,7 +29,7 @@ namespace GSC.Data.Dto.UserMgt
 
         public string MiddleName { get; set; }
 
-        [Required(ErrorMessage = "Email is required.")]
+        //[Required(ErrorMessage = "Email is required.")]
         public string Email { get; set; }
         public DateTime? _DateOfBirth { get; set; }
         public DateTime? DateOfBirth
