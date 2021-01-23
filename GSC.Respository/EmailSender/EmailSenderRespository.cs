@@ -157,7 +157,7 @@ namespace GSC.Respository.EmailSender
             emailMessage.SendTo = toMail;
             emailMessage.MessageBody = ReplaceBodyForPatientScreened(emailMessage.MessageBody, userName, patientName, ProjectName,password);
             emailMessage.Subject = ReplaceSubjectForPatientScreened(emailMessage.Subject, ProjectName);
-            if (sendtype == 1 || sendtype == 2)
+            if (toMail != null && toMail != "" && (sendtype == 1 || sendtype == 2))
             {
                 _emailService.SendMail(emailMessage);
             }
