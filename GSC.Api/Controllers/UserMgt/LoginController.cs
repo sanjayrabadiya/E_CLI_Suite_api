@@ -84,11 +84,13 @@ namespace GSC.Api.Controllers.UserMgt
             var loginUser = await CheckifAlreadyLogin(user.UserId);
             if (loginUser.IsLogin)
             {
-                var errorResult = new ObjectResult(dto.UserName)
-                {
-                    StatusCode = 409
-                };
-                return errorResult;
+                //var errorResult = new ObjectResult(dto.UserName)
+                //{
+                //    StatusCode = 409
+                //};
+                //return errorResult;
+
+                return Ok(new { alreadyLoggedIn = true});
             }
 
             if (roles.Count == 1)
@@ -165,11 +167,13 @@ namespace GSC.Api.Controllers.UserMgt
             var loginUser = await CheckifAlreadyLogin(user.UserId);
             if (loginUser.IsLogin)
             {
-                var errorResult = new ObjectResult(dto.UserName)
-                {
-                    StatusCode = 409
-                };
-                return errorResult;
+                //var errorResult = new ObjectResult(dto.UserName)
+                //{
+                //    StatusCode = 409
+                //};
+                //return errorResult;
+
+                return Ok(new { alreadyLoggedIn = true });
             }
 
             if (roles.Count == 1)
