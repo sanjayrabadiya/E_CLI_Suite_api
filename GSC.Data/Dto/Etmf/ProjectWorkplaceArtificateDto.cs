@@ -35,6 +35,7 @@ namespace GSC.Data.Dto.Etmf
         public int AllArtificate { get; set; }
         public int CoreArtificate { get; set; }
         public int RecommendedArtificate { get; set; }
+        public int NotRequired { get; set; }
     }
 
     public class WorkplaceChartFilterDto

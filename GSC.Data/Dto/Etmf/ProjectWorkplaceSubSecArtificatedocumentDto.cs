@@ -28,11 +28,13 @@ namespace GSC.Data.Dto.Etmf
         public string Version { get; set; }
         public int? ParentDocumentId { get; set; }
         public bool? IsAccepted { get; set; }
+
+        public bool IsNotRequired { get; set; }
     }
 
-    public  class CommonArtifactDocumentDto
+    public class CommonArtifactDocumentDto
     {
-        public int Id{ get; set; }
+        public int Id { get; set; }
         public int ProjectWorkplaceSubSectionArtifactId { get; set; }
         public int EtmfArtificateMasterLbraryId { get; set; }
         public int ProjectWorkplaceArtificateId { get; set; }
@@ -46,7 +48,7 @@ namespace GSC.Data.Dto.Etmf
         public string StatusName { get; set; }
         public string Version { get; set; }
         public string CreatedByUser { get; set; }
-        public double  Level{ get; set; }
+        public double Level { get; set; }
         public int CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public bool SendBy { get; set; }
@@ -57,6 +59,7 @@ namespace GSC.Data.Dto.Etmf
         public string ApprovedStatus { get; set; }
         public string Approver { get; set; }
         public bool IsApproveDoc { get; set; }
+        public bool IsNotRequired { get; set; }
     }
 
     public class CustomParameter

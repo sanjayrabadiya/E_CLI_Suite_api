@@ -28,5 +28,6 @@ namespace GSC.Data.Dto.Etmf
         public string Version { get; set; }
         public int? ParentDocumentId { get; set; }
         public bool SuperSede { get; set; }
+        public bool IsNotRequired { get; set; }
     }
 }

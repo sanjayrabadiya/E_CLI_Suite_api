@@ -300,5 +300,27 @@ namespace GSC.Api.Controllers.Etmf
 
             return Ok(auditsDto);
         }
+
+        [HttpPut]
+        [Route("UpdateNotRequired/{id}")]
+        public IActionResult UpdateNotRequired(int id)
+        {
+            var projectWorkplaceArtificatedocumentDto = _projectWorkplaceArtificatedocumentRepository.Find(id);
+            if (projectWorkplaceArtificatedocumentDto.IsNotRequired)
+            {
+                projectWorkplaceArtificatedocumentDto.Status = ArtifactDocStatusType.Draft;
+                projectWorkplaceArtificatedocumentDto.IsNotRequired = !projectWorkplaceArtificatedocumentDto.IsNotRequired;
+            }
+            else
+            {
+                projectWorkplaceArtificatedocumentDto.Status = ArtifactDocStatusType.NotRequired;
+                projectWorkplaceArtificatedocumentDto.IsNotRequired = !projectWorkplaceArtificatedocumentDto.IsNotRequired;
+            }
+            var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
+            _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            return Ok(projectWorkplaceArtificatedocument.Id);
+        }
     }
 }

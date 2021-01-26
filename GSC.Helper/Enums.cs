@@ -486,6 +486,7 @@ namespace GSC.Helper
         [Description("Draft")] Draft = 1,
         [Description("Final")] Final = 2,
         [Description("Supersede")] Supersede = 3,
+        [Description("Not Required")] NotRequired = 4,
     }
 
 
