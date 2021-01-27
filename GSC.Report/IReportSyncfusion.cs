@@ -9,6 +9,6 @@ namespace GSC.Report
 {
     public interface IReportSyncfusion
     {
-        void BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
+        void BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);    
     }
 }

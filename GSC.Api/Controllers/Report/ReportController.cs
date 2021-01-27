@@ -2,11 +2,8 @@
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
-using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Project.Design;
-using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.Report;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Report;
 using GSC.Respository.Project.Design;
@@ -16,7 +13,6 @@ using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -72,8 +68,42 @@ namespace GSC.Api.Controllers.Report
         [Route("GetProjectDesignWithFliter")]
         public async Task<IActionResult> GetProjectDesignWithFliter([FromBody] ReportSettingNew reportSetting)
         {
-            //var projectdesign = _projectDesignRepository.FindBy(x => x.ProjectId == reportSetting.ProjectId).SingleOrDefault();
-           
+            #region Report Setting Save
+            var reportSettingForm = _projectDesignReportSettingRepository.All.Where(x => x.ProjectDesignId == reportSetting.ProjectId && x.CompanyId == reportSetting.CompanyId && x.DeletedBy == null).FirstOrDefault();
+            if (reportSettingForm == null)
+            {
+                ProjectDesignReportSetting objNew = new ProjectDesignReportSetting();
+
+                objNew.ProjectDesignId = reportSetting.ProjectId;
+                objNew.IsClientLogo = reportSetting.IsClientLogo;
+                objNew.IsCompanyLogo = reportSetting.IsCompanyLogo;
+                objNew.IsInitial = reportSetting.IsInitial;
+                objNew.IsScreenNumber = reportSetting.IsScreenNumber;
+                objNew.IsSponsorNumber = reportSetting.IsSponsorNumber;
+                objNew.IsSubjectNumber = reportSetting.IsSubjectNumber;
+                objNew.LeftMargin = reportSetting.LeftMargin;
+                objNew.RightMargin = reportSetting.RightMargin;
+                objNew.TopMargin = reportSetting.TopMargin;
+                objNew.BottomMargin = reportSetting.BottomMargin;
+                _projectDesignReportSettingRepository.Add(objNew);
+            }
+            else
+            {
+                reportSettingForm.ProjectDesignId = reportSetting.ProjectId;
+                reportSettingForm.IsClientLogo = reportSetting.IsClientLogo;
+                reportSettingForm.IsCompanyLogo = reportSetting.IsCompanyLogo;
+                reportSettingForm.IsInitial = reportSetting.IsInitial;
+                reportSettingForm.IsScreenNumber = reportSetting.IsScreenNumber;
+                reportSettingForm.IsSponsorNumber = reportSetting.IsSponsorNumber;
+                reportSettingForm.IsSubjectNumber = reportSetting.IsSubjectNumber;
+                reportSettingForm.LeftMargin = reportSetting.LeftMargin;
+                reportSettingForm.RightMargin = reportSetting.RightMargin;
+                reportSettingForm.TopMargin = reportSetting.TopMargin;
+                reportSettingForm.BottomMargin = reportSetting.BottomMargin;
+
+                _projectDesignReportSettingRepository.Update(reportSettingForm);
+            }
+            #endregion
             JobMonitoringDto jobMonitoringDto = new JobMonitoringDto();
             jobMonitoringDto.JobName = JobNameType.DossierReport;
             jobMonitoringDto.JobDescription = reportSetting.ProjectId;
