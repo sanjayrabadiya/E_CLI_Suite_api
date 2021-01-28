@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.Master
         public List<SiteTeamDto> siteTeams { get; set; }
         public string siteAddress { get; set; }
         public string hospitalName { get; set; }
+        public string patientdetail { get; set; }
         //public string investigatorName { get; set; }
         //public string investigatorcontact { get; set; }
         //public string investigatorEmail { get; set; }
