@@ -261,7 +261,7 @@ namespace GSC.Respository.EditCheckImpact
               
             projectDesignVariableId = _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ValueName == value && x.DeletedDate == null).Select(t => t.ProjectDesignVariableId).FirstOrDefault();
 
-            return projectDesignVariableId.ToString();
+            return projectDesignVariableValueId.ToString();
 
         }
 
