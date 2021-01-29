@@ -6,6 +6,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
+using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Configuration;
@@ -30,6 +31,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
         private readonly IMapper _mapper;
+        private readonly ILoginPreferenceRepository _loginPreferenceRepository;
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
@@ -38,7 +40,8 @@ namespace GSC.Api.Controllers.UserMgt
             IHubContext<MessageHub> hubContext,
             IConfiguration configuration,
             IOptions<EnvironmentSetting> environmentSetting,
-            ICentreUserService centreUserService, IMapper mapper)
+            ICentreUserService centreUserService, IMapper mapper,
+            ILoginPreferenceRepository loginPreferenceRepository)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -49,6 +52,7 @@ namespace GSC.Api.Controllers.UserMgt
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
             _mapper = mapper;
+            _loginPreferenceRepository = loginPreferenceRepository;
         }
 
         [HttpPost]
@@ -65,6 +69,14 @@ namespace GSC.Api.Controllers.UserMgt
             else
                 user = await _centreUserService.ValidateClient(dto);
 
+            var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == user.CompanyId).FirstOrDefault();
+            if (user.FailedLoginAttempts > company.MaxLoginAttempt)
+            {
+                var users = _userRepository.Find(user.UserId);
+                users.IsLocked = true;
+                _userRepository.Update(users);
+                _uow.Save();
+            }
 
             if (!user.IsValid)
             {

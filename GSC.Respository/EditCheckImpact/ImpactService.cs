@@ -28,6 +28,7 @@ namespace GSC.Respository.EditCheckImpact
         private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
+
         public ImpactService(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper,
@@ -242,6 +243,26 @@ namespace GSC.Respository.EditCheckImpact
             int.TryParse(result, out value);
 
             return value;
+        }
+
+        public string GetProjectDesignVariableId(int projectDesignVariableId, string collectionSource)
+        {
+           
+            var variableCollectionSource = _projectDesignVariableRepository.All.Where(x => x.Id == projectDesignVariableId && x.DeletedDate == null).Select(t => t.CollectionSource).FirstOrDefault();
+
+            if (IsNotDropDown(variableCollectionSource))
+                return collectionSource;
+
+            int projectDesignVariableValueId;
+
+            int.TryParse(collectionSource, out projectDesignVariableValueId);
+
+            var value = _projectDesignVariableValueRepository.All.Where(x => x.Id == projectDesignVariableValueId).Select(t => t.ValueName).FirstOrDefault();
+              
+            projectDesignVariableId = _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ValueName == value && x.DeletedDate == null).Select(t => t.ProjectDesignVariableId).FirstOrDefault();
+
+            return projectDesignVariableValueId.ToString();
+
         }
 
         public string ScreeningValueAnnotation(string value, EditCheckRuleBy checkBy, CollectionSources? collectionSource)

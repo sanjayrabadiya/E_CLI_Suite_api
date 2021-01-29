@@ -721,6 +721,7 @@ namespace GSC.Respository.Attendance
 
                     dashboardPatientDto.siteAddress = _manageSiteRepository.Find((int)project.ManageSiteId).SiteAddress;
                 }
+                dashboardPatientDto.patientdetail = "Screening Number: " + randomization.ScreeningNumber + " Initial: " + randomization.Initial;
                 //dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
                 //dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
                 //dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;

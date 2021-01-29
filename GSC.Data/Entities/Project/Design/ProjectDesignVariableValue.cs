@@ -12,6 +12,7 @@ namespace GSC.Data.Entities.Project.Design
         public string ValueName { get; set; }
         public int SeqNo { get; set; }
         public string Label { get; set; }
+        public ProjectDesignVariable ProjectDesignVariable { get; set; }
         public List<VariableValueLanguage> VariableValueLanguage { get; set; }
     }
 }

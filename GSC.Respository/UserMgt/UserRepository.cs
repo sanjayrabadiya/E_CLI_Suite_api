@@ -387,10 +387,12 @@ namespace GSC.Respository.UserMgt
         public void UpdateIsLogin(int id, bool isLogin)
         {
             var user = Find(id);
-            user.IsLogin = isLogin;
-            Update(user);
-            _context.Save();
-
+            if (user != null)
+            {
+                user.IsLogin = isLogin;
+                Update(user);
+                _context.Save();
+            }
         }
     }
 }

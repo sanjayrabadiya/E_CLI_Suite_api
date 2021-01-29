@@ -627,11 +627,11 @@ namespace GSC.Respository.Screening
                     value = string.Join(",", _screeningTemplateValueChildRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateValueId == screeningTemplateValue.Id && x.Value == "true").Select(t => t.ProjectDesignVariableValueId));
 
                 var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).
-                    Select(r => new { r.Id, r.ScreeningVisitId, r.ParentId, VisitParent = r.ScreeningVisit.ParentId, r.ProjectDesignTemplateId, r.ScreeningVisit.ScreeningEntryId, r.ScreeningVisit.ProjectDesignVisitId }).FirstOrDefault();
+                    Select(r => new { r.Id, r.ScreeningVisitId, r.Status, r.ParentId, VisitParent = r.ScreeningVisit.ParentId, r.ProjectDesignTemplateId, r.ScreeningVisit.ScreeningEntryId, r.ScreeningVisit.ProjectDesignVisitId }).FirstOrDefault();
 
                 var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningTemplate.ScreeningEntryId, screeningTemplateValue.ScreeningTemplateId,
                     screeningTemplateValue.IsNa ? "NA" : screeningTemplateValue.Value, screeningTemplate.ProjectDesignTemplateId,
-                    screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.ScreeningVisitId, screeningTemplate.ProjectDesignVisitId, screeningTemplateValue.IsNa);
+                    screeningTemplateValue.ProjectDesignVariableId, EditCheckIds, false, screeningTemplate.ScreeningVisitId, screeningTemplate.ProjectDesignVisitId, screeningTemplateValue.IsNa, screeningTemplate.Status);
 
                 if (screeningTemplate.ParentId == null && screeningTemplate.VisitParent == null)
                 {

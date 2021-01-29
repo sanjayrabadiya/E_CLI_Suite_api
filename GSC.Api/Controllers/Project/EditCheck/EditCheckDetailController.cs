@@ -8,6 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.EditCheck;
 using GSC.Data.Entities.Project.EditCheck;
 using GSC.Domain.Context;
+using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.EditCheck;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,14 +21,15 @@ namespace GSC.Api.Controllers.Project.EditCheck
         private readonly IEditCheckRepository _editCheckRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-
+        private readonly IImpactService _impactService;
         public EditCheckDetailController(IEditCheckDetailRepository editCheckDetailRepository,
-            IUnitOfWork uow, IMapper mapper, IEditCheckRepository editCheckRepository)
+            IUnitOfWork uow, IMapper mapper, IEditCheckRepository editCheckRepository, IImpactService impactService)
         {
             _editCheckDetailRepository = editCheckDetailRepository;
             _uow = uow;
             _mapper = mapper;
             _editCheckRepository = editCheckRepository;
+            _impactService = impactService;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -70,6 +72,9 @@ namespace GSC.Api.Controllers.Project.EditCheck
                     {
                         return BadRequest(validateMsg);
                     }
+
+                    if (editCheckDetail.CheckBy == Helper.EditCheckRuleBy.ByVariable)
+                        editCheckDetail.CollectionValue = _impactService.GetProjectDesignVariableId(editCheckDetailDto.ProjectDesignVariableId ?? 0, editCheckDetail.CollectionValue);
 
                     _editCheckDetailRepository.Add(editCheckDetail);
 
