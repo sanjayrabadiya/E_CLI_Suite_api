@@ -273,9 +273,7 @@ namespace GSC.Api.Controllers.UserMgt
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto loginDto)
         {
 
-            var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
-                .FirstOrDefault();
-
+           
             if (!_environmentSetting.Value.IsPremise)
             {
                 CommonResponceView userdetails = await _centreUserService.ChangePassword(loginDto, _environmentSetting.Value.CentralApi);
@@ -292,6 +290,9 @@ namespace GSC.Api.Controllers.UserMgt
             }
             else
             {
+                var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
+                    .FirstOrDefault();
+
                 if (user == null)
                     return NotFound();
                 if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(loginDto.OldPassword, user.Id)))
