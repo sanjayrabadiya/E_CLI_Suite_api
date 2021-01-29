@@ -279,7 +279,7 @@ namespace GSC.Respository.Master
         {
             var ParentProjectId = _context.ProjectDesign.Where(x => x.Id == ProjectDesignId).Select(t => t.ProjectId).FirstOrDefault();
 
-            return GetChildProjectDropDown(ParentProjectId);
+            return GetChildProjectDropDown(ProjectDesignId);
         }
 
         public List<ProjectDropDown> GetChildProjectRightsDropDown()
