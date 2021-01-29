@@ -50,7 +50,7 @@ namespace GSC.Respository.Project.Design
             return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownVaribleDto
             {
                 Id = c.Id,
-                Value = c.VariableName +
+                Value = c.DesignOrder + ". "+ c.VariableName +
                                          Convert.ToString(string.IsNullOrEmpty(c.Annotation) ? "" : " [" + c.Annotation + "]"),
                 Code = c.Annotation,
                 DataType = c.DataType,
