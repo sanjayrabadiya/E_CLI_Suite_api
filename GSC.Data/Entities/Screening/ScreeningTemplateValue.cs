@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
 using GSC.Data.Entities.Project.Design;
+using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using GSC.Shared.Extension;
 
@@ -29,6 +31,9 @@ namespace GSC.Data.Entities.Screening
         public List<ScreeningTemplateValueChild> Children { get; set; }
         public bool IsNa { get; set; }
         public int? UserRoleId { get; set; }
+
+        [ForeignKey("UserRoleId")] 
+        public SecurityRole SecurityRole { get; set; }
         public bool IsSystem { get; set; }
     }
 

@@ -296,20 +296,31 @@ namespace GSC.Respository.Screening
 
             PatientStatus(visit.ScreeningEntryId);
 
-            ScheduleVisitUpdate(visit.ScreeningEntryId);
+            if (visit.IsSchedule)
+                ScheduleVisitUpdate(visit.ScreeningEntryId);
 
 
         }
 
         public void ScheduleVisitUpdate(int screeningEntryId)
         {
-            var scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
+            var scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.ScheduleDate != null && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
                   OrderBy(t => t.ScheduleDate).FirstOrDefault();
 
             if (scheduleVisit != null)
             {
                 scheduleVisit.Status = ScreeningVisitStatus.Scheduled;
                 Update(scheduleVisit);
+            }
+            else
+            {
+                scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
+                 OrderBy(t => t.ScheduleDate).FirstOrDefault();
+                if (scheduleVisit != null)
+                {
+                    scheduleVisit.Status = ScreeningVisitStatus.Scheduled;
+                    Update(scheduleVisit);
+                }
             }
         }
 

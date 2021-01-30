@@ -135,17 +135,19 @@ namespace GSC.Respository.Screening
                          VariableName = (_jwtTokenAccesser.Language != 1 ?
                          t.ProjectDesignVariable.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && t.ProjectDesignVariable.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : t.ProjectDesignVariable.VariableName),
                          t.QueryStatus,
-                         t.AcknowledgeLevel
-                     }).GroupBy(a => new { a.QueryStatus, a.VariableName, a.AcknowledgeLevel }).
+                         t.AcknowledgeLevel,
+                         t.SecurityRole.RoleShortName
+                     }).GroupBy(a => new { a.QueryStatus, a.VariableName, a.AcknowledgeLevel, a.RoleShortName }).
                     Select(b => new VariableQueryDto
                     {
                         QueryStatus = b.Key.QueryStatus.GetDescription(),
                         VariableName = b.Key.VariableName,
                         Level = b.Key.AcknowledgeLevel ?? 0,
+                        LevelName = b.Key.AcknowledgeLevel == 0 ? "Independent - " + b.Key.RoleShortName : "",
                         Total = b.Count()
                     }).ToList();
 
-            result.ForEach(x => x.LevelName = workText.FirstOrDefault(a => a.LevelNo == x.Level)?.RoleName);
+            result.Where(a => a.Level != 0).ToList().ForEach(x => x.LevelName = workText.FirstOrDefault(a => a.LevelNo == x.Level)?.RoleName);
 
             return result;
 
