@@ -69,13 +69,16 @@ namespace GSC.Api.Controllers.UserMgt
             else
                 user = await _centreUserService.ValidateClient(dto);
 
-            var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == user.CompanyId).FirstOrDefault();
-            if (user.FailedLoginAttempts > company.MaxLoginAttempt)
+            if (!_environmentSetting.Value.IsPremise)
             {
-                var users = _userRepository.Find(user.UserId);
-                users.IsLocked = true;
-                _userRepository.Update(users);
-                _uow.Save();
+                var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == user.CompanyId).FirstOrDefault();
+                if (user.FailedLoginAttempts > company.MaxLoginAttempt)
+                {
+                    var users = _userRepository.Find(user.UserId);
+                    users.IsLocked = true;
+                    _userRepository.Update(users);
+                    _uow.Save();
+                }
             }
 
             if (!user.IsValid)
