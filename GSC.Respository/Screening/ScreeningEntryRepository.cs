@@ -216,8 +216,8 @@ namespace GSC.Respository.Screening
                 _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
                 _context.Save();
 
-                if (screningVisit.IsSchedule)
-                    _screeningVisitRepository.ScheduleVisitUpdate(screeningEntry.Id);
+                _screeningVisitRepository.ScheduleVisitUpdate(screeningEntry.Id);
+
             }
 
 
