@@ -30,6 +30,9 @@ using GSC.Respository.Project.Workflow;
 using GSC.Shared.Configuration;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using GSC.Data.Entities.UserMgt;
+using GSC.Data.Dto.UserMgt;
+using GSC.Shared.Security;
 
 namespace GSC.Respository.Attendance
 {
@@ -661,13 +664,29 @@ namespace GSC.Respository.Attendance
         }
 
 
-        public void PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId)
+        public async Task PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId)
         {
             var randomization = All.AsNoTracking().Where(x => x.ScreeningEntry.Id == screeningEntryId).FirstOrDefault();
             if (randomization.PatientStatusId != patientStatus)
             {
                 randomization.PatientStatusId = patientStatus;
                 Update(randomization);
+                if (patientStatus == ScreeningPatientStatus.ScreeningFailure || patientStatus == ScreeningPatientStatus.Withdrawal)
+                {
+                    if (!_environmentSetting.Value.IsPremise)
+                    {
+                        int userId = (int)randomization.UserId;
+                        User user = new User();
+                        user = _userRepository.Find(userId);
+                        user.ValidTo = DateTime.Today.AddDays(-1);
+                        _userRepository.Update(user);
+
+                        user = await _centreUserService.GetUserData($"{_environmentSetting.Value.CentralApi}Login/GetUserData/{user.UserName}");
+                        user.ValidTo = DateTime.Today.AddDays(-1);
+                        var userDto = _mapper.Map<UserDto>(user);
+                        CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
+                    }
+                }
             }
 
         }

@@ -205,6 +205,7 @@ namespace GSC.Api.Controllers.UserMgt
 
 
             var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
+            validatedUser.alreadyLoggedIn = false;
             if (!string.IsNullOrEmpty(validatedUser.Token))
             {
                 _userRepository.UpdateRefreshToken(validatedUser.UserId, validatedUser.RefreshToken);

@@ -295,6 +295,7 @@ namespace GSC.Api.Helpers
             CreateMap<AppScreenPatientRights, AppScreenPatientRightsDto>().ReverseMap();
             CreateMap<VariableCategory, VariableCategoryDto>().ReverseMap();
             CreateMap<AEReporting, AEReportingDto>().ReverseMap();
+            CreateMap<AdverseEventSettings, AdverseEventSettingsDto>().ReverseMap();
 
 
 

@@ -22,7 +22,7 @@ namespace GSC.Respository.Attendance
         void ChangeStatustoConsentInProgress();
         void ChangeStatustoConsentCompleted(int id);
         void ChangeStatustoReConsentInProgress(int id);
-        void PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId);
+        Task PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId);
         void ChangeStatustoWithdrawal(FileModel fileModel);
         DashboardPatientDto GetDashboardPatientDetail();
         //List<ProjectDesignVisitMobileDto> GetPatientVisits();
