@@ -93,7 +93,8 @@ namespace GSC.Respository.EditCheckImpact
                         x.HasQueries = SystemQuery(x.ScreeningTemplate.Id, x.ProjectDesignVariableId, x.AutoNumber, x.Message);
                 }
 
-                InsertScheduleDate(x, targetSchDate);
+                if (x.Operator != null && (x.Operator == ProjectScheduleOperator.Equal || x.Operator == ProjectScheduleOperator.Plus))
+                    InsertScheduleDate(x, targetSchDate);
 
             });
 
@@ -296,25 +297,28 @@ namespace GSC.Respository.EditCheckImpact
 
         void InsertScheduleDate(ScheduleCheckValidateDto target, string targetSchDate)
         {
-            if (string.IsNullOrEmpty(targetSchDate) || target.Operator != ProjectScheduleOperator.Plus)
+            if (string.IsNullOrEmpty(targetSchDate))
                 return;
 
             DateTime scheduleDate;
             DateTime.TryParse(targetSchDate, out scheduleDate);
 
-            if (target.CollectionSource == CollectionSources.Date)
+            if (target.Operator == ProjectScheduleOperator.Plus)
             {
-                if (target.NoOfDay.HasValue)
-                    scheduleDate = scheduleDate.AddDays(Convert.ToDouble(target.NoOfDay));
+                if (target.CollectionSource == CollectionSources.Date)
+                {
+                    if (target.NoOfDay.HasValue)
+                        scheduleDate = scheduleDate.AddDays(Convert.ToDouble(target.NoOfDay));
 
-            }
-            else
-            {
-                if (target.HH.HasValue)
-                    scheduleDate = scheduleDate.AddHours(Convert.ToDouble(target.HH));
+                }
+                else
+                {
+                    if (target.HH.HasValue)
+                        scheduleDate = scheduleDate.AddHours(Convert.ToDouble(target.HH));
 
-                if (target.MM.HasValue)
-                    scheduleDate = scheduleDate.AddMinutes(Convert.ToDouble(target.MM));
+                    if (target.MM.HasValue)
+                        scheduleDate = scheduleDate.AddMinutes(Convert.ToDouble(target.MM));
+                }
             }
 
             target.ScheduleDate = scheduleDate;
