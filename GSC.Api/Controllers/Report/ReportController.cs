@@ -128,9 +128,10 @@ namespace GSC.Api.Controllers.Report
 
         //[HttpGet]
         //[AllowAnonymous]
-        //public IActionResult test() {
+        //public IActionResult test()
+        //{
 
-        //   var result= _reportSuncfusion.test();
+        //    var result = _reportSuncfusion.DesignTemplatetest();
         //    return result;
         //}
     }

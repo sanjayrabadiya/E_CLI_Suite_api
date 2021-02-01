@@ -73,6 +73,7 @@ namespace GSC.Report
 
         private PdfDocument document = null;
         private PdfLayoutResult tocresult = null;
+        Dictionary<PdfPageBase, int> pages = new Dictionary<PdfPageBase, int>();
 
         public ReportSyncfusion(IHostingEnvironment hostingEnvironment, IProjectDesignRepository projectDesignRepository, IProjectDesignVisitRepository projectDesignVisitRepository,
         IProjectDesignTemplateRepository projectDesignTemplateRepository, IProjectDesignVariableRepository projectDesignVariableRepository, IUploadSettingRepository uploadSettingRepository, IReportBaseRepository reportBaseRepository, ICompanyRepository companyRepository,
@@ -104,6 +105,9 @@ namespace GSC.Report
             document.PageSettings.Margins.Left = Convert.ToInt32(reportSetting.LeftMargin * 100);
             document.PageSettings.Margins.Right = Convert.ToInt32(reportSetting.RightMargin * 100);
 
+            document.Template.Top = AddHeader(document, projectdetails.Project.ProjectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo));
+            document.Template.Bottom = AddFooter(document);
+
             DesignVisit(projectDesignvisit, reportSetting, projectdetails.Project.ProjectCode);
 
 
@@ -121,6 +125,59 @@ namespace GSC.Report
                     graphics.Restore();
                 }
             }
+
+            for (int i = 0; i < document.Pages.Count; i++)
+            {
+                PdfPageBase page = document.Pages[i] as PdfPageBase;
+                //Add the page and index to dictionary 
+                pages.Add(page, i);
+            }
+            PdfBookmarkBase bookmarks = document.Bookmarks;
+            //Iterates through bookmarks
+            foreach (PdfBookmark bookmark in bookmarks)
+            {
+                PdfLayoutFormat layoutformat = new PdfLayoutFormat();
+                layoutformat.Break = PdfLayoutBreakType.FitPage;
+                layoutformat.Layout = PdfLayoutType.Paginate;
+                PdfPageBase page = bookmark.Destination.Page;
+                if (pages.ContainsKey(page))
+                {
+                    int pagenumber = pages[page];
+
+                    PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
+                    documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
+                    documentLinkAnnotation.Text = bookmark.Title;
+                    documentLinkAnnotation.Color = Color.Transparent;
+                    //Sets the destination
+                    documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page);
+                    documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y + 20);
+                    //Adds this annotation to a new page
+                    tocresult.Page.Annotations.Add(documentLinkAnnotation);
+
+                    pagenumber++;
+                    string[] values = bookmark.Title.Split('.');
+                    if (values.Length > 0)
+                    {
+                        int n;
+                        bool isNumeric = int.TryParse(values[0], out n);
+                        if (isNumeric)
+                        {
+                            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
+                            tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
+                            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                        }
+                        else
+                        {
+                            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
+                            tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
+                            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                        }
+                    }
+                }
+            }
+
             MemoryStream memoryStream = new MemoryStream();
             document.Save(memoryStream);
 
@@ -169,7 +226,7 @@ namespace GSC.Report
             //Create a page template
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
             PdfFont font = new PdfStandardFont(PdfFontFamily.Helvetica, 24);
-           // float doubleHeight = font.Height * 2;
+            // float doubleHeight = font.Height * 2;
             Color activeColor = Color.FromArgb(44, 71, 120);
             SizeF imageSize = new SizeF(50f, 50f);
 
@@ -232,9 +289,9 @@ namespace GSC.Report
             return header;
         }
 
-        private PdfPageTemplateElement AddFooter(PdfSection section)
+        private PdfPageTemplateElement AddFooter(PdfDocument doc)
         {
-            RectangleF rect = new RectangleF(0, 0, section.Pages[0].GetClientSize().Width, 50);
+            RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 10);
 
             //Create a page template
             PdfPageTemplateElement footer = new PdfPageTemplateElement(rect);
@@ -253,7 +310,7 @@ namespace GSC.Report
             compositeField.Bounds = footer.Bounds;
 
             //Draw the composite field in the footer
-            compositeField.Draw(footer.Graphics, new PointF(470, 30));
+            compositeField.Draw(footer.Graphics, new PointF(footer.Width - 40, footer.Height - 10));
 
             //Drawing Line
             PdfPen pen = new PdfPen(Color.Black, 1.0f);
@@ -284,7 +341,7 @@ namespace GSC.Report
             PdfBookmark bookmarks = document.Bookmarks.Add(title);
             bookmarks.Destination = new PdfDestination(sectionpage.Page);
             bookmarks.Destination.Location = new PointF(0, sectionpage.Bounds.Y);
-            AddTableOfcontents(sectionpage, title, isVisit);
+            //AddTableOfcontents(sectionpage, title, isVisit);
             // Adding bookmark with named destination
             PdfNamedDestination namedDestination = new PdfNamedDestination(title);
             namedDestination.Destination = new PdfDestination(sectionpage.Page, new PointF(0, sectionpage.Bounds.Y));
@@ -327,7 +384,7 @@ namespace GSC.Report
 
             PdfPage pageTOC = SectionTOC.Pages.Add();
 
-            document.Template.Top = AddHeader(document, projectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo));
+
             PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
             //layoutFormat.Break = PdfLayoutBreakType.FitPage;
             layoutFormat.Layout = PdfLayoutType.Paginate;
@@ -356,7 +413,7 @@ namespace GSC.Report
                 PdfSection SectionContent = document.Sections.Add();
                 PdfPage pageContent = SectionContent.Pages.Add();
                 SectionContent.Template.Top = VisitTemplateHeader(document, template.Value, "", "", "");
-                SectionContent.Template.Bottom = AddFooter(SectionContent);
+                // SectionContent.Template.Bottom = AddFooter(SectionContent);
                 var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id, x => x.ProjectDesignTemplateNote).ToList();
                 DesignTemplate(projecttemplate, reportSetting, template.Value, pageContent);
 
@@ -441,16 +498,16 @@ namespace GSC.Report
             //document.Form.SetDefaultAppearance(false);
 
             AddBookmark(result, $"{vistitName}", true);
-            PdfBookmark bookmarks = document.Bookmarks.Add(vistitName);
-            bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
-            bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
+            //PdfBookmark bookmarks = document.Bookmarks.Add(vistitName);
+            //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
+            //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
 
             foreach (var designt in designtemplate)
             {
                 AddBookmark(result, $"{index}.{designt.TemplateName}", false);
-                bookmarks = document.Bookmarks.Add($"{index}.{designt.TemplateName}");
-                bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
-                bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
+                //bookmarks = document.Bookmarks.Add($"{index}.{designt.TemplateName}");
+                //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
+                //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
 
                 result = AddString($"{index}.{designt.TemplateName} -{designt.TemplateCode}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 string notes = "";
@@ -719,38 +776,35 @@ namespace GSC.Report
                     }
                     else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox)
                     {
-                        PdfComboBoxField comboBox = new PdfComboBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
-                        comboBox.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                        comboBox.BorderColor = new PdfColor(Color.Gray);
-                        // comboBox.ToolTip = "Job Title";
-                        // string ValueName = "";
+                        //PdfComboBoxField comboBox = new PdfComboBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
+                        //comboBox.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                        //comboBox.BorderColor = new PdfColor(Color.Gray);                   
 
-                        var variablevalue = _context.ProjectDesignVariableValue.Where(b =>
-                                                        b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id
-                                                        ).ToList();
+                        //var variablevalue = _context.ProjectDesignVariableValue.Where(b =>
+                        //                                b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id
+                        //                                ).ToList();
 
                         var variblevaluename = _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                                         b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id &&
                                                         (variable.Value != null || variable.Value != "" ||
                                                         b.Id == Convert.ToInt32(variable.Value))).ValueName;
-                        foreach (var value in variablevalue)
-                        {
-                            //ValueName = value.ValueName;
-                            comboBox.Items.Add(new PdfListFieldItem(value.ValueName, value.Id.ToString()));
-                        }
-                        int cvalue = variablevalue.FindIndex(x => x.ValueName == variblevaluename);
-                        //comboBox.Editable = true;
-                        //comboBox.ComplexScript = true;
-                        //comboBox.ReadOnly = true;                       
-                        document.Form.Fields.Add(comboBox);                       
-                        document.Form.SetDefaultAppearance(false);
-                        comboBox.SelectedIndex = 0;
+                        //foreach (var value in variablevalue)
+                        //{                         
+                        //    comboBox.Items.Add(new PdfListFieldItem(value.ValueName, value.Id.ToString()));
+                        //}
+                        //int cvalue = variablevalue.FindIndex(x => x.ValueName == variblevaluename);
+                        ////comboBox.Editable = true;
+                        ////comboBox.ComplexScript = true;
+                        ////comboBox.ReadOnly = true;                       
+                        //document.Form.Fields.Add(comboBox);
+                        //document.Form.SetDefaultAppearance(false);
+                        //comboBox.SelectedIndex = 0;
 
-                        //PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
-                        //textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);                     
-                        //textBoxField.Text = variblevaluename;
-                        //textBoxField.ReadOnly = true;
-                        //document.Form.Fields.Add(textBoxField);
+                        PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
+                        textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                        textBoxField.Text = variblevaluename;
+                        textBoxField.ReadOnly = true;
+                        document.Form.Fields.Add(textBoxField);
                         result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton || variable.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale)
@@ -779,7 +833,7 @@ namespace GSC.Report
                             int cvalue = variablevalue.FindIndex(x => x.ValueName == variblevaluename.FirstOrDefault().ValueName);
                             radioList.SelectedIndex = cvalue;
                         }
-                       
+
                         result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox)
@@ -803,7 +857,7 @@ namespace GSC.Report
                             if (variblevaluename.ToList().Contains(value.ValueName))
                                 checkField.Checked = true;
                             document.Form.Fields.Add(checkField);
-                           
+
                             AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
@@ -852,7 +906,7 @@ namespace GSC.Report
                         //textBoxField.ToolTip = "Date Time";
                         textBoxField.Text = dttime;
                         textBoxField.ReadOnly = true;
-                       // document.Form.SetDefaultAppearance(true);
+                        // document.Form.SetDefaultAppearance(true);
                         document.Form.Fields.Add(textBoxField);
                         AddString($"{GeneralSettings.DateFormat} {GeneralSettings.TimeFormat}", result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                         result = AddString("", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -915,7 +969,7 @@ namespace GSC.Report
             stringFormat.MeasureTrailingSpaces = true;
             stringFormat.WordWrap = PdfWordWrapType.Character;
 
-            
+
             //Draw title
             header.Graphics.DrawString($"Visit Name :- {vistName}", headerfont, PdfBrushes.Black, new RectangleF(0, 110, 340, header.Height), stringFormat);
             header.Graphics.DrawString($"Screening No.:- {screeningNO}", headerfont, PdfBrushes.Black, new RectangleF(0, 130, 340, header.Height), stringFormat);
@@ -954,6 +1008,7 @@ namespace GSC.Report
                 PdfPage pageTOC = SectionTOC.Pages.Add();
 
                 document.Template.Top = AddHeader(document, item.Project.ProjectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo));
+                document.Template.Bottom = AddFooter(document);
                 PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
                 //layoutFormat.Break = PdfLayoutBreakType.FitPage;
                 layoutFormat.Layout = PdfLayoutType.Paginate;
@@ -984,6 +1039,59 @@ namespace GSC.Report
                         graphics.Restore();
                     }
                 }
+
+                for (int i = 0; i < document.Pages.Count; i++)
+                {
+                    PdfPageBase page = document.Pages[i] as PdfPageBase;
+                    //Add the page and index to dictionary 
+                    pages.Add(page, i);
+                }
+                PdfBookmarkBase bookmarks = document.Bookmarks;
+                //Iterates through bookmarks
+                foreach (PdfBookmark bookmark in bookmarks)
+                {
+                    PdfLayoutFormat layoutformat = new PdfLayoutFormat();
+                    layoutformat.Break = PdfLayoutBreakType.FitPage;
+                    layoutformat.Layout = PdfLayoutType.Paginate;
+                    PdfPageBase page = bookmark.Destination.Page;
+                    if (pages.ContainsKey(page))
+                    {
+                        int pagenumber = pages[page];
+
+                        PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
+                        documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
+                        documentLinkAnnotation.Text = bookmark.Title;
+                        documentLinkAnnotation.Color = Color.Transparent;
+                        //Sets the destination
+                        documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page);
+                        documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y + 20);
+                        //Adds this annotation to a new page
+                        tocresult.Page.Annotations.Add(documentLinkAnnotation);
+
+                        pagenumber++;
+                        string[] values = bookmark.Title.Split('.');
+                        if (values.Length > 0)
+                        {
+                            int n;
+                            bool isNumeric = int.TryParse(values[0], out n);
+                            if (isNumeric)
+                            {
+                                PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
+                                tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
+                                PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                                pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                            }
+                            else
+                            {
+                                PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
+                                tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
+                                PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                                pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                            }
+                        }
+                    }
+                }
+
                 MemoryStream memoryStream = new MemoryStream();
                 document.Save(memoryStream);
 
@@ -998,18 +1106,12 @@ namespace GSC.Report
                 fileInfo.ChildFolderName = item.Project.ProjectCode;
 
                 string fileName = fileInfo.FileName + ".pdf";
-                string filePath = string.Empty;
-                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                    filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileName);
-                else
-                    filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
+                //string filePath = string.Empty;
+                string filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
 
                 bool exists = Directory.Exists(filePath);
                 if (!exists)
-                    if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                        System.IO.Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
-                    else
-                        System.IO.Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName));
+                    System.IO.Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName));
 
                 using (System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
                 {
@@ -1029,8 +1131,6 @@ namespace GSC.Report
             ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
             Directory.Delete(Zipfilename, true);
         }
-
-
 
     }
 
