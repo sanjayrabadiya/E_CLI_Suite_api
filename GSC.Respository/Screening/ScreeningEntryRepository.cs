@@ -37,7 +37,6 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IVolunteerRepository _volunteerRepository;
-        private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IGSCContext _context;
         public ScreeningEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
@@ -50,8 +49,7 @@ namespace GSC.Respository.Screening
             IRandomizationRepository randomizationRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             INumberFormatRepository numberFormatRepository,
-            IScreeningTemplateValueRepository screeningTemplateValueRepository,
-        IRolePermissionRepository rolePermissionRepository)
+            IRolePermissionRepository rolePermissionRepository)
             : base(context)
         {
             _volunteerRepository = volunteerRepository;
@@ -63,7 +61,6 @@ namespace GSC.Respository.Screening
             _numberFormatRepository = numberFormatRepository;
             _rolePermissionRepository = rolePermissionRepository;
             _screeningVisitRepository = screeningVisitRepository;
-            _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectDesignRepository = projectDesignRepository;
             _projectRepository = projectRepository;
             _context = context;
