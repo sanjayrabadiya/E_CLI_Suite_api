@@ -28,13 +28,11 @@ namespace GSC.Respository.Screening
         private readonly IGSCContext _context;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
-        private readonly IScreeningVisitRepository _screeningVisitRepository;
         public ScreeningTemplateValueQueryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
-            IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
-            IScreeningVisitRepository screeningVisitRepository)
+            IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -43,7 +41,6 @@ namespace GSC.Respository.Screening
             _context = context;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
-            _screeningVisitRepository = screeningVisitRepository;
         }
 
         public IList<ScreeningTemplateValueQueryDto> GetQueries(int screeningTemplateValueId)
@@ -611,7 +608,7 @@ namespace GSC.Respository.Screening
                      TotalQuery = t.Count()
                  }).ToList();
 
-            var visitData = _screeningVisitRepository.All.Where(r => r.ScreeningEntry.ProjectId == projectId
+            var visitData = _context.ScreeningVisit.Where(r => r.ScreeningEntry.ProjectId == projectId
             && r.DeletedDate == null && r.Status > ScreeningVisitStatus.ReSchedule).Select(t => new
             {
                 ProjectDesignVisitId = t.ProjectDesignVisitId,
