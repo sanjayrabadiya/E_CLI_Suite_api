@@ -107,7 +107,7 @@ namespace GSC.Data.Dto.ProjectRight
         public int? MyQuery { get; set; }
         public string QueryStatus { get; set; }
         public QueryStatus? Status { get; set; }
-        public int? ScreeningEntryId { get; set; }
+
     }
 
     public class DashboardStudyStatusDto

@@ -153,47 +153,68 @@ namespace GSC.Respository.EditCheckImpact
 
             _context.DetachAllEntities();
 
-            var result = _impactService.GetEditCheckByVaiableId(projectDesignTemplateId, projectDesignVariableId, editCheckIds);
+            var editCheckResult = _impactService.GetEditCheckByVaiableId(projectDesignTemplateId, projectDesignVariableId, editCheckIds);
 
             if (!isQueryRaise)
             {
-                var Ids = result.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
-                result = result.Where(t => Ids.Contains(t.EditCheckId)).ToList();
+                var Ids = editCheckResult.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
+                editCheckResult = editCheckResult.Where(t => Ids.Contains(t.EditCheckId)).ToList();
             }
 
             var editTargetValidation = new List<EditCheckTargetValidationList>();
-            VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, false, status);
-            VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, false, status);
 
-            if (isQueryRaise)
+            var targetEditCheckIds = editCheckResult.GroupBy(t => new { t.EditCheckId, t.ProjectDesignVariableId })
+            .Select(a => new
             {
-                var targetScreeningTemplates = result.Where(x => x.IsTarget).Select(x => x.ScreeningTemplateId).Distinct().ToList();
-                var repeatTemplateIds = All.Where(x => x.Status > ScreeningTemplateStatus.InProcess
-                && targetScreeningTemplates.Contains((int)x.ParentId)).Select(t => new
-                {
-                    t.Id,
-                    t.ProjectDesignTemplateId,
-                    t.ScreeningVisitId
-                }).ToList();
-                repeatTemplateIds.ForEach(t =>
-                {
-                    VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, t.Id, value, projectDesignTemplateId, projectDesignVariableId, new List<EditCheckTargetValidationList>(), isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, true, status);
-                });
+                a.Key.EditCheckId,
+                SortBy = editCheckResult.Count(f => f.ProjectDesignVariableId == a.Key.ProjectDesignVariableId) > 1 &&
+                    editCheckResult.Any(f => f.ProjectDesignVariableId == a.Key.ProjectDesignVariableId &&
+                    f.EditCheckId == a.Key.EditCheckId && f.IsTarget) ? 1 : 2
+            }).
+            OrderBy(v => v.SortBy).Select(m => m.EditCheckId).Distinct().ToList();
 
-                var screeningVisitIds = repeatTemplateIds.Select(t => t.ScreeningVisitId).Distinct().ToList();
-                var projectDesignTemplateIds = repeatTemplateIds.Select(t => t.ProjectDesignTemplateId).Distinct().ToList();
+            targetEditCheckIds.ForEach(x =>
+            {
+                var result = editCheckResult.Where(t => t.EditCheckId == x).ToList();
 
-                var repeatVisitIds = All.Where(x => x.Status > ScreeningTemplateStatus.InProcess &&
-                   screeningVisitIds.Contains((int)x.ScreeningVisit.ParentId) && projectDesignTemplateIds.Contains(x.ProjectDesignTemplateId)).Select(t => new
-                   {
-                       t.Id,
-                       t.ScreeningVisitId
-                   }).ToList();
-                repeatVisitIds.ForEach(t =>
+                VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, false, status);
+                VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, false, status);
+
+                if (isQueryRaise)
                 {
-                    VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, t.Id, value, projectDesignTemplateId, projectDesignVariableId, new List<EditCheckTargetValidationList>(), isQueryRaise, t.ScreeningVisitId, projectDesignVisitId, isNa, true, status);
-                });
-            }
+                    var targetScreeningTemplates = result.Where(x => x.IsTarget).Select(x => x.ScreeningTemplateId).Distinct().ToList();
+                    var repeatTemplateIds = All.Where(x => x.Status > ScreeningTemplateStatus.InProcess
+                    && targetScreeningTemplates.Contains((int)x.ParentId)).Select(t => new
+                    {
+                        t.Id,
+                        t.ProjectDesignTemplateId,
+                        t.ScreeningVisitId
+                    }).ToList();
+
+                    repeatTemplateIds.ForEach(t =>
+                    {
+                        VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, t.Id, value, projectDesignTemplateId, projectDesignVariableId, new List<EditCheckTargetValidationList>(), isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, true, status);
+                    });
+
+                    var screeningVisitIds = repeatTemplateIds.Select(t => t.ScreeningVisitId).Distinct().ToList();
+                    var projectDesignTemplateIds = repeatTemplateIds.Select(t => t.ProjectDesignTemplateId).Distinct().ToList();
+
+                    var repeatVisitIds = All.Where(x => x.Status > ScreeningTemplateStatus.InProcess &&
+                       screeningVisitIds.Contains((int)x.ScreeningVisit.ParentId) && projectDesignTemplateIds.Contains(x.ProjectDesignTemplateId)).Select(t => new
+                       {
+                           t.Id,
+                           t.ScreeningVisitId
+                       }).ToList();
+                    repeatVisitIds.ForEach(t =>
+                    {
+                        VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, t.Id, value, projectDesignTemplateId, projectDesignVariableId, new List<EditCheckTargetValidationList>(), isQueryRaise, t.ScreeningVisitId, projectDesignVisitId, isNa, true, status);
+                    });
+                }
+
+            });
+
+
+
 
             return editTargetValidation;
         }

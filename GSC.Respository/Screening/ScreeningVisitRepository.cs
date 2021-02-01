@@ -298,8 +298,6 @@ namespace GSC.Respository.Screening
 
             if (visit.IsSchedule)
                 ScheduleVisitUpdate(visit.ScreeningEntryId);
-
-
         }
 
         public void ScheduleVisitUpdate(int screeningEntryId)

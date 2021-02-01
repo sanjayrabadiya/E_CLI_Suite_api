@@ -35,8 +35,12 @@ namespace GSC.Respository.Project.Workflow
 
         public int GetMaxWorkFlowLevel(int projectDesignId)
         {
-            return _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
-                                                            && x.DeletedDate == null).Max(t => t.LevelNo);
+            if (_context.ProjectWorkflowLevel.Any(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
+                                                          && x.DeletedDate == null))
+                return _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
+                                                              && x.DeletedDate == null).Max(t => t.LevelNo);
+            else
+                return 0;
         }
 
         public short GetNoCRFLevel(int projectDesignId, short levelNo)

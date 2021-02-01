@@ -135,6 +135,7 @@ namespace GSC.Respository.Screening
 
             var closeQueries = await _screeningTemplateValueQueryRepository.All.Where(r =>
             r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
+            r.QueryStatus == QueryStatus.Closed &&
             r.ScreeningTemplateValue.ProjectDesignVariable.DeletedDate == null && r.ScreeningTemplateValue.DeletedDate == null).
                 GroupBy(c => new
                 {
