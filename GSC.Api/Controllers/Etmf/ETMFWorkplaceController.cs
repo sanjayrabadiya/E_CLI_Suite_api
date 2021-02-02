@@ -35,6 +35,10 @@ namespace GSC.Api.Controllers.Etmf
         private readonly ICountryRepository _countryRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IProjectWorkplaceDetailRepository _projectWorkplaceDetailRepository;
+        private readonly IProjectWorkPlaceZoneRepository _projectWorkPlaceZoneRepository;
+        private readonly IProjectWorkplaceSectionRepository _projectWorkplaceSectionRepository;
+        private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         public ETMFWorkplaceController(IProjectRepository projectRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -42,8 +46,12 @@ namespace GSC.Api.Controllers.Etmf
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             ICountryRepository countryRepository,
-              IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository
+            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
+            IUploadSettingRepository uploadSettingRepository,
+            IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository,
+            IProjectWorkPlaceZoneRepository projectWorkPlaceZoneRepository,
+            IProjectWorkplaceSectionRepository projectWorkplaceSectionRepository,
+            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository
             )
         {
             _userRepository = userRepository;
@@ -55,6 +63,10 @@ namespace GSC.Api.Controllers.Etmf
             _countryRepository = countryRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
+            _projectWorkplaceDetailRepository = projectWorkplaceDetailRepository;
+            _projectWorkPlaceZoneRepository = projectWorkPlaceZoneRepository;
+            _projectWorkplaceSectionRepository = projectWorkplaceSectionRepository;
+            _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
         }
 
         [Route("Get")]
@@ -100,6 +112,25 @@ namespace GSC.Api.Controllers.Etmf
             var SaveFolderStructure = _eTMFWorkplaceRepository.SaveFolderStructure(projectDetail, childProjectList, countryList, artificiteList, imageUrl);
 
             _eTMFWorkplaceRepository.Add(SaveFolderStructure);
+            foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetail)
+            {
+                _projectWorkplaceDetailRepository.Add(workplaceDetail);
+
+                foreach (var zone in workplaceDetail.ProjectWorkPlaceZone)
+                {
+                    _projectWorkPlaceZoneRepository.Add(zone);
+
+                    foreach (var section in zone.ProjectWorkplaceSection)
+                    {
+                        _projectWorkplaceSectionRepository.Add(section);
+
+                        foreach (var artificate in section.ProjectWorkplaceArtificate)
+                        {
+                            _projectWorkplaceArtificateRepository.Add(artificate);
+                        }
+                    }
+                }
+            }
             if (_uow.Save() <= 0) throw new Exception("Creating ETMFWorkplace failed on save.");
             return Ok(SaveFolderStructure.Id);
         }

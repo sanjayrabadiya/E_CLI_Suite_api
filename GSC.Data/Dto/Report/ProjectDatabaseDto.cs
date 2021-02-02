@@ -82,6 +82,15 @@ namespace GSC.Data.Dto.Report
         public string Visit { get; set; }
         public int DesignOrder { get; set; }
         public string TemplateName { get; set; }
+        public List<ProjectDatabaseTemplateDto> LstProjectDataBaseTemplate { get; set; }
+        //public List<ProjectDatabaseItemDto> LstProjectDataBaseitems { get; set; }
+    }
+
+    public class ProjectDatabaseTemplateDto
+    {
+        public int TemplateId { get; set; }
+        public int DesignOrder { get; set; }
+        public string TemplateName { get; set; }
         public List<ProjectDatabaseItemDto> LstProjectDataBaseitems { get; set; }
     }
 
