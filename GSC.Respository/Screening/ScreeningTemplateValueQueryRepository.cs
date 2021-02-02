@@ -467,21 +467,19 @@ namespace GSC.Respository.Screening
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisit(int projectId)
         {
             var queries = _screeningTemplateValueRepository.All.Where(r =>
-              r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
-              r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
-                   GroupBy(c => new
-                   {
-                       c.QueryStatus
-                   }).Select(t => new DashboardQueryStatusDto
-                   {
-                       DisplayName = t.Key.QueryStatus.GetDescription(),
-                       Total = t.Count()
-                   }).ToList();
-
-
+             (r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
+             r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
+                  GroupBy(c => new
+                  {
+                      c.QueryStatus
+                  }).Select(t => new DashboardQueryStatusDto
+                  {
+                      DisplayName = t.Key.QueryStatus.GetDescription(),
+                      Total = t.Count()
+                  }).ToList();
 
             var closeQueries = All.Count(r =>
-            r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
+            (r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
             r.QueryStatus == QueryStatus.Closed &&
             r.ScreeningTemplateValue.ProjectDesignVariable.DeletedDate == null && r.ScreeningTemplateValue.DeletedDate == null);
 
@@ -537,37 +535,15 @@ namespace GSC.Respository.Screening
 
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId)
         {
-
-            //var queryStatus = (from stvq in _context.ScreeningTemplateValueQuery
-            //                   join stv in _context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
-            //                       templatevalue
-            //                   from stv in templatevalue.DefaultIfEmpty()
-            //                   join st in _context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
-            //                   from st in stemplate.DefaultIfEmpty()
-            //                   join se in _context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
-            //                   from sEntry in entry.DefaultIfEmpty()
-            //                   join p in _context.Project on sEntry.ProjectId equals p.Id into project
-            //                   from p in project.DefaultIfEmpty()
-            //                       //join sr in _context.SecurityRole on stvq.UserRoleId equals sr.Id into role
-            //                       //from sr in role.DefaultIfEmpty()
-            //                   where p.Id == projectId || p.ParentProjectId == projectId
-            //                   group new { stvq } by new { stvq.UserRole, stvq.QueryStatus }
-            //       into g
-            //                   select new DashboardQueryStatusDto
-            //                   {
-            //                       DisplayName = g.Key.UserRole,
-            //                       QueryStatus = g.Key.QueryStatus.GetDescription(),
-            //                       Total = g.Count()
-            //                   }
-            //   ).ToList();
-            //return queryStatus;
-
-            var result = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId && x.UserRoleId != null).GroupBy(
-                t => new { t.SecurityRole.RoleShortName }).Select(g => new DashboardQueryStatusDto
-                {
-                    DisplayName = g.Key.RoleShortName,
-                    Total = g.Count()
-                }).ToList();
+            var result = All.Where(x => (x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId ||
+           x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) && (x.QueryStatus == QueryStatus.Open || x.QueryStatus == QueryStatus.SelfCorrection
+           || x.QueryStatus == QueryStatus.Acknowledge) && x.UserRole != null).GroupBy(
+               t => new { t.UserRole, t.QueryStatus }).Select(g => new DashboardQueryStatusDto
+               {
+                   DisplayName = g.Key.UserRole,
+                   QueryStatus = g.Key.QueryStatus.GetDescription(),
+                   Total = g.Count()
+               }).ToList();
 
             return result;
         }
@@ -575,24 +551,24 @@ namespace GSC.Respository.Screening
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisitwise(int projectId)
         {
             var queries = _screeningTemplateValueRepository.All.Where(r =>
-           r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
-           r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null && r.QueryStatus != QueryStatus.Closed).
-                GroupBy(c => new
-                {
-                    c.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId,
-                    c.AcknowledgeLevel,
-                    c.UserRoleId,
-                    c.ReviewLevel,
-                    c.QueryStatus
-                }).Select(t => new
-                {
-                    t.Key.AcknowledgeLevel,
-                    t.Key.ProjectDesignVisitId,
-                    t.Key.ReviewLevel,
-                    t.Key.UserRoleId,
-                    t.Key.QueryStatus,
-                    TotalQuery = t.Count()
-                }).ToList();
+          r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
+          r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null && r.QueryStatus != QueryStatus.Closed).
+               GroupBy(c => new
+               {
+                   c.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId,
+                   c.AcknowledgeLevel,
+                   c.UserRoleId,
+                   c.ReviewLevel,
+                   c.QueryStatus
+               }).Select(t => new
+               {
+                   t.Key.AcknowledgeLevel,
+                   t.Key.ProjectDesignVisitId,
+                   t.Key.ReviewLevel,
+                   t.Key.UserRoleId,
+                   t.Key.QueryStatus,
+                   TotalQuery = t.Count()
+               }).ToList();
 
             var closeQueries = All.Where(r =>
             r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
@@ -612,7 +588,7 @@ namespace GSC.Respository.Screening
             && r.DeletedDate == null && r.Status > ScreeningVisitStatus.ReSchedule).Select(t => new
             {
                 ProjectDesignVisitId = t.ProjectDesignVisitId,
-                VisitName = t.ProjectDesignVisit.DisplayName + Convert.ToString(t.ParentId != null ? "-" + t.RepeatedVisitNumber.ToString() : "")
+                VisitName = t.ProjectDesignVisit.DisplayName
             }).Distinct().ToList();
 
             var result = visitData.Select(r => new DashboardQueryStatusDto
@@ -630,41 +606,6 @@ namespace GSC.Respository.Screening
             result.ForEach(x => x.Total = (x.Answered + x.Resolved + x.ReOpened + x.Closed + x.SelfCorrection + x.Acknowledge));
 
             return result;
-
-            //var queryStatus = (from stvq in _context.ScreeningTemplateValueQuery
-            //                   join stv in _context.ScreeningTemplateValue on stvq.ScreeningTemplateValueId equals stv.Id into
-            //                       templatevalue
-            //                   from stv in templatevalue.DefaultIfEmpty()
-            //                   join st in _context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id into stemplate
-            //                   from st in stemplate.DefaultIfEmpty()
-            //                   join pdv in _context.ProjectDesignVisit on st.ScreeningVisit.ProjectDesignVisitId equals pdv.Id into design
-            //                   from pdesign in design.DefaultIfEmpty()
-            //                   join se in _context.ScreeningEntry on st.ScreeningVisit.ScreeningEntryId equals se.Id into entry
-            //                   from sEntry in entry.DefaultIfEmpty()
-            //                   join p in _context.Project on sEntry.ProjectId equals p.Id into project
-            //                   from p in project.DefaultIfEmpty()
-            //                   where p.Id == projectId || p.ParentProjectId == projectId
-            //                   orderby pdesign.Id
-            //                   group new { stvq, pdesign, st } by new { pdesign.Description, st.ScreeningVisit.ProjectDesignVisitId }
-            //into g
-            //                   select new DashboardQueryStatusDto
-            //                   {
-            //                       DisplayName = g.Key.Description,
-            //                       Open = g.Where(x => (int)x.stvq.QueryStatus == 1).Count(),
-            //                       Answered = g.Where(x => (int)x.stvq.QueryStatus == 2).Count(),
-            //                       Resolved = g.Where(x => (int)x.stvq.QueryStatus == 3).Count(),
-            //                       ReOpened = g.Where(x => (int)x.stvq.QueryStatus == 4).Count(),
-            //                       Closed = g.Where(x => (int)x.stvq.QueryStatus == 5).Count(),
-            //                       SelfCorrection = g.Where(x => (int)x.stvq.QueryStatus == 6).Count(),
-            //                       Acknowledge = g.Where(x => (int)x.stvq.QueryStatus == 7).Count(),
-            //                       Total = g.Where(x => (int)x.stvq.QueryStatus == 1).Count() +
-            //                               g.Where(x => (int)x.stvq.QueryStatus == 2).Count() +
-            //                               g.Where(x => (int)x.stvq.QueryStatus == 3).Count()
-            //                               + g.Where(x => (int)x.stvq.QueryStatus == 4).Count() +
-            //                               g.Where(x => (int)x.stvq.QueryStatus == 5).Count() +
-            //                               g.Where(x => (int)x.stvq.QueryStatus == 6).Count()
-            //                   }).ToList();
-            //return queryStatus;
         }
 
     }
