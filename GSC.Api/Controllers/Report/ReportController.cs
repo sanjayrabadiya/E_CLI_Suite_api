@@ -125,14 +125,5 @@ namespace GSC.Api.Controllers.Report
             return Ok();
         }
 
-
-        //[HttpGet]
-        //[AllowAnonymous]
-        //public IActionResult test()
-        //{
-
-        //    var result = _reportSuncfusion.DesignTemplatetest();
-        //    return result;
-        //}
     }
 }

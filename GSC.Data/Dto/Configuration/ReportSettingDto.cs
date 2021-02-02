@@ -46,5 +46,6 @@ namespace GSC.Data.Dto.Configuration
         public int? CompanyId { get; set; }
         public int? TimezoneoffSet { get; set; }
         public string ClientDateTime { get; set; }
+        public bool? NonCRF { get; set; }
     }
 }
