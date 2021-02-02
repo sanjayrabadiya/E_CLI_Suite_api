@@ -273,12 +273,12 @@ namespace GSC.Respository.Screening
                                 && t.ProjectDesignPeriod.DeletedDate == null
                                 && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
                                 && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.Id)))
-                             join template in _context.ScreeningTemplate.Where(u =>
+                             join template in _context.ScreeningTemplate.Where(u => u.DeletedDate == null &&
                                                 (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
                                                 && (filters.VisitIds == null || filters.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId))
                                                 && u.ProjectDesignTemplate.DeletedDate == null)
                              on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                             join value in _context.ScreeningTemplateValue.Where(val =>
+                             join value in _context.ScreeningTemplateValue.Where(val => val.DeletedDate == null &&
                                           (filters.DataEntryBy == null || val.CreatedBy == filters.DataEntryBy)
                                           && val.ProjectDesignVariable.DeletedDate == null)
                              on template.Id equals value.ScreeningTemplateId
@@ -464,7 +464,8 @@ namespace GSC.Respository.Screening
         }
 
 
-        public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisit(int projectId)
+        // Total query chart
+        public List<DashboardQueryStatusDto> GetDashboardTotalQueryStatus(int projectId)
         {
             var queries = _screeningTemplateValueRepository.All.Where(r =>
              (r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
@@ -533,6 +534,7 @@ namespace GSC.Respository.Screening
             return queryStatus;
         }
 
+        // Role wise chart
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId)
         {
             var result = All.Where(x => (x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId ||
@@ -548,6 +550,7 @@ namespace GSC.Respository.Screening
             return result;
         }
 
+        // Visit wise chart
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisitwise(int projectId)
         {
             var queries = _screeningTemplateValueRepository.All.Where(r =>

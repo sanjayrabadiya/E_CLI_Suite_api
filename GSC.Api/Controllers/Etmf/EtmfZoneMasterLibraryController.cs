@@ -76,10 +76,10 @@ namespace GSC.Api.Controllers.Etmf
                 {
                     foreach (var Lastdata in LastVersiondata)
                     {
-                        _etmfZoneMasterLibraryRepository.Delete(Lastdata.Id);
+                        _etmfZoneMasterLibraryRepository.Delete(Lastdata);
                         foreach (var SectionLast in Lastdata.EtmfSectionMasterLibrary)
                         {
-                            _etmfSectionMasterLibraryRepository.Delete(SectionLast.Id);
+                            _etmfSectionMasterLibraryRepository.Delete(SectionLast);
                             var LastArtificateVersiondata = _etmfArtificateMasterLibraryRepository.FindBy(x => x.EtmfSectionMasterLibraryId == SectionLast.Id).ToList();
                             foreach (var ArtificateLast in LastArtificateVersiondata)
                             {
@@ -99,6 +99,16 @@ namespace GSC.Api.Controllers.Etmf
                     {
                         item.FileName = FileName;
                         _etmfZoneMasterLibraryRepository.Add(item);
+
+                        foreach (var section in item.EtmfSectionMasterLibrary)
+                        {
+                            _etmfSectionMasterLibraryRepository.Add(section);
+
+                            foreach (var Artificate in section.EtmfArtificateMasterLbrary)
+                            {
+                                _etmfArtificateMasterLibraryRepository.Add(Artificate);
+                            }
+                        }
                         _uow.Save();
                     }
                 }

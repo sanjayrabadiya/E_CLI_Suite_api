@@ -260,11 +260,12 @@ namespace GSC.Api.Controllers.Screening
             return Ok();
         }
 
+        // Total query chart
         [HttpGet]
-        [Route("GetDashboardQueryStatusByVisit/{projectId}")]
-        public IActionResult GetDashboardQueryStatusByVisit(int projectId)
+        [Route("GetDashboardTotalQueryStatus/{projectId}")]
+        public IActionResult GetDashboardTotalQueryStatus(int projectId)
         {
-            return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByVisit(projectId));
+            return Ok(_screeningTemplateValueQueryRepository.GetDashboardTotalQueryStatus(projectId));
         }
 
         [HttpGet]
@@ -274,6 +275,7 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusBySite(projectId));
         }
 
+        // Role wise chart
         [HttpGet]
         [Route("GetDashboardQueryStatusByRolewise/{projectId}")]
         public IActionResult GetDashboardQueryStatusByRolewise(int projectId)
@@ -281,6 +283,7 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByRolewise(projectId));
         }
 
+        // Visit wise chart
         [HttpGet]
         [Route("GetDashboardQueryStatusByVisitwise/{projectId}")]
         public IActionResult GetDashboardQueryStatusByVisitwise(int projectId)

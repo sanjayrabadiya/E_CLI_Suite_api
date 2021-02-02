@@ -389,17 +389,20 @@ namespace GSC.Respository.Screening
                         LstProjectDataBaseVisit = s.GroupBy(vst => vst.Visit).Select(n => new ProjectDatabaseVisitDto
                         {
                             Visit = n.Key,
-                            DesignOrder = n.FirstOrDefault().DesignOrder,
-                            TemplateName = n.FirstOrDefault().TemplateName,
-                            LstProjectDataBaseitems = n.OrderBy(o => o.ScreeningTemplateId).Select(i => new ProjectDatabaseItemDto
+                            LstProjectDataBaseTemplate = n.GroupBy(x => x.TemplateId).Select(t => new ProjectDatabaseTemplateDto
                             {
-                                ScreeningTemplateParentId = i.ScreeningTemplateParentId,
-                                VariableName = i.VariableName,
-                                ScreeningTemplateId = i.ScreeningTemplateId,
-                                CollectionSource = i.CollectionSource,
-                                VariableNameValue = i.VariableNameValue,
-                                UnitId = i.UnitId,
-                                Unit = i.Unit,
+                                DesignOrder = n.FirstOrDefault().DesignOrder,
+                                TemplateName = n.FirstOrDefault().TemplateName,
+                                LstProjectDataBaseitems = n.OrderBy(o => o.ScreeningTemplateId).Select(i => new ProjectDatabaseItemDto
+                                {
+                                    ScreeningTemplateParentId = i.ScreeningTemplateParentId,
+                                    VariableName = i.VariableName,
+                                    ScreeningTemplateId = i.ScreeningTemplateId,
+                                    CollectionSource = i.CollectionSource,
+                                    VariableNameValue = i.VariableNameValue,
+                                    UnitId = i.UnitId,
+                                    Unit = i.Unit,
+                                }).ToList()
                             }).ToList()
                         }).ToList()
                     }).OrderBy(p => p.ProjectId).ThenBy(x => x.SubjectNo).ToList()
@@ -580,33 +583,36 @@ namespace GSC.Respository.Screening
                         {
                             db.LstProjectDataBaseVisit.ForEach(vst =>
                             {
-                                var repeatlength = vst.LstProjectDataBaseitems.Where(m => m.ScreeningTemplateParentId != null).GroupBy(x => x.ScreeningTemplateId).ToList().Count;
-
-                                worksheet.Row(j).Cell(1).SetValue(db.ProjectCode);
-                                worksheet.Row(j).Cell(2).SetValue(db.ParentProjectId != null ? db.ProjectName : "");
-                                worksheet.Row(j).Cell(3).SetValue(vst.DesignOrder + ". " + vst.TemplateName);
-                                worksheet.Row(j).Cell(4).SetValue(db.SubjectNo);
-                                worksheet.Row(j).Cell(5).SetValue(db.RandomizationNumber);
-                                worksheet.Row(j).Cell(6).SetValue(db.Initial);
-                                worksheet.Row(j).Cell(7).SetValue(vst.Visit);
-
-                                var repeatorder = 1;
-                                if (repeatlength > 0)
+                                vst.LstProjectDataBaseTemplate.ForEach(t =>
                                 {
-                                    for (var m = 0; m < repeatlength; m++)
+                                    var repeatlength = t.LstProjectDataBaseitems.Where(m => m.ScreeningTemplateParentId != null).GroupBy(x => x.ScreeningTemplateId).ToList().Count;
+
+                                    worksheet.Row(j).Cell(1).SetValue(db.ProjectCode);
+                                    worksheet.Row(j).Cell(2).SetValue(db.ParentProjectId != null ? db.ProjectName : "");
+                                    worksheet.Row(j).Cell(3).SetValue(t.DesignOrder + ". " + t.TemplateName);
+                                    worksheet.Row(j).Cell(4).SetValue(db.SubjectNo);
+                                    worksheet.Row(j).Cell(5).SetValue(db.RandomizationNumber);
+                                    worksheet.Row(j).Cell(6).SetValue(db.Initial);
+                                    worksheet.Row(j).Cell(7).SetValue(vst.Visit);
+
+                                    var repeatorder = 1;
+                                    if (repeatlength > 0)
                                     {
-                                        j = j + 1;
-                                        worksheet.Row(j).Cell(1).SetValue(db.ProjectCode);
-                                        worksheet.Row(j).Cell(2).SetValue(db.ParentProjectId != null ? db.ProjectName : "");
-                                        worksheet.Row(j).Cell(3).SetValue(vst.DesignOrder + "." + repeatorder + " " + vst.TemplateName);
-                                        worksheet.Row(j).Cell(4).SetValue(db.SubjectNo);
-                                        worksheet.Row(j).Cell(5).SetValue(db.RandomizationNumber);
-                                        worksheet.Row(j).Cell(6).SetValue(db.Initial);
-                                        worksheet.Row(j).Cell(7).SetValue(vst.Visit);
-                                        repeatorder++;
+                                        for (var m = 0; m < repeatlength; m++)
+                                        {
+                                            j = j + 1;
+                                            worksheet.Row(j).Cell(1).SetValue(db.ProjectCode);
+                                            worksheet.Row(j).Cell(2).SetValue(db.ParentProjectId != null ? db.ProjectName : "");
+                                            worksheet.Row(j).Cell(3).SetValue(t.DesignOrder + "." + repeatorder + " " + t.TemplateName);
+                                            worksheet.Row(j).Cell(4).SetValue(db.SubjectNo);
+                                            worksheet.Row(j).Cell(5).SetValue(db.RandomizationNumber);
+                                            worksheet.Row(j).Cell(6).SetValue(db.Initial);
+                                            worksheet.Row(j).Cell(7).SetValue(vst.Visit);
+                                            repeatorder++;
+                                        }
                                     }
-                                }
-                                j++;
+                                    j++;
+                                });
                             });
                         });
 
@@ -617,76 +623,80 @@ namespace GSC.Respository.Screening
                             var totalVariablevisit = d.LstProjectDataBase[n].LstProjectDataBaseVisit.Count;
                             for (var vst = 0; vst < totalVariablevisit; vst++)
                             {
-                                var indexrow = 0;
-                                var totalVariablelen = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems.Count;
-                                for (var m = 7; m < (totalVariablelen + 7); m++)
+                                var totalTemplate = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate.Count;
+                                for (var temp = 0; temp < totalTemplate; temp++)
                                 {
-                                    var variableName = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].VariableName;
-                                    var parent = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].ScreeningTemplateParentId;
-                                    var templateID = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].ScreeningTemplateId;
-                                    var collectionSource = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].CollectionSource;
-
-                                    if (parent != null)
+                                    var indexrow = 0;
+                                    var totalVariablelen = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems.Count;
+                                    for (var m = 7; m < (totalVariablelen + 7); m++)
                                     {
-                                        var findparent = repeatdata.Where(x => x.Parent == parent && x.TemplateId == templateID).FirstOrDefault();
-                                        if (findparent != null)
+                                        var variableName = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableName;
+                                        var parent = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].ScreeningTemplateParentId;
+                                        var templateID = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].ScreeningTemplateId;
+                                        var collectionSource = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].CollectionSource;
+
+                                        if (parent != null)
                                         {
-                                            rownumber = findparent.Row;
+                                            var findparent = repeatdata.Where(x => x.Parent == parent && x.TemplateId == templateID).FirstOrDefault();
+                                            if (findparent != null)
+                                            {
+                                                rownumber = findparent.Row;
+                                            }
+                                            else
+                                            {
+                                                var repeat = new RepeatTemplateDto();
+                                                repeat.TemplateId = templateID;
+                                                repeat.Parent = parent;
+                                                repeat.Row = rownumber + 1;
+                                                repeatdata.Add(repeat);
+
+                                                rownumber = rownumber + 1;
+                                            }
+                                        }
+
+                                        var row = worksheet.Row(2).CellsUsed();
+                                        var cellvalue = row.Where(x => x.Value.ToString() == variableName).ToList();
+                                        var cellnumber = cellvalue[0].Address.ColumnNumber;
+                                        if (collectionSource == (int)CollectionSources.DateTime)
+                                        {
+                                            DateTime dDate;
+                                            var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                            worksheet.Cell(rownumber, cellnumber).SetValue(dt);
+                                        }
+                                        else if (collectionSource == (int)CollectionSources.Date)
+                                        {
+                                            DateTime dDate;
+                                            var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
+                                            string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                                            worksheet.Cell(rownumber, cellnumber).SetValue(dt);
+                                        }
+                                        else if (collectionSource == (int)CollectionSources.Time)
+                                        {
+                                            var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                                            worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                                         }
                                         else
                                         {
-                                            var repeat = new RepeatTemplateDto();
-                                            repeat.TemplateId = templateID;
-                                            repeat.Parent = parent;
-                                            repeat.Row = rownumber + 1;
-                                            repeatdata.Add(repeat);
-
-                                            rownumber = rownumber + 1;
+                                            worksheet.Cell(rownumber, cellnumber).SetValue(
+                                            d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue);
                                         }
+
+                                        if (d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].UnitId != null)
+                                        {
+                                            cellnumber += 1;
+                                            m += 1;
+                                            totalVariablelen += 1;
+                                            worksheet.Cell(rownumber, cellnumber).SetValue(
+                                                d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].Unit);
+                                        }
+
+                                        indexrow++;
                                     }
 
-                                    var row = worksheet.Row(2).CellsUsed();
-                                    var cellvalue = row.Where(x => x.Value.ToString() == variableName).ToList();
-                                    var cellnumber = cellvalue[0].Address.ColumnNumber;
-                                    if (collectionSource == (int)CollectionSources.DateTime)
-                                    {
-                                        DateTime dDate;
-                                        var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                        var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                        worksheet.Cell(rownumber, cellnumber).SetValue(dt);
-                                    }
-                                    else if (collectionSource == (int)CollectionSources.Date)
-                                    {
-                                        DateTime dDate;
-                                        var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                        string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
-                                        worksheet.Cell(rownumber, cellnumber).SetValue(dt);
-                                    }
-                                    else if (collectionSource == (int)CollectionSources.Time)
-                                    {
-                                        var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                        var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
-                                        worksheet.Cell(rownumber, cellnumber).SetValue(dt);
-                                    }
-                                    else
-                                    {
-                                        worksheet.Cell(rownumber, cellnumber).SetValue(
-                                        d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].VariableNameValue);
-                                    }
-
-                                    if (d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].UnitId != null)
-                                    {
-                                        cellnumber += 1;
-                                        m += 1;
-                                        totalVariablelen += 1;
-                                        worksheet.Cell(rownumber, cellnumber).SetValue(
-                                            d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseitems[indexrow].Unit);
-                                    }
-
-                                    indexrow++;
+                                    rownumber++;
                                 }
-
-                                rownumber++;
                             }
                         }
                     });
