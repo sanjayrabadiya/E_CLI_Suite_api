@@ -106,23 +106,6 @@ namespace GSC.Respository.EditCheckImpact
             }
             else
             {
-                //var logicalOperator = editCheck.Where(x => !x.IsTarget && (x.LogicalOperator != null || x.LogicalOperator != "")).Select(t => t.LogicalOperator).FirstOrDefault();
-                //if (editCheck.Count(x => !x.IsTarget) == 2 && string.IsNullOrEmpty(logicalOperator))
-                //{
-
-                //    var refEditCheck = editCheck.Where(x => !x.IsTarget).ToList();
-                //    if (isFromValidate)
-                //        refEditCheck[0].CollectionValue = refEditCheck[1].InputValue;
-                //    else
-                //    {
-                //        refEditCheck[0].CollectionValue = "1";
-                //        refEditCheck[0].InputValue = "1";
-                //        refEditCheck[0].RefernceFieldName = refEditCheck[1]?.FieldName;
-                //    }
-                //    editCheck = editCheck.Where(t => t.IsTarget).ToList();
-                //    editCheck.Add(refEditCheck[0]);
-                //}
-
                 return TargetAndReference(editCheck, isFromValidate);
             }
         }
@@ -132,25 +115,7 @@ namespace GSC.Respository.EditCheckImpact
             var result = ValidateRuleReference(editCheck.Where(x => !x.IsTarget).ToList(), isFromValidate);
             //Added by vipul for display failed message in target grid on 25092020
             result.Target = new List<EditCheckResult>();
-            //if (isFromValidate && !result.IsValid)
-            //{
-            //    if ( string.IsNullOrEmpty(result.ErrorMessage))
-            //    {
-            //        result.ErrorMessage = "Reference Value not verifed.";
-            //        //Added by vipul for display failed message in target grid on 25092020
-            //        editCheck.Where(x => x.IsTarget).ToList().ForEach(r =>
-            //        {
-            //            var editCheckResult = new EditCheckResult();
-            //            editCheckResult.Result = "Failed";
-            //            editCheckResult.Id = r.Id;
-            //            result.Target.Add(editCheckResult);
-            //        });
-            //    }
-            //    return result;
-            //}
-
-            //Added by vipul for display failed message in target grid on 25092020
-            //result.Target = new List<EditCheckResult>();
+           
             editCheck.Where(x => x.IsTarget).ToList().ForEach(r =>
             {
                 if (!isFromValidate)
@@ -161,8 +126,16 @@ namespace GSC.Respository.EditCheckImpact
                 {
                     var editCheckResult = new EditCheckResult();
                     editCheckResult.Id = r.Id;
-                    editCheckResult.IsValid = true;
-                    editCheckResult.Result = "Passed";
+                    if (result.IsValid)
+                    {
+                        editCheckResult.IsValid = true;
+                        editCheckResult.Result = "Passed";
+                    }
+                    else
+                    {
+                        editCheckResult.IsValid = false;
+                        editCheckResult.Result = "Failed";
+                    }
                     result.Target.Add(editCheckResult);
                 }
                 else if (r.Operator == Operator.HardFetch || r.Operator == Operator.SoftFetch)
@@ -320,19 +293,18 @@ namespace GSC.Respository.EditCheckImpact
 
                 InNotInOperator(r);
 
-                if (!isFromValidate)
-                {
-                    if (string.IsNullOrEmpty(collectionValue))
-                        collectionValue = "1";
-
-                    if (string.IsNullOrEmpty(r.CollectionValue))
-                        r.CollectionValue = "1";
-                }
-
-
                 r.OperatorName = r.OperatorName.Replace(Operator.NotEqual.GetDescription(), "<>").
-                Replace(Operator.NotNull.GetDescription(), "<>").
-                Replace(Operator.Null.GetDescription(), "=");
+                   Replace(Operator.NotNull.GetDescription(), "<>").
+                   Replace(Operator.Null.GetDescription(), "=");
+
+                //if (!isFromValidate)
+                //{
+                //    if (string.IsNullOrEmpty(collectionValue))
+                //        collectionValue = "1";
+
+                //    if (string.IsNullOrEmpty(r.CollectionValue))
+                //        r.CollectionValue = "1";
+                //}
 
                 if (r.Operator == Operator.In || (r.CollectionSource == CollectionSources.MultiCheckBox && r.Operator == Operator.Equal))
                 {
@@ -375,6 +347,9 @@ namespace GSC.Respository.EditCheckImpact
                 col.ColumnName = colName;
                 dt.Columns.Add(col);
             });
+
+            if (ruleStr.Contains("<") || ruleStr.Contains(">"))
+                ruleStr = ruleStr.Replace("'", "").Trim();
 
             var result = ValidateDataTable(dt, ruleStr, isFromValidate, editCheck.Any(r => r.IsTarget));
 
