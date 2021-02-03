@@ -385,7 +385,7 @@ namespace GSC.Api.Controllers.Attendance
             var data = _randomizationRepository.GetPatientVisits();
             if (data == null || data.ToList().Count <= 0)
             {
-                ModelState.AddModelError("Message", "Your Visit is not open, Please contact your administrator");
+                ModelState.AddModelError("Message", "Your Visit is not started, Please contact your administrator");
                 return BadRequest(ModelState);
             }
             return Ok(data);
