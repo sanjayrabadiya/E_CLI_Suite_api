@@ -611,5 +611,17 @@ namespace GSC.Respository.Screening
             return result;
         }
 
+        // Site wise open query chart
+        public List<DashboardQueryStatusDto> GetDashboardOpenQuerySitewise(int projectId)
+        {
+            var result = All.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId && x.QueryStatus == QueryStatus.Open).GroupBy(
+               t => new { t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode, t.QueryStatus }).Select(g => new DashboardQueryStatusDto
+               {
+                   DisplayName = g.Key.ProjectCode,
+                   Total = g.Count()
+               }).ToList();
+            return result;
+        }
+
     }
 }

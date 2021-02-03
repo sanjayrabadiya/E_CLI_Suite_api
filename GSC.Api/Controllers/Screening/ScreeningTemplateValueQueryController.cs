@@ -290,5 +290,13 @@ namespace GSC.Api.Controllers.Screening
         {
             return Ok(_screeningTemplateValueQueryRepository.GetDashboardQueryStatusByVisitwise(projectId));
         }
+
+        // Site wise open query chart
+        [HttpGet]
+        [Route("GetDashboardOpenQuerySitewise/{projectId}")]
+        public IActionResult GetDashboardOpenQuerySitewise(int projectId)
+        {
+            return Ok(_screeningTemplateValueQueryRepository.GetDashboardOpenQuerySitewise(projectId));
+        }
     }
 }
