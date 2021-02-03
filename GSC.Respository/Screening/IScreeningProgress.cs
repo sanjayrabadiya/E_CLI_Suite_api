@@ -8,5 +8,6 @@ namespace GSC.Respository.Screening
     public interface IScreeningProgress
     {
         ScreeningProgressDto GetScreeningProgress(int screeningEntryId, int screeningTemplateId);
+        int SetTemplateCount(int id);
     }
 }
