@@ -460,8 +460,9 @@ namespace GSC.Report
             {
                 var screeningtemplate = _context.ScreeningTemplate.Where(x => x.Status != ScreeningTemplateStatus.Pending && x.DeletedDate == null).Include(x => x.ScreeningTemplateReview)
                     .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.ProjectDesignTemplateNote)
+                    .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.VariableTemplate)
                     .Include(x => x.ScreeningTemplateValues).ThenInclude(x => x.ProjectDesignVariable)
-                    .ThenInclude(x => x.Unit).Where(x => x.ScreeningVisitId == visit.Id)
+                    .ThenInclude(x => x.Unit).Where(x => x.ScreeningVisitId == visit.Id && reportSetting.NonCRF == true ? true :x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific)
                     .OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList();
 
                 var visitName = (_jwtTokenAccesser.Language != 1 ?
@@ -851,12 +852,12 @@ namespace GSC.Report
                             AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
                             checkField.Bounds = new RectangleF(300, result.Bounds.Y, 10, 10);
-                            checkField.Style = PdfCheckBoxStyle.Check;   
+                            checkField.Style = PdfCheckBoxStyle.Check;
                             checkField.ReadOnly = true;
                             if (variblevaluename.ToList().Contains(value.ValueName))
                                 checkField.Checked = true;
                             document.Form.Fields.Add(checkField);
-                           
+
                             result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                         result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -869,7 +870,7 @@ namespace GSC.Report
                         {
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
                             checkField.Bounds = new RectangleF(300, result.Bounds.Y, 10, 10);
-                            checkField.Style = PdfCheckBoxStyle.Check;                            
+                            checkField.Style = PdfCheckBoxStyle.Check;
                             checkField.Checked = true;
                             checkField.ReadOnly = true;
                             document.Form.Fields.Add(checkField);
@@ -978,7 +979,7 @@ namespace GSC.Report
                             }
                         }
                     }
-                }                
+                }
                 ++index;
             }
             //document.Template.Top = AddHeader(document, vistitName, vistitName);
