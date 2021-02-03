@@ -144,7 +144,9 @@ namespace GSC.Api.Controllers.Screening
 
             _uow.Save();
 
-            _screeningProgress.SetTemplateCount(id);
+            var screeningEntryId = _screeningTemplateRepository.All.Where(x => x.Id == id).Select(t => t.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
+
+            _screeningProgress.GetScreeningProgress(screeningEntryId, id);
 
             var result = _screeningVisitRepository.AutomaticStatusUpdate(id);
 

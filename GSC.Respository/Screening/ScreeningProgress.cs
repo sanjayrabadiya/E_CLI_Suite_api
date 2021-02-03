@@ -62,7 +62,7 @@ namespace GSC.Respository.Screening
             return 0;
         }
 
-        public int SetTemplateCount(int id)
+        int SetTemplateCount(int id)
         {
             var sqlquery = @"                
                 Declare @TotalCnt AS INT
