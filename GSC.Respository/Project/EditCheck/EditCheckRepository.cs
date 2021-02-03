@@ -262,6 +262,10 @@ namespace GSC.Respository.Project.EditCheck
             if (isFormula)
                 data = data.Where(x => !x.IsTarget).ToList();
 
+            if (data.Any(x => x.Operator == Operator.Greater || x.Operator == Operator.GreaterEqual ||
+                x.Operator == Operator.Lessthen || x.Operator == Operator.LessthenEqual) && data.Count(x => !x.IsTarget) > 1)
+                data.ToList().ForEach(x => x.InputValue = "");
+
             return _editCheckRuleRepository.ValidateEditCheckReference(data);
 
         }
