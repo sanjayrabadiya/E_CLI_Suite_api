@@ -28,7 +28,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly IScreeningProgress _screeningProgress;
         public ScreeningTemplateController(IScreeningTemplateRepository screeningTemplateRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
@@ -36,6 +36,7 @@ namespace GSC.Api.Controllers.Screening
             IProjectWorkflowRepository projectWorkflowRepository,
             IProjectSubjectRepository projectSubjectRepository,
             IScreeningVisitRepository screeningVisitRepository,
+            IScreeningProgress screeningProgress,
             IJwtTokenAccesser jwtTokenAccesser, IUnitOfWork uow)
         {
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -47,6 +48,7 @@ namespace GSC.Api.Controllers.Screening
             _projectWorkflowRepository = projectWorkflowRepository;
             _projectSubjectRepository = projectSubjectRepository;
             _screeningVisitRepository = screeningVisitRepository;
+            _screeningProgress = screeningProgress;
         }
 
         [HttpPost("Repeat/{screeningTemplateId}")]
@@ -141,6 +143,10 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateRepository.SubmitReviewTemplate(id, false);
 
             _uow.Save();
+
+            var screeningEntryId = _screeningTemplateRepository.All.Where(x => x.Id == id).Select(t => t.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
+
+            _screeningProgress.GetScreeningProgress(screeningEntryId, id);
 
             var result = _screeningVisitRepository.AutomaticStatusUpdate(id);
 

@@ -20,7 +20,7 @@ namespace GSC.Respository.Screening
         {
             var screeningProgressDto = new ScreeningProgressDto();
             screeningProgressDto.ScreeningCnt = ScreeningCount(screeningEntryId);
-            screeningProgressDto.TemplateCnt = TemplateCount(screeningTemplateId);
+            screeningProgressDto.TemplateCnt = SetTemplateCount(screeningTemplateId);
             return screeningProgressDto;
         }
 
@@ -62,7 +62,7 @@ namespace GSC.Respository.Screening
             return 0;
         }
 
-        int TemplateCount(int id)
+        int SetTemplateCount(int id)
         {
             var sqlquery = @"                
                 Declare @TotalCnt AS INT

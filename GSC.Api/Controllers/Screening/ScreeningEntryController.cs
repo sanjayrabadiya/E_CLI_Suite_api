@@ -23,29 +23,23 @@ namespace GSC.Api.Controllers.Screening
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IScreeningProgress _screeningProgress;
-        private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
 
         public ScreeningEntryController(IScreeningEntryRepository screeningEntryRepository,
             IUnitOfWork uow, IMapper mapper,
-            IUserRecentItemRepository userRecentItemRepository,
             IVolunteerRepository volunteerRepository,
             IAttendanceRepository attendanceRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
-            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
             IScreeningProgress screeningProgress,
             IScreeningVisitRepository screeningVisitRepository)
         {
             _screeningEntryRepository = screeningEntryRepository;
             _uow = uow;
             _mapper = mapper;
-            _userRecentItemRepository = userRecentItemRepository;
             _attendanceRepository = attendanceRepository;
             _screeningProgress = screeningProgress;
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
-            _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _screeningVisitRepository = screeningVisitRepository;
         }
 

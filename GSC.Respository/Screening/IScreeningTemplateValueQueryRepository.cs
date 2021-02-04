@@ -35,5 +35,6 @@ namespace GSC.Respository.Screening
         IList<QueryManagementDto> GetQueryEntries(QuerySearchDto filters);
         IList<QueryManagementDto> GetGenerateQueryBy(int projectId);
         IList<DropDownDto> GetDataEntryBy(int projectId);
+        List<DashboardQueryStatusDto> GetDashboardOpenQuerySitewise(int projectId);
     }
 }
