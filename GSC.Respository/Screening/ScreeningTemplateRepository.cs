@@ -924,6 +924,47 @@ namespace GSC.Respository.Screening
             var IsLocked = ScreeningTemplates.Count() <= 0 || ScreeningTemplates.Any(y => y.IsLocked == false) ? false : true;
             return IsLocked;
         }
+
+        public IList<ScheduleDueReport> GetScheduleDueReport(ScheduleDueReportSearchDto filters)
+        {
+            var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            string studycode = "";
+            var parentIds = new List<int>();
+            if (parentId == null)
+            {
+                parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+                studycode = _context.Project.Where(x => x.Id == filters.ProjectId).ToList().FirstOrDefault().ProjectCode;
+            }
+            else
+            {
+                parentIds.Add(filters.ProjectId);
+                studycode = _context.Project.Where(x => x.Id == parentId).ToList().FirstOrDefault().ProjectCode;
+            }
+            var result = All.Where(x => x.DeletedDate == null && x.ScheduleDate != null && x.Status == ScreeningTemplateStatus.Pending && x.ScheduleDate <= DateTime.Today);
+            if (filters.SubjectIds != null && filters.SubjectIds.ToList().Count > 0) result = result.Where(x => filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.RandomizationId));
+            if (filters.fromDate != null)
+            {
+                result = result.Where(x => x.ScheduleDate >=  Convert.ToDateTime(filters.fromDate));
+            }
+            if (filters.toDate != null)
+            {
+                result = result.Where(x => x.ScheduleDate <= Convert.ToDateTime(filters.toDate));
+            }
+            if (parentIds != null) result = result.Where(x => parentIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId));
+
+            return result.Select(r => new ScheduleDueReport
+            {
+                Id = r.Id,
+                studyCode = studycode,
+                siteCode = r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                screeningNo = r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
+                initial = r.ScreeningVisit.ScreeningEntry.Randomization.Initial,
+                randomizationNumber = r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
+                visitName = r.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                templateName = r.ProjectDesignTemplate.TemplateName,
+                scheduleDate = r.ScheduleDate,
+            }).ToList();
+        }
     }
 }
 
