@@ -951,7 +951,8 @@ namespace GSC.Respository.Screening
                 result = result.Where(x => x.ScheduleDate <= Convert.ToDateTime(filters.toDate));
             }
             if (parentIds != null) result = result.Where(x => parentIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId));
-
+            var dateformat = _context.AppSetting.Where(x => x.KeyName == "GeneralSettingsDto.DateFormat").ToList().FirstOrDefault().KeyValue;
+            dateformat = dateformat.Replace("/", "\\/");
             return result.Select(r => new ScheduleDueReport
             {
                 Id = r.Id,
@@ -963,6 +964,7 @@ namespace GSC.Respository.Screening
                 visitName = r.ScreeningVisit.ProjectDesignVisit.DisplayName,
                 templateName = r.ProjectDesignTemplate.TemplateName,
                 scheduleDate = r.ScheduleDate,
+                scheduleDateExcel = Convert.ToDateTime(r.ScheduleDate).ToString(dateformat)
             }).ToList();
         }
     }
