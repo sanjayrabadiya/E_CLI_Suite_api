@@ -32,5 +32,6 @@ namespace GSC.Respository.Screening
         IList<VisitDeviationReport> GetVisitDeviationReport(VisitDeviationReportSearchDto filters);
 
         bool CheckLockedProject(int ProjectId);
+        IList<ScheduleDueReport> GetScheduleDueReport(ScheduleDueReportSearchDto filters);
     }
 }

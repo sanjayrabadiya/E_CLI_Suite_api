@@ -334,5 +334,16 @@ namespace GSC.Api.Controllers.Screening
         {
             return Ok(_screeningTemplateRepository.CheckLockedProject(ProjectId));
         }
+
+        [HttpPost]
+        [Route("GetScheduleDueReport")]
+        public IActionResult GetScheduleDueReport([FromBody] ScheduleDueReportSearchDto filters)
+        {
+            if (filters.ProjectId <= 0) return BadRequest();
+
+            var auditsDto = _screeningTemplateRepository.GetScheduleDueReport(filters);
+
+            return Ok(auditsDto);
+        }
     }
 }
