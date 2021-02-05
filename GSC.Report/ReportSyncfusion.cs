@@ -128,7 +128,7 @@ namespace GSC.Report
             {
                 PdfPageBase page = document.Pages[i] as PdfPageBase;
                 //Add the page and index to dictionary 
-                pages.Add(page, i);
+                pages.Add(page, i + 1);
             }
             PdfBookmarkBase bookmarks = document.Bookmarks;
             //Iterates through bookmarks
@@ -468,7 +468,7 @@ namespace GSC.Report
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
 
             AddBookmark(result, $"{vistitName}", true);
-            foreach (var designt in designtemplate.OrderBy(i=>i.DesignOrder))
+            foreach (var designt in designtemplate.OrderBy(i => i.DesignOrder))
             {
                 AddBookmark(result, $"{designt.DesignOrder.ToString()}.{designt.TemplateName}", false);
                 //bookmarks = document.Bookmarks.Add($"{index}.{designt.TemplateName}");
@@ -1010,7 +1010,7 @@ namespace GSC.Report
                 {
                     PdfPageBase page = document.Pages[i] as PdfPageBase;
                     //Add the page and index to dictionary 
-                    pages.Add(page, i);
+                    pages.Add(page, i + 1);
                 }
                 PdfBookmarkBase bookmarks = document.Bookmarks;
                 //Iterates through bookmarks
@@ -1029,7 +1029,7 @@ namespace GSC.Report
                         documentLinkAnnotation.Text = bookmark.Title;
                         documentLinkAnnotation.Color = Color.Transparent;
                         //Sets the destination
-                        documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page,new PointF(bookmark.Destination.Location.X,bookmark.Destination.Location.Y));
+                        documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page, new PointF(bookmark.Destination.Location.X, bookmark.Destination.Location.Y));
                         documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y);
                         //Adds this annotation to a new page
                         tocresult.Page.Annotations.Add(documentLinkAnnotation);
