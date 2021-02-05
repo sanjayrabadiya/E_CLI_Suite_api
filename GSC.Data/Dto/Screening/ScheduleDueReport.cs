@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.Screening
         public string visitName { get; set; }
         public string templateName { get; set; }
         public DateTime? scheduleDate { get; set; }
+        public string? scheduleDateExcel { get; set; }
         //private DateTime? _scheduleDate { get; set; }
         //public DateTime? scheduleDate
         //{
