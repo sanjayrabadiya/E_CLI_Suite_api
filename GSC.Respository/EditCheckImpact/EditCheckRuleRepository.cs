@@ -113,7 +113,6 @@ namespace GSC.Respository.EditCheckImpact
         private EditCheckResult TargetAndReference(List<EditCheckValidate> editCheck, bool isFromValidate)
         {
             var result = ValidateRuleReference(editCheck.Where(x => !x.IsTarget).ToList(), isFromValidate);
-            //Added by vipul for display failed message in target grid on 25092020
             result.Target = new List<EditCheckResult>();
 
             editCheck.Where(x => x.IsTarget).ToList().ForEach(r =>
@@ -300,7 +299,7 @@ namespace GSC.Respository.EditCheckImpact
                    Replace(Operator.NotNull.GetDescription(), "<>").
                    Replace(Operator.Null.GetDescription(), "=");
 
-              
+
                 if (r.Operator == Operator.In || (r.CollectionSource == CollectionSources.MultiCheckBox && r.Operator == Operator.Equal))
                 {
                     ruleStr = ruleStr + $"{r.StartParens}{colName} {"LIKE '%"}{r.CollectionValue}{"%'"}";
@@ -338,7 +337,18 @@ namespace GSC.Respository.EditCheckImpact
                 var col = new DataColumn();
                 col.DefaultValue = r.InputValue ?? "";
 
-                if (r.Operator != Operator.NotNull && r.Operator != Operator.Null)
+                if (r.CollectionSource == CollectionSources.Date || r.CollectionSource == CollectionSources.DateTime || r.CollectionSource == CollectionSources.Time)
+                {
+                    if (!string.IsNullOrEmpty(r.InputValue))
+                    {
+                        DateTime createdDate;
+                        var isSucess = DateTime.TryParse(r.InputValue, out createdDate);
+                        if (isSucess)
+                            col.DataType = Type.GetType("System.DateTime");
+                    }
+
+                }
+                else if (r.Operator != Operator.NotNull && r.Operator != Operator.Null)
                 {
                     decimal value;
                     decimal.TryParse(r.InputValue, out value);
@@ -346,6 +356,7 @@ namespace GSC.Respository.EditCheckImpact
                     if (value != 0 && string.IsNullOrEmpty(singleQuote))
                         col.DataType = Type.GetType("System.Decimal");
                 }
+
 
                 col.ColumnName = colName;
                 dt.Columns.Add(col);
