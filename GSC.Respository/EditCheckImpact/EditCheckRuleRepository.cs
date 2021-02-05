@@ -115,7 +115,7 @@ namespace GSC.Respository.EditCheckImpact
             var result = ValidateRuleReference(editCheck.Where(x => !x.IsTarget).ToList(), isFromValidate);
             //Added by vipul for display failed message in target grid on 25092020
             result.Target = new List<EditCheckResult>();
-           
+
             editCheck.Where(x => x.IsTarget).ToList().ForEach(r =>
             {
                 if (!isFromValidate)
@@ -274,6 +274,9 @@ namespace GSC.Respository.EditCheckImpact
                 _operator == Operator.Lessthen || _operator == Operator.LessthenEqual))
                 return "";
 
+            if (dataType != null && dataType != DataType.Character)
+                return "";
+
             return "'";
         }
         EditCheckResult ValidateRuleReference(List<EditCheckValidate> editCheck, bool isFromValidate)
@@ -289,7 +292,7 @@ namespace GSC.Respository.EditCheckImpact
                 i += 1;
                 string colName = "Col" + i.ToString();
                 string fieldName = isFromValidate ? r.InputValue : r.FieldName;
-                string collectionValue = !r.IsReferenceValue ? r.CollectionValue : r.RefernceFieldName;
+                string collectionValue = !r.IsReferenceValue ? r.CollectionValue : r.RefernceFieldName ?? r.CollectionValue;
 
                 InNotInOperator(r);
 
@@ -297,15 +300,7 @@ namespace GSC.Respository.EditCheckImpact
                    Replace(Operator.NotNull.GetDescription(), "<>").
                    Replace(Operator.Null.GetDescription(), "=");
 
-                //if (!isFromValidate)
-                //{
-                //    if (string.IsNullOrEmpty(collectionValue))
-                //        collectionValue = "1";
-
-                //    if (string.IsNullOrEmpty(r.CollectionValue))
-                //        r.CollectionValue = "1";
-                //}
-
+              
                 if (r.Operator == Operator.In || (r.CollectionSource == CollectionSources.MultiCheckBox && r.Operator == Operator.Equal))
                 {
                     ruleStr = ruleStr + $"{r.StartParens}{colName} {"LIKE '%"}{r.CollectionValue}{"%'"}";
@@ -326,6 +321,11 @@ namespace GSC.Respository.EditCheckImpact
                     ruleStr = ruleStr + $"({r.StartParens}{colName} {"<="}{singleQuote}{r.CollectionValue}{singleQuote}{" OR "}{colName} {">="}{singleQuote}{r.CollectionValue2}{singleQuote})";
                     displayRule = displayRule + $"{r.StartParens}{fieldName} {r.OperatorName} {collectionValue} {"AND"} {r.CollectionValue2}";
                 }
+                else if (r.Operator == Operator.NotNull || r.Operator == Operator.Null)
+                {
+                    ruleStr = ruleStr + $"{r.StartParens}{colName} {r.OperatorName} '{r.CollectionValue}'";
+                    displayRule = displayRule + $"{r.StartParens}{fieldName} {r.OperatorName} {collectionValue}";
+                }
                 else
                 {
                     ruleStr = ruleStr + $"{r.StartParens}{colName} {r.OperatorName} {singleQuote}{r.CollectionValue}{singleQuote}";
@@ -338,18 +338,21 @@ namespace GSC.Respository.EditCheckImpact
                 var col = new DataColumn();
                 col.DefaultValue = r.InputValue ?? "";
 
-                decimal value;
-                decimal.TryParse(r.InputValue, out value);
+                if (r.Operator != Operator.NotNull && r.Operator != Operator.Null)
+                {
+                    decimal value;
+                    decimal.TryParse(r.InputValue, out value);
 
-                if (value != 0 && string.IsNullOrEmpty(singleQuote))
-                    col.DataType = Type.GetType("System.Decimal");
+                    if (value != 0 && string.IsNullOrEmpty(singleQuote))
+                        col.DataType = Type.GetType("System.Decimal");
+                }
 
                 col.ColumnName = colName;
                 dt.Columns.Add(col);
             });
 
-            if (ruleStr.Contains("<") || ruleStr.Contains(">"))
-                ruleStr = ruleStr.Replace("'", "").Trim();
+
+            ruleStr = ruleStr.Replace("  ", " ").Trim();
 
             var result = ValidateDataTable(dt, ruleStr, isFromValidate, editCheck.Any(r => r.IsTarget));
 
