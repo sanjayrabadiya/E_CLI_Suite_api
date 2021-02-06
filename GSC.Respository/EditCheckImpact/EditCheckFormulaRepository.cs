@@ -51,7 +51,7 @@ namespace GSC.Respository.EditCheckImpact
                     if (r.Operator == Operator.SquareRoot)
                         targetResult.ResultMessage = $"{targetResult.Result} {"->"}{"Sqrt("}{targetResult.ResultMessage}{")"}";
                     else if (r.Operator == Operator.Avg)
-                        targetResult.Result = $"{targetResult.Result} {"->"}{"Avg("}{targetResult.ResultMessage}{")"}";
+                        targetResult.ResultMessage = $"{targetResult.Result} {"->"}{"Avg("}{targetResult.ResultMessage}{")"}";
 
                     result.Target.Add(targetResult);
                 });
