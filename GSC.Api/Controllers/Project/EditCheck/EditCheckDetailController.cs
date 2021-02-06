@@ -73,6 +73,9 @@ namespace GSC.Api.Controllers.Project.EditCheck
                         return BadRequest(validateMsg);
                     }
 
+                    if (editCheckDetailDto.VariableIds.Length > 1 && !editCheckDetail.IsTarget && editCheckDetailDto.VariableIds.Length - 1 == i)
+                        editCheckDetail.Operator = null;
+
                     if (editCheckDetail.CheckBy == Helper.EditCheckRuleBy.ByVariable)
                         editCheckDetail.CollectionValue = _impactService.GetProjectDesignVariableId(editCheckDetailDto.ProjectDesignVariableId ?? 0, editCheckDetail.CollectionValue);
 

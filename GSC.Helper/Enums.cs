@@ -339,7 +339,7 @@ namespace GSC.Helper
         [Description("+")] Plus = 8,
         [Description("Diff")] Different = 9,
         [Description("%")] Percentage = 10,
-        //[Description("BMI")] Bmi = 11,
+        [Description("Avg")] Avg = 11,
         [Description("Null")] Null = 12,
         [Description("Soft Fetch")] SoftFetch = 13,
         [Description("Hard Fetch")] HardFetch = 14,

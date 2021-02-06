@@ -15,6 +15,8 @@ namespace GSC.Respository.EditCheckImpact
         {
             var result = ValidateFormulaReference(editCheck.Where(r => !r.IsTarget).ToList());
 
+            var refCount = editCheck.Where(x => !x.IsTarget && x.InputValue != "" && x.InputValue != null && x.InputValue != "0").Count();
+
             if (result.IsValid && editCheck.Any(r => r.IsTarget && r.IsFormula == true))
             {
                 result.Target = new List<EditCheckResult>();
@@ -30,6 +32,9 @@ namespace GSC.Respository.EditCheckImpact
 
                     if (r.Operator == Operator.SquareRoot)
                         targetResult.Result = Math.Sqrt(Convert.ToDouble(targetResult.Result)).ToString();
+                    else if (r.Operator == Operator.Avg)
+                        targetResult.Result = (Convert.ToDouble(targetResult.Result) / refCount).ToString();
+
                     int round = 1;
 
                     if (r.DataType != null)
@@ -45,6 +50,8 @@ namespace GSC.Respository.EditCheckImpact
 
                     if (r.Operator == Operator.SquareRoot)
                         targetResult.ResultMessage = $"{targetResult.Result} {"->"}{"Sqrt("}{targetResult.ResultMessage}{")"}";
+                    else if (r.Operator == Operator.Avg)
+                        targetResult.Result = $"{targetResult.Result} {"->"}{"Avg("}{targetResult.ResultMessage}{")"}";
 
                     result.Target.Add(targetResult);
                 });
@@ -61,6 +68,9 @@ namespace GSC.Respository.EditCheckImpact
             {
                 editCheck.Where(x => !x.IsTarget).ToList().ForEach(r =>
                 {
+                    if (string.IsNullOrEmpty(r.InputValue))
+                        r.InputValue = "0";
+
                     if (r.Operator == Operator.SquareRoot)
                         ruleStr = ruleStr + $"{r.CollectionValue2}{r.StartParens}{"sqrt("}{r.InputValue}{")"}{r.EndParens}{r.CollectionValue}";
                     else
