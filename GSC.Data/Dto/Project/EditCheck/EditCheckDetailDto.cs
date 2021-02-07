@@ -47,6 +47,8 @@ namespace GSC.Data.Dto.Project.EditCheck
         public List<ProjectDesignVariableValueDropDown> ExtraData { get; set; }
         public string StartParens { get; set; }
         public string EndParens { get; set; }
+        public int? FetchingProjectDesignTemplateId { get; set; }
+        public int? FetchingProjectDesignVariableId { get; set; }
     }
 
     public class EditCheckValidate

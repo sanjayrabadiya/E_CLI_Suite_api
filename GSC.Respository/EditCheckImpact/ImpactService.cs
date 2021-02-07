@@ -105,6 +105,8 @@ namespace GSC.Respository.EditCheckImpact
                                   IsTarget = checkDetail.IsTarget,
                                   StartParens = checkDetail.StartParens,
                                   EndParens = checkDetail.EndParens,
+                                  FetchingProjectDesignTemplateId = checkDetail.FetchingProjectDesignTemplateId,
+                                  FetchingProjectDesignVariableId = checkDetail.FetchingProjectDesignVariableId,
                               }).Distinct().ToList();
 
             if (annotation != null)
@@ -199,9 +201,7 @@ namespace GSC.Respository.EditCheckImpact
         {
             var screeningValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(t =>
                          t.ProjectDesignVariableId == projectDesignVariableId
-                         && t.ScreeningTemplateId == screeningTemplateId
-                         && t.ScreeningTemplate.ParentId == null
-                         ).Select(c => c.Value).FirstOrDefault();
+                         && t.ScreeningTemplateId == screeningTemplateId).Select(c => c.Value).FirstOrDefault();
 
             return screeningValue;
         }
@@ -247,7 +247,7 @@ namespace GSC.Respository.EditCheckImpact
 
         public string GetProjectDesignVariableId(int projectDesignVariableId, string collectionSource)
         {
-           
+
             var variableCollectionSource = _projectDesignVariableRepository.All.Where(x => x.Id == projectDesignVariableId && x.DeletedDate == null).Select(t => t.CollectionSource).FirstOrDefault();
 
             if (IsNotDropDown(variableCollectionSource))
@@ -258,7 +258,7 @@ namespace GSC.Respository.EditCheckImpact
             int.TryParse(collectionSource, out projectDesignVariableValueId);
 
             var value = _projectDesignVariableValueRepository.All.Where(x => x.Id == projectDesignVariableValueId).Select(t => t.ValueName).FirstOrDefault();
-              
+
             projectDesignVariableId = _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ValueName == value && x.DeletedDate == null).Select(t => t.ProjectDesignVariableId).FirstOrDefault();
 
             return projectDesignVariableValueId.ToString();

@@ -30,6 +30,8 @@ namespace GSC.Data.Entities.Project.EditCheck
         public string LogicalOperator { get; set; }
         public string StartParens { get; set; }
         public string EndParens { get; set; }
+        public int? FetchingProjectDesignTemplateId { get; set; }
+        public int? FetchingProjectDesignVariableId { get; set; }
 
 
     }

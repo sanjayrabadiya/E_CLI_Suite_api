@@ -290,7 +290,7 @@ namespace GSC.Respository.EditCheckImpact
               });
             _context.Save();
 
-            var variableResult = UpdateVariale(targetResult.Where(r => r.ScreeningTemplateId > 0 && (r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)).ToList(), true, isQueryRaise);
+            var variableResult = UpdateVariale(targetResult.Where(r => r.ScreeningTemplateId > 0 && (r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)).ToList(), screeningEntryId, screeningVisitId, true, isQueryRaise);
 
             if (variableResult != null)
                 editTargetValidation.AddRange(variableResult);
@@ -298,7 +298,7 @@ namespace GSC.Respository.EditCheckImpact
             _context.Save();
         }
 
-        public List<EditCheckTargetValidationList> UpdateVariale(List<EditCheckValidateDto> editCheckValidateDto, bool isVariable, bool isQueryRaise)
+        public List<EditCheckTargetValidationList> UpdateVariale(List<EditCheckValidateDto> editCheckValidateDto, int screeningEntryId, int screeningVisitId, bool isVariable, bool isQueryRaise)
         {
             if (_editCheckTargetValidationLists == null)
                 _editCheckTargetValidationLists = new List<EditCheckTargetValidationList>();
@@ -355,6 +355,26 @@ namespace GSC.Respository.EditCheckImpact
                     {
                         if (isQueryRaise) editCheckTarget.HasQueries = r.ValidateType == EditCheckValidateType.Failed;
                         editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
+                    }
+
+
+                    if ((r.Operator == Operator.SoftFetch || r.Operator == Operator.HardFetch) && r.FetchingProjectDesignVariableId != null)
+                    {
+                        if (r.ValidateType == EditCheckValidateType.ReferenceVerifed || r.ValidateType == EditCheckValidateType.Passed)
+                        {
+                            if (r.ProjectDesignTemplateId == r.FetchingProjectDesignTemplateId)
+                                editCheckTarget.Value = _impactService.GetVariableValue(r.ScreeningTemplateId, r.FetchingProjectDesignVariableId ?? 0);
+                            else
+                            {
+                                var refTemplate = _impactService.GetScreeningTemplate((int)r.ProjectDesignTemplateId, screeningEntryId,
+                                 r.ProjectDesignVisitId == r.ProjectDesignVisitId ? screeningVisitId : (int?)null);
+                                editCheckTarget.Value = _impactService.GetVariableValue(r.ScreeningTemplateId, r.FetchingProjectDesignVariableId ?? 0);
+                            }
+                        }
+                        else
+                        {
+                            editCheckTarget.Value = null;
+                        }
                     }
 
                     if (r.Operator == Operator.Required && r.ValidateType == EditCheckValidateType.ReferenceVerifed)

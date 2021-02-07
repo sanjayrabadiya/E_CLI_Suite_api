@@ -192,7 +192,7 @@ namespace GSC.Respository.Screening
                 }
             });
 
-            var variableTargetResult = _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), false, false);
+            var variableTargetResult = _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, false, false);
             projectDesignTemplateDto.Variables.ToList().ForEach(r =>
             {
                 var singleResult = variableTargetResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
@@ -292,8 +292,8 @@ namespace GSC.Respository.Screening
             var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
             var values = GetScreeningValues(screeningTemplateBasic.Id);
             var result = _editCheckImpactRepository.CheckValidation(null, values, screeningTemplateBasic, true);
-            _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), true, true);
-            if (!isLockUnLock)
+            _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, true, true);
+            if (!isLockUnLock && screeningTemplateBasic.ParentId == null)
                 _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, true);
         }
 
@@ -944,7 +944,7 @@ namespace GSC.Respository.Screening
             if (filters.SubjectIds != null && filters.SubjectIds.ToList().Count > 0) result = result.Where(x => filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.RandomizationId));
             if (filters.fromDate != null)
             {
-                result = result.Where(x => x.ScheduleDate >=  Convert.ToDateTime(filters.fromDate));
+                result = result.Where(x => x.ScheduleDate >= Convert.ToDateTime(filters.fromDate));
             }
             if (filters.toDate != null)
             {

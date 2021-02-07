@@ -139,11 +139,10 @@ namespace GSC.Respository.Screening
 
             if (openVariable != null && openVariable.ProjectDesignVisitId == projectDesignVisitId)
             {
-
+                var screeningVisit = Find(screeningVisitId);
                 var screeningTemplate = _screeningTemplateRepository.All.AsNoTracking().Where(x => x.ScreeningVisitId == screeningVisitId && x.ProjectDesignTemplateId == openVariable.ProjectDesignTemplateId && x.ParentId == null).FirstOrDefault();
-                if (screeningTemplate != null && SaveVariableValue(visitDate.ToString(), screeningTemplate, openVariable.Id, openVariable.ProjectDesignTemplateId, screeningEntryId))
+                if (screeningTemplate != null && SaveVariableValue(visitDate.ToString(), screeningTemplate, openVariable.Id, openVariable.ProjectDesignTemplateId, screeningEntryId, screeningVisit.ParentId == null))
                 {
-                    var screeningVisit = Find(screeningVisitId);
                     screeningVisit.Status = ScreeningVisitStatus.InProgress;
                     screeningTemplate.Status = ScreeningTemplateStatus.InProcess;
                     _screeningTemplateRepository.Update(screeningTemplate);
@@ -156,7 +155,7 @@ namespace GSC.Respository.Screening
             }
         }
 
-        private bool SaveVariableValue(string value, ScreeningTemplate screeningTemplate, int projectDesignVariableId, int projectDesignTemplateId, int screeningEntryId)
+        private bool SaveVariableValue(string value, ScreeningTemplate screeningTemplate, int projectDesignVariableId, int projectDesignTemplateId, int screeningEntryId, bool isParentVisit)
         {
 
             if (!_projectDesignVariableRepository.All.Any(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.Id == projectDesignVariableId))
@@ -191,7 +190,7 @@ namespace GSC.Respository.Screening
 
             _context.Save();
 
-            if (screeningTemplate.ParentId == null)
+            if (screeningTemplate.ParentId == null && isParentVisit)
                 _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.ScreeningVisitId, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, true);
 
             return true;
