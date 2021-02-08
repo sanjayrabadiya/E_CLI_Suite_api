@@ -64,7 +64,9 @@ namespace GSC.Respository.Project.EditCheck
                 VariableName = c.ProjectDesignVariable.VariableName,
                 VisitName = c.ProjectDesignVariable != null
                      ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
-                     : ""
+                     : "",
+                FetchingProjectDesignTemplateId = c.FetchingProjectDesignTemplateId,
+                FetchingProjectDesignVariableId = c.FetchingProjectDesignVariableId
             }).FirstOrDefault();
 
             if (result.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
