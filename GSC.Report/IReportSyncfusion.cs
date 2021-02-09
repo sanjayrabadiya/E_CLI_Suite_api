@@ -11,6 +11,7 @@ namespace GSC.Report
     {
         void BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
         void DataGenerateReport(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
+        FileStreamResult GetProjectDesign(ReportSettingNew reportSetting);
 
     }
 }

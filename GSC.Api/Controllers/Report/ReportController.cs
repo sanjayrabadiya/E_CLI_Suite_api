@@ -51,7 +51,19 @@ namespace GSC.Api.Controllers.Report
         [AllowAnonymous]
         public IActionResult GetProjectDesign(int projectDesignId)
         {
-            var abc = _gscReport.GetProjectDesign(projectDesignId);
+            //var abc = _gscReport.GetProjectDesign(projectDesignId);
+            //return abc;
+
+            ReportSettingNew reportSetting = new ReportSettingNew();
+            reportSetting.ProjectId = projectDesignId;
+            reportSetting.PdfStatus = DossierPdfStatus.Blank;
+            reportSetting.AnnotationType = true;
+            reportSetting.LeftMargin =Convert.ToDecimal(0.5);
+            reportSetting.RightMargin =Convert.ToDecimal(0.5);
+            reportSetting.BottomMargin =Convert.ToDecimal(0.5);
+            reportSetting.TopMargin = Convert.ToDecimal(0.5);
+
+            var abc = _reportSuncfusion.GetProjectDesign(reportSetting);
             return abc;
         }
 
