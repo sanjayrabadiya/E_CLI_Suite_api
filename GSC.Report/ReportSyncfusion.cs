@@ -433,12 +433,15 @@ namespace GSC.Report
 
                 var screeningtemplate = _context.ScreeningTemplate.Include(x => x.ScreeningTemplateReview)
                    .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.ProjectDesignTemplateNote)
+                   .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.VariableTemplate)
                    .Include(x => x.ScreeningTemplateValues).ThenInclude(x => x.ProjectDesignVariable)
                    .ThenInclude(x => x.Unit).Where(x => x.ScreeningVisitId == visit.Id)
                    .Where(x => x.Status != ScreeningTemplateStatus.Pending
                         && x.DeletedDate == null && x.ProjectDesignTemplate.DeletedDate == null
                         )
                    .OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList();
+                if (reportSetting.NonCRF == true)
+                    screeningtemplate = screeningtemplate.Where(x => x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
 
                 var visitName = (_jwtTokenAccesser.Language != 1 ?
                 visit.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
@@ -740,8 +743,8 @@ namespace GSC.Report
                         //textBoxField.Text = variblevaluename;
                         //textBoxField.ReadOnly = true;
                         //document.Form.Fields.Add(textBoxField);
-                        SizeF size = regularfont.MeasureString($"\n{variblevaluename}\n ");
-                        result.Page.Graphics.DrawString($"\n{variblevaluename}\n ", regularfont, PdfBrushes.Black, new RectangleF(new PointF(300, result.Bounds.Y), size));
+                        SizeF size = regularfont.MeasureString($"{variblevaluename}");
+                        result.Page.Graphics.DrawString($"{variblevaluename}", regularfont, PdfBrushes.Black, new RectangleF(new PointF(300, result.Bounds.Y), size));
                         result.Page.Graphics.DrawRectangle(PdfPens.Black, PdfBrushes.Transparent, new RectangleF(300, result.Bounds.Y, size.Width, size.Height));
 
 
