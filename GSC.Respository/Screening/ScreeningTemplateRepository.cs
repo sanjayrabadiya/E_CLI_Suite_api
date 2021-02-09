@@ -940,7 +940,7 @@ namespace GSC.Respository.Screening
                 parentIds.Add(filters.ProjectId);
                 studycode = _context.Project.Where(x => x.Id == parentId).ToList().FirstOrDefault().ProjectCode;
             }
-            var result = All.Where(x => x.DeletedDate == null && x.ScheduleDate != null && x.Status == ScreeningTemplateStatus.Pending && x.ScheduleDate <= DateTime.Today);
+            var result = All.Where(x => x.DeletedDate == null && x.ScheduleDate != null && (x.Status == ScreeningTemplateStatus.Pending || x.Status == ScreeningTemplateStatus.InProcess) && x.ScheduleDate <= DateTime.Today);
             if (filters.SubjectIds != null && filters.SubjectIds.ToList().Count > 0) result = result.Where(x => filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.RandomizationId));
             if (filters.fromDate != null)
             {
