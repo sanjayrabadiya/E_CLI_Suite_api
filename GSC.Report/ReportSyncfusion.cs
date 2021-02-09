@@ -410,7 +410,7 @@ namespace GSC.Report
                 PdfSection SectionContent = document.Sections.Add();
                 PdfPage pageContent = SectionContent.Pages.Add();
                 SectionContent.Template.Top = VisitTemplateHeader(document, template.Value, "", "", "", Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial));
-                var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote).ToList();
+                var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote,x=>x.Domain).ToList();
                 DesignTemplate(projecttemplate, reportSetting, template.Value, pageContent);
 
 
@@ -434,6 +434,7 @@ namespace GSC.Report
                 var screeningtemplate = _context.ScreeningTemplate.Include(x => x.ScreeningTemplateReview)
                    .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.ProjectDesignTemplateNote)
                    .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.VariableTemplate)
+                   .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.Domain)
                    .Include(x => x.ScreeningTemplateValues).ThenInclude(x => x.ProjectDesignVariable)
                    .ThenInclude(x => x.Unit).Where(x => x.ScreeningVisitId == visit.Id)
                    .Where(x => x.Status != ScreeningTemplateStatus.Pending
@@ -478,7 +479,7 @@ namespace GSC.Report
                 //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
                 //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
 
-                result = AddString($"{designt.DesignOrder.ToString()}.{designt.TemplateName} -{designt.TemplateCode}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                result = AddString($"{designt.DesignOrder.ToString()}.{designt.TemplateName} -{designt.Domain.DomainCode}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 string notes = "";
                 for (int n = 0; n < designt.ProjectDesignTemplateNote.Count; n++)
                 {
@@ -665,7 +666,7 @@ namespace GSC.Report
                 //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
 
 
-                result = AddString($"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName} -{template.ProjectDesignTemplate.TemplateCode}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                result = AddString($"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName} -{template.ProjectDesignTemplate.Domain.DomainCode}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 string notes = "";
                 for (int n = 0; n < template.ProjectDesignTemplate.ProjectDesignTemplateNote.Count; n++)
                 {
@@ -759,11 +760,11 @@ namespace GSC.Report
 
                         var variblevaluename = _context.ProjectDesignVariableValue.Where(b =>
                                                         b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id &&
-                                                         (variable.Value != null || variable.Value != "" ||
+                                                         (variable.Value != null && variable.Value != "" &&
                                                         b.Id == Convert.ToInt32(variable.Value))).ToList();
                         //PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.ProjectDesignVariable.Id.ToString());
                         //document.Form.Fields.Add(radioList);                     
-                        foreach (var value in variablevalue)
+                        foreach (var value in variablevalue.OrderBy(x=>x.SeqNo))
                         {
                             AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.ProjectDesignVariable.Id.ToString());
@@ -797,7 +798,7 @@ namespace GSC.Report
                                                on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into prpjectdesignvalueDto
                                                from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
                                                select prpjectdesignvalue.ValueName;
-                        foreach (var value in variablevalue)
+                        foreach (var value in variablevalue.OrderBy(x=>x.SeqNo))
                         {
                             result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
@@ -816,7 +817,7 @@ namespace GSC.Report
                     {
                         var variablevalue = _context.ProjectDesignVariableValue.Where(b =>
                                                   b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id);
-                        foreach (var value in variablevalue)
+                        foreach (var value in variablevalue.OrderBy(x=>x.SeqNo))
                         {
                             result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
@@ -869,7 +870,7 @@ namespace GSC.Report
                     }
                     else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.Time)
                     {
-                        var time = !string.IsNullOrEmpty(variable.Value) ? DateTime.Parse(variable.Value).UtcDateTime().AddMinutes(330).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                        var time = !string.IsNullOrEmpty(variable.Value) ? DateTime.Parse(variable.Value).UtcDateTime().ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
 
                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
                         textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
