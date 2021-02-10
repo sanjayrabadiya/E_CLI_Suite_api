@@ -65,7 +65,7 @@ namespace GSC.Respository.Etmf
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
                             ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            ProjectName = project.ProjectName + "-" + project.ProjectCode
+                            ProjectName = project.ProjectCode.Replace("/", "")
 
                         }).FirstOrDefault();
 
@@ -115,7 +115,7 @@ namespace GSC.Respository.Etmf
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
                             ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            ProjectName = project.ProjectName + "-" + project.ProjectCode,
+                            ProjectName = project.ProjectCode.Replace("/", ""),
                             ArtifactName = artifact.ArtifactName
 
                         }).FirstOrDefault();
@@ -193,7 +193,7 @@ namespace GSC.Respository.Etmf
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
                             ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            ProjectName = project.ProjectName + "-" + project.ProjectCode,
+                            ProjectName = project.ProjectCode.Replace("/", ""),
                             ArtifactName = artifact.ArtifactName
 
                         }).FirstOrDefault();

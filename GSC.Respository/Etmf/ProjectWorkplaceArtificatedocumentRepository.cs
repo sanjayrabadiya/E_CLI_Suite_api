@@ -87,7 +87,7 @@ namespace GSC.Respository.Etmf
                             FolderType = workdetail.WorkPlaceFolderId,
                             Sitename = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            Projectname = project.ProjectName + "-" + project.ProjectCode,
+                            Projectname = project.ProjectCode.Replace("/", ""),
                             Artificatename = etmfartifact.ArtificateName,
                             DocumentName = artifactdoc.DocumentName,
                         }).FirstOrDefault();
@@ -235,7 +235,7 @@ namespace GSC.Respository.Etmf
         public ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
         {
             var Project = _projectRepository.Find(projectWorkplaceArtificatedocumentDto.ProjectId);
-            var Projectname = Project.ProjectName + "-" + Project.ProjectCode;
+            var Projectname = Project.ProjectCode.Replace("/", "");
 
             string filePath = string.Empty;
             string path = string.Empty;

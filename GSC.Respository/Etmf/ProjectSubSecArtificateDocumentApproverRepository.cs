@@ -9,6 +9,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -39,13 +40,14 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id)
         {
-            var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId).Select(c => new ProjectSubSecArtificateDocumentReviewDto
-            {
-                UserId = c.Id,
-                Name = c.UserName,
-                IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null
-                && (b.IsApproved == true || b.IsApproved == null)),
-            }).Where(x => x.IsSelected == false).ToList();
+            var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId && x.UserType == UserMasterUserType.User)
+                .Select(c => new ProjectSubSecArtificateDocumentReviewDto
+                {
+                    UserId = c.Id,
+                    Name = c.UserName,
+                    IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null
+                    && (b.IsApproved == true || b.IsApproved == null)),
+                }).Where(x => x.IsSelected == false).ToList();
 
             return users;
         }
@@ -73,7 +75,8 @@ namespace GSC.Respository.Etmf
                 .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkplaceSubSection)
                 .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
                 .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
-                .Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection
+                .Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceSubSecArtificateDocument.DeletedDate == null
+                && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection
                 .ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId)
                 .Select(s => new DashboardDto
                 {
