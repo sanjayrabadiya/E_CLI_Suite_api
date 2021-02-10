@@ -12,8 +12,10 @@ using GSC.Helper;
 using GSC.Report.Common;
 using GSC.Respository.Client;
 using GSC.Respository.Configuration;
+using GSC.Respository.EmailSender;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
+using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Hosting;
@@ -54,6 +56,8 @@ namespace GSC.Report
         private readonly IGSCContext _context;
         private readonly IAppSettingRepository _appSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IUserRepository _userRepository;
+        private readonly IEmailSenderRespository _emailSenderRespository;
 
         //private PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
         private readonly PdfFont watermarkerfornt = new PdfStandardFont(PdfFontFamily.TimesRoman, 120, PdfFontStyle.Bold);
@@ -77,7 +81,9 @@ namespace GSC.Report
 
         public ReportSyncfusion(IHostingEnvironment hostingEnvironment, IProjectDesignRepository projectDesignRepository, IProjectDesignVisitRepository projectDesignVisitRepository,
         IProjectDesignTemplateRepository projectDesignTemplateRepository, IProjectDesignVariableRepository projectDesignVariableRepository, IUploadSettingRepository uploadSettingRepository, IReportBaseRepository reportBaseRepository, ICompanyRepository companyRepository,
-        IClientRepository clientRepository, IGSCContext context, IAppSettingRepository appSettingRepository, IJwtTokenAccesser jwtTokenAccesser)
+        IClientRepository clientRepository, IGSCContext context, IAppSettingRepository appSettingRepository, IJwtTokenAccesser jwtTokenAccesser,
+        IUserRepository userRepository, IEmailSenderRespository emailSenderRespository
+        )
         {
             _hostingEnvironment = hostingEnvironment;
             _projectDesignRepository = projectDesignRepository;
@@ -91,6 +97,8 @@ namespace GSC.Report
             _context = context;
             _appSettingRepository = appSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _userRepository = userRepository;
+            _emailSenderRespository = emailSenderRespository;
         }
 
         public void BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
@@ -209,12 +217,17 @@ namespace GSC.Report
             jobMonitoring.JobStatus = JobStatusType.Completed;
             jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
             jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
-            var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);
-
+            var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);            
 
             string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
             ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
             Directory.Delete(Zipfilename, true);
+
+            var user = _userRepository.Find(_jwtTokenAccesser.UserId);
+            var ProjectName = projectdetails.Project.ProjectCode + "-" + projectdetails.Project.ProjectName;
+            string asa = Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType, jobMonitoring.FolderName);
+            var linkOfPdf = "<a href='" + asa + "'>Click Here</a>";
+            _emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
         }
 
         private PdfPageTemplateElement AddHeader(PdfDocument doc, string studyName, bool isClientLogo, bool isCompanyLogo)
@@ -233,12 +246,12 @@ namespace GSC.Report
 
 
             var imagePath = _uploadSettingRepository.GetImagePath();
+            var companydetail = _companyRepository.All.Select(x => new { x.Logo, x.CompanyName }).FirstOrDefault();
             if (isCompanyLogo)
             {
-                var companylogopath = _companyRepository.All.Select(x => x.Logo).FirstOrDefault();
-                if (File.Exists($"{imagePath}/{companylogopath}") && !String.IsNullOrEmpty(companylogopath))
+                if (File.Exists($"{imagePath}/{companydetail.Logo}") && !String.IsNullOrEmpty(companydetail.Logo))
                 {
-                    FileStream logoinputstream = new FileStream($"{imagePath}/{companylogopath}", FileMode.Open, FileAccess.Read);
+                    FileStream logoinputstream = new FileStream($"{imagePath}/{companydetail.Logo}", FileMode.Open, FileAccess.Read);
                     PdfImage img = new PdfBitmap(logoinputstream);
                     var companylogo = new PointF(20, 0);
                     header.Graphics.DrawImage(img, companylogo, imageSize);
@@ -266,7 +279,7 @@ namespace GSC.Report
             format.LineAlignment = PdfVerticalAlignment.Top;
 
             //Draw title
-            header.Graphics.DrawString("Clinvigilant", font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
+            header.Graphics.DrawString($"{companydetail.CompanyName}", font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
             brush = new PdfSolidBrush(Color.Gray);
             font = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
 
@@ -376,7 +389,6 @@ namespace GSC.Report
         private void DesignVisit(IList<DropDownDto> designvisit, ReportSettingNew reportSetting, string projectCode)
         {
             PdfSection SectionTOC = document.Sections.Add();
-
             PdfPage pageTOC = SectionTOC.Pages.Add();
 
             document.Template.Top = AddHeader(document, projectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo));
@@ -409,8 +421,8 @@ namespace GSC.Report
             {
                 PdfSection SectionContent = document.Sections.Add();
                 PdfPage pageContent = SectionContent.Pages.Add();
-                SectionContent.Template.Top = VisitTemplateHeader(document, template.Value, "", "", "", Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial));
-                var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote,x=>x.Domain).ToList();
+                SectionContent.Template.Top = VisitTemplateHeader(document, projectCode, template.Value, "", "", "", Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));
+                var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote, x => x.Domain).ToList();
                 DesignTemplate(projecttemplate, reportSetting, template.Value, pageContent);
 
 
@@ -452,7 +464,7 @@ namespace GSC.Report
 
                 PdfSection SectionContent = document.Sections.Add();
                 PdfPage pageContent = SectionContent.Pages.Add();
-                SectionContent.Template.Top = VisitTemplateHeader(document, visitName, screeningEntry.Randomization.ScreeningNumber, screeningEntry.Randomization.RandomizationNumber, screeningEntry.Randomization.Initial, Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial));
+                SectionContent.Template.Top = VisitTemplateHeader(document, projectCode, visitName, screeningEntry.Randomization.ScreeningNumber, screeningEntry.Randomization.RandomizationNumber, screeningEntry.Randomization.Initial, Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));
 
                 DesignTemplateWithData(screeningtemplate.OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList(), reportSetting, visitName, pageContent);
 
@@ -516,6 +528,14 @@ namespace GSC.Report
 
                     if (variable.Unit != null)
                         AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                    if (variable.IsNa)
+                    {
+                        PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
+                        checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
+                        checkField.Style = PdfCheckBoxStyle.Check;
+                        document.Form.Fields.Add(checkField);
+                        AddString("IsNa", result.Page, new Syncfusion.Drawing.RectangleF(420, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                    }
                     if (variable.CollectionSource == CollectionSources.TextBox || variable.CollectionSource == CollectionSources.MultilineTextBox)
                     {
                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
@@ -708,6 +728,15 @@ namespace GSC.Report
 
                     if (variable.ProjectDesignVariable.Unit != null)
                         AddString(variable.ProjectDesignVariable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width - 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                    if (variable.ProjectDesignVariable.IsNa)
+                    {
+                        PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
+                        checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
+                        checkField.Style = PdfCheckBoxStyle.Check;
+                        document.Form.Fields.Add(checkField);
+                        AddString("IsNa", result.Page, new Syncfusion.Drawing.RectangleF(420, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                    }
+
                     if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox || variable.ProjectDesignVariable.CollectionSource == CollectionSources.MultilineTextBox)
                     {
                         result = AddString(variable.Value == null ? " " : variable.Value, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -725,7 +754,7 @@ namespace GSC.Report
 
                         var variblevaluename = _context.ProjectDesignVariableValue.FirstOrDefault(b =>
                                                         b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id &&
-                                                        (variable.Value != null || variable.Value != "" ||
+                                                        (variable.Value != null && variable.Value != "" &&
                                                         b.Id == Convert.ToInt32(variable.Value))).ValueName;
                         //foreach (var value in variablevalue)
                         //{                         
@@ -745,11 +774,11 @@ namespace GSC.Report
                         //textBoxField.ReadOnly = true;
                         //document.Form.Fields.Add(textBoxField);
                         SizeF size = regularfont.MeasureString($"{variblevaluename}");
-                        result.Page.Graphics.DrawString($"{variblevaluename}", regularfont, PdfBrushes.Black, new RectangleF(new PointF(300, result.Bounds.Y), size));
-                        result.Page.Graphics.DrawRectangle(PdfPens.Black, PdfBrushes.Transparent, new RectangleF(300, result.Bounds.Y, size.Width, size.Height));
+                        //result.Page.Graphics.DrawString($"{variblevaluename}", regularfont, PdfBrushes.Black, new RectangleF(new PointF(300, result.Bounds.Y), size),);
+                        result = AddString($"{variblevaluename}", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                        //result.Page.Graphics.DrawRectangle(PdfPens.Black, PdfBrushes.Transparent, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, size.Height));
 
-
-                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton || variable.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale)
                     {
@@ -764,7 +793,7 @@ namespace GSC.Report
                                                         b.Id == Convert.ToInt32(variable.Value))).ToList();
                         //PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.ProjectDesignVariable.Id.ToString());
                         //document.Form.Fields.Add(radioList);                     
-                        foreach (var value in variablevalue.OrderBy(x=>x.SeqNo))
+                        foreach (var value in variablevalue.OrderBy(x => x.SeqNo))
                         {
                             AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.ProjectDesignVariable.Id.ToString());
@@ -798,7 +827,7 @@ namespace GSC.Report
                                                on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into prpjectdesignvalueDto
                                                from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
                                                select prpjectdesignvalue.ValueName;
-                        foreach (var value in variablevalue.OrderBy(x=>x.SeqNo))
+                        foreach (var value in variablevalue.OrderBy(x => x.SeqNo))
                         {
                             result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
@@ -817,7 +846,7 @@ namespace GSC.Report
                     {
                         var variablevalue = _context.ProjectDesignVariableValue.Where(b =>
                                                   b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id);
-                        foreach (var value in variablevalue.OrderBy(x=>x.SeqNo))
+                        foreach (var value in variablevalue.OrderBy(x => x.SeqNo))
                         {
                             result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
@@ -833,7 +862,7 @@ namespace GSC.Report
                     else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.Date)
                     {
 
-                        var dt = !string.IsNullOrEmpty(variable.Value) ? DateTime.TryParse(variable.Value, out dDate) ? DateTime.Parse(variable.Value).UtcDateTime().AddMinutes(330).ToString(GeneralSettings.DateFormat) : variable.Value : "";
+                        var dt = !string.IsNullOrEmpty(variable.Value) ? DateTime.TryParse(variable.Value, out dDate) ? DateTime.Parse(variable.Value).UtcDateTime().ToString(GeneralSettings.DateFormat) : variable.Value : "";
 
                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
                         textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
@@ -848,7 +877,7 @@ namespace GSC.Report
                     else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.DateTime)
                     {
 
-                        var dttime = !string.IsNullOrEmpty(variable.Value) ? DateTime.TryParse(variable.Value, out dDate) ? DateTime.Parse(variable.Value).UtcDateTime().AddMinutes(330).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variable.Value : "";
+                        var dttime = !string.IsNullOrEmpty(variable.Value) ? DateTime.TryParse(variable.Value, out dDate) ? DateTime.Parse(variable.Value).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variable.Value : "";
 
                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
                         textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
@@ -930,7 +959,7 @@ namespace GSC.Report
             }
         }
 
-        private PdfPageTemplateElement VisitTemplateHeader(PdfDocument doc, string vistName, string screeningNO, string subjectNo, string Initial, bool Isscreeningno, bool isSubjectNo, bool IsInitial)
+        private PdfPageTemplateElement VisitTemplateHeader(PdfDocument doc, string projectcode, string vistName, string screeningNO, string subjectNo, string Initial, bool Isscreeningno, bool isSubjectNo, bool IsInitial, bool isSiteCode)
         {
             RectangleF rect = new RectangleF(0, 80, doc.Pages[0].GetClientSize().Width, 150);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
@@ -946,6 +975,8 @@ namespace GSC.Report
                 header.Graphics.DrawString($"Subject No :- {subjectNo}", headerfont, PdfBrushes.Black, new RectangleF(350, 80, header.Width, header.Height), stringFormat);
             if (IsInitial)
                 header.Graphics.DrawString($"Initial :- {Initial}", headerfont, PdfBrushes.Black, new RectangleF(350, 100, header.Width, header.Height), stringFormat);
+            if (isSiteCode)
+                header.Graphics.DrawString($"SiteCode :- {projectcode}", headerfont, PdfBrushes.Black, new RectangleF(0, 120, header.Width, header.Height), stringFormat);
             return header;
         }
 
@@ -955,7 +986,7 @@ namespace GSC.Report
         {
             var subject = _context.ScreeningEntry.Include(s => s.ScreeningVisit).ThenInclude(s => s.ProjectDesignVisit).Include(x => x.Randomization).Include(x => x.Project)
                 .Where(a => reportSetting.SiteId.Contains(a.ProjectId) && a.DeletedDate == null &&
-              (reportSetting.SubjectIds == null || reportSetting.SubjectIds.Select(x => x.Id).ToList().Contains(a.Id))).ToList();
+              (reportSetting.SubjectIds == null || reportSetting.SubjectIds.Select(x => x.Id).ToList().Contains((int)a.RandomizationId))).ToList();
 
             var base_URL = _uploadSettingRepository.All.OrderByDescending(x => x.Id).FirstOrDefault().DocumentPath;
             FileSaveInfo fileInfo = new FileSaveInfo();
@@ -1101,6 +1132,12 @@ namespace GSC.Report
             string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
             ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
             Directory.Delete(Zipfilename, true);
+
+            var user = _userRepository.Find(_jwtTokenAccesser.UserId);
+            var ProjectName = subject.FirstOrDefault().Project.ProjectCode + "-" + subject.FirstOrDefault().Project.ProjectName;
+            string asa = Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType, jobMonitoring.FolderName);
+            var linkOfPdf = "<a href='" + asa + "'>Click Here</a>";
+            _emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
         }
 
         public FileStreamResult GetProjectDesign(ReportSettingNew reportSetting)

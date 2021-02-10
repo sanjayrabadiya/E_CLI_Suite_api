@@ -243,7 +243,8 @@ namespace GSC.Respository.Master
             var projects = All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                     && x.DeletedDate == null
-                    && projectIds.Any(c => c == x.Id))
+                    && projectIds.Any(c => c == x.Id)
+                    && x.ParentProjectId==null)
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
