@@ -87,7 +87,7 @@ namespace GSC.Respository.Etmf
                             FolderType = workdetail.WorkPlaceFolderId,
                             Sitename = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            Projectname = project.ProjectName + "-" + project.ProjectCode,
+                            Projectname = project.ProjectCode.Replace("/", ""),
                             Artificatename = etmfartifact.ArtificateName,
                             DocumentName = artifactdoc.DocumentName,
                         }).FirstOrDefault();
@@ -235,7 +235,7 @@ namespace GSC.Respository.Etmf
         public ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
         {
             var Project = _projectRepository.Find(projectWorkplaceArtificatedocumentDto.ProjectId);
-            var Projectname = Project.ProjectName + "-" + Project.ProjectCode;
+            var Projectname = Project.ProjectCode.Replace("/", "");
 
             string filePath = string.Empty;
             string path = string.Empty;
@@ -387,7 +387,8 @@ namespace GSC.Respository.Etmf
                 .Where(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).ToList();
             var projectWorkplaceArtificatedocumentreviews = _context.ProjectArtificateDocumentReview.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var projectWorkplaceArtificatedocumentapprover = _context.ProjectArtificateDocumentApprover.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
-            var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null, x => x.Reason).ToList();
+            var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null).ToList();
+            
             var cretaedData = projectWorkplaceArtificatedocuments.Select(r => new EtmfAuditLogReportDto
             {
                 projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,

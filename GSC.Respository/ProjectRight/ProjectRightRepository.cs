@@ -69,7 +69,7 @@ namespace GSC.Respository.ProjectRight
                     }).Where(x => x.IsSelected == false).ToList()
             }).ToList();
 
-            return roles.Where(x=>x.users.Count() != 0).ToList();
+            return roles.Where(x => x.users.Count() != 0).ToList();
         }
 
 
@@ -697,5 +697,23 @@ namespace GSC.Respository.ProjectRight
             return queryDtos;
         }
 
+        public List<ProjectDocumentReviewDto> EtmfUserDropDown(int projectId)
+        {
+            var projectListbyId = All.Where(x => x.ProjectId == projectId).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId, c.RoleId }, (key, group) => group.First());
+
+            var result = latestProjectRight.Select(x => new ProjectDocumentReviewDto
+            {
+                Id = x.Id,
+                ProjectId = x.ProjectId,
+                UserId = x.UserId,
+                UserName = _context.Users.Where(p => p.Id == x.UserId).Select(r => r.UserName).FirstOrDefault(),
+                RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.ProjectId && c.UserId == x.UserId && c.RoleId == x.RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
+                TotalReviewName = _context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
+                                          && a.UserId == x.UserId && a.IsReview).ToList().Count > 0 ? "Complete" : null,
+            }).Where(x => x.TotalReviewName != null).ToList();
+            return result;
+        }
     }
 }

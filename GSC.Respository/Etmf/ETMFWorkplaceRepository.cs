@@ -502,7 +502,7 @@ namespace GSC.Respository.Etmf
                 projectWorkplace = new ProjectWorkplace();
                 ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
                 projectWorkplace.ProjectId = projectDetail.Id;
-                projectPath = System.IO.Path.Combine(docPath, FolderType.ProjectWorksplace.GetDescription(), projectDetail.ProjectName + "-" + projectDetail.ProjectCode);
+                projectPath = System.IO.Path.Combine(docPath, FolderType.ProjectWorksplace.GetDescription(), projectDetail.ProjectCode.Replace("/", ""));
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
                 sitePath = Path.Combine(projectPath, WorkPlaceFolder.Site.GetDescription());
@@ -687,7 +687,7 @@ namespace GSC.Respository.Etmf
         public byte[] CreateZipFileOfWorkplace(int Id)
         {
             var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
-            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), ProjectWorkplace.Project.ProjectName + "-" + ProjectWorkplace.Project.ProjectCode);
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""));
             ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
             byte[] compressedBytes;
             var zipfolder = FolderPath + ".zip";

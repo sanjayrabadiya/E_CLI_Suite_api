@@ -109,5 +109,14 @@ namespace GSC.Api.Controllers.ProjectRight
             if (projectId <= 0 || userId <= 0) return BadRequest();
             return Ok(_projectRightRepository.GetProjectRightHistory(projectId, userId, roleId));
         }
+
+        [HttpGet]
+        [Route("EtmfUserDropDown/{projectId}")]
+        [AllowAnonymous]
+        public IActionResult EtmfUserDropDown(int projectId)
+        {
+            if (projectId <= 0) return BadRequest();
+            return Ok(_projectRightRepository.EtmfUserDropDown(projectId));
+        }
     }
 }

@@ -255,7 +255,7 @@ namespace GSC.Respository.Screening
         {
 
             var ProjectCode = _context.Project.Find(filters.ParentProjectId).ProjectCode;
-            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(1);
+            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
 
             CommonDto MainData = new CommonDto();
