@@ -676,19 +676,28 @@ namespace GSC.Respository.Screening
 
         public IList<VisitDeviationReport> GetVisitDeviationReport(VisitDeviationReportSearchDto filters)
         {
-            int? parentprojectid = 0;
-            var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+
+            int parentprojectid = filters.ProjectId;
+            int? siteId = filters.SiteId;
             var parentIds = new List<int>();
-            if (parentId == null)
+            if (siteId == null)
             {
                 parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
-                parentprojectid = filters.ProjectId;
             }
             else
             {
-                parentIds.Add(filters.ProjectId);
-                parentprojectid = parentId;
+                parentIds.Add((int)filters.SiteId);
             }
+            //if (parentId == null)
+            //{
+            //    parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+            //    //parentprojectid = filters.ProjectId;
+            //}
+            //else
+            //{
+            //    parentIds.Add(filters.ProjectId);
+            //    //parentprojectid = parentId;
+            //}
             var studycode = _context.Project.Where(x => x.Id == parentprojectid).FirstOrDefault().ProjectCode;
 
             //    string sqlqry = @";with cts as(
@@ -793,31 +802,66 @@ namespace GSC.Respository.Screening
             //select * from cts where flag=0
             //                        ";
             string sqlqry = @";with cts as(
-                                select *,ROW_NUMBER() OVER (ORDER BY SiteCode,Initial) Id,'" + studycode + @"' StudyCode,'' RefValueExcel,'' TargetValueExcel,'Date' Unit,
+                                select *,ROW_NUMBER() OVER (ORDER BY SiteCode,Initial) Id,'" + studycode + @"' StudyCode,'' RefValueExcel,'' TargetValueExcel,
+										case when collectionsource = 3 then
                                         case when TargetValue < DATEADD(day,(NoOfDay - NegativeDeviation) , RefValue) then DATEDIFF(DAY,DATEADD(day,(NoOfDay - NegativeDeviation) , RefValue), TargetValue) else
-		                                case when TargetValue > DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue) then DATEDIFF(DAY, DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue), TargetValue) end end Deviation
+		                                case when TargetValue > DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue) then DATEDIFF(DAY, DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue), TargetValue) end end 
+										else 
+										case when collectionsource = 4 then
+										case when TargetValue < dateadd(minute,(NegativeDeviation*-1),Dateadd(minute,MM,DATEADD(hour,HH,convert(datetime,RefValue)))) then DATEDIFF(MINUTE,dateadd(minute,(NegativeDeviation*-1),Dateadd(minute,MM,DATEADD(hour,HH,convert(datetime,RefValue)))), TargetValue) else
+		                                case when TargetValue > dateadd(minute,PositiveDeviation,Dateadd(minute,MM,DATEADD(hour,HH,convert(datetime,RefValue)))) then DATEDIFF(MINUTE, dateadd(minute,PositiveDeviation,Dateadd(minute,MM,DATEADD(hour,HH,convert(datetime,RefValue)))), TargetValue) end end 
+										--case when TargetValue < DATEADD(day,(NoOfDay - NegativeDeviation) , RefValue) then DATEDIFF(DAY,DATEADD(day,(NoOfDay - NegativeDeviation) , RefValue), TargetValue) else
+		        --                        case when TargetValue > DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue) then DATEDIFF(DAY, DATEADD(day,(NoOfDay + PositiveDeviation) , RefValue), TargetValue) end end 
+										end end Deviation,
+										case when CollectionSource = 3 then 'Days' else 'Minutes' end as Unit
                                 from
                                 (
 	                                select Randomization.Initial,Randomization.ScreeningNumber ScreeningNo,isnull(Randomization.RandomizationNumber,'') RandomizationNumber,
 									ScreeningEntry.ScreeningDate,ProjectDesignVisit.DisplayName RefVisit,
 	                                ProjectDesignTemplate.TemplateName RefTemplate,ProjectDesignVariable.VariableName RefVariable,
-                                    convert(varchar,convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) RefValue,
-	                                convert(varchar,convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value)))) TargetValue,
+                                    convert(datetime,ScreeningTemplateValue.Value) RefValue,
+	                                convert(datetime,tvalue.Value) TargetValue,
                                     tVisit.DisplayName TargetVisit,tDesignTemplate.TemplateName TargetTemplate,tvariable.VariableName TargetVariable,
-	                                ProjectScheduleTemplate.NoOfDay,ProjectScheduleTemplate.PositiveDeviation,ProjectScheduleTemplate.NegativeDeviation,Project.ProjectCode SiteCode,
-                                    CASE WHEN convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value))) >= DATEADD(day,(NoOfDay - NegativeDeviation) , convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) 
-                                    AND  convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,tvalue.Value))) <= DATEADD(day,(NoOfDay + PositiveDeviation) , convert(date,dateadd(HOUR,5,dateadd(MINUTE,30,ScreeningTemplateValue.Value)))) THEN 1 ELSE 0 END flag,
+	                                isnull(ProjectScheduleTemplate.NoOfDay,0) NoOfDay,ProjectScheduleTemplate.PositiveDeviation,ProjectScheduleTemplate.NegativeDeviation,Project.ProjectCode SiteCode,
+									case when variable.collectionsource = 3 then
+                                    CASE WHEN convert(date,tvalue.Value) >= DATEADD(day,(NoOfDay - NegativeDeviation) , convert(date,ScreeningTemplateValue.Value)) 
+                                    AND  convert(date,tvalue.Value) <= DATEADD(day,(NoOfDay + PositiveDeviation) , convert(date,ScreeningTemplateValue.Value)) THEN 1 ELSE 0 END 
+									else 
+									case when variable.collectionsource = 4 then
+									CASE WHEN convert(datetime,tvalue.Value) >= dateadd(minute,(NegativeDeviation*-1),Dateadd(minute,MM,DATEADD(hour,HH,convert(datetime,ScreeningTemplateValue.Value)))) 
+                                    AND  convert(datetime,tvalue.Value) <= dateadd(minute,PositiveDeviation,Dateadd(minute,MM,DATEADD(hour,HH,convert(datetime,ScreeningTemplateValue.Value)))) THEN 1 ELSE 0 END 
+									end 
+									end flag,
                                     ScreeningEntry.RandomizationId,ScreeningTemplateValue.ProjectDesignVariableId,ScreeningTemplate.ProjectDesignTemplateId,ScreeningVisit.ProjectDesignVisitId,
-                                    ProjectDesignVisit.ProjectDesignPeriodId,Project.Id ProjectId
+                                    ProjectDesignVisit.ProjectDesignPeriodId,Project.Id ProjectId,variable.collectionsource,isnull(HH,0) HH,isnull(MM,0) MM
 	                                from
-	                                ScreeningTemplateValue
+	                                --ScreeningTemplateValue
+									(
+										select *
+										from
+										(
+											select a.id,a.screeningtemplateid,a.projectdesignvariableid,replace(a.value,',','') value,a.deleteddate
+											from
+											screeningtemplatevalue a,
+											projectdesignvariable b,
+											variable c
+											where
+											a.projectdesignvariableid = b.id and
+											b.variableid = c.id and
+											c.collectionsource in (3,4) and
+											isnull(value,'') <> '' and
+											len(value) > 4
+										) a
+										where
+										isdate(a.value) = 1
+									) ScreeningTemplateValue
 	                                inner join
 	                                ScreeningTemplate
 	                                on
 	                                ScreeningTemplateValue.ScreeningTemplateId = ScreeningTemplate.Id and
 	                                ScreeningTemplate.DeletedDate is null and
-	                                ScreeningTemplateValue.value is not null and
-	                                isdate(ScreeningTemplateValue.value) = 1
+	                                ScreeningTemplateValue.value is not null --and
+	                                --isdate(ScreeningTemplateValue.value) = 1
 									inner join
 									ScreeningVisit 
 									on
@@ -835,6 +879,11 @@ namespace GSC.Respository.Screening
 	                                on
 	                                ScreeningTemplateValue.ProjectDesignVariableId = ProjectDesignVariable.id and
 	                                ProjectDesignVariable.deleteddate is null
+									inner join
+									Variable
+									on
+									ProjectDesignVariable.variableid = Variable.id and
+									variable.Collectionsource in (3,4)
 	                                inner join
 	                                ProjectDesignTemplate
 	                                on
@@ -849,7 +898,7 @@ namespace GSC.Respository.Screening
 	                                projectschedule
 	                                on
 	                                projectschedule.projectdesignvariableid = ProjectDesignVariable.Id and
-	                                projectschedule.projectdesigntemplateid = ProjectDesignTemplate.Id and
+	                                --projectschedule.projectdesigntemplateid = ProjectDesignTemplate.Id and
 	                                projectschedule.deleteddate is null
 	                                inner join
 	                                ProjectScheduletemplate
@@ -858,18 +907,36 @@ namespace GSC.Respository.Screening
 	                                ProjectSchedule.deleteddate is null and
 	                                projectscheduletemplate.operator = 2
 	                                inner join
-	                                ScreeningTemplateValue tvalue
+	                                --ScreeningTemplateValue tvalue
+									(
+										select *
+										from
+										(
+											select a.id,a.screeningtemplateid,a.projectdesignvariableid,replace(a.value,',','') value,a.deleteddate
+											from
+											screeningtemplatevalue a,
+											projectdesignvariable b,
+											variable c
+											where
+											a.projectdesignvariableid = b.id and
+											b.variableid = c.id and
+											c.collectionsource in (3,4) and
+											isnull(value,'') <> '' and
+											len(value) > 4
+										) a
+										where
+										isdate(a.value) = 1
+									) tvalue
 	                                on
 	                                tvalue.projectdesignvariableid = ProjectScheduletemplate.projectdesignvariableid and
 	                                tvalue.DeletedDate is null and
-	                                tvalue.Value is not null and
-	                                ISDATE(tvalue.Value) = 1
+	                                tvalue.Value is not null --and
+	                                --ISDATE(tvalue.Value) = 1
 	                                inner join
 	                                ScreeningTemplate tTemplate
 	                                on
-	                                tvalue.ScreeningTemplateId = tTemplate.Id and
-	                                --tTemplate.ScreeningEntryId = ScreeningEntry.Id and
-	                                tTemplate.ProjectDesignTemplateId = ProjectScheduletemplate.ProjectDesignTemplateId
+	                                tvalue.ScreeningTemplateId = tTemplate.Id --and
+	                                --tTemplate.ProjectDesignTemplateId = ProjectScheduletemplate.ProjectDesignTemplateId
 									inner join
 									ScreeningVisit tScreeningvisit
 									on
@@ -896,7 +963,9 @@ namespace GSC.Respository.Screening
 	                                Randomization.ProjectId = Project.Id
                                 ) a
                                 )
-								select * from cts where flag=0";
+								select * from cts where flag=0
+
+";
             var finaldata = _context.FromSql<VisitDeviationReport>(sqlqry).ToList();
 
             finaldata = finaldata.Where(x => parentIds.Contains(x.ProjectId)).ToList();
@@ -906,10 +975,13 @@ namespace GSC.Respository.Screening
             if (filters.TemplateIds != null && filters.TemplateIds.Length > 0) finaldata = finaldata.Where(x => filters.TemplateIds.Contains(x.ProjectDesignTemplateId)).ToList();
             if (filters.VariableIds != null && filters.VariableIds.Length > 0) finaldata = finaldata.Where(x => filters.VariableIds.Contains(x.ProjectDesignVariableId)).ToList();
             var dateformat = _context.AppSetting.Where(x => x.KeyName == "GeneralSettingsDto.DateFormat").ToList().FirstOrDefault().KeyValue;
+            dateformat = dateformat.Replace("/", "\\/");
+            var timeformat = _context.AppSetting.Where(x => x.KeyName == "GeneralSettingsDto.TimeFormat").ToList().FirstOrDefault().KeyValue;
+            var datetimeformat = dateformat + " " + timeformat;
             for (int i = 0; i < finaldata.Count; i++)
             {
-                finaldata[i].RefValueExcel = DateTime.Parse(finaldata[i].RefValue).ToString(dateformat);
-                finaldata[i].TargetValueExcel = DateTime.Parse(finaldata[i].TargetValue).ToString(dateformat);
+                finaldata[i].RefValueExcel = finaldata[i].RefValue.ToString(datetimeformat);
+                finaldata[i].TargetValueExcel = finaldata[i].TargetValue.ToString(datetimeformat);
             }
             return finaldata;
         }
