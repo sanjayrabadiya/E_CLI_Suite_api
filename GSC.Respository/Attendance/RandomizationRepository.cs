@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Dto.UserMgt;
 using GSC.Shared.Security;
+using GSC.Data.Dto.ProjectRight;
 
 namespace GSC.Respository.Attendance
 {
@@ -842,6 +843,20 @@ namespace GSC.Respository.Attendance
                                                ? ""
                                                : " - " + x.RandomizationNumber))
                 }).Distinct().ToList();
+        }
+
+        // Dashboard chart for Subject Status
+        public List<DashboardQueryStatusDto> GetSubjectStatus(int projectId)
+        {
+            var result = All.Where(x => (x.ProjectId == projectId ||
+           x.Project.ParentProjectId == projectId) && x.DeletedDate == null).GroupBy(
+               t => new { t.PatientStatusId }).Select(g => new DashboardQueryStatusDto
+               {
+                   DisplayName = g.Key.PatientStatusId.GetDescription(),
+                   Total = g.Count()
+               }).ToList();
+            return result;
+
         }
     }
 }

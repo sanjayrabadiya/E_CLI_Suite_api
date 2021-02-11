@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Project.Workflow;
+using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -31,6 +32,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
         public DataEntryRespository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
@@ -54,6 +56,7 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _projectDesignRepository = projectDesignRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public async Task<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
@@ -380,6 +383,49 @@ namespace GSC.Respository.Screening
 
             return result;
 
+
+        }
+
+        // Dashboard chart for data entry status
+        public List<DashboardQueryStatusDto> GetDataEntriesStatus(int projectId)
+        {
+            var screeningData = _screeningEntryRepository.All.Where(r => r.ProjectId == projectId || r.Project.ParentProjectId == projectId
+             && r.DeletedDate == null).Select(x => new DataCaptureGridData
+             {
+                 ScreeningEntryId = x.Id,
+                 RandomizationId = x.RandomizationId,
+                 AttendanceId = x.AttendanceId,
+                 VolunteerName = x.RandomizationId != null ? x.Randomization.Initial : x.Attendance.Volunteer.AliasName,
+                 IsRandomization = x.RandomizationId != null,
+                 SubjectNo = x.RandomizationId != null ? x.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
+                 ScreeningPatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId : ScreeningPatientStatus.Screening,
+                 PatientStatusId = x.RandomizationId != null ? x.Randomization.PatientStatusId : 0,
+                 PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
+                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
+                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
+                 {
+                     ScreeningVisitId = a.Id,
+                     ProjectDesignVisitId = a.ProjectDesignVisitId,
+                     VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
+                     VisitStatus = a.Status.GetDescription(),
+                     VisitStatusId = (int)a.Status,
+                     ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
+                     ScheduleDate = a.ScheduleDate,
+                     IsSchedule = a.IsSchedule
+                 }).OrderBy(b => b.ProjectDesignVisitId).ToList()
+             }).ToList();
+
+            screeningData.ForEach(r =>
+            {
+                r.NotStarted = r.Visit.Sum(x => x.NotStarted);
+            });
+
+            // % = (OpenVisitTemplate-NotStartedTemplate)/OpenVisitTemplate*100;
+
+            return screeningData.GroupBy(x=> new { x.Visit,x.NotStarted }).Select(x=>new DashboardQueryStatusDto { 
+                DisplayName = x.Key.Visit.FirstOrDefault().VisitName,
+                Total = x.Key.Visit.Count()
+            }).ToList();
 
         }
 
