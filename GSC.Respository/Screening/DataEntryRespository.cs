@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Project.Workflow;
+using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -31,6 +32,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
         public DataEntryRespository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
@@ -54,6 +56,7 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _projectDesignRepository = projectDesignRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public async Task<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
@@ -383,5 +386,20 @@ namespace GSC.Respository.Screening
 
         }
 
+        // Dashboard chart for data entry status
+        public List<DashboardQueryStatusDto> GetDataEntriesStatus(int projectId)
+        {
+            // Formula % = (OpenVisitTemplate-NotStartedTemplate)/OpenVisitTemplate*100;
+            var result = _screeningTemplateRepository.All.Where(x => (x.ScreeningVisit.ScreeningEntry.ProjectId == projectId ||
+          x.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) && x.DeletedDate == null).GroupBy(
+              t => new { t.ProjectDesignTemplate.ProjectDesignVisit.DisplayName, t.ProjectDesignTemplate.ProjectDesignVisit.Id }).Select(g => new DashboardQueryStatusDto
+              {
+                  DisplayName = g.Key.DisplayName,
+                  Avg = Math.Round((g.Count() - g.Where(a => a.Status == ScreeningTemplateStatus.Pending).Count()) * 100d / g.Count(), 2),
+                  // For order by visit id store visit id 
+                  Total = g.Key.Id
+              }).OrderBy(g => g.Total).ToList();
+            return result;
+        }
     }
 }

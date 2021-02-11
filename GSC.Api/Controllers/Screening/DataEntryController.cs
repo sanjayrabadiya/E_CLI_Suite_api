@@ -113,5 +113,21 @@ namespace GSC.Api.Controllers.Screening
             _uow.Save();
             return Ok(screeningVisitDto.ScreeningVisitId);
         }
+
+        [HttpGet]
+        [Route("GetDataEntriesStatus/{projectId}")]
+        public IActionResult GetDataEntriesStatus(int projectId)
+        {
+            return Ok(_dataEntryRespository.GetDataEntriesStatus(projectId));
+        }
+
+        [HttpGet]
+        [Route("GetVisitStatus/{projectId}")]
+        public IActionResult GetVisitStatus(int projectId)
+        {
+            return Ok(_screeningVisitRepository.GetVisitStatus(projectId));
+        }
+
+      
     }
 }

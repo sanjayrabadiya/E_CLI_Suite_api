@@ -33,6 +33,7 @@ namespace GSC.Data.Dto.Report
         public int ProjectId { get; set; }
         public string ProjectCode { get; set; }
         public string SiteName { get; set; }
+        public string SiteCode { get; set; }
     }
 
     public class ReviewSearchDto : BaseDto

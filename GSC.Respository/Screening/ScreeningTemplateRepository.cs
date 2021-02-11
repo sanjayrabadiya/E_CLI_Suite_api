@@ -413,7 +413,7 @@ namespace GSC.Respository.Screening
                 parentIds.Add(filters.ProjectId);
             }
 
-            var result = All.Where(x => x.DeletedDate == null);
+            var result = All.Where(x => x.DeletedDate == null && x.ScreeningVisit.Status != ScreeningVisitStatus.NotStarted);
             if (filters.ReviewStatus != null)
             {
                 result = result.Where(y => y.Status != ScreeningTemplateStatus.Pending && y.Status != ScreeningTemplateStatus.InProcess);
@@ -433,6 +433,7 @@ namespace GSC.Respository.Screening
             {
                 Id = r.Id,
                 SiteName = string.IsNullOrEmpty(r.ScreeningVisit.ScreeningEntry.Project.SiteName) ? r.ScreeningVisit.ScreeningEntry.Project.ProjectName : r.ScreeningVisit.ScreeningEntry.Project.SiteName,
+                SiteCode = r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
                 ScreeningEntryId = r.ScreeningVisit.ScreeningEntryId,
                 ScreeningNo = r.ScreeningVisit.ScreeningEntry.ScreeningNo,
                 ReviewLevel = r.ReviewLevel,

@@ -443,5 +443,12 @@ namespace GSC.Api.Controllers.Attendance
         {
             return Ok(_randomizationRepository.GetRandomizationDropdown(projectId));
         }
+
+        [HttpGet]
+        [Route("GetSubjectStatus/{projectId}")]
+        public IActionResult GetSubjectStatus(int projectId)
+        {
+            return Ok(_randomizationRepository.GetSubjectStatus(projectId));
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -482,6 +483,19 @@ namespace GSC.Respository.Screening
                 Id = x.Key,
                 Value = x.FirstOrDefault().ProjectDesignVisit.DisplayName
             }).Distinct().ToList();
+        }
+
+        // Dashboard chart for Visit Status
+        public List<DashboardQueryStatusDto> GetVisitStatus(int projectId)
+        {
+            var result = All.Where(x => (x.ScreeningEntry.ProjectId == projectId ||
+           x.ScreeningEntry.Project.ParentProjectId == projectId) && x.DeletedDate == null).GroupBy(
+               t => new { t.Status }).Select(g => new DashboardQueryStatusDto
+               {
+                   DisplayName = g.Key.Status.GetDescription(),
+                   Total = g.Count()
+               }).ToList();
+            return result;
         }
     }
 }
