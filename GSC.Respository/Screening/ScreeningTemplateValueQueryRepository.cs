@@ -618,13 +618,19 @@ namespace GSC.Respository.Screening
         // Site wise open query chart
         public List<DashboardQueryStatusDto> GetDashboardOpenQuerySitewise(int projectId)
         {
-            var result = All.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId && x.QueryStatus == QueryStatus.Open).GroupBy(
-               t => new { t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode, t.QueryStatus }).Select(g => new DashboardQueryStatusDto
-               {
-                   DisplayName = g.Key.ProjectCode,
-                   Total = g.Count()
-               }).ToList();
-            return result;
+            var queries = _screeningTemplateValueRepository.All.Where(r =>
+            (r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
+            r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null && r.QueryStatus == QueryStatus.Open).
+                 GroupBy(c => new
+                 {
+                     c.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode
+                 }).Select(t => new DashboardQueryStatusDto
+                 {
+                     DisplayName = t.Key.ProjectCode,
+                     Total = t.Count()
+                 }).ToList();
+
+            return queries;
         }
 
     }
