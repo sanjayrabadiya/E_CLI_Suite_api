@@ -391,9 +391,10 @@ namespace GSC.Respository.Screening
                             Visit = n.Key,
                             LstProjectDataBaseTemplate = n.GroupBy(x => x.TemplateId).Select(t => new ProjectDatabaseTemplateDto
                             {
-                                DesignOrder = n.FirstOrDefault().DesignOrder,
-                                TemplateName = n.FirstOrDefault().TemplateName,
-                                LstProjectDataBaseitems = n.OrderBy(o => o.ScreeningTemplateId).Select(i => new ProjectDatabaseItemDto
+                                DesignOrder = t.FirstOrDefault().DesignOrder,
+                                TemplateId = t.FirstOrDefault().TemplateId,
+                                TemplateName = t.FirstOrDefault().TemplateName,
+                                LstProjectDataBaseitems = t.OrderBy(o => o.ScreeningTemplateId).Select(i => new ProjectDatabaseItemDto
                                 {
                                     ScreeningTemplateParentId = i.ScreeningTemplateParentId,
                                     VariableName = i.VariableName,
@@ -661,20 +662,20 @@ namespace GSC.Respository.Screening
                                         {
                                             DateTime dDate;
                                             var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
                                             worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                                         }
                                         else if (collectionSource == (int)CollectionSources.Date)
                                         {
                                             DateTime dDate;
                                             var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                            string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                                            string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
                                             worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                                         }
                                         else if (collectionSource == (int)CollectionSources.Time)
                                         {
                                             var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
                                             worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                                         }
                                         else
