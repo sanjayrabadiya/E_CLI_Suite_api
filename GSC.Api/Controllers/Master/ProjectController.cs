@@ -339,6 +339,13 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
+        [Route("GetAllProjectsForDataEntry")]
+        public IActionResult GetAllProjectsForDataEntry()
+        {
+            return Ok(_projectRepository.GetAllProjectsForDataEntry());
+        }
+
+        [HttpGet]
         [Route("GetChildProjectWithParentProjectDropDown/{parentProjectId}")]
         public IActionResult GetChildProjectWithParentProjectDropDown(int parentProjectId)
         {
