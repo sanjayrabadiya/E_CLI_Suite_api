@@ -389,45 +389,17 @@ namespace GSC.Respository.Screening
         // Dashboard chart for data entry status
         public List<DashboardQueryStatusDto> GetDataEntriesStatus(int projectId)
         {
-            var screeningData = _screeningEntryRepository.All.Where(r => r.ProjectId == projectId || r.Project.ParentProjectId == projectId
-             && r.DeletedDate == null).Select(x => new DataCaptureGridData
-             {
-                 ScreeningEntryId = x.Id,
-                 RandomizationId = x.RandomizationId,
-                 AttendanceId = x.AttendanceId,
-                 VolunteerName = x.RandomizationId != null ? x.Randomization.Initial : x.Attendance.Volunteer.AliasName,
-                 IsRandomization = x.RandomizationId != null,
-                 SubjectNo = x.RandomizationId != null ? x.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
-                 ScreeningPatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId : ScreeningPatientStatus.Screening,
-                 PatientStatusId = x.RandomizationId != null ? x.Randomization.PatientStatusId : 0,
-                 PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
-                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
-                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
-                 {
-                     ScreeningVisitId = a.Id,
-                     ProjectDesignVisitId = a.ProjectDesignVisitId,
-                     VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
-                     VisitStatus = a.Status.GetDescription(),
-                     VisitStatusId = (int)a.Status,
-                     ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
-                     ScheduleDate = a.ScheduleDate,
-                     IsSchedule = a.IsSchedule
-                 }).OrderBy(b => b.ProjectDesignVisitId).ToList()
-             }).ToList();
-
-            screeningData.ForEach(r =>
-            {
-                r.NotStarted = r.Visit.Sum(x => x.NotStarted);
-            });
-
-            // % = (OpenVisitTemplate-NotStartedTemplate)/OpenVisitTemplate*100;
-
-            return screeningData.GroupBy(x=> new { x.Visit,x.NotStarted }).Select(x=>new DashboardQueryStatusDto { 
-                DisplayName = x.Key.Visit.FirstOrDefault().VisitName,
-                Total = x.Key.Visit.Count()
-            }).ToList();
-
+            // Formula % = (OpenVisitTemplate-NotStartedTemplate)/OpenVisitTemplate*100;
+            var result = _screeningTemplateRepository.All.Where(x => (x.ScreeningVisit.ScreeningEntry.ProjectId == projectId ||
+          x.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) && x.DeletedDate == null).GroupBy(
+              t => new { t.ProjectDesignTemplate.ProjectDesignVisit.DisplayName, t.ProjectDesignTemplate.ProjectDesignVisit.Id }).Select(g => new DashboardQueryStatusDto
+              {
+                  DisplayName = g.Key.DisplayName,
+                  Avg = Math.Round((g.Count() - g.Where(a => a.Status == ScreeningTemplateStatus.Pending).Count()) * 100d / g.Count(), 2),
+                  // For order by visit id store visit id 
+                  Total = g.Key.Id
+              }).OrderBy(g => g.Total).ToList();
+            return result;
         }
-
     }
 }
