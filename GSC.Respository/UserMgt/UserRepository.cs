@@ -85,7 +85,7 @@ namespace GSC.Respository.UserMgt
             _mapper = mapper;
         }
 
-        public List<UserGridDto> GetUsers(bool isDeleted)
+        public List<UserGridDto> GetUsers(bool isDeleted, bool isPatient)
         {
             //return All.Where(x =>
 
@@ -108,7 +108,7 @@ namespace GSC.Respository.UserMgt
             //    Role = string.Join(", ",
             //        t.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
             //}).OrderByDescending(x => x.Id).ToList();
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (isPatient ? x.UserType == UserMasterUserType.Patient : x.UserType != UserMasterUserType.Patient)).
                    ProjectTo<UserGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 

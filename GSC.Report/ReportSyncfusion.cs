@@ -59,21 +59,13 @@ namespace GSC.Report
         private readonly IUserRepository _userRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
 
-        //private PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
+
         private readonly PdfFont watermarkerfornt = new PdfStandardFont(PdfFontFamily.TimesRoman, 120, PdfFontStyle.Bold);
         private readonly PdfFont largeheaderfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
         private readonly PdfFont headerfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold);
         private readonly PdfFont regularfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
         private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
 
-        // private float yPosition { get; set; }
-        //string str = "Threads are relatively lightweight processes responsible for multitasking within a single "
-        //         + "application. The System.Threading namespace provides a wealth of classes and interfaces to "
-        //         + "manage multithreaded programming. The majority of programmers might never need to manage "
-        //         + "threads explicitly, however, because the Common Language Runtime (CLR) abstracts much of the "
-        //         + "threading support into classes that greatly simplify most threading tasks. For example, "
-        //         + " you will see how to create multithreaded reading and writing streams without resorting to "
-        //         + "managing the threads yourself.";
 
         private PdfDocument document = null;
         private PdfLayoutResult tocresult = null;
@@ -217,7 +209,7 @@ namespace GSC.Report
             jobMonitoring.JobStatus = JobStatusType.Completed;
             jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
             jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
-            var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);            
+            var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);
 
             string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
             ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
@@ -233,17 +225,10 @@ namespace GSC.Report
         private PdfPageTemplateElement AddHeader(PdfDocument doc, string studyName, bool isClientLogo, bool isCompanyLogo)
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
-
-            //Create a page template
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
             PdfFont font = new PdfStandardFont(PdfFontFamily.Helvetica, 24);
-            // float doubleHeight = font.Height * 2;
             Color activeColor = Color.FromArgb(44, 71, 120);
             SizeF imageSize = new SizeF(50f, 50f);
-
-            //string basePath = _hostingEnvironment.WebRootPath;
-
-
 
             var imagePath = _uploadSettingRepository.GetImagePath();
             var companydetail = _companyRepository.All.Select(x => new { x.Logo, x.CompanyName }).FirstOrDefault();
@@ -273,12 +258,11 @@ namespace GSC.Report
             PdfPen pen = new PdfPen(Color.DarkBlue, 3f);
             font = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
 
-            //Set formattings for the text
             PdfStringFormat format = new PdfStringFormat();
             format.Alignment = PdfTextAlignment.Center;
             format.LineAlignment = PdfVerticalAlignment.Top;
 
-            //Draw title
+
             header.Graphics.DrawString($"{companydetail.CompanyName}", font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
             brush = new PdfSolidBrush(Color.Gray);
             font = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
@@ -294,7 +278,6 @@ namespace GSC.Report
             format.LineAlignment = PdfVerticalAlignment.Bottom;
 
             pen = new PdfPen(Color.Black, 2f);
-            // header.Graphics.DrawLine(pen, 0, header.Height - 3, header.Width, header.Height - 3);
             header.Graphics.DrawLine(pen, 0, header.Height, header.Width, header.Height);
 
             return header;
@@ -307,20 +290,14 @@ namespace GSC.Report
             PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 8, PdfFontStyle.Bold);
             PdfSolidBrush brush = new PdfSolidBrush(Color.Black);
 
-            //Create the page number field
             PdfPageNumberField pageNumber = new PdfPageNumberField(font, brush);
-
-            //Create the page count field
             PdfPageCountField count = new PdfPageCountField(font, brush);
 
-            //Add the fields in the composite fields
             PdfCompositeField compositeField = new PdfCompositeField(font, brush, "Page {0} of {1}", pageNumber, count);
             compositeField.Bounds = footer.Bounds;
 
-            //Draw the composite field in the footer
             compositeField.Draw(footer.Graphics, new PointF(footer.Width - 50, footer.Height - 10));
 
-            //Drawing Line
             PdfPen pen = new PdfPen(Color.Black, 1.0f);
             footer.Graphics.DrawLine(pen, 0, 0, footer.Width, 0);
 
@@ -412,8 +389,6 @@ namespace GSC.Report
             format.Alignment = PdfTextAlignment.Left;
             format.WordWrap = PdfWordWrapType.Word;
 
-
-            //document.Template.Bottom = AddFooter(document);
             var scrrening = _context.ScreeningEntry.Where(x => x.ProjectId == reportSetting.ProjectId)
               .Include(x => x.ScreeningVisit).ThenInclude(x => x.ScreeningTemplates).ThenInclude(x => x.ScreeningTemplateValues).ToList();
 
@@ -436,13 +411,6 @@ namespace GSC.Report
             format.WordWrap = PdfWordWrapType.Word;
             foreach (var visit in screeningVisits)
             {
-                //var screeningtemplate = _context.ScreeningTemplate.Where(x => x.Status != ScreeningTemplateStatus.Pending && x.DeletedDate == null).Include(x => x.ScreeningTemplateReview)
-                //    .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.ProjectDesignTemplateNote)
-                //    .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.VariableTemplate)
-                //    .Include(x => x.ScreeningTemplateValues).ThenInclude(x => x.ProjectDesignVariable)
-                //    .ThenInclude(x => x.Unit).Where(x => x.ScreeningVisitId == visit.Id && reportSetting.NonCRF == true ? true : x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific)
-                //    .OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList();
-
                 var screeningtemplate = _context.ScreeningTemplate.Include(x => x.ScreeningTemplateReview)
                    .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.ProjectDesignTemplateNote)
                    .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.VariableTemplate)
@@ -733,6 +701,9 @@ namespace GSC.Report
                         PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
                         checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
                         checkField.Style = PdfCheckBoxStyle.Check;
+                        var isNa = _context.ScreeningTemplateValue.Where(x => x.ScreeningTemplateId == variable.Id && x.DeletedDate == null).Select(x => x.IsNa).FirstOrDefault();
+                        if (isNa)
+                            checkField.Checked = true;
                         document.Form.Fields.Add(checkField);
                         AddString("IsNa", result.Page, new Syncfusion.Drawing.RectangleF(420, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                     }
@@ -752,10 +723,10 @@ namespace GSC.Report
                         //                                b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id
                         //                                ).ToList();
 
-                        var variblevaluename = _context.ProjectDesignVariableValue.FirstOrDefault(b =>
+                        var variblevaluename = _context.ProjectDesignVariableValue.Where(b =>
                                                         b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id &&
                                                         (variable.Value != null && variable.Value != "" &&
-                                                        b.Id == Convert.ToInt32(variable.Value))).ValueName;
+                                                        b.Id == Convert.ToInt32(variable.Value))).ToList();
                         //foreach (var value in variablevalue)
                         //{                         
                         //    comboBox.Items.Add(new PdfListFieldItem(value.ValueName, value.Id.ToString()));
@@ -773,9 +744,11 @@ namespace GSC.Report
                         //textBoxField.Text = variblevaluename;
                         //textBoxField.ReadOnly = true;
                         //document.Form.Fields.Add(textBoxField);
-                        SizeF size = regularfont.MeasureString($"{variblevaluename}");
+
+                        string dropdownvalue = variblevaluename != null && variblevaluename.Count > 0 ? variblevaluename.FirstOrDefault().ValueName : " ";
+                        SizeF size = regularfont.MeasureString($"{dropdownvalue}");
                         //result.Page.Graphics.DrawString($"{variblevaluename}", regularfont, PdfBrushes.Black, new RectangleF(new PointF(300, result.Bounds.Y), size),);
-                        result = AddString($"{variblevaluename}", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                        result = AddString($"{dropdownvalue}", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         //result.Page.Graphics.DrawRectangle(PdfPens.Black, PdfBrushes.Transparent, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, size.Height));
 
                         result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -938,19 +911,21 @@ namespace GSC.Report
                             //var signature = template.ScreeningTemplateReview.Where(x => x.ScreeningTemplateId == template.Id && x.ReviewLevel > level.LevelNo - 1 && x.RoleId == level.SecurityRoleId).LastOrDefault();
                             var signature = (from s in template.ScreeningTemplateReview
                                              join u in _context.Users on s.CreatedBy equals u.Id
+                                             join sr in _context.SecurityRole on s.RoleId equals sr.Id
                                              where s.ScreeningTemplateId == template.Id && s.ReviewLevel > level.LevelNo - 1 && s.RoleId == level.SecurityRoleId
                                              select new
                                              {
                                                  u.UserName,
                                                  u.FirstName,
                                                  u.LastName,
-                                                 s.CreatedDate
+                                                 s.CreatedDate,
+                                                 sr.RoleName
                                              }).LastOrDefault();
                             if (signature != null)
                             {
-                                result = AddString(signature.UserName, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 20, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-                                result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat), result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 20, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 20, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString($"{ signature.UserName}  ({signature.RoleName})", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
+                                result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                 result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             }
                         }

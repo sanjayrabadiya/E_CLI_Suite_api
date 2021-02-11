@@ -19,7 +19,7 @@ namespace GSC.Respository.UserMgt
         void UpdateRefreshToken(int userid, string refreshToken);
         string GenerateAccessToken(IEnumerable<Claim> claims);
         string GenerateRefreshToken();
-        List<UserGridDto> GetUsers(bool isDeleted);
+        List<UserGridDto> GetUsers(bool isDeleted, bool isPatient);
         List<DropDownDto> GetUserNameDropdown();
         LoginResponseDto BuildUserAuthObject(UserViewModel userViewModel, int roleId);
         void UpdateIsLogin(int id, bool isLogin);

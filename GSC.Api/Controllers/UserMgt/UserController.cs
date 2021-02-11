@@ -71,10 +71,10 @@ namespace GSC.Api.Controllers.UserMgt
         }
 
 
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        [HttpGet("{isDeleted:bool?}/{isPatient:bool?}")]
+        public IActionResult Get(bool isDeleted,bool isPatient)
         {
-            var usersDto = _userRepository.GetUsers(isDeleted);
+            var usersDto = _userRepository.GetUsers(isDeleted, isPatient);
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
             usersDto.ForEach(t => t.ProfilePicPath = imageUrl + (t.ProfilePic ?? DocumentService.DefulatProfilePic));
 
