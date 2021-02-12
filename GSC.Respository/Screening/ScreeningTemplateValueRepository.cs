@@ -255,6 +255,14 @@ namespace GSC.Respository.Screening
         {
 
             var ProjectCode = _context.Project.Find(filters.ParentProjectId).ProjectCode;
+            var sites = new List<int>();
+            if (filters.SiteId != null)
+            {
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
+            } else
+            {
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ParentProjectId).ToList().Select(x => x.Id).ToList();
+            }
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
 
@@ -277,7 +285,7 @@ namespace GSC.Respository.Screening
             {
 
                 #region Main Query
-                var queryDtos = (from screening in _context.ScreeningEntry.Where(t => filters.ProjectId.Contains(t.ProjectId)
+                var queryDtos = (from screening in _context.ScreeningEntry.Where(t => sites.Contains(t.ProjectId)//filters.ProjectId.Contains(t.ProjectId)
                                  && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
                                  && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.Id))
                                  && t.DeletedDate == null)
