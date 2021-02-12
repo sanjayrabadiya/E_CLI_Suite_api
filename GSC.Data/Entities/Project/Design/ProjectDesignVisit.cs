@@ -14,6 +14,7 @@ namespace GSC.Data.Entities.Project.Design
         public bool IsRepeated { get; set; }
         public bool IsNonCRF { get; set; }
         public bool? IsSchedule { get; set; }
+        public int? DesignOrder { get; set; }
         public IList<ProjectDesignTemplate> Templates { get; set; }
         public List<VisitLanguage> VisitLanguage { get; set; }
         public List<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }

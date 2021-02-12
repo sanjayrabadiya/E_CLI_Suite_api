@@ -15,6 +15,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsRepeated { get; set; }
         public bool? IsSchedule { get; set; }
         public bool IsNonCRF { get; set; }
+        public int? DesignOrder { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
     }
 

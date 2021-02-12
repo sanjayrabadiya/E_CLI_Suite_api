@@ -75,7 +75,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetVisitDropDown(int projectDesignPeriodId)
         {
             var visits = All.Where(x => x.DeletedDate == null
-                                        && x.ProjectDesignPeriodId == projectDesignPeriodId).OrderBy(t => t.Id).Select(
+                                        && x.ProjectDesignPeriodId == projectDesignPeriodId).OrderBy(t => t.DesignOrder).Select(
                 t => new DropDownDto
                 {
                     Id = t.Id,

@@ -17,12 +17,14 @@ namespace GSC.Data.Dto.Screening
         public string RefVisit { get; set; }
         public string RefTemplate { get; set; }
         public string RefVariable { get; set; }
-        public string RefValue { get; set; }
+        public DateTime RefValue { get; set; }
         public string TargetVisit { get; set; }
         public string TargetTemplate { get; set; }
         public string TargetVariable { get; set; }
-        public string TargetValue { get; set; }
+        public DateTime TargetValue { get; set; }
         public int NoOfDay { get; set; }
+        public int HH { get; set; }
+        public int MM { get; set; }
         public int PositiveDeviation { get; set; }
         public int NegativeDeviation { get; set; }
         public int ProjectDesignVariableId { get; set; }
@@ -43,6 +45,7 @@ namespace GSC.Data.Dto.Screening
     public class VisitDeviationReportSearchDto : BaseDto
     {
         public int ProjectId { get; set; }
+        public int? SiteId { get; set; }
         public int?[] PeriodIds { get; set; }
         public int?[] SubjectIds { get; set; }
         public int?[] VisitIds { get; set; }

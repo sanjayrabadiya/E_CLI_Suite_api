@@ -255,6 +255,14 @@ namespace GSC.Respository.Screening
         {
 
             var ProjectCode = _context.Project.Find(filters.ParentProjectId).ProjectCode;
+            var sites = new List<int>();
+            if (filters.SiteId != null)
+            {
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
+            } else
+            {
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ParentProjectId).ToList().Select(x => x.Id).ToList();
+            }
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
 
@@ -277,7 +285,7 @@ namespace GSC.Respository.Screening
             {
 
                 #region Main Query
-                var queryDtos = (from screening in _context.ScreeningEntry.Where(t => filters.ProjectId.Contains(t.ProjectId)
+                var queryDtos = (from screening in _context.ScreeningEntry.Where(t => sites.Contains(t.ProjectId)//filters.ProjectId.Contains(t.ProjectId)
                                  && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
                                  && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.Id))
                                  && t.DeletedDate == null)
@@ -391,9 +399,10 @@ namespace GSC.Respository.Screening
                             Visit = n.Key,
                             LstProjectDataBaseTemplate = n.GroupBy(x => x.TemplateId).Select(t => new ProjectDatabaseTemplateDto
                             {
-                                DesignOrder = n.FirstOrDefault().DesignOrder,
-                                TemplateName = n.FirstOrDefault().TemplateName,
-                                LstProjectDataBaseitems = n.OrderBy(o => o.ScreeningTemplateId).Select(i => new ProjectDatabaseItemDto
+                                DesignOrder = t.FirstOrDefault().DesignOrder,
+                                TemplateId = t.FirstOrDefault().TemplateId,
+                                TemplateName = t.FirstOrDefault().TemplateName,
+                                LstProjectDataBaseitems = t.OrderBy(o => o.ScreeningTemplateId).Select(i => new ProjectDatabaseItemDto
                                 {
                                     ScreeningTemplateParentId = i.ScreeningTemplateParentId,
                                     VariableName = i.VariableName,
@@ -548,19 +557,19 @@ namespace GSC.Respository.Screening
                         worksheet.Rows(1, 2).Style.Fill.BackgroundColor = XLColor.LightGray;
                         worksheet.Cell(1, 1).Value = "STUDY CODE";
                         worksheet.Cell(1, 2).Value = "SITE CODE";
-                        worksheet.Cell(1, 3).Value = d.DomainName;
-                        worksheet.Cell(1, 4).Value = "SCRNUM";
-                        worksheet.Cell(1, 5).Value = "RANDNUM";
-                        worksheet.Cell(1, 6).Value = "INITIAL";
-                        worksheet.Cell(1, 7).Value = "VISIT";
+                        worksheet.Cell(1, 3).Value = "SCRNUM";
+                        worksheet.Cell(1, 4).Value = "RANDNUM";
+                        worksheet.Cell(1, 5).Value = "INITIAL";
+                        worksheet.Cell(1, 6).Value = "VISIT";
+                        worksheet.Cell(1, 7).Value = d.DomainName;
 
                         worksheet.Cell(2, 1).Value = "Study Code";
                         worksheet.Cell(2, 2).Value = "Site Code";
-                        worksheet.Cell(2, 3).Value = "Panel Name";
-                        worksheet.Cell(2, 4).Value = "Screening No";
-                        worksheet.Cell(2, 5).Value = "Enrollment No";
-                        worksheet.Cell(2, 6).Value = "Patient Initial";
-                        worksheet.Cell(2, 7).Value = "Visit";
+                        worksheet.Cell(2, 3).Value = "Screening No";
+                        worksheet.Cell(2, 4).Value = "Enrollment No";
+                        worksheet.Cell(2, 5).Value = "Patient Initial";
+                        worksheet.Cell(2, 6).Value = "Visit";
+                        worksheet.Cell(2, 7).Value = "Panel Name";
 
                         var totalVariable = d.LstVariable.Count;
                         var index = 0;
@@ -589,11 +598,11 @@ namespace GSC.Respository.Screening
 
                                     worksheet.Row(j).Cell(1).SetValue(db.ProjectCode);
                                     worksheet.Row(j).Cell(2).SetValue(db.ParentProjectId != null ? db.ProjectName : "");
-                                    worksheet.Row(j).Cell(3).SetValue(t.DesignOrder + ". " + t.TemplateName);
-                                    worksheet.Row(j).Cell(4).SetValue(db.SubjectNo);
-                                    worksheet.Row(j).Cell(5).SetValue(db.RandomizationNumber);
-                                    worksheet.Row(j).Cell(6).SetValue(db.Initial);
-                                    worksheet.Row(j).Cell(7).SetValue(vst.Visit);
+                                    worksheet.Row(j).Cell(3).SetValue(db.SubjectNo);
+                                    worksheet.Row(j).Cell(4).SetValue(db.RandomizationNumber);
+                                    worksheet.Row(j).Cell(5).SetValue(db.Initial);
+                                    worksheet.Row(j).Cell(6).SetValue(vst.Visit);
+                                    worksheet.Row(j).Cell(7).SetValue(t.DesignOrder + ". " + t.TemplateName);
 
                                     var repeatorder = 1;
                                     if (repeatlength > 0)
@@ -603,11 +612,11 @@ namespace GSC.Respository.Screening
                                             j = j + 1;
                                             worksheet.Row(j).Cell(1).SetValue(db.ProjectCode);
                                             worksheet.Row(j).Cell(2).SetValue(db.ParentProjectId != null ? db.ProjectName : "");
-                                            worksheet.Row(j).Cell(3).SetValue(t.DesignOrder + "." + repeatorder + " " + t.TemplateName);
-                                            worksheet.Row(j).Cell(4).SetValue(db.SubjectNo);
-                                            worksheet.Row(j).Cell(5).SetValue(db.RandomizationNumber);
-                                            worksheet.Row(j).Cell(6).SetValue(db.Initial);
-                                            worksheet.Row(j).Cell(7).SetValue(vst.Visit);
+                                            worksheet.Row(j).Cell(3).SetValue(db.SubjectNo);
+                                            worksheet.Row(j).Cell(4).SetValue(db.RandomizationNumber);
+                                            worksheet.Row(j).Cell(5).SetValue(db.Initial);
+                                            worksheet.Row(j).Cell(6).SetValue(vst.Visit);
+                                            worksheet.Row(j).Cell(7).SetValue(t.DesignOrder + "." + repeatorder + " " + t.TemplateName);
                                             repeatorder++;
                                         }
                                     }
@@ -661,20 +670,20 @@ namespace GSC.Respository.Screening
                                         {
                                             DateTime dDate;
                                             var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
                                             worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                                         }
                                         else if (collectionSource == (int)CollectionSources.Date)
                                         {
                                             DateTime dDate;
                                             var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                            string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                                            string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
                                             worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                                         }
                                         else if (collectionSource == (int)CollectionSources.Time)
                                         {
                                             var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).AddHours(5).AddMinutes(30).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
                                             worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                                         }
                                         else

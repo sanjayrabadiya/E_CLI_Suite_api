@@ -89,6 +89,11 @@ namespace GSC.Api.Controllers.Project.Design
                 return BadRequest(ModelState);
             }
 
+            var designOrder = 0;
+            if (_projectDesignVisitRepository.All.Any(t => t.ProjectDesignPeriodId == projectDesignVisit.ProjectDesignPeriodId && t.DeletedDate == null))
+                designOrder = (int)_projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriodId == projectDesignVisit.ProjectDesignPeriodId
+                && t.DeletedDate == null).Max(t => t.DesignOrder);
+            projectDesignVisit.DesignOrder = ++designOrder;
             _projectDesignVisitRepository.Add(projectDesignVisit);
             _uow.Save();
 
@@ -154,6 +159,12 @@ namespace GSC.Api.Controllers.Project.Design
                 .FindBy(t => t.ProjectDesignPeriodId == projectDesignPeriodId && t.DeletedDate == null).Count();
 
             ProjectDesignVisit firstSaved = null;
+
+            var designOrder = 0;
+            if (_projectDesignVisitRepository.All.Any(t => t.ProjectDesignPeriodId == projectDesignPeriodId && t.DeletedDate == null))
+                designOrder = (int)_projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriodId == projectDesignPeriodId
+                && t.DeletedDate == null).Max(t => t.DesignOrder);
+
             for (var i = 1; i <= noOfVisits; i++)
             {
                 var visitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == id).ToList();
@@ -161,6 +172,7 @@ namespace GSC.Api.Controllers.Project.Design
                 var visit = _projectDesignVisitRepository.GetVisit(id);
                 visit.Id = 0;
                 visit.ProjectDesignPeriodId = projectDesignPeriodId;
+                visit.DesignOrder = ++designOrder;
                 visit.Templates.ToList().ForEach(template =>
                 {
                     template.Id = 0;
@@ -178,29 +190,29 @@ namespace GSC.Api.Controllers.Project.Design
                             value.Id = 0;
                             _projectDesignVariableValueRepository.Add(value);
 
-                        //For variable value clone language
-                        value.VariableValueLanguage.ToList().ForEach(x =>
-                    {
-                                x.Id = 0;
-                                _variableValueLanguageRepository.Add(x);
-                            });
+                            //For variable value clone language
+                            value.VariableValueLanguage.ToList().ForEach(x =>
+                        {
+                            x.Id = 0;
+                            _variableValueLanguageRepository.Add(x);
+                        });
 
                         });
                         _projectDesignVariableRepository.Add(variable);
 
-                    //For variable clone language
-                    variable.VariableLanguage.ToList().ForEach(r =>
-                {
-                            r.Id = 0;
-                            _variableLanguageRepository.Add(r);
-                        });
+                        //For variable clone language
+                        variable.VariableLanguage.ToList().ForEach(r =>
+                    {
+                        r.Id = 0;
+                        _variableLanguageRepository.Add(r);
+                    });
 
-                    //For variable note clone language
-                    variable.VariableNoteLanguage.ToList().ForEach(r =>
-                {
-                            r.Id = 0;
-                            _variableNoteLanguageRepository.Add(r);
-                        });
+                        //For variable note clone language
+                        variable.VariableNoteLanguage.ToList().ForEach(r =>
+                    {
+                        r.Id = 0;
+                        _variableNoteLanguageRepository.Add(r);
+                    });
 
                     });
 
@@ -254,6 +266,37 @@ namespace GSC.Api.Controllers.Project.Design
             _uow.Save();
 
             return Ok(firstSaved != null ? firstSaved.Id : id);
+        }
+
+        [HttpGet]
+        [Route("ChangeVisitDesignOrder/{id}/{index}")]
+        public IActionResult ChangeVisitDesignOrder(int id, int index)
+        {
+            var template = _projectDesignVisitRepository.Find(id);
+            var PeriodId = template.ProjectDesignPeriodId;
+
+            var orderedList = _projectDesignVisitRepository
+                .FindBy(t => t.ProjectDesignPeriodId == PeriodId && t.DeletedDate == null).OrderBy(t => t.DesignOrder)
+                .ToList();
+            orderedList.Remove(orderedList.First(t => t.Id == id));
+
+            if (orderedList.Count() < index)
+            {
+                index = index - 1;
+            }
+
+            orderedList.Insert(index, template);
+
+            var i = 0;
+            foreach (var item in orderedList)
+            {
+                item.DesignOrder = ++i;
+                _projectDesignVisitRepository.Update(item);
+            }
+
+            _uow.Save();
+
+            return Ok();
         }
     }
 }
