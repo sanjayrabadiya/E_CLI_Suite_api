@@ -549,19 +549,19 @@ namespace GSC.Respository.Screening
                         worksheet.Rows(1, 2).Style.Fill.BackgroundColor = XLColor.LightGray;
                         worksheet.Cell(1, 1).Value = "STUDY CODE";
                         worksheet.Cell(1, 2).Value = "SITE CODE";
-                        worksheet.Cell(1, 3).Value = d.DomainName;
-                        worksheet.Cell(1, 4).Value = "SCRNUM";
-                        worksheet.Cell(1, 5).Value = "RANDNUM";
-                        worksheet.Cell(1, 6).Value = "INITIAL";
-                        worksheet.Cell(1, 7).Value = "VISIT";
+                        worksheet.Cell(1, 3).Value = "SCRNUM";
+                        worksheet.Cell(1, 4).Value = "RANDNUM";
+                        worksheet.Cell(1, 5).Value = "INITIAL";
+                        worksheet.Cell(1, 6).Value = "VISIT";
+                        worksheet.Cell(1, 7).Value = d.DomainName;
 
                         worksheet.Cell(2, 1).Value = "Study Code";
                         worksheet.Cell(2, 2).Value = "Site Code";
-                        worksheet.Cell(2, 3).Value = "Panel Name";
-                        worksheet.Cell(2, 4).Value = "Screening No";
-                        worksheet.Cell(2, 5).Value = "Enrollment No";
-                        worksheet.Cell(2, 6).Value = "Patient Initial";
-                        worksheet.Cell(2, 7).Value = "Visit";
+                        worksheet.Cell(2, 3).Value = "Screening No";
+                        worksheet.Cell(2, 4).Value = "Enrollment No";
+                        worksheet.Cell(2, 5).Value = "Patient Initial";
+                        worksheet.Cell(2, 6).Value = "Visit";
+                        worksheet.Cell(2, 7).Value = "Panel Name";
 
                         var totalVariable = d.LstVariable.Count;
                         var index = 0;
@@ -590,11 +590,11 @@ namespace GSC.Respository.Screening
 
                                     worksheet.Row(j).Cell(1).SetValue(db.ProjectCode);
                                     worksheet.Row(j).Cell(2).SetValue(db.ParentProjectId != null ? db.ProjectName : "");
-                                    worksheet.Row(j).Cell(3).SetValue(t.DesignOrder + ". " + t.TemplateName);
-                                    worksheet.Row(j).Cell(4).SetValue(db.SubjectNo);
-                                    worksheet.Row(j).Cell(5).SetValue(db.RandomizationNumber);
-                                    worksheet.Row(j).Cell(6).SetValue(db.Initial);
-                                    worksheet.Row(j).Cell(7).SetValue(vst.Visit);
+                                    worksheet.Row(j).Cell(3).SetValue(db.SubjectNo);
+                                    worksheet.Row(j).Cell(4).SetValue(db.RandomizationNumber);
+                                    worksheet.Row(j).Cell(5).SetValue(db.Initial);
+                                    worksheet.Row(j).Cell(6).SetValue(vst.Visit);
+                                    worksheet.Row(j).Cell(7).SetValue(t.DesignOrder + ". " + t.TemplateName);
 
                                     var repeatorder = 1;
                                     if (repeatlength > 0)
@@ -604,11 +604,11 @@ namespace GSC.Respository.Screening
                                             j = j + 1;
                                             worksheet.Row(j).Cell(1).SetValue(db.ProjectCode);
                                             worksheet.Row(j).Cell(2).SetValue(db.ParentProjectId != null ? db.ProjectName : "");
-                                            worksheet.Row(j).Cell(3).SetValue(t.DesignOrder + "." + repeatorder + " " + t.TemplateName);
-                                            worksheet.Row(j).Cell(4).SetValue(db.SubjectNo);
-                                            worksheet.Row(j).Cell(5).SetValue(db.RandomizationNumber);
-                                            worksheet.Row(j).Cell(6).SetValue(db.Initial);
-                                            worksheet.Row(j).Cell(7).SetValue(vst.Visit);
+                                            worksheet.Row(j).Cell(3).SetValue(db.SubjectNo);
+                                            worksheet.Row(j).Cell(4).SetValue(db.RandomizationNumber);
+                                            worksheet.Row(j).Cell(5).SetValue(db.Initial);
+                                            worksheet.Row(j).Cell(6).SetValue(vst.Visit);
+                                            worksheet.Row(j).Cell(7).SetValue(t.DesignOrder + "." + repeatorder + " " + t.TemplateName);
                                             repeatorder++;
                                         }
                                     }
