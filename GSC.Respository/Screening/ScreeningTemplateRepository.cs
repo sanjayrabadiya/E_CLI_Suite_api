@@ -402,17 +402,29 @@ namespace GSC.Respository.Screening
 
         public IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
-            var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            //var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            //var parentIds = new List<int>();
+            //if (parentId == null)
+            //{
+            //    parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+            //}
+            //else
+            //{
+            //    parentIds.Add(filters.ProjectId);
+            //}
+
+            int parentprojectid = filters.ProjectId;
+            int? siteId = filters.SiteId;
             var parentIds = new List<int>();
-            if (parentId == null)
+            if (siteId == null)
             {
                 parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
             }
             else
             {
-                parentIds.Add(filters.ProjectId);
+                parentIds.Add((int)filters.SiteId);
             }
-
+            
             var result = All.Where(x => x.DeletedDate == null && x.ScreeningVisit.Status != ScreeningVisitStatus.NotStarted);
             if (filters.ReviewStatus != null)
             {
@@ -1000,19 +1012,32 @@ namespace GSC.Respository.Screening
 
         public IList<ScheduleDueReport> GetScheduleDueReport(ScheduleDueReportSearchDto filters)
         {
-            var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
-            string studycode = "";
+            int parentprojectid = filters.ProjectId;
+            int? siteId = filters.SiteId;
             var parentIds = new List<int>();
-            if (parentId == null)
+            if (siteId == null)
             {
                 parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
-                studycode = _context.Project.Where(x => x.Id == filters.ProjectId).ToList().FirstOrDefault().ProjectCode;
             }
             else
             {
-                parentIds.Add(filters.ProjectId);
-                studycode = _context.Project.Where(x => x.Id == parentId).ToList().FirstOrDefault().ProjectCode;
+                parentIds.Add((int)filters.SiteId);
             }
+            var studycode = _context.Project.Where(x => x.Id == parentprojectid).FirstOrDefault().ProjectCode;
+
+            //var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
+            //string studycode = "";
+            //var parentIds = new List<int>();
+            //if (parentId == null)
+            //{
+            //    parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+            //    studycode = _context.Project.Where(x => x.Id == filters.ProjectId).ToList().FirstOrDefault().ProjectCode;
+            //}
+            //else
+            //{
+            //    parentIds.Add(filters.ProjectId);
+            //    studycode = _context.Project.Where(x => x.Id == parentId).ToList().FirstOrDefault().ProjectCode;
+            //}
             var result = All.Where(x => x.DeletedDate == null && x.ScheduleDate != null && (x.Status == ScreeningTemplateStatus.Pending || x.Status == ScreeningTemplateStatus.InProcess) && x.ScheduleDate <= DateTime.Today);
             if (filters.SubjectIds != null && filters.SubjectIds.ToList().Count > 0) result = result.Where(x => filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.RandomizationId));
             if (filters.fromDate != null)
@@ -1038,7 +1063,7 @@ namespace GSC.Respository.Screening
                 templateName = r.ProjectDesignTemplate.TemplateName,
                 scheduleDate = r.ScheduleDate,
                 scheduleDateExcel = Convert.ToDateTime(r.ScheduleDate).ToString(dateformat)
-            }).ToList();
+            }).OrderBy(x => x.screeningNo).ThenBy(x => x.visitName).ThenBy(x => x.templateName).ToList();
         }
     }
 }

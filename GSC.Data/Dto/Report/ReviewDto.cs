@@ -39,6 +39,7 @@ namespace GSC.Data.Dto.Report
     public class ReviewSearchDto : BaseDto
     {
         public int ProjectId { get; set; }
+        public int? SiteId { get; set; }
         public int?[] PeriodIds { get; set; }
         public int?[] SubjectIds { get; set; }
         public int?[] VisitIds { get; set; }
