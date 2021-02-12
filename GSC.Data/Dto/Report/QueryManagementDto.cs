@@ -68,6 +68,7 @@ namespace GSC.Data.Dto.Report
     public class QuerySearchDto : BaseDto
     {
         public int ProjectId { get; set; }
+        public int? SiteId { get; set; }
         public int?[] PeriodIds { get; set; }
         public int?[] SubjectIds { get; set; }
         public int?[] VisitIds { get; set; }

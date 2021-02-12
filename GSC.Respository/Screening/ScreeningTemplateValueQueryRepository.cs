@@ -265,8 +265,18 @@ namespace GSC.Respository.Screening
 
         public IList<QueryManagementDto> GetQueryEntries(QuerySearchDto filters)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == filters.ProjectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).ToList().Select(x => x.Id).ToList();
+            //var ParentProject = _context.Project.FirstOrDefault(x => x.Id == filters.ProjectId).ParentProjectId;
+            int? ParentProject;
+            var sites = new List<int>();
+            if (filters.SiteId != null)
+            {
+                ParentProject = filters.ProjectId;
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
+            } else
+            {
+                ParentProject = null;
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).ToList().Select(x => x.Id).ToList();
+            }
 
             var queryDtos = (from screening in _context.ScreeningEntry.Where(t =>
                                 (ParentProject != null ? t.ProjectId == filters.ProjectId : sites.Contains(t.ProjectId))
