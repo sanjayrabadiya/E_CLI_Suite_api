@@ -81,4 +81,11 @@ namespace GSC.Data.Dto.Screening
         public EditCheckValidateType ValidateType { get; set; }
         public ScreeningTemplate ScreeningTemplate { get; set; }
     }
+
+    public class TemplateScreeningVariableDto
+    {
+        public int ProjectDesignVariableId { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public string Value { get; set; }
+    }
 }

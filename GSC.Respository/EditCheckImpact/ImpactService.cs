@@ -122,7 +122,7 @@ namespace GSC.Respository.EditCheckImpact
             var Ids = editCheckIds.Select(r => r.EditCheckId).Distinct().ToList();
 
             var result = _editCheckDetailRepository.All.AsNoTracking().Where(c =>
-                c.DeletedDate == null && Ids.Contains(c.EditCheckId)
+                c.DeletedDate == null && (Ids.Contains(c.EditCheckId) || (c.ProjectDesignTemplateId == projectDesignTemplateId && c.Operator == Operator.HardFetch))
                  && c.EditCheck.DeletedDate == null)
                 .ProjectTo<EditCheckValidateDto>(_mapper.ConfigurationProvider).ToList();
 
