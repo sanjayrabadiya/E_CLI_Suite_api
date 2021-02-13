@@ -64,24 +64,11 @@ namespace GSC.Respository.Etmf
             var Worksplace = Enum.GetValues(typeof(WorkPlaceFolder))
                             .Cast<WorkPlaceFolder>().Select(e => new EtmfUserPermissionDto
                             {
+                                UserId = UserId,
                                 ItemId = Convert.ToInt16(e),
                                 ItemName = e.GetDescription(),
                                 hasChild = true,
                             }).OrderBy(o => o.ItemId).ToList();
-
-            //Worksplace.ForEach(t =>
-            //{
-            //    t.LstUserPermission = _context.ProjectWorkplaceDetail.Include(t => t.ProjectWorkplace)
-            //    .Where(t => t.DeletedDate == null && t.ProjectWorkplace.ProjectId == ProjectId)
-            //    .Select(t => new EtmfUserPermissionDto
-            //    {
-            //        ProjectWorkplaceDetailId = t.Id,
-            //        WorkPlaceFolderId = t.WorkPlaceFolderId,
-            //        WorkPlaceFolder = ((WorkPlaceFolder)t.WorkPlaceFolderId).GetDescription(),
-            //        ItemId = t.ItemId,
-            //        ItemName = ((WorkPlaceFolder)t.WorkPlaceFolderId).GetDescription() + " " + t.ItemName,
-            //    }).ToList();
-            //});
 
             var ProjectWorkplaceDetail = _context.ProjectWorkplaceDetail.Include(t => t.ProjectWorkplace)
                 .Where(t => t.DeletedDate == null && t.ProjectWorkplace.ProjectId == ProjectId)
@@ -92,7 +79,7 @@ namespace GSC.Respository.Etmf
                     WorkPlaceFolderId = t.WorkPlaceFolderId,
                     WorkPlaceFolder = ((WorkPlaceFolder)t.WorkPlaceFolderId).GetDescription(),
                     ItemId = t.ItemId,
-                    ItemName = ((WorkPlaceFolder)t.WorkPlaceFolderId).GetDescription() + " " + t.ItemName,
+                    ItemName = t.ItemName,
                     hasChild = false,
                 }).ToList();
 
@@ -111,6 +98,16 @@ namespace GSC.Respository.Etmf
                 t.IsAll = p.IsAdd && p.IsDelete && p.IsEdit && p.IsExport && p.IsView;
             });
 
+            Worksplace.ForEach(w =>
+            {
+                w.IsAdd = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsAdd);
+                w.IsEdit = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsEdit);
+                w.IsDelete = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsDelete);
+                w.IsView = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsView);
+                w.IsExport = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsExport);
+                w.IsAll = w.IsAdd && w.IsEdit && w.IsDelete && w.IsView && w.IsExport;
+            });
+
             ProjectWorkplaceDetail.AddRange(Worksplace);
 
             return ProjectWorkplaceDetail;
@@ -120,6 +117,7 @@ namespace GSC.Respository.Etmf
         {
             var userId = EtmfUserPermission.First().UserId;
 
+            EtmfUserPermission = EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId > 0).ToList();
             var ProjectWorksplace = EtmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
                 .Select(x => x.ProjectWorkplaceDetailId).ToList();
 
@@ -137,11 +135,12 @@ namespace GSC.Respository.Etmf
             _context.Save();
         }
 
-        public void updatePermission(List<EtmfUserPermission> etmfUserPermission)
+        public void updatePermission(List<EtmfUserPermission> EtmfUserPermission)
         {
-            var userId = etmfUserPermission.First().UserId;
+            var userId = EtmfUserPermission.First().UserId;
 
-            var ProjectWorksplace = etmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
+            EtmfUserPermission = EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId > 0).ToList();
+            var ProjectWorksplace = EtmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
                 .Select(x => x.ProjectWorkplaceDetailId).ToList();
 
             var existing = _context.EtmfUserPermission.Where(t => t.UserId == userId && ProjectWorksplace.Contains(t.ProjectWorkplaceDetailId)).ToList();
@@ -151,9 +150,9 @@ namespace GSC.Respository.Etmf
                 _context.Save();
             }
 
-            etmfUserPermission = etmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
+            EtmfUserPermission = EtmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
                 .ToList();
-            _context.EtmfUserPermission.UpdateRange(etmfUserPermission);
+            _context.EtmfUserPermission.UpdateRange(EtmfUserPermission);
             _context.Save();
         }
     }
