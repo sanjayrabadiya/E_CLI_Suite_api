@@ -67,6 +67,7 @@ namespace GSC.Data.Dto.Master
         public int? ManageSiteId { get; set; }
         public int? RandomNoStartsWith { get; set; }
         public int? ScreeningNoStartsWith { get; set; }
+        public bool IsTestSite { get; set; }
     }
 
     public class RandomizationAndScreeningNumberFormatDto : BaseDto
@@ -101,6 +102,7 @@ namespace GSC.Data.Dto.Master
         public string ParentProjectCode { get; set; }
         public string RegulatoryTypeName { get; set; }
         public bool IsStatic { get; set; }
+        public bool IsTestSite { get; set; }
         public int? AttendanceLimit { get; set; }
         public int? NoofSite { get; set; }
         public string DesignTrialName { get; set; }

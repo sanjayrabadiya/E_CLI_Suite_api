@@ -87,7 +87,7 @@ namespace GSC.Api.Controllers.Master
             projectDto.Id = 0;
             var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
 
-            if (projectDto.ParentProjectId > 0)
+            if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
                 var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPost(project);
                 if (!string.IsNullOrEmpty(CheckAttendanceLimit))
@@ -330,7 +330,7 @@ namespace GSC.Api.Controllers.Master
             return Ok(_projectRepository.GetChildProjectDropDown(parentProjectId));
         }
 
-            
+
         [HttpGet]
         [Route("GetProjectsForDataEntry")]
         public IActionResult GetProjectsForDataEntry()
@@ -427,7 +427,7 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_projectRepository.GetParentProjectDropDown());
         }
-       
+
         [HttpGet]
         [Route("GetProjectDetailForDashboard/{projectId}")]
         public IActionResult GetProjectDetailForDashboard(int ProjectId)
