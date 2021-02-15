@@ -305,7 +305,9 @@ namespace GSC.Domain.Context
         public DbSet<VariableCategoryLanguage> VariableCategoryLanguage { get; set; }
         public DbSet<AEReporting> AEReporting { get; set; }
         public DbSet<AdverseEventSettings> AdverseEventSettings { get; set; }
+        public DbSet<AEReportingValue> AEReportingValue { get; set; }
         public DbSet<EtmfUserPermission> EtmfUserPermission { get; set; }
+        public DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

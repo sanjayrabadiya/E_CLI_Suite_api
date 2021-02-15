@@ -260,6 +260,8 @@ namespace GSC.Domain.Context
         DbSet<AEReporting> AEReporting { get; set; }
         DbSet<AdverseEventSettings> AdverseEventSettings { get; set; }
         DbSet<EtmfUserPermission> EtmfUserPermission { get; set; }
+        DbSet<AEReportingValue> AEReportingValue { get; set; }
+        DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }
 
     }
 }
