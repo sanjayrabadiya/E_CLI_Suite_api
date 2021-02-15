@@ -72,5 +72,21 @@ namespace GSC.Api.Controllers.AdverseEvent
             if (_uow.Save() <= 0) throw new Exception("Creating Adverse Event language failed on save.");
             return Ok();
         }
+
+        [HttpPost]
+        [Route("RemoveLanguage/{AdverseEventSettingsLanguageId}/{SeqNo}")]
+        public IActionResult RemoveLanguage(int AdverseEventSettingsLanguageId, int SeqNo)
+        {
+            var data = _adverseEventSettingsLanguageRepository.Find(AdverseEventSettingsLanguageId);
+            if (SeqNo == 1)
+                data.LowSeverityDisplay = null;
+            else if (SeqNo == 2)
+                data.MediumSeverityDisplay = null;
+            else if (SeqNo == 3)
+                data.HighSeverityDisplay = null;
+            _adverseEventSettingsLanguageRepository.Update(data);
+            if (_uow.Save() <= 0) throw new Exception("Error occured on remove language");
+            return Ok();
+        }
     }
 }

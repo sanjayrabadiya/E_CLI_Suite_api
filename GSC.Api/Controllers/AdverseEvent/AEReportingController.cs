@@ -131,7 +131,7 @@ namespace GSC.Api.Controllers.AdverseEvent
             var studyname = _projectRepository.Find((int)studyId).ProjectCode;
             userdata.ForEach(async x =>
             {
-                //await _emailSenderRespository.SendAdverseEventAlertEMailtoInvestigator(x.Email, x.Phone, x.UserName, studyname, randomization.Initial + " " + randomization.ScreeningNumber, DateTime.Now.ToString("dd-MMM-yyyy"));
+                await _emailSenderRespository.SendAdverseEventAlertEMailtoInvestigator(x.Email, x.Phone, x.UserName, studyname, randomization.Initial + " " + randomization.ScreeningNumber, DateTime.Now.ToString("dd-MMM-yyyy"));
             });
             if (_uow.Save() <= 0) throw new Exception("Error to save Adverse Event Reporting.");
 
