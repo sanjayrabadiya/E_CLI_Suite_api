@@ -21,7 +21,7 @@ namespace GSC.Respository.AdverseEvent
         {
             var projectdesigns = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
             var projectdesignperiods = _context.ProjectDesignPeriod.Where(x => projectdesigns.Contains(x.ProjectDesignId) && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
-            var visits = _context.ProjectDesignVisit.Where(x => projectdesignperiods.Contains(x.ProjectDesignPeriodId) && x.DeletedDate == null && x.IsNonCRF == true).ToList()
+            var visits = _context.ProjectDesignVisit.Where(x => projectdesignperiods.Contains(x.ProjectDesignPeriodId) && x.DeletedDate == null).ToList()
                 .Select(x => new DropDownDto
                 {
                     Id = x.Id,
@@ -34,7 +34,7 @@ namespace GSC.Respository.AdverseEvent
         {
             var projectdesigns = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
             var projectdesignperiods = _context.ProjectDesignPeriod.Where(x => projectdesigns.Contains(x.ProjectDesignId) && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
-            var visits = _context.ProjectDesignVisit.Where(x => projectdesignperiods.Contains(x.ProjectDesignPeriodId) && x.DeletedDate == null).ToList()
+            var visits = _context.ProjectDesignVisit.Where(x => projectdesignperiods.Contains(x.ProjectDesignPeriodId) && x.DeletedDate == null && x.IsNonCRF == true).ToList()
                 .Select(x => new DropDownDto
                 {
                     Id = x.Id,
