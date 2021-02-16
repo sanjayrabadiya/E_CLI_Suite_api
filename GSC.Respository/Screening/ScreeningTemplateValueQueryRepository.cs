@@ -486,16 +486,17 @@ namespace GSC.Respository.Screening
                       c.QueryStatus
                   }).Select(t => new DashboardQueryStatusDto
                   {
+                      Status = t.Key.QueryStatus,
                       DisplayName = t.Key.QueryStatus.GetDescription(),
                       Total = t.Count()
-                  }).ToList();
+                  }).ToList().OrderBy(x => x.Status).ToList();
 
             var closeQueries = All.Count(r =>
             (r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
             r.QueryStatus == QueryStatus.Closed &&
             r.ScreeningTemplateValue.ProjectDesignVariable.DeletedDate == null && r.ScreeningTemplateValue.DeletedDate == null);
 
-            queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).ToList().ForEach(x => x.Total = closeQueries);
+            queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x=>x.Status).ToList().ForEach(x => x.Total = closeQueries);
 
 
             if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
