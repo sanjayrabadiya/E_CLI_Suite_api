@@ -36,7 +36,7 @@ namespace GSC.Respository.UserMgt
         public async Task<UserViewModel> ValidateClient(LoginDto loginDto)
         {
             var result = await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
-            if (result != null && result.CompanyId!=null)
+            if (result != null && result.CompanyId != null)
             {
                 string companyCode = $"CompanyId{result.CompanyId}";
                 _userLoginReportRepository.SetDbConnection(result.ConnectionString);
@@ -48,7 +48,8 @@ namespace GSC.Respository.UserMgt
                 }
                 else
                 {
-                    if (result.ConnectionString != null) {
+                    if (result.ConnectionString != null)
+                    {
                         var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == result.CompanyId).FirstOrDefault();
                         if (result.FailedLoginAttempts > company.MaxLoginAttempt)
                         {
@@ -134,7 +135,7 @@ namespace GSC.Respository.UserMgt
         {
             string result = await HttpService.Post(_httpClient, clientUrl, userOtpDto);
             return result;
-        }        
+        }
         public async Task<UserOtp> GetUserOtpDetails(string clientUrl)
         {
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
@@ -143,12 +144,43 @@ namespace GSC.Respository.UserMgt
 
         public async Task Logout(string clientUrl)
         {
-            var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);           
+            var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
         }
 
         public async Task GetBlockedUser(string clientUrl)
         {
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
+        }
+
+        public async Task SentConnectionString(int CompanyID, string clientUrl)
+        {
+            string companyCode = $"CompanyId{CompanyID}";
+            object connectionStrig;
+            _gSCCaching.TryGetValue(companyCode, out connectionStrig);
+            if (connectionStrig != null)
+            {
+                _userLoginReportRepository.SetDbConnection(connectionStrig.ToString());
+            }
+            else
+            {
+                var result = await HttpService.Get<CompanyDetailsDto>(_httpClient, clientUrl);
+                if (result.CompanyId > 0)
+                {
+                    companyCode = $"CompanyId{result.CompanyId}";
+                    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
+                    if (result.ConnectionString != null)
+                    {
+                        _gSCCaching.Remove(companyCode);
+                        _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
+                    }
+                }
+            }
+        }
+
+        public async Task<int> Getnoofstudy(string clientUrl)
+        {
+            int result = await HttpService.Get<int>(_httpClient, clientUrl);
+            return result;
         }
     }
 }

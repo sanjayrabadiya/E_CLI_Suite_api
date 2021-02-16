@@ -28,9 +28,9 @@ namespace GSC.Respository.UserMgt
         Task<string> ChangePasswordByOtpCenteral(string clientUrl, UserOtpDto userOtpDto);
         Task<UserOtp> GetUserOtpDetails(string clientUrl);
         Task Logout(string clientUrl);
-
         Task GetBlockedUser(string clientUrl);
-
+        Task SentConnectionString(int CompanyID, string clientUrl);
+        Task<int> Getnoofstudy(string clientUrl);
 
     }
 }
