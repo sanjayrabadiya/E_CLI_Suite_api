@@ -8,6 +8,7 @@ using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.ProjectRight;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
@@ -30,15 +31,18 @@ namespace GSC.Respository.Etmf
         List<ProjectWorkplaceDetail> ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectRightRepository _projectRightRepository;
         public ETMFWorkplaceRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
-           IMapper mapper, IUploadSettingRepository uploadSettingRepository)
+           IMapper mapper, IUploadSettingRepository uploadSettingRepository,
+           IProjectRightRepository projectRightRepository)
            : base(context)
         {
             _context = context;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _projectRightRepository = projectRightRepository;
         }
 
         public string Duplicate(int id)
@@ -776,8 +780,10 @@ namespace GSC.Respository.Etmf
 
         public List<ETMFWorkplaceGridDto> GetETMFWorkplaceList(bool isDeleted)
         {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
 
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
         }

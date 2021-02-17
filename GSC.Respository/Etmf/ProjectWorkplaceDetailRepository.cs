@@ -164,11 +164,11 @@ namespace GSC.Respository.Etmf
                 {
                     UserId = _jwtTokenAccesser.UserId,
                     ProjectWorkplaceDetailId = item.Id,
-                    IsAdd = true,
-                    IsEdit = true,
-                    IsDelete = true,
-                    IsExport = true,
-                    IsView = true,
+                    IsAdd = false,
+                    IsEdit = false,
+                    IsDelete = false,
+                    IsExport = false,
+                    IsView = false,
                 });
             }
             _context.Save();

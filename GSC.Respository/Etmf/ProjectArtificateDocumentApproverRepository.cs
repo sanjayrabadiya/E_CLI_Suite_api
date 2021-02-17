@@ -88,11 +88,7 @@ namespace GSC.Respository.Etmf
 
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)
         {
-            var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
-                .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
-                .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
-                .Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
+            var result = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
                  && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection
                 .ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId)
                 .Select(s => new DashboardDto
