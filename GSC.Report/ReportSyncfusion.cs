@@ -95,7 +95,7 @@ namespace GSC.Report
 
         public void BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
         {
-            var projectdetails = _projectDesignRepository.FindByInclude(i => i.ProjectId == reportSetting.ProjectId, i => i.Project).SingleOrDefault();
+            var projectdetails = _projectDesignRepository.FindByInclude(i => i.ProjectId == reportSetting.ProjectId && i.Project.IsTestSite == false, i => i.Project).SingleOrDefault();
             var projectDesignvisit = _projectDesignVisitRepository.GetVisitsByProjectDesignId(projectdetails.Id);
 
             document = new PdfDocument();

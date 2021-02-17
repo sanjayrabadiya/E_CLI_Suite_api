@@ -220,6 +220,11 @@ namespace GSC.Api.Controllers.InformConcent
                 return new UnprocessableEntityObjectResult(ModelState);
             }
             econsentSetupDto.Id = 0;
+            if (_econsentSetupRepository.All.Where(x => x.DocumentName == econsentSetupDto.DocumentName && x.LanguageId == econsentSetupDto.LanguageId && x.ProjectId == econsentSetupDto.ProjectId).ToList().Count > 0)
+            {
+                ModelState.AddModelError("Message", "Please add different document name");
+                return BadRequest(ModelState);
+            }
 
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
             {
@@ -247,12 +252,12 @@ namespace GSC.Api.Controllers.InformConcent
             econsent.PatientStatus.Add(econsentSetupPatientStatus);
 
             _econsentSetupRepository.Add(econsent);
-            for (int i = 0; i < econsent.PatientStatus.Count - 1; i++)
+            for (int i = 0; i <= econsent.PatientStatus.Count - 1; i++)
             {
                 _econsentSetupPatientStatusRepository.Add(econsent.PatientStatus[i]);
             }
 
-            for (int i = 0; i < econsent.Roles.Count -1; i++)
+            for (int i = 0; i <= econsent.Roles.Count -1; i++)
             {
                 _econsentSetupRolesRepository.Add(econsent.Roles[i]);
             }
@@ -279,7 +284,7 @@ namespace GSC.Api.Controllers.InformConcent
                               PatientStatusId = patients.PatientStatusId
                           }).ToList();
             string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
-            for (var i = 0; i < result.Count; i++)
+            for (var i = 0; i <= result.Count - 1; i++)
             {
                 if (result[i].PatientStatusId == ScreeningPatientStatus.ConsentCompleted || result[i].PatientStatusId == ScreeningPatientStatus.OnTrial)
                 {
@@ -319,6 +324,12 @@ namespace GSC.Api.Controllers.InformConcent
             if (!ModelState.IsValid)
             {
                 return new UnprocessableEntityObjectResult(ModelState);
+            }
+
+            if (_econsentSetupRepository.All.Where(x => x.DocumentName == econsentSetupDto.DocumentName && x.LanguageId == econsentSetupDto.LanguageId && x.ProjectId == econsentSetupDto.ProjectId && x.Id != econsentSetupDto.Id).ToList().Count > 0)
+            {
+                ModelState.AddModelError("Message", "Please add different document name");
+                return BadRequest(ModelState);
             }
 
             var document = _econsentSetupRepository.Find(econsentSetupDto.Id);

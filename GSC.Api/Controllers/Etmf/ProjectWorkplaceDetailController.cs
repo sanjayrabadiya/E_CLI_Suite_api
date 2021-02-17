@@ -59,6 +59,14 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult GetByUserId(int UserId, int ProjectId)
         {
             if (UserId <= 0) return BadRequest();
+
+            var validate = _projectWorkplaceDetailRepository
+                .FindByInclude(t => t.DeletedDate == null && t.ProjectWorkplace.ProjectId == ProjectId);
+            if (validate.Count() == 0)
+            {
+                ModelState.AddModelError("Message", "Worksplace Not Created.");
+                return BadRequest(ModelState);
+            }
             var permissionDtos = _projectWorkplaceDetailRepository.GetByUserId(UserId, ProjectId);
 
             return Ok(permissionDtos);

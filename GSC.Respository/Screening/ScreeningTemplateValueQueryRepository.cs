@@ -272,7 +272,7 @@ namespace GSC.Respository.Screening
                 sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
             } else
             {
-                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
             }
 
             var queryDtos = (from screening in _context.ScreeningEntry.Where(t =>
@@ -309,6 +309,7 @@ namespace GSC.Respository.Screening
                                  QueryStatus = query.QueryStatus,
                                  CreatedByName = query.UserName + " (" + query.UserRole + ")" +
                                        Convert.ToString(query.IsSystem ? " - System" : ""),
+                                 CreatedDate = query.CreatedDate,
                                  DataEntryByName = role == null || string.IsNullOrEmpty(role.RoleName)
                                          ? user.UserName
                                          : user.UserName + "(" + role.RoleName + ")",
@@ -344,6 +345,9 @@ namespace GSC.Respository.Screening
                 ModifieedByName = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedByName,
                 CollectionSource = y.Last().CollectionSource,
                 DataEntryByName = y.Last().DataEntryByName,
+                ClosedDate = y.Where(a => a.QueryStatus == QueryStatus.Closed).LastOrDefault()?.CreatedDate,
+                CreatedDate = y.Where(a => a.QueryStatus == QueryStatus.Open).LastOrDefault()?.CreatedDate,
+                ModifiedDate = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedDate,
             }).Where(q => (filters.Status == null
                 || q.QueryStatus.GetDescription() == ((QueryStatus)filters.Status).GetDescription())
                 && (filters.QueryGenerateBy == null || filters.QueryGenerateBy.Contains(q.CreatedByName))

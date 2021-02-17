@@ -25,6 +25,7 @@ namespace GSC.Data.Dto.Master
         public List<DashboardDto> eTMFSendData { get; set; }
         public List<DashboardDto> eTMFSubSecSendData { get; set; }
         public List<DashboardDto> eTMFSendBackData { get; set; }
+        public List<DashboardDto> eTMFSubSecSendBackData { get; set; }
         public List<DashboardDto> eConsentData { get; set; }
     }
 }

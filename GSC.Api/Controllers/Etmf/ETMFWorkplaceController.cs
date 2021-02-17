@@ -132,6 +132,7 @@ namespace GSC.Api.Controllers.Etmf
                 }
             }
             if (_uow.Save() <= 0) throw new Exception("Creating ETMFWorkplace failed on save.");
+            _projectWorkplaceDetailRepository.AddEtmfAccessRights(SaveFolderStructure.ProjectWorkplaceDetail);
             return Ok(SaveFolderStructure.Id);
         }
 

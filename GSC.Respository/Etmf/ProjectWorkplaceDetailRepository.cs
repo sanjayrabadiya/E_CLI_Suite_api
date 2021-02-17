@@ -155,5 +155,23 @@ namespace GSC.Respository.Etmf
             _context.EtmfUserPermission.UpdateRange(EtmfUserPermission);
             _context.Save();
         }
+
+        public void AddEtmfAccessRights(List<ProjectWorkplaceDetail> ProjectWorkplaceDetail)
+        {
+            foreach (var item in ProjectWorkplaceDetail)
+            {
+                _context.EtmfUserPermission.Add(new EtmfUserPermission
+                {
+                    UserId = _jwtTokenAccesser.UserId,
+                    ProjectWorkplaceDetailId = item.Id,
+                    IsAdd = false,
+                    IsEdit = false,
+                    IsDelete = false,
+                    IsExport = false,
+                    IsView = false,
+                });
+            }
+            _context.Save();
+        }
     }
 }

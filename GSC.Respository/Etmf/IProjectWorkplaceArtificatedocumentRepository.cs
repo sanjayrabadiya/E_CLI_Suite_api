@@ -28,5 +28,6 @@ namespace GSC.Respository.Etmf
         string ImportWordDocument(Stream stream, string FullPath);
         string SaveDocumentInFolder(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument, CustomParameter param);
         string ImportData(int Id);
+        ProjectWorkplaceArtificatedocument WordToPdf(int Id);
     }
 }

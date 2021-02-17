@@ -217,6 +217,8 @@ namespace GSC.Respository.EditCheckImpact
 
         private void VariableProcess(List<EditCheckValidateDto> result, int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckTargetValidationList> editTargetValidation, bool isQueryRaise, int screeningVisitId, int? projectDesignVisitId, bool isNa, bool isRepated, ScreeningTemplateStatus status)
         {
+            if (result.Count == 0) return;
+
             result.ForEach(r =>
             {
                 r.ScreeningEntryId = screeningEntryId;
@@ -289,7 +291,13 @@ namespace GSC.Respository.EditCheckImpact
             var variableResult = UpdateVariale(targetResult.Where(r => r.ScreeningTemplateId > 0 && (r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)).ToList(), screeningEntryId, screeningVisitId, true, isQueryRaise);
 
             if (variableResult != null)
-                editTargetValidation.AddRange(variableResult);
+            {
+                variableResult.ForEach(x =>
+                {
+                    if (!editTargetValidation.Any(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId))
+                        editTargetValidation.Add(x);
+                });
+            }
 
             _context.Save();
         }
@@ -298,6 +306,7 @@ namespace GSC.Respository.EditCheckImpact
         {
             if (_editCheckTargetValidationLists == null)
                 _editCheckTargetValidationLists = new List<EditCheckTargetValidationList>();
+
             var variableIds = editCheckValidateDto.Where(a => a.ScreeningTemplateId > 0).Select(c => c.ProjectDesignVariableId).Distinct().ToList();
             variableIds.ForEach(t =>
             {
@@ -362,9 +371,9 @@ namespace GSC.Respository.EditCheckImpact
                                 editCheckTarget.Value = _impactService.GetVariableValue(r.ScreeningTemplateId, r.FetchingProjectDesignVariableId ?? 0);
                             else
                             {
-                                var refTemplate = _impactService.GetScreeningTemplate((int)r.ProjectDesignTemplateId, screeningEntryId,
+                                var refTemplate = _impactService.GetScreeningTemplate((int)r.FetchingProjectDesignTemplateId, screeningEntryId,
                                  r.ProjectDesignVisitId == r.ProjectDesignVisitId ? screeningVisitId : (int?)null);
-                                editCheckTarget.Value = _impactService.GetVariableValue(r.ScreeningTemplateId, r.FetchingProjectDesignVariableId ?? 0);
+                                editCheckTarget.Value = _impactService.GetVariableValue(refTemplate.Id, r.FetchingProjectDesignVariableId ?? 0);
                             }
                             if (_templateScreeningVariableDtos != null)
                                 _templateScreeningVariableDtos.Add(new TemplateScreeningVariableDto

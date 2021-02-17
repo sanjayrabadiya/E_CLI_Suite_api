@@ -331,6 +331,13 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
+        [Route("GetParentProjectDropDownEtmf")]
+        public IActionResult GetParentProjectDropDownEtmf()
+        {
+            return Ok(_projectRepository.GetParentProjectDropDownEtmf());
+        }
+
+        [HttpGet]
         [Route("GetParentStaticProjectDropDown")]
         public IActionResult GetParentStaticProjectDropDown()
         {

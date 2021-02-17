@@ -261,7 +261,7 @@ namespace GSC.Respository.Screening
                 sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
             } else
             {
-                sites = _context.Project.Where(x => x.ParentProjectId == filters.ParentProjectId).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ParentProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
             }
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");

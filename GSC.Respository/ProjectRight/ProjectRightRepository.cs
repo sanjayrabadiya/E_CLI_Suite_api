@@ -710,9 +710,7 @@ namespace GSC.Respository.ProjectRight
                 UserId = x.UserId,
                 UserName = _context.Users.Where(p => p.Id == x.UserId).Select(r => r.UserName).FirstOrDefault(),
                 RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.ProjectId && c.UserId == x.UserId && c.RoleId == x.RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
-                TotalReviewName = _context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
-                                          && a.UserId == x.UserId && a.IsReview).ToList().Count > 0 ? "Complete" : null,
-            }).Where(x => x.TotalReviewName != null).ToList();
+            }).ToList();
             return result;
         }
     }

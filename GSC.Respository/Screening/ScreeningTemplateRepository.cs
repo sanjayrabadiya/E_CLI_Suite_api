@@ -219,7 +219,7 @@ namespace GSC.Respository.Screening
                     r.EditCheckValidation.InfoType = singleResult.InfoType;
                     r.EditCheckValidation.EditCheckDisable = singleResult.EditCheckDisable;
                 }
-                r.editCheckIds = GetEditCheckIds(result, (int)r.ProjectDesignVariableId);
+                r.editCheckIds = GetEditCheckIds(result, (int)r.ProjectDesignVariableId, screeningTemplateBasic.ProjectDesignTemplateId);
             });
 
 
@@ -263,29 +263,46 @@ namespace GSC.Respository.Screening
             }
         }
 
-        List<EditCheckIds> GetEditCheckIds(List<EditCheckValidateDto> editCheckValidateDtos, int projectDesignVariableId)
+        List<EditCheckIds> GetEditCheckIds(List<EditCheckValidateDto> editCheckValidateDtos, int projectDesignVariableId, int projectDesignTemplateId)
         {
             var editCheckIds = editCheckValidateDtos.
-                Where(x => x.ProjectDesignVariableId == projectDesignVariableId).
+                Where(x => (x.ProjectDesignVariableId == projectDesignVariableId || (x.FetchingProjectDesignVariableId == projectDesignVariableId && x.FetchingProjectDesignTemplateId == projectDesignTemplateId))).
                 GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
 
-            var projectDesignVariableIds = editCheckValidateDtos.
-                Where(x => editCheckIds.Contains(x.EditCheckId)).
-               Select(t => t.ProjectDesignVariableId).Distinct().ToList();
+            if (editCheckIds.Count > 0)
+                RecuranceEditCheck(editCheckValidateDtos, editCheckIds, ref editCheckIds, projectDesignTemplateId);
 
-            projectDesignVariableIds.ForEach(r =>
-            {
-                editCheckIds.AddRange(editCheckValidateDtos.
-                Where(x => x.ProjectDesignVariableId == r).
-                GroupBy(t => t.EditCheckId).Select(c => c.Key).ToList());
-            });
-
-            return editCheckIds.Distinct().
-               Select(t => new EditCheckIds
-               {
-                   EditCheckId = t
-               }).ToList();
+            return editCheckIds.GroupBy(t => t).Select(r => new EditCheckIds { EditCheckId = r.Key }).ToList();
         }
+
+        void RecuranceEditCheck(List<EditCheckValidateDto> editCheckValidateDtos, List<int> editCheckIds, ref List<int> result, int projectDesignTemplateId)
+        {
+            var variable = GetVariableIdEditCheckDetail(editCheckValidateDtos, editCheckIds, result);
+            foreach (var item in variable)
+            {
+                var subEditCheckIds = GetEditCheckIdTarget(editCheckValidateDtos, item, result, projectDesignTemplateId);
+                result.AddRange(subEditCheckIds);
+                RecuranceEditCheck(editCheckValidateDtos, subEditCheckIds, ref result, projectDesignTemplateId);
+            }
+        }
+
+        List<int> GetVariableIdEditCheckDetail(List<EditCheckValidateDto> editCheckValidateDtos, List<int> editCheckIds, List<int> alreadyUsed)
+        {
+            return editCheckValidateDtos.
+               Where(x => editCheckIds.Contains(x.EditCheckId) && !alreadyUsed.Contains(x.EditCheckId) &&
+               (x.IsFormula || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+              Select(t => t.ProjectDesignVariableId).Distinct().ToList();
+        }
+
+
+        List<int> GetEditCheckIdTarget(List<EditCheckValidateDto> editCheckValidateDtos, int projectDesignVariableId, List<int> alreadyUsed, int projectDesignTemplateId)
+        {
+            return editCheckValidateDtos.
+             Where(x => (x.ProjectDesignVariableId == projectDesignVariableId || (x.FetchingProjectDesignVariableId == projectDesignVariableId && x.FetchingProjectDesignTemplateId == projectDesignTemplateId)) && !alreadyUsed.Contains(x.EditCheckId) && x.IsTarget &&
+             (x.IsFormula || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+             GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
+        }
+
         public void SubmitReviewTemplate(int screeningTemplateId, bool isLockUnLock)
         {
             _context.DetachAllEntities();
@@ -418,13 +435,13 @@ namespace GSC.Respository.Screening
             var parentIds = new List<int>();
             if (siteId == null)
             {
-                parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+                parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && x.IsTestSite == false).Select(y => y.Id).ToList();
             }
             else
             {
                 parentIds.Add((int)filters.SiteId);
             }
-            
+
             var result = All.Where(x => x.DeletedDate == null && x.ScreeningVisit.Status != ScreeningVisitStatus.NotStarted);
             if (filters.ReviewStatus != null)
             {
