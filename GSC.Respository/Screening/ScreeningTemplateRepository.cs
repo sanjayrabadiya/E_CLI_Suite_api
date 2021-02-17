@@ -435,7 +435,7 @@ namespace GSC.Respository.Screening
             var parentIds = new List<int>();
             if (siteId == null)
             {
-                parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
+                parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && x.IsTestSite == false).Select(y => y.Id).ToList();
             }
             else
             {

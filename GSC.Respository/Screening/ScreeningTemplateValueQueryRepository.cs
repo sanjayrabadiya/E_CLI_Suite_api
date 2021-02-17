@@ -272,7 +272,7 @@ namespace GSC.Respository.Screening
                 sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
             } else
             {
-                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
             }
 
             var queryDtos = (from screening in _context.ScreeningEntry.Where(t =>
