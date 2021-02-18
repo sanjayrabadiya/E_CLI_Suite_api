@@ -106,7 +106,7 @@ namespace GSC.Report
 
 
 
-            DesignVisit(projectDesignvisit, reportSetting, projectdetails.Project.ProjectCode);
+            DesignVisit(projectDesignvisit, reportSetting, projectdetails.Project.ProjectCode, projectdetails.Project.ClientId);
 
 
             if (reportSetting.PdfType == 1)
@@ -222,7 +222,7 @@ namespace GSC.Report
             _emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
         }
 
-        private PdfPageTemplateElement AddHeader(PdfDocument doc, string studyName, bool isClientLogo, bool isCompanyLogo)
+        private PdfPageTemplateElement AddHeader(PdfDocument doc, string studyName, bool isClientLogo, bool isCompanyLogo, int ClientId)
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
@@ -244,7 +244,7 @@ namespace GSC.Report
             }
             if (isClientLogo)
             {
-                var clientlogopath = _clientRepository.All.Select(x => x.Logo).FirstOrDefault();
+                var clientlogopath = _clientRepository.All.Where(x => x.Id == ClientId).Select(x => x.Logo).FirstOrDefault();
                 if (File.Exists($"{imagePath}/{clientlogopath}") && !String.IsNullOrEmpty(clientlogopath))
                 {
                     FileStream logoinputstream = new FileStream($"{imagePath}/{clientlogopath}", FileMode.Open, FileAccess.Read);
@@ -363,12 +363,12 @@ namespace GSC.Report
             tocresult.Page.Annotations.Add(documentLinkAnnotation);
         }
 
-        private void DesignVisit(IList<DropDownDto> designvisit, ReportSettingNew reportSetting, string projectCode)
+        private void DesignVisit(IList<DropDownDto> designvisit, ReportSettingNew reportSetting, string projectCode, int ClientId)
         {
             PdfSection SectionTOC = document.Sections.Add();
             PdfPage pageTOC = SectionTOC.Pages.Add();
 
-            document.Template.Top = AddHeader(document, projectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo));
+            document.Template.Top = AddHeader(document, projectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo), ClientId);
             document.Template.Bottom = AddFooter(document);
 
             PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
@@ -389,18 +389,22 @@ namespace GSC.Report
             format.Alignment = PdfTextAlignment.Left;
             format.WordWrap = PdfWordWrapType.Word;
 
-            var scrrening = _context.ScreeningEntry.Where(x => x.ProjectId == reportSetting.ProjectId)
-              .Include(x => x.ScreeningVisit).ThenInclude(x => x.ScreeningTemplates).ThenInclude(x => x.ScreeningTemplateValues).ToList();
-
             foreach (var template in designvisit)
             {
-                PdfSection SectionContent = document.Sections.Add();
-                PdfPage pageContent = SectionContent.Pages.Add();
-                SectionContent.Template.Top = VisitTemplateHeader(document, projectCode, template.Value, "", "", "", Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));
-                var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote, x => x.Domain).ToList();
-                DesignTemplate(projecttemplate, reportSetting, template.Value, pageContent);
+                var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote, x => x.Domain, x => x.VariableTemplate).Where(x => reportSetting.NonCRF == true ? x.VariableTemplate.ActivityMode == ActivityMode.Generic : x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
+                if (projecttemplate.Count > 0)
+                {
+                    PdfSection SectionContent = document.Sections.Add();
+                    PdfPage pageContent = SectionContent.Pages.Add();
+                    SectionContent.Template.Top = VisitTemplateHeader(document, projectCode, template.Value, "", "", "", Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));
 
+                    //if (reportSetting.NonCRF == true)
+                    //    projecttemplate = projecttemplate.Where(x => x.VariableTemplate.ActivityMode == ActivityMode.Generic).ToList();
+                    //else
+                    //    projecttemplate = projecttemplate.Where(x => x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
 
+                    DesignTemplate(projecttemplate, reportSetting, template.Value, pageContent);
+                }
             }
         }
         private void DesignVisitData(List<ScreeningVisit> screeningVisits, ReportSettingNew reportSetting, string projectCode, ScreeningEntry screeningEntry)
@@ -418,23 +422,27 @@ namespace GSC.Report
                    .Include(x => x.ScreeningTemplateValues).ThenInclude(x => x.ProjectDesignVariable)
                    .ThenInclude(x => x.Unit).Where(x => x.ScreeningVisitId == visit.Id)
                    .Where(x => x.Status != ScreeningTemplateStatus.Pending
-                        && x.DeletedDate == null && x.ProjectDesignTemplate.DeletedDate == null
+                        && x.DeletedDate == null && x.ProjectDesignTemplate.DeletedDate == null && reportSetting.NonCRF == true ? x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic : x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific
                         )
                    .OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList();
-                if (reportSetting.NonCRF == true)
-                    screeningtemplate = screeningtemplate.Where(x => x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
+                //if (reportSetting.NonCRF == true)
+                //    screeningtemplate = screeningtemplate.Where(x => x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic).ToList();
+                //else
+                //    screeningtemplate = screeningtemplate.Where(x => x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
+                if (screeningtemplate.Count > 0)
+                {
 
-                var visitName = (_jwtTokenAccesser.Language != 1 ?
-                visit.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
-                : visit.ProjectDesignVisit.DisplayName) +
-                                         Convert.ToString(visit.RepeatedVisitNumber == null ? "" : "_" + visit.RepeatedVisitNumber);
+                    var visitName = (_jwtTokenAccesser.Language != 1 ?
+                    visit.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
+                    : visit.ProjectDesignVisit.DisplayName) +
+                                             Convert.ToString(visit.RepeatedVisitNumber == null ? "" : "_" + visit.RepeatedVisitNumber);
 
 
-                PdfSection SectionContent = document.Sections.Add();
-                PdfPage pageContent = SectionContent.Pages.Add();
-                SectionContent.Template.Top = VisitTemplateHeader(document, screeningEntry.Project.ProjectCode, visitName, screeningEntry.Randomization.ScreeningNumber, screeningEntry.Randomization.RandomizationNumber, screeningEntry.Randomization.Initial, Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));                
-                DesignTemplateWithData(screeningtemplate.OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList(), reportSetting, visitName, pageContent);
-
+                    PdfSection SectionContent = document.Sections.Add();
+                    PdfPage pageContent = SectionContent.Pages.Add();
+                    SectionContent.Template.Top = VisitTemplateHeader(document, screeningEntry.Project.ProjectCode, visitName, screeningEntry.Randomization.ScreeningNumber, screeningEntry.Randomization.RandomizationNumber, screeningEntry.Randomization.Initial, Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));
+                    DesignTemplateWithData(screeningtemplate.OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList(), reportSetting, visitName, pageContent);
+                }
             }
         }
 
@@ -653,7 +661,7 @@ namespace GSC.Report
                 //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
                 //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
 
-               
+
                 result = AddString($"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName} -{template.ProjectDesignTemplate.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 string notes = "";
                 for (int n = 0; n < template.ProjectDesignTemplate.ProjectDesignTemplateNote.Count; n++)
@@ -662,7 +670,7 @@ namespace GSC.Report
                 }
                 if (!string.IsNullOrEmpty(notes))
                     result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                               
+
                 result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                 AddString("Sr# ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
@@ -703,9 +711,11 @@ namespace GSC.Report
                         PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
                         checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
                         checkField.Style = PdfCheckBoxStyle.Check;
-                        var isNa = _context.ScreeningTemplateValue.Where(x => x.ScreeningTemplateId == variable.Id && x.DeletedDate == null).Select(x => x.IsNa).FirstOrDefault();
+                        var isNa = variable.IsNa;
+
                         if (isNa)
                             checkField.Checked = true;
+                        checkField.ReadOnly = true;
                         document.Form.Fields.Add(checkField);
                         AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(420, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                     }
@@ -987,8 +997,8 @@ namespace GSC.Report
 
                 PdfSection SectionTOC = document.Sections.Add();
                 PdfPage pageTOC = SectionTOC.Pages.Add();
-                
-                document.Template.Top = AddHeader(document, item.Project.ProjectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo));
+
+                document.Template.Top = AddHeader(document, item.Project.ProjectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo), item.Project.ClientId);
                 document.Template.Bottom = AddFooter(document);
                 PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
                 //layoutFormat.Break = PdfLayoutBreakType.FitPage;
@@ -1133,7 +1143,7 @@ namespace GSC.Report
 
 
 
-            DesignVisit(projectDesignvisit, reportSetting, projectdetails.Project.ProjectCode);
+            DesignVisit(projectDesignvisit, reportSetting, projectdetails.Project.ProjectCode, projectdetails.Project.ClientId);
 
 
             if (reportSetting.PdfType == 1)
