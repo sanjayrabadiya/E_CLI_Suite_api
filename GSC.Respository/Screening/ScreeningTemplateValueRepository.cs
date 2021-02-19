@@ -316,6 +316,7 @@ namespace GSC.Respository.Screening
                                      TemplateId = template.ProjectDesignTemplateId,
                                      TemplateName = template.ProjectDesignTemplate.TemplateName,
                                      DomainName = template.ProjectDesignTemplate.Domain.DomainName,
+                                     DomainCode = template.ProjectDesignTemplate.Domain.DomainCode,
                                      DomainId = template.ProjectDesignTemplate.DomainId,
                                      VisitId = template.ScreeningVisit.ProjectDesignVisitId,
                                      RepeatedVisit = template.ScreeningVisit.RepeatedVisitNumber,
@@ -360,6 +361,7 @@ namespace GSC.Respository.Screening
                 var grpquery = queryDtos.OrderBy(d => d.VisitId).ThenBy(x => x.DesignOrder).GroupBy(x => new { x.DomainName, x.DomainId }).Select(y => new ProjectDatabaseDomainDto
                 {
                     DomainName = y.Key.DomainName,
+                    DomainCode = y.FirstOrDefault().DomainCode,
                     TemplateId = y.FirstOrDefault().TemplateId,
                     DesignOrder = y.FirstOrDefault().DesignOrder,
                     LstVariable = y.Where(v => v.VariableName != null).ToList().Count > 0 ? y.Where(q => q.DomainId == y.Key.DomainId && q.VariableName != null).GroupBy(vari => vari.VariableName).Select(v =>
@@ -552,7 +554,7 @@ namespace GSC.Respository.Screening
                 {
                     MainData.Dbds.ForEach(d =>
                     {
-                        worksheet = workbook.Worksheets.Add(d.DomainName);
+                        worksheet = workbook.Worksheets.Add(d.DomainCode);
 
                         worksheet.Rows(1, 2).Style.Fill.BackgroundColor = XLColor.LightGray;
                         worksheet.Cell(1, 1).Value = "STUDY CODE";

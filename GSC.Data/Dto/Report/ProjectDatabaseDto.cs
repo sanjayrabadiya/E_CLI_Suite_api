@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.Report
         public int TemplateId { get; set; }
         public string TemplateName { get; set; }
         public string DomainName { get; set; }
+        public string DomainCode { get; set; }
         public int? DomainId { get; set; }
         public string Visit { get; set; }
         public int VisitId { get; set; }
@@ -47,6 +48,7 @@ namespace GSC.Data.Dto.Report
     public class ProjectDatabaseDomainDto
     {
         public string DomainName { get; set; }
+        public string DomainCode { get; set; }
         public int TemplateId { get; set; }
         public int DesignOrder { get; set; }
         public string UnitAnnotation { get; set; }
