@@ -187,6 +187,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
                                 pvListArtificateObj.ArtificateId = f.Id;
                                 pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
                                 pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
@@ -240,6 +241,7 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
                                     pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
                                     pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
                                     pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
                                     pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
@@ -348,6 +350,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
                                 pvListArtificateObj.ArtificateId = f.Id;
                                 pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
                                 pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
@@ -402,6 +405,7 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
                                     pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
                                     pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
                                     pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
                                     pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
@@ -505,6 +509,7 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
                                 pvListArtificateObj.ArtificateId = f.Id;
                                 pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
                                 pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
@@ -558,6 +563,7 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
                                     pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
                                     pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
                                     pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
                                     pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
@@ -826,5 +832,6 @@ namespace GSC.Respository.Etmf
         public bool IsView { get; set; }
         public bool IsDelete { get; set; }
         public bool IsExport { get; set; }
+        public bool IsNotRequired { get; set; }
     }
 }

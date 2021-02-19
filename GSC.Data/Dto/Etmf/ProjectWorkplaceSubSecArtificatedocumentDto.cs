@@ -29,7 +29,6 @@ namespace GSC.Data.Dto.Etmf
         public int? ParentDocumentId { get; set; }
         public bool? IsAccepted { get; set; }
 
-        public bool IsNotRequired { get; set; }
     }
 
     public class CommonArtifactDocumentDto
