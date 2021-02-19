@@ -18,6 +18,6 @@ namespace GSC.Data.Dto.Etmf
         public string ChildName { get; set; }
         public string ProjectName { get; set; }
         public int projectWorkplaceDetailId { get; set; }
-        
+        public bool IsNotRequired { get; set; }
     }
 }

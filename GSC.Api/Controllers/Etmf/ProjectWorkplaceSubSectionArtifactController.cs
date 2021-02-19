@@ -108,5 +108,25 @@ namespace GSC.Api.Controllers.Etmf
         {
             return Ok(_projectWorkplaceSubSectionArtifactRepository.GetDrodDown(subsectionId));
         }
+
+        [HttpPut]
+        [Route("UpdateNotRequired/{id}")]
+        public IActionResult UpdateNotRequired(int id)
+        {
+            var projectWorkplaceSubSecArtificatDto = _projectWorkplaceSubSectionArtifactRepository.Find(id);
+            if (projectWorkplaceSubSecArtificatDto.IsNotRequired)
+            {
+                projectWorkplaceSubSecArtificatDto.IsNotRequired = !projectWorkplaceSubSecArtificatDto.IsNotRequired;
+            }
+            else
+            {
+                projectWorkplaceSubSecArtificatDto.IsNotRequired = !projectWorkplaceSubSecArtificatDto.IsNotRequired;
+            }
+            var projectWorkplaceSubSecArtificat = _mapper.Map<ProjectWorkplaceSubSectionArtifact>(projectWorkplaceSubSecArtificatDto);
+            _projectWorkplaceSubSectionArtifactRepository.Update(projectWorkplaceSubSecArtificat);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating Artificate failed on save.");
+            return Ok(projectWorkplaceSubSecArtificat.Id);
+        }
     }
 }

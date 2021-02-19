@@ -17,7 +17,7 @@ namespace GSC.Data.Entities.Etmf
         public bool? IsAccepted { get; set; }
         public int? ParentDocumentId { get; set; }
 
-        public bool IsNotRequired { get; set; }
+        
         public ProjectWorkplaceSubSectionArtifact ProjectWorkplaceSubSectionArtifact { get; set; }
         public List<ProjectSubSecArtificateDocumentReview> ProjectSubSecArtificateDocumentReview { get; set; }
         public List<ProjectSubSecArtificateDocumentApprover> ProjectSubSecArtificateDocumentApprover { get; set; }

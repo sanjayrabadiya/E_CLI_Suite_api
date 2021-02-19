@@ -11,6 +11,7 @@ namespace GSC.Data.Dto.Etmf
         public int ProjectWorkplaceSectionId { get; set; }
         public int EtmfArtificateMasterLbraryId { get; set; }
         public int? ParentArtificateId { get; set; }
+        public bool IsNotRequired { get; set; }
     }
     public class WorkplaceFolderDto
     {

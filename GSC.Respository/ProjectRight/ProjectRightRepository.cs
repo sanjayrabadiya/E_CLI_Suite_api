@@ -703,13 +703,14 @@ namespace GSC.Respository.ProjectRight
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId, c.RoleId }, (key, group) => group.First());
 
-            var result = latestProjectRight.Select(x => new ProjectDocumentReviewDto
+            var result = latestProjectRight.GroupBy(x => x.UserId).Select(x => new ProjectDocumentReviewDto
             {
-                Id = x.Id,
-                ProjectId = x.ProjectId,
-                UserId = x.UserId,
-                UserName = _context.Users.Where(p => p.Id == x.UserId).Select(r => r.UserName).FirstOrDefault(),
-                RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.ProjectId && c.UserId == x.UserId && c.RoleId == x.RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
+                Id = x.FirstOrDefault().Id,
+                ProjectId = x.FirstOrDefault().ProjectId,
+                UserId = x.Key,
+                UserName = _context.Users.Where(p => p.Id == x.Key).Select(r => r.UserName).FirstOrDefault(),
+                RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.FirstOrDefault().ProjectId && c.UserId == x.Key 
+                && c.RoleId == x.FirstOrDefault().RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
             }).ToList();
             return result;
         }
