@@ -134,46 +134,51 @@ namespace GSC.Report
             //Iterates through bookmarks
             foreach (PdfBookmark bookmark in bookmarks)
             {
-                PdfLayoutFormat layoutformat = new PdfLayoutFormat();
-                layoutformat.Break = PdfLayoutBreakType.FitPage;
-                layoutformat.Layout = PdfLayoutType.Paginate;
-                PdfPageBase page = bookmark.Destination.Page;
-                if (pages.ContainsKey(page))
+                IndexCreate(bookmark, false);
+                foreach (PdfBookmark subbookmark in bookmark)
                 {
-                    int pagenumber = pages[page];
-
-                    PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
-                    documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
-                    documentLinkAnnotation.Text = bookmark.Title;
-                    documentLinkAnnotation.Color = Color.Transparent;
-                    //Sets the destination
-                    documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page);
-                    documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y + 20);
-                    //Adds this annotation to a new page
-                    tocresult.Page.Annotations.Add(documentLinkAnnotation);
-
-                    pagenumber++;
-                    string[] values = bookmark.Title.Split('.');
-                    if (values.Length > 0)
-                    {
-                        int n;
-                        bool isNumeric = int.TryParse(values[0], out n);
-                        if (isNumeric)
-                        {
-                            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
-                            tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
-                            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
-                            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
-                        }
-                        else
-                        {
-                            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
-                            tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
-                            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
-                            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
-                        }
-                    }
+                    IndexCreate(subbookmark, true);
                 }
+                //PdfLayoutFormat layoutformat = new PdfLayoutFormat();
+                //layoutformat.Break = PdfLayoutBreakType.FitPage;
+                //layoutformat.Layout = PdfLayoutType.Paginate;
+                //PdfPageBase page = bookmark.Destination.Page;
+                //if (pages.ContainsKey(page))
+                //{
+                //    int pagenumber = pages[page];
+
+                //    PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
+                //    documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
+                //    documentLinkAnnotation.Text = bookmark.Title;
+                //    documentLinkAnnotation.Color = Color.Transparent;
+                //    //Sets the destination
+                //    documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page);
+                //    documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y + 20);
+                //    //Adds this annotation to a new page
+                //    tocresult.Page.Annotations.Add(documentLinkAnnotation);
+
+                //    pagenumber++;
+                //    string[] values = bookmark.Title.Split('.');
+                //    if (values.Length > 0)
+                //    {
+                //        int n;
+                //        bool isNumeric = int.TryParse(values[0], out n);
+                //        if (isNumeric)
+                //        {
+                //            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
+                //            tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
+                //            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                //            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                //        }
+                //        else
+                //        {
+                //            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
+                //            tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
+                //            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                //            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                //        }
+                //    }
+                //}
             }
 
             MemoryStream memoryStream = new MemoryStream();
@@ -336,6 +341,22 @@ namespace GSC.Report
             return bookmarks;
         }
 
+        public PdfBookmark AddSection(PdfBookmark bookmark, PdfLayoutResult page, string title)
+        {
+            //PdfGraphics graphics = page.Graphics;
+            //Add bookmark in PDF document
+            PdfBookmark bookmarks = bookmark.Add(title);
+
+            //Draw the content in the PDF page
+            //graphics.DrawString(title, regularfont, PdfBrushes.Black, new PointF(point.X, point.Y));
+
+            bookmarks.Destination = new PdfDestination(page.Page, new PointF(0, page.Bounds.Y));
+            // bookmarks.Destination = new PdfDestination(page.Page);
+            bookmarks.Destination.Location = new PointF(0, page.Bounds.Y);
+
+            return bookmarks;
+        }
+
         public void AddTableOfcontents(PdfLayoutResult page, string title, bool isVisit)
         {
             PdfTextElement element;
@@ -391,7 +412,7 @@ namespace GSC.Report
 
             foreach (var template in designvisit)
             {
-                var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote, x => x.Domain, x => x.VariableTemplate).Where(x => reportSetting.NonCRF == true ? x.VariableTemplate.ActivityMode == ActivityMode.Generic : x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
+                var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote, x => x.Domain, x => x.VariableTemplate).Where(x =>  reportSetting.NonCRF == true ? x.VariableTemplate.ActivityMode == ActivityMode.Generic || x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
                 if (projecttemplate.Count > 0)
                 {
                     PdfSection SectionContent = document.Sections.Add();
@@ -422,7 +443,7 @@ namespace GSC.Report
                    .Include(x => x.ScreeningTemplateValues).ThenInclude(x => x.ProjectDesignVariable)
                    .ThenInclude(x => x.Unit).Where(x => x.ScreeningVisitId == visit.Id)
                    .Where(x => x.Status != ScreeningTemplateStatus.Pending
-                        && x.DeletedDate == null && x.ProjectDesignTemplate.DeletedDate == null && reportSetting.NonCRF == true ? x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic : x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific
+                        && x.DeletedDate == null && x.ProjectDesignTemplate.DeletedDate == null && reportSetting.NonCRF == true ? x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic || x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific
                         )
                    .OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList();
                 //if (reportSetting.NonCRF == true)
@@ -458,10 +479,11 @@ namespace GSC.Report
 
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
 
-            AddBookmark(result, $"{vistitName}", true);
+            PdfBookmark bookmark = AddBookmark(result, $"{vistitName}", true);
             foreach (var designt in designtemplate.OrderBy(i => i.DesignOrder))
             {
-                AddBookmark(result, $"{designt.DesignOrder.ToString()}.{designt.TemplateName}", false);
+                AddSection(bookmark, result, $"{designt.DesignOrder.ToString()}.{designt.TemplateName}");
+                // AddBookmark(result, $"{designt.DesignOrder.ToString()}.{designt.TemplateName}", false);
                 //bookmarks = document.Bookmarks.Add($"{index}.{designt.TemplateName}");
                 //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
                 //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
@@ -644,7 +666,7 @@ namespace GSC.Report
 
             //document.Form.SetDefaultAppearance(false);
 
-            AddBookmark(result, $"{vistitName}", true);
+            PdfBookmark bookmark = AddBookmark(result, $"{vistitName}", true);
             //PdfBookmark bookmarks = document.Bookmarks.Add(vistitName);
             //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
             //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
@@ -656,7 +678,8 @@ namespace GSC.Report
             {
                 decimal DesignOrder = template.RepeatSeqNo == null ? template.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(template.ProjectDesignTemplate.DesignOrder.ToString() + "." + template.RepeatSeqNo.Value.ToString());
 
-                AddBookmark(result, $"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName}", false);
+                AddSection(bookmark, result, $"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName}");
+                //AddBookmark(result, $"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName}", false);
                 //bookmarks = document.Bookmarks.Add($"{index}.{template.ProjectDesignTemplate.TemplateName}");
                 //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
                 //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
@@ -1012,7 +1035,7 @@ namespace GSC.Report
                 format.Alignment = PdfTextAlignment.Left;
                 format.WordWrap = PdfWordWrapType.Word;
 
-                var visit = item.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null).OrderBy(o => o.ProjectDesignVisitId).ThenBy(t => t.RepeatedVisitNumber).ToList();
+                var visit = item.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null).OrderBy(o => o.ProjectDesignVisit.DesignOrder).ThenBy(t => t.RepeatedVisitNumber).ToList();
                 DesignVisitData(visit, reportSetting, item.Project.ProjectCode, item);
 
 
@@ -1041,46 +1064,51 @@ namespace GSC.Report
                 //Iterates through bookmarks
                 foreach (PdfBookmark bookmark in bookmarks)
                 {
-                    PdfLayoutFormat layoutformat = new PdfLayoutFormat();
-                    layoutformat.Break = PdfLayoutBreakType.FitPage;
-                    layoutformat.Layout = PdfLayoutType.Paginate;
-                    PdfPageBase page = bookmark.Destination.Page;
-                    if (pages.ContainsKey(page))
+                    IndexCreate(bookmark, false);
+                    foreach (PdfBookmark subbookmark in bookmark)
                     {
-                        int pagenumber = pages[page];
-
-                        PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
-                        documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
-                        documentLinkAnnotation.Text = bookmark.Title;
-                        documentLinkAnnotation.Color = Color.Transparent;
-                        //Sets the destination
-                        documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page, new PointF(bookmark.Destination.Location.X, bookmark.Destination.Location.Y));
-                        documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y);
-                        //Adds this annotation to a new page
-                        tocresult.Page.Annotations.Add(documentLinkAnnotation);
-
-                        pagenumber++;
-                        string[] values = bookmark.Title.Split('.');
-                        if (values.Length > 0)
-                        {
-                            int n;
-                            bool isNumeric = int.TryParse(values[0], out n);
-                            if (isNumeric)
-                            {
-                                PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
-                                tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
-                                PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
-                                pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
-                            }
-                            else
-                            {
-                                PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
-                                tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
-                                PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
-                                pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
-                            }
-                        }
+                        IndexCreate(subbookmark, true);
                     }
+                    //PdfLayoutFormat layoutformat = new PdfLayoutFormat();
+                    //layoutformat.Break = PdfLayoutBreakType.FitPage;
+                    //layoutformat.Layout = PdfLayoutType.Paginate;
+                    //PdfPageBase page = bookmark.Destination.Page;
+                    //if (pages.ContainsKey(page))
+                    //{
+                    //    int pagenumber = pages[page];
+
+                    //    PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
+                    //    documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
+                    //    documentLinkAnnotation.Text = bookmark.Title;
+                    //    documentLinkAnnotation.Color = Color.Transparent;
+                    //    //Sets the destination
+                    //    documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page, new PointF(bookmark.Destination.Location.X, bookmark.Destination.Location.Y));
+                    //    documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y);
+                    //    //Adds this annotation to a new page
+                    //    tocresult.Page.Annotations.Add(documentLinkAnnotation);
+
+                    //    pagenumber++;
+                    //    string[] values = bookmark.Title.Split('.');
+                    //    if (values.Length > 0)
+                    //    {
+                    //        int n;
+                    //        bool isNumeric = int.TryParse(values[0], out n);
+                    //        if (isNumeric)
+                    //        {
+                    //            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
+                    //            tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
+                    //            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                    //            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                    //        }
+                    //        else
+                    //        {
+                    //            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
+                    //            tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
+                    //            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                    //            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                    //        }
+                    //    }
+                    //}
                 }
 
                 MemoryStream memoryStream = new MemoryStream();
@@ -1171,46 +1199,52 @@ namespace GSC.Report
             //Iterates through bookmarks
             foreach (PdfBookmark bookmark in bookmarks)
             {
-                PdfLayoutFormat layoutformat = new PdfLayoutFormat();
-                layoutformat.Break = PdfLayoutBreakType.FitPage;
-                layoutformat.Layout = PdfLayoutType.Paginate;
-                PdfPageBase page = bookmark.Destination.Page;
-                if (pages.ContainsKey(page))
+                IndexCreate(bookmark, false);
+                foreach (PdfBookmark subbookmark in bookmark)
                 {
-                    int pagenumber = pages[page];
-
-                    PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
-                    documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
-                    documentLinkAnnotation.Text = bookmark.Title;
-                    documentLinkAnnotation.Color = Color.Transparent;
-                    //Sets the destination
-                    documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page);
-                    documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y + 20);
-                    //Adds this annotation to a new page
-                    tocresult.Page.Annotations.Add(documentLinkAnnotation);
-
-                    pagenumber++;
-                    string[] values = bookmark.Title.Split('.');
-                    if (values.Length > 0)
-                    {
-                        int n;
-                        bool isNumeric = int.TryParse(values[0], out n);
-                        if (isNumeric)
-                        {
-                            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
-                            tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
-                            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
-                            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
-                        }
-                        else
-                        {
-                            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
-                            tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
-                            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
-                            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
-                        }
-                    }
+                    IndexCreate(subbookmark, true);
                 }
+
+                //PdfLayoutFormat layoutformat = new PdfLayoutFormat();
+                //layoutformat.Break = PdfLayoutBreakType.FitPage;
+                //layoutformat.Layout = PdfLayoutType.Paginate;
+                //PdfPageBase page = bookmark.Destination.Page;
+                //if (pages.ContainsKey(page))
+                //{
+                //    int pagenumber = pages[page];
+
+                //    PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
+                //    documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
+                //    documentLinkAnnotation.Text = bookmark.Title;
+                //    documentLinkAnnotation.Color = Color.Transparent;
+                //    //Sets the destination
+                //    documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page);
+                //    documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y + 20);
+                //    //Adds this annotation to a new page
+                //    tocresult.Page.Annotations.Add(documentLinkAnnotation);
+
+                //    pagenumber++;
+                //    string[] values = bookmark.Title.Split('.');
+                //    if (values.Length > 0)
+                //    {
+                //        int n;
+                //        bool isNumeric = int.TryParse(values[0], out n);
+                //        if (isNumeric)
+                //        {
+                //            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
+                //            tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
+                //            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                //            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                //        }
+                //        else
+                //        {
+                //            PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
+                //            tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
+                //            PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                //            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                //        }
+                //    }
+                //}
             }
 
             MemoryStream memoryStream = new MemoryStream();
@@ -1220,6 +1254,47 @@ namespace GSC.Report
             fileStreamResult.FileDownloadName = "blankreport.pdf";
             return fileStreamResult;
 
+        }
+
+        private void IndexCreate(PdfBookmark bookmark, bool isSubSection)
+        {
+            PdfLayoutFormat layoutformat = new PdfLayoutFormat();
+            layoutformat.Break = PdfLayoutBreakType.FitPage;
+            layoutformat.Layout = PdfLayoutType.Paginate;
+            PdfPageBase page = bookmark.Destination.Page;
+            int pageindex = bookmark.Destination.PageIndex;
+            if (pages.ContainsKey(page))
+            {
+                int pagenumber = pages[page];
+
+                PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
+                documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
+                documentLinkAnnotation.Text = bookmark.Title;
+                documentLinkAnnotation.Color = Color.Transparent;
+                //Sets the destination
+                documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page);
+                documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y + 20);
+                //Adds this annotation to a new page
+                tocresult.Page.Annotations.Add(documentLinkAnnotation);
+
+                pagenumber++;
+
+                if (isSubSection)
+                {
+                    PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
+                    tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
+                    PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                    pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                }
+                else
+                {
+                    PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
+                    tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
+                    PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
+                    pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
+                }
+
+            }
         }
 
     }

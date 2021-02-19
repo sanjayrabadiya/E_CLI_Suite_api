@@ -59,7 +59,7 @@ namespace GSC.Respository.Project.Design
             var visits = new List<DropDownDto>();
             periods.ForEach(period =>
             {
-                period.VisitList.Where(x => x.DeletedDate == null).ToList().ForEach(visit =>
+                period.VisitList.Where(x => x.DeletedDate == null).OrderBy(x=>x.DesignOrder).ToList().ForEach(visit =>
                 {
                     visits.Add(new DropDownDto
                     {
