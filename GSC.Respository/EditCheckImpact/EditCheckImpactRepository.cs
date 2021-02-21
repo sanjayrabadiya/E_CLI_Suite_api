@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using GSC.Common.GenericRespository;
+﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
 using GSC.Data.Dto.Screening;
@@ -208,9 +207,6 @@ namespace GSC.Respository.EditCheckImpact
                 }
 
             });
-
-
-
 
             return editTargetValidation;
         }

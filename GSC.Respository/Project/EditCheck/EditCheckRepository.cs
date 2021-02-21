@@ -4,10 +4,8 @@ using System.Data;
 using System.Linq;
 using AutoMapper;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
-using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
@@ -318,7 +316,7 @@ namespace GSC.Respository.Project.EditCheck
                          : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
                              .DisplayName : "",
                     TemplateName = r.ProjectDesignTemplate.TemplateName,
-                    VariableName = r.ProjectDesignVariable.Annotation ?? r.ProjectDesignVariable.VariableName,
+                    VariableName = string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation,
                     VisitName = r.ProjectDesignVariable != null
                          ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
                          : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
@@ -395,7 +393,6 @@ namespace GSC.Respository.Project.EditCheck
 
             return string.Join(" ", result.Select(r => r.QueryFormula));
         }
-
 
 
     }
