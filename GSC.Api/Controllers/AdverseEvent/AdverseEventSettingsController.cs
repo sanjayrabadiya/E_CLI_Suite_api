@@ -18,18 +18,17 @@ namespace GSC.Api.Controllers.AdverseEvent
     public class AdverseEventSettingsController : ControllerBase
     {
         private readonly IAdverseEventSettingsRepository _adverseEventSettingsRepository;
-        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         public AdverseEventSettingsController(IAdverseEventSettingsRepository adverseEventSettingsRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IMapper mapper,
             IUnitOfWork uow)
         {
             _adverseEventSettingsRepository = adverseEventSettingsRepository;
             _mapper = mapper;
             _uow = uow;
-            _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            
         }
 
         [HttpGet("{projectId}")]
@@ -39,13 +38,7 @@ namespace GSC.Api.Controllers.AdverseEvent
             {
                 return BadRequest();
             }
-            var adverseEventSettings = _adverseEventSettingsRepository.FindBy(x => x.ProjectId == projectId).ToList().FirstOrDefault();
-            var adverseEventSettingsDto = _mapper.Map<AdverseEventSettingsDto>(adverseEventSettings);
-            if (adverseEventSettingsDto != null)
-            {
-                adverseEventSettingsDto.ProjectDesignVisitIdInvestigator = _projectDesignTemplateRepository.Find((int)adverseEventSettingsDto.ProjectDesignTemplateIdInvestigator).ProjectDesignVisitId;
-                adverseEventSettingsDto.ProjectDesignVisitIdPatient = _projectDesignTemplateRepository.Find((int)adverseEventSettingsDto.ProjectDesignTemplateIdPatient).ProjectDesignVisitId;
-            }
+            var adverseEventSettingsDto = _adverseEventSettingsRepository.GetData(projectId);
             return Ok(adverseEventSettingsDto);
         }
 
@@ -90,10 +83,24 @@ namespace GSC.Api.Controllers.AdverseEvent
         }
 
         [HttpGet]
-        [Route("GetTemplateDropDownforAEReporting/{visitId}")]
-        public IActionResult GetTemplateDropDownforAEReporting(int visitId)
+        [Route("GetTemplateDropDownforPatientAEReporting/{visitId}")]
+        public IActionResult GetTemplateDropDownforPatientAEReporting(int visitId)
         {
-            return Ok(_adverseEventSettingsRepository.GetTemplateDropDownforAEReporting(visitId));
+            return Ok(_adverseEventSettingsRepository.GetTemplateDropDownforPatientAEReporting(visitId));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateDropDownforInvestigatorAEReporting/{visitId}")]
+        public IActionResult GetTemplateDropDownforInvestigatorAEReporting(int visitId)
+        {
+            return Ok(_adverseEventSettingsRepository.GetTemplateDropDownforInvestigatorAEReporting(visitId));
+        }
+
+        [HttpGet]
+        [Route("GetAdverseEventSettingsVariableValue/{projectDesignTemplateId}")]
+        public IActionResult GetAdverseEventSettingsVariableValue(int projectDesignTemplateId)
+        {
+            return Ok(_adverseEventSettingsRepository.GetAdverseEventSettingsVariableValue(projectDesignTemplateId));
         }
 
     }

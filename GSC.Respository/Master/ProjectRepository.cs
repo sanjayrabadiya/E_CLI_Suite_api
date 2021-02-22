@@ -447,7 +447,8 @@ namespace GSC.Respository.Master
             var editCheckDetailsDto = new EditCheckDetailsDto();
 
             siteDetailsDto.NoofSite = GetNoOfSite(projectId);
-            siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.CountryId).Select(t => t.Key).Count();
+            //siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.CountryId).Select(t => t.Key).Count();
+            siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.ManageSite.City.State.Country.Id).Select(t => t.Key).Count();
             siteDetailsDto.MarkAsCompleted = All.Any(x => x.ParentProjectId == projectId && x.DeletedDate == null);
 
             var projectDeisgn = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();

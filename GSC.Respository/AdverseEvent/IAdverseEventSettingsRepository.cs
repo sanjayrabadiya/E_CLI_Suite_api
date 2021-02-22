@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.AdverseEvent;
 using System;
@@ -11,6 +12,10 @@ namespace GSC.Respository.AdverseEvent
     {
         IList<DropDownDto> GetVisitDropDownforAEReportingPatientForm(int projectId);
         IList<DropDownDto> GetVisitDropDownforAEReportingInvestigatorForm(int projectId);
-        IList<DropDownDto> GetTemplateDropDownforAEReporting(int visitId);
+        IList<DropDownDto> GetTemplateDropDownforPatientAEReporting(int visitId);
+        IList<DropDownDto> GetTemplateDropDownforInvestigatorAEReporting(int visitId);
+        IList<AdverseEventSettingsVariableValue> GetAdverseEventSettingsVariableValue(int projectDesignTemplateId);
+        AdverseEventSettingsDto GetData(int projectId);
+
     }
 }

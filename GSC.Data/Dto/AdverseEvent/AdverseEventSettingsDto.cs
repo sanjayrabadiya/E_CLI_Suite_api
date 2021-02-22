@@ -8,12 +8,23 @@ namespace GSC.Data.Dto.AdverseEvent
     public class AdverseEventSettingsDto : BaseDto
     {
         public int ProjectId { get; set; }
-        public int? ProjectDesignTemplateIdPatient { get; set; }
-        public int? ProjectDesignTemplateIdInvestigator { get; set; }
+        public int ProjectDesignTemplateIdPatient { get; set; }
+        public int ProjectDesignTemplateIdInvestigator { get; set; }
         public int? ProjectDesignVisitIdPatient { get; set; }
         public int? ProjectDesignVisitIdInvestigator { get; set; }
         public int SeveritySeqNo1 { get; set; }
         public int SeveritySeqNo2 { get; set; }
         public int SeveritySeqNo3 { get; set; }
+        public List<AdverseEventSettingsVariableValue> variableValues { get; set; }
+    }
+
+    public class AdverseEventSettingsVariableValue
+    {
+        public int ProjectDesignVariableId { get; set; }
+        public int ProjectDesignVariableValueId { get; set; }
+        public string Value { get; set; }
+        public int SeqNo { get; set; }
+        public int SeveritySeqNo { get; set; }
+        public string Severity { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace GSC.Respository.AdverseEvent
     {
         List<AEReportingDto> GetAEReportingList();
         List<AEReportingGridDto> GetAEReportingGridData(int projectId);
-        AEReportingForm GetAEReportingForm();
+        DesignScreeningTemplateDto GetAEReportingForm();
         AEReportingDto GetAEReportingFilledForm(int id);
         ScreeningDetailsforAE GetScreeningDetailsforAE(int id);
     }

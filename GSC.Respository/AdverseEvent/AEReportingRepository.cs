@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
+using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.AdverseEvent;
@@ -7,6 +8,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Attendance;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Screening;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +28,8 @@ namespace GSC.Respository.AdverseEvent
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IAEReportingValueRepository _aEReportingValueRepository;
-        private readonly IAdverseEventSettingsLanguageRepository _adverseEventSettingsLanguageRepository;
+        private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        private readonly IUnitOfWork _uow;
 
         public AEReportingRepository(IGSCContext context, 
             IJwtTokenAccesser jwtTokenAccesser,
@@ -35,7 +38,8 @@ namespace GSC.Respository.AdverseEvent
             IProjectRepository projectRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IAEReportingValueRepository aEReportingValueRepository,
-            IAdverseEventSettingsLanguageRepository adverseEventSettingsLanguageRepository) : base(context)
+            IScreeningTemplateRepository screeningTemplateRepository,
+            IUnitOfWork uow) : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -44,7 +48,8 @@ namespace GSC.Respository.AdverseEvent
             _projectRepository = projectRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _aEReportingValueRepository = aEReportingValueRepository;
-            _adverseEventSettingsLanguageRepository = adverseEventSettingsLanguageRepository;
+            _screeningTemplateRepository = screeningTemplateRepository;
+            _uow = uow;
         }
 
         public AEReportingDto GetAEReportingFilledForm(int id)
@@ -55,8 +60,7 @@ namespace GSC.Respository.AdverseEvent
             var randomization = _randomizationRepository.Find(aereportingdata.RandomizationId);
             if (randomization == null) return new AEReportingDto();
             var projectid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
-            var projectDesignTemplateId = _context.AdverseEventSettings.Where(x => x.ProjectId == projectid).ToList().FirstOrDefault().ProjectDesignTemplateIdPatient;
-            var data = _projectDesignTemplateRepository.GetTemplate((int)projectDesignTemplateId);
+            var data = _projectDesignTemplateRepository.GetTemplate(aereportingdata.ProjectDesignTemplateIdPatient);
             aereportingvalue.ForEach(t =>
             {
                 var variable = data.Variables.FirstOrDefault(v => v.ProjectDesignVariableId == t.ProjectDesignVariableId);
@@ -67,82 +71,33 @@ namespace GSC.Respository.AdverseEvent
                 }
             });
             aEReportingdto.template = data;
-            var severitydetails = GetSeverityDetails((int)projectid);
-            aEReportingdto.SeverityLabel1 = severitydetails.SeverityLabel1;
-            aEReportingdto.SeverityLabel2 = severitydetails.SeverityLabel2;
-            aEReportingdto.SeverityLabel3 = severitydetails.SeverityLabel3;
-            aEReportingdto.SeverityValue1 = severitydetails.SeverityValue1;
-            aEReportingdto.SeverityValue2 = severitydetails.SeverityValue2;
-            aEReportingdto.SeverityValue3 = severitydetails.SeverityValue3;
             return aEReportingdto;
         }
 
-       public AEReportingForm GetSeverityDetails(int projectid)
-        {
-            var aEReportingdto = new AEReportingForm();
-            var adverseeventsettings = _context.AdverseEventSettings.Where(x => x.ProjectId == projectid).ToList().FirstOrDefault();
-            aEReportingdto.SeverityValue1 = adverseeventsettings.SeveritySeqNo1;
-            aEReportingdto.SeverityValue2 = adverseeventsettings.SeveritySeqNo2;
-            aEReportingdto.SeverityValue3 = adverseeventsettings.SeveritySeqNo3;
-            //low  Uncomfortable but did not affect daily activities
-            //medium Bad enough to affect daily activities
-            //high Bad enough to be admitted to hospital
-            string SeverityLabel1 = "Uncomfortable but did not affect daily activities";
-            string SeverityLabel2 = "Bad enough to affect daily activities";
-            string SeverityLabel3 = "Bad enough to be admitted to hospital";
-            var languagedata = _adverseEventSettingsLanguageRepository.All.Where(x => x.LanguageId == _jwtTokenAccesser.Language && x.AdverseEventSettingsId == adverseeventsettings.Id).ToList();
-            if (languagedata != null && languagedata.Count > 0)
-            {
-                SeverityLabel1 = (languagedata.FirstOrDefault().LowSeverityDisplay == null || languagedata.FirstOrDefault().LowSeverityDisplay == "") ? SeverityLabel1 : languagedata.FirstOrDefault().LowSeverityDisplay;
-                SeverityLabel2 = (languagedata.FirstOrDefault().MediumSeverityDisplay == null || languagedata.FirstOrDefault().MediumSeverityDisplay == "") ? SeverityLabel2 : languagedata.FirstOrDefault().MediumSeverityDisplay;
-                SeverityLabel3 = (languagedata.FirstOrDefault().HighSeverityDisplay == null || languagedata.FirstOrDefault().HighSeverityDisplay == "") ? SeverityLabel3 : languagedata.FirstOrDefault().HighSeverityDisplay;
-            }
-            if (aEReportingdto.SeverityValue1 == 1)
-                aEReportingdto.SeverityLabel1 = SeverityLabel1;
-            if (aEReportingdto.SeverityValue2 == 1)
-                aEReportingdto.SeverityLabel2 = SeverityLabel1;
-            if (aEReportingdto.SeverityValue3 == 1)
-                aEReportingdto.SeverityLabel3 = SeverityLabel1;
-            if (aEReportingdto.SeverityValue1 == 2)
-                aEReportingdto.SeverityLabel1 = SeverityLabel2;
-            if (aEReportingdto.SeverityValue2 == 2)
-                aEReportingdto.SeverityLabel2 = SeverityLabel2;
-            if (aEReportingdto.SeverityValue3 == 2)
-                aEReportingdto.SeverityLabel3 = SeverityLabel2;
-            if (aEReportingdto.SeverityValue1 == 3)
-                aEReportingdto.SeverityLabel1 = SeverityLabel3;
-            if (aEReportingdto.SeverityValue2 == 3)
-                aEReportingdto.SeverityLabel2 = SeverityLabel3;
-            if (aEReportingdto.SeverityValue3 == 3)
-                aEReportingdto.SeverityLabel3 = SeverityLabel3;
-
-            return aEReportingdto;
-        }
-
-        public AEReportingForm GetAEReportingForm()
+       
+        public DesignScreeningTemplateDto GetAEReportingForm()
         {
             var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
-            if (randomization == null) return new AEReportingForm();
+            if (randomization == null) return new DesignScreeningTemplateDto();
             var projectid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             var projectDesignTemplateId = _context.AdverseEventSettings.Where(x => x.ProjectId == projectid).ToList().FirstOrDefault().ProjectDesignTemplateIdPatient;
-            var data = _projectDesignTemplateRepository.GetTemplate((int)projectDesignTemplateId);
-            var returndata = new AEReportingForm();
-            returndata = GetSeverityDetails((int)projectid);
-            returndata.template = data;
-            return returndata;
+            var data = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
+            return data;
         }
 
         public List<AEReportingGridDto> GetAEReportingGridData(int projectId)
         {
-            var aEData = All.Include(x => x.Randomization).Where(x => x.Randomization.ProjectId == projectId && x.DeletedDate == null).ToList();//FindByInclude(x => x.Randomization.ProjectId == projectId && x.DeletedDate == null).ToList();
+            var aEData = All.Include(x => x.Randomization).Include(x => x.AEReportingValueValues).Where(x => x.Randomization.ProjectId == projectId && x.DeletedDate == null).ToList();
             var aEGridData = aEData.Select(c => new AEReportingGridDto
             {
                 Id = c.Id,
                 SubjectName = c.Randomization.FirstName + " " + c.Randomization.LastName,
                 Initial = c.Randomization.Initial,
                 ScreeningNumber = c.Randomization.ScreeningNumber,
+                RandomizationNumber = c.Randomization.RandomizationNumber,
                 CreatedDate = c.CreatedDate,
-                EventEffectName = c.EventEffect.GetDescription(),
+                EventEffectName = GetEventEffectName(c.Id),
+                //EventEffectName = c.EventEffect.GetDescription(),
                 IsReviewedDone = c.IsReviewedDone,
                 ReviewStatus = c.IsReviewedDone == false ? "" : (c.IsApproved == true ? "Approved" : "Rejected"),
                 ApproveRejectDateTime = c.ApproveRejectDateTime,
@@ -150,6 +105,22 @@ namespace GSC.Respository.AdverseEvent
                 RejectReason = c.RejectReasonId == null ? "" : _context.AuditReason.Where(x => x.Id == c.RejectReasonId).ToList().FirstOrDefault().ReasonName,
             }).ToList();
             return aEGridData;
+        }
+
+        public string GetEventEffectName(int id)
+        {
+            var data = FindByInclude(x => x.Id == id, x => x.AEReportingValueValues).ToList().FirstOrDefault();
+            string eventname = "";
+            if (data.AEReportingValueValues.Where(x => x.ProjectDesignVariableId == data.ProjectDesignVariableIdForEvent).ToList().Count > 0)
+            {
+                if (data.AEReportingValueValues.Where(x => x.ProjectDesignVariableId == data.ProjectDesignVariableIdForEvent).ToList().FirstOrDefault().Value == data.SeveritySeqNo1.ToString())
+                    eventname = "Low";
+                else if (data.AEReportingValueValues.Where(x => x.ProjectDesignVariableId == data.ProjectDesignVariableIdForEvent).ToList().FirstOrDefault().Value == data.SeveritySeqNo2.ToString())
+                    eventname = "Medium";
+                else if (data.AEReportingValueValues.Where(x => x.ProjectDesignVariableId == data.ProjectDesignVariableIdForEvent).ToList().FirstOrDefault().Value == data.SeveritySeqNo3.ToString())
+                    eventname = "High";
+            }
+            return eventname;
         }
 
         public List<AEReportingDto> GetAEReportingList()
@@ -160,7 +131,7 @@ namespace GSC.Respository.AdverseEvent
             var datadtos = _mapper.Map<List<AEReportingDto>>(data);
             datadtos.ForEach(x =>
             {
-                x.EventEffectName = x.EventEffect.GetDescription();
+                x.EventEffectName = GetEventEffectName(x.Id);
             });
             return datadtos;
         }
@@ -171,7 +142,7 @@ namespace GSC.Respository.AdverseEvent
             var randomization = _randomizationRepository.Find(aereportingdata.RandomizationId);
             if (randomization == null) return new ScreeningDetailsforAE();
             var projectid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
-            var projectDesignTemplateId = _context.AdverseEventSettings.Where(x => x.ProjectId == projectid).ToList().FirstOrDefault().ProjectDesignTemplateIdInvestigator;
+            var projectDesignTemplateId = aereportingdata.ProjectDesignTemplateIdInvestigator;
             var projectDesignVisitId = _context.ProjectDesignTemplate.Where(x => x.Id == projectDesignTemplateId).ToList().FirstOrDefault().ProjectDesignVisitId;
             var data = new ScreeningDetailsforAE();
             data.ProjectId = randomization.ProjectId;
@@ -181,12 +152,34 @@ namespace GSC.Respository.AdverseEvent
             if (entry == null || entry.Count <= 0)
             {
                 return new ScreeningDetailsforAE();
-            } 
+            }
             data.ScreeningEntryId = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).ToList().FirstOrDefault().Id;
             data.ProjectDesignPeriodId = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).ToList().FirstOrDefault().ProjectDesignPeriodId;
             data.ScreeningVisitId = _context.ScreeningVisit.Where(x => x.ScreeningEntryId == data.ScreeningEntryId && x.ProjectDesignVisitId == projectDesignVisitId).ToList().FirstOrDefault().Id;
-            data.ScreeningTemplateId = _context.ScreeningTemplate.Where(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == projectDesignTemplateId).ToList().FirstOrDefault().Id;
-            data.Status = _context.ScreeningTemplate.Where(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == projectDesignTemplateId).ToList().FirstOrDefault().Status;
+            if (aereportingdata.ScreeningTemplateId == null)
+            {
+                var screeningtemplates = _context.ScreeningTemplate.Where(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == data.ProjectDesignTemplateId && x.Status == Helper.ScreeningTemplateStatus.Pending).ToList();
+                if (screeningtemplates.Count > 0)
+                {
+                    data.ScreeningTemplateId = screeningtemplates.FirstOrDefault().Id;
+                    data.Status = screeningtemplates.FirstOrDefault().Status;
+                    aereportingdata.ScreeningTemplateId = data.ScreeningTemplateId;
+                    Update(aereportingdata);
+                } else
+                {
+                    var parentscreeningTemplateId = _screeningTemplateRepository.FindBy(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == data.ProjectDesignTemplateId && x.ParentId == null).ToList().FirstOrDefault().Id;
+                    var repeatScreeningTemplate = _screeningTemplateRepository.TemplateRepeat(parentscreeningTemplateId);
+                    _uow.Save();
+                    data.ScreeningTemplateId = repeatScreeningTemplate.Id;
+                    data.Status = repeatScreeningTemplate.Status;
+                    aereportingdata.ScreeningTemplateId = data.ScreeningTemplateId;
+                    Update(aereportingdata);
+                }
+            } else
+            {
+                data.ScreeningTemplateId = _context.ScreeningTemplate.Where(x => x.Id == (int)aereportingdata.ScreeningTemplateId).ToList().FirstOrDefault().Id;
+                data.Status = _context.ScreeningTemplate.Where(x => x.Id == (int)aereportingdata.ScreeningTemplateId).ToList().FirstOrDefault().Status;
+            }
             return data;
         }
     }

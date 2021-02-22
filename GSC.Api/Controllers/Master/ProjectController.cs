@@ -103,6 +103,11 @@ namespace GSC.Api.Controllers.Master
 
             if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null).ToList().Count > 0)
+                {
+                    ModelState.AddModelError("Message", "This site is already exist, please select other site.");
+                    return BadRequest(ModelState);
+                }
                 var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPost(project);
                 if (!string.IsNullOrEmpty(CheckAttendanceLimit))
                 {
@@ -253,6 +258,11 @@ namespace GSC.Api.Controllers.Master
 
             if (projectDto.ParentProjectId > 0)
             {
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.Id != projectDto.Id && x.DeletedDate == null).ToList().Count > 0)
+                {
+                    ModelState.AddModelError("Message", "This site is already exist, please select other site.");
+                    return BadRequest(ModelState);
+                }
                 var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPut(project);
                 if (!string.IsNullOrEmpty(CheckAttendanceLimit))
                 {

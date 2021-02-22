@@ -217,6 +217,11 @@ namespace GSC.Api.Controllers.Attendance
             var randomization = _randomizationRepository.Find(id);
             if (!_environmentSetting.Value.IsPremise)
             {
+                if (type == 1 && (randomization.Email == null || randomization.Email == ""))
+                {
+                    ModelState.AddModelError("Message", "Email is not set for this patient");
+                    return BadRequest(ModelState);
+                }
                 var userdata = _userRepository.Find((int)randomization.UserId);
                 var user = new UserViewModel();
                 user = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userdata.UserName}");

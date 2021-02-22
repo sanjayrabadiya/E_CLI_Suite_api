@@ -11,15 +11,7 @@ namespace GSC.Data.Dto.AdverseEvent
     public class AEReportingDto : BaseDto
     {
         public int RandomizationId { get; set; }
-        //public string EventDescription { get; set; }
-        //private DateTime _StartDate { get; set; }
-        //public DateTime StartDate
-        //{
-        //    get => _StartDate.UtcDate();
-        //    set => _StartDate = value.UtcDate();
-        //}
         public DateTime? CreatedDate { get; set; }
-        public AdverseEventEffect EventEffect { get; set; }
         public bool IsReviewedDone { get; set; }
         public int? ReviewedByUser { get; set; }
         public int? ReviewedByRole { get; set; }
@@ -35,12 +27,13 @@ namespace GSC.Data.Dto.AdverseEvent
         public int? RejectReasonId { get; set; }
         public string? RejectReasonOth { get; set; }
         public DateTime? ApproveRejectDateTime { get; set; }
-        public int SeverityValue1 { get; set; }
-        public int SeverityValue2 { get; set; }
-        public int SeverityValue3 { get; set; }
-        public string SeverityLabel1 { get; set; }
-        public string SeverityLabel2 { get; set; }
-        public string SeverityLabel3 { get; set; }
+        public int ProjectDesignTemplateIdPatient { get; set; }
+        public int ProjectDesignTemplateIdInvestigator { get; set; }
+        public int SeveritySeqNo1 { get; set; }
+        public int SeveritySeqNo2 { get; set; }
+        public int SeveritySeqNo3 { get; set; }
+        public int ProjectDesignVariableIdForEvent { get; set; }
+        public int? ScreeningTemplateId { get; set; }
 
     }
 
@@ -48,6 +41,7 @@ namespace GSC.Data.Dto.AdverseEvent
     {
         public string SubjectName { get; set; }
         public string ScreeningNumber { get; set; }
+        public string RandomizationNumber { get; set; }
         public string Initial { get; set; }
         public string EventDescription { get; set; }
         public string ReviewStatus { get; set; }
@@ -78,15 +72,4 @@ namespace GSC.Data.Dto.AdverseEvent
 
     }
 
-    public class AEReportingForm
-    {
-        public DesignScreeningTemplateDto template { get; set; }
-        public int SeverityValue1 { get; set; }
-        public int SeverityValue2 { get; set; }
-        public int SeverityValue3 { get; set; }
-        public string SeverityLabel1 { get; set; }
-        public string SeverityLabel2 { get; set; }
-        public string SeverityLabel3 { get; set; }
-
-    }
 }

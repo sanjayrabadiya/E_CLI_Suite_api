@@ -7,6 +7,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.AdverseEvent;
+using GSC.Domain.Context;
 using GSC.Respository.AdverseEvent;
 using GSC.Respository.Attendance;
 using GSC.Respository.EmailSender;
@@ -33,6 +34,7 @@ namespace GSC.Api.Controllers.AdverseEvent
         private readonly IProjectRepository _projectRepository;
         private readonly IUnitOfWork _uow;
         private readonly IAEReportingValueRepository _aEReportingValueRepository;
+        private readonly IGSCContext _context;
         public AEReportingController(IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper,
             IAEReportingRepository iAEReportingRepository,
@@ -42,7 +44,8 @@ namespace GSC.Api.Controllers.AdverseEvent
             IUserRepository usersRepository,
             IEmailSenderRespository emailSenderRespository,
             IProjectRepository projectRepository,
-            IAEReportingValueRepository aEReportingValueRepository
+            IAEReportingValueRepository aEReportingValueRepository,
+            IGSCContext context
             )
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -55,6 +58,7 @@ namespace GSC.Api.Controllers.AdverseEvent
             _emailSenderRespository = emailSenderRespository;
             _projectRepository = projectRepository;
             _aEReportingValueRepository = aEReportingValueRepository;
+            _context = context;
         }
 
         [HttpGet("GetAEReportingList")]
@@ -78,10 +82,11 @@ namespace GSC.Api.Controllers.AdverseEvent
             return Ok(data);
         }
 
-        [HttpGet("GetScreeningDetailsforAE/{id}")]
+        [HttpPost("GetScreeningDetailsforAE/{id}")]
         public IActionResult GetScreeningDetailsforAE(int id)
         {
             var data = _iAEReportingRepository.GetScreeningDetailsforAE(id);
+            _uow.Save();
             return Ok(data);
         }
 
@@ -106,6 +111,14 @@ namespace GSC.Api.Controllers.AdverseEvent
             }
             aEReporting.RandomizationId = randomization.Id;
             aEReporting.IsReviewedDone = false;
+            var parentprojectId = _context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault().ParentProjectId;
+            var adverseeventsettings = _context.AdverseEventSettings.Where(x => x.ProjectId == parentprojectId).ToList().FirstOrDefault();
+            aEReporting.ProjectDesignTemplateIdInvestigator = adverseeventsettings.ProjectDesignTemplateIdInvestigator;
+            aEReporting.ProjectDesignTemplateIdPatient = adverseeventsettings.ProjectDesignTemplateIdPatient;
+            aEReporting.SeveritySeqNo1 = adverseeventsettings.SeveritySeqNo1;
+            aEReporting.SeveritySeqNo2 = adverseeventsettings.SeveritySeqNo2;
+            aEReporting.SeveritySeqNo3 = adverseeventsettings.SeveritySeqNo3;
+            aEReporting.ProjectDesignVariableIdForEvent = (int)aEReportingDto.template.Variables.Where(x => x.CollectionSource == Helper.CollectionSources.RadioButton).ToList().FirstOrDefault().ProjectDesignVariableId;
             _iAEReportingRepository.Add(aEReporting);
             _uow.Save();
             for (int i = 0; i <= aEReportingDto.template.Variables.Count - 1; i++)

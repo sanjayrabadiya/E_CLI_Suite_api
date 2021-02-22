@@ -561,7 +561,7 @@ namespace GSC.Respository.Attendance
             if (All.Any(x =>
                 x.Id != objSave.Id && x.ScreeningNumber == objSave.ScreeningNumber &&
                 x.ProjectId == projectId &&
-                x.DeletedDate == null)) return "Duplicate ScreeningNumber Number : " + objSave.ScreeningNumber;
+                x.DeletedDate == null)) return "Duplicate Screening Number : " + objSave.ScreeningNumber;
 
             if (All.Any(x =>
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&
