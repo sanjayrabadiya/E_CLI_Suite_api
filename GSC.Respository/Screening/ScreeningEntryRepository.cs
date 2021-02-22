@@ -208,7 +208,7 @@ namespace GSC.Respository.Screening
 
             var screningVisit = screeningEntry.ScreeningVisit.Where(x => x.ProjectDesignVisitId == saveRandomizationDto.ProjectDesignVisitId).FirstOrDefault();
 
-            if (screningVisit != null)
+            if (screningVisit != null && screningVisit.IsSchedule)
             {
                 _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
                 _context.Save();
@@ -216,8 +216,6 @@ namespace GSC.Respository.Screening
                 _screeningVisitRepository.ScheduleVisitUpdate(screeningEntry.Id);
 
             }
-
-
 
             return screeningEntry;
         }
