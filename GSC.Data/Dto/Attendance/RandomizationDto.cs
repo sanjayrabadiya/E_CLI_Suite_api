@@ -141,6 +141,7 @@ namespace GSC.Data.Dto.Attendance
         public int RandomizationNoseries { get; set; }
         public int ProjectId { get; set; }
         public int ParentProjectId { get; set; }
+        public bool IsTestSite { get; set; }
 
     }
 }

@@ -120,15 +120,18 @@ namespace GSC.Respository.Attendance
             randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
 
             Update(randomization);
-            int projectidforRandomNo = 0;
-            if (randomizationNumberDto.IsSiteDependentRandomNo == true)
-                projectidforRandomNo = randomizationNumberDto.ProjectId;
-            else
-                projectidforRandomNo = randomizationNumberDto.ParentProjectId;
+            if (!randomizationNumberDto.IsTestSite)
+            {
+                int projectidforRandomNo = 0;
+                if (randomizationNumberDto.IsSiteDependentRandomNo == true)
+                    projectidforRandomNo = randomizationNumberDto.ProjectId;
+                else
+                    projectidforRandomNo = randomizationNumberDto.ParentProjectId;
 
-            var projectRandom = _projectRepository.Find(projectidforRandomNo);
-            projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
-            _projectRepository.Update(projectRandom);
+                var projectRandom = _projectRepository.Find(projectidforRandomNo);
+                projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
+                _projectRepository.Update(projectRandom);
+            }
         }
 
         public void SaveScreeningNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -149,15 +152,18 @@ namespace GSC.Respository.Attendance
                 randomization.PatientStatusId = ScreeningPatientStatus.Screening;
 
             Update(randomization);
-            int projectidforscreeningNo = 0;
-            if (randomizationNumberDto.IsSiteDependentScreeningNo == true)
-                projectidforscreeningNo = randomizationNumberDto.ProjectId;
-            else
-                projectidforscreeningNo = randomizationNumberDto.ParentProjectId;
+            if (!randomizationNumberDto.IsTestSite)
+            {
+                int projectidforscreeningNo = 0;
+                if (randomizationNumberDto.IsSiteDependentScreeningNo == true)
+                    projectidforscreeningNo = randomizationNumberDto.ProjectId;
+                else
+                    projectidforscreeningNo = randomizationNumberDto.ParentProjectId;
 
-            var projectSeries = _projectRepository.Find(projectidforscreeningNo);
-            projectSeries.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
-            _projectRepository.Update(projectSeries);
+                var projectSeries = _projectRepository.Find(projectidforscreeningNo);
+                projectSeries.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
+                _projectRepository.Update(projectSeries);
+            } 
         }
 
         //public void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto)
@@ -331,13 +337,6 @@ namespace GSC.Respository.Attendance
             randomizationNumberDto.RandomNoLength = studydata.RandomNoLength;
             //randomizationNumberDto.PrefixRandomNo = studydata.PrefixRandomNo;
 
-            if (sitedata.IsTestSite)
-            {
-                var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.RandomizationNumber != null).Count() + 1;
-                randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
-                return randomizationNumberDto;
-            }
-
             if (studydata.IsManualRandomNo == true)
             {
                 randomizationNumberDto.RandomizationNumber = "";
@@ -357,6 +356,13 @@ namespace GSC.Respository.Attendance
                 }
 
                 randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+            }
+            randomizationNumberDto.IsTestSite = sitedata.IsTestSite;
+            if (sitedata.IsTestSite)
+            {
+                var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.RandomizationNumber != null).Count() + 1;
+                randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                return randomizationNumberDto;
             }
             return randomizationNumberDto;
         }
@@ -398,15 +404,6 @@ namespace GSC.Respository.Attendance
             randomizationNumberDto.ScreeningLength = studydata.ScreeningLength;
             //randomizationNumberDto.PrefixScreeningNo = studydata.PrefixScreeningNo;
 
-            if (sitedata.IsTestSite)
-            {
-                var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.ScreeningNumber != null).Count() + 1;
-                randomizationNumberDto.ScreeningNumber = "TS -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
-                //  randomizationNumberDto.RandomizationNumber = "TestRnd -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
-                return randomizationNumberDto;
-            }
-
-
             if (studydata.IsManualScreeningNo == true)
             {
                 randomizationNumberDto.ScreeningNumber = "";
@@ -425,6 +422,14 @@ namespace GSC.Respository.Attendance
                     randomizationNumberDto.ScreeningNoseries = studydata.ScreeningNoseries;
                 }
                 randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+            }
+            randomizationNumberDto.IsTestSite = sitedata.IsTestSite;
+            if (sitedata.IsTestSite)
+            {
+                var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.ScreeningNumber != null).Count() + 1;
+                randomizationNumberDto.ScreeningNumber = "TS -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                //  randomizationNumberDto.RandomizationNumber = "TestRnd -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                return randomizationNumberDto;
             }
             return randomizationNumberDto;
         }

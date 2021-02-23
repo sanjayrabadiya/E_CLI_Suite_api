@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.InformConcent
 
         [HttpGet]
         [Route("GetEconsentChat/{userid}")]
-        public IActionResult GetChatUsersList(int userid)
+        public IActionResult GetEconsentChat(int userid)
         {
             var data = _econsentChatRepository.GetEconsentChat(userid);
             return Ok(data);

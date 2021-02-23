@@ -35,36 +35,69 @@ namespace GSC.Respository.InformConcent
 
         public List<EConsentUserChatDto> GetChatUsersList()
         {
-            var users = _userRepository.FindBy(x => x.Id != _jwtTokenAccesser.UserId && x.DeletedDate == null && x.IsLocked == false).ToList();
-            var userschat = _mapper.Map<List<EConsentUserChatDto>>(users);
-            userschat.ForEach(e =>
+            var user = _userRepository.Find(_jwtTokenAccesser.UserId);
+            var users = new List<User>();
+            if (user.UserType == Shared.Generic.UserMasterUserType.Patient)
             {
-                IList<int> intList = new List<int>() { e.Id, _jwtTokenAccesser.UserId };
+                users = _userRepository.FindBy(x => x.Id != _jwtTokenAccesser.UserId && x.DeletedDate == null && x.IsLocked == false && x.UserType != Shared.Generic.UserMasterUserType.Patient &&
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)).ToList();
+            } else
+            {
+                var userids = new List<int>();
+                userids = _context.Randomization.Where(x => x.PatientStatusId != Helper.ScreeningPatientStatus.Completed && x.PatientStatusId != Helper.ScreeningPatientStatus.ScreeningFailure && x.DeletedDate == null && x.UserId != null).Select(x => (int)x.UserId).ToList();
+                users = _userRepository.FindBy(x => x.Id != _jwtTokenAccesser.UserId && x.DeletedDate == null && userids.Contains(x.Id) && x.IsLocked == false && x.UserType == Shared.Generic.UserMasterUserType.Patient &&
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)).ToList();
+            }
+            var userschat = _mapper.Map<List<EConsentUserChatDto>>(users);
+
+            for (int i = 0; i <= userschat.Count - 1; i++)
+            {
+                IList<int> intList = new List<int>() { userschat[i].Id, _jwtTokenAccesser.UserId };
                 var chatobj = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).ToList().OrderBy(t => t.SendDateTime).ToList().LastOrDefault();
-                e.LastMessage = chatobj == null ? "" : chatobj.Message;
-                e.UnReadMsgCount = FindBy(x => x.SenderId == e.Id && x.IsRead == false).ToList().Count;
+                userschat[i].LastMessage = chatobj == null ? "" : chatobj.Message;
+                userschat[i].UnReadMsgCount = FindBy(x => x.SenderId == userschat[i].Id && x.IsRead == false).ToList().Count;
                 if (chatobj != null)
                 {
                     if (chatobj.ReceiverId == _jwtTokenAccesser.UserId)
-                    {
-                        e.LastMessageStatus = "";
-                    }
+                        userschat[i].LastMessageStatus = "";
                     else if (chatobj.IsDelivered == false)
-                    {
-                        e.LastMessageStatus = "S";
-                    }
+                        userschat[i].LastMessageStatus = "S";
                     else if (chatobj.IsDelivered == true && chatobj.IsRead == false)
-                    {
-                        e.LastMessageStatus = "D";
-                    }
+                        userschat[i].LastMessageStatus = "D";
                     else if (chatobj.IsRead == true)
-                    {
-                        e.LastMessageStatus = "R";
-                    }
+                        userschat[i].LastMessageStatus = "R";
                 }
-                else e.LastMessageStatus = "";
+                else
+                    userschat[i].LastMessageStatus = "";
+            }
+            //userschat.ForEach(e =>
+            //{
+            //    IList<int> intList = new List<int>() { e.Id, _jwtTokenAccesser.UserId };
+            //    var chatobj = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).ToList().OrderBy(t => t.SendDateTime).ToList().LastOrDefault();
+            //    e.LastMessage = chatobj == null ? "" : chatobj.Message;
+            //    e.UnReadMsgCount = FindBy(x => x.SenderId == e.Id && x.IsRead == false).ToList().Count;
+            //    if (chatobj != null)
+            //    {
+            //        if (chatobj.ReceiverId == _jwtTokenAccesser.UserId)
+            //        {
+            //            e.LastMessageStatus = "";
+            //        }
+            //        else if (chatobj.IsDelivered == false)
+            //        {
+            //            e.LastMessageStatus = "S";
+            //        }
+            //        else if (chatobj.IsDelivered == true && chatobj.IsRead == false)
+            //        {
+            //            e.LastMessageStatus = "D";
+            //        }
+            //        else if (chatobj.IsRead == true)
+            //        {
+            //            e.LastMessageStatus = "R";
+            //        }
+            //    }
+            //    else e.LastMessageStatus = "";
                 
-            });
+            //});
             return userschat;
         }
 
