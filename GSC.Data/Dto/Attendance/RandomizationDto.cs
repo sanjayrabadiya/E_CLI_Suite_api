@@ -14,12 +14,12 @@ namespace GSC.Data.Dto.Attendance
         public string MiddleName { get; set; }
         public string LastName { get; set; }
         public string Initial { get; set; }
-        public DateTime? _DateOfBirth { get; set; }
-        public DateTime? DateOfBirth
-        {
-            get => _DateOfBirth.UtcDate();
-            set => _DateOfBirth = value.UtcDate();
-        }
+        public DateTime? DateOfBirth { get; set; }
+        //public DateTime? DateOfBirth
+        //{
+        //    get => _DateOfBirth.UtcDate();
+        //    set => _DateOfBirth = value.UtcDate();
+       // }
         public int? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
@@ -41,19 +41,19 @@ namespace GSC.Data.Dto.Attendance
         public int? StateId { get; set; }
         public int? CountryId { get; set; }
         public string ScreeningNumber { get; set; }
-        public DateTime? _DateOfScreening { get; set; }
-        public DateTime? DateOfScreening
-        {
-            get => _DateOfScreening.UtcDate();
-            set => _DateOfScreening = value.UtcDate();
-        }
+        public DateTime? DateOfScreening { get; set; }
+        //public DateTime? DateOfScreening
+        //{
+        //    get => _DateOfScreening.UtcDate();
+        //    set => _DateOfScreening = value.UtcDate();
+        //}
         public string RandomizationNumber { get; set; }
-        public DateTime? _DateOfRandomization { get; set; }
-        public DateTime? DateOfRandomization
-        {
-            get => _DateOfRandomization.UtcDate();
-            set => _DateOfRandomization = value.UtcDate();
-        }
+        public DateTime? DateOfRandomization { get; set; }
+        //public DateTime? DateOfRandomization
+        //{
+        //    get => _DateOfRandomization.UtcDate();
+        //    set => _DateOfRandomization = value.UtcDate();
+        //}
         public int ParentProjectId { get; set; }
         public int? CompanyId { get; set; }
         public bool IsLocked { get; set; }
@@ -66,12 +66,12 @@ namespace GSC.Data.Dto.Attendance
         public string MiddleName { get; set; }
         public string LastName { get; set; }
         public string Initial { get; set; }
-        public DateTime? _DateOfBirth { get; set; }
-        public DateTime? DateOfBirth
-        {
-            get => _DateOfBirth.UtcDate();
-            set => _DateOfBirth = value.UtcDate();
-        }
+        public DateTime? DateOfBirth { get; set; }
+        //public DateTime? DateOfBirth
+        //{
+        //    get => _DateOfBirth.UtcDate();
+        //    set => _DateOfBirth = value.UtcDate();
+        //}
         public int? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
@@ -93,19 +93,19 @@ namespace GSC.Data.Dto.Attendance
         public int? StateId { get; set; }
         public int? CountryId { get; set; }
         public string ScreeningNumber { get; set; }
-        public DateTime? _DateOfScreening { get; set; }
-        public DateTime? DateOfScreening
-        {
-            get => _DateOfScreening.UtcDate();
-            set => _DateOfScreening = value.UtcDate();
-        }
+        public DateTime? DateOfScreening { get; set; }
+        //public DateTime? DateOfScreening
+        //{
+        //    get => _DateOfScreening.UtcDate();
+        //    set => _DateOfScreening = value.UtcDate();
+        //}
         public string RandomizationNumber { get; set; }
-        public DateTime? _DateOfRandomization { get; set; }
-        public DateTime? DateOfRandomization
-        {
-            get => _DateOfRandomization.UtcDate();
-            set => _DateOfRandomization = value.UtcDate();
-        }
+        public DateTime? DateOfRandomization { get; set; }
+        //public DateTime? DateOfRandomization
+        //{
+        //    get => _DateOfRandomization.UtcDate();
+        //    set => _DateOfRandomization = value.UtcDate();
+        //}
 
         public string Language { get; set; }
         public string ParentProjectCode { get; set; }
