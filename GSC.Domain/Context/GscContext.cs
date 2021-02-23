@@ -308,8 +308,7 @@ namespace GSC.Domain.Context
         public DbSet<AdverseEventSettings> AdverseEventSettings { get; set; }
         public DbSet<AEReportingValue> AEReportingValue { get; set; }
         public DbSet<EtmfUserPermission> EtmfUserPermission { get; set; }
-        public DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }
-        public DbSet<ReleaseSetting> ReleaseSetting { get; set; }
+        public DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }   
         public DbSet<PhaseManagement> PhaseManagement { get; set; }
         public DbSet<ResourceType> ResourceType { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

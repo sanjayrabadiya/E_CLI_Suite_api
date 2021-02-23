@@ -6,6 +6,6 @@ namespace GSC.Respository.UserMgt
 {
     public interface IReleaseSettingRepository : IGenericRepository<ReleaseSetting>
     {
-        ReleaseSettingDto GetVersionNum();
+        //ReleaseSettingDto GetVersionNum();
     }
 }

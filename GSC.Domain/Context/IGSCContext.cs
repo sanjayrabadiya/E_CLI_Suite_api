@@ -264,7 +264,7 @@ namespace GSC.Domain.Context
         DbSet<AEReportingValue> AEReportingValue { get; set; }
         DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }
 
-        DbSet<ReleaseSetting> ReleaseSetting { get; set; }
+       
         DbSet<PhaseManagement> PhaseManagement { get; set; }
         DbSet<ResourceType> ResourceType { get; set; }
     }

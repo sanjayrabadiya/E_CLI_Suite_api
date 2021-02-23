@@ -32,7 +32,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly ICentreUserService _centreUserService;
         private readonly IMapper _mapper;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
-        private readonly IReleaseSettingRepository _releaseSettingRepository;
+     
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -43,8 +43,8 @@ namespace GSC.Api.Controllers.UserMgt
             IConfiguration configuration,
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService, IMapper mapper,
-            ILoginPreferenceRepository loginPreferenceRepository,
-            IReleaseSettingRepository releaseSettingRepository)
+            ILoginPreferenceRepository loginPreferenceRepository
+            )
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -55,8 +55,7 @@ namespace GSC.Api.Controllers.UserMgt
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
             _mapper = mapper;
-            _loginPreferenceRepository = loginPreferenceRepository;
-            _releaseSettingRepository = releaseSettingRepository;
+            _loginPreferenceRepository = loginPreferenceRepository;         
         }
 
         [HttpPost]
@@ -407,14 +406,14 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(user);
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("VersionNum")]
-        public ActionResult VersionNum()
-        {
-            var VersionNum = _releaseSettingRepository.GetVersionNum();
-            return Ok(VersionNum);
+        //[HttpGet]
+        //[AllowAnonymous]
+        //[Route("VersionNum")]
+        //public ActionResult VersionNum()
+        //{
+        //    var VersionNum = _releaseSettingRepository.GetVersionNum();
+        //    return Ok(VersionNum);
                 
-        }
+        //}
     }
 }

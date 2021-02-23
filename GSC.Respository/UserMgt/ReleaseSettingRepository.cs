@@ -26,16 +26,16 @@ namespace GSC.Respository.UserMgt
         }
 
 
-        public ReleaseSettingDto GetVersionNum()
-        {
-            var releasesetting = _context.ReleaseSetting
-                     .Select(c => new ReleaseSettingDto
-                     {
-                         Id = c.Id,
-                         VersionNumber = c.VersionNumber
-                     }).OrderByDescending(o => o.Id).ToList();
+        //public ReleaseSettingDto GetVersionNum()
+        //{
+        //    var releasesetting = _context.ReleaseSetting
+        //             .Select(c => new ReleaseSettingDto
+        //             {
+        //                 Id = c.Id,
+        //                 VersionNumber = c.VersionNumber
+        //             }).OrderByDescending(o => o.Id).ToList();
 
-            return releasesetting.FirstOrDefault();
-        }
+        //    return releasesetting.FirstOrDefault();
+        //}
     }
 }
