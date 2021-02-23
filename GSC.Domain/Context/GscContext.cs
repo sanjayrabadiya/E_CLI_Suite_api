@@ -16,6 +16,7 @@ using GSC.Data.Entities.Barcode.Generate;
 using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.InformConcent;
@@ -305,6 +306,9 @@ namespace GSC.Domain.Context
         public DbSet<VariableCategoryLanguage> VariableCategoryLanguage { get; set; }
         public DbSet<AEReporting> AEReporting { get; set; }
         public DbSet<AdverseEventSettings> AdverseEventSettings { get; set; }
+        public DbSet<ReleaseSetting> ReleaseSetting { get; set; }
+        public DbSet<PhaseManagement> PhaseManagement { get; set; }
+        public DbSet<ResourceType> ResourceType { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

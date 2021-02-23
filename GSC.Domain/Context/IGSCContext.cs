@@ -9,6 +9,7 @@ using GSC.Data.Entities.Barcode.Generate;
 using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.InformConcent;
@@ -259,6 +260,8 @@ namespace GSC.Domain.Context
         DbSet<ScreeningTemplateEditCheckValue> ScreeningTemplateEditCheckValue { get; set; }
         DbSet<AEReporting> AEReporting { get; set; }
         DbSet<AdverseEventSettings> AdverseEventSettings { get; set; }
-
+        DbSet<ReleaseSetting> ReleaseSetting { get; set; }
+        DbSet<PhaseManagement> PhaseManagement { get; set; }
+        DbSet<ResourceType> ResourceType { get; set; }
     }
 }

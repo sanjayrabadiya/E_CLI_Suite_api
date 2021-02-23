@@ -41,6 +41,7 @@ using GSC.Shared.Caching;
 using GSC.Common.Common;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.AdverseEvent;
+using GSC.Respository.CTMS;
 
 namespace GSC.Api.Helpers
 {
@@ -291,6 +292,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVariableCategoryLanguageRepository, VariableCategoryLanguageRepository>();
             services.AddScoped<IAEReportingRepository, AEReportingRepository>();
             services.AddScoped<IAdverseEventSettingsRepository, AdverseEventSettingsRepository>();
+            services.AddScoped<IReleaseSettingRepository, ReleaseSettingRepository>();
+            services.AddScoped<IPhaseManagementRepository, PhaseManagementRepository>();
+            services.AddScoped<IResourceTypeRepository, ResourceTypeRepository>();
+
 
         }
     }

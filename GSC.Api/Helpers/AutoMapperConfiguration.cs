@@ -7,6 +7,7 @@ using GSC.Data.Dto.Barcode.Generate;
 using GSC.Data.Dto.Client;
 using GSC.Data.Dto.Common;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Custom;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.InformConcent;
@@ -32,6 +33,7 @@ using GSC.Data.Entities.Barcode.Generate;
 using GSC.Data.Entities.Client;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.InformConcent;
@@ -296,6 +298,8 @@ namespace GSC.Api.Helpers
             CreateMap<VariableCategory, VariableCategoryDto>().ReverseMap();
             CreateMap<AEReporting, AEReportingDto>().ReverseMap();
             CreateMap<AdverseEventSettings, AdverseEventSettingsDto>().ReverseMap();
+            CreateMap<PhaseManagement, PhaseManagementDto>().ReverseMap();
+            CreateMap<ResourceType, ResourceTypeDto>().ReverseMap();
 
 
 

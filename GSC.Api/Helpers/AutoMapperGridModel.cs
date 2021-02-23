@@ -27,6 +27,8 @@ using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Dto.LanguageSetup;
 using GSC.Data.Dto.Master.LanguageSetup;
+using GSC.Data.Dto.CTMS;
+using GSC.Data.Entities.CTMS;
 
 namespace GSC.Api.Helpers
 {
@@ -238,6 +240,8 @@ namespace GSC.Api.Helpers
            .ReverseMap();
 
             CreateMap<SiteTeam, SiteTeamGridDto>().ReverseMap();
+            CreateMap<PhaseManagement, PhaseManagementGridDto>().ReverseMap();
+            CreateMap<ResourceType, ResourceTypeGridDto>().ReverseMap();
         }
     }
 }
