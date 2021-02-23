@@ -206,8 +206,10 @@ namespace GSC.Api.Controllers.Project.Design
 
                 _projectDesignVariableValueRepository.Remove(value);
 
+            var SeqNo = data.Count;
             foreach (var item in addvalues)
             {
+                item.SeqNo = ++SeqNo;
                 _projectDesignVariableValueRepository.Add(item);
             }
 
