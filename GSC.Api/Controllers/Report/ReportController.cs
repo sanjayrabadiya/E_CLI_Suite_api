@@ -62,6 +62,9 @@ namespace GSC.Api.Controllers.Report
             reportSetting.RightMargin =Convert.ToDecimal(0.5);
             reportSetting.BottomMargin =Convert.ToDecimal(0.5);
             reportSetting.TopMargin = Convert.ToDecimal(0.5);
+            reportSetting.IsClientLogo = true;
+            reportSetting.IsCompanyLogo = true;
+            reportSetting.NonCRF = true;
 
             var abc = _reportSuncfusion.GetProjectDesign(reportSetting);
             return abc;

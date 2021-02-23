@@ -66,6 +66,7 @@ namespace GSC.Data.Dto.Attendance
         public string VisitName { get; set; }
         public string VisitStatus { get; set; }
         public int VisitStatusId { get; set; }
+        public int? DesignOrder { get; set; }
 
         private DateTime? _scheduleDate { get; set; }
         public DateTime? ScheduleDate

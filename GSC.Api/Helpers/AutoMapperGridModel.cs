@@ -133,7 +133,8 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
 
             CreateMap<Data.Entities.Master.Project, ProjectGridDto>()
-                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                //.ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.ManageSite.City.State.Country.CountryName))
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
                 .ForMember(x => x.AreaName, x => x.MapFrom(a => a.CityArea.AreaName))
                 .ForMember(x => x.StateName, x => x.MapFrom(a => a.State.StateName))

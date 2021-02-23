@@ -7,6 +7,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Entities.AdverseEvent;
 using GSC.Respository.AdverseEvent;
+using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace GSC.Api.Controllers.AdverseEvent
     public class AdverseEventSettingsController : ControllerBase
     {
         private readonly IAdverseEventSettingsRepository _adverseEventSettingsRepository;
+        
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         public AdverseEventSettingsController(IAdverseEventSettingsRepository adverseEventSettingsRepository,
@@ -26,6 +28,7 @@ namespace GSC.Api.Controllers.AdverseEvent
             _adverseEventSettingsRepository = adverseEventSettingsRepository;
             _mapper = mapper;
             _uow = uow;
+            
         }
 
         [HttpGet("{projectId}")]
@@ -35,8 +38,7 @@ namespace GSC.Api.Controllers.AdverseEvent
             {
                 return BadRequest();
             }
-            var adverseEventSettings = _adverseEventSettingsRepository.FindBy(x => x.ProjectId == projectId).ToList().FirstOrDefault();
-            var adverseEventSettingsDto = _mapper.Map<AdverseEventSettingsDto>(adverseEventSettings);
+            var adverseEventSettingsDto = _adverseEventSettingsRepository.GetData(projectId);
             return Ok(adverseEventSettingsDto);
         }
 
@@ -64,6 +66,41 @@ namespace GSC.Api.Controllers.AdverseEvent
             _adverseEventSettingsRepository.Update(adverseEventSettings);
             if (_uow.Save() <= 0) throw new Exception("Error to save Adverse Event settings.");
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetVisitDropDownforAEReportingPatientForm/{projectId}")]
+        public IActionResult GetVisitDropDownforAEReportingPatientForm(int projectId)
+        {
+            return Ok(_adverseEventSettingsRepository.GetVisitDropDownforAEReportingPatientForm(projectId));
+        }
+
+        [HttpGet]
+        [Route("GetVisitDropDownforAEReportingInvestigatorForm/{projectId}")]
+        public IActionResult GetVisitDropDownforAEReportingInvestigatorForm(int projectId)
+        {
+            return Ok(_adverseEventSettingsRepository.GetVisitDropDownforAEReportingInvestigatorForm(projectId));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateDropDownforPatientAEReporting/{visitId}")]
+        public IActionResult GetTemplateDropDownforPatientAEReporting(int visitId)
+        {
+            return Ok(_adverseEventSettingsRepository.GetTemplateDropDownforPatientAEReporting(visitId));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateDropDownforInvestigatorAEReporting/{visitId}")]
+        public IActionResult GetTemplateDropDownforInvestigatorAEReporting(int visitId)
+        {
+            return Ok(_adverseEventSettingsRepository.GetTemplateDropDownforInvestigatorAEReporting(visitId));
+        }
+
+        [HttpGet]
+        [Route("GetAdverseEventSettingsVariableValue/{projectDesignTemplateId}")]
+        public IActionResult GetAdverseEventSettingsVariableValue(int projectDesignTemplateId)
+        {
+            return Ok(_adverseEventSettingsRepository.GetAdverseEventSettingsVariableValue(projectDesignTemplateId));
         }
 
     }

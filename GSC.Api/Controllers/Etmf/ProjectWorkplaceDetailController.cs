@@ -55,5 +55,41 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(_projectWorkplaceDetailRepository.GetSiteByWorkplace(id));
         }
 
+        [HttpGet("GetByUserId/{UserId}/{ProjectId}")]
+        public IActionResult GetByUserId(int UserId, int ProjectId)
+        {
+            if (UserId <= 0) return BadRequest();
+
+            var validate = _projectWorkplaceDetailRepository
+                .FindByInclude(t => t.DeletedDate == null && t.ProjectWorkplace.ProjectId == ProjectId);
+            if (validate.Count() == 0)
+            {
+                ModelState.AddModelError("Message", "Worksplace Not Created.");
+                return BadRequest(ModelState);
+            }
+            var permissionDtos = _projectWorkplaceDetailRepository.GetByUserId(UserId, ProjectId);
+
+            return Ok(permissionDtos);
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] List<EtmfUserPermission> etmfUserPermission)
+        {
+            if (!ModelState.IsValid || !etmfUserPermission.Any()) return new UnprocessableEntityObjectResult(ModelState);
+
+            _projectWorkplaceDetailRepository.Save(etmfUserPermission);
+
+            return Ok();
+        }
+
+        [HttpPut]
+        public IActionResult Put([FromBody] List<EtmfUserPermission> rolePermissions)
+        {
+            if (!ModelState.IsValid || !rolePermissions.Any()) return new UnprocessableEntityObjectResult(ModelState);
+
+            _projectWorkplaceDetailRepository.updatePermission(rolePermissions);
+
+            return Ok();
+        }
     }
 }

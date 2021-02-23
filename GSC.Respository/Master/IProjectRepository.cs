@@ -38,5 +38,7 @@ namespace GSC.Respository.Master
         ProjectGridDto GetProjectDetailForDashboard(int ProjectId);
         List<ProjectDropDown> GetParentProjectDropDownforAE();
         List<ProjectDropDown> GetChildProjectDropDownforAE(int parentProjectId);
+        IList<ProjectDropDown> GetAllProjectsForDataEntry();
+        List<ProjectDropDown> GetParentProjectDropDownEtmf();
     }
 }

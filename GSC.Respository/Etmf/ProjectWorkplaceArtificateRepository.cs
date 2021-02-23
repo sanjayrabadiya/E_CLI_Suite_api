@@ -146,8 +146,8 @@ namespace GSC.Respository.Etmf
                 + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0).Count();
             result.AllPendingReview = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Count != 0).Count()
                 + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0).Count();
-            result.NotRequired = ArtificateDocument.Where(x => x.IsNotRequired == true).Count()
-                + SubSecArtificateDocument.Where(x => x.IsNotRequired == true).Count();
+            result.NotRequired = Artificate.Where(x => x.IsNotRequired == true).Count()
+                + SubSectionArtificate.Where(x => x.IsNotRequired == true).Count();
 
             result.CoreArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 2 && x.ProjectWorkplaceArtificatedocument.Count == 0).Count();
             result.RecommendedArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 1 && x.ProjectWorkplaceArtificatedocument.Count == 0).Count();

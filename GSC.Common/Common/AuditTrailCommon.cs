@@ -24,13 +24,7 @@ namespace GSC.Common.Common
         public int? CompanyId { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
-        private DateTime? _createdDate;
-        public DateTime? CreatedDate
-        {
-            get => _createdDate?.UtcDateTime();
-            set => _createdDate = value?.UtcDateTime();
-        }
-
+        public DateTime? CreatedDate { get; set; }
         public int? CreatedBy { get; set; }
 
 

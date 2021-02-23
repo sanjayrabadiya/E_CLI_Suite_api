@@ -32,6 +32,8 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly ICentreUserService _centreUserService;
         private readonly IMapper _mapper;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
+        private readonly IReleaseSettingRepository _releaseSettingRepository;
+
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
@@ -41,7 +43,8 @@ namespace GSC.Api.Controllers.UserMgt
             IConfiguration configuration,
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService, IMapper mapper,
-            ILoginPreferenceRepository loginPreferenceRepository)
+            ILoginPreferenceRepository loginPreferenceRepository,
+            IReleaseSettingRepository releaseSettingRepository)
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
@@ -53,6 +56,7 @@ namespace GSC.Api.Controllers.UserMgt
             _centreUserService = centreUserService;
             _mapper = mapper;
             _loginPreferenceRepository = loginPreferenceRepository;
+            _releaseSettingRepository = releaseSettingRepository;
         }
 
         [HttpPost]
@@ -105,7 +109,7 @@ namespace GSC.Api.Controllers.UserMgt
                 //};
                 //return errorResult;
 
-                return Ok(new { alreadyLoggedIn = true});
+                return Ok(new { alreadyLoggedIn = true });
             }
 
             if (roles.Count == 1)
@@ -289,7 +293,7 @@ namespace GSC.Api.Controllers.UserMgt
             if (!_environmentSetting.Value.IsPremise)
             {
                 _centreUserService.Logout($"{ _environmentSetting.Value.CentralApi}Login/Logout/{userId}/{loginReportId}");
-              //  return Ok();
+                //  return Ok();
             }
 
             var user = _userRepository.Find(userId);
@@ -382,6 +386,7 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(await _userRepository.Refresh(token.AccessToken, token.RefreshToken));
         }
 
+
         [HttpPost]
         [Route("ValidateUserForSignature")]
         public async Task<IActionResult> ValidateUserForSignature([FromBody] LoginDto dto)
@@ -402,6 +407,14 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(user);
         }
 
-
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("VersionNum")]
+        public ActionResult VersionNum()
+        {
+            var VersionNum = _releaseSettingRepository.GetVersionNum();
+            return Ok(VersionNum);
+                
+        }
     }
 }

@@ -88,5 +88,6 @@ namespace GSC.Data.Entities.Master
         public int? ManageSiteId { get; set; }
         public int? RandomNoStartsWith { get; set; }
         public int? ScreeningNoStartsWith { get; set; }
+        public bool IsTestSite { get; set; }
     }
 }

@@ -131,7 +131,7 @@ namespace GSC.Api.Controllers.Project.Design
                 projectDesignTemplate.Id = 0;
                 projectDesignTemplate.ProjectDesignVisitId = projectDesignVisitId;
                 projectDesignTemplate.VariableTemplateId = variableTemplateId;
-                projectDesignTemplate.DesignOrder = ++designOrder;                
+                projectDesignTemplate.DesignOrder = ++designOrder;
                 projectDesignTemplate.Variables = new List<ProjectDesignVariable>();
                 projectDesignTemplate.ProjectDesignTemplateNote = new List<ProjectDesignTemplateNote>();
 
@@ -217,6 +217,7 @@ namespace GSC.Api.Controllers.Project.Design
                     variable.Unit = null;
                     variable.VariableCategory = null;
                     variable.ProjectDesignTemplate = null;
+
                     _projectDesignVariableRepository.Add(variable);
 
                     //For variable clone language
@@ -233,17 +234,20 @@ namespace GSC.Api.Controllers.Project.Design
                         _variableNoteLanguageRepository.Add(r);
                     });
 
+                    var Seq = 0;
                     variable.Values.ToList().ForEach(r =>
-                    {
-                        r.Id = 0;
-                        _projectDesignVariableValueRepository.Add(r);
-                        //For variable value clone language
-                        r.VariableValueLanguage.ToList().ForEach(x =>
-                        {
-                            x.Id = 0;
-                            _variableValueLanguageRepository.Add(x);
-                        });
-                    });
+                      {
+                          r.Id = 0;
+                      //    if (r.SeqNo == 0)
+                              r.SeqNo = ++Seq;
+                          _projectDesignVariableValueRepository.Add(r);
+                          //For variable value clone language
+                          r.VariableValueLanguage.ToList().ForEach(x =>
+                            {
+                                x.Id = 0;
+                                _variableValueLanguageRepository.Add(x);
+                            });
+                      });
                 }
 
                 foreach (var note in projectDesignTemplate.ProjectDesignTemplateNote)
@@ -294,22 +298,57 @@ namespace GSC.Api.Controllers.Project.Design
                     _projectDesignVariableRepository.Update(variable);
                 }
 
-
                 var variables = parent.Variables.ToList();
                 foreach (var variable in variables)
                 {
+                    ////For variable clone language
+                    //variable.VariableLanguage.ToList().ForEach(r =>
+                    //{
+                    //    _variableLanguageRepository.Add(r);
+                    //});
+
+                    ////For variable note clone language
+                    //variable.VariableNoteLanguage.ToList().ForEach(r =>
+                    //{
+                    //    _variableNoteLanguageRepository.Add(r);
+                    //});
+
                     variable.Id = 0;
                     foreach (var variableValue in variable.Values)
                     {
                         variableValue.Id = 0;
                         _projectDesignVariableValueRepository.Add(variableValue);
+
+                        ////For variable value clone language
+                        //variableValue.VariableValueLanguage.ToList().ForEach(x =>
+                        //{
+                        //    _variableValueLanguageRepository.Add(x);
+                        //});
                     }
 
                     clonnedTemplate.Variables.Add(variable);
                     _projectDesignVariableRepository.Add(variable);
                 }
 
+                //foreach (var note in clonnedTemplate.ProjectDesignTemplateNote)
+                //{
+                //    _projectDesignTemplateNoteRepository.Update(note);
+
+                //    //For template note clone language
+                //    note.TemplateNoteLanguage.ToList().ForEach(x =>
+                //    {
+                //        _templateNoteLanguageRepository.Update(x);
+                //    });
+                //}
+
                 _projectDesignTemplateRepository.Update(clonnedTemplate);
+
+                ////For template clone language
+                //clonnedTemplate.TemplateLanguage.ToList().ForEach(x =>
+                //{
+                //    _templateLanguageRepository.Update(x);
+                //});
+
             });
 
             _uow.Save();

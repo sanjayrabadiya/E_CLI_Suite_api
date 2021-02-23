@@ -69,7 +69,7 @@ namespace GSC.Respository.ProjectRight
                     }).Where(x => x.IsSelected == false).ToList()
             }).ToList();
 
-            return roles.Where(x=>x.users.Count() != 0).ToList();
+            return roles.Where(x => x.users.Count() != 0).ToList();
         }
 
 
@@ -697,5 +697,22 @@ namespace GSC.Respository.ProjectRight
             return queryDtos;
         }
 
+        public List<ProjectDocumentReviewDto> EtmfUserDropDown(int projectId)
+        {
+            var projectListbyId = All.Where(x => x.ProjectId == projectId).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId, c.RoleId }, (key, group) => group.First());
+
+            var result = latestProjectRight.GroupBy(x => x.UserId).Select(x => new ProjectDocumentReviewDto
+            {
+                Id = x.FirstOrDefault().Id,
+                ProjectId = x.FirstOrDefault().ProjectId,
+                UserId = x.Key,
+                UserName = _context.Users.Where(p => p.Id == x.Key).Select(r => r.UserName).FirstOrDefault(),
+                RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.FirstOrDefault().ProjectId && c.UserId == x.Key 
+                && c.RoleId == x.FirstOrDefault().RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
+            }).ToList();
+            return result;
+        }
     }
 }

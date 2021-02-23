@@ -2,6 +2,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
@@ -93,6 +94,8 @@ namespace GSC.Respository.Master
             {
                 var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).FirstOrDefault();
                 project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectSitesCode(project);
+                if (project.IsTestSite)
+                    project.ProjectCode = "T-" + project.ProjectCode;
             }
 
             project.ProjectRight = new List<Data.Entities.ProjectRight.ProjectRight>();
@@ -150,7 +153,7 @@ namespace GSC.Respository.Master
 
         public string CheckAttendanceLimitPost(Data.Entities.Master.Project objSave)
         {
-            int? sum = All.AsNoTracking().Where(t => t.ParentProjectId == objSave.ParentProjectId && t.DeletedDate == null)
+            int? sum = All.AsNoTracking().Where(t => t.ParentProjectId == objSave.ParentProjectId && t.DeletedDate == null && t.IsTestSite == false)
                         .Select(t => t.AttendanceLimit ?? 0).Sum() + objSave.AttendanceLimit;
             int? subSum = All.AsNoTracking().Where(x => x.Id == objSave.ParentProjectId).FirstOrDefault().AttendanceLimit;
 
@@ -207,6 +210,34 @@ namespace GSC.Respository.Master
                 }).Distinct().OrderBy(o => o.Value).ToList();
         }
 
+
+        public List<ProjectDropDown> GetParentProjectDropDownEtmf()
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var AlreadyAdded = _context.ProjectWorkplace.Where(x => x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
+                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            var ProjectList = All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ParentProjectId == null
+                    && x.ProjectCode != null
+                    && projectList.Any(c => c == x.Id)
+                    )
+                  .Select(c => new ProjectDropDown
+                  {
+                      Id = c.Id,
+                      Value = c.ProjectCode,
+                      Code = c.ProjectCode,
+                      IsStatic = c.IsStatic,
+                      ParentProjectId = c.ParentProjectId ?? c.Id,
+                      IsDeleted = c.DeletedDate != null
+                  }).Distinct().OrderBy(o => o.Value).ToList();
+
+            return ProjectList.Where(x => !AlreadyAdded.Any(c => c.ProjectId == x.Id)).ToList();
+        }
+
         public List<ProjectDropDown> GetParentStaticProjectDropDown()
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
@@ -236,6 +267,28 @@ namespace GSC.Respository.Master
         }
 
         public IList<ProjectDropDown> GetProjectsForDataEntry()
+        {
+            var projectIds = _projectRightRepository.GetProjectRightIdList();
+            if (!projectIds.Any()) return new List<ProjectDropDown>();
+
+            var projects = All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.DeletedDate == null
+                    && projectIds.Any(c => c == x.Id)
+                    && x.ParentProjectId == null
+                    )
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    IsStatic = c.IsStatic,
+                    Value = c.ProjectCode + " - " + c.ProjectName,
+                    ParentProjectId = c.ParentProjectId ?? c.Id
+                }).OrderBy(o => o.Value).ToList();
+
+            return projects;
+        }
+
+        public IList<ProjectDropDown> GetAllProjectsForDataEntry()
         {
             var projectIds = _projectRightRepository.GetProjectRightIdList();
             if (!projectIds.Any()) return new List<ProjectDropDown>();
@@ -369,7 +422,11 @@ namespace GSC.Respository.Master
 
         private string GetProjectSitesCode(Data.Entities.Master.Project project)
         {
-            var SiteCount = All.Where(x => x.ParentProjectId == project.ParentProjectId).Count();
+            var SiteCount = 0;
+            if (!project.IsTestSite)
+                SiteCount = All.Where(x => x.ParentProjectId == project.ParentProjectId && x.IsTestSite == false).Count();
+            else
+                SiteCount = All.Where(x => x.ParentProjectId == project.ParentProjectId && x.IsTestSite == true).Count();
             var projectCode = _numberFormatRepository.GenerateNumberForSite("projectchild", SiteCount);
             var country = _countryRepository.Find(project.CountryId).CountryCode;
             var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
@@ -390,7 +447,8 @@ namespace GSC.Respository.Master
             var editCheckDetailsDto = new EditCheckDetailsDto();
 
             siteDetailsDto.NoofSite = GetNoOfSite(projectId);
-            siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.CountryId).Select(t => t.Key).Count();
+            //siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.CountryId).Select(t => t.Key).Count();
+            siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.ManageSite.City.State.Country.Id).Select(t => t.Key).Count();
             siteDetailsDto.MarkAsCompleted = All.Any(x => x.ParentProjectId == projectId && x.DeletedDate == null);
 
             var projectDeisgn = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
@@ -497,7 +555,8 @@ namespace GSC.Respository.Master
 
         public string GetAutoNumberForSites(int Id)
         {
-            var SiteCount = All.Where(x => x.ParentProjectId == Id).Count();
+            var SiteCount = All.Where(x => x.ParentProjectId == Id && x.IsTestSite == false).Count();
+            //var SiteCount = All.Where(x => x.ParentProjectId == Id).Count();
             var projectCode = _numberFormatRepository.GenerateNumberForSite("projectchild", SiteCount);
             var country = "In";
             var design = "007";

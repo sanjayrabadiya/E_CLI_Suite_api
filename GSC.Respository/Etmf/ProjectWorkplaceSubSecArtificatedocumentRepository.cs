@@ -73,7 +73,7 @@ namespace GSC.Respository.Etmf
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
                             ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            ProjectName = project.ProjectName + "-" + project.ProjectCode,
+                            ProjectName = project.ProjectCode.Replace("/", ""),
                             SubSectionName = subsection.SubSectionName,
                             SubSectionArtifactName = artifact.ArtifactName
                         }).FirstOrDefault();
@@ -124,7 +124,7 @@ namespace GSC.Respository.Etmf
                             FolderType = workdetail.WorkPlaceFolderId,
                             Sitename = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            Projectname = project.ProjectName + "-" + project.ProjectCode,
+                            Projectname = project.ProjectCode.Replace("/", ""),
                             SubsectionName = subsection.SubSectionName,
                             Artificatename = artifact.ArtifactName,
                             DocumentName = artifactdoc.DocumentName
@@ -213,7 +213,6 @@ namespace GSC.Respository.Etmf
                    : "Send For Approval";
                 obj.Approver = string.Join(", ", ApproverName);
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
-                obj.IsNotRequired = item.IsNotRequired;
                 dataList.Add(obj);
             }
             return dataList;
@@ -414,7 +413,8 @@ namespace GSC.Respository.Etmf
 
             document.DocumentName = outputname;
             document.Status = ArtifactDocStatusType.Final;
-            document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
+            //document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
+            document.Version = "1.0";
             return document;
         }
 

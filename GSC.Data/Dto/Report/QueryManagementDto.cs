@@ -29,6 +29,7 @@ namespace GSC.Data.Dto.Report
         public string ReasonName { get; set; }
         public QueryStatus? QueryStatus { get; set; }
         public string CreatedByName { get; set; }
+        public string DataEntryByName { get; set; }
         public int ProjectDesignVariableId { get; set; }
         public string ModifieedByName { get; set; }
         public string ClosedByName { get; set; }
@@ -67,12 +68,13 @@ namespace GSC.Data.Dto.Report
     public class QuerySearchDto : BaseDto
     {
         public int ProjectId { get; set; }
+        public int? SiteId { get; set; }
         public int?[] PeriodIds { get; set; }
         public int?[] SubjectIds { get; set; }
         public int?[] VisitIds { get; set; }
         public int?[] TemplateIds { get; set; }
-        public int?[] QueryGenerateBy { get; set; }
-        public int? DataEntryBy { get; set; }
+        public string[] QueryGenerateBy { get; set; }
+        public string DataEntryBy { get; set; }
         public int? Status { get; set; }
     }
 }

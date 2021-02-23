@@ -160,30 +160,8 @@ namespace GSC.Api.Controllers.Etmf
         [Route("WordToPdf/{id}")]
         public IActionResult WordToPdf(int id)
         {
-            var document = _projectWorkplaceArtificatedocumentRepository.Find(id);
-            var parent = document.ParentDocumentId != null ?
-                _projectWorkplaceArtificatedocumentRepository.Find((int)document.ParentDocumentId) : null;
+            var document = _projectWorkplaceArtificatedocumentRepository.WordToPdf(id);
 
-            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
-            FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
-            Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
-            DocIORenderer render = new DocIORenderer();
-            render.Settings.PreserveFormFields = true;
-            PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
-            render.Dispose();
-            wordDocument.Dispose();
-            MemoryStream outputStream = new MemoryStream();
-            pdfDocument.Save(outputStream);
-            pdfDocument.Close();
-
-            var outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
-            var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
-            FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
-            outputStream.WriteTo(file);
-
-            document.DocumentName = outputname;
-            document.Status = ArtifactDocStatusType.Final;
-            document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
             _projectWorkplaceArtificatedocumentRepository.Update(document);
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
 
@@ -299,28 +277,6 @@ namespace GSC.Api.Controllers.Etmf
             var auditsDto = _projectWorkplaceArtificatedocumentRepository.GetEtmfAuditLogReport(filters);
 
             return Ok(auditsDto);
-        }
-
-        [HttpPut]
-        [Route("UpdateNotRequired/{id}")]
-        public IActionResult UpdateNotRequired(int id)
-        {
-            var projectWorkplaceArtificatedocumentDto = _projectWorkplaceArtificatedocumentRepository.Find(id);
-            if (projectWorkplaceArtificatedocumentDto.IsNotRequired)
-            {
-                projectWorkplaceArtificatedocumentDto.Status = ArtifactDocStatusType.Draft;
-                projectWorkplaceArtificatedocumentDto.IsNotRequired = !projectWorkplaceArtificatedocumentDto.IsNotRequired;
-            }
-            else
-            {
-                projectWorkplaceArtificatedocumentDto.Status = ArtifactDocStatusType.NotRequired;
-                projectWorkplaceArtificatedocumentDto.IsNotRequired = !projectWorkplaceArtificatedocumentDto.IsNotRequired;
-            }
-            var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
-            _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
-
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
-            return Ok(projectWorkplaceArtificatedocument.Id);
         }
     }
 }

@@ -81,6 +81,16 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(usersDto);
         }
 
+        [HttpPost("Getpatients")]
+        public IActionResult Getpatients([FromBody] PatientDto userDto)
+        {
+            var usersDto = _userRepository.GetPatients(userDto);
+            var imageUrl = _uploadSettingRepository.GetWebImageUrl();
+            usersDto.ForEach(t => t.ProfilePicPath = imageUrl + (t.ProfilePic ?? DocumentService.DefulatProfilePic));
+
+            return Ok(usersDto);
+        }
+
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {

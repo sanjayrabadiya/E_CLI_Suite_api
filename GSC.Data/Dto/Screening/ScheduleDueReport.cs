@@ -30,6 +30,7 @@ namespace GSC.Data.Dto.Screening
     public class ScheduleDueReportSearchDto
     {
         public int ProjectId { get; set; }
+        public int? SiteId { get; set; }
         public int?[] SubjectIds { get; set; }
         public DateTime? fromDate { get; set; }
         public DateTime? toDate { get; set; }

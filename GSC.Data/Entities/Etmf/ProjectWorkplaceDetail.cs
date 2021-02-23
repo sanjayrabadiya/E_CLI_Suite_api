@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using GSC.Common.Common;
+using GSC.Helper;
 
 namespace GSC.Data.Entities.Etmf
 {

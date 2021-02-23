@@ -8,6 +8,7 @@ using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.ProjectRight;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
@@ -29,14 +30,19 @@ namespace GSC.Respository.Etmf
         private readonly IGSCContext _context;
         List<ProjectWorkplaceDetail> ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectRightRepository _projectRightRepository;
         public ETMFWorkplaceRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
-           IMapper mapper, IUploadSettingRepository uploadSettingRepository)
+           IMapper mapper, IUploadSettingRepository uploadSettingRepository,
+           IProjectRightRepository projectRightRepository)
            : base(context)
         {
             _context = context;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _projectRightRepository = projectRightRepository;
         }
 
         public string Duplicate(int id)
@@ -104,6 +110,8 @@ namespace GSC.Respository.Etmf
                 #region Get Country
                 foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Country && x.DeletedBy == null))
                 {
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Item = new List<TreeValue>();
                     pvListdetaiObj.Id = 22222222;
@@ -112,6 +120,12 @@ namespace GSC.Respository.Etmf
                     pvListdetaiObj.Level = 3;
                     pvListdetaiObj.Icon = "folder";
                     pvListdetaiObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                    pvListdetaiObj.IsAdd = rights != null ?  rights.IsAdd : false;
+                    pvListdetaiObj.IsEdit = rights != null ?  rights.IsEdit : false;
+                    pvListdetaiObj.IsDelete = rights != null ?  rights.IsDelete : false;
+                    pvListdetaiObj.IsView = rights != null ?  rights.IsView : false;
+                    pvListdetaiObj.IsExport = rights != null ?  rights.IsExport : false;
+
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                     {
@@ -127,6 +141,12 @@ namespace GSC.Respository.Etmf
                         pvListZoneObj.Icon = "folder";
                         pvListZoneObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
                         pvListZoneObj.ZoneId = d.Id;
+                        pvListZoneObj.IsAdd = rights != null ? rights.IsAdd : false;
+                        pvListZoneObj.IsEdit = rights != null ? rights.IsEdit : false;
+                        pvListZoneObj.IsDelete = rights != null ? rights.IsDelete : false;
+                        pvListZoneObj.IsView = rights != null ? rights.IsView : false;
+                        pvListZoneObj.IsExport = rights != null ? rights.IsExport : false;
+
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
@@ -144,6 +164,11 @@ namespace GSC.Respository.Etmf
                             pvListSectionObj.Icon = "folder";
                             pvListSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
                             pvListSectionObj.SectionId = e.Id;
+                            pvListSectionObj.IsAdd = rights != null ? rights.IsAdd : false;
+                            pvListSectionObj.IsEdit = rights != null ? rights.IsEdit : false;
+                            pvListSectionObj.IsDelete = rights != null ? rights.IsDelete : false;
+                            pvListSectionObj.IsView = rights != null ? rights.IsView : false;
+                            pvListSectionObj.IsExport = rights != null ? rights.IsExport : false;
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                             {
@@ -162,7 +187,13 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
                                 pvListArtificateObj.ArtificateId = f.Id;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -186,6 +217,12 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "folder";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
                                 var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                 foreach (var itemartifact in artifactsubSectionData)
@@ -204,6 +241,12 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
                                     pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
+                                    pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
+                                    pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
+                                    pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
+                                    pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
+                                    pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                 }
                                 pvListArtificateList.Add(pvListArtificateObj);
@@ -229,6 +272,8 @@ namespace GSC.Respository.Etmf
                 #region Get Site
                 foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site && x.DeletedBy == null))
                 {
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Item = new List<TreeValue>();
                     pvListdetaiObj.Id = 232323232;
@@ -237,6 +282,11 @@ namespace GSC.Respository.Etmf
                     pvListdetaiObj.Level = 3;
                     pvListdetaiObj.Icon = "folder";
                     pvListdetaiObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                    pvListdetaiObj.IsAdd = rights != null ? rights.IsAdd : false;
+                    pvListdetaiObj.IsEdit = rights != null ? rights.IsEdit : false;
+                    pvListdetaiObj.IsDelete = rights != null ? rights.IsDelete : false;
+                    pvListdetaiObj.IsView = rights != null ? rights.IsView : false;
+                    pvListdetaiObj.IsExport = rights != null ? rights.IsExport : false;
 
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
@@ -253,6 +303,12 @@ namespace GSC.Respository.Etmf
                         pvListZoneObj.Icon = "folder";
                         pvListZoneObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
                         pvListZoneObj.ZoneId = d.Id;
+                        pvListZoneObj.IsAdd = rights != null ? rights.IsAdd : false;
+                        pvListZoneObj.IsEdit = rights != null ? rights.IsEdit : false;
+                        pvListZoneObj.IsDelete = rights != null ? rights.IsDelete : false;
+                        pvListZoneObj.IsView = rights != null ? rights.IsView : false;
+                        pvListZoneObj.IsExport = rights != null ? rights.IsExport : false;
+
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
@@ -270,6 +326,11 @@ namespace GSC.Respository.Etmf
                             pvListSectionObj.Icon = "folder";
                             pvListSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
                             pvListSectionObj.SectionId = e.Id;
+                            pvListSectionObj.IsAdd = rights != null ? rights.IsAdd : false;
+                            pvListSectionObj.IsEdit = rights != null ? rights.IsEdit : false;
+                            pvListSectionObj.IsDelete = rights != null ? rights.IsDelete : false;
+                            pvListSectionObj.IsView = rights != null ? rights.IsView : false;
+                            pvListSectionObj.IsExport = rights != null ? rights.IsExport : false;
 
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
@@ -289,7 +350,13 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
                                 pvListArtificateObj.ArtificateId = f.Id;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -313,6 +380,11 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "folder";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
 
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
                                 var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
@@ -333,7 +405,12 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
                                     pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                                     pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
-
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
+                                    pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
+                                    pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
+                                    pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
+                                    pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
+                                    pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
 
                                 }
@@ -358,6 +435,8 @@ namespace GSC.Respository.Etmf
                 #region Get Trial
                 foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial && x.DeletedBy == null))
                 {
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Id = 333333333;
                     pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
@@ -365,7 +444,11 @@ namespace GSC.Respository.Etmf
                     pvListdetaiObj.Level = 3;
                     pvListdetaiObj.Icon = "folder";
                     pvListdetaiObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
-
+                    pvListdetaiObj.IsAdd = rights != null ? rights.IsAdd : false;
+                    pvListdetaiObj.IsEdit = rights != null ? rights.IsEdit : false;
+                    pvListdetaiObj.IsDelete = rights != null ? rights.IsDelete : false;
+                    pvListdetaiObj.IsView = rights != null ? rights.IsView : false;
+                    pvListdetaiObj.IsExport = rights != null ? rights.IsExport : false;
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
 
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
@@ -382,6 +465,11 @@ namespace GSC.Respository.Etmf
                         pvListZoneObj.Icon = "folder";
                         pvListZoneObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
                         pvListZoneObj.ZoneId = d.Id;
+                        pvListZoneObj.IsAdd = rights != null ? rights.IsAdd : false;
+                        pvListZoneObj.IsEdit = rights != null ? rights.IsEdit : false;
+                        pvListZoneObj.IsDelete = rights != null ? rights.IsDelete : false;
+                        pvListZoneObj.IsView = rights != null ? rights.IsView : false;
+                        pvListZoneObj.IsExport = rights != null ? rights.IsExport : false;
                         List<TreeValue> pvListSectionList = new List<TreeValue>();
                         foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                         {
@@ -398,6 +486,11 @@ namespace GSC.Respository.Etmf
                             pvListSectionObj.Icon = "folder";
                             pvListSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
                             pvListSectionObj.SectionId = e.Id;
+                            pvListSectionObj.IsAdd = rights != null ? rights.IsAdd : false;
+                            pvListSectionObj.IsEdit = rights != null ? rights.IsEdit : false;
+                            pvListSectionObj.IsDelete = rights != null ? rights.IsDelete : false;
+                            pvListSectionObj.IsView = rights != null ? rights.IsView : false;
+                            pvListSectionObj.IsExport = rights != null ? rights.IsExport : false;
                             List<TreeValue> pvListArtificateList = new List<TreeValue>();
                             foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                             {
@@ -416,7 +509,13 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
                                 pvListArtificateObj.ArtificateId = f.Id;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
                                 pvListArtificateList.Add(pvListArtificateObj);
                             }
 
@@ -440,7 +539,11 @@ namespace GSC.Respository.Etmf
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
                                 pvListArtificateObj.Icon = "folder";
                                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
-
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
                                 #region MyRegion
                                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
                                 var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
@@ -459,8 +562,13 @@ namespace GSC.Respository.Etmf
                                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
                                     pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
                                     pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
-                                    pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
-
+                                    pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
+                                    pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
+                                    pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
+                                    pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
+                                    pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
+                                    pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
                                     pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                 }
                                 #endregion
@@ -502,7 +610,7 @@ namespace GSC.Respository.Etmf
                 projectWorkplace = new ProjectWorkplace();
                 ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
                 projectWorkplace.ProjectId = projectDetail.Id;
-                projectPath = System.IO.Path.Combine(docPath, FolderType.ProjectWorksplace.GetDescription(), projectDetail.ProjectName + "-" + projectDetail.ProjectCode);
+                projectPath = System.IO.Path.Combine(docPath, FolderType.ProjectWorksplace.GetDescription(), projectDetail.ProjectCode.Replace("/", ""));
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
                 sitePath = Path.Combine(projectPath, WorkPlaceFolder.Site.GetDescription());
@@ -678,8 +786,10 @@ namespace GSC.Respository.Etmf
 
         public List<ETMFWorkplaceGridDto> GetETMFWorkplaceList(bool isDeleted)
         {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
 
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
         }
@@ -687,7 +797,7 @@ namespace GSC.Respository.Etmf
         public byte[] CreateZipFileOfWorkplace(int Id)
         {
             var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
-            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), ProjectWorkplace.Project.ProjectName + "-" + ProjectWorkplace.Project.ProjectCode);
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""));
             ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
             byte[] compressedBytes;
             var zipfolder = FolderPath + ".zip";
@@ -717,5 +827,11 @@ namespace GSC.Respository.Etmf
         public WorkPlaceFolder WorkPlaceFolderId { get; set; }
         public string Icon { get; set; }
         public string RandomId { get; set; }
+        public bool IsAdd { get; set; }
+        public bool IsEdit { get; set; }
+        public bool IsView { get; set; }
+        public bool IsDelete { get; set; }
+        public bool IsExport { get; set; }
+        public bool IsNotRequired { get; set; }
     }
 }

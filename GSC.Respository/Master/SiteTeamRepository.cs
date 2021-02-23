@@ -44,7 +44,10 @@ namespace GSC.Respository.Master
             var data = _projectRightRepository.FindByInclude(x => x.ProjectId == projectid && x.IsReviewDone == true, x => x.role).
                 Select(c => new DropDownDto { Id = c.RoleId, Value = c.role.RoleName, IsDeleted = false }).OrderBy(o => o.Value)
                .Distinct().ToList();
-            return data;
+            var distinctList = data.GroupBy(x => x.Id)
+                      .Select(x => x.First())
+                      .ToList();
+            return distinctList;
         }
 
         public List<SiteTeamGridDto> GetSiteTeamList(int projectid, bool isDeleted)

@@ -23,5 +23,6 @@ namespace GSC.Respository.UserMgt
         List<DropDownDto> GetUserNameDropdown();
         LoginResponseDto BuildUserAuthObject(UserViewModel userViewModel, int roleId);
         void UpdateIsLogin(int id, bool isLogin);
+        List<UserGridDto> GetPatients(PatientDto userDto);
     }
 }

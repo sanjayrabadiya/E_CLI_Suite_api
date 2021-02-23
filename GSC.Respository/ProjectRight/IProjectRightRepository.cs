@@ -23,6 +23,8 @@ namespace GSC.Respository.ProjectRight
         IList<ProjectTrainingDto> GetProjectTrainingReportList(ProjectTrainigAccessSearchDto filters);
         IList<UserReportDto> GetUserReportList(UserReportSearchDto filters);
         IList<UserReportDto> GetLoginLogoutReportList(UserReportSearchDto filters);
-       
+        List<ProjectDocumentReviewDto> EtmfUserDropDown(int projectId);
+
+
     }
 }

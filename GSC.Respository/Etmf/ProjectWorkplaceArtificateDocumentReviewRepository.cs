@@ -11,6 +11,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -54,7 +55,7 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id)
         {
-            var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId).Select(c => new ProjectArtificateDocumentReviewDto
+            var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId && x.UserType == UserMasterUserType.User).Select(c => new ProjectArtificateDocumentReviewDto
             {
                 UserId = c.Id,
                 Name = c.UserName,
@@ -157,6 +158,7 @@ namespace GSC.Respository.Etmf
                 .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
                 .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
                 .Where(x => (x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy && x.UserId == _jwtTokenAccesser.UserId)
+                && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
                 && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection
                 .ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId && x.IsSendBack == false)
                 .Select(s => new DashboardDto

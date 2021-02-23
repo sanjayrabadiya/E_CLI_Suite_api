@@ -242,7 +242,7 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplate.ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel + 1);
 
             CheckCompletedStatus(screeningTemplate, projectDesignId);
-
+            screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
             _screeningTemplateRepository.Update(screeningTemplate);
 
             _uow.Save();

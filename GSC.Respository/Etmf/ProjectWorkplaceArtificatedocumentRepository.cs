@@ -21,6 +21,8 @@ using Syncfusion.EJ2.DocumentEditor;
 using GSC.Respository.Audit;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Syncfusion.DocIORenderer;
+using Syncfusion.Pdf;
 
 namespace GSC.Respository.Etmf
 {
@@ -87,7 +89,7 @@ namespace GSC.Respository.Etmf
                             FolderType = workdetail.WorkPlaceFolderId,
                             Sitename = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            Projectname = project.ProjectName + "-" + project.ProjectCode,
+                            Projectname = project.ProjectCode.Replace("/", ""),
                             Artificatename = etmfartifact.ArtificateName,
                             DocumentName = artifactdoc.DocumentName,
                         }).FirstOrDefault();
@@ -185,7 +187,6 @@ namespace GSC.Respository.Etmf
                 obj.Approver = string.Join(", ", ApproverName);
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
-                obj.IsNotRequired = item.IsNotRequired;
                 dataList.Add(obj);
             }
             return dataList;
@@ -235,7 +236,7 @@ namespace GSC.Respository.Etmf
         public ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto)
         {
             var Project = _projectRepository.Find(projectWorkplaceArtificatedocumentDto.ProjectId);
-            var Projectname = Project.ProjectName + "-" + Project.ProjectCode;
+            var Projectname = Project.ProjectCode.Replace("/", "");
 
             string filePath = string.Empty;
             string path = string.Empty;
@@ -387,7 +388,8 @@ namespace GSC.Respository.Etmf
                 .Where(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).ToList();
             var projectWorkplaceArtificatedocumentreviews = _context.ProjectArtificateDocumentReview.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var projectWorkplaceArtificatedocumentapprover = _context.ProjectArtificateDocumentApprover.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
-            var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null, x => x.Reason).ToList();
+            var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null).ToList();
+            
             var cretaedData = projectWorkplaceArtificatedocuments.Select(r => new EtmfAuditLogReportDto
             {
                 projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
@@ -665,5 +667,33 @@ namespace GSC.Respository.Etmf
             return json;
         }
 
+        public ProjectWorkplaceArtificatedocument WordToPdf(int Id)
+        {
+            var document = Find(Id);
+            var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
+
+            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+            Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+            DocIORenderer render = new DocIORenderer();
+            render.Settings.PreserveFormFields = true;
+            PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+            render.Dispose();
+            wordDocument.Dispose();
+            MemoryStream outputStream = new MemoryStream();
+            pdfDocument.Save(outputStream);
+            pdfDocument.Close();
+
+            var outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
+            var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
+            FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+            outputStream.WriteTo(file);
+
+            document.DocumentName = outputname;
+            document.Status = ArtifactDocStatusType.Final;
+            //document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
+            document.Version = "1.0";
+            return document;
+        }
     }
 }

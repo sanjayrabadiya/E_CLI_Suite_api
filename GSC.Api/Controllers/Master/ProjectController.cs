@@ -12,7 +12,12 @@ using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Respository.UserMgt;
+using GSC.Shared.Configuration;
+using GSC.Shared.JWTAuth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -28,6 +33,9 @@ namespace GSC.Api.Controllers.Master
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
+        private readonly ICentreUserService _centreUserService;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
 
         public ProjectController(IProjectRepository projectRepository,
             IDesignTrialRepository designTrialRepository,
@@ -36,7 +44,10 @@ namespace GSC.Api.Controllers.Master
             IProjectDesignRepository projectDesignRepository,
             IUnitOfWork uow, IMapper mapper,
             IUserRecentItemRepository userRecentItemRepository,
-            INumberFormatRepository numberFormatRepository)
+            INumberFormatRepository numberFormatRepository,
+            ICentreUserService centreUserService,
+            IJwtTokenAccesser jwtTokenAccesser,
+            IOptions<EnvironmentSetting> environmentSetting)
         {
             _projectRepository = projectRepository;
             _designTrialRepository = designTrialRepository;
@@ -47,6 +58,9 @@ namespace GSC.Api.Controllers.Master
             _userRecentItemRepository = userRecentItemRepository;
             _numberFormatRepository = numberFormatRepository;
             _projectDesignRepository = projectDesignRepository;
+            _centreUserService = centreUserService;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _environmentSetting = environmentSetting;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -87,8 +101,13 @@ namespace GSC.Api.Controllers.Master
             projectDto.Id = 0;
             var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
 
-            if (projectDto.ParentProjectId > 0)
+            if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null).ToList().Count > 0)
+                {
+                    ModelState.AddModelError("Message", "This site is already exist, please select other site.");
+                    return BadRequest(ModelState);
+                }
                 var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPost(project);
                 if (!string.IsNullOrEmpty(CheckAttendanceLimit))
                 {
@@ -239,6 +258,11 @@ namespace GSC.Api.Controllers.Master
 
             if (projectDto.ParentProjectId > 0)
             {
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.Id != projectDto.Id && x.DeletedDate == null).ToList().Count > 0)
+                {
+                    ModelState.AddModelError("Message", "This site is already exist, please select other site.");
+                    return BadRequest(ModelState);
+                }
                 var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPut(project);
                 if (!string.IsNullOrEmpty(CheckAttendanceLimit))
                 {
@@ -317,6 +341,13 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
+        [Route("GetParentProjectDropDownEtmf")]
+        public IActionResult GetParentProjectDropDownEtmf()
+        {
+            return Ok(_projectRepository.GetParentProjectDropDownEtmf());
+        }
+
+        [HttpGet]
         [Route("GetParentStaticProjectDropDown")]
         public IActionResult GetParentStaticProjectDropDown()
         {
@@ -330,12 +361,19 @@ namespace GSC.Api.Controllers.Master
             return Ok(_projectRepository.GetChildProjectDropDown(parentProjectId));
         }
 
-            
+
         [HttpGet]
         [Route("GetProjectsForDataEntry")]
         public IActionResult GetProjectsForDataEntry()
         {
             return Ok(_projectRepository.GetProjectsForDataEntry());
+        }
+
+        [HttpGet]
+        [Route("GetAllProjectsForDataEntry")]
+        public IActionResult GetAllProjectsForDataEntry()
+        {
+            return Ok(_projectRepository.GetAllProjectsForDataEntry());
         }
 
         [HttpGet]
@@ -420,7 +458,7 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_projectRepository.GetParentProjectDropDown());
         }
-       
+
         [HttpGet]
         [Route("GetProjectDetailForDashboard/{projectId}")]
         public IActionResult GetProjectDetailForDashboard(int ProjectId)
@@ -442,5 +480,31 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_projectRepository.GetChildProjectDropDownforAE(parentProjectId));
         }
+        [HttpGet]
+        [Route("validatenoofStudy")]
+        public async Task<IActionResult> ValidatenoofStudy()
+        {
+            bool IsAddmoreStudy = false;
+            int noofstudy = 0;
+            if (!_environmentSetting.Value.IsPremise)
+            {
+                noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Company/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
+                int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null && x.DeletedDate == null).Count();
+                if (studycount < noofstudy)
+                    IsAddmoreStudy = true;
+            }
+            return Ok(IsAddmoreStudy);
+        }
+
+        [HttpGet]
+        [Route("GetStudyCount/{CompanyID}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetStudyCount(int CompanyID)
+        {
+            await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
+            int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null && x.DeletedDate == null).Count();
+            return Ok(studycount);
+        }
+
     }
 }

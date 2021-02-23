@@ -56,7 +56,7 @@ namespace GSC.Respository.EditCheckImpact
                 c.DeletedDate == null &&
                  c.CheckBy != EditCheckRuleBy.ByVariableAnnotation &&
                 _editCheckDetailRepository.All.AsNoTracking().Any(x =>
-                ((x.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId) ||
+                ((x.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId || x.FetchingProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId) ||
                 (x.EditCheck.ProjectDesignId == screeningTemplateBasic.ProjectDesignId
                 && x.DomainId != null && x.DomainId == screeningTemplateBasic.DomainId))
                 && x.EditCheckId == c.EditCheckId && x.EditCheck.DeletedDate == null))
