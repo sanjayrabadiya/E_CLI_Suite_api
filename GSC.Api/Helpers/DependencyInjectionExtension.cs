@@ -292,6 +292,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVariableCategoryLanguageRepository, VariableCategoryLanguageRepository>();
             services.AddScoped<IAEReportingRepository, AEReportingRepository>();
             services.AddScoped<IAdverseEventSettingsRepository, AdverseEventSettingsRepository>();
+            services.AddScoped<IAEReportingValueRepository, AEReportingValueRepository>();
+            services.AddScoped<IAdverseEventSettingsLanguageRepository, AdverseEventSettingsLanguageRepository>();
             services.AddScoped<IReleaseSettingRepository, ReleaseSettingRepository>();
             services.AddScoped<IPhaseManagementRepository, PhaseManagementRepository>();
             services.AddScoped<IResourceTypeRepository, ResourceTypeRepository>();

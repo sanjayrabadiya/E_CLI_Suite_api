@@ -298,6 +298,7 @@ namespace GSC.Api.Helpers
             CreateMap<VariableCategory, VariableCategoryDto>().ReverseMap();
             CreateMap<AEReporting, AEReportingDto>().ReverseMap();
             CreateMap<AdverseEventSettings, AdverseEventSettingsDto>().ReverseMap();
+            CreateMap<EtmfUserPermission, EtmfUserPermissionDto>().ReverseMap();
             CreateMap<PhaseManagement, PhaseManagementDto>().ReverseMap();
             CreateMap<ResourceType, ResourceTypeDto>().ReverseMap();
 

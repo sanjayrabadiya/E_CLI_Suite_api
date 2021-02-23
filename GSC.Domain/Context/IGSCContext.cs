@@ -260,6 +260,10 @@ namespace GSC.Domain.Context
         DbSet<ScreeningTemplateEditCheckValue> ScreeningTemplateEditCheckValue { get; set; }
         DbSet<AEReporting> AEReporting { get; set; }
         DbSet<AdverseEventSettings> AdverseEventSettings { get; set; }
+        DbSet<EtmfUserPermission> EtmfUserPermission { get; set; }
+        DbSet<AEReportingValue> AEReportingValue { get; set; }
+        DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }
+
         DbSet<ReleaseSetting> ReleaseSetting { get; set; }
         DbSet<PhaseManagement> PhaseManagement { get; set; }
         DbSet<ResourceType> ResourceType { get; set; }
