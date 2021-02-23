@@ -124,7 +124,7 @@ namespace GSC.Report
                     graphics.Restore();
                 }
             }
-            PdfBookmarkBase bookmarks = document.Bookmarks;            
+            PdfBookmarkBase bookmarks = document.Bookmarks;
             foreach (PdfBookmark bookmark in bookmarks)
             {
                 IndexCreate(bookmark, false);
@@ -448,7 +448,7 @@ namespace GSC.Report
                         notes += designt.ProjectDesignTemplateNote[n].Note + "\n ";
                 }
                 if (!string.IsNullOrEmpty(notes))
-                    result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                    result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                 result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                 AddString("Sr# ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
@@ -466,15 +466,17 @@ namespace GSC.Report
                 // var variablelist = _projectDesignVariableRepository.FindByInclude(t => t.ProjectDesignTemplateId == designt.Id && t.DeletedDate == null, t => t.Values, t => t.Remarks, t => t.Unit).ToList();                
                 foreach (var variable in variabledetails.OrderBy(i => i.DesignOrder))
                 {
+                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
                     string annotation = String.IsNullOrEmpty(variable.Annotation) ? " " : $"[{variable.Annotation}]";
                     string CollectionAnnotation = String.IsNullOrEmpty(variable.CollectionAnnotation) ? " " : $"({variable.CollectionAnnotation})";
                     if (reportSetting.AnnotationType == true)
                         result = AddString($"{variable.VariableName}\n {annotation}   {CollectionAnnotation} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     else
                         result = AddString($"{variable.VariableName} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-                    AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     PdfLayoutResult secondresult = result;
+                    AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
 
                     if (variable.Unit != null)
                         AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
@@ -523,7 +525,7 @@ namespace GSC.Report
                             radioItem1.Bounds = new RectangleF(300, result.Bounds.Y, 13, 13);
                             radioList.Items.Add(radioItem1);
                             document.Form.Fields.Add(radioList);
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 20, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                         result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
@@ -591,15 +593,13 @@ namespace GSC.Report
                     {
                         result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
-                    // result = AddString("--last line ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    //result = AddString("--last line ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     PdfLayoutResult thirdresult = result;
-                    if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
-                        if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
-                            result = AddString(" ", thirdresult.Page, new Syncfusion.Drawing.RectangleF(0, thirdresult.Bounds.Bottom, thirdresult.Page.GetClientSize().Width, thirdresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        else
-                            result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Y + 10, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                    else
-                        result = AddString("  ", thirdresult.Page, new Syncfusion.Drawing.RectangleF(0, thirdresult.Bounds.Bottom, thirdresult.Page.GetClientSize().Width, thirdresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    if (secondresult.Page == thirdresult.Page)
+                        if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
+                            if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
+                                result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
                 }
             }
         }
@@ -636,7 +636,7 @@ namespace GSC.Report
                 //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
                 //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
 
-
+                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat); result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                 result = AddString($"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName} -{template.ProjectDesignTemplate.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 string notes = "";
                 for (int n = 0; n < template.ProjectDesignTemplate.ProjectDesignTemplateNote.Count; n++)
@@ -644,7 +644,7 @@ namespace GSC.Report
                     notes += template.ProjectDesignTemplate.ProjectDesignTemplateNote[n].Note + "\n";
                 }
                 if (!string.IsNullOrEmpty(notes))
-                    result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                    result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                 result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
@@ -662,6 +662,7 @@ namespace GSC.Report
                     .OrderBy(x => x.ProjectDesignVariable.DesignOrder).ToList())
                 {
                     //result = AddString($"{DesignOrder.ToString()}.{variable.ProjectDesignVariable.DesignOrder}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat); result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                     string annotation = String.IsNullOrEmpty(variable.ProjectDesignVariable.Annotation) ? "" : $"[{variable.ProjectDesignVariable.Annotation}]";
                     string CollectionAnnotation = String.IsNullOrEmpty(variable.ProjectDesignVariable.CollectionAnnotation) ? "" : $"({variable.ProjectDesignVariable.CollectionAnnotation})";
@@ -674,11 +675,9 @@ namespace GSC.Report
                         result = AddString($"{variable.ProjectDesignVariable.VariableName}\n {annotation}   {CollectionAnnotation} \n {Variablenotes}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     else
                         result = AddString($"{variable.ProjectDesignVariable.VariableName} \n {Variablenotes} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-                    AddString($"{DesignOrder.ToString()}.{variable.ProjectDesignVariable.DesignOrder}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
                     PdfLayoutResult secondresult = result;
-
+                    AddString($"{DesignOrder.ToString()}.{variable.ProjectDesignVariable.DesignOrder}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    
                     if (variable.ProjectDesignVariable.Unit != null)
                         AddString(variable.ProjectDesignVariable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width - 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                     if (variable.ProjectDesignVariable.IsNa)
@@ -755,7 +754,7 @@ namespace GSC.Report
                         //document.Form.Fields.Add(radioList);                     
                         foreach (var value in variablevalue.OrderBy(x => x.SeqNo))
                         {
-                            AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.ProjectDesignVariable.Id.ToString());
                             document.Form.Fields.Add(radioList);
 
@@ -766,7 +765,7 @@ namespace GSC.Report
                             if (variblevaluename?.Count > 0)
                                 if (value.ValueName == variblevaluename.FirstOrDefault().ValueName)
                                     radioList.SelectedIndex = 0;
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                         //if (variblevaluename?.Count > 0)
                         //{
@@ -874,18 +873,26 @@ namespace GSC.Report
                         result = AddString(variable.ProjectDesignVariable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     PdfLayoutResult thirdresult = result;
-                    if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
-                    {
-                        if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
-                            result = AddString(" ", thirdresult.Page, new Syncfusion.Drawing.RectangleF(0, thirdresult.Bounds.Bottom, thirdresult.Page.GetClientSize().Width, thirdresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        else
-                            result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                    }
-                    else
-                    {
-                        result = AddString(" ", thirdresult.Page, new Syncfusion.Drawing.RectangleF(0, thirdresult.Bounds.Bottom, thirdresult.Page.GetClientSize().Width, thirdresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                    }
-                }
+                    //if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
+                    //{
+                    //    if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
+                    //        result = AddString(" ", thirdresult.Page, new Syncfusion.Drawing.RectangleF(0, thirdresult.Bounds.Bottom, thirdresult.Page.GetClientSize().Width, thirdresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    //    else
+                    //        result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    //}
+                    //else
+                    //{
+                    //    result = AddString(" ", thirdresult.Page, new Syncfusion.Drawing.RectangleF(0, thirdresult.Bounds.Bottom, thirdresult.Page.GetClientSize().Width, thirdresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    //}
+                    if (secondresult.Page == thirdresult.Page)
+                        if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
+                            if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
+                                result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                    
+                 result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                }                
+
                 int projectdesignId = _context.ProjectDesign.Where(x => x.ProjectId == reportSetting.ProjectId).SingleOrDefault().Id;
                 var workflowlevel = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectdesignId).Include(x => x.Levels).ToList();
                 foreach (var workflow in workflowlevel)
@@ -944,8 +951,6 @@ namespace GSC.Report
             return header;
         }
 
-
-
         public void DataGenerateReport(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
         {
             var subject = _context.ScreeningEntry.Include(s => s.ScreeningVisit).ThenInclude(s => s.ProjectDesignVisit).Include(x => x.Randomization).Include(x => x.Project)
@@ -973,7 +978,7 @@ namespace GSC.Report
                 PdfSection SectionTOC = document.Sections.Add();
                 PdfPage pageTOC = SectionTOC.Pages.Add();
 
-                document.Template.Top = AddHeader(document, item.Project.ProjectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo), item.Project.ClientId);
+                document.Template.Top = AddHeader(document, parent, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo), item.Project.ClientId);
                 document.Template.Bottom = AddFooter(document);
                 PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
                 //layoutFormat.Break = PdfLayoutBreakType.FitPage;
@@ -1004,8 +1009,8 @@ namespace GSC.Report
                         graphics.DrawString("Draft", watermarkerfornt, PdfPens.LightBlue, PdfBrushes.LightBlue, new PointF(-100, 300));
                         graphics.Restore();
                     }
-                }              
-                PdfBookmarkBase bookmarks = document.Bookmarks;              
+                }
+                PdfBookmarkBase bookmarks = document.Bookmarks;
                 foreach (PdfBookmark bookmark in bookmarks)
                 {
                     IndexCreate(bookmark, false);
@@ -1200,14 +1205,14 @@ namespace GSC.Report
 
         }
 
-     
+
         private void IndexCreate(PdfBookmark bookmark, bool isSubSection)
         {
             PdfLayoutFormat layoutformat = new PdfLayoutFormat();
             layoutformat.Break = PdfLayoutBreakType.FitPage;
             layoutformat.Layout = PdfLayoutType.Paginate;
             PdfPageBase page = bookmark.Destination.Page;
-           
+
             PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
             documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
             documentLinkAnnotation.Text = bookmark.Title;
@@ -1221,14 +1226,14 @@ namespace GSC.Report
             {
                 PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
                 tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
-                _pagenumberset.Add(new TocIndexCreate { TocPage = tocresult.Page, Point = new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y), bookmark = bookmark });               
+                _pagenumberset.Add(new TocIndexCreate { TocPage = tocresult.Page, Point = new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y), bookmark = bookmark });
             }
             else
             {
                 PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
                 tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
-                _pagenumberset.Add(new TocIndexCreate { TocPage = tocresult.Page, Point = new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y), bookmark = bookmark });                
-            }           
+                _pagenumberset.Add(new TocIndexCreate { TocPage = tocresult.Page, Point = new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y), bookmark = bookmark });
+            }
         }
 
         private void SetPageNumber()
