@@ -1,12 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
-using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Project.Design;
-using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
 
@@ -111,6 +109,7 @@ namespace GSC.Api.Controllers.Project.Design
 
         [HttpGet]
         [Route("ClonePeriod/{id}/{noOfPeriods}")]
+        [TransactionRequired]
         public IActionResult ClonePeriod(int id, int noOfPeriods)
         {
             var projectDesignId = _projectDesignPeriodRepository.Find(id).ProjectDesignId;

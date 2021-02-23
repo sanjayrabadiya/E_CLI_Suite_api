@@ -90,7 +90,6 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [AllowAnonymous]
         [Route("GetProjectDesignTemplateList/{projectDesignVisitId}")]
         public IActionResult GetProjectDesignTemplateList([FromRoute] int projectDesignVisitId)
         {
@@ -99,7 +98,6 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [AllowAnonymous]
         [Route("GetProjectDesignTemplate/{projectDesignTemplateId}")]
         public IActionResult GetProjectDesignTemplates([FromRoute] int projectDesignTemplateId)
         {

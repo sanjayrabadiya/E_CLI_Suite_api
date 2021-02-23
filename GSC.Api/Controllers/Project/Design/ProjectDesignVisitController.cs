@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
@@ -153,6 +153,7 @@ namespace GSC.Api.Controllers.Project.Design
 
         [HttpGet]
         [Route("CloneVisit/{id}/{projectDesignPeriodId}/{noOfVisits}")]
+        [TransactionRequired]
         public IActionResult CloneVisit(int id, int projectDesignPeriodId, int noOfVisits)
         {
             var saved = _projectDesignVisitRepository
