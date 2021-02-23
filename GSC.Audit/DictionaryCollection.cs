@@ -220,8 +220,11 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "LegalRelationship", DisplayName = "Relationship to the Subject" });
             _dictionaries.Add(new Dictionary { FieldName = "HolidayType", DisplayName = "Holiday" });
             _dictionaries.Add(new Dictionary { FieldName = "FreezerType", DisplayName = "Freezer Type" });
+            //
             _dictionaries.Add(new Dictionary { FieldName = "ScreeningNumber", DisplayName = "Screening Number" });
             _dictionaries.Add(new Dictionary { FieldName = "RandomizationNumber", DisplayName = "Randomization Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "DateOfScreening", DisplayName = "Date Of Screening" });
+            _dictionaries.Add(new Dictionary { FieldName = "DateOfRandomization", DisplayName = "Date Of Randomization" });
 
 
         }
