@@ -334,7 +334,7 @@ namespace GSC.Respository.Attendance
             if (sitedata.IsTestSite)
             {
                 var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.RandomizationNumber != null).Count() + 1;
-                randomizationNumberDto.RandomizationNumber = "TestRnd -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
                 return randomizationNumberDto;
             }
 
@@ -401,7 +401,7 @@ namespace GSC.Respository.Attendance
             if (sitedata.IsTestSite)
             {
                 var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.ScreeningNumber != null).Count() + 1;
-                randomizationNumberDto.ScreeningNumber = "TestScr -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                randomizationNumberDto.ScreeningNumber = "TS -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
                 //  randomizationNumberDto.RandomizationNumber = "TestRnd -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
                 return randomizationNumberDto;
             }
