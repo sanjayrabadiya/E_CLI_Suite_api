@@ -43,19 +43,19 @@ namespace GSC.Data.Dto.UserMgt
         public string Phone { get; set; }
 
         public int? CompanyId { get; set; }
-        public DateTime? _ValidFrom { get; set; }
-        public DateTime? ValidFrom
-        {
-            get => _ValidFrom?.UtcDate();
-            set => _ValidFrom = value?.UtcDate();
-        }
-        public DateTime? _ValidTo { get; set; }
+        public DateTime? ValidFrom { get; set; }
+        //public DateTime? ValidFrom
+        //{
+        //    get => _ValidFrom?.UtcDate();
+        //    set => _ValidFrom = value?.UtcDate();
+        //}
+        public DateTime? ValidTo { get; set; }
 
-        public DateTime? ValidTo
-        {
-            get => _ValidTo?.UtcDate();
-            set => _ValidTo = value?.UtcDate();
-        }
+        //public DateTime? ValidTo
+        //{
+        //    get => _ValidTo?.UtcDate();
+        //    set => _ValidTo = value?.UtcDate();
+        //}
 
         public int? FailedLoginAttempts { get; set; }
 
