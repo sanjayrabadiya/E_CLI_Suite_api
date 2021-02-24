@@ -8,6 +8,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Attendance;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
@@ -36,6 +37,7 @@ namespace GSC.Api.Controllers.Master
         private readonly ICentreUserService _centreUserService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly IRandomizationRepository _randomizationRepository;
 
         public ProjectController(IProjectRepository projectRepository,
             IDesignTrialRepository designTrialRepository,
@@ -47,7 +49,8 @@ namespace GSC.Api.Controllers.Master
             INumberFormatRepository numberFormatRepository,
             ICentreUserService centreUserService,
             IJwtTokenAccesser jwtTokenAccesser,
-            IOptions<EnvironmentSetting> environmentSetting)
+            IOptions<EnvironmentSetting> environmentSetting,
+            IRandomizationRepository randomizationRepository)
         {
             _projectRepository = projectRepository;
             _designTrialRepository = designTrialRepository;
@@ -61,6 +64,7 @@ namespace GSC.Api.Controllers.Master
             _centreUserService = centreUserService;
             _jwtTokenAccesser = jwtTokenAccesser;
             _environmentSetting = environmentSetting;
+            _randomizationRepository = randomizationRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -143,6 +147,15 @@ namespace GSC.Api.Controllers.Master
         {
             if (projectDto.Id <= 0) return BadRequest();
 
+            var sites = _projectRepository.All.Where(x => x.ParentProjectId == projectDto.Id).Select(y => y.Id).ToList();
+            var randomizations = _randomizationRepository.All.Where(x => sites.Contains(x.ProjectId) && x.RandomizationNumber != null && x.RandomizationNumber != "").ToList();
+
+            if (randomizations != null && randomizations.Count > 0)
+            {
+                ModelState.AddModelError("Message", "You can't change format, Randomization entry is started in subject management");
+                return BadRequest(ModelState);
+            }
+
             if (projectDto.IsManualRandomNo == false)
             {
                 if (projectDto.RandomNoStartsWith == null)
@@ -189,6 +202,15 @@ namespace GSC.Api.Controllers.Master
         public IActionResult UpdateScreeningNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
         {
             if (projectDto.Id <= 0) return BadRequest();
+
+            var sites = _projectRepository.All.Where(x => x.ParentProjectId == projectDto.Id).Select(y => y.Id).ToList();
+            var randomizations = _randomizationRepository.All.Where(x => sites.Contains(x.ProjectId) && x.ScreeningNumber != null && x.ScreeningNumber != "").ToList();
+
+            if (randomizations != null && randomizations.Count > 0)
+            {
+                ModelState.AddModelError("Message", "You can't change format, Screening entry is started in subject management");
+                return BadRequest(ModelState);
+            }
 
             if (projectDto.IsManualScreeningNo == false)
             {
@@ -256,7 +278,7 @@ namespace GSC.Api.Controllers.Master
             project.IsAlphaNumScreeningNo = details.IsAlphaNumScreeningNo;
             project.IsAlphaNumRandomNo = details.IsAlphaNumRandomNo;
 
-            if (projectDto.ParentProjectId > 0)
+            if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
                 if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.Id != projectDto.Id && x.DeletedDate == null && x.IsTestSite == false).ToList().Count > 0)
                 {
