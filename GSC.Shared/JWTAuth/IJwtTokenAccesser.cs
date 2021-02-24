@@ -1,4 +1,5 @@
 using GSC.Shared.Generic;
+using System;
 
 namespace GSC.Shared.JWTAuth
 {
@@ -12,5 +13,6 @@ namespace GSC.Shared.JWTAuth
         string IpAddress { get; }
         int Language { get; }
         string GetHeader(string key);
+        DateTime GetClientDate();
     }
 }

@@ -34,11 +34,8 @@ namespace GSC.Audit
             {
                 var userId = _jwtTokenAccesser.UserId;
                 var roleId = _jwtTokenAccesser.RoleId;
-                var clientDate = _jwtTokenAccesser.GetHeader("clientDateTime");
-                DateTime createdDate;
-                var isSucess = DateTime.TryParse(clientDate, out createdDate);
-                if (!isSucess) createdDate = System.DateTime.Now;
-
+                var clientDate = _jwtTokenAccesser.GetClientDate();
+         
                 var changeTracker = entities.Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted).ToList();
 
 
@@ -62,7 +59,7 @@ namespace GSC.Audit
                             RecordId = recordId,
                             CreatedBy = userId,
                             UserRole = _jwtTokenAccesser.RoleName,
-                            CreatedDate = createdDate,
+                            CreatedDate = clientDate,
                             Reason = reason,
                             ReasonOth = reasonOth,
                             IpAddress = _jwtTokenAccesser.IpAddress,
@@ -87,7 +84,7 @@ namespace GSC.Audit
                                 CreatedBy = userId,
                                 UserRole = _jwtTokenAccesser.RoleName,
                                 RecordId = recordId,
-                                CreatedDate = createdDate,
+                                CreatedDate = clientDate,
                                 IpAddress = _jwtTokenAccesser.IpAddress,
                                 Reason = reason,
                                 ReasonOth = reasonOth,

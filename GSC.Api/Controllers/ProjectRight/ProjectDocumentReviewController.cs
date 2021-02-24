@@ -7,6 +7,7 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Respository.Configuration;
 using GSC.Respository.ProjectRight;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.ProjectRight
@@ -19,15 +20,18 @@ namespace GSC.Api.Controllers.ProjectRight
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public ProjectDocumentReviewController(IProjectDocumentReviewRepository projectDocumentReviewRepository,
             IUnitOfWork uow,
             IMapper mapper,
-            IProjectRightRepository projectRightRepository,
+            IJwtTokenAccesser jwtTokenAccesser,
+        IProjectRightRepository projectRightRepository,
             IUploadSettingRepository uploadSettingRepository)
         {
             _projectDocumentReviewRepository = projectDocumentReviewRepository;
             _uow = uow;
+            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _projectRightRepository = projectRightRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -73,7 +77,7 @@ namespace GSC.Api.Controllers.ProjectRight
                     projectid = result.ProjectId;
                     result.IsReview = true;
                     result.ReviewNote = projectDocumentReviewDto.ReviewNote;
-                    result.ReviewDate = DateTime.Now.ToUniversalTime();
+                    result.ReviewDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
                     result.TrainingType = projectDocumentReviewDto.TrainingType;
                     result.TrainerId = projectDocumentReviewDto.TrainerId;
                     result.TrainingDuration = projectDocumentReviewDto.TrainingDuration;
@@ -86,7 +90,7 @@ namespace GSC.Api.Controllers.ProjectRight
                     //Projectid = review.ProjectId;
                     review.IsReview = true;
                     review.ReviewNote = projectDocumentReviewDto.ReviewNote;
-                    review.ReviewDate = DateTime.Now.ToUniversalTime();
+                    review.ReviewDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
                     review.TrainingType = projectDocumentReviewDto.TrainingType;
                     review.TrainerId = projectDocumentReviewDto.TrainerId;
                     review.TrainingDuration = projectDocumentReviewDto.TrainingDuration;

@@ -17,7 +17,7 @@ namespace GSC.Respository.UserMgt
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
-
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public UserOtpRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IUserRepository userRepository,
@@ -25,6 +25,7 @@ namespace GSC.Respository.UserMgt
             IUserPasswordRepository userPasswordRepository)
             : base(context)
         {
+             _jwtTokenAccesser= jwtTokenAccesser;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
             _userPasswordRepository = userPasswordRepository;
@@ -62,7 +63,7 @@ namespace GSC.Respository.UserMgt
                 if (userOtp.CreatedDate != null)
                     userOtp.CreatedDate = userOtp.CreatedDate.Value.AddHours(-1);
             var startDate = userOtp.CreatedDate;
-            var endDate = DateTime.Now.ToUniversalTime();
+            var endDate = _jwtTokenAccesser.GetClientDate();// DateTime.Now.ToUniversalTime();
             var totalMinutes = (Convert.ToDateTime(endDate) - Convert.ToDateTime(startDate)).TotalMinutes;
             if (totalMinutes >= 60)
                 return "OTP you have entered is expire!";
@@ -88,7 +89,7 @@ namespace GSC.Respository.UserMgt
                 if (userOtp.CreatedDate != null)
                     userOtp.CreatedDate = userOtp.CreatedDate.Value.AddHours(-1);
             var startDate = userOtp.CreatedDate;
-            var endDate = DateTime.Now.ToUniversalTime();
+            var endDate = _jwtTokenAccesser.GetClientDate();//DateTime.Now.ToUniversalTime();
             var totalMinutes = (Convert.ToDateTime(endDate) - Convert.ToDateTime(startDate)).TotalMinutes;
             if (totalMinutes >= 60)
                 return "OTP you have entered is expire!";

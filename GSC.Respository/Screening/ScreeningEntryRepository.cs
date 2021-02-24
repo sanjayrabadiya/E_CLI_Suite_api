@@ -38,6 +38,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IGSCContext _context;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ScreeningEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
@@ -48,13 +49,14 @@ namespace GSC.Respository.Screening
             IProjectRepository projectRepository,
             IRandomizationRepository randomizationRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
-            INumberFormatRepository numberFormatRepository,
+        INumberFormatRepository numberFormatRepository,
             IRolePermissionRepository rolePermissionRepository)
             : base(context)
         {
             _volunteerRepository = volunteerRepository;
             _projectRightRepository = projectRightRepository;
             _attendanceRepository = attendanceRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
             _projectWorkflowRepository = projectWorkflowRepository;
             _randomizationRepository = randomizationRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -147,7 +149,7 @@ namespace GSC.Respository.Screening
             screeningEntry.EntryType = attendace.AttendanceType;
             screeningEntry.ProjectDesignPeriodId = attendace.ProjectDesignPeriodId;
 
-            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId, 0, System.DateTime.Now);
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId, 0, _jwtTokenAccesser.GetClientDate());
 
             attendace.IsProcessed = true;
             _attendanceRepository.Update(attendace);

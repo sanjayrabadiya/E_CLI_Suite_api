@@ -1,6 +1,7 @@
 using GSC.Shared.Generic;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using System;
 
 namespace GSC.Shared.JWTAuth
 {
@@ -36,6 +37,18 @@ namespace GSC.Shared.JWTAuth
                 value = _httpContextAccessor.HttpContext.Request.Headers[key];
             return value;
         }
+
+
+        public DateTime GetClientDate()
+        {
+            var clientDate = GetHeader("clientDateTime");
+            DateTime createdDate;
+            var isSucess = DateTime.TryParse(clientDate, out createdDate);
+            if (!isSucess) createdDate = System.DateTime.Now;
+            return createdDate;
+        }
+
+
 
         public int UserId { get; }
 

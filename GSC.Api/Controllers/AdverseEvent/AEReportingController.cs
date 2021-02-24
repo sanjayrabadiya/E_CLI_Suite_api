@@ -159,7 +159,7 @@ namespace GSC.Api.Controllers.AdverseEvent
             var data = _iAEReportingRepository.Find(id);
             data.IsReviewedDone = true;
             data.IsApproved = true;
-            data.ApproveRejectDateTime = DateTime.Now.ToUniversalTime();
+            data.ApproveRejectDateTime = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
             _iAEReportingRepository.Update(data);
 
             if (_uow.Save() <= 0) throw new Exception("Approve Failed.");
@@ -176,7 +176,7 @@ namespace GSC.Api.Controllers.AdverseEvent
             data.IsApproved = false;
             data.RejectReasonId = aEReportingDto.RejectReasonId;
             data.RejectReasonOth = aEReportingDto.RejectReasonOth;
-            data.ApproveRejectDateTime = DateTime.Now.ToUniversalTime();
+            data.ApproveRejectDateTime = _jwtTokenAccesser.GetClientDate();// DateTime.Now.ToUniversalTime();
 
             _iAEReportingRepository.Update(data);
 

@@ -116,7 +116,8 @@ namespace GSC.Api.Controllers.ProjectRight
                 return BadRequest(ModelState);
             }
             projectDocument.ModifiedBy = _jwtTokenAccesser.UserId;
-            projectDocument.ModifiedDate = DateTime.Now.ToUniversalTime();
+            //projectDocument.ModifiedDate = DateTime.Now.ToUniversalTime();
+            projectDocument.ModifiedDate = _jwtTokenAccesser.GetClientDate();
             _projectDocumentRepository.Add(projectDocument);
 
             if (_uow.Save() <= 0) throw new Exception("Creating project document failed on save.");

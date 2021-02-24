@@ -1,6 +1,7 @@
 ﻿using GSC.Data.Dto.Project.EditCheck;
 using GSC.Helper;
 using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,10 +12,14 @@ namespace GSC.Respository.EditCheckImpact
     public class EditCheckRuleRepository : IEditCheckRuleRepository
     {
         private readonly IEditCheckFormulaRepository _editCheckFormulaRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public EditCheckRuleRepository(
-            IEditCheckFormulaRepository editCheckFormulaRepository)
+            IEditCheckFormulaRepository editCheckFormulaRepository,
+            IJwtTokenAccesser jwtTokenAccesser
+            )
         {
             _editCheckFormulaRepository = editCheckFormulaRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
 
@@ -206,8 +211,8 @@ namespace GSC.Respository.EditCheckImpact
 
             if (!isFromValidate)
             {
-                from.InputValue = System.DateTime.Now.ToString();
-                to.InputValue = System.DateTime.Now.ToString();
+                from.InputValue = _jwtTokenAccesser.GetClientDate().ToString();
+                to.InputValue = _jwtTokenAccesser.GetClientDate().ToString();
             }
 
             result.IsValid = true;

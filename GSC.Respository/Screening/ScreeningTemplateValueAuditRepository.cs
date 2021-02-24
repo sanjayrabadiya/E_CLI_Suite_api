@@ -77,11 +77,7 @@ namespace GSC.Respository.Screening
             audit.UserName = _jwtTokenAccesser.UserName;
             audit.UserRole = _jwtTokenAccesser.RoleName;
 
-            var clientDate = _jwtTokenAccesser.GetHeader("clientDateTime");
-            DateTime createdDate;
-            var isSucess = DateTime.TryParse(clientDate, out createdDate);
-            if (!isSucess) createdDate = System.DateTime.Now;
-            audit.CreatedDate = createdDate;
+            audit.CreatedDate = _jwtTokenAccesser.GetClientDate();
 
             Add(audit);
         }

@@ -25,7 +25,7 @@ namespace GSC.Data.Entities.Attendance
         //    get => _dateOfBirth.UtcDate();
         //    set => _dateOfBirth = value.UtcDate();
         //}
-        public int? Gender { get; set; }
+        public Gender? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
         public string Email { get; set; }

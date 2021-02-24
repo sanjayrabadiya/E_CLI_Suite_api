@@ -68,11 +68,11 @@ namespace GSC.Respository.Screening
             screeningTemplateValueQuery.UserName = _jwtTokenAccesser.UserName;
             screeningTemplateValueQuery.UserRole = _jwtTokenAccesser.RoleName;
 
-            var clientDate = _jwtTokenAccesser.GetHeader("clientDateTime");
-            DateTime createdDate;
-            var isSucess = DateTime.TryParse(clientDate, out createdDate);
-            if (!isSucess) createdDate = System.DateTime.Now;
-            screeningTemplateValueQuery.CreatedDate = createdDate;
+            //var clientDate = _jwtTokenAccesser.GetHeader("clientDateTime");
+            //DateTime createdDate;
+            //var isSucess = DateTime.TryParse(clientDate, out createdDate);
+            //if (!isSucess) createdDate = System.DateTime.Now;
+            screeningTemplateValueQuery.CreatedDate = _jwtTokenAccesser.GetClientDate();
             Add(screeningTemplateValueQuery);
         }
 

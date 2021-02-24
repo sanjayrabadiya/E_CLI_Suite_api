@@ -20,7 +20,7 @@ namespace GSC.Data.Dto.Attendance
         //    get => _DateOfBirth.UtcDate();
         //    set => _DateOfBirth = value.UtcDate();
        // }
-        public int? Gender { get; set; }
+        public Gender? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
         public string Email { get; set; }
@@ -72,7 +72,7 @@ namespace GSC.Data.Dto.Attendance
         //    get => _DateOfBirth.UtcDate();
         //    set => _DateOfBirth = value.UtcDate();
         //}
-        public int? Gender { get; set; }
+
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
         public string Email { get; set; }
@@ -120,6 +120,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsmultipleEconsentReviewDetails { get; set; }
         public int? ZipCode { get; set; }
         public int? UserId { get; set; }
+        public string Gen { get; set; }
 
     }
 

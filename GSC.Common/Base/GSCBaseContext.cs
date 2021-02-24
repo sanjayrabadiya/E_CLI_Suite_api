@@ -105,11 +105,14 @@ namespace GSC.Common.Base
         #endregion
         void SetAuditInformation()
         {
+        
             foreach (var entry in ChangeTracker.Entries<BaseEntity>())
                 if (entry.State == EntityState.Added)
                 {
                     entry.Entity.CreatedBy = _commonSharedService.JwtTokenAccesser.UserId;
-                    entry.Entity.CreatedDate = DateTime.Now.ToUniversalTime();
+                    // entry.Entity.CreatedDate = DateTime.Now.ToUniversalTime();
+                    entry.Entity.CreatedDate = _commonSharedService.JwtTokenAccesser.GetClientDate();
+
                 }
                 else if (entry.State == EntityState.Modified)
                 {
@@ -119,12 +122,14 @@ namespace GSC.Common.Base
                     if (entry.Entity.AuditAction == AuditAction.Deleted)
                     {
                         entry.Entity.DeletedBy = _commonSharedService.JwtTokenAccesser.UserId;
-                        entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
+                        // entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
+                        entry.Entity.DeletedDate = _commonSharedService.JwtTokenAccesser.GetClientDate();
                     }
                     else
                     {
                         entry.Entity.ModifiedBy = _commonSharedService.JwtTokenAccesser.UserId;
-                        entry.Entity.ModifiedDate = DateTime.Now.ToUniversalTime();
+                        // entry.Entity.ModifiedDate = DateTime.Now.ToUniversalTime();
+                        entry.Entity.ModifiedDate = _commonSharedService.JwtTokenAccesser.GetClientDate();
                     }
                 }
         }

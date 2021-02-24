@@ -470,7 +470,7 @@ namespace GSC.Respository.Medra
                     item.CodedType = CodedType.ReCoded;
                     item.ModifiedBy = _jwtTokenAccesser.UserId;
                     item.CreatedRole = _jwtTokenAccesser.RoleId;
-                    item.ModifiedDate = DateTime.Now.ToUniversalTime();
+                    item.ModifiedDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
                     item.MeddraLowLevelTermId = null;
                     item.MeddraSocTermId = null;
                     item.IsApproved = false;
@@ -490,7 +490,7 @@ namespace GSC.Respository.Medra
                 data.CodedType = CodedType.ReCoded;
                 data.ModifiedBy = _jwtTokenAccesser.UserId;
                 data.CreatedRole = _jwtTokenAccesser.RoleId;
-                data.ModifiedDate = DateTime.Now.ToUniversalTime();
+                data.ModifiedDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
                 data.MeddraLowLevelTermId = null;
                 data.MeddraSocTermId = null;
                 data.IsApproved = false;
@@ -553,7 +553,7 @@ namespace GSC.Respository.Medra
                 data.IsApproved = false;
                 data.ApprovedBy = null;
                 data.DeletedBy = _jwtTokenAccesser.UserId;
-                data.DeletedDate = DateTime.Now.ToUniversalTime();
+                data.DeletedDate = _jwtTokenAccesser.GetClientDate();// DateTime.Now.ToUniversalTime();
                 Update(data);
                 _meddraCodingAuditRepository.SaveAudit("Remove from meddra Coding", data.Id, null, null, "Removed due to edit check fired.", null, null);
             }

@@ -134,8 +134,8 @@ namespace GSC.Respository.ProjectRight
                                 UserId = userId,
                                 ProjectId = item.Id,
                                 IsReview = true,
-                                ReviewDate = DateTime.Now.ToUniversalTime()
-                            });
+                                ReviewDate = _jwtTokenAccesser.GetClientDate()// DateTime.Now.ToUniversalTime()
+                    });
                         else
                             Add(new ProjectDocumentReview
                             {

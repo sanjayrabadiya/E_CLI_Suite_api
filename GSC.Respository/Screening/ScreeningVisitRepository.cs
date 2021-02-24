@@ -370,7 +370,8 @@ namespace GSC.Respository.Screening
                 t => new { t.ProjectDesignVariableId, t.VisitStatusId }).ToList();
 
 
-            DateTime? statusDate = System.DateTime.Now;
+            DateTime? statusDate = _jwtTokenAccesser.GetClientDate();
+
             ScreeningVisitStatus? visitStatus = ScreeningVisitStatus.InProgress;
 
             if (screeningTemplate.Status >= ScreeningTemplateStatus.Submitted)
@@ -378,7 +379,7 @@ namespace GSC.Respository.Screening
                 if (!_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningTemplate.ScreeningEntryId
                 && x.ScreeningVisitId == screeningTemplate.ScreeningVisitId && !x.IsDisable && x.Status < ScreeningTemplateStatus.Submitted))
                 {
-                    statusDate = System.DateTime.Now;
+                    statusDate = _jwtTokenAccesser.GetClientDate();
                     visitStatus = ScreeningVisitStatus.Completed;
                 }
             }

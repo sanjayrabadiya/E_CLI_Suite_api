@@ -226,6 +226,21 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "DateOfScreening", DisplayName = "Date Of Screening" });
             _dictionaries.Add(new Dictionary { FieldName = "DateOfRandomization", DisplayName = "Date Of Randomization" });
 
+            //
+            _dictionaries.Add(new Dictionary { FieldName = "EmergencyContactNumber", DisplayName = "Emergency Contact Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "Qualification", DisplayName = "Qualification" });
+            _dictionaries.Add(new Dictionary { FieldName = "Occupation", DisplayName = "Occupation" });
+            _dictionaries.Add(new Dictionary { FieldName = "AddressLine1", DisplayName = "Address Line1" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "AddressLine2", DisplayName = "Address Line2" });
+            _dictionaries.Add(new Dictionary { FieldName = "ZipCode", DisplayName = "ZipCode" });
+            _dictionaries.Add(new Dictionary { FieldName = "LegalFirstName", DisplayName = "(LR)First Name" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "LegalMiddleName", DisplayName = "(LR)Middle Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "LegalLastName", DisplayName = "(LR)Last Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "LegalEmergencyCoNumber", DisplayName = "(LR)Contact Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "LegalEmail", DisplayName = "(LR)Email" });
+
 
         }
 

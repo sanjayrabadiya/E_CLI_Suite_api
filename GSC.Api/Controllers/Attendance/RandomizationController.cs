@@ -89,7 +89,10 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("GetRandomizationList/{projectId}/{isDeleted:bool?}")]
         public IActionResult GetRandomizationList(int projectId, bool isDeleted)
         {
-            return Ok(_randomizationRepository.GetRandomizationList(projectId, isDeleted));
+            var randomizations = _randomizationRepository.GetRandomizationList(projectId, isDeleted);
+            return Ok(randomizations);
+
+            //return Ok();
         }
 
         [HttpGet("{id}")]
@@ -159,7 +162,7 @@ namespace GSC.Api.Controllers.Attendance
             {
                 var userDetail = _userRepository.FindBy(x => x.Id == details.UserId).FirstOrDefault();
                 userDetail.FirstName = RandomizationDto.FirstName;
-                userDetail.MiddleName = RandomizationDto.LastName;
+                userDetail.MiddleName = RandomizationDto.MiddleName;
                 userDetail.LastName = RandomizationDto.LastName;
                 userDetail.DateOfBirth = RandomizationDto.DateOfBirth;
                 userDetail.Email = RandomizationDto.Email;
