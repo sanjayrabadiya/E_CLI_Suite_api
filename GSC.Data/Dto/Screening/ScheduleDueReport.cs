@@ -34,6 +34,9 @@ namespace GSC.Data.Dto.Screening
         public int?[] SubjectIds { get; set; }
         public DateTime? fromDate { get; set; }
         public DateTime? toDate { get; set; }
+        public int?[] PeriodIds { get; set; }
+        public int?[] VisitIds { get; set; }
+        public int?[] TemplateIds { get; set; }
         //private DateTime? _fromDate { get; set; }
         //public DateTime? fromDate
         //{

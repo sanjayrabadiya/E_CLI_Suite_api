@@ -168,7 +168,7 @@ namespace GSC.Respository.Master
         {
             int? limit = All.AsNoTracking().Where(x => x.Id == objSave.Id).FirstOrDefault().AttendanceLimit;
 
-            int? sum = All.AsNoTracking().Where(t => t.ParentProjectId == objSave.ParentProjectId && t.DeletedDate == null)
+            int? sum = All.AsNoTracking().Where(t => t.ParentProjectId == objSave.ParentProjectId && t.DeletedDate == null && t.IsTestSite == false)
                         .Select(t => t.AttendanceLimit ?? 0).Sum() - limit + objSave.AttendanceLimit;
 
             //int? total = sum + objSave.AttendanceLimit;

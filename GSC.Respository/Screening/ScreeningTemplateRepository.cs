@@ -1056,6 +1056,9 @@ namespace GSC.Respository.Screening
             //    studycode = _context.Project.Where(x => x.Id == parentId).ToList().FirstOrDefault().ProjectCode;
             //}
             var result = All.Where(x => x.DeletedDate == null && x.ScheduleDate != null && (x.Status == ScreeningTemplateStatus.Pending || x.Status == ScreeningTemplateStatus.InProcess) && x.ScheduleDate <= DateTime.Today);
+            if (filters.PeriodIds != null && filters.PeriodIds.ToList().Count > 0) result = result.Where(x => filters.PeriodIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId));
+            if (filters.VisitIds != null && filters.VisitIds.ToList().Count > 0) result = result.Where(x => filters.VisitIds.Contains(x.ScreeningVisit.ProjectDesignVisitId));
+            if (filters.TemplateIds != null && filters.TemplateIds.ToList().Count > 0) result = result.Where(x => filters.TemplateIds.Contains(x.ProjectDesignTemplateId));
             if (filters.SubjectIds != null && filters.SubjectIds.ToList().Count > 0) result = result.Where(x => filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.RandomizationId));
             if (filters.fromDate != null)
             {
