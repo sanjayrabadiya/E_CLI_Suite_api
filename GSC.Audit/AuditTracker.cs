@@ -69,6 +69,7 @@ namespace GSC.Audit
                     }
                     else
                     {
+                        trackers = new List<TrackerResult>();
                         GetOldAndNewValues(dbEntry, ref trackers, recordId, context);
 
                         trackers.ForEach(r =>
@@ -186,13 +187,13 @@ namespace GSC.Audit
                 {
                     if (string.IsNullOrEmpty(oldValue)) oldValue = "Empty";
                     if (string.IsNullOrEmpty(newValue)) newValue = "Empty";
-
-                    if (!trackers.Any(x => x.EntityName == dbEntry.CurrentValues.EntityType.ClrType.Name.ToString() && x.FieldName == displayName))
+                    var tableName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString().Trim();
+                    if (!trackers.Any(x => x.EntityName == tableName && x.FieldName == displayName.Trim()))
                         trackers.Add(new TrackerResult
                         {
-                            EntityName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString(),
+                            EntityName = tableName,
                             OldValue = oldValue,
-                            FieldName = displayName,
+                            FieldName = displayName.Trim(),
                             NewValue = newValue
                         });
                 }
