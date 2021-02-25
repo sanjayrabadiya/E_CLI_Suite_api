@@ -132,11 +132,17 @@ namespace GSC.Api.Controllers.Report
 
             if (_uow.Save() <= 0) throw new Exception("Creating Job Monitoring failed on save.");
 
+            string message = "";
             if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                _reportSuncfusion.BlankReportGenerate(reportSetting, jobMonitoring);
+                message= _reportSuncfusion.BlankReportGenerate(reportSetting, jobMonitoring);
             else
-                _reportSuncfusion.DataGenerateReport(reportSetting, jobMonitoring);
+                message= _reportSuncfusion.DataGenerateReport(reportSetting, jobMonitoring);
 
+            if (!string.IsNullOrEmpty(message))
+            {
+                ModelState.AddModelError("Message", message);
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 
