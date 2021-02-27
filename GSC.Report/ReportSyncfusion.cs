@@ -343,7 +343,7 @@ namespace GSC.Report
             PdfPage pageTOC = SectionTOC.Pages.Add();
 
             document.Template.Top = AddHeader(document, projectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo), ClientId);
-            SectionTOC.Template.Bottom = AddFooter(document);
+            document.Template.Bottom = AddFooter(document);
 
             PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
             //layoutFormat.Break = PdfLayoutBreakType.FitPage;
@@ -521,7 +521,6 @@ namespace GSC.Report
                         {
                             result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
-
                             PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueCode.ToString());
                             radioItem1.Bounds = new RectangleF(300, result.Bounds.Y, 13, 13);
                             radioList.Items.Add(radioItem1);
@@ -927,7 +926,7 @@ namespace GSC.Report
 
         private PdfPageTemplateElement VisitTemplateHeader(PdfDocument doc, string projectcode, string vistName, string screeningNO, string subjectNo, string Initial, bool Isscreeningno, bool isSubjectNo, bool IsInitial, bool isSiteCode)
         {
-            RectangleF rect = new RectangleF(0, 80, doc.Pages[0].GetClientSize().Width, 150);
+            RectangleF rect = new RectangleF(0, 80, doc.Pages[0].GetClientSize().Width, 120);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
             PdfStringFormat stringFormat = new PdfStringFormat();
             stringFormat.MeasureTrailingSpaces = true;
