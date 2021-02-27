@@ -302,6 +302,7 @@ namespace GSC.Respository.Screening
                                  Id = query.Id,
                                  ProjectCode = screening.Project.ProjectCode,
                                  ReasonName = reason.ReasonName,
+                                 ReasonOth = query.ReasonOth, // added by Neel
                                  StatusName = query.QueryStatus.GetDescription(),
                                  Value = query.Value,
                                  QueryDescription = query.Note,
@@ -329,6 +330,7 @@ namespace GSC.Respository.Screening
                 Id = y.Last().Id,
                 ProjectCode = y.Last().ProjectCode,
                 ReasonName = y.Last().ReasonName,
+                ReasonOth = y.Last().ReasonOth,
                 StatusName = y.Last().StatusName,
                 QueryDescription = y.Last().QueryDescription,
                 QueryStatus = y.Last().QueryStatus,
