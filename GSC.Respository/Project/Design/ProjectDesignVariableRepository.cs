@@ -197,7 +197,7 @@ namespace GSC.Respository.Project.Design
                 CollectionSources = c.Key.CollectionSources,
                 VisitName = string.Join(", ", variableResult.Where(v => v.Value == c.Key.Value).Select(r => r.VisitName).ToList()),
                 ExtraData = variableResult.FirstOrDefault(v => v.Value == c.Key.Value)?.ExtraData
-            }).ToList();
+            }).Where(x=>x.Value != null).ToList();
         }
 
         //Added method By Vipul 25062020

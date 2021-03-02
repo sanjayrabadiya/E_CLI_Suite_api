@@ -346,7 +346,7 @@ namespace GSC.Respository.ProjectRight
                 Value = c.FirstOrDefault().Value,
                 Code = c.FirstOrDefault().Code,
                 ExtraData = c.FirstOrDefault().ExtraData
-            }).ToList();
+            }).OrderBy(o => o.Id).ToList();
         }
 
         public List<ProjectDropDown> GetChildProjectDropDownProjectRight(int ParentProjectId)
