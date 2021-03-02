@@ -132,6 +132,7 @@ namespace GSC.Respository.Screening
 
                 if (x.VisitStatus == ScreeningVisitStatus.Missed || x.VisitStatus == ScreeningVisitStatus.Missed)
                     x.IsVisitRepeated = false;
+                x.IsLocked = x.ScreeningTemplates.All(x => x.IsLocked);
             });
 
             myReview = templates.Any(x => x.MyReview);

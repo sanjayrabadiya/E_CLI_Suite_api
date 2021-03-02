@@ -699,8 +699,9 @@ namespace GSC.Respository.Screening
             return Templates.Select(x => new DropDownDto
             {
                 Id = x.ProjectDesignTemplateId,
-                Value = x.ProjectDesignTemplate.TemplateName
-            }).Distinct().ToList();
+                Value = x.ProjectDesignTemplate.TemplateName,
+                ExtraData = x.ProjectDesignTemplate.DesignOrder
+            }).Distinct().OrderBy(x => x.ExtraData).ToList();
         }
 
         public IList<VisitDeviationReport> GetVisitDeviationReport(VisitDeviationReportSearchDto filters)

@@ -15,7 +15,7 @@ namespace GSC.Data.Dto.Screening
         public int? ParentScreeningVisitId { get; set; }
         public bool IsVisitRepeated { get; set; }
         public List<ScreeningTemplateTree> ScreeningTemplates { get; set; }
-
+        public bool IsLocked { get; set; }
     }
 
     public class ScreeningTemplateTree
