@@ -75,6 +75,7 @@ namespace GSC.Respository.Screening
             {
                 ScreeningVisitId = s.Id,
                 VisitSeqNo = s.RepeatedVisitNumber,
+                DesignOrder = s.ProjectDesignVisit.DesignOrder,
                 ProjectDesignVisitId = s.ProjectDesignVisitId,
                 ProjectDesignVisitName = (_jwtTokenAccesser.Language != 1 ?
                 s.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
@@ -84,7 +85,7 @@ namespace GSC.Respository.Screening
                 VisitStatusName = s.Status.GetDescription(),
                 ParentScreeningVisitId = s.ParentId,
                 IsVisitRepeated = s.ProjectDesignVisit.IsRepeated,
-            }).OrderBy(o => o.ProjectDesignVisitId).ThenBy(t => t.VisitSeqNo).ToList();
+            }).OrderBy(o => o.DesignOrder).ThenBy(t => t.VisitSeqNo).ToList();
 
             return result;
         }

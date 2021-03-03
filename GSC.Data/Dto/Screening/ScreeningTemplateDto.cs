@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.Screening
         public bool IsVisitRepeated { get; set; }
         public List<ScreeningTemplateTree> ScreeningTemplates { get; set; }
         public bool IsLocked { get; set; }
+        public int? DesignOrder { get; set; }
     }
 
     public class ScreeningTemplateTree
