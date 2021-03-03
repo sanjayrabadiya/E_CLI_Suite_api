@@ -109,13 +109,15 @@ namespace GSC.Api.Controllers.Project.Schedule
             if (projectScheduleDto.Templates != null)
                 projectScheduleDto.Templates.ToList().ForEach(t =>
                 {
-                    t.TemplateName = _projectDesignTemplateRepository.Find(t.ProjectDesignTemplateId).TemplateName;
+                    var Template = _projectDesignTemplateRepository.Find(t.ProjectDesignTemplateId);
+                    t.TemplateName = Template.TemplateName;
+                    t.TemplateDesignOrder = Template.DesignOrder;
                     t.Variables = _projectDesignVariableRepository.GetVariabeDropDown(t.ProjectDesignTemplateId);
                     t.PeriodName = _projectDesignPeriodRepository.Find(t.ProjectDesignPeriodId).DisplayName;
                     t.VisitName = _projectDesignVisitRepository.Find(t.ProjectDesignVisitId).DisplayName;
                     t.IsVariablLoaded = true;
                 });
-            projectScheduleDto.Templates = projectScheduleDto.Templates.Where(x => (x.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null)).ToList();
+            projectScheduleDto.Templates = projectScheduleDto.Templates.Where(x => (x.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderBy(x => x.ProjectDesignVisitId).ThenBy(x => x.TemplateDesignOrder).ToList();
             projectScheduleDto.IsLock = !projectSchedule.ProjectDesign.IsUnderTesting;
             return Ok(projectScheduleDto);
         }
@@ -188,10 +190,10 @@ namespace GSC.Api.Controllers.Project.Schedule
             _projectScheduleRepository.Update(projectSchedule);
             foreach (var item in projectSchedule.Templates)
             {
-                if(item.Id>0)
-                _projectScheduleTemplateRepository.Update(item);
+                if (item.Id > 0)
+                    _projectScheduleTemplateRepository.Update(item);
                 else
-                _projectScheduleTemplateRepository.Add(item);
+                    _projectScheduleTemplateRepository.Add(item);
             }
             _uow.Save();
 
