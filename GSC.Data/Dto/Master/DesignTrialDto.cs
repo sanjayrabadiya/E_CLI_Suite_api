@@ -7,7 +7,7 @@ namespace GSC.Data.Dto.Master
 {
     public class DesignTrialDto : BaseDto
     {
-        [Required(ErrorMessage = "Trial Type Code is required.")]
+        //[Required(ErrorMessage = "Trial Type Code is required.")]
         public string DesignTrialCode { get; set; }
 
         [Required(ErrorMessage = "Trial Type is required.")]

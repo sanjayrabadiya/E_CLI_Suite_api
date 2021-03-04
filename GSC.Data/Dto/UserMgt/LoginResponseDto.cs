@@ -37,6 +37,7 @@ namespace GSC.Data.Dto.UserMgt
         public UserMasterUserType? UserType { get; set; }
         public List<AppScreenPatient> PatientRights { get; set; }
         public bool alreadyLoggedIn { get; set; }
-        
+        public int MinutesToExpiration { get; set; }
+
     }
 }

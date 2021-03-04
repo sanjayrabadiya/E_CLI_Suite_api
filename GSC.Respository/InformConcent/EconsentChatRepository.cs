@@ -49,13 +49,14 @@ namespace GSC.Respository.InformConcent
                         (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)).ToList();
             }
             var userschat = _mapper.Map<List<EConsentUserChatDto>>(users);
-
+            var userintlist = users.Select(x => x.Id).ToList();
+            var chatdata = FindBy(x => (x.SenderId == _jwtTokenAccesser.UserId || x.ReceiverId == _jwtTokenAccesser.UserId));
             for (int i = 0; i <= userschat.Count - 1; i++)
             {
                 IList<int> intList = new List<int>() { userschat[i].Id, _jwtTokenAccesser.UserId };
-                var chatobj = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).ToList().OrderBy(t => t.SendDateTime).ToList().LastOrDefault();
+                var chatobj = chatdata.Where(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();//FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();
                 userschat[i].LastMessage = chatobj == null ? "" : chatobj.Message;
-                userschat[i].UnReadMsgCount = FindBy(x => x.SenderId == userschat[i].Id && x.IsRead == false).ToList().Count;
+                userschat[i].UnReadMsgCount = chatdata.Where(x => x.SenderId == userschat[i].Id && x.IsRead == false).ToList().Count;
                 if (chatobj != null)
                 {
                     if (chatobj.ReceiverId == _jwtTokenAccesser.UserId)

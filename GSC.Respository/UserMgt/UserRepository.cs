@@ -218,6 +218,7 @@ namespace GSC.Respository.UserMgt
                 Token = roleId == 0 ? null : BuildJwtToken(user, roleId),
                 RefreshToken = roleId == 0 ? null : GenerateRefreshToken(),
                 ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.Value.MinutesToExpiration),
+                MinutesToExpiration = _settings.Value.MinutesToExpiration, // Added By Neel for use in Mobile App 
                 IsFirstTime = userViewModel.IsFirstTime,
                 UserId = user.Id,
                 RoleTokenId = roleTokenId,

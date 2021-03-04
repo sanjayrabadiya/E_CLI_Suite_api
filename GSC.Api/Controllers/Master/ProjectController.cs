@@ -85,6 +85,8 @@ namespace GSC.Api.Controllers.Master
             var projectDesign =
                 _projectDesignRepository.FindByInclude(t => t.ProjectId == id && t.DeletedDate == null).FirstOrDefault();
             projectDto.ProjectDesignId = projectDesign == null ? (int?)null : projectDesign.Id;
+            if (projectDto.ParentProjectId != null)
+                projectDto.ProjectName = _projectRepository.Find((int)projectDto.ParentProjectId).ProjectName;
 
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
