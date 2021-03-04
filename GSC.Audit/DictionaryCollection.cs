@@ -241,7 +241,27 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "LegalEmergencyCoNumber", DisplayName = "(LR)Contact Number" });
             _dictionaries.Add(new Dictionary { FieldName = "LegalEmail", DisplayName = "(LR)Email" });
             _dictionaries.Add(new Dictionary { FieldName = "PrimaryContactNumber", DisplayName = "Primary Contact Number" });
-           
+            //
+            _dictionaries.Add(new Dictionary { FieldName = "IsManualRandomNo", DisplayName = "Is Manual Randomization Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsSiteDependentRandomNo", DisplayName = "Is Site Dependent Randomization Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "RandomNoLength", DisplayName = "Randomization Number Length" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsAlphaNumRandomNo", DisplayName = "Is Alpha Numeric Randomization Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "PrefixRandomNo", DisplayName = "Prefix Randomization Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "RandomNoStartsWith", DisplayName = "Randomization Number Starts with" });
+            //
+            _dictionaries.Add(new Dictionary { FieldName = "IsManualScreeningNo", DisplayName = "Is Manual Screening Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsSiteDependentScreeningNo", DisplayName = "Is Site Dependent Screening Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "ScreeningLength", DisplayName = "Screening Number Length" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsAlphaNumScreeningNo", DisplayName = "Is Alpha Numeric Screening Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "PrefixScreeningNo", DisplayName = "Prefix Screening Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "ScreeningNoStartsWith", DisplayName = "Screening Number Starts with" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Study", SourceColumn = "ProjectId", TableName = "Project", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignTemplateIdPatient", DisplayName = "Patient Template", SourceColumn = "ProjectDesignTemplateIdPatient", TableName = "ProjectDesignTemplate", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignTemplateIdInvestigator", DisplayName = "Investigator Template", SourceColumn = "ProjectDesignTemplateIdInvestigator", TableName = "ProjectDesignTemplate", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "SeveritySeqNo1", DisplayName = "Label for Low", SourceColumn = "SeveritySeqNo1", TableName = "ProjectDesignVariableValue", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "SeveritySeqNo2", DisplayName = "Label for Medium", SourceColumn = "SeveritySeqNo2", TableName = "ProjectDesignVariableValue", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "SeveritySeqNo3", DisplayName = "Label for High", SourceColumn = "SeveritySeqNo3", TableName = "ProjectDesignVariableValue", PkName = "Id" });
         }
 
 

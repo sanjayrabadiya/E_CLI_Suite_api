@@ -396,7 +396,8 @@ namespace GSC.Respository.Master
             {
                 var projectCode = _numberFormatRepository.GenerateNumber("project");
                 var country = _countryRepository.Find(project.CountryId).CountryCode;
-                var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
+                //var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode; // commented By Neel
+                var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialName;
                 projectCode = projectCode.Replace("DESIGN", design);
                 projectCode = projectCode.Replace("COUNTRY", country);
 
@@ -429,7 +430,8 @@ namespace GSC.Respository.Master
                 SiteCount = All.Where(x => x.ParentProjectId == project.ParentProjectId && x.IsTestSite == true).Count();
             var projectCode = _numberFormatRepository.GenerateNumberForSite("projectchild", SiteCount);
             var country = _countryRepository.Find(project.CountryId).CountryCode;
-            var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode;
+            //var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialCode; // commented by Neel 
+            var design = _designTrialRepository.Find(project.DesignTrialId).DesignTrialName;
             projectCode = projectCode.Replace("DESIGN", design);
             projectCode = projectCode.Replace("COUNTRY", country);
 
@@ -521,11 +523,11 @@ namespace GSC.Respository.Master
                 ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             var projectCode = _context.Project.Find(projectId).ProjectCode;
-
+            var projectName = Find(projectId).ProjectName; // Added By Neel
             projects.ForEach(x =>
             {
                 x.ParentProjectCode = projectCode;
-
+                x.ProjectName = projectName; // Added By Neel
             });
 
             //projects.ForEach(x =>

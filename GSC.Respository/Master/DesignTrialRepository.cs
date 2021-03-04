@@ -40,9 +40,9 @@ namespace GSC.Respository.Master
 
         public string Duplicate(DesignTrial objSave)
         {
-            if (All.Any(
-                x => x.Id != objSave.Id && x.DesignTrialCode == objSave.DesignTrialCode.Trim() && x.DeletedDate == null))
-                return "Duplicate DesignTrial code : " + objSave.DesignTrialCode;
+            //if (All.Any(
+            //    x => x.Id != objSave.Id && x.DesignTrialCode == objSave.DesignTrialCode.Trim() && x.DeletedDate == null))
+            //    return "Duplicate DesignTrial code : " + objSave.DesignTrialCode;
 
             if (All.Any(
                 x => x.Id != objSave.Id && x.DesignTrialName == objSave.DesignTrialName.Trim() && x.DeletedDate == null))

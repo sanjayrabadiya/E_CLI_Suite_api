@@ -639,6 +639,9 @@ namespace GSC.Respository.ProjectRight
         }
         public IList<UserReportDto> GetUserReportList(UserReportSearchDto filters)
         {
+            if (filters.UserIds != null && filters.UserIds.ToList().Count <= 0)
+                filters.UserIds = null;
+
             var results = (from user in _context.Users.Where(t => ((t.DeletedBy != null && filters.UserId == 2) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) ||
                            ((t.DeletedBy == null && filters.UserId == 3) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) || ((t.IsLogin == true && filters.UserId == 1) && (filters.UserIds == null || filters.UserIds.Contains(t.Id)))
                           )
@@ -668,32 +671,38 @@ namespace GSC.Respository.ProjectRight
         }
         public IList<UserReportDto> GetLoginLogoutReportList(UserReportSearchDto filters)
         {
-            var parent = _context.Project.Where(x => (x.Id == filters.ProjectId) || (x.ParentProjectId == filters.ProjectId)).Select(x => x.Id).ToList();
+            if (filters.UserIds != null && filters.UserIds.ToList().Count <= 0)
+                filters.UserIds = null;
 
-            var queryDtos = (from user in _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId)))
-                             join projectRight in _context.ProjectRight.Where(u => filters.ProjectId == null || parent.Contains(u.ProjectId))
-                             on user.UserId equals projectRight.UserId
-                             join project in _context.Project on projectRight.ProjectId equals project.Id
-                             select new UserReportDto
-                             {
-                                 UserName = user.LoginName,
-                                 ParentProjectId = project.Id,
-                                 SiteName = string.IsNullOrEmpty(project.SiteName) ? project.ProjectName : project.SiteName,
-                                 LoginTime = _context.UserLoginReport.FirstOrDefault(a => a.UserId == projectRight.UserId).LoginTime.UtcDateTime(),
-                                 LogOutTime = user.LoginTime.UtcDateTime(),
-                                 RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.UserId).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
-                             }).ToList();//OrderBy(x => x.Id).ToList();
+            //var parent = _context.Project.Where(x => (x.Id == filters.ProjectId) || (x.ParentProjectId == filters.ProjectId)).Select(x => x.Id).ToList();
 
-            queryDtos = queryDtos.OrderBy(x => x.Id).ToList();
+            //var userlis = _context.ProjectRight.Where(u => filters.ProjectId == null || parent.Contains(u.ProjectId)).ToList();
 
-            queryDtos.ForEach(r =>
-            {
-                if (filters.ProjectId == 1)
+
+            //var queryDtos = (from user in _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId)))
+            //                 join projectRight in _context.ProjectRight.Where(u => filters.ProjectId == null || parent.Contains(u.ProjectId))
+            //                 on user.UserId equals projectRight.UserId
+            //                 join project in _context.Project on projectRight.ProjectId equals project.Id
+            //                 select new UserReportDto
+            //                 {
+            //                     UserName = user.LoginName,
+            //                     ParentProjectId = project.Id,
+            //                     SiteName = string.IsNullOrEmpty(project.SiteName) ? project.ProjectName : project.SiteName,
+            //                     LoginTime = _context.UserLoginReport.FirstOrDefault(a => a.UserId == projectRight.UserId).LoginTime.UtcDateTime(),
+            //                     LogOutTime = user.LoginTime.UtcDateTime(),
+            //                     RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.UserId).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
+            //                 }).ToList();//OrderBy(x => x.Id).ToList();
+
+           var queryDtos = _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId))).Select(
+                x => new UserReportDto
                 {
-                    r.RoleName = _context.SecurityRole.FirstOrDefault(a => a.Id == _jwtTokenAccesser.RoleId).RoleName;
-
-                }
-            });
+                    Id = x.Id,
+                    UserName = x.LoginName,
+                    LoginTime = x.LoginTime,
+                    LogOutTime = x.LogoutTime,
+                }).ToList();
+            queryDtos = queryDtos.OrderByDescending(x => x.Id).ToList();
+           
             return queryDtos;
         }
 
