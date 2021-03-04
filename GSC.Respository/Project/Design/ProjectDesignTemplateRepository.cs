@@ -40,6 +40,8 @@ namespace GSC.Respository.Project.Design
                 .ThenInclude(d => d.VariableLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.VariableNoteLanguage.Where(x => x.DeletedBy == null))
+               // .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
+              //  .ThenInclude(d => d.Roles.Where(x => x.DeletedBy == null))
                 .AsNoTracking().FirstOrDefault();
 
             return template;
@@ -101,6 +103,7 @@ namespace GSC.Respository.Project.Design
                         UnitName = x.Unit.UnitName,
                         DesignOrder = x.DesignOrder,
                         IsDocument = x.IsDocument,
+                       // IsEncrypt = x.IsEncrypt,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
                         SystemType = x.SystemType,
@@ -128,7 +131,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetTemplateDropDown(int projectDesignVisitId)
         {
             var templates = All.Where(x => x.DeletedDate == null
-                                           && x.ProjectDesignVisitId == projectDesignVisitId).OrderBy(t => t.Id).Select(
+                                           && x.ProjectDesignVisitId == projectDesignVisitId).OrderBy(t => t.DesignOrder).Select(
                 t => new DropDownDto
                 {
                     Id = t.Id,
@@ -150,7 +153,7 @@ namespace GSC.Respository.Project.Design
                                                y.CollectionSource == CollectionSources.DateTime).Any()
                                                // && (refVariable.Value > 0 ? !x.Variables.Any(v => _context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Any(s => s.ProjectDesignVariableId == v.Id)) : true)
                                                && x.Variables != null
-                                               ).OrderBy(t => t.Id)
+                                               ).OrderBy(t => t.DesignOrder)
                 .Select(t => new DropDownDto
                 {
                     Id = t.Id,
@@ -172,7 +175,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetClonnedTemplateDropDown(int id)
         {
             var templates = All.Where(x => x.DeletedDate == null
-                                           && x.ParentId == id).OrderBy(t => t.Id).Select(t => new DropDownDto
+                                           && x.ParentId == id).OrderBy(t => t.DesignOrder).Select(t => new DropDownDto
                                            {
                                                Id = t.Id,
                                                Value = t.TemplateName + " - " + t.ProjectDesignVisit.DisplayName,
@@ -192,7 +195,7 @@ namespace GSC.Respository.Project.Design
                                                t.SystemType == variableCategoryType
                                                && t.DeletedDate == null
                                                && t.ProjectDesignTemplateId == x.Id)
-            ).OrderBy(t => t.Id).Select(t => new DropDownDto
+            ).OrderBy(t => t.DesignOrder).Select(t => new DropDownDto
             {
                 Id = t.Id,
                 Value = t.TemplateName + " " + t.ProjectDesignVisit.DisplayName
@@ -205,7 +208,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetTemplateDropDownAnnotation(int projectDesignVisitId)
         {
             var templates = All.Where(x => x.DeletedDate == null
-                                           && x.ProjectDesignVisitId == projectDesignVisitId).OrderBy(t => t.Id).Select(
+                                           && x.ProjectDesignVisitId == projectDesignVisitId).OrderBy(t => t.DesignOrder).Select(
                 t => new DropDownDto
                 {
                     Id = t.Id,
@@ -220,7 +223,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetTemplateDropDownForVisitStatus(int projectDesignVisitId)
         {
             return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == projectDesignVisitId
-            && x.Variables.Where(y => (y.CollectionSource == CollectionSources.Date || y.CollectionSource == CollectionSources.DateTime) && y.DeletedDate == null).Any()).OrderBy(t => t.Id)
+            && x.Variables.Where(y => (y.CollectionSource == CollectionSources.Date || y.CollectionSource == CollectionSources.DateTime) && y.DeletedDate == null).Any()).OrderBy(t => t.DesignOrder)
                 .Select(t => new DropDownDto { Id = t.Id, Value = t.TemplateName }).ToList();
         }
     }
