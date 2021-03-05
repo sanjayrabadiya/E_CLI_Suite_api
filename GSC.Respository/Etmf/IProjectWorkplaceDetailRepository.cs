@@ -16,5 +16,9 @@ namespace GSC.Respository.Etmf
         void Save(List<EtmfUserPermission> EtmfUserPermission);
         void updatePermission(List<EtmfUserPermission> etmfUserPermission);
         void AddEtmfAccessRights(List<ProjectWorkplaceDetail> ProjectWorkplaceDetail);
+        List<EtmfUserPermissionDto> GetEtmfPermissionData(int ProjectId);
+        void SaveProjectRollbackRight(int projectId, int[] userIds);
+
+        List<EtmfUserPermissionDto> GetEtmfRightHistoryDetails(int projectId, int userId);
     }
 }

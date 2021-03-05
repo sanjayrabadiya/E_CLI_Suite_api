@@ -57,7 +57,7 @@ namespace GSC.Data.Dto.ProjectRight
         public DateTime? RollbackOn { get; set; }
         public string RollabackBy { get; set; }
         public string AccessType { get; set; }
-
+        public bool IsRevoke { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string CreatedByName { get; set; }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Domain.Context;
@@ -706,11 +707,20 @@ namespace GSC.Respository.ProjectRight
             return queryDtos;
         }
 
-        public List<ProjectDocumentReviewDto> EtmfUserDropDown(int projectId)
+        public List<ProjectDocumentReviewDto> EtmfUserDropDown(int projectId, int? userId)
         {
             var projectListbyId = All.Where(x => x.ProjectId == projectId).ToList();
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId, c.RoleId }, (key, group) => group.First());
+
+            var etmf = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == projectId).ToList();
+            var etmfresult = etmf.GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
+            {
+                Id = x.FirstOrDefault().Id,
+                UserId = x.Key,
+                IsRevoke = x.LastOrDefault().DeletedDate == null ? false : true,
+                CreatedDate = x.FirstOrDefault().CreatedDate
+            }).ToList();
 
             var result = latestProjectRight.GroupBy(x => x.UserId).Select(x => new ProjectDocumentReviewDto
             {
@@ -718,9 +728,14 @@ namespace GSC.Respository.ProjectRight
                 ProjectId = x.FirstOrDefault().ProjectId,
                 UserId = x.Key,
                 UserName = _context.Users.Where(p => p.Id == x.Key).Select(r => r.UserName).FirstOrDefault(),
-                RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.FirstOrDefault().ProjectId && c.UserId == x.Key 
+                RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.FirstOrDefault().ProjectId && c.UserId == x.Key
                 && c.RoleId == x.FirstOrDefault().RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
+                IsRevoke = etmfresult.Where(y => y.UserId == x.Key).Count() > 0 ? etmfresult.Where(y => y.UserId == x.Key).FirstOrDefault().IsRevoke : true
             }).ToList();
+
+            if (userId <= 0)
+                result = result.Where(x => x.IsRevoke == true).ToList();
+
             return result;
         }
     }

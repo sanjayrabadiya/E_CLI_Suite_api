@@ -111,12 +111,12 @@ namespace GSC.Api.Controllers.ProjectRight
         }
 
         [HttpGet]
-        [Route("EtmfUserDropDown/{projectId}")]
+        [Route("EtmfUserDropDown/{projectId}/{userId}")]
         [AllowAnonymous]
-        public IActionResult EtmfUserDropDown(int projectId)
+        public IActionResult EtmfUserDropDown(int projectId, int? userId)
         {
             if (projectId <= 0) return BadRequest();
-            return Ok(_projectRightRepository.EtmfUserDropDown(projectId));
+            return Ok(_projectRightRepository.EtmfUserDropDown(projectId, userId));
         }
     }
 }

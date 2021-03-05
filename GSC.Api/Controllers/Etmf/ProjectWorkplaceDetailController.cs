@@ -91,5 +91,33 @@ namespace GSC.Api.Controllers.Etmf
 
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetEtmfPermissionData/{ProjectId}")]
+        public IActionResult GetEtmfPermissionData(int ProjectId)
+        {
+            return Ok(_projectWorkplaceDetailRepository.GetEtmfPermissionData(ProjectId));
+        }
+
+        [HttpPut]
+        [Route("RollbackRight/{ProjectId}/{UserIds}")]
+        public IActionResult RollbackRight(int ProjectId, int[] UserIds)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            _projectWorkplaceDetailRepository.SaveProjectRollbackRight(ProjectId, UserIds);
+
+            if (_uow.Save() < 0) throw new Exception("Project Revoke rights failed on save.");
+
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("EtmfRightHistoryDetails/{projectId}/{userId}")]
+        public IActionResult EtmfRightHistoryDetails(int projectId, int userId)
+        {
+            if (projectId <= 0 || userId <= 0) return BadRequest();
+            return Ok(_projectWorkplaceDetailRepository.GetEtmfRightHistoryDetails(projectId, userId));
+        }
     }
 }

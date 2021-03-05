@@ -87,7 +87,7 @@ namespace GSC.Respository.Etmf
             {
                 t.UserId = UserId;
                 var p = _context.EtmfUserPermission.Where(s =>
-                    s.ProjectWorkplaceDetailId == t.ProjectWorkplaceDetailId && s.UserId == UserId).FirstOrDefault();
+                    s.ProjectWorkplaceDetailId == t.ProjectWorkplaceDetailId && s.UserId == UserId && s.DeletedDate == null).FirstOrDefault();
                 if (p == null) return;
                 t.IsAdd = p.IsAdd;
                 t.EtmfUserPermissionId = p.Id;
@@ -110,7 +110,7 @@ namespace GSC.Respository.Etmf
 
             ProjectWorkplaceDetail.AddRange(Worksplace);
 
-            return ProjectWorkplaceDetail;
+            return ProjectWorkplaceDetail.OrderBy(item => item.ItemId == 3 ? 1 : item.ItemId == 1 ? 2 : 2).ToList();
         }
 
         public void Save(List<EtmfUserPermission> EtmfUserPermission)
@@ -124,7 +124,8 @@ namespace GSC.Respository.Etmf
             var existing = _context.EtmfUserPermission.Where(t => t.UserId == userId && ProjectWorksplace.Contains(t.ProjectWorkplaceDetailId)).ToList();
             if (existing.Any())
             {
-                _context.EtmfUserPermission.RemoveRange(existing);
+                existing = existing.Select(c => { c.DeletedBy = _jwtTokenAccesser.UserId; c.DeletedDate = DateTime.Now; return c; }).ToList();
+                _context.EtmfUserPermission.UpdateRange(existing);
                 _context.Save();
             }
 
@@ -143,10 +144,16 @@ namespace GSC.Respository.Etmf
             var ProjectWorksplace = EtmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
                 .Select(x => x.ProjectWorkplaceDetailId).ToList();
 
-            var existing = _context.EtmfUserPermission.Where(t => t.UserId == userId && ProjectWorksplace.Contains(t.ProjectWorkplaceDetailId)).ToList();
+            var existing = _context.EtmfUserPermission.Where(t => t.UserId == userId &&
+                                        ProjectWorksplace.Contains(t.ProjectWorkplaceDetailId)).ToList();
+
             if (existing.Any())
             {
-                _context.EtmfUserPermission.RemoveRange(existing);
+                var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+                var reasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+                existing = existing.Select(c => { c.DeletedBy = _jwtTokenAccesser.UserId; c.DeletedDate = DateTime.Now; c.AuditReasonId = reasonId; c.RollbackReason = reasonOth; return c; }).ToList();
+
+                _context.EtmfUserPermission.UpdateRange(existing);
                 _context.Save();
             }
 
@@ -173,5 +180,81 @@ namespace GSC.Respository.Etmf
             }
             _context.Save();
         }
+
+        public List<EtmfUserPermissionDto> GetEtmfPermissionData(int ProjectId)
+        {
+            var result = _context.EtmfUserPermission
+                .Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId)
+                .Select(y => new EtmfUserPermissionDto
+                {
+                    Id = y.Id,
+                    UserId = y.UserId,
+                    UserName = y.User.UserName,
+                    CreatedDate = y.CreatedDate,
+                    DeletedDate = y.DeletedDate
+                }).ToList();
+
+            result = result.GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
+            {
+                Id = x.FirstOrDefault().Id,
+                UserId = x.Key,
+                IsRevoke = x.LastOrDefault().DeletedDate == null ? false : true,
+                UserName = x.FirstOrDefault().UserName,
+                CreatedDate = x.FirstOrDefault().CreatedDate
+            }).ToList();
+
+            return result;
+
+        }
+
+        public void SaveProjectRollbackRight(int projectId, int[] userIds)
+        {
+            foreach (var itemDto in userIds)
+            {
+                var EtmfUserPermission = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == projectId
+                && x.UserId == itemDto && x.DeletedDate == null).ToList();
+
+                foreach (var item in EtmfUserPermission)
+                {
+                    item.RollbackReason = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+                    item.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+                    item.DeletedBy = _jwtTokenAccesser.UserId;
+                    item.DeletedDate = DateTime.Now;
+                    _context.EtmfUserPermission.Update(item);
+                }
+            }
+        }
+
+        public List<EtmfUserPermissionDto> GetEtmfRightHistoryDetails(int projectId, int userId)
+        {
+            var result = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == projectId
+               && x.UserId == userId)
+                .Select(x => new EtmfUserPermissionDto
+                {
+                    Id = x.Id,
+                    UserId = x.UserId,
+                    UserName = x.User.UserName,
+                    ProjectWorkplaceDetailId = x.ProjectWorkplaceDetailId,
+                    IsAdd = x.IsAdd,
+                    IsEdit = x.IsEdit,
+                    IsDelete = x.IsDelete,
+                    IsView = x.IsView,
+                    IsExport = x.IsExport,
+                    CreatedDate = x.CreatedDate,
+                    CreatedByUser = x.CreatedByUser.UserName,
+                    ModifiedDate = x.ModifiedDate,
+                    ModifiedByUser = x.ModifiedByUser.UserName,
+                    DeletedDate = x.DeletedDate,
+                    DeletedByUser = x.DeletedByUser.UserName,
+                    WorkPlaceFolder = ((WorkPlaceFolder)x.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                    ItemName = x.ProjectWorkplaceDetail.ItemName,
+                    RollbackReason = x.RollbackReason,
+                    AuditReasonId = x.AuditReasonId,
+                    AuditReason = x.AuditReason.ReasonName
+                }).OrderByDescending(x => x.Id).ToList();
+
+            return result;
+        }
+
     }
 }
