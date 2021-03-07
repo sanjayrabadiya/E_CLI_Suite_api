@@ -253,12 +253,24 @@ namespace GSC.Respository.Project.EditCheck
                     LogicalOperator = r.LogicalOperator,
                     OperatorName = r.Operator == null ? "" : r.Operator.GetDescription(),
                     EndParens = r.EndParens,
+                    CollectionSource = r.ProjectDesignVariable.CollectionSource,
                     CollectionValue2 = r.CollectionValue2,
                     CollectionValue = r.CollectionValue
                 }).ToList();
 
             if (isFormula)
                 data = data.Where(x => !x.IsTarget).ToList();
+
+            data.ForEach(x =>
+            {
+                if ((IsMultiCollection(x.CollectionSource) || IsInFilter(x.Operator)) && !string.IsNullOrEmpty(x.CollectionValue))
+                {
+                    x.CollectionValue = Convert.ToString(IsInFilter(x.Operator) ? "(" : "") + string.Join(", ", _context.ProjectDesignVariableValue
+                                                   .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
+                                                   Select(a => a.ValueName).ToList()) + Convert.ToString(IsInFilter(x.Operator) ? ")" : "");
+
+                }
+            });
 
             if (data.Any(x => x.Operator == Operator.Greater || x.Operator == Operator.GreaterEqual ||
                 x.Operator == Operator.Lessthen || x.Operator == Operator.LessthenEqual) && data.Count(x => !x.IsTarget) > 1)

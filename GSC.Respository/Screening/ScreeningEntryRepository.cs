@@ -127,8 +127,7 @@ namespace GSC.Respository.Screening
                 x.ScreeningTemplates.ForEach(v => v.Children = templates.Where(a => a.ParentId == v.Id).OrderBy(c => c.DesignOrder).ToList());
 
                 x.IsVisitRepeated = x.ParentScreeningVisitId != null ? false :
-                    workflowlevel.IsStartTemplate &&
-                    templates.Any(t => t.Status > ScreeningTemplateStatus.Pending && t.ScreeningVisitId == x.ScreeningVisitId) && x.IsVisitRepeated ? true : false;
+                    workflowlevel.IsStartTemplate && x.IsVisitRepeated ? true : false;
 
                 if (x.VisitStatus == ScreeningVisitStatus.Missed || x.VisitStatus == ScreeningVisitStatus.Missed)
                     x.IsVisitRepeated = false;

@@ -9,7 +9,6 @@ using GSC.Respository.Attendance;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.Design;
 using GSC.Shared.Extension;
-using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -416,6 +415,15 @@ namespace GSC.Respository.Screening
 
             return visitStatus;
         }
+
+        public bool ValidateRepeatVisit(int id)
+        {
+            if (All.Any(x => x.Id == id && x.ParentId == null && x.ScreeningTemplates.Any(t => t.Status > ScreeningTemplateStatus.Pending)))
+                return true;
+
+            return false;
+        }
+
         public void VisitRepeat(ScreeningVisitDto screeningVisitDto)
         {
             var repeatedCount = 0;

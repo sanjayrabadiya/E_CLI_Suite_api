@@ -46,7 +46,7 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
-            if (screeningVisitHistoryDto.VisitStatusId == ScreeningVisitStatus.ReSchedule )
+            if (screeningVisitHistoryDto.VisitStatusId == ScreeningVisitStatus.ReSchedule)
             {
                 var validation = _screeningVisitRepository.CheckScheduleDate(screeningVisitHistoryDto);
                 if (!string.IsNullOrEmpty(validation))
@@ -71,7 +71,7 @@ namespace GSC.Api.Controllers.Screening
                 ModelState.AddModelError("Message", "You can't change visit status!");
                 return BadRequest(ModelState);
             }
-                       
+
             _screeningVisitRepository.OpenVisit(screeningVisitDto);
             _uow.Save();
             return Ok();
@@ -109,6 +109,11 @@ namespace GSC.Api.Controllers.Screening
         [TransactionRequired]
         public IActionResult VisitRepeat([FromBody] ScreeningVisitDto screeningVisitDto)
         {
+            if (!_screeningVisitRepository.ValidateRepeatVisit(screeningVisitDto.ScreeningVisitId))
+            {
+                ModelState.AddModelError("Message", "You can't create repeat visit!");
+                return BadRequest(ModelState);
+            }
             _screeningVisitRepository.VisitRepeat(screeningVisitDto);
             _uow.Save();
             return Ok(screeningVisitDto.ScreeningVisitId);
@@ -128,6 +133,6 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningVisitRepository.GetVisitStatus(projectId));
         }
 
-      
+
     }
 }
