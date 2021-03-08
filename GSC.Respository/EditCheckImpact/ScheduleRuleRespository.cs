@@ -109,7 +109,7 @@ namespace GSC.Respository.EditCheckImpact
                     var screeningTemplate = targetList.Where(t => t.ScreeningTemplate.Id == x).Select(c => c.ScreeningTemplate).FirstOrDefault();
                     if (screeningTemplate != null)
                     {
-                        screeningTemplate.ScheduleDate = targetList.Where(t => t.ScreeningTemplate.Id == x).Min(x => x.ScheduleDate);
+                        screeningTemplate.ScheduleDate = targetList.Where(t => t.ScreeningTemplate.Id == x && t.ScheduleDate != null).Min(x => x.ScheduleDate);
                         Update(screeningTemplate);
                     }
                 });
@@ -353,7 +353,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (screeningVisit.IsSchedule && screeningVisit.Status != ScreeningVisitStatus.ReSchedule)
             {
-                screeningVisit.ScheduleDate = targetList.Where(a => a.ScreeningTemplate.ScreeningVisitId == screeningVisitId).Min(x => x.ScheduleDate);
+                screeningVisit.ScheduleDate = targetList.Where(a => a.ScreeningTemplate.ScreeningVisitId == screeningVisitId && a.ScheduleDate != null).Min(x => x.ScheduleDate);
                 _context.ScreeningVisit.Update(screeningVisit);
                 _context.Save();
             }
