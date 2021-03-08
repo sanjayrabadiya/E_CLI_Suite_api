@@ -158,6 +158,41 @@ namespace GSC.Api.Controllers.Etmf
             return File(filebytes, "application/zip");
         }
 
+        [HttpPost]
+        [Route("SaveSiteData")]
+        public IActionResult SaveSiteData([FromBody] List<int> ProjectIds)
+        {
+            var ParentProjectId = _projectRepository.FindByInclude(x => x.Id == ProjectIds[0]).FirstOrDefault().ParentProjectId;
+            var projectDetail = _projectRepository.Find((int)ParentProjectId);
+            var childProjectList = ProjectIds;
+            var countryList = _countryRepository.GetCountryByProjectIdDropDown((int)ParentProjectId);
+            var artificiteList = _etmfArtificateMasterLbraryRepository.GetArtifcateWithAllListByVersion((int)ParentProjectId);
+            var imageUrl = _uploadSettingRepository.GetDocumentPath();
 
+            var SaveFolderStructure = _eTMFWorkplaceRepository.SaveSiteFolderStructure(projectDetail, childProjectList, countryList, artificiteList, imageUrl);
+
+            foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetail)
+            {
+                _projectWorkplaceDetailRepository.Add(workplaceDetail);
+
+                foreach (var zone in workplaceDetail.ProjectWorkPlaceZone)
+                {
+                    _projectWorkPlaceZoneRepository.Add(zone);
+
+                    foreach (var section in zone.ProjectWorkplaceSection)
+                    {
+                        _projectWorkplaceSectionRepository.Add(section);
+
+                        foreach (var artificate in section.ProjectWorkplaceArtificate)
+                        {
+                            _projectWorkplaceArtificateRepository.Add(artificate);
+                        }
+                    }
+                }
+            }
+
+            if (_uow.Save() <= 0) throw new Exception("Creating ETMFWorkplace failed on save.");
+            return Ok(SaveFolderStructure.Id);
+        }
     }
 }

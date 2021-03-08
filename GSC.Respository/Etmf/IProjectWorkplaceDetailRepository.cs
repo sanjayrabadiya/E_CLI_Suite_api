@@ -20,5 +20,6 @@ namespace GSC.Respository.Etmf
         void SaveProjectRollbackRight(int projectId, int[] userIds);
 
         List<EtmfUserPermissionDto> GetEtmfRightHistoryDetails(int projectId, int userId);
+        List<DropDownDto> GetSitesForEtmf(int ProjectId);
     }
 }

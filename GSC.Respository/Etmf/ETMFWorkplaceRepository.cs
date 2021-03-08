@@ -120,11 +120,11 @@ namespace GSC.Respository.Etmf
                     pvListdetaiObj.Level = 3;
                     pvListdetaiObj.Icon = "folder";
                     pvListdetaiObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
-                    pvListdetaiObj.IsAdd = rights != null ?  rights.IsAdd : false;
-                    pvListdetaiObj.IsEdit = rights != null ?  rights.IsEdit : false;
-                    pvListdetaiObj.IsDelete = rights != null ?  rights.IsDelete : false;
-                    pvListdetaiObj.IsView = rights != null ?  rights.IsView : false;
-                    pvListdetaiObj.IsExport = rights != null ?  rights.IsExport : false;
+                    pvListdetaiObj.IsAdd = rights != null ? rights.IsAdd : false;
+                    pvListdetaiObj.IsEdit = rights != null ? rights.IsEdit : false;
+                    pvListdetaiObj.IsDelete = rights != null ? rights.IsDelete : false;
+                    pvListdetaiObj.IsView = rights != null ? rights.IsView : false;
+                    pvListdetaiObj.IsExport = rights != null ? rights.IsExport : false;
 
                     List<TreeValue> pvListZoneList = new List<TreeValue>();
                     foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
@@ -808,6 +808,123 @@ namespace GSC.Respository.Etmf
             File.Delete(zipfolder);
             return compressedBytes.ToArray();
         }
+
+        public ProjectWorkplace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath)
+        {
+            bool status = false;
+            try
+            {
+                string projectPath = string.Empty;
+                string countryPath = string.Empty;
+                string sitePath = string.Empty;
+                projectWorkplace = All.Where(x => x.ProjectId == projectDetail.Id).FirstOrDefault();
+                ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
+                projectPath = Path.Combine(docPath, FolderType.ProjectWorksplace.GetDescription(), projectDetail.ProjectCode.Replace("/", ""));
+                //Set Path of country, site, trial
+                countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
+                sitePath = Path.Combine(projectPath, WorkPlaceFolder.Site.GetDescription());
+
+                bool projectPathExists = Directory.Exists(projectPath);
+                if (!projectPathExists)
+                {
+
+                    // Create Project Directory
+                    Directory.CreateDirectory(Path.Combine(projectPath));
+
+                    //create directiry of country, site, trial
+                    Directory.CreateDirectory(Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription()));
+                    Directory.CreateDirectory(Path.Combine(projectPath, WorkPlaceFolder.Site.GetDescription()));
+                    Directory.CreateDirectory(Path.Combine(projectPath, WorkPlaceFolder.Trial.GetDescription()));
+                }
+
+                //Create direcotry of child project inside of child folder
+                if (countryList != null && countryList.Count > 0)
+                {
+
+                    foreach (var coountryp in countryList)
+                    {
+                        ProjectWorkplaceDetail projectWorkplaceobj = new ProjectWorkplaceDetail();
+                        projectWorkplaceobj.ProjectWorkplaceId = projectWorkplace.Id;
+                        projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Country;
+                        projectWorkplaceobj.ItemId = coountryp.Id;
+                        projectWorkplaceobj.ItemName = coountryp.Value;
+
+
+                        bool countryPathExists = Directory.Exists(countryPath);
+                        if (!countryPathExists)
+                            Directory.CreateDirectory(Path.Combine(countryPath));
+
+                        bool countryExists = Directory.Exists(Path.Combine(countryPath, coountryp.Value));
+                        if (!countryExists)
+                        {
+                            Directory.CreateDirectory(Path.Combine(countryPath, coountryp.Value));
+                            string CountryNameCreatePath = Path.Combine(countryPath, coountryp.Value);
+
+                            // Get CountryLevel Artificates
+
+                            var CountryLevelArtificteData = artificiteList.Where(x => x.CountryLevelDoc == true).ToList();
+                            CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
+                            var aa = createDBSet(CountryLevelArtificteData);
+                            projectWorkplaceobj.ProjectWorkPlaceZone = aa;
+                            ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
+                        }
+                    }
+                    projectWorkplace.ProjectWorkplaceDetail = ProjectWorkplaceDetailList;
+                }
+
+                if (childProjectList != null && childProjectList.Count > 0)
+                {
+                    //Create direcotry of child project inside of child folder
+
+                    foreach (var item in childProjectList)
+                    {
+                        var childp = _context.Project.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                                     && x.DeletedDate == null && x.Id == item)
+                                    .Select(c => new ProjectDropDown
+                                    {
+                                        Id = c.Id,
+                                        Value = c.ProjectCode,
+                                        CountryId = c.CountryId,
+                                        Code = c.ProjectCode,
+                                        IsStatic = c.IsStatic,
+                                        ParentProjectId = c.ParentProjectId ?? 0
+                                    }).OrderBy(o => o.Value).FirstOrDefault();
+
+                        ProjectWorkplaceDetail projectWorkplaceobj = new ProjectWorkplaceDetail();
+                        projectWorkplaceobj.ProjectWorkplaceId = projectWorkplace.Id;
+                        projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Site;
+                        projectWorkplaceobj.ItemId = childp.Id;
+                        projectWorkplaceobj.ItemName = childp.Value;
+
+                        bool sitePathExists = Directory.Exists(sitePath);
+                        if (!sitePathExists)
+                            Directory.CreateDirectory(Path.Combine(sitePath));
+
+                        bool siteExists = Directory.Exists(Path.Combine(sitePath, childp.Value));
+                        if (!siteExists)
+                        {
+                            Directory.CreateDirectory(Path.Combine(sitePath, childp.Value));
+
+                            var CountryLevelArtificteData = artificiteList.Where(x => x.SiteLevelDoc == true).ToList();
+                            string CountryNameCreatePath = Path.Combine(sitePath, childp.Value);
+                            CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
+                            var aa = createDBSet(CountryLevelArtificteData);
+                            projectWorkplaceobj.ProjectWorkPlaceZone = aa;
+                            ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
+                        }
+                    }
+                    projectWorkplace.ProjectWorkplaceDetail = ProjectWorkplaceDetailList;
+                }
+
+                return projectWorkplace;
+            }
+            catch (Exception)
+            {
+                status = true;
+                return null;
+            }
+        }
+
     }
     public class TreeValue
     {

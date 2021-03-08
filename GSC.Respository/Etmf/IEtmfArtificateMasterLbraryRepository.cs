@@ -10,5 +10,6 @@ namespace GSC.Respository.Etmf
     public interface IEtmfArtificateMasterLbraryRepository : IGenericRepository<EtmfArtificateMasterLbrary>
     {
         List<MasterLibraryJoinDto> GetArtifcateWithAllList();
+        List<MasterLibraryJoinDto> GetArtifcateWithAllListByVersion(int ParentProjectId);
     }
 }

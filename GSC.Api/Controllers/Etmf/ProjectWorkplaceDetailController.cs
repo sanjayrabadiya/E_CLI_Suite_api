@@ -119,5 +119,12 @@ namespace GSC.Api.Controllers.Etmf
             if (projectId <= 0 || userId <= 0) return BadRequest();
             return Ok(_projectWorkplaceDetailRepository.GetEtmfRightHistoryDetails(projectId, userId));
         }
+
+        [HttpGet]
+        [Route("GetSitesForEtmf/{ProjectId}")]
+        public IActionResult GetSitesForEtmf(int ProjectId)
+        {
+            return Ok(_projectWorkplaceDetailRepository.GetSitesForEtmf(ProjectId));
+        }
     }
 }

@@ -256,5 +256,21 @@ namespace GSC.Respository.Etmf
             return result;
         }
 
+        public List<DropDownDto> GetSitesForEtmf(int ProjectId)
+        {
+            var result = All.Where(x => x.ProjectWorkplace.ProjectId == ProjectId && x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
+                        .Select(x => x.ItemId).ToList();
+
+            var project = _context.Project.Where(x => x.ParentProjectId == ProjectId && x.DeletedDate == null && !result.Contains(x.Id))
+                .Select(x => new DropDownDto
+                {
+                    Id = x.Id,
+                    Value = x.ProjectCode,
+                    ExtraData = x.ProjectName
+                }).ToList();
+
+            return project;
+
+        }
     }
 }
