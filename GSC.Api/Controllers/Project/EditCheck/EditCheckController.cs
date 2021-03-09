@@ -59,7 +59,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
             var projectEditCheck = _mapper.Map<Data.Entities.Project.EditCheck.EditCheck>(editCheck);
             projectEditCheck.Id = 0;
             _editCheckRepository.SaveEditCheck(projectEditCheck);
-             _uow.Save();
+            _uow.Save();
             return Ok(_editCheckRepository.GetAll(editCheck.ProjectDesignId, false));
         }
 
@@ -117,7 +117,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
         public IActionResult CopyTo(int id)
         {
             var editCheck = _editCheckRepository.CopyTo(id);
-             _uow.Save() ;
+            _uow.Save();
             return Ok(_editCheckRepository.GetAll(editCheck.ProjectDesignId, false));
         }
 
@@ -125,6 +125,13 @@ namespace GSC.Api.Controllers.Project.EditCheck
         [HttpPost("ValidateEditCheck")]
         public IActionResult ValidateEditCheck([FromBody] List<EditCheckValidate> editCheck)
         {
+            editCheck.ForEach(x =>
+            {
+                if (x.CollectionSource == Helper.CollectionSources.MultiCheckBox && x.Operator == Helper.Operator.Equal)
+                    x.CollectionSource = Helper.CollectionSources.ComboBox;
+                else if (x.CollectionSource == Helper.CollectionSources.MultiCheckBox)
+                    x.InputValue = "," + x.InputValue;
+            });
             return Ok(_editCheckRuleRepository.ValidateEditCheck(editCheck));
         }
     }
