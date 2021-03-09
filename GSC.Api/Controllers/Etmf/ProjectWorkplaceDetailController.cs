@@ -26,18 +26,14 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IProjectWorkplaceDetailRepository _projectWorkplaceDetailRepository;
-      
-        public ProjectWorkplaceDetailController(IProjectRepository projectRepository,
-            IUnitOfWork uow,
+
+        public ProjectWorkplaceDetailController(IUnitOfWork uow,
             IMapper mapper,
-            IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository
-            )
+            IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository)
         {
-           
             _uow = uow;
             _mapper = mapper;
             _projectWorkplaceDetailRepository = projectWorkplaceDetailRepository;
-             
         }
 
 
@@ -83,12 +79,11 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] List<EtmfUserPermission> rolePermissions)
+        public IActionResult Put([FromBody] List<EtmfUserPermissionDto> etmfUserPermissionDto)
         {
-            if (!ModelState.IsValid || !rolePermissions.Any()) return new UnprocessableEntityObjectResult(ModelState);
+            if (!ModelState.IsValid || !etmfUserPermissionDto.Any()) return new UnprocessableEntityObjectResult(ModelState);
 
-            _projectWorkplaceDetailRepository.updatePermission(rolePermissions);
-
+            _projectWorkplaceDetailRepository.updatePermission(etmfUserPermissionDto);
             return Ok();
         }
 

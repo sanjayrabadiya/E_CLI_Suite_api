@@ -25,5 +25,7 @@ namespace GSC.Data.Entities.Etmf
         public ProjectWorkplaceDetail ProjectWorkplaceDetail { get; set; }
         public User User { get; set; }
         public AuditReason AuditReason { get; set; }
+        public int ModifiedAuditReasonId { get; set; }
+        public string ModifiedRollbackReason { get; set; }
     }
 }

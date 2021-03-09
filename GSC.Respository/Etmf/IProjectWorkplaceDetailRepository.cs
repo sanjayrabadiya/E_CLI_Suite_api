@@ -14,7 +14,7 @@ namespace GSC.Respository.Etmf
         List<DropDownDto> GetSiteByWorkplace(int ParentProjectId);
         List<EtmfUserPermissionDto> GetByUserId(int UserId, int ProjectId);
         void Save(List<EtmfUserPermission> EtmfUserPermission);
-        void updatePermission(List<EtmfUserPermission> etmfUserPermission);
+        void updatePermission(List<EtmfUserPermissionDto> etmfUserPermission);
         void AddEtmfAccessRights(List<ProjectWorkplaceDetail> ProjectWorkplaceDetail);
         List<EtmfUserPermissionDto> GetEtmfPermissionData(int ProjectId);
         void SaveProjectRollbackRight(int projectId, int[] userIds);

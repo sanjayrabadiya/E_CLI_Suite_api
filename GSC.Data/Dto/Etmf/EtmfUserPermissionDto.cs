@@ -28,5 +28,9 @@ namespace GSC.Data.Dto.Etmf
         public string AuditReason { get; set; }
         public bool IsRevoke { get; set; }
         public bool IsRevoked { get; set; }
+        public int ModifiedAuditReasonId { get; set; }
+        public string ModifiedAuditReason { get; set; }
+        public string ModifiedRollbackReason { get; set; }
+
     }
 }

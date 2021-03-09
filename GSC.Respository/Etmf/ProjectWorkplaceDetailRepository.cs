@@ -1,4 +1,5 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
@@ -20,12 +21,14 @@ namespace GSC.Respository.Etmf
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
+        private readonly IMapper _mapper;
         public ProjectWorkplaceDetailRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser)
+           IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
            : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         public List<DropDownDto> GetCountryByWorkplace(int ParentProjectId)
@@ -136,31 +139,83 @@ namespace GSC.Respository.Etmf
             _context.Save();
         }
 
-        public void updatePermission(List<EtmfUserPermission> EtmfUserPermission)
+        public void updatePermission(List<EtmfUserPermissionDto> EtmfUserPermissionDto)
         {
-            var userId = EtmfUserPermission.First().UserId;
+            //var ddfdf = EtmfUserPermissionDto.Where(x => x.IsChanged == true).ToList();
+            //var userId = EtmfUserPermissionDto.First().UserId;
 
-            EtmfUserPermission = EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId > 0).ToList();
-            var ProjectWorksplace = EtmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
-                .Select(x => x.ProjectWorkplaceDetailId).ToList();
+            //EtmfUserPermissionDto = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0).ToList();
+            //var ProjectWorksplace = EtmfUserPermissionDto.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
+            //    .Select(x => x.ProjectWorkplaceDetailId).ToList();
 
-            var existing = _context.EtmfUserPermission.Where(t => t.UserId == userId &&
-                                        ProjectWorksplace.Contains(t.ProjectWorkplaceDetailId)).ToList();
+            //var existing = _context.EtmfUserPermission.Where(t => t.UserId == userId &&
+            //                            ProjectWorksplace.Contains(t.ProjectWorkplaceDetailId)).ToList();
 
-            if (existing.Any())
+            //if (existing.Any())
+            //{
+            //    var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+            //    var reasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+            //    existing = existing.Select(c => { c.DeletedBy = _jwtTokenAccesser.UserId; c.DeletedDate = DateTime.Now; return c; }).ToList();
+
+            //    _context.EtmfUserPermission.UpdateRange(existing);
+            //    _context.Save();
+            //}
+
+            //EtmfUserPermissionDto = EtmfUserPermissionDto.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
+            //    .ToList();
+
+            //var EtmfUserPermission = _mapper.Map<EtmfUserPermission>(EtmfUserPermissionDto);
+            //_context.EtmfUserPermission.UpdateRange(EtmfUserPermission);
+            //_context.Save();
+
+
+            // new
+            var userId = EtmfUserPermissionDto.First().UserId;
+
+            EtmfUserPermissionDto = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0 && (x.IsAdd || x.IsEdit || x.IsDelete || x.IsView || x.IsExport)).ToList();
+
+            var ToAdd = EtmfUserPermissionDto.Where(x => x.EtmfUserPermissionId == null).ToList();
+            foreach (var item in ToAdd)
             {
-                var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
-                var reasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
-                existing = existing.Select(c => { c.DeletedBy = _jwtTokenAccesser.UserId; c.DeletedDate = DateTime.Now; c.AuditReasonId = reasonId; c.RollbackReason = reasonOth; return c; }).ToList();
-
-                _context.EtmfUserPermission.UpdateRange(existing);
-                _context.Save();
+                EtmfUserPermission obj = new EtmfUserPermission();
+                obj.UserId = userId;
+                obj.ProjectWorkplaceDetailId = item.ProjectWorkplaceDetailId;
+                obj.IsAdd = item.IsAdd;
+                obj.IsDelete = item.IsDelete;
+                obj.IsView = item.IsView;
+                obj.IsEdit = item.IsEdit;
+                obj.IsExport = item.IsExport;
+                _context.EtmfUserPermission.AddRange(obj);
             }
-
-            EtmfUserPermission = EtmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
-                .ToList();
-            _context.EtmfUserPermission.UpdateRange(EtmfUserPermission);
             _context.Save();
+
+            var ToUpdate = EtmfUserPermissionDto.Where(t => t.EtmfUserPermissionId > 0).ToList();
+            foreach (var item in ToUpdate)
+            {
+                var existing = _context.EtmfUserPermission.Where(t => t.DeletedDate == null && t.UserId == userId && t.ProjectWorkplaceDetailId == item.ProjectWorkplaceDetailId).FirstOrDefault();
+                if (existing.IsAdd == item.IsAdd && existing.IsEdit == item.IsEdit && existing.IsDelete == item.IsDelete
+                    && existing.IsView == item.IsView && existing.IsExport == item.IsExport) { }
+                else
+                {
+                    existing.DeletedBy = _jwtTokenAccesser.UserId;
+                    existing.DeletedDate = DateTime.Now;
+                    _context.EtmfUserPermission.Update(existing);
+                    _context.Save();
+
+                    existing.Id = 0;
+                    existing.DeletedBy = null;
+                    existing.DeletedDate = null;
+                    existing.IsAdd = item.IsAdd;
+                    existing.IsDelete = item.IsDelete;
+                    existing.IsView = item.IsView;
+                    existing.IsEdit = item.IsEdit;
+                    existing.IsExport = item.IsExport;
+                    existing.ModifiedAuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+                    existing.ModifiedRollbackReason = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+                    _context.EtmfUserPermission.Add(existing);
+                    _context.Save();
+                }
+            }
         }
 
         public void AddEtmfAccessRights(List<ProjectWorkplaceDetail> ProjectWorkplaceDetail)
@@ -201,7 +256,7 @@ namespace GSC.Respository.Etmf
                 IsRevoke = x.LastOrDefault().DeletedDate == null ? false : true,
                 UserName = x.FirstOrDefault().UserName,
                 CreatedDate = x.FirstOrDefault().CreatedDate
-            }).ToList();
+            }).OrderByDescending(x => x.Id).ToList();
 
             return result;
 
@@ -216,6 +271,7 @@ namespace GSC.Respository.Etmf
 
                 foreach (var item in EtmfUserPermission)
                 {
+                    item.IsRevoked = true;
                     item.RollbackReason = _jwtTokenAccesser.GetHeader("audit-reason-oth");
                     item.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
                     item.DeletedBy = _jwtTokenAccesser.UserId;
@@ -250,7 +306,10 @@ namespace GSC.Respository.Etmf
                     ItemName = x.ProjectWorkplaceDetail.ItemName,
                     RollbackReason = x.RollbackReason,
                     AuditReasonId = x.AuditReasonId,
-                    AuditReason = x.AuditReason.ReasonName
+                    AuditReason = x.AuditReason.ReasonName,
+                    IsRevoked = x.IsRevoked,
+                    ModifiedAuditReason = _context.AuditReason.Where(t => t.Id == x.ModifiedAuditReasonId).FirstOrDefault().ReasonName,
+                    ModifiedRollbackReason = x.ModifiedRollbackReason,
                 }).OrderByDescending(x => x.Id).ToList();
 
             return result;
