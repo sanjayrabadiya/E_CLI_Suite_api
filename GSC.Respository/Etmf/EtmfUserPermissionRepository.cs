@@ -31,6 +31,7 @@ namespace GSC.Respository.Etmf
 
         public List<EtmfUserPermissionDto> GetByUserId(int UserId, int ProjectId)
         {
+            // Get workplace folder name
             var Worksplace = Enum.GetValues(typeof(WorkPlaceFolder))
                             .Cast<WorkPlaceFolder>().Select(e => new EtmfUserPermissionDto
                             {
@@ -40,6 +41,7 @@ namespace GSC.Respository.Etmf
                                 hasChild = true,
                             }).OrderBy(o => o.ItemId).ToList();
 
+            // Get child of workplace folder
             var ProjectWorkplaceDetail = _context.ProjectWorkplaceDetail.Include(t => t.ProjectWorkplace)
                 .Where(t => t.DeletedDate == null && t.ProjectWorkplace.ProjectId == ProjectId)
                 .Select(t => new EtmfUserPermissionDto
@@ -53,6 +55,7 @@ namespace GSC.Respository.Etmf
                     hasChild = false,
                 }).ToList();
 
+            // update isadd, isdelete .. etc field by etmfuserpermission table
             ProjectWorkplaceDetail.ForEach(t =>
             {
                 t.UserId = UserId;
@@ -135,6 +138,7 @@ namespace GSC.Respository.Etmf
                     && existing.IsView == item.IsView && existing.IsExport == item.IsExport) { }
                 else
                 {
+                    // Delete old record & add same data to table
                     //existing.DeletedBy = _jwtTokenAccesser.UserId;
                     //existing.DeletedDate = DateTime.Now;
                     Delete(existing);
@@ -158,6 +162,7 @@ namespace GSC.Respository.Etmf
 
         public void AddEtmfAccessRights(List<ProjectWorkplaceDetail> ProjectWorkplaceDetail)
         {
+            // add rights when worksplace created
             foreach (var item in ProjectWorkplaceDetail)
             {
                 Add(new EtmfUserPermission
@@ -176,6 +181,7 @@ namespace GSC.Respository.Etmf
 
         public List<EtmfUserPermissionDto> GetEtmfPermissionData(int ProjectId)
         {
+            // get etmf rights list
             var result = All
                 .Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId)
                 .Select(y => new EtmfUserPermissionDto
@@ -202,6 +208,7 @@ namespace GSC.Respository.Etmf
 
         public void SaveProjectRollbackRight(int projectId, int[] userIds)
         {
+            // save rollback rights
             foreach (var itemDto in userIds)
             {
                 var EtmfUserPermission = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == projectId
@@ -221,6 +228,7 @@ namespace GSC.Respository.Etmf
 
         public List<EtmfUserPermissionDto> GetEtmfRightHistoryDetails(int projectId, int userId)
         {
+            // Get etmf rights history details
             var result = All.Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == projectId
                && x.UserId == userId)
                 .Select(x => new EtmfUserPermissionDto
@@ -255,6 +263,7 @@ namespace GSC.Respository.Etmf
 
         public List<DropDownDto> GetSitesForEtmf(int ProjectId)
         {
+            // Get site for add after worksplace created
             var result = _context.ProjectWorkplaceDetail.Where(x => x.ProjectWorkplace.ProjectId == ProjectId && x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
                         .Select(x => x.ItemId).ToList();
 

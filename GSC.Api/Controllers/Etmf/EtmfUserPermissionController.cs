@@ -35,7 +35,9 @@ namespace GSC.Api.Controllers.Etmf
             _etmfUserPermissionRepository = etmfUserPermissionRepository;
             _projectWorkplaceDetailRepository = projectWorkplaceDetailRepository;
         }
-
+         
+        /// Get User for etmf rights
+        /// Created By Swati
         [HttpGet("GetByUserId/{UserId}/{ProjectId}")]
         public IActionResult GetByUserId(int UserId, int ProjectId)
         {
@@ -52,6 +54,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(permissionDtos);
         }
 
+        /// Add rights
+        /// Created By Swati
         [HttpPost]
         public IActionResult Post([FromBody] List<EtmfUserPermission> etmfUserPermission)
         {
@@ -62,6 +66,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok();
         }
 
+        /// Update rights
+        /// Created By Swati
         [HttpPut]
         public IActionResult Put([FromBody] List<EtmfUserPermissionDto> etmfUserPermissionDto)
         {
@@ -71,6 +77,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok();
         }
 
+        /// Get list of permission in etmf rights
+        /// Created By Swati
         [HttpGet]
         [Route("GetEtmfPermissionData/{ProjectId}")]
         public IActionResult GetEtmfPermissionData(int ProjectId)
@@ -78,6 +86,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(_etmfUserPermissionRepository.GetEtmfPermissionData(ProjectId));
         }
 
+        /// Rollback all rights
+        /// Created By Swati
         [HttpPut]
         [Route("RollbackRight/{ProjectId}/{UserIds}")]
         public IActionResult RollbackRight(int ProjectId, int[] UserIds)
@@ -91,6 +101,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok();
         }
 
+        /// Get History of rights
+        /// Created By Swati
         [HttpGet]
         [Route("EtmfRightHistoryDetails/{projectId}/{userId}")]
         public IActionResult EtmfRightHistoryDetails(int projectId, int userId)
@@ -99,6 +111,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(_etmfUserPermissionRepository.GetEtmfRightHistoryDetails(projectId, userId));
         }
 
+        /// Get site for add after worksplace created
+        /// Created By Swati
         [HttpGet]
         [Route("GetSitesForEtmf/{ProjectId}")]
         public IActionResult GetSitesForEtmf(int ProjectId)

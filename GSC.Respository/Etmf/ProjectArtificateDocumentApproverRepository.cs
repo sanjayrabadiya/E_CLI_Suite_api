@@ -55,6 +55,7 @@ namespace GSC.Respository.Etmf
             _uploadSettingRepository = uploadSettingRepository;
         }
 
+        // Get UserName for approval
         public List<ProjectArtificateDocumentReviewDto> UserNameForApproval(int Id)
         {
             var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId && x.UserType == UserMasterUserType.User)
@@ -69,6 +70,7 @@ namespace GSC.Respository.Etmf
             return users;
         }
 
+        // Send mail for approver
         public void SendMailForApprover(ProjectArtificateDocumentApproverDto ProjectArtificateDocumentApproverDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
@@ -86,6 +88,7 @@ namespace GSC.Respository.Etmf
             _emailSenderRespository.SendApproverEmailOfArtificate(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
         }
 
+        // Get data for mytasklist on dashboard
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)
         {
             var result = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
@@ -111,6 +114,7 @@ namespace GSC.Respository.Etmf
             return result;
         }
 
+        // Get atrificate doc approver history
         public List<ProjectArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id)
         {
             var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Include(x => x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
@@ -134,6 +138,7 @@ namespace GSC.Respository.Etmf
             return result;
         }
 
+        // update approve document
         public void IsApproveDocument(int Id)
         {
             var DocumentApprover = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id

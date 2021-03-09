@@ -63,6 +63,8 @@ namespace GSC.Api.Controllers.Etmf
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
         }
 
+        /// Get user for send for review
+        /// Created By Swati
         [HttpGet]
         [Route("UserRoles/{Id}")]
         public IActionResult UserRoles(int Id)
@@ -71,6 +73,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(_projectWorkplaceArtificateDocumentReviewRepository.UserRoles(Id));
         }
 
+        /// Save user for send for review
+        /// Created By Swati
         [HttpPost]
         [Route("SaveDocumentReview")]
         public IActionResult SaveDocumentReview([FromBody] List<ProjectArtificateDocumentReviewDto> projectArtificateDocumentReviewDto)
@@ -82,6 +86,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok();
         }
 
+        /// Save user for send back
+        /// Created By Swati
         [HttpPut]
         [Route("SendBackDocument/{id}")]
         public IActionResult SendBackDocument(int id)

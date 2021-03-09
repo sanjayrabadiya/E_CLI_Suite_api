@@ -50,6 +50,8 @@ namespace GSC.Api.Controllers.Etmf
 
         }
 
+        /// Add approver
+        /// Created By Swati
         [HttpPost]
         public IActionResult Post([FromBody] ProjectArtificateDocumentApproverDto ProjectArtificateDocumentApproverDto)
         {
@@ -70,6 +72,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(ProjectArtificateDocumentApprover.Id);
         }
 
+        /// Get UserName For Approval list
+        /// Created By Swati
         [HttpGet]
         [Route("UserNameForApproval/{Id}")]
         public IActionResult UserNameForApproval(int Id)
@@ -78,6 +82,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(_projectArtificateDocumentApproverRepository.UserNameForApproval(Id));
         }
 
+        /// update approve doc or not
+        /// Created By Swati
         [HttpPut]
         [Route("ApproveDocument/{DocApprover}/{Id}")]
         public IActionResult ApproveDocument(bool DocApprover, int Id)

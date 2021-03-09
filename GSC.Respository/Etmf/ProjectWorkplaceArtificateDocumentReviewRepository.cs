@@ -86,6 +86,7 @@ namespace GSC.Respository.Etmf
                 }
         }
 
+        // Send mail for review
         public void SendMailToReviewer(ProjectArtificateDocumentReviewDto ReviewDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
@@ -100,6 +101,7 @@ namespace GSC.Respository.Etmf
             _emailSenderRespository.SendEmailOfReview(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
         }
 
+        // Send mail for sendback
         public void SendMailToSendBack(ProjectArtificateDocumentReview ReviewDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
