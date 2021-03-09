@@ -39,6 +39,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectWorkPlaceZoneRepository _projectWorkPlaceZoneRepository;
         private readonly IProjectWorkplaceSectionRepository _projectWorkplaceSectionRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
+        private readonly IEtmfUserPermissionRepository _etmfUserPermissionRepository;
         public ETMFWorkplaceController(IProjectRepository projectRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -51,7 +52,8 @@ namespace GSC.Api.Controllers.Etmf
             IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository,
             IProjectWorkPlaceZoneRepository projectWorkPlaceZoneRepository,
             IProjectWorkplaceSectionRepository projectWorkplaceSectionRepository,
-            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository
+            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
+            IEtmfUserPermissionRepository etmfUserPermissionRepository
             )
         {
             _userRepository = userRepository;
@@ -67,6 +69,7 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkPlaceZoneRepository = projectWorkPlaceZoneRepository;
             _projectWorkplaceSectionRepository = projectWorkplaceSectionRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
+            _etmfUserPermissionRepository = etmfUserPermissionRepository;
         }
 
         [Route("Get")]
@@ -132,7 +135,7 @@ namespace GSC.Api.Controllers.Etmf
                 }
             }
             if (_uow.Save() <= 0) throw new Exception("Creating ETMFWorkplace failed on save.");
-            _projectWorkplaceDetailRepository.AddEtmfAccessRights(SaveFolderStructure.ProjectWorkplaceDetail);
+            _etmfUserPermissionRepository.AddEtmfAccessRights(SaveFolderStructure.ProjectWorkplaceDetail);
             return Ok(SaveFolderStructure.Id);
         }
 

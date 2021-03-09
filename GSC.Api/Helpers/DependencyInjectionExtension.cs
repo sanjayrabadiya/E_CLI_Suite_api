@@ -296,6 +296,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IAdverseEventSettingsLanguageRepository, AdverseEventSettingsLanguageRepository>();           
             services.AddScoped<IPhaseManagementRepository, PhaseManagementRepository>();
             services.AddScoped<IResourceTypeRepository, ResourceTypeRepository>();
+            services.AddScoped<IEtmfUserPermissionRepository, EtmfUserPermissionRepository>();
 
 
         }
