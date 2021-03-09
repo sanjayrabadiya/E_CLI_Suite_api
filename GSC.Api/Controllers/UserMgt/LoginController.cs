@@ -32,7 +32,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly ICentreUserService _centreUserService;
         private readonly IMapper _mapper;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
-     
+
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -55,7 +55,7 @@ namespace GSC.Api.Controllers.UserMgt
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
             _mapper = mapper;
-            _loginPreferenceRepository = loginPreferenceRepository;         
+            _loginPreferenceRepository = loginPreferenceRepository;
         }
 
         [HttpPost]
@@ -74,13 +74,21 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (!_environmentSetting.Value.IsPremise)
             {
-                var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == user.CompanyId).FirstOrDefault();
-                if (user.FailedLoginAttempts > company.MaxLoginAttempt)
+                if (user.CompanyId > 0)
                 {
-                    var users = _userRepository.Find(user.UserId);
-                    users.IsLocked = true;
-                    _userRepository.Update(users);
-                    _uow.Save();
+                    var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == user.CompanyId).FirstOrDefault();
+                    if (user.FailedLoginAttempts > company.MaxLoginAttempt)
+                    {
+                        var users = _userRepository.Find(user.UserId);
+                        users.IsLocked = true;
+                        _userRepository.Update(users);
+                        _uow.Save();
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("UserName", user.ValidateMessage);
+                    return BadRequest(ModelState);
                 }
             }
 
@@ -413,7 +421,7 @@ namespace GSC.Api.Controllers.UserMgt
         //{
         //    var VersionNum = _releaseSettingRepository.GetVersionNum();
         //    return Ok(VersionNum);
-                
+
         //}
     }
 }

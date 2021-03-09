@@ -55,7 +55,7 @@ namespace GSC.Respository.ProjectRight
 
         public List<ProjectRightDto> GetProjectRightByProjectId(int projectId)
         {
-            var roles = _context.SecurityRole.Where(x => x.DeletedDate == null).Select(c => new ProjectRightDto
+            var roles = _context.SecurityRole.Where(x => x.DeletedDate == null && x.Id != 2).Select(c => new ProjectRightDto
             {
                 RoleId = c.Id,
                 Name = c.RoleName,

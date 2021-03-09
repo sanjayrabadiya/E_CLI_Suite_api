@@ -149,7 +149,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ContactName", DisplayName = "Contact Name" });
             //_dictionaries.Add(new Dictionary { FieldName = "IsLogin", DisplayName = "Is Login" });
             _dictionaries.Add(new Dictionary { FieldName = "IsPowerAdmin", DisplayName = "Is Power Admin" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IsLocked", DisplayName = "Is Locked" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsLocked", DisplayName = "Locked Status" });
             _dictionaries.Add(new Dictionary { FieldName = "IsFirstTime", DisplayName = "Is First Time" });
             _dictionaries.Add(new Dictionary { FieldName = "UserName", DisplayName = "User Name" });
             _dictionaries.Add(new Dictionary { FieldName = "FirstName", DisplayName = "First Name" });

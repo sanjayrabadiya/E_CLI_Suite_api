@@ -281,7 +281,7 @@ namespace GSC.Respository.UserMgt
         public List<DropDownDto> GetUserName()
         {
             var result = All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && x.UserType != UserMasterUserType.Patient)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.UserName }).OrderBy(o => o.Value) //c.FirstName + " " + c.LastName // changed by Neel for trainer dropdown
                 .ToList();
             return result;
