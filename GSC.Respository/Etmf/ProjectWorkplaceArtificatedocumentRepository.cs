@@ -136,11 +136,12 @@ namespace GSC.Respository.Etmf
             foreach (var item in documentList)
             {
                 var reviewerList = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy).Select(z => z.UserId).Distinct().ToList();
-                var users = new List<string>();
+                var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
-                    var username = _userRepository.Find(r).UserName;
-                    users.Add(username);
+                    DocumentUsers obj = new DocumentUsers();
+                    obj.UserName = _userRepository.Find(r).UserName;
+                    users.Add(obj);
                 });
 
                 var Review = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id
@@ -155,11 +156,12 @@ namespace GSC.Respository.Etmf
                         IsApproved = y.FirstOrDefault().IsApproved
                     }).ToList();
 
-                var ApproverName = new List<string>();
+                var ApproverName = new List<DocumentUsers>();
                 ApproveList.ForEach(r =>
                 {
-                    var username = _userRepository.Find(r.UserId).UserName;
-                    ApproverName.Add(username);
+                    DocumentUsers obj = new DocumentUsers();
+                    obj.UserName = _userRepository.Find(r.UserId).UserName;
+                    ApproverName.Add(obj);
                 });
 
                 CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
@@ -171,7 +173,7 @@ namespace GSC.Respository.Etmf
                 obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                 obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
-                obj.Reviewer = string.Join(", ", users);
+                obj.Reviewer = users;
                 obj.CreatedDate = item.CreatedDate;
                 obj.Version = item.Version;
                 obj.StatusName = item.Status.GetDescription();
@@ -184,7 +186,7 @@ namespace GSC.Respository.Etmf
                 obj.IsAccepted = item.IsAccepted;
                 obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.Any(x => x.IsApproved == false) ? "Reject" : ApproveList.All(x => x.IsApproved == true) ? "Approved"
                     : "Send For Approval";
-                obj.Approver = string.Join(", ", ApproverName);
+                obj.Approver = ApproverName;
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 dataList.Add(obj);

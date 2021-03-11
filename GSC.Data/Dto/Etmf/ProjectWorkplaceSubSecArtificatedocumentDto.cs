@@ -42,7 +42,7 @@ namespace GSC.Data.Dto.Etmf
         public FileModel FileModel { get; set; }
         public string DocPath { get; set; }
         public string Artificatename { get; set; }
-        public string Reviewer { get; set; }
+        public List<DocumentUsers> Reviewer { get; set; }
         public int Status { get; set; }
         public string StatusName { get; set; }
         public string Version { get; set; }
@@ -56,11 +56,15 @@ namespace GSC.Data.Dto.Etmf
         public bool IsReview { get; set; }
         public bool? IsAccepted { get; set; }
         public string ApprovedStatus { get; set; }
-        public string Approver { get; set; }
+        public List<DocumentUsers> Approver { get; set; }
         public bool IsApproveDoc { get; set; }
         public bool IsNotRequired { get; set; }
     }
 
+    public class DocumentUsers
+    {
+        public string UserName { get; set; }
+    }
     public class CustomParameter
     {
         public int id { get; set; }

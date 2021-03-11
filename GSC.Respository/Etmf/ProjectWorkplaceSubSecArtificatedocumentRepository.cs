@@ -164,11 +164,12 @@ namespace GSC.Respository.Etmf
             foreach (var item in documentList)
             {
                 var reviewerList = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId != item.CreatedBy).Select(z => z.UserId).Distinct().ToList();
-                var users = new List<string>();
+                var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
-                    var username = _userRepository.Find(r).UserName;
-                    users.Add(username);
+                    DocumentUsers obj = new DocumentUsers();
+                    obj.UserName = _userRepository.Find(r).UserName;
+                    users.Add(obj);
                 });
                 var Review = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
                 && x.UserId != item.CreatedBy && x.DeletedDate == null).ToList();
@@ -182,11 +183,12 @@ namespace GSC.Respository.Etmf
                         IsApproved = y.FirstOrDefault().IsApproved
                     }).ToList();
 
-                var ApproverName = new List<string>();
+                var ApproverName = new List<DocumentUsers>();
                 ApproveList.ForEach(r =>
                 {
-                    var username = _userRepository.Find(r.UserId).UserName;
-                    ApproverName.Add(username);
+                    DocumentUsers obj = new DocumentUsers();
+                    obj.UserName = _userRepository.Find(r.UserId).UserName;
+                    ApproverName.Add(obj);
                 });
 
                 CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
@@ -205,13 +207,13 @@ namespace GSC.Respository.Etmf
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 obj.IsAccepted = item.IsAccepted;
                 //obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceSubSectionArtifact.EtmfArtificateMasterLbraryId;
-                obj.Reviewer = string.Join(", ", users);
+                obj.Reviewer = users;
                 obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
                 obj.IsReview = Review.Count() == 0 ? false : Review.All(z => z.IsSendBack) ? true : false;
                 obj.IsSendBack = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.Any(x => x.IsApproved == false) ? "Reject" : ApproveList.All(x => x.IsApproved == true) ? "Approved"
                    : "Send For Approval";
-                obj.Approver = string.Join(", ", ApproverName);
+                obj.Approver = ApproverName;
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 dataList.Add(obj);
             }
