@@ -106,6 +106,8 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             projectDto.Id = 0;
             var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
+            project.IsSendEmail = true;
+            project.IsSendSMS = false;
 
             if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
@@ -279,6 +281,8 @@ namespace GSC.Api.Controllers.Master
             project.IsSiteDependentRandomNo = details.IsSiteDependentRandomNo;
             project.IsAlphaNumScreeningNo = details.IsAlphaNumScreeningNo;
             project.IsAlphaNumRandomNo = details.IsAlphaNumRandomNo;
+            project.IsSendEmail = details.IsSendEmail;
+            project.IsSendSMS = details.IsSendSMS;
 
             if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
@@ -304,6 +308,23 @@ namespace GSC.Api.Controllers.Master
 
             _projectRepository.Update(project);
             if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
+            return Ok(project.Id);
+        }
+
+        [HttpPut]
+        [Route("UpdateSMSEmailConfiguration")]
+        public IActionResult UpdateSMSEmailConfiguration([FromBody] SMSEMailConfig projectDto)
+        {
+            if (projectDto.Id <= 0) return BadRequest();
+
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var project = _projectRepository.Find(projectDto.Id);
+            project.IsSendEmail = projectDto.IsSendEmail;
+            project.IsSendSMS = projectDto.IsSendSMS;
+
+            _projectRepository.Update(project);
+            if (_uow.Save() <= 0) throw new Exception("Updating SMS/Email configuration failed on save.");
             return Ok(project.Id);
         }
 

@@ -21,7 +21,7 @@ namespace GSC.Respository.EmailSender
         void SendEmailOfInvestigatorApprovedPDFtoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath);
         void SendEmailOfEconsentDocumentuploaded(string toMail, string userName, string documentName, string ProjectName);
         void SendDBDSGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf);
-        Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile,int sendtype);
+        Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile,int sendtype,bool isSendEmail,bool isSendSMS);
         Task SendAdverseEventAlertEMailtoInvestigator(string toMail, string mobile, string userName, string projectName, string patientname,string reportdate);
     }
 }

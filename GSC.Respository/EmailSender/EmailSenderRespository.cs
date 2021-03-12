@@ -151,19 +151,24 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-        public async Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile,int sendtype)
+        public async Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile,int sendtype, bool isSendEmail, bool isSendSMS)
         {
-            var emailMessage = ConfigureEmail("PatientScreened", userName);
-            emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBodyForPatientScreened(emailMessage.MessageBody, userName, patientName, ProjectName,password);
-            emailMessage.Subject = ReplaceSubjectForPatientScreened(emailMessage.Subject, ProjectName);
-            if (toMail != null && toMail != "" && (sendtype == 1 || sendtype == 2))
+            if (isSendEmail == true || isSendSMS == true)
             {
-                _emailService.SendMail(emailMessage);
-            }
-            if (mobile != "" && (sendtype == 0 || sendtype == 2))
-            {
-                await SendSMS(mobile, emailMessage.MessageBody);
+                var emailMessage = ConfigureEmail("PatientScreened", userName);
+                emailMessage.SendTo = toMail;
+                emailMessage.MessageBody = ReplaceBodyForPatientScreened(emailMessage.MessageBody, userName, patientName, ProjectName, password);
+                emailMessage.Subject = ReplaceSubjectForPatientScreened(emailMessage.Subject, ProjectName);
+                if (toMail != null && toMail != "" && (sendtype == 1 || sendtype == 2))
+                {
+                    if (isSendEmail == true)
+                    _emailService.SendMail(emailMessage);
+                }
+                if (mobile != "" && (sendtype == 0 || sendtype == 2))
+                {
+                    if (isSendSMS == true)
+                    await SendSMS(mobile, emailMessage.MessageBody);
+                }
             }
         }
 

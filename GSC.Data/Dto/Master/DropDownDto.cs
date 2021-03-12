@@ -56,5 +56,7 @@ namespace GSC.Data.Dto.Master
         public int CountryId { get; set; }
         public int ParentProjectId { get; set; }
         public int AttendanceLimit { get; set; }
+        public bool IsSendSMS { get; set; }
+        public bool IsSendEmail { get; set; }
     }
 }

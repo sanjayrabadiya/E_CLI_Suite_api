@@ -68,6 +68,8 @@ namespace GSC.Data.Dto.Master
         public int? RandomNoStartsWith { get; set; }
         public int? ScreeningNoStartsWith { get; set; }
         public bool IsTestSite { get; set; }
+        public bool IsSendSMS { get; set; }
+        public bool IsSendEmail { get; set; }
     }
 
     public class RandomizationAndScreeningNumberFormatDto : BaseDto
@@ -179,5 +181,12 @@ namespace GSC.Data.Dto.Master
         public DateTime ValidTo { get; set; }
         [Required(ErrorMessage = "Company ID is required.")]
         public int CompanyID { get; set; }
+    }
+
+    public class SMSEMailConfig
+    {
+        public int Id { get; set; }
+        public bool IsSendSMS { get; set; }
+        public bool IsSendEmail { get; set; }
     }
 }

@@ -89,5 +89,7 @@ namespace GSC.Data.Entities.Master
         public int? RandomNoStartsWith { get; set; }
         public int? ScreeningNoStartsWith { get; set; }
         public bool IsTestSite { get; set; }
+        public bool IsSendSMS { get; set; }
+        public bool IsSendEmail { get; set; }
     }
 }

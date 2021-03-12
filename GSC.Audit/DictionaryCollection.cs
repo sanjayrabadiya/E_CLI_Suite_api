@@ -262,6 +262,9 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "SeveritySeqNo1", DisplayName = "Label for Low", SourceColumn = "SeveritySeqNo1", TableName = "ProjectDesignVariableValue", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "SeveritySeqNo2", DisplayName = "Label for Medium", SourceColumn = "SeveritySeqNo2", TableName = "ProjectDesignVariableValue", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "SeveritySeqNo3", DisplayName = "Label for High", SourceColumn = "SeveritySeqNo3", TableName = "ProjectDesignVariableValue", PkName = "Id" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "IsSendEmail", DisplayName = "Send Email to Patients" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsSendSMS", DisplayName = "Send SMS to Patients" });
         }
 
 

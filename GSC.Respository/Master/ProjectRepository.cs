@@ -261,6 +261,8 @@ namespace GSC.Respository.Master
                     Value = c.ProjectCode,
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
+                    IsSendEmail = c.IsSendEmail,
+                    IsSendSMS = c.IsSendSMS,
                     ParentProjectId = c.ParentProjectId ?? c.Id,
                     IsDeleted = c.DeletedDate != null
                 }).Distinct().OrderBy(o => o.Value).ToList();

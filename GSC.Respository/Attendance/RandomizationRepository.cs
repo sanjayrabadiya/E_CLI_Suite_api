@@ -580,10 +580,13 @@ namespace GSC.Respository.Attendance
         {
             var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             var studydata = _projectRepository.Find((int)studyId);
-            var userdata = _userRepository.Find((int)randomization.UserId);
-            //var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
-            var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
-            await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp, studydata.ProjectName, randomization.PrimaryContactNumber, sendtype);
+            if (studydata.IsSendSMS == true || studydata.IsSendEmail == true)
+            {
+                var userdata = _userRepository.Find((int)randomization.UserId);
+                //var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
+                var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
+                await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp, studydata.ProjectName, randomization.PrimaryContactNumber, sendtype, studydata.IsSendEmail, studydata.IsSendSMS);
+            }
         }
 
         public void SendEmailOfStartEconsent(Randomization randomization)
