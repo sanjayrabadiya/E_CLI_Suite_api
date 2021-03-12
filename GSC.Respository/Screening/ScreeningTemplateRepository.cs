@@ -1070,6 +1070,14 @@ namespace GSC.Respository.Screening
                 result = result.Where(x => x.ScheduleDate <= Convert.ToDateTime(filters.toDate));
             }
             if (parentIds != null) result = result.Where(x => parentIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId));
+            var patientstatuslist = Enum.GetValues(typeof(ScreeningPatientStatus))
+                        .Cast<ScreeningPatientStatus>().Where(x => x != ScreeningPatientStatus.Completed && 
+                                                                    x != ScreeningPatientStatus.Withdrawal && 
+                                                                    x != ScreeningPatientStatus.ScreeningFailure && 
+                                                                    x != ScreeningPatientStatus.OnHold)
+                        .Select(d => (int)d)
+                        .ToList();
+            result = result.Where(x => patientstatuslist.Contains((int)x.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId));
             var dateformat = _context.AppSetting.Where(x => x.KeyName == "GeneralSettingsDto.DateFormat").ToList().FirstOrDefault().KeyValue;
             dateformat = dateformat.Replace("/", "\\/");
             return result.Select(r => new ScheduleDueReport
