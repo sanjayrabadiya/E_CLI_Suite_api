@@ -345,7 +345,6 @@ namespace GSC.Respository.EditCheckImpact
         public bool CheckReferenceVariable(int projectDesignVariableId)
         {
             return _projectScheduleRepository.All.AsNoTracking().Any(r => r.ProjectDesignVariableId == projectDesignVariableId && r.DeletedDate == null);
-
         }
 
         public List<ScheduleCheckValidateDto> GetTargetScheduleByVariableId(int ProjectDesignVariableId)

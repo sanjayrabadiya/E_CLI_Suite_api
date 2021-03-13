@@ -14,6 +14,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Project.Schedule;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
@@ -39,6 +40,7 @@ namespace GSC.Respository.Screening
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectScheduleRepository _projectScheduleRepository;
         public ScreeningEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
@@ -49,8 +51,9 @@ namespace GSC.Respository.Screening
             IProjectRepository projectRepository,
             IRandomizationRepository randomizationRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
-        INumberFormatRepository numberFormatRepository,
-            IRolePermissionRepository rolePermissionRepository)
+            INumberFormatRepository numberFormatRepository,
+            IRolePermissionRepository rolePermissionRepository,
+             IProjectScheduleRepository projectScheduleRepository)
             : base(context)
         {
             _volunteerRepository = volunteerRepository;
@@ -66,6 +69,7 @@ namespace GSC.Respository.Screening
             _projectDesignRepository = projectDesignRepository;
             _projectRepository = projectRepository;
             _context = context;
+            _projectScheduleRepository = projectScheduleRepository;
         }
 
         public ScreeningEntryDto GetDetails(int id)
@@ -209,8 +213,8 @@ namespace GSC.Respository.Screening
             _screeningVisitRepository.PatientStatus(screeningEntry.Id);
 
             var screningVisit = screeningEntry.ScreeningVisit.Where(x => x.ProjectDesignVisitId == saveRandomizationDto.ProjectDesignVisitId).FirstOrDefault();
-
-            if (screningVisit != null && screningVisit.IsSchedule)
+            var isScheduleReference = _projectScheduleRepository.All.Any(x => x.ProjectDesignVisitId == screningVisit.ProjectDesignVisitId && x.DeletedDate == null);
+            if (screningVisit != null && isScheduleReference)
             {
                 _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
                 _context.Save();
