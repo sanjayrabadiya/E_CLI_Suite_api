@@ -8,6 +8,7 @@ using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Project.Schedule;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,7 @@ namespace GSC.Respository.Screening
         private readonly IImpactService _impactService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
+        private readonly IProjectScheduleRepository _projectScheduleRepository;
         public ScreeningVisitRepository(IGSCContext context,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
@@ -46,7 +48,8 @@ namespace GSC.Respository.Screening
             IScreeningProgress screeningProgress,
             IScheduleRuleRespository scheduleRuleRespository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
-            IImpactService impactService)
+            IImpactService impactService,
+            IProjectScheduleRepository projectScheduleRepository)
             : base(context)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -63,6 +66,7 @@ namespace GSC.Respository.Screening
             _impactService = impactService;
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
+            _projectScheduleRepository = projectScheduleRepository;
         }
 
 
@@ -295,8 +299,8 @@ namespace GSC.Respository.Screening
             FindOpenVisitVarible(visit.ProjectDesignVisitId, visit.Id, screeningVisitDto.VisitOpenDate, visit.ScreeningEntryId);
 
             PatientStatus(visit.ScreeningEntryId);
-
-            if (visit.IsSchedule)
+            var isScheduleReference = _projectScheduleRepository.All.Any(x => x.ProjectDesignVisitId == visit.ProjectDesignVisitId && x.DeletedDate == null);
+            if (visit.IsSchedule || isScheduleReference)
                 ScheduleVisitUpdate(visit.ScreeningEntryId);
         }
 
