@@ -8,6 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.EditCheck;
 using GSC.Data.Entities.Project.EditCheck;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.EditCheck;
 using Microsoft.AspNetCore.Mvc;
@@ -60,8 +61,13 @@ namespace GSC.Api.Controllers.Project.EditCheck
             editCheckDetailDto.Id = 0;
             EditCheckDetail editCheckDetail = null;
 
-            if (editCheckDetailDto.VariableIds.Length != 0)
+            if (editCheckDetailDto.VariableIds.Length > 0)
             {
+                if (!editCheckDetailDto.IsTarget && editCheckDetailDto.VariableIds.Length > 1 && string.IsNullOrEmpty(editCheckDetailDto.LogicalOperator))
+                {
+                    return BadRequest("Please select Logical Operator");
+                }
+
                 for (var i = 0; i < editCheckDetailDto.VariableIds.Length; i++)
                 {
                     editCheckDetailDto.ProjectDesignVariableId = editCheckDetailDto.VariableIds[i];
@@ -73,10 +79,19 @@ namespace GSC.Api.Controllers.Project.EditCheck
                         return BadRequest(validateMsg);
                     }
 
+                    if (editCheckDetailDto.VariableIds.Length > 1 && i > 0)
+                        editCheckDetail.StartParens = null;
+
+                    if (editCheckDetailDto.VariableIds.Length > 1 && editCheckDetailDto.VariableIds.Length - 1 != i)
+                        editCheckDetail.EndParens = null;
+
                     if (editCheckDetailDto.VariableIds.Length > 1 && !editCheckDetail.IsTarget && editCheckDetailDto.VariableIds.Length - 1 == i)
                     {
-                        editCheckDetail.Operator = null;
+                        if (editCheckDetail.Operator != null && editCheckDetail.Operator.Value.CheckMathOperator())
+                            editCheckDetail.Operator = null;
+
                         editCheckDetail.LogicalOperator = null;
+
                     }
 
 
