@@ -349,26 +349,51 @@ namespace GSC.Respository.EditCheckImpact
 
         public List<ScheduleCheckValidateDto> GetTargetScheduleByVariableId(int ProjectDesignVariableId)
         {
-            return _projectScheduleTemplateRepository.All.AsNoTracking().
-                Where(x => x.DeletedDate == null && (x.ProjectDesignVariableId == ProjectDesignVariableId ||
-                 _projectScheduleRepository.All.Any(t => t.ProjectDesignVariableId == ProjectDesignVariableId
-                 && t.Id == x.ProjectScheduleId && t.DeletedDate == null))).Select(t => new ScheduleCheckValidateDto
-                 {
-                     ProjectScheduleId = t.ProjectScheduleId,
-                     ProjectScheduleTemplateId = t.Id,
-                     ProjectDesignVariableId = t.ProjectDesignVariableId,
-                     ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                     Message = t.Message,
-                     CollectionSource = t.ProjectDesignVariable.CollectionSource,
-                     HH = t.HH,
-                     MM = t.MM,
-                     IsTarget = true,
-                     PositiveDeviation = t.PositiveDeviation,
-                     NegativeDeviation = t.NegativeDeviation,
-                     NoOfDay = t.NoOfDay,
-                     Operator = t.Operator
-                 }).ToList();
+            var result = _projectScheduleTemplateRepository.All.AsNoTracking().
+                Where(x => x.DeletedDate == null && x.ProjectDesignVariableId == ProjectDesignVariableId).Select(t => new ScheduleCheckValidateDto
+                {
+                    ProjectScheduleId = t.ProjectScheduleId,
+                    ProjectScheduleTemplateId = t.Id,
+                    ProjectDesignVariableId = t.ProjectDesignVariableId,
+                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                    Message = t.Message,
+                    CollectionSource = t.ProjectDesignVariable.CollectionSource,
+                    HH = t.HH,
+                    MM = t.MM,
+                    IsTarget = true,
+                    PositiveDeviation = t.PositiveDeviation,
+                    NegativeDeviation = t.NegativeDeviation,
+                    NoOfDay = t.NoOfDay,
+                    Operator = t.Operator
+                }).ToList();
+
+            if (result.Count == 0)
+            {
+                result = _projectScheduleTemplateRepository.All.AsNoTracking().
+                Where(x => x.DeletedDate == null && x.ProjectSchedule.DeletedDate == null
+                && x.ProjectSchedule.ProjectDesignVariableId == ProjectDesignVariableId).Select(t => new ScheduleCheckValidateDto
+                {
+                    ProjectScheduleId = t.ProjectScheduleId,
+                    ProjectScheduleTemplateId = t.Id,
+                    ProjectDesignVariableId = t.ProjectDesignVariableId,
+                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                    Message = t.Message,
+                    CollectionSource = t.ProjectDesignVariable.CollectionSource,
+                    HH = t.HH,
+                    MM = t.MM,
+                    IsTarget = true,
+                    PositiveDeviation = t.PositiveDeviation,
+                    NegativeDeviation = t.NegativeDeviation,
+                    NoOfDay = t.NoOfDay,
+                    Operator = t.Operator
+                }).ToList();
+
+            }
+
+            return result;
         }
+
+
 
 
     }

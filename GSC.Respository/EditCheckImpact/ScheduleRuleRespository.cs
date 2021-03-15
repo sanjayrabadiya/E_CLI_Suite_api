@@ -94,7 +94,7 @@ namespace GSC.Respository.EditCheckImpact
                 }
 
                 if (x.Operator != null && (x.Operator == ProjectScheduleOperator.Equal || x.Operator == ProjectScheduleOperator.Plus))
-                    InsertScheduleDate(x, targetSchDate);
+                    InsertScheduleDate(x, reference?.Value ?? targetSchDate);
 
             });
 
