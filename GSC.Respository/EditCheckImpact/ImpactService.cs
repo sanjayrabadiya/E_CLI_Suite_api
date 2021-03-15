@@ -350,7 +350,7 @@ namespace GSC.Respository.EditCheckImpact
         public List<ScheduleCheckValidateDto> GetTargetScheduleByVariableId(int ProjectDesignVariableId)
         {
             var result = _projectScheduleTemplateRepository.All.AsNoTracking().
-                Where(x => x.DeletedDate == null && 
+                Where(x => x.DeletedDate == null && x.ProjectSchedule.DeletedDate == null &&
                 (x.ProjectDesignVariableId == ProjectDesignVariableId || x.ProjectSchedule.ProjectDesignVariableId == ProjectDesignVariableId)).Select(t => new ScheduleCheckValidateDto
                 {
                     ProjectScheduleId = t.ProjectScheduleId,
@@ -367,29 +367,6 @@ namespace GSC.Respository.EditCheckImpact
                     NoOfDay = t.NoOfDay,
                     Operator = t.Operator
                 }).ToList();
-
-            //if (result.Count == 0)
-            //{
-            //    result = _projectScheduleTemplateRepository.All.AsNoTracking().
-            //    Where(x => x.DeletedDate == null && x.ProjectSchedule.DeletedDate == null
-            //    && x.ProjectSchedule.ProjectDesignVariableId == ProjectDesignVariableId).Select(t => new ScheduleCheckValidateDto
-            //    {
-            //        ProjectScheduleId = t.ProjectScheduleId,
-            //        ProjectScheduleTemplateId = t.Id,
-            //        ProjectDesignVariableId = t.ProjectDesignVariableId,
-            //        ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-            //        Message = t.Message,
-            //        CollectionSource = t.ProjectDesignVariable.CollectionSource,
-            //        HH = t.HH,
-            //        MM = t.MM,
-            //        IsTarget = true,
-            //        PositiveDeviation = t.PositiveDeviation,
-            //        NegativeDeviation = t.NegativeDeviation,
-            //        NoOfDay = t.NoOfDay,
-            //        Operator = t.Operator
-            //    }).ToList();
-
-            //}
 
             return result;
         }
