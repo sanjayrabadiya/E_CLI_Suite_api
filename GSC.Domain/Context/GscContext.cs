@@ -311,6 +311,11 @@ namespace GSC.Domain.Context
         public DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }   
         public DbSet<PhaseManagement> PhaseManagement { get; set; }
         public DbSet<ResourceType> ResourceType { get; set; }
+        public DbSet<TaskTemplate> TaskTemplate { get; set; }
+        public DbSet<TaskMaster> TaskMaster { get; set; }
+        public DbSet<StudyPlan> StudyPlan { get; set; }
+
+        public DbSet<StudyPlanTask> StudyPlanTask { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

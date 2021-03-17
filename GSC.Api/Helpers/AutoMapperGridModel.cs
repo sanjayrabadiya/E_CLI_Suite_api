@@ -112,7 +112,7 @@ namespace GSC.Api.Helpers
             CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
             CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
             CreateMap<User, UserGridDto>()
-                .ForMember(x => x.Role, x => x.MapFrom(a => string.Join(", ",a.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())))
+                .ForMember(x => x.Role, x => x.MapFrom(a => string.Join(", ", a.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())))
                 .ForMember(x => x.CompanyName, x => x.MapFrom(a => a.Company.CompanyName))
                 .ReverseMap();
 
@@ -150,7 +150,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.RegulatoryTypeName, x => x.MapFrom(a => a.RegulatoryType.RegulatoryTypeName))
                 .ForMember(x => x.ProjectDesignId, x => x.MapFrom(a => a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.Id).FirstOrDefault()))
                 .ForMember(x => x.Locked, x => x.MapFrom(a => !a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.IsUnderTesting).FirstOrDefault()))
-                .ForMember(x => x.ParentProjectCode, x => x.MapFrom(a => a.ChildProject.Where(x=>x.DeletedDate == null).Select(r => r.ProjectCode).FirstOrDefault()))
+                .ForMember(x => x.ParentProjectCode, x => x.MapFrom(a => a.ChildProject.Where(x => x.DeletedDate == null).Select(r => r.ProjectCode).FirstOrDefault()))
                 .ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.Where(x => x.DeletedDate == null).Count()))
                 .ReverseMap();
 
@@ -246,6 +246,13 @@ namespace GSC.Api.Helpers
             CreateMap<SiteTeam, SiteTeamGridDto>().ReverseMap();
             CreateMap<PhaseManagement, PhaseManagementGridDto>().ReverseMap();
             CreateMap<ResourceType, ResourceTypeGridDto>().ReverseMap();
+            CreateMap<TaskTemplate, TaskTemplateGridDto>().ReverseMap();
+
+            CreateMap<TaskMaster, TaskMasterGridDto>().ReverseMap();
+            CreateMap<StudyPlan, StudyPlanGridDto>()
+                   .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                   .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
+                  .ReverseMap();
         }
     }
 }

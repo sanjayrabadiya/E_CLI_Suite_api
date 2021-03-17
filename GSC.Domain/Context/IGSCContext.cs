@@ -263,9 +263,11 @@ namespace GSC.Domain.Context
         DbSet<EtmfUserPermission> EtmfUserPermission { get; set; }
         DbSet<AEReportingValue> AEReportingValue { get; set; }
         DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }
-
-       
+        DbSet<TaskTemplate> TaskTemplate { get; set; }
         DbSet<PhaseManagement> PhaseManagement { get; set; }
         DbSet<ResourceType> ResourceType { get; set; }
+        DbSet<TaskMaster> TaskMaster { get; set; }
+        DbSet<StudyPlan> StudyPlan { get; set; }
+        DbSet<StudyPlanTask> StudyPlanTask { get; set; }
     }
 }

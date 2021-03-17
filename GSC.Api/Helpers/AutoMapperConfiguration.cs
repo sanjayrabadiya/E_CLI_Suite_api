@@ -323,6 +323,12 @@ namespace GSC.Api.Helpers
                  .ReverseMap();
 
             CreateMap<RefreshTokanDto, LoginResponseDto>().ReverseMap();
+            CreateMap<TaskTemplate, TaskTemplateDto>().ReverseMap();
+            CreateMap<TaskMaster, TaskmasterDto>().ReverseMap();
+            CreateMap<StudyPlan, StudyPlanDto>().ReverseMap();
+            CreateMap<StudyPlanTask,TaskMaster>()
+                .ForMember(x => x.Id, y => y.MapFrom(a => a.TaskId))
+               .ReverseMap();
         }
     }
 }

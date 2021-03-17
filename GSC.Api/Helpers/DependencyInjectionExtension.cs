@@ -297,7 +297,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPhaseManagementRepository, PhaseManagementRepository>();
             services.AddScoped<IResourceTypeRepository, ResourceTypeRepository>();
             services.AddScoped<IEtmfUserPermissionRepository, EtmfUserPermissionRepository>();
-
+            services.AddScoped<ITaskTemplateRepository, TaskTemplateRepository>();
+            services.AddScoped<ITaskMasterRepository, TaskMasterRepository>();
+            services.AddScoped<IStudyPlanRepository, StudyPlanRepository>();
+            services.AddScoped<IStudyPlanTaskRepository, StudyPlanTaskRepository>();
 
         }
     }
