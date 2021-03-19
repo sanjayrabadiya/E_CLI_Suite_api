@@ -842,7 +842,11 @@ namespace GSC.Respository.Attendance
                     if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
                         x.IsTemplateRestricted = false;
                     else
+                    {
                         x.IsTemplateRestricted = true;
+                        if (DateTime.Today > maxdate)
+                            x.IsPastTemplate = true;
+                    }
                 }
             });
             return data;
