@@ -810,6 +810,7 @@ namespace GSC.Respository.Attendance
             return data;
         }
 
+
         public List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId)
         {
             var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Include(x => x.ScreeningVisit).Where(x => x.ScreeningVisitId == screeningVisitId && x.ProjectDesignTemplate.IsParticipantView == true).
@@ -817,17 +818,31 @@ namespace GSC.Respository.Attendance
                         {
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
+                            ProjectDesignVisitId = r.ScreeningVisit.ProjectDesignVisitId,
                             TemplateName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
                 r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
                             ScheduleDate = r.ScheduleDate,
+                            IsTemplateRestricted = false
                         }).OrderBy(r => r.DesignOrder).ToList();
             data.ForEach(x =>
             {
                 if (x.Status == ScreeningTemplateStatus.Submitted)
                 {
                     x.SubmittedDate = _context.ScreeningTemplateReview.Where(t => t.ScreeningTemplateId == x.ScreeningTemplateId && t.Status == ScreeningTemplateStatus.Submitted).ToList().FirstOrDefault().CreatedDate;
+                }
+                if (x.ScheduleDate != null)
+                {
+                    var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId);
+                    var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
+                    var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
+                    var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
+                    var maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
+                    if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
+                        x.IsTemplateRestricted = false;
+                    else
+                        x.IsTemplateRestricted = true;
                 }
             });
             return data;
