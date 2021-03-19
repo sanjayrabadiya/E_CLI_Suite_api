@@ -19,8 +19,13 @@ using Newtonsoft.Json;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Syncfusion.EJ2.PdfViewer;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authorization;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GSC.Api.Controllers.Etmf
@@ -28,7 +33,8 @@ namespace GSC.Api.Controllers.Etmf
     [Route("api/[controller]")]
     public class ProjectWorkplaceArtificatedocumentController : BaseController
     {
-
+        private readonly IHostingEnvironment _hostingEnvironment;
+        public IMemoryCache _cache;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
@@ -50,8 +56,10 @@ namespace GSC.Api.Controllers.Etmf
             IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
-            IGSCContext context)
+            IGSCContext context, IMemoryCache cache, IHostingEnvironment hostingEnvironment)
         {
+            _hostingEnvironment = hostingEnvironment;
+            _cache = cache;
             _uow = uow;
             _mapper = mapper;
             _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
@@ -277,6 +285,19 @@ namespace GSC.Api.Controllers.Etmf
             var auditsDto = _projectWorkplaceArtificatedocumentRepository.GetEtmfAuditLogReport(filters);
 
             return Ok(auditsDto);
+        }
+
+        [HttpPost]
+        [Route("GetDocumentForPdfHistory/{id}")]
+        public IActionResult GetDocumentForPdfHistory(int id)
+        {
+            CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
+            var history = _projectArtificateDocumentHistoryRepository.Find(id);
+            var document = _projectWorkplaceArtificatedocumentRepository.Find(history.ProjectWorkplaceArtificateDocumentId);
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var FullPath = Path.Combine(upload.DocumentUrl, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, history.DocumentName);
+            obj.FullDocPath = FullPath;
+            return Ok(obj);
         }
     }
 }

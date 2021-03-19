@@ -197,6 +197,7 @@ namespace GSC.Respository.Etmf
                 obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
                 obj.DocumentName = item.DocumentName;
                 obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
+                obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
                 obj.Level = 5.2;
@@ -433,6 +434,17 @@ namespace GSC.Respository.Etmf
             string json = ImportWordDocument(stream, path);
             stream.Close();
             return json;
+        }
+
+        public CommonArtifactDocumentDto GetDocumentForPdfHistory(int Id)
+        {
+            CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
+            var history = _projectSubSecArtificateDocumentHistoryRepository.Find(Id);
+            var document = Find(history.ProjectWorkplaceSubSecArtificateDocumentId);
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var FullPath = Path.Combine(upload.DocumentUrl, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, history.DocumentName);
+            obj.FullDocPath = FullPath;
+            return obj;
         }
     }
 }

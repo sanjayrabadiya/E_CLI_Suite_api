@@ -172,6 +172,7 @@ namespace GSC.Respository.Etmf
                 obj.DocumentName = item.DocumentName;
                 obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                 obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
+                obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.Reviewer = users;
                 obj.CreatedDate = item.CreatedDate;
@@ -204,7 +205,8 @@ namespace GSC.Respository.Etmf
             obj.ProjectWorkplaceArtificateId = document.ProjectWorkplaceArtificateId;
             obj.DocumentName = document.DocumentName;
             obj.ExtendedName = document.DocumentName.Contains('_') ? document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) : document.DocumentName;
-            obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath);
             obj.CreatedByUser = _userRepository.Find((int)document.CreatedBy).UserName;
             obj.CreatedDate = document.CreatedDate;
             obj.Version = document.Version;

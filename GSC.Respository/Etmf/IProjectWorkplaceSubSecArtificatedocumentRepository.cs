@@ -19,5 +19,6 @@ namespace GSC.Respository.Etmf
         ProjectWorkplaceSubSecArtificatedocument WordToPdf(int Id);
         string GetDocumentHistory(int Id);
         CommonArtifactDocumentDto GetDocument(int id);
+        CommonArtifactDocumentDto GetDocumentForPdfHistory(int Id);
     }
 }

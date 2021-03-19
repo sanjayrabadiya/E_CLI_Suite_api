@@ -198,5 +198,13 @@ namespace GSC.Api.Controllers.Etmf
             var result = _projectWorkplaceSubSecArtificatedocumentRepository.GetDocumentHistory(id);
             return Ok(result);
         }
+
+        [HttpPost]
+        [Route("GetDocumentForPdfHistory/{id}")]
+        public IActionResult GetDocumentForPdfHistory(int id)
+        {
+            var result = _projectWorkplaceSubSecArtificatedocumentRepository.GetDocumentForPdfHistory(id);
+            return Ok(result);
+        }
     }
 }

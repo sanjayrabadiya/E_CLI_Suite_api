@@ -41,6 +41,7 @@ namespace GSC.Data.Dto.Etmf
         public string ExtendedName { get; set; }
         public FileModel FileModel { get; set; }
         public string DocPath { get; set; }
+        public string FullDocPath { get; set; }
         public string Artificatename { get; set; }
         public List<DocumentUsers> Reviewer { get; set; }
         public int Status { get; set; }
