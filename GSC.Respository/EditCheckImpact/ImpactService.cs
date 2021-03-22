@@ -347,11 +347,31 @@ namespace GSC.Respository.EditCheckImpact
             return _projectScheduleRepository.All.AsNoTracking().Any(r => r.ProjectDesignVariableId == projectDesignVariableId && r.DeletedDate == null);
         }
 
+        public int CheckVisitRefAndTarget(int projectDesignVisitId, List<int> startedProjectDesignVisitId)
+        {
+
+            var projectScheduleId = _projectScheduleTemplateRepository.All.AsNoTracking().Where(r => r.ProjectDesignVisitId == projectDesignVisitId && 
+            r.ProjectSchedule.ProjectDesignVisitId == projectDesignVisitId &&
+            r.ProjectSchedule.DeletedDate == null && r.DeletedDate == null).
+            Select(t => t.ProjectScheduleId).FirstOrDefault();
+
+            var visits = _projectScheduleTemplateRepository.All.AsNoTracking().Where(r => r.ProjectScheduleId == projectScheduleId
+            && r.ProjectSchedule.DeletedDate == null && r.DeletedDate == null).
+             Select(t => new { t.ProjectDesignVisitId, t.NoOfDay }).OrderBy(c => c.NoOfDay).ToList();
+
+            if (visits != null && visits.Count > 0)
+            {
+                return visits.Where(x => !startedProjectDesignVisitId.Contains(x.ProjectDesignVisitId)).FirstOrDefault()?.ProjectDesignVisitId ?? 0;
+            }
+
+            return 0;
+        }
+
         public List<ScheduleCheckValidateDto> GetTargetScheduleByVariableId(int ProjectDesignVariableId)
         {
             var result = _projectScheduleTemplateRepository.All.AsNoTracking().
                 Where(x => x.DeletedDate == null && x.ProjectSchedule.DeletedDate == null &&
-                (x.ProjectDesignVariableId == ProjectDesignVariableId)).Select(t => new ScheduleCheckValidateDto
+                (x.ProjectDesignVariableId == ProjectDesignVariableId || x.ProjectSchedule.ProjectDesignVariableId == ProjectDesignVariableId)).Select(t => new ScheduleCheckValidateDto
                 {
                     ProjectScheduleId = t.ProjectScheduleId,
                     ProjectScheduleTemplateId = t.Id,
@@ -367,27 +387,6 @@ namespace GSC.Respository.EditCheckImpact
                     NoOfDay = t.NoOfDay,
                     Operator = t.Operator
                 }).ToList();
-
-            if (result.Count() == 0)
-            {
-                result = _projectScheduleTemplateRepository.All.AsNoTracking().Where(x => x.DeletedDate == null && x.ProjectSchedule.DeletedDate == null &&
-                (x.ProjectSchedule.ProjectDesignVariableId == ProjectDesignVariableId)).Select(t => new ScheduleCheckValidateDto
-                {
-                    ProjectScheduleId = t.ProjectScheduleId,
-                    ProjectScheduleTemplateId = t.Id,
-                    ProjectDesignVariableId = t.ProjectDesignVariableId,
-                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                    Message = t.Message,
-                    CollectionSource = t.ProjectDesignVariable.CollectionSource,
-                    HH = t.HH,
-                    MM = t.MM,
-                    IsTarget = true,
-                    PositiveDeviation = t.PositiveDeviation,
-                    NegativeDeviation = t.NegativeDeviation,
-                    NoOfDay = t.NoOfDay,
-                    Operator = t.Operator
-                }).ToList();
-            }
 
             return result;
         }

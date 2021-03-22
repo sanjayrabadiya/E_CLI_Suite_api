@@ -26,5 +26,6 @@ namespace GSC.Respository.EditCheckImpact
         bool CheckReferenceVariable(int projectDesignVariableId);
         int CollectionValue(string id);
         string GetProjectDesignVariableId(int projectDesignVariableId, string collectionSource);
+        int CheckVisitRefAndTarget(int projectDesignVisitId, List<int> startedProjectDesignVisitId);
     }
 }
