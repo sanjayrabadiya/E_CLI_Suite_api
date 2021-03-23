@@ -301,6 +301,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ITaskMasterRepository, TaskMasterRepository>();
             services.AddScoped<IStudyPlanRepository, StudyPlanRepository>();
             services.AddScoped<IStudyPlanTaskRepository, StudyPlanTaskRepository>();
+            services.AddScoped<IPdfViewerRepository, PdfViewerRepository>();
 
         }
     }

@@ -197,7 +197,7 @@ namespace GSC.Respository.Etmf
                 obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
                 obj.DocumentName = item.DocumentName;
                 obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
-                obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
+                obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
                 obj.Level = 5.2;
@@ -231,6 +231,7 @@ namespace GSC.Respository.Etmf
             obj.DocumentName = document.DocumentName;
             obj.ExtendedName = document.DocumentName.Contains('_') ? document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) : document.DocumentName;
             obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath);
             obj.CreatedByUser = _userRepository.Find((int)document.CreatedBy).UserName;
             obj.CreatedDate = document.CreatedDate;
             obj.Version = document.Version;
@@ -312,7 +313,7 @@ namespace GSC.Respository.Etmf
             var document = All.Where(x => x.Id == documentId).FirstOrDefault();
             document.IsAccepted = IsAccepted;
             Update(document);
-             _context.Save();
+            _context.Save();
         }
 
         public string SaveDocumentInFolder(ProjectWorkplaceSubSecArtificatedocument projectWorkplaceSubSecArtificatedocument, CustomParameter param)
@@ -395,26 +396,29 @@ namespace GSC.Respository.Etmf
         public ProjectWorkplaceSubSecArtificatedocument WordToPdf(int Id)
         {
             var document = Find(Id);
-            var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
+            var outputname = "";
+            if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+            {
+                var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
 
-            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
-            FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
-            Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
-            DocIORenderer render = new DocIORenderer();
-            render.Settings.PreserveFormFields = true;
-            PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
-            render.Dispose();
-            wordDocument.Dispose();
-            MemoryStream outputStream = new MemoryStream();
-            pdfDocument.Save(outputStream);
-            pdfDocument.Close();
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                DocIORenderer render = new DocIORenderer();
+                render.Settings.PreserveFormFields = true;
+                PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+                render.Dispose();
+                wordDocument.Dispose();
+                MemoryStream outputStream = new MemoryStream();
+                pdfDocument.Save(outputStream);
+                pdfDocument.Close();
 
-            var outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
-            var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
-            FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
-            outputStream.WriteTo(file);
-
-            document.DocumentName = outputname;
+                outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
+                var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
+                FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+                outputStream.WriteTo(file);
+            }
+            document.DocumentName = string.IsNullOrEmpty(outputname) ? document.DocumentName : outputname;
             document.Status = ArtifactDocStatusType.Final;
             //document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
             document.Version = "1.0";

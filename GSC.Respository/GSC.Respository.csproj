@@ -8,6 +8,7 @@
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="ClosedXML" Version="0.95.4" />
     <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="18.2.0.59" />
+    <PackageReference Include="Syncfusion.EJ2.PdfViewer.AspNet.Core.Windows" Version="18.4.0.48" />
     <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="18.2.0.59" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.1.8" />

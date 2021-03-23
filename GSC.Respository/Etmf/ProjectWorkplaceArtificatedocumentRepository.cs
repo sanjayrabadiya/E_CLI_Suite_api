@@ -393,7 +393,7 @@ namespace GSC.Respository.Etmf
             var projectWorkplaceArtificatedocumentreviews = _context.ProjectArtificateDocumentReview.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var projectWorkplaceArtificatedocumentapprover = _context.ProjectArtificateDocumentApprover.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null).ToList();
-            
+
             var cretaedData = projectWorkplaceArtificatedocuments.Select(r => new EtmfAuditLogReportDto
             {
                 projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
@@ -674,26 +674,29 @@ namespace GSC.Respository.Etmf
         public ProjectWorkplaceArtificatedocument WordToPdf(int Id)
         {
             var document = Find(Id);
-            var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
+            var outputname = "";
+            if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+            {
+                var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
 
-            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
-            FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
-            Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
-            DocIORenderer render = new DocIORenderer();
-            render.Settings.PreserveFormFields = true;
-            PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
-            render.Dispose();
-            wordDocument.Dispose();
-            MemoryStream outputStream = new MemoryStream();
-            pdfDocument.Save(outputStream);
-            pdfDocument.Close();
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                DocIORenderer render = new DocIORenderer();
+                render.Settings.PreserveFormFields = true;
+                PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+                render.Dispose();
+                wordDocument.Dispose();
+                MemoryStream outputStream = new MemoryStream();
+                pdfDocument.Save(outputStream);
+                pdfDocument.Close();
 
-            var outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
-            var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
-            FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
-            outputStream.WriteTo(file);
-
-            document.DocumentName = outputname;
+                outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
+                var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
+                FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+                outputStream.WriteTo(file);
+            }
+            document.DocumentName = string.IsNullOrEmpty(outputname) ? document.DocumentName : outputname;
             document.Status = ArtifactDocStatusType.Final;
             //document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
             document.Version = "1.0";
