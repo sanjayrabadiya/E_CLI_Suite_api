@@ -350,18 +350,18 @@ namespace GSC.Respository.EditCheckImpact
         public int CheckVisitRefAndTarget(int projectDesignVisitId, List<int> startedProjectDesignVisitId)
         {
 
-            var projectScheduleId = _projectScheduleTemplateRepository.All.AsNoTracking().Where(r => r.ProjectDesignVisitId == projectDesignVisitId && 
+            var projectScheduleId = _projectScheduleTemplateRepository.All.AsNoTracking().Where(r => r.ProjectDesignVisitId == projectDesignVisitId &&
             r.ProjectSchedule.ProjectDesignVisitId == projectDesignVisitId &&
             r.ProjectSchedule.DeletedDate == null && r.DeletedDate == null).
             Select(t => t.ProjectScheduleId).FirstOrDefault();
 
             var visits = _projectScheduleTemplateRepository.All.AsNoTracking().Where(r => r.ProjectScheduleId == projectScheduleId
             && r.ProjectSchedule.DeletedDate == null && r.DeletedDate == null).
-             Select(t => new { t.ProjectDesignVisitId, t.NoOfDay }).OrderBy(c => c.NoOfDay).ToList();
+             Select(t => new { t.ProjectDesignVisitId, t.NoOfDay }).OrderBy(c => c.NoOfDay).Distinct().ToList();
 
             if (visits != null && visits.Count > 0)
             {
-                return visits.Where(x => !startedProjectDesignVisitId.Contains(x.ProjectDesignVisitId)).FirstOrDefault()?.ProjectDesignVisitId ?? 0;
+                return visits.Where(x => x.ProjectDesignVisitId != projectDesignVisitId && !startedProjectDesignVisitId.Contains(x.ProjectDesignVisitId)).FirstOrDefault()?.ProjectDesignVisitId ?? 0;
             }
 
             return 0;
