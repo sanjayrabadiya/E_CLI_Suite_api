@@ -316,8 +316,7 @@ namespace GSC.Respository.Screening
             }
             else
             {
-                scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
-                 OrderBy(t => t.ScheduleDate).FirstOrDefault();
+                scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).FirstOrDefault();
                 if (scheduleVisit != null)
                 {
                     scheduleVisit.Status = ScreeningVisitStatus.Scheduled;
