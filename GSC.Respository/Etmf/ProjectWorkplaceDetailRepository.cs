@@ -55,7 +55,7 @@ namespace GSC.Respository.Etmf
                         select new DropDownDto
                         {
                             Id = workplacedetail.Id,
-                            Value = project.ProjectCode + " - " + project.ProjectName
+                            Value = project.ProjectCode
                         }).ToList();
 
             return data;
