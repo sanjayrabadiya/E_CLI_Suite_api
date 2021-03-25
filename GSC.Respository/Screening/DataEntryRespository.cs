@@ -175,7 +175,8 @@ namespace GSC.Respository.Screening
                     ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
                     ScheduleDate = a.ScheduleDate,
                     IsSchedule = a.IsSchedule,
-                    DesignOrder = a.ProjectDesignVisit.DesignOrder
+                    DesignOrder = a.ProjectDesignVisit.DesignOrder,
+                    IsLocked = a.ScreeningTemplates.All(x => x.IsLocked == true) ? true : false
                 }).OrderBy(b => b.DesignOrder).ToList()
 
             }).ToListAsync();

@@ -540,7 +540,8 @@ namespace GSC.Respository.Screening
 
         public string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel)
         {
-            if (myReview) return "My Review";
+            if (myReview) 
+                return "My Review";
 
             if (basicDetail.Status != ScreeningTemplateStatus.Completed && basicDetail.ReviewLevel != null &&
                 basicDetail.ReviewLevel > 0)
@@ -634,10 +635,20 @@ namespace GSC.Respository.Screening
                         TemplateName = t.RepeatSeqNo == null && t.ParentId == null ? t.ProjectDesignTemplate.DesignOrder + " " + t.ProjectDesignTemplate.TemplateName
                                         : t.ProjectDesignTemplate.DesignOrder + "." + t.RepeatSeqNo + " " + t.ProjectDesignTemplate.TemplateName,
                         DesignOrder = t.ProjectDesignTemplate.DesignOrder.ToString(),
-                        SeqNo = t.ProjectDesignTemplate.DesignOrder
+                        SeqNo = t.ProjectDesignTemplate.DesignOrder,
+                        ReviewLevel = t.ReviewLevel,
+                        ScreeningTemplateStatus = t.Status
+                        //DataEntryStatus = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = t.ReviewLevel, Status = t.Status }, false, workflowlevel),
                     }).OrderBy(b => b.VisitId).ThenBy(a => a.SeqNo).ThenBy(a => a.ScreeningTemplateId).ToList()
             }).OrderBy(x => x.ProjectId).ToList();
 
+            grpresult.ForEach(x =>
+            {
+                x.lstTemplate.ForEach(y =>
+                {
+                    y.DataEntryStatus = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = y.ReviewLevel, Status = y.ScreeningTemplateStatus }, false, workflowlevel);
+                });
+            });
             return grpresult.Where(x => x.lstTemplate.Count > 0).ToList();
         }
 
@@ -1071,9 +1082,9 @@ namespace GSC.Respository.Screening
             }
             if (parentIds != null) result = result.Where(x => parentIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId));
             var patientstatuslist = Enum.GetValues(typeof(ScreeningPatientStatus))
-                        .Cast<ScreeningPatientStatus>().Where(x => x != ScreeningPatientStatus.Completed && 
-                                                                    x != ScreeningPatientStatus.Withdrawal && 
-                                                                    x != ScreeningPatientStatus.ScreeningFailure && 
+                        .Cast<ScreeningPatientStatus>().Where(x => x != ScreeningPatientStatus.Completed &&
+                                                                    x != ScreeningPatientStatus.Withdrawal &&
+                                                                    x != ScreeningPatientStatus.ScreeningFailure &&
                                                                     x != ScreeningPatientStatus.OnHold)
                         .Select(d => (int)d)
                         .ToList();

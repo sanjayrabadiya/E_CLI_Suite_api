@@ -20,5 +20,6 @@ namespace GSC.Data.Entities.Screening
         public Master.Project Project { get; set; }
         public ScreeningTemplate ScreeningTemplate { get; set; }
         public ScreeningEntry ScreeningEntry { get; set; }
+        public string DataEntryStatus { get; set; }
     }
 }

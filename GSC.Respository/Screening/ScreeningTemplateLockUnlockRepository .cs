@@ -80,7 +80,8 @@ namespace GSC.Respository.Screening
                 ProjectName = x.ScreeningEntry.Project.ParentProjectId != null ? x.ScreeningEntry.Project.ProjectCode : null,
                 ProjectCode = ProjectCode,
                 ParentProjectId = x.ScreeningEntry.Project.ParentProjectId,
-                SeqNo = x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder
+                SeqNo = x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
+                DataEntryStatus = x.DataEntryStatus
             }).OrderByDescending(x => x.Id).ToList();            
 
             return result;

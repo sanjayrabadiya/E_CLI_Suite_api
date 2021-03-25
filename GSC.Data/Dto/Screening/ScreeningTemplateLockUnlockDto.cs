@@ -60,6 +60,7 @@ namespace GSC.Data.Dto.Screening
         public int AuditReasonId { get; set; }
         public string AuditReasonComment { get; set; }
         public bool IsLocked { get; set; }
+        public string DataEntryStatus { get; set; }
 
     }
 
@@ -75,6 +76,7 @@ namespace GSC.Data.Dto.Screening
         public string PeriodName { get; set; }
         public string TemplateName { get; set; }
         public bool Status { get; set; }
+        public ScreeningTemplateStatus ScreeningTemplateStatus { get; set; }
         public string StatusName { get; set; }
         public int ScreeningTemplateId { get; set; }
         public int screeningEntryId { get; set; }
@@ -100,6 +102,7 @@ namespace GSC.Data.Dto.Screening
         public ScreeningTemplateStatus ScreeningStatusNo { get; set; }
         public short? ReviewLevel { get; set; }
         public string DesignOrder { get; set; }
+        public string DataEntryStatus { get; set; }
         public int SeqNo { get; set; }
 
     }
@@ -145,6 +148,7 @@ namespace GSC.Data.Dto.Screening
         public int ScreeningTemplateId { get; set; }
 
         public int SeqNo { get; set; }
+        public string DataEntryStatus { get; set; }
         public int VisitId { get; set; }
     }
 }
