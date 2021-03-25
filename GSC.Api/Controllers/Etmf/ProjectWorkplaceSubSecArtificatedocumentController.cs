@@ -163,35 +163,6 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpPost]
-        [Route("DocumentMove")]
-        public IActionResult DocumentMove([FromBody] List<WorkplaceFolderDto> workplaceFolderDto)
-        {
-            ProjectWorkplaceSubSecArtificatedocument firstSaved = null;
-
-            //for (var i = 0; i <= (workplaceFolderDto.Count - 1); i++)
-            //{
-            //    var document = _projectWorkplaceSubSecArtificatedocumentRepository.AddMovedDocument(workplaceFolderDto[i]);
-            //    var ProjectArtificate = _projectWorkplaceArtificateRepository.All.Where(x => x.Id == workplaceFolderDto[i].ProjectWorkplaceArtificateId).FirstOrDefault();
-            //    ProjectArtificate.ParentArtificateId = document.ProjectWorkplaceArtificateId;
-
-            //    document.Id = 0;
-            //    document.ProjectWorkplaceArtificateId = workplaceFolderDto[i].ProjectWorkplaceArtificateId;
-
-            //    document.ProjectArtificateDocumentReview.Select(x => { x.Id = 0; return x; }).ToList();
-            //    document.ProjectArtificateDocumentApprover.Select(x => { x.Id = 0; return x; }).ToList();
-            //    document.ProjectArtificateDocumentComment.Select(x => { x.Id = 0; return x; }).ToList();
-            //    document.ProjectArtificateDocumentHistory = null;
-
-            //    _projectWorkplaceSubSecArtificatedocumentRepository.Add(document);
-            //    _projectWorkplaceArtificateRepository.Update(ProjectArtificate);
-            //    if (i == 0) firstSaved = document;
-            //}
-            //if (_uow.Save() <= 0) throw new Exception("Creating move document failed on save.");
-
-            return Ok(firstSaved.Id);
-        }
-
-        [HttpPost]
         [Route("GetDocumentForHistory/{id}")]
         public IActionResult GetDocumentForHistory(int id)
         {

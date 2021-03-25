@@ -226,7 +226,11 @@ namespace GSC.Api.Controllers.Etmf
                 document.ProjectArtificateDocumentComment.Select(x => { x.Id = 0; return x; }).ToList();
                 document.ProjectArtificateDocumentHistory = null;
 
+                document.IsMoved = true;
                 _projectWorkplaceArtificatedocumentRepository.Add(document);
+                _context.ProjectArtificateDocumentReview.AddRange(document.ProjectArtificateDocumentReview);
+                _context.ProjectArtificateDocumentApprover.AddRange(document.ProjectArtificateDocumentApprover);
+                _context.ProjectArtificateDocumentComment.AddRange(document.ProjectArtificateDocumentComment);
                 _projectWorkplaceArtificateRepository.Update(ProjectArtificate);
                 if (i == 0) firstSaved = document;
             }

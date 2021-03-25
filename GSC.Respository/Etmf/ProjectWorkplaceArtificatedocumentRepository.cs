@@ -177,6 +177,7 @@ namespace GSC.Respository.Etmf
                 obj.Reviewer = users;
                 obj.CreatedDate = item.CreatedDate;
                 obj.Version = item.Version;
+                obj.IsMoved = item.IsMoved;
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;
                 obj.Level = 6;
@@ -213,6 +214,7 @@ namespace GSC.Respository.Etmf
             obj.StatusName = document.Status.GetDescription();
             obj.Status = (int)document.Status;
             obj.Level = 6;
+            obj.IsMoved = document.IsMoved;
             obj.SendBy = !(document.CreatedBy == _jwtTokenAccesser.UserId);
             obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == document.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
             obj.IsAccepted = document.IsAccepted;

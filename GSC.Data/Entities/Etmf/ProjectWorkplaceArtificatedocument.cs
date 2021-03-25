@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.Etmf
         public string DocPath { get; set; }
         public int CompanyId { get; set; }
         public bool? IsAccepted { get; set; }
+        public bool IsMoved { get; set; }
         public int? ParentDocumentId { get; set; }
         public ProjectWorkplaceArtificate ProjectWorkplaceArtificate { get; set; }
         public List<ProjectArtificateDocumentReview> ProjectArtificateDocumentReview { get; set; }

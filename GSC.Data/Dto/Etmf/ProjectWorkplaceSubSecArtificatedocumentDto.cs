@@ -55,6 +55,7 @@ namespace GSC.Data.Dto.Etmf
         public bool IsSendBack { get; set; }
         public string ReviewStatus { get; set; }
         public bool IsReview { get; set; }
+        public bool IsMoved { get; set; }
         public bool? IsAccepted { get; set; }
         public string ApprovedStatus { get; set; }
         public List<DocumentUsers> Approver { get; set; }
