@@ -306,23 +306,29 @@ namespace GSC.Respository.Screening
 
         public void ScheduleVisitUpdate(int screeningEntryId)
         {
-            var scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.ScheduleDate != null && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
-                  OrderBy(t => t.ScheduleDate).FirstOrDefault();
+            if (!All.Any(x => x.ScreeningEntryId == screeningEntryId && x.DeletedDate == null && x.Status == ScreeningVisitStatus.Scheduled))
+            {
+                var scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.ScheduleDate != null && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).
+                 OrderBy(t => t.ScheduleDate).FirstOrDefault();
 
-            if (scheduleVisit != null)
-            {
-                scheduleVisit.Status = ScreeningVisitStatus.Scheduled;
-                Update(scheduleVisit);
-            }
-            else
-            {
-                scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).FirstOrDefault();
                 if (scheduleVisit != null)
                 {
                     scheduleVisit.Status = ScreeningVisitStatus.Scheduled;
                     Update(scheduleVisit);
                 }
             }
+
+
+
+            //else
+            //{
+            //    scheduleVisit = All.Where(x => x.ScreeningEntryId == screeningEntryId && x.IsSchedule && x.Status == ScreeningVisitStatus.NotStarted).FirstOrDefault();
+            //    if (scheduleVisit != null)
+            //    {
+            //        scheduleVisit.Status = ScreeningVisitStatus.Scheduled;
+            //        Update(scheduleVisit);
+            //    }
+            //}
         }
 
 

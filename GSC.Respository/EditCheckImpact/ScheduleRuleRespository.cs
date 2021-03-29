@@ -49,7 +49,7 @@ namespace GSC.Respository.EditCheckImpact
             SetValue(refrenceSchedule, values, screeningTemplateBasic);
             SetValue(targetScheduleTemplate, values, screeningTemplateBasic);
 
-            CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, "");
+            CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, "", screeningTemplateBasic.ScreeningEntryId);
 
             _context.Save();
             _context.DetachAllEntities();
@@ -75,7 +75,7 @@ namespace GSC.Respository.EditCheckImpact
             });
         }
 
-        void CheckValidationProcess(List<ScheduleCheckValidateDto> targetList, List<ScheduleCheckValidateDto> referenceList, bool isQuery, string targetSchDate)
+        void CheckValidationProcess(List<ScheduleCheckValidateDto> targetList, List<ScheduleCheckValidateDto> referenceList, bool isQuery, string targetSchDate, int screeningEntryId)
         {
             targetList.ForEach(x =>
             {
@@ -123,10 +123,35 @@ namespace GSC.Respository.EditCheckImpact
                     VisitScheduleDate(x, targetList);
                 });
 
+                SetScheduleStatus(screeningEntryId);
+
                 _context.Save();
+
+
             }
         }
 
+        void SetScheduleStatus(int screeningEntryId)
+        {
+            var scheduleVisit = _context.ScreeningVisit.Where(x => x.ScreeningEntryId == screeningEntryId && x.ScheduleDate != null
+            && x.IsSchedule && (x.Status == ScreeningVisitStatus.NotStarted || x.Status == ScreeningVisitStatus.Scheduled)).OrderBy(t => t.ScheduleDate).ToList();
+            int firstRecord = 0;
+            scheduleVisit.ForEach(x =>
+            {
+                if (firstRecord == 0)
+                {
+                    x.Status = ScreeningVisitStatus.Scheduled;
+                    _context.ScreeningVisit.Update(x);
+                }
+                else if (x.Status == ScreeningVisitStatus.Scheduled)
+                {
+                    x.Status = ScreeningVisitStatus.NotStarted;
+                    _context.ScreeningVisit.Update(x);
+                }
+                firstRecord += 1;
+            });
+
+        }
         public List<ScheduleCheckValidateDto> ValidateByVariable(int screeningEntryId, int screeningVisitId, string value, int projectDesignTemplateId, int projectDesignVariableId, bool isQuery)
         {
             var targetScheduleTemplate = _impactService.GetTargetScheduleByVariableId(projectDesignVariableId);
@@ -154,7 +179,7 @@ namespace GSC.Respository.EditCheckImpact
 
             string targetValue = _impactService.CheckReferenceVariable(projectDesignVariableId) ? value : "";
 
-            CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue);
+            CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue, screeningEntryId);
 
             var currentTarget = targetScheduleTemplate.FirstOrDefault(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ProjectDesignTemplateId == projectDesignTemplateId);
             if (currentTarget != null && !string.IsNullOrEmpty(value))
