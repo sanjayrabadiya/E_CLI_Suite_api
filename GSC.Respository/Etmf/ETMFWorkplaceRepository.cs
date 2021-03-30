@@ -322,6 +322,7 @@ namespace GSC.Respository.Etmf
                             pvListSectionObj.Level = 5;
                             pvListSectionObj.ZoneId = d.Id;
                             pvListSectionObj.SiteId = c.Id;
+                            pvListSectionObj.SiteProjectId = c.ItemId;
                             pvListSectionObj.ParentMasterId = b.ProjectId;
                             pvListSectionObj.Icon = "folder";
                             pvListSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
@@ -345,6 +346,7 @@ namespace GSC.Respository.Etmf
 
                                 pvListArtificateObj.CountryId = 0;
                                 pvListArtificateObj.SiteId = c.Id;
+                                pvListArtificateObj.SiteProjectId = c.ItemId;
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.ParentMasterId = b.ProjectId;
@@ -374,6 +376,7 @@ namespace GSC.Respository.Etmf
 
                                 pvListArtificateObj.CountryId = 0;
                                 pvListArtificateObj.SiteId = c.Id;
+                                pvListArtificateObj.SiteProjectId = c.ItemId;
                                 pvListArtificateObj.ZoneId = d.Id;
                                 pvListArtificateObj.SectionId = e.Id;
                                 pvListArtificateObj.SubSectionId = s.Id;
@@ -398,6 +401,7 @@ namespace GSC.Respository.Etmf
 
                                     pvListartifactsubsectionobj.CountryId = 0;
                                     pvListartifactsubsectionobj.SiteId = c.Id;
+                                    pvListartifactsubsectionobj.SiteProjectId = c.ItemId;
                                     pvListartifactsubsectionobj.ZoneId = d.Id;
                                     pvListartifactsubsectionobj.SectionId = e.Id;
                                     pvListartifactsubsectionobj.SubSectionId = s.Id;
@@ -936,6 +940,7 @@ namespace GSC.Respository.Etmf
         public int ParentMasterId { get; set; }
         public int CountryId { get; set; }
         public int SiteId { get; set; }
+        public int SiteProjectId { get; set; }
         public int ZoneId { get; set; }
         public int SectionId { get; set; }
         public int ArtificateId { get; set; }

@@ -9,7 +9,7 @@ namespace GSC.Respository.Etmf
     public interface IProjectSubSecArtificateDocumentApproverRepository : IGenericRepository<ProjectSubSecArtificateDocumentApprover>
     {
         List<ProjectSubSecArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id);
-        List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id);
+        List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id, int ProjectId);
         void SendMailForApprover(ProjectSubSecArtificateDocumentApproverDto ProjectSubSecArtificateDocumentApproverDto);
         void IsApproveDocument(int Id);
         List<DashboardDto> GetEtmfMyTaskList(int ProjectId);

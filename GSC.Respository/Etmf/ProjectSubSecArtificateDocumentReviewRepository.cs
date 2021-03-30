@@ -6,6 +6,7 @@ using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.EmailSender;
+using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
@@ -26,13 +27,15 @@ namespace GSC.Respository.Etmf
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
+        private readonly IProjectRightRepository _projectRightRepository;
 
         public ProjectSubSecArtificateDocumentReviewRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
             IEmailSenderRespository emailSenderRespository,
             IUserRepository userRepository,
             IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
-            IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository
+            IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
+            IProjectRightRepository projectRightRepository
             )
            : base(context)
         {
@@ -42,17 +45,30 @@ namespace GSC.Respository.Etmf
             _userRepository = userRepository;
             _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
             _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
+            _projectRightRepository = projectRightRepository;
         }
 
-        public List<ProjectSubSecArtificateDocumentReviewDto> UserRoles(int Id)
+        public List<ProjectSubSecArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId)
         {
-            var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId && x.UserType == UserMasterUserType.User).Select(c => new ProjectSubSecArtificateDocumentReviewDto
-            {
-                UserId = c.Id,
-                Name = c.UserName,
-                IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
-            }).Where(x => x.IsSelected == false).ToList();
+            //var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId && x.UserType == UserMasterUserType.User).Select(c => new ProjectSubSecArtificateDocumentReviewDto
+            //{
+            //    UserId = c.Id,
+            //    Name = c.UserName,
+            //    IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
+            //}).Where(x => x.IsSelected == false).ToList();
 
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+            var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
+                .Select(c => new ProjectSubSecArtificateDocumentReviewDto
+                {
+                    UserId = c.UserId,
+                    Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                    IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
+                }).Where(x => x.IsSelected == false).ToList();
+            
             return users;
         }
 

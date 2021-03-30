@@ -67,11 +67,11 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpGet]
-        [Route("UserNameForApproval/{Id}")]
-        public IActionResult UserNameForApproval(int Id)
+        [Route("UserNameForApproval/{Id}/{ProjectId}")]
+        public IActionResult UserNameForApproval(int Id, int ProjectId)
         {
             if (Id <= 0) return BadRequest();
-            return Ok(_projectSubSecArtificateDocumentApproverRepository.UserNameForApproval(Id));
+            return Ok(_projectSubSecArtificateDocumentApproverRepository.UserNameForApproval(Id, ProjectId));
         }
 
         [HttpPut]

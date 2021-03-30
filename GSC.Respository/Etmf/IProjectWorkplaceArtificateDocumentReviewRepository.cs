@@ -11,7 +11,7 @@ namespace GSC.Respository.Etmf
 {
     public interface IProjectWorkplaceArtificateDocumentReviewRepository : IGenericRepository<ProjectArtificateDocumentReview>
     {
-        List<ProjectArtificateDocumentReviewDto> UserRoles(int Id);
+        List<ProjectArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId);
         void SaveDocumentReview(List<ProjectArtificateDocumentReviewDto> pojectArtificateDocumentReviewDto);
         void SaveByDocumentIdInReview(int projectWorkplaceArtificateDocumentId);
         void SendMailToSendBack(ProjectArtificateDocumentReview ReviewDto);

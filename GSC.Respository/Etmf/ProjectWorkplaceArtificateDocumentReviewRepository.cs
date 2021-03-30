@@ -9,6 +9,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
+using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
@@ -25,25 +26,25 @@ namespace GSC.Respository.Etmf
     public class ProjectWorkplaceArtificateDocumentReviewRepository : GenericRespository<ProjectArtificateDocumentReview>, IProjectWorkplaceArtificateDocumentReviewRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IGSCContext _context;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
+        private readonly IProjectRightRepository _projectRightRepository;
 
         public ProjectWorkplaceArtificateDocumentReviewRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
-            IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
-            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
-            IEmailSenderRespository emailSenderRespository,
-            IUserRepository userRepository,
-              IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository
+           IJwtTokenAccesser jwtTokenAccesser, 
+           IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
+           IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
+           IEmailSenderRespository emailSenderRespository,
+           IUserRepository userRepository,
+           IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
+           IProjectRightRepository projectRightRepository
             )
            : base(context)
         {
-            _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
@@ -51,17 +52,29 @@ namespace GSC.Respository.Etmf
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
+            _projectRightRepository = projectRightRepository;
         }
 
-        public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id)
+        public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId)
         {
-            var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId && x.UserType == UserMasterUserType.User).Select(c => new ProjectArtificateDocumentReviewDto
-            {
-                UserId = c.Id,
-                Name = c.UserName,
-                IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
-            }).Where(x => x.IsSelected == false).ToList();
+            //var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId && x.UserType == UserMasterUserType.User).Select(c => new ProjectArtificateDocumentReviewDto
+            //{
+            //    UserId = c.Id,
+            //    Name = c.UserName,
+            //    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
+            //}).Where(x => x.IsSelected == false).ToList();
 
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+            var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
+                .Select(c => new ProjectArtificateDocumentReviewDto
+                {
+                    UserId = c.UserId,
+                    Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
+                }).Where(x => x.IsSelected == false).ToList();
             return users;
         }
 
@@ -77,7 +90,7 @@ namespace GSC.Respository.Etmf
                         IsSendBack = false,
                         Message = ReviewDto.Message,
                     });
-                    if ( _context.Save() < 0) throw new Exception("Artificate Send failed on save.");
+                    if (_context.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
                     SendMailToReviewer(ReviewDto);
 
@@ -125,19 +138,19 @@ namespace GSC.Respository.Etmf
                 RoleId = _jwtTokenAccesser.RoleId
             });
 
-             _context.Save();
+            _context.Save();
         }
 
         public List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id)
         {
-            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x=>x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
-                        && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy)
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x => x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
+                          && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy)
                 .Select(x => new ProjectArtificateDocumentReviewHistory
                 {
                     Id = x.Id,
-                    DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
+                    DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().DocumentName,
                     //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
-                    ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().Id,
+                    ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().Id,
                     UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                     IsSendBack = x.IsSendBack,
                     UserId = x.UserId,
@@ -200,7 +213,7 @@ namespace GSC.Respository.Etmf
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.DocumentName,
                     CreatedDate = s.CreatedDate,
-                    CreatedByUser = _context.Users.Where(x=>x.Id == s.UserId).FirstOrDefault().UserName,
+                    CreatedByUser = _context.Users.Where(x => x.Id == s.UserId).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.SendBack.GetDescription()
                 }).OrderBy(x => x.Id).ToList();

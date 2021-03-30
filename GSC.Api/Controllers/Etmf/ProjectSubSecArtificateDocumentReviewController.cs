@@ -66,11 +66,11 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpGet]
-        [Route("UserRoles/{Id}")]
-        public IActionResult UserRoles(int Id)
+        [Route("UserRoles/{Id}/{ProjectId}")]
+        public IActionResult UserRoles(int Id, int ProjectId)
         {
             if (Id <= 0) return BadRequest();
-            return Ok(_projectSubSecArtificateDocumentReviewRepository.UserRoles(Id));
+            return Ok(_projectSubSecArtificateDocumentReviewRepository.UserRoles(Id, ProjectId));
         }
 
         [HttpPost]

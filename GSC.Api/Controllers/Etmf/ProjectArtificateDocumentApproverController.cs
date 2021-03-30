@@ -75,11 +75,11 @@ namespace GSC.Api.Controllers.Etmf
         /// Get UserName For Approval list
         /// Created By Swati
         [HttpGet]
-        [Route("UserNameForApproval/{Id}")]
-        public IActionResult UserNameForApproval(int Id)
+        [Route("UserNameForApproval/{Id}/{ProjectId}")]
+        public IActionResult UserNameForApproval(int Id, int ProjectId)
         {
             if (Id <= 0) return BadRequest();
-            return Ok(_projectArtificateDocumentApproverRepository.UserNameForApproval(Id));
+            return Ok(_projectArtificateDocumentApproverRepository.UserNameForApproval(Id, ProjectId));
         }
 
         /// update approve doc or not
