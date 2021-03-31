@@ -25,5 +25,6 @@ namespace GSC.Shared.Email
         public string DomainName { get; set; }
         public string EmailPassword { get; set; }
         public bool MailSsl { get; set; }
+        public string? DLTTemplateId { get; set; }
     }
 }

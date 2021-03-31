@@ -67,7 +67,7 @@ namespace GSC.Respository.EmailSender
             }
             if (mobile != null && mobile != "")
             {
-                await SendSMS(mobile, emailMessage.MessageBody);
+                await SendSMS(mobile, emailMessage.MessageBody,emailMessage.DLTTemplateId);
             }
                 
         }
@@ -167,7 +167,7 @@ namespace GSC.Respository.EmailSender
                 if (mobile != "" && (sendtype == 0 || sendtype == 2))
                 {
                     if (isSendSMS == true)
-                    await SendSMS(mobile, emailMessage.MessageBody);
+                    await SendSMS(mobile, emailMessage.MessageBody, emailMessage.DLTTemplateId);
                 }
             }
         }
@@ -179,10 +179,10 @@ namespace GSC.Respository.EmailSender
             emailMessage.MessageBody = ReplaceBodyForAdverseEventAlerttoInvestigator(emailMessage.MessageBody, userName, patientname, projectName, reportdate);
             emailMessage.Subject = ReplaceSubjectForAdverseEventAlerttoInvestigator(emailMessage.Subject, patientname);
             _emailService.SendMail(emailMessage);
-            await SendSMS(mobile, emailMessage.MessageBody);
+            await SendSMS(mobile, emailMessage.MessageBody,emailMessage.DLTTemplateId);
         }
 
-        public async Task SendSMS(string mobile,string messagebody)
+        public async Task SendSMS(string mobile,string messagebody,string? DLTTemplateId)
         {
             var smstemplate = messagebody;//emailMessage.MessageBody;
             smstemplate = smstemplate.Replace("<p>", "");
@@ -197,7 +197,11 @@ namespace GSC.Respository.EmailSender
             url = url.Replace("##senderid##", smssetting.SenderId);
             url = url.Replace("##route##", "4");
             url = url.Replace("##message##", smstemplate);//emailMessage.MessageBody
-             await HttpService.Get(_httpClient, url, null);
+            if (DLTTemplateId != null && DLTTemplateId != "")
+                url = url.Replace("##DLTTemplateId##", DLTTemplateId);
+            else
+                url = url.Replace("&DLT_TE_ID=##DLTTemplateId##", "");
+            await HttpService.Get(_httpClient, url, null);
             //var responseresult = _aPICall.Get(url);
         }
 
@@ -237,6 +241,7 @@ namespace GSC.Respository.EmailSender
                 emailMessage.DomainName = result.EmailSetting.DomainName;
                 emailMessage.EmailPassword = result.EmailSetting.EmailPassword;
                 emailMessage.MailSsl = result.EmailSetting.MailSsl;
+                emailMessage.DLTTemplateId = result.DLTTemplateId;
             }
 
             return emailMessage;

@@ -12,5 +12,6 @@ namespace GSC.Data.Entities.Configuration
         public string Body { get; set; }
         public int CompanyId { get; set; }
         public EmailSetting EmailSetting { get; set; }
+        public string? DLTTemplateId { get; set; }
     }
 }

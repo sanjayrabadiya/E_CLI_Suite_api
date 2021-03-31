@@ -21,5 +21,6 @@ namespace GSC.Data.Dto.Configuration
 
         [Required(ErrorMessage = "Company is required.")]
         public int CompanyId { get; set; }
+        public string? DLTTemplateId { get; set; }
     }
 }
