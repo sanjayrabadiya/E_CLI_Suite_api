@@ -271,6 +271,14 @@ namespace GSC.Respository.ProjectRight
                                   && c.IsReviewDone).Select(x => x.ProjectId).ToList();
         }
 
+        public List<int> GetChildProjectRightIdList()
+        {
+            return All.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId &&
+                                  c.project.ParentProjectId != null &&
+                                  c.RoleId == _jwtTokenAccesser.RoleId
+                                  && c.IsReviewDone).Select(x => (int)x.project.ParentProjectId).ToList();
+        }
+
         public List<ProjectDocumentReviewDto> GetProjectRightDetailsByProjectId(int projectId)
         {
             var projectListbyId = All.Where(x => x.ProjectId == projectId).ToList();

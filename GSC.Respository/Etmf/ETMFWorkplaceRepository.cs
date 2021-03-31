@@ -110,7 +110,7 @@ namespace GSC.Respository.Etmf
                 #region Get Country
                 foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Country && x.DeletedBy == null))
                 {
-                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
 
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Item = new List<TreeValue>();
@@ -272,7 +272,7 @@ namespace GSC.Respository.Etmf
                 #region Get Site
                 foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site && x.DeletedBy == null))
                 {
-                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
 
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Item = new List<TreeValue>();
@@ -439,7 +439,7 @@ namespace GSC.Respository.Etmf
                 #region Get Trial
                 foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial && x.DeletedBy == null))
                 {
-                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
 
                     TreeValue pvListdetaiObj = new TreeValue();
                     pvListdetaiObj.Id = 333333333;
@@ -791,6 +791,9 @@ namespace GSC.Respository.Etmf
         public List<ETMFWorkplaceGridDto> GetETMFWorkplaceList(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
+            var childProjectList = _projectRightRepository.GetChildProjectRightIdList();
+            projectList.AddRange(childProjectList);
+
             if (projectList == null || projectList.Count == 0) return null;
 
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
