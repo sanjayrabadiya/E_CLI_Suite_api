@@ -209,7 +209,7 @@ namespace GSC.Respository.Project.Design
                       !(from o in _context.ProjectScheduleTemplate
                         where o.DeletedDate == null
                         select o.ProjectDesignVariableId)
-                          .Contains(c.Id) && (c.CollectionSource == CollectionSources.Date || c.CollectionSource == CollectionSources.Time || c.CollectionSource == CollectionSources.DateTime)
+                          .Contains(c.Id) && (c.CollectionSource == CollectionSources.Date || c.CollectionSource == CollectionSources.DateTime)
                 select c;
 
 

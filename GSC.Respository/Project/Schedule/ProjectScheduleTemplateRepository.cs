@@ -15,18 +15,15 @@ namespace GSC.Respository.Project.Schedule
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-        private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         public ProjectScheduleTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
-            IProjectScheduleRepository projectScheduleRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository) :
             base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
-            _projectScheduleRepository = projectScheduleRepository;
         }
 
         public void UpdateTemplates(ProjectSchedule projectSchedule)
@@ -47,7 +44,6 @@ namespace GSC.Respository.Project.Schedule
             var orderedList = _projectDesignTemplateRepository
                 .FindBy(t => t.ProjectDesignVisitId == projectSchedule.ProjectDesignVisitId && t.DeletedDate == null)
                 .OrderBy(t => t.DesignOrder).ToList();
-
 
             var i = 0;
             foreach (var item in orderedList)

@@ -13,7 +13,7 @@ namespace GSC.Respository.Project.Schedule
     public class ProjectScheduleRepository : GenericRespository<ProjectSchedule>, IProjectScheduleRepository
     {
         private readonly IGSCContext _context;
-        public ProjectScheduleRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
+        public ProjectScheduleRepository(IGSCContext context) : base(context)
         {
             _context = context;
         }
@@ -21,8 +21,7 @@ namespace GSC.Respository.Project.Schedule
         public IList<ProjectScheduleTemplateDto> GetDataByPeriod(long periodId, long projectId)
         {
             var projectScheduleTemplate = (from projectschedule in _context.ProjectSchedule
-                    .Where(t => t.DeletedBy == null).Where(x =>
-                        x.ProjectDesignId == projectId && x.ProjectDesignPeriodId == periodId)
+                        .Where(x => x.DeletedBy == null && x.ProjectDesignId == projectId && x.ProjectDesignPeriodId == periodId)
                                            join projectscheduletemp in _context.ProjectScheduleTemplate.Where(t => t.DeletedBy == null) on
                                                projectschedule.Id equals projectscheduletemp.ProjectScheduleId
                                            join period in _context.ProjectDesignPeriod on projectscheduletemp.ProjectDesignPeriodId equals period.Id

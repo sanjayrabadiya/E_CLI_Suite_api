@@ -23,8 +23,6 @@ namespace GSC.Api.Controllers.Project.Schedule
     public class ProjectScheduleController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
@@ -39,8 +37,6 @@ namespace GSC.Api.Controllers.Project.Schedule
         private readonly IGSCContext _context;
 
         public ProjectScheduleController(IProjectScheduleRepository projectScheduleRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IProjectScheduleTemplateRepository projectScheduleTemplateRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
@@ -53,8 +49,6 @@ namespace GSC.Api.Controllers.Project.Schedule
             IProjectDesignVisitRepository projectDesignVisitRepository, IGSCContext context)
         {
             _projectScheduleRepository = projectScheduleRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _projectScheduleTemplateRepository = projectScheduleTemplateRepository;
             _projectDesignRepository = projectDesignRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
@@ -90,9 +84,8 @@ namespace GSC.Api.Controllers.Project.Schedule
                     TemplateName = x.ProjectDesignTemplate.TemplateName,
                     VariableName = x.ProjectDesignVariable.VariableName,
                     IsDeleted = x.DeletedDate != null,
-
                 }).OrderByDescending(x => x.Id).ToList();
-            //return Ok(projectSchedules);
+            
             return projectSchedules;
         }
 
@@ -250,7 +243,6 @@ namespace GSC.Api.Controllers.Project.Schedule
 
         [HttpGet("GetData/{id}")]
         public IList<ProjectScheduleDto> GetData(int id)
-        //public IActionResult Get(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<ProjectScheduleDto>();
@@ -279,7 +271,7 @@ namespace GSC.Api.Controllers.Project.Schedule
                     ModifiedByUser = x.ModifiedBy == null ? null : _context.Users.Where(y => y.Id == x.ModifiedBy).FirstOrDefault().UserName,
                     ModifiedDate = x.ModifiedDate
                 }).OrderByDescending(x => x.Id).ToList();
-            //return Ok(projectSchedules);
+            
             return projectSchedules;
         }
 

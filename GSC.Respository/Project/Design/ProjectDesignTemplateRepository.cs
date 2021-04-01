@@ -149,7 +149,6 @@ namespace GSC.Respository.Project.Design
                                            && x.ProjectDesignVisitId == projectDesignVisitId
                                            && x.Variables.Where(y => collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
                                                y.CollectionSource == CollectionSources.Date ||
-                                               y.CollectionSource == CollectionSources.Time ||
                                                y.CollectionSource == CollectionSources.DateTime).Any()
                                                // && (refVariable.Value > 0 ? !x.Variables.Any(v => _context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Any(s => s.ProjectDesignVariableId == v.Id)) : true)
                                                && x.Variables != null
@@ -163,7 +162,6 @@ namespace GSC.Respository.Project.Design
                                                && !_context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Select(x => x.ProjectDesignVariableId).Contains(y.Id)
                                                && (collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
                                                y.CollectionSource == CollectionSources.Date ||
-                                               y.CollectionSource == CollectionSources.Time ||
                                                y.CollectionSource == CollectionSources.DateTime)
                                                ).ToList()
                 }).ToList();
