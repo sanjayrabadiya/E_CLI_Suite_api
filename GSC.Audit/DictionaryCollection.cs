@@ -265,6 +265,10 @@ namespace GSC.Audit
 
             _dictionaries.Add(new Dictionary { FieldName = "IsSendEmail", DisplayName = "Send Email to Patients" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSendSMS", DisplayName = "Send SMS to Patients" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "SectionNo", DisplayName = "SectionNo" });
+            _dictionaries.Add(new Dictionary { FieldName = "ReferenceTitle", DisplayName = "Reference Title" });
+            _dictionaries.Add(new Dictionary { FieldName = "FilePath", DisplayName = "File Path" });
         }
 
 

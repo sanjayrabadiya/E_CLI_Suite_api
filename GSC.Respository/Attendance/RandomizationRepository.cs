@@ -61,6 +61,8 @@ namespace GSC.Respository.Attendance
         private readonly IManageSiteRepository _manageSiteRepository;
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
+        private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -79,7 +81,9 @@ namespace GSC.Respository.Attendance
             ISiteTeamRepository siteTeamRepository,
             IUserOtpRepository userOtpRepository,
             IRoleRepository roleRepository,
-            IManageSiteRepository manageSiteRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting)
+            IManageSiteRepository manageSiteRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting,
+            IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
+            IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository)
             : base(context)
         {
             _userRepository = userRepository;
@@ -103,6 +107,8 @@ namespace GSC.Respository.Attendance
             _manageSiteRepository = manageSiteRepository;
             _centreUserService = centreUserService;
             _environmentSetting = environmentSetting;
+            _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
+            _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -122,15 +128,19 @@ namespace GSC.Respository.Attendance
             Update(randomization);
             if (!randomizationNumberDto.IsTestSite)
             {
-                int projectidforRandomNo = 0;
-                if (randomizationNumberDto.IsSiteDependentRandomNo == true)
-                    projectidforRandomNo = randomizationNumberDto.ProjectId;
-                else
-                    projectidforRandomNo = randomizationNumberDto.ParentProjectId;
+                if (randomizationNumberDto.IsManualRandomNo == false)
+                {
+                    int projectidforRandomNo = 0;
+                    if (randomizationNumberDto.IsSiteDependentRandomNo == true)
+                        projectidforRandomNo = randomizationNumberDto.ProjectId;
+                    else
+                        projectidforRandomNo = randomizationNumberDto.ParentProjectId;
 
-                var projectRandom = _projectRepository.Find(projectidforRandomNo);
-                projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
-                _projectRepository.Update(projectRandom);
+                    var projectRandom = _context.RandomizationNumberSettings.Where(x => x.ProjectId == projectidforRandomNo).FirstOrDefault();//_projectRepository.Find(projectidforRandomNo);
+                    projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
+                    //_projectRepository.Update(projectRandom);
+                    _randomizationNumberSettingsRepository.Update(projectRandom);
+                }
             }
         }
 
@@ -154,15 +164,19 @@ namespace GSC.Respository.Attendance
             Update(randomization);
             if (!randomizationNumberDto.IsTestSite)
             {
-                int projectidforscreeningNo = 0;
-                if (randomizationNumberDto.IsSiteDependentScreeningNo == true)
-                    projectidforscreeningNo = randomizationNumberDto.ProjectId;
-                else
-                    projectidforscreeningNo = randomizationNumberDto.ParentProjectId;
+                if (randomizationNumberDto.IsManualScreeningNo == false)
+                {
+                    int projectidforscreeningNo = 0;
+                    if (randomizationNumberDto.IsSiteDependentScreeningNo == true)
+                        projectidforscreeningNo = randomizationNumberDto.ProjectId;
+                    else
+                        projectidforscreeningNo = randomizationNumberDto.ParentProjectId;
 
-                var projectSeries = _projectRepository.Find(projectidforscreeningNo);
-                projectSeries.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
-                _projectRepository.Update(projectSeries);
+                    var projectSeries = _context.ScreeningNumberSettings.Where(x => x.ProjectId == projectidforscreeningNo).FirstOrDefault();//_projectRepository.Find(projectidforscreeningNo);
+                    projectSeries.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
+                    //_projectRepository.Update(projectSeries);
+                    _screeningNumberSettingsRepository.Update(projectSeries);
+                }
             }
         }
 
@@ -327,11 +341,12 @@ namespace GSC.Respository.Attendance
         public RandomizationNumberDto GenerateRandomizationNumber(int id)
         {
             var randomization = Find(id);
-            var sitedata = _projectRepository.Find(randomization.ProjectId);
-            var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
+            var site = _projectRepository.Find(randomization.ProjectId);
+            var sitedata = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomization.ProjectId).FirstOrDefault();//_projectRepository.Find(randomization.ProjectId);
+            var studydata = _context.RandomizationNumberSettings.Where(x => x.ProjectId == (int)site.ParentProjectId).FirstOrDefault();//_projectRepository.Find((int)sitedata.ParentProjectId);
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
             randomizationNumberDto.ProjectId = randomization.ProjectId;
-            randomizationNumberDto.ParentProjectId = studydata.Id;
+            randomizationNumberDto.ParentProjectId = (int)site.ParentProjectId;
             randomizationNumberDto.IsManualRandomNo = studydata.IsManualRandomNo;
             randomizationNumberDto.IsSiteDependentRandomNo = studydata.IsSiteDependentRandomNo;
             randomizationNumberDto.RandomNoLength = studydata.RandomNoLength;
@@ -348,20 +363,23 @@ namespace GSC.Respository.Attendance
                 {
                     latestno = sitedata.RandomizationNoseries;
                     randomizationNumberDto.RandomizationNoseries = sitedata.RandomizationNoseries;
+                    if (string.IsNullOrEmpty(sitedata.PrefixRandomNo))
+                        randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                    else
+                        randomizationNumberDto.RandomizationNumber = sitedata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength - 1, '0');
                 }
                 else
                 {
                     latestno = studydata.RandomizationNoseries;
                     randomizationNumberDto.RandomizationNoseries = studydata.RandomizationNoseries;
+                    randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
                 }
-
-                randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
             }
-            randomizationNumberDto.IsTestSite = sitedata.IsTestSite;
-            if (sitedata.IsTestSite)
+            randomizationNumberDto.IsTestSite = site.IsTestSite;
+            if (site.IsTestSite)
             {
                 var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.RandomizationNumber != null).Count() + 1;
-                randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.RandomNoLength, '0');
                 return randomizationNumberDto;
             }
             return randomizationNumberDto;
@@ -371,11 +389,10 @@ namespace GSC.Respository.Attendance
         {
             var randomization = Find(id);
             var sitedata = _projectRepository.Find(randomization.ProjectId);
-            var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
-            if (studydata.IsManualScreeningNo == null || studydata.ScreeningLength == null)
-            {
+            var studydata = _context.ScreeningNumberSettings.Where(x => x.ProjectId == (int)sitedata.ParentProjectId).FirstOrDefault();
+            //var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
+            if (studydata.ScreeningLength <= 0)
                 return false;
-            }
             return true;
         }
 
@@ -383,26 +400,25 @@ namespace GSC.Respository.Attendance
         {
             var randomization = Find(id);
             var sitedata = _projectRepository.Find(randomization.ProjectId);
-            var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
-            if (studydata.IsManualRandomNo == null || studydata.RandomNoLength == null)
-            {
+            //var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
+            var studydata = _context.RandomizationNumberSettings.Where(x => x.ProjectId == (int)sitedata.ParentProjectId).FirstOrDefault();
+            if (studydata.RandomNoLength <= 0)
                 return false;
-            }
             return true;
         }
 
         public RandomizationNumberDto GenerateScreeningNumber(int id)
         {
             var randomization = Find(id);
-            var sitedata = _projectRepository.Find(randomization.ProjectId);
-            var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
+            var site = _projectRepository.Find(randomization.ProjectId);
+            var sitedata = _context.ScreeningNumberSettings.Where(x => x.ProjectId == randomization.ProjectId).FirstOrDefault();//_projectRepository.Find(randomization.ProjectId);
+            var studydata = _context.ScreeningNumberSettings.Where(x => x.ProjectId == (int)site.ParentProjectId).FirstOrDefault();//_projectRepository.Find((int)sitedata.ParentProjectId);
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
             randomizationNumberDto.ProjectId = randomization.ProjectId;
-            randomizationNumberDto.ParentProjectId = studydata.Id;
+            randomizationNumberDto.ParentProjectId = (int)site.ParentProjectId;
             randomizationNumberDto.IsManualScreeningNo = studydata.IsManualScreeningNo;
             randomizationNumberDto.IsSiteDependentScreeningNo = studydata.IsSiteDependentScreeningNo;
-            randomizationNumberDto.ScreeningLength = studydata.ScreeningLength ?? 5;
-            //randomizationNumberDto.PrefixScreeningNo = studydata.PrefixScreeningNo;
+            randomizationNumberDto.ScreeningLength = studydata.ScreeningLength;
 
             if (studydata.IsManualScreeningNo == true)
             {
@@ -415,19 +431,23 @@ namespace GSC.Respository.Attendance
                 {
                     latestno = sitedata.ScreeningNoseries;
                     randomizationNumberDto.ScreeningNoseries = sitedata.ScreeningNoseries;
+                    if (string.IsNullOrEmpty(sitedata.PrefixScreeningNo))
+                        randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                    else
+                        randomizationNumberDto.ScreeningNumber = sitedata.PrefixScreeningNo + latestno.ToString().PadLeft((int)studydata.ScreeningLength - 1, '0');
                 }
                 else
                 {
                     latestno = studydata.ScreeningNoseries;
                     randomizationNumberDto.ScreeningNoseries = studydata.ScreeningNoseries;
+                    randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
                 }
-                randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)randomizationNumberDto.ScreeningLength, '0');
             }
-            randomizationNumberDto.IsTestSite = sitedata.IsTestSite;
-            if (sitedata.IsTestSite)
+            randomizationNumberDto.IsTestSite = site.IsTestSite;
+            if (site.IsTestSite)
             {
                 var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.ScreeningNumber != null).Count() + 1;
-                randomizationNumberDto.ScreeningNumber = "TS -" + patientCount.ToString().PadLeft((int)randomizationNumberDto.ScreeningLength, '0');
+                randomizationNumberDto.ScreeningNumber = "TS -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
                 //  randomizationNumberDto.RandomizationNumber = "TestRnd -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
                 return randomizationNumberDto;
             }
@@ -513,7 +533,8 @@ namespace GSC.Respository.Attendance
             var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).ToList();
             result.ForEach(x =>
             {
-                x.PatientStatusName = x.PatientStatusId == null ? "" : _patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
+                x.PatientStatusName = x.PatientStatusId == null ? "" : x.PatientStatusId.GetDescription();//_patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
+                x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => x.IsReviewedByPatient == true);
                 //if (projectright.Count > 0)
                 //{
                 //    var EconsentReviewDetails = (from econsentreviewdetails in _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true).ToList()
@@ -624,17 +645,21 @@ namespace GSC.Respository.Attendance
                                              Id = econsentsetups.Id,
                                              DocumentName = econsentsetups.DocumentName
                                          }).ToList();
-                for (var i = 0; i < Econsentdocuments.Count; i++)
+                if (Econsentdocuments.Count > 0)
                 {
-                    EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
-                    econsentReviewDetails.AttendanceId = randomization.Id;
-                    econsentReviewDetails.EconsentDocumentId = Econsentdocuments[i].Id;
-                    econsentReviewDetails.IsReviewedByPatient = false;
-                    _econsentReviewDetailsRepository.Add(econsentReviewDetails);
-                }
+                    //for (var i = 0; i < Econsentdocuments.Count; i++)
+                    //{
+                    //    EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
+                    //    econsentReviewDetails.RandomizationId = randomization.Id;
+                    //    econsentReviewDetails.EconsentSetupId = Econsentdocuments[i].Id;
+                    //    econsentReviewDetails.IsReviewedByPatient = false;
+                    //    _econsentReviewDetailsRepository.Add(econsentReviewDetails);
+                    //}
 
-                randomization.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
-                Update(randomization);
+                    randomization.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
+                    Update(randomization);
+                }
+                
             }
         }
 
@@ -643,13 +668,13 @@ namespace GSC.Respository.Attendance
             var randomization = Find(id);
             if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
             {
-                if (_econsentReviewDetailsRepository.FindByInclude(x => x.AttendanceId == id && x.IsApprovedByInvestigator == false).ToList().Count > 0)
+                if (_econsentReviewDetailsRepository.FindByInclude(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).ToList().Count > 0)
                 {
                 }
                 else
                 {
                     var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.DeletedDate == null && x.LanguageId == randomization.LanguageId && x.ProjectId == randomization.ProjectId).ToList()
-                                             join doc in _econsentReviewDetailsRepository.FindByInclude(x => x.AttendanceId == id).ToList() on econsentsetups.Id equals doc.EconsentDocumentId into ps
+                                             join doc in _econsentReviewDetailsRepository.FindByInclude(x => x.RandomizationId == id && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == true).ToList() on econsentsetups.Id equals doc.EconsentSetupId into ps
                                              from p in ps.DefaultIfEmpty()
                                              select new EconsentSetup
                                              {
@@ -810,7 +835,6 @@ namespace GSC.Respository.Attendance
             return data;
         }
 
-
         public List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId)
         {
             var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Include(x => x.ScreeningVisit).Where(x => x.ScreeningVisitId == screeningVisitId && x.ProjectDesignTemplate.IsParticipantView == true).
@@ -824,7 +848,8 @@ namespace GSC.Respository.Attendance
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
                             ScheduleDate = r.ScheduleDate,
-                            IsTemplateRestricted = false
+                            IsTemplateRestricted = false,
+                            IsPastTemplate = false
                         }).OrderBy(r => r.DesignOrder).ToList();
             data.ForEach(x =>
             {
@@ -834,7 +859,7 @@ namespace GSC.Respository.Attendance
                 }
                 if (x.ScheduleDate != null)
                 {
-                    var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId);
+                    var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null);
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
                     var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
                     var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
@@ -855,6 +880,21 @@ namespace GSC.Respository.Attendance
         //public RandomizationNumberDto GetRandomizationAndScreeningNumber(int id)
         //{
         //    return GenerateRandomizationAndScreeningNumber(id);
+        //}
+        //for (int i = 0; i < data.Count; i++)
+        //{
+        //    if (data[i].ScheduleDate != null)
+        //    {
+        //        var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == data[i].ProjectDesignTemplateId && t.ProjectDesignVisitId == data[i].ProjectDesignVisitId);
+        //        var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
+        //        var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
+        //        var mindate = ((DateTime)data[i].ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
+        //        var maxdate = ((DateTime)data[i].ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
+        //        if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
+        //            data[i].IsTemplateRestricted = false;
+        //        else
+        //            data[i].IsTemplateRestricted = true;
+        //    }
         //}
         public RandomizationNumberDto GetRandomizationNumber(int id)
         {

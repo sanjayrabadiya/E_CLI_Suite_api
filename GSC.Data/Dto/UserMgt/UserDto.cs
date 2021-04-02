@@ -85,10 +85,11 @@ namespace GSC.Data.Dto.UserMgt
         public bool IsFirstTime { get; set; }
         public int? Language { get; set; }
         public string LanguageShortName { get; set; }
-        public string? SignaturePath { get; set; }
+        //public string? SignaturePath { get; set; }
         public string CompanyName { get; set; }
 
         public UserMasterUserType? UserType { get; set; }
+        public string? SignatureBase64String { get; set; }
     }
 
     public class UserGridDto : BaseAuditDto

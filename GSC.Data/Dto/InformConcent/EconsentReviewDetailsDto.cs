@@ -8,15 +8,15 @@ namespace GSC.Data.Dto.InformConcent
     public class EconsentReviewDetailsDto : BaseDto
     {
         public int Id { get; set; }
-        public int AttendanceId { get; set; }
-        public int EconsentDocumentId { get; set; }
-        public bool IsApprovedByInvestigator { get; set; }
-        public int ApprovedByRoleId { get; set; }
-        public string AttendanceName { get; set; }
+        public int RandomizationId { get; set; }
+        public int EconsentSetupId { get; set; }
+        public bool IsReviewDoneByInvestigator { get; set; }
+        public int ReviewDoneByRoleId { get; set; }
+        public string RandomizationName { get; set; }
         public string EconsentDocumentName { get; set; }
         public string ApprovedByRole { get; set; }
         public int TotalNoSection { get; set; }
-        public DateTime? investigatorapproveddatetime { get; set; }
+        public DateTime? investigatorRevieweddatetime { get; set; }
         public DateTime? patientapproveddatetime { get; set; }
         public string? pdfpath { get; set; }
         public string? documentData { get; set; }
@@ -27,5 +27,10 @@ namespace GSC.Data.Dto.InformConcent
         public string? patientdigitalSignImagepath { get; set; }
         //public string? investigatordigitalSignImagepath { get; set; }
         public List<EconsentReviewDetailsSectionsDto> EconsentReviewDetailsSections { get; set; }
+        public int? ReviewDoneByUserId { get; set; }
+        public bool? IsApproved { get; set; }
+        public int? ApproveRejectReasonId { get; set; }
+        public string? ApproveRejectReasonOth { get; set; }
+
     }
 }

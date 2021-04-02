@@ -273,5 +273,7 @@ namespace GSC.Domain.Context
         DbSet<ProjectDesignVariableEncryptRole> ProjectDesignVariableEncryptRole { get; set; }
         DbSet<TemplatePermission> TemplatePermission { get; set; }
         DbSet<UserSetting> UserSetting { get; set; }
+        DbSet<RandomizationNumberSettings> RandomizationNumberSettings { get; set; }
+        DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }
     }
 }

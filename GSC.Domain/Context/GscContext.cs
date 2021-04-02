@@ -321,6 +321,8 @@ namespace GSC.Domain.Context
         public DbSet<ProjectDesignVariableEncryptRole> ProjectDesignVariableEncryptRole { get; set; }
         public DbSet<TemplatePermission> TemplatePermission { get; set; }
         public DbSet<UserSetting> UserSetting { get; set; }
+        public DbSet<RandomizationNumberSettings> RandomizationNumberSettings { get; set; }
+        public DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

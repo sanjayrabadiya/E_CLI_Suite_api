@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Common.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace GSC.Data.Entities.InformConcent
 {
-    public class EconsentChat : BaseEntity
+    public class EconsentChat : BaseEntity, ICommonAduit
     {
         //public int Id { get; set; }
         public int SenderId { get; set; }

@@ -26,6 +26,8 @@ using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using GSC.Shared.JWTAuth;
+using Syncfusion.Pdf.Graphics;
+using Syncfusion.Drawing;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -97,7 +99,7 @@ namespace GSC.Api.Controllers.InformConcent
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var randomizationId = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault().Id;
-            econsentReviewDetailsDto.AttendanceId = randomizationId;
+            econsentReviewDetailsDto.RandomizationId = randomizationId;
             var econsentReviewDetail = _mapper.Map<EconsentReviewDetails>(econsentReviewDetailsDto);
             econsentReviewDetail.patientapproveddatetime = DateTime.Now;
             var validate = _econsentReviewDetailsRepository.Duplicate(econsentReviewDetailsDto);
@@ -157,11 +159,13 @@ namespace GSC.Api.Controllers.InformConcent
             econsentReviewDetail.IsReviewedByPatient = true;
             _econsentReviewDetailsRepository.Add(econsentReviewDetail);
 
+            _context.EconsentReviewDetailsSections.AddRange(econsentReviewDetail.EconsentReviewDetailsSections);
+
             System.IO.File.Delete(filePath);
             if (_uow.Save() <= 0) throw new Exception("Creating Econsent review insert failed on save.");
-            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentDocumentId).ToList().FirstOrDefault();
+            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentSetupId).ToList().FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
-            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.AttendanceId).ToList().FirstOrDefault();
+            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.RandomizationId).ToList().FirstOrDefault();
             _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
             if (project.InvestigatorContactId != null)
             {
@@ -177,7 +181,9 @@ namespace GSC.Api.Controllers.InformConcent
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var econsentReviewDetail = _mapper.Map<EconsentReviewDetails>(econsentReviewDetailsDto);
+            var original = _econsentReviewDetailsRepository.Find(econsentReviewDetail.Id);
             econsentReviewDetail.patientapproveddatetime = DateTime.Now;
+            econsentReviewDetail.RandomizationId = original.RandomizationId;
             var validate = _econsentReviewDetailsRepository.Duplicate(econsentReviewDetailsDto);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -235,11 +241,19 @@ namespace GSC.Api.Controllers.InformConcent
             econsentReviewDetail.IsReviewedByPatient = true;
             _econsentReviewDetailsRepository.Update(econsentReviewDetail);
 
+            var existing = _context.EconsentReviewDetailsSections.Where(t => t.EconsentReviewDetailId == econsentReviewDetail.Id).ToList();
+            if (existing.Any())
+            {
+                _context.EconsentReviewDetailsSections.RemoveRange(econsentReviewDetail.EconsentReviewDetailsSections);
+                _context.Save();
+            }
+            _context.EconsentReviewDetailsSections.AddRange(econsentReviewDetail.EconsentReviewDetailsSections);
+
             System.IO.File.Delete(filePath);
             if (_uow.Save() <= 0) throw new Exception("Creating Econsent review insert failed on save.");
-            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentDocumentId).ToList().FirstOrDefault();
+            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentSetupId).ToList().FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
-            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.AttendanceId).ToList().FirstOrDefault();
+            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.RandomizationId).ToList().FirstOrDefault();
             _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
             if (project.InvestigatorContactId != null)
             {
@@ -278,15 +292,27 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(json);
         }
 
+        [HttpGet]
+        [Route("GetEconsentReviewDetailsForSubjectManagement/{patientid}")]
+        public IActionResult GetEconsentReviewDetailsForSubjectManagement(int patientid)
+        {
+            return Ok(_econsentReviewDetailsRepository.GetEconsentReviewDetailsForSubjectManagement(patientid));
+        }
+
         [HttpPut]
-        [Route("ApproveEconsentDocument")]
-        public IActionResult ApproveEconsentDocument([FromBody] EconsentReviewDetailsDto econsentReviewDetailsDto)
+        [Route("ApproveRejectEconsentDocument")]
+        public IActionResult ApproveRejectEconsentDocument([FromBody] EconsentReviewDetailsDto econsentReviewDetailsDto)
         {
             if (econsentReviewDetailsDto.Id <= 0) return BadRequest();
 
             var econsentReviewDetails = _econsentReviewDetailsRepository.Find(econsentReviewDetailsDto.Id);
-            econsentReviewDetails.IsApprovedByInvestigator = true;
-            econsentReviewDetails.investigatorapproveddatetime = DateTime.Now;
+            econsentReviewDetails.IsReviewDoneByInvestigator = true;
+            econsentReviewDetails.investigatorRevieweddatetime = DateTime.Now;
+            econsentReviewDetails.ReviewDoneByRoleId = _jwtTokenAccesser.RoleId;
+            econsentReviewDetails.ReviewDoneByUserId = _jwtTokenAccesser.UserId;
+            econsentReviewDetails.IsApproved = econsentReviewDetailsDto.IsApproved;
+            econsentReviewDetails.ApproveRejectReasonId = econsentReviewDetailsDto.ApproveRejectReasonId;
+            econsentReviewDetails.ApproveRejectReasonOth = econsentReviewDetailsDto.ApproveRejectReasonOth;
             
             string filePath = string.Empty;
 
@@ -303,9 +329,6 @@ namespace GSC.Api.Controllers.InformConcent
             catch(Exception ex)
             {
             }
-            
-            
-
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
             filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.InformConcent.ToString(), docName);
 
@@ -325,6 +348,27 @@ namespace GSC.Api.Controllers.InformConcent
             DocIORenderer render = new DocIORenderer();
             render.Settings.PreserveFormFields = true;
             PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+
+            int pagecount = pdfDocument.Pages.Count;
+            PdfGraphics graphics = pdfDocument.Pages[pagecount -1].Graphics;
+            PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 13,PdfFontStyle.Bold);
+            PdfFont fontnormal = new PdfStandardFont(PdfFontFamily.TimesRoman, 13);
+            if (econsentReviewDetailsDto.IsApproved == true)
+                graphics.DrawString("Approved Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 275));
+            else
+                graphics.DrawString("Reject Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 275));
+
+            string reasonName = _context.AuditReason.Where(x => x.Id == econsentReviewDetailsDto.ApproveRejectReasonId).FirstOrDefault().ReasonName;
+            graphics.DrawString(reasonName, fontnormal, PdfBrushes.Black, new PointF(175, 275));
+            if (econsentReviewDetailsDto.ApproveRejectReasonOth != null && econsentReviewDetailsDto.ApproveRejectReasonOth != "")
+            {
+                if (econsentReviewDetailsDto.IsApproved == true)
+                    graphics.DrawString("Approved Comment: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
+                else
+                    graphics.DrawString("Reject Comment: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
+
+                graphics.DrawString(econsentReviewDetailsDto.ApproveRejectReasonOth, fontnormal, PdfBrushes.Black, new PointF(190, 300));
+            }
             render.Dispose();
             wordDocument.Dispose();
             MemoryStream outputStream = new MemoryStream();
@@ -344,13 +388,21 @@ namespace GSC.Api.Controllers.InformConcent
 
             _econsentReviewDetailsRepository.Update(econsentReviewDetails);
             System.IO.File.Delete(filePath);
-            if (_uow.Save() <= 0) throw new Exception("Approving failed");
+            
 
-            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetails.EconsentDocumentId).ToList().FirstOrDefault();
+            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetails.EconsentSetupId).ToList().FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
-            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetails.AttendanceId).ToList().FirstOrDefault();
+            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetails.RandomizationId).ToList().FirstOrDefault();
             _emailSenderRespository.SendEmailOfInvestigatorApprovedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
-            _randomizationRepository.ChangeStatustoConsentCompleted(econsentReviewDetails.AttendanceId);
+            if (econsentReviewDetailsDto.IsApproved == true)
+                _randomizationRepository.ChangeStatustoConsentCompleted(econsentReviewDetails.RandomizationId);
+            else
+            {
+                var randomizationdata = _randomizationRepository.Find(econsentReviewDetails.RandomizationId);
+                randomizationdata.PatientStatusId = ScreeningPatientStatus.Withdrawal;
+                _randomizationRepository.Update(randomizationdata);
+            }
+            if (_uow.Save() <= 0) throw new Exception(econsentReviewDetailsDto.IsApproved == true ? "Approving failed" : "Rejecting failed");
             return Ok(econsentReviewDetails.Id);
         }
 

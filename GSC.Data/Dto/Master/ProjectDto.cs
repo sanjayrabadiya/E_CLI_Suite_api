@@ -72,21 +72,21 @@ namespace GSC.Data.Dto.Master
         public bool IsSendEmail { get; set; }
     }
 
-    public class RandomizationAndScreeningNumberFormatDto : BaseDto
-    {
-        public bool? IsManualRandomNo { get; set; }
-        public bool? IsSiteDependentRandomNo { get; set; }
-        public int? RandomNoLength { get; set; }
-        public bool? IsAlphaNumRandomNo { get; set; }
-        //public string? PrefixRandomNo { get; set; }
-        public bool? IsManualScreeningNo { get; set; }
-        public bool? IsSiteDependentScreeningNo { get; set; }
-        public int? ScreeningLength { get; set; }
-        public bool? IsAlphaNumScreeningNo { get; set; }
-        //public string? PrefixScreeningNo { get; set; }
-        public int? RandomNoStartsWith { get; set; }
-        public int? ScreeningNoStartsWith { get; set; }
-    }
+    //public class RandomizationAndScreeningNumberFormatDto : BaseDto
+    //{
+    //    public bool? IsManualRandomNo { get; set; }
+    //    public bool? IsSiteDependentRandomNo { get; set; }
+    //    public int? RandomNoLength { get; set; }
+    //    public bool? IsAlphaNumRandomNo { get; set; }
+    //    //public string? PrefixRandomNo { get; set; }
+    //    public bool? IsManualScreeningNo { get; set; }
+    //    public bool? IsSiteDependentScreeningNo { get; set; }
+    //    public int? ScreeningLength { get; set; }
+    //    public bool? IsAlphaNumScreeningNo { get; set; }
+    //    //public string? PrefixScreeningNo { get; set; }
+    //    public int? RandomNoStartsWith { get; set; }
+    //    public int? ScreeningNoStartsWith { get; set; }
+    //}
 
 
 
@@ -118,7 +118,7 @@ namespace GSC.Data.Dto.Master
         public string TherapeuticIndication { get; set; }
     }
 
-    public class ProjectDetailsDto 
+    public class ProjectDetailsDto
     {
         public SiteDetailsDto siteDetails { get; set; }
         public DesignDetailsDto designDetails { get; set; }
@@ -146,11 +146,11 @@ namespace GSC.Data.Dto.Master
     public class WorkflowDetailsDto
     {
         public int? Independent { get; set; }
-        public int? NoofLevels { get; set; }       
+        public int? NoofLevels { get; set; }
         public bool? MarkAsCompleted { get; set; }
     }
     public class UserRightDetailsDto
-    {       
+    {
         public int? NoofUser { get; set; }
         public bool? MarkAsCompleted { get; set; }
     }

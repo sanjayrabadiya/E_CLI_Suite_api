@@ -134,6 +134,32 @@ namespace GSC.Api.Controllers.Master
             _projectRepository.Save(project);
             if (_uow.Save() <= 0) throw new Exception("Creating Project failed on save.");
 
+            ScreeningNumberSettings screeningNumberSettings = new ScreeningNumberSettings();
+            screeningNumberSettings.Id = 0;
+            screeningNumberSettings.ProjectId = project.Id;
+            screeningNumberSettings.IsManualScreeningNo = false;
+            screeningNumberSettings.IsSiteDependentScreeningNo = false;
+            screeningNumberSettings.IsAlphaNumScreeningNo = false;
+            screeningNumberSettings.ScreeningLength = 0;
+            screeningNumberSettings.ScreeningNoStartsWith = 0;
+            screeningNumberSettings.ScreeningNoseries = 0;
+            screeningNumberSettings.PrefixScreeningNo = "";
+            _screeningNumberSettingsRepository.Add(screeningNumberSettings);
+
+            RandomizationNumberSettings randomizationNumberSettings = new RandomizationNumberSettings();
+            randomizationNumberSettings.Id = 0;
+            randomizationNumberSettings.ProjectId = project.Id;
+            randomizationNumberSettings.IsManualRandomNo = false;
+            randomizationNumberSettings.IsSiteDependentRandomNo = false;
+            randomizationNumberSettings.IsAlphaNumRandomNo = false;
+            randomizationNumberSettings.RandomNoLength = 0;
+            randomizationNumberSettings.RandomNoStartsWith = 0;
+            randomizationNumberSettings.RandomizationNoseries = 0;
+            randomizationNumberSettings.PrefixRandomNo = "";
+            _randomizationNumberSettingsRepository.Add(randomizationNumberSettings);
+
+            _uow.Save();
+
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
                 KeyId = project.Id,
@@ -146,117 +172,117 @@ namespace GSC.Api.Controllers.Master
             return Ok(project);
         }
 
-        [HttpPut("UpdateRandomizationNumberFormat")]
-        public IActionResult UpdateRandomizationNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
-        {
-            if (projectDto.Id <= 0) return BadRequest();
+        //[HttpPut("UpdateRandomizationNumberFormat")]
+        //public IActionResult UpdateRandomizationNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
+        //{
+        //    if (projectDto.Id <= 0) return BadRequest();
 
-            var sites = _projectRepository.All.Where(x => x.ParentProjectId == projectDto.Id).Select(y => y.Id).ToList();
-            var randomizations = _randomizationRepository.All.Where(x => sites.Contains(x.ProjectId) && x.RandomizationNumber != null && x.RandomizationNumber != "").ToList();
+        //    var sites = _projectRepository.All.Where(x => x.ParentProjectId == projectDto.Id).Select(y => y.Id).ToList();
+        //    var randomizations = _randomizationRepository.All.Where(x => sites.Contains(x.ProjectId) && x.RandomizationNumber != null && x.RandomizationNumber != "").ToList();
 
-            if (randomizations != null && randomizations.Count > 0)
-            {
-                ModelState.AddModelError("Message", "You can't change format, Randomization entry is started in subject management");
-                return BadRequest(ModelState);
-            }
+        //    if (randomizations != null && randomizations.Count > 0)
+        //    {
+        //        ModelState.AddModelError("Message", "You can't change format, Randomization entry is started in subject management");
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (projectDto.IsManualRandomNo == false)
-            {
-                if (projectDto.RandomNoStartsWith == null)
-                {
-                    ModelState.AddModelError("Message", "Please add valid Starts with number");
-                    return BadRequest(ModelState);
-                }
-            }
+        //    if (projectDto.IsManualRandomNo == false)
+        //    {
+        //        if (projectDto.RandomNoStartsWith == null)
+        //        {
+        //            ModelState.AddModelError("Message", "Please add valid Starts with number");
+        //            return BadRequest(ModelState);
+        //        }
+        //    }
 
-            var project = _projectRepository.Find(projectDto.Id);
-            project.RandomNoLength = projectDto.RandomNoLength;
-            project.IsManualRandomNo = projectDto.IsManualRandomNo;
-            project.IsAlphaNumRandomNo = projectDto.IsAlphaNumRandomNo;
-            project.RandomNoStartsWith = projectDto.RandomNoStartsWith;
-            project.IsSiteDependentRandomNo = projectDto.IsSiteDependentRandomNo;
-            //project.ScreeningLength = projectDto.ScreeningLength;
-            //project.IsManualScreeningNo = projectDto.IsManualScreeningNo;
-            //project.IsAlphaNumScreeningNo = projectDto.IsAlphaNumScreeningNo;
-            //project.ScreeningNoStartsWith = projectDto.ScreeningNoStartsWith;
-            //project.IsSiteDependentScreeningNo = projectDto.IsSiteDependentScreeningNo;
+        //    var project = _projectRepository.Find(projectDto.Id);
+        //    project.RandomNoLength = projectDto.RandomNoLength;
+        //    project.IsManualRandomNo = projectDto.IsManualRandomNo;
+        //    project.IsAlphaNumRandomNo = projectDto.IsAlphaNumRandomNo;
+        //    project.RandomNoStartsWith = projectDto.RandomNoStartsWith;
+        //    project.IsSiteDependentRandomNo = projectDto.IsSiteDependentRandomNo;
+        //    //project.ScreeningLength = projectDto.ScreeningLength;
+        //    //project.IsManualScreeningNo = projectDto.IsManualScreeningNo;
+        //    //project.IsAlphaNumScreeningNo = projectDto.IsAlphaNumScreeningNo;
+        //    //project.ScreeningNoStartsWith = projectDto.ScreeningNoStartsWith;
+        //    //project.IsSiteDependentScreeningNo = projectDto.IsSiteDependentScreeningNo;
 
-            if (project.IsManualRandomNo == false)
-            {
-                if (project.IsSiteDependentRandomNo == true)
-                {
-                    var projects = _projectRepository.FindBy(x => x.ParentProjectId == project.Id).ToList();
-                    for (int i = 0; i < projects.Count; i++)
-                    {
-                        projects[i].RandomizationNoseries = (int)project.RandomNoStartsWith;
-                        _projectRepository.Update(projects[i]);
-                    }
-                }
-                else
-                {
-                    project.RandomizationNoseries = (int)project.RandomNoStartsWith;
-                }
-            }
-            _projectRepository.Update(project);
-            if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
-            return Ok(project.Id);
-        }
+        //    if (project.IsManualRandomNo == false)
+        //    {
+        //        if (project.IsSiteDependentRandomNo == true)
+        //        {
+        //            var projects = _projectRepository.FindBy(x => x.ParentProjectId == project.Id).ToList();
+        //            for (int i = 0; i < projects.Count; i++)
+        //            {
+        //                projects[i].RandomizationNoseries = (int)project.RandomNoStartsWith;
+        //                _projectRepository.Update(projects[i]);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            project.RandomizationNoseries = (int)project.RandomNoStartsWith;
+        //        }
+        //    }
+        //    _projectRepository.Update(project);
+        //    if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
+        //    return Ok(project.Id);
+        //}
 
-        [HttpPut("UpdateScreeningNumberFormat")]
-        public IActionResult UpdateScreeningNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
-        {
-            if (projectDto.Id <= 0) return BadRequest();
+        //[HttpPut("UpdateScreeningNumberFormat")]
+        //public IActionResult UpdateScreeningNumberFormat([FromBody] RandomizationAndScreeningNumberFormatDto projectDto)
+        //{
+        //    if (projectDto.Id <= 0) return BadRequest();
 
-            var sites = _projectRepository.All.Where(x => x.ParentProjectId == projectDto.Id).Select(y => y.Id).ToList();
-            var randomizations = _randomizationRepository.All.Where(x => sites.Contains(x.ProjectId) && x.ScreeningNumber != null && x.ScreeningNumber != "").ToList();
+        //    var sites = _projectRepository.All.Where(x => x.ParentProjectId == projectDto.Id).Select(y => y.Id).ToList();
+        //    var randomizations = _randomizationRepository.All.Where(x => sites.Contains(x.ProjectId) && x.ScreeningNumber != null && x.ScreeningNumber != "").ToList();
 
-            if (randomizations != null && randomizations.Count > 0)
-            {
-                ModelState.AddModelError("Message", "You can't change format, Screening entry is started in subject management");
-                return BadRequest(ModelState);
-            }
+        //    if (randomizations != null && randomizations.Count > 0)
+        //    {
+        //        ModelState.AddModelError("Message", "You can't change format, Screening entry is started in subject management");
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (projectDto.IsManualScreeningNo == false)
-            {
-                if (projectDto.ScreeningNoStartsWith == null)
-                {
-                    ModelState.AddModelError("Message", "Please add valid Starts with number");
-                    return BadRequest(ModelState);
-                }
-            }
+        //    if (projectDto.IsManualScreeningNo == false)
+        //    {
+        //        if (projectDto.ScreeningNoStartsWith == null)
+        //        {
+        //            ModelState.AddModelError("Message", "Please add valid Starts with number");
+        //            return BadRequest(ModelState);
+        //        }
+        //    }
 
-            var project = _projectRepository.Find(projectDto.Id);
-            //project.RandomNoLength = projectDto.RandomNoLength;
-            //project.IsManualRandomNo = projectDto.IsManualRandomNo;
-            //project.IsAlphaNumRandomNo = projectDto.IsAlphaNumRandomNo;
-            //project.RandomNoStartsWith = projectDto.RandomNoStartsWith;
-            //project.IsSiteDependentRandomNo = projectDto.IsSiteDependentRandomNo;
-            project.ScreeningLength = projectDto.ScreeningLength;
-            project.IsManualScreeningNo = projectDto.IsManualScreeningNo;
-            project.IsAlphaNumScreeningNo = projectDto.IsAlphaNumScreeningNo;
-            project.ScreeningNoStartsWith = projectDto.ScreeningNoStartsWith;
-            project.IsSiteDependentScreeningNo = projectDto.IsSiteDependentScreeningNo;
+        //    var project = _projectRepository.Find(projectDto.Id);
+        //    //project.RandomNoLength = projectDto.RandomNoLength;
+        //    //project.IsManualRandomNo = projectDto.IsManualRandomNo;
+        //    //project.IsAlphaNumRandomNo = projectDto.IsAlphaNumRandomNo;
+        //    //project.RandomNoStartsWith = projectDto.RandomNoStartsWith;
+        //    //project.IsSiteDependentRandomNo = projectDto.IsSiteDependentRandomNo;
+        //    project.ScreeningLength = projectDto.ScreeningLength;
+        //    project.IsManualScreeningNo = projectDto.IsManualScreeningNo;
+        //    project.IsAlphaNumScreeningNo = projectDto.IsAlphaNumScreeningNo;
+        //    project.ScreeningNoStartsWith = projectDto.ScreeningNoStartsWith;
+        //    project.IsSiteDependentScreeningNo = projectDto.IsSiteDependentScreeningNo;
 
-            if (project.IsManualScreeningNo == false)
-            {
-                if (project.IsSiteDependentScreeningNo == true)
-                {
-                    var projects = _projectRepository.FindBy(x => x.ParentProjectId == project.Id).ToList();
-                    for (int i = 0; i < projects.Count; i++)
-                    {
-                        projects[i].ScreeningNoseries = (int)project.ScreeningNoStartsWith;
-                        _projectRepository.Update(projects[i]);
-                    }
-                }
-                else
-                {
-                    project.ScreeningNoseries = (int)project.ScreeningNoStartsWith;
-                }
-            }
-            _projectRepository.Update(project);
-            if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
-            return Ok(project.Id);
-        }
+        //    if (project.IsManualScreeningNo == false)
+        //    {
+        //        if (project.IsSiteDependentScreeningNo == true)
+        //        {
+        //            var projects = _projectRepository.FindBy(x => x.ParentProjectId == project.Id).ToList();
+        //            for (int i = 0; i < projects.Count; i++)
+        //            {
+        //                projects[i].ScreeningNoseries = (int)project.ScreeningNoStartsWith;
+        //                _projectRepository.Update(projects[i]);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            project.ScreeningNoseries = (int)project.ScreeningNoStartsWith;
+        //        }
+        //    }
+        //    _projectRepository.Update(project);
+        //    if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
+        //    return Ok(project.Id);
+        //}
 
         // PUT api/<controller>/5
         [HttpPut]
@@ -269,18 +295,18 @@ namespace GSC.Api.Controllers.Master
             var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
             project.Id = projectDto.Id;
             var details = _projectRepository.Find(projectDto.Id);
-            project.ScreeningNoseries = details.ScreeningNoseries;
-            project.RandomizationNoseries = details.RandomizationNoseries;
-            project.ScreeningNoStartsWith = details.ScreeningNoStartsWith;
-            project.RandomNoStartsWith = details.RandomNoStartsWith;
-            project.ScreeningLength = details.ScreeningLength;
-            project.RandomNoLength = details.RandomNoLength;
-            project.IsManualScreeningNo = details.IsManualScreeningNo;
-            project.IsManualRandomNo = details.IsManualRandomNo;
-            project.IsSiteDependentScreeningNo = details.IsSiteDependentScreeningNo;
-            project.IsSiteDependentRandomNo = details.IsSiteDependentRandomNo;
-            project.IsAlphaNumScreeningNo = details.IsAlphaNumScreeningNo;
-            project.IsAlphaNumRandomNo = details.IsAlphaNumRandomNo;
+            //project.ScreeningNoseries = details.ScreeningNoseries;
+            //project.RandomizationNoseries = details.RandomizationNoseries;
+            //project.ScreeningNoStartsWith = details.ScreeningNoStartsWith;
+            //project.RandomNoStartsWith = details.RandomNoStartsWith;
+            //project.ScreeningLength = details.ScreeningLength;
+            //project.RandomNoLength = details.RandomNoLength;
+            //project.IsManualScreeningNo = details.IsManualScreeningNo;
+            //project.IsManualRandomNo = details.IsManualRandomNo;
+            //project.IsSiteDependentScreeningNo = details.IsSiteDependentScreeningNo;
+            //project.IsSiteDependentRandomNo = details.IsSiteDependentRandomNo;
+            //project.IsAlphaNumScreeningNo = details.IsAlphaNumScreeningNo;
+            //project.IsAlphaNumRandomNo = details.IsAlphaNumRandomNo;
             project.IsSendEmail = details.IsSendEmail;
             project.IsSendSMS = details.IsSendSMS;
 

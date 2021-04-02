@@ -4,6 +4,7 @@ using GSC.Helper;
 using System.Collections.Generic;
 using GSC.Data.Dto.InformConcent;
 using GSC.Shared.Extension;
+using GSC.Data.Entities.InformConcent;
 
 namespace GSC.Data.Dto.Attendance
 {
@@ -116,7 +117,7 @@ namespace GSC.Data.Dto.Attendance
         public ScreeningPatientStatus? PatientStatusId { get; set; }
         public bool IsShowEconsentIcon { get; set; }
         public bool IsEconsentReviewPending { get; set; }
-        public List<EconsentReviewDetailsDto> EconsentReviewDetails { get; set; }
+        public List<EconsentReviewDetails> EconsentReviewDetails { get; set; }
         public bool IsmultipleEconsentReviewDetails { get; set; }
         public int? ZipCode { get; set; }
         public int? UserId { get; set; }

@@ -289,8 +289,8 @@ namespace GSC.Api.Controllers.InformConcent
                 if (result[i].PatientStatusId == ScreeningPatientStatus.ConsentCompleted || result[i].PatientStatusId == ScreeningPatientStatus.OnTrial)
                 {
                     EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
-                    econsentReviewDetails.AttendanceId = result[i].Id;
-                    econsentReviewDetails.EconsentDocumentId = econsent.Id;
+                    econsentReviewDetails.RandomizationId = result[i].Id;
+                    econsentReviewDetails.EconsentSetupId = econsent.Id;
                     econsentReviewDetails.IsReviewedByPatient = false;
                     _econsentReviewDetailsRepository.Add(econsentReviewDetails);
                     _randomizationRepository.ChangeStatustoReConsentInProgress(result[i].Id);

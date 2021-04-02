@@ -8,8 +8,7 @@ namespace GSC.Data.Dto.InformConcent
 {
     public class EconsentSectionReferenceDto : BaseDto
     {
-        //public int Id { get; set; }
-        public int EconsentDocId { get; set; }
+        public int EconsentSetupId { get; set; }
         public int SectionNo { get; set; }
         public string ReferenceTitle { get; set; }
         public string FilePath { get; set; }

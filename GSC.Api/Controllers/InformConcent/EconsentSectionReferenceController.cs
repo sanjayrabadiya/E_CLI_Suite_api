@@ -45,7 +45,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("GetSectionReference/{isDeleted}/{documentId}")]
         public IActionResult GetSectionReference(bool isDeleted,int documentId)
         {
-            var econsentSectionReferences = _econsentSectionReferenceRepository.FindByInclude(x => x.EconsentDocId == documentId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderByDescending(x => x.Id).ToList();
+            var econsentSectionReferences = _econsentSectionReferenceRepository.FindByInclude(x => x.EconsentSetupId == documentId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderByDescending(x => x.Id).ToList();
             var econsentSectionReferenceDto = _mapper.Map<IEnumerable<EconsentSectionReferenceDto>>(econsentSectionReferences).ToList();
             return Ok(econsentSectionReferenceDto);
         }
@@ -113,14 +113,14 @@ namespace GSC.Api.Controllers.InformConcent
 
             var document = _econsentSectionReferenceRepository.Find(econsentSectionReferenceDto.Id);
 
-                if (econsentSectionReferenceDto.FileModel[0]?.Base64?.Length > 0)
+                if (econsentSectionReferenceDto.FileModel != null && econsentSectionReferenceDto.FileModel[0]?.Base64?.Length > 0)
                 {
                     document.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel[0], _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
                 }
             
             document.SectionNo = econsentSectionReferenceDto.SectionNo;
             document.ReferenceTitle = econsentSectionReferenceDto.ReferenceTitle;
-            document.EconsentDocId = econsentSectionReferenceDto.EconsentDocId;
+            document.EconsentSetupId = econsentSectionReferenceDto.EconsentSetupId;
             //var econsentSectionReference = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
             _econsentSectionReferenceRepository.Update(document);
 
@@ -170,7 +170,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("GetEconsentDocumentSectionReference/{documentId}/{sectionNo}")]
         public IActionResult GetEconsentDocumentSectionReference(int documentId,int sectionNo)
         {
-            var references = _econsentSectionReferenceRepository.FindBy(x => x.EconsentDocId == documentId && x.SectionNo == sectionNo).ToList();
+            var references = _econsentSectionReferenceRepository.FindBy(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo).ToList();
             return Ok(references);
         }
 

@@ -22,5 +22,6 @@ namespace GSC.Respository.InformConcent
         string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails);
         List<DashboardDto> GetEconsentMyTaskList(int ProjectId);
         void downloadpdf(CustomParameter param);
+        List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForSubjectManagement(int patientid);
     }
 }

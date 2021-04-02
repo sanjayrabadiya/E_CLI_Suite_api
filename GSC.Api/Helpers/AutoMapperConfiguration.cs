@@ -111,7 +111,7 @@ namespace GSC.Api.Helpers
             CreateMap<ClientAddress, ClientAddressDto>().ReverseMap();
             CreateMap<ClientContact, ClientContactDto>().ReverseMap();
             CreateMap<Project, ProjectDto>().ReverseMap();
-            CreateMap<Project, RandomizationAndScreeningNumberFormatDto>().ReverseMap();
+            //CreateMap<Project, RandomizationAndScreeningNumberFormatDto>().ReverseMap();
             CreateMap<UserRole, UserRoleDto>().ReverseMap();
             CreateMap<PopulationType, PopulationTypeDto>().ReverseMap();
             CreateMap<ProductType, ProductTypeDto>().ReverseMap();
@@ -333,6 +333,15 @@ namespace GSC.Api.Helpers
             CreateMap<StudyPlanTask,TaskMaster>()
                 .ForMember(x => x.Id, y => y.MapFrom(a => a.TaskId))
                .ReverseMap();
+            CreateMap<ScreeningNumberSettings, ScreeningNumberSettingsDto>()
+               .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+              .ReverseMap();
+            CreateMap<RandomizationNumberSettings, RandomizationNumberSettingsDto>()
+                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ReverseMap();
+            CreateMap<EconsentReviewDetails, EconsentReviewDetailsDto>()
+                .ForMember(x => x.EconsentDocumentName, x => x.MapFrom(a => a.EconsentSetup.DocumentName))
+                .ReverseMap();
         }
     }
 }

@@ -9,6 +9,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Master;
 using GSC.Respository.PropertyMapping;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
@@ -61,13 +62,21 @@ namespace GSC.Respository.InformConcent
 
         public List<DropDownDto> GetPatientStatusDropDown()
         {
-            IList<int> intList = new List<int>() { (int)ScreeningPatientStatus.PreScreening, (int)ScreeningPatientStatus.Screening, (int)ScreeningPatientStatus.ConsentCompleted, (int)ScreeningPatientStatus.OnTrial };
-            return _patientStatusRepository.All.Where(x => intList.Contains(x.Id) && x.DeletedDate == null)
-               .Select(c => new DropDownDto { Id = c.Id, Value = c.StatusName, IsDeleted = false }).OrderBy(o => o.Value)
-               .ToList();
-            //return _patientStatusRepository.All.Where(x => (x.Code == 1 || x.Code == 2 || x.Code == 4 || x.Code == 7) && x.DeletedDate == null)
+            //IList<int> intList = new List<int>() { (int)ScreeningPatientStatus.PreScreening, (int)ScreeningPatientStatus.Screening, (int)ScreeningPatientStatus.ConsentCompleted, (int)ScreeningPatientStatus.OnTrial };
+            //return _patientStatusRepository.All.Where(x => intList.Contains(x.Id) && x.DeletedDate == null)
             //   .Select(c => new DropDownDto { Id = c.Id, Value = c.StatusName, IsDeleted = false }).OrderBy(o => o.Value)
             //   .ToList();
+
+            var result = Enum.GetValues(typeof(ScreeningPatientStatus))
+                 .Cast<ScreeningPatientStatus>().Where(x => x == ScreeningPatientStatus.PreScreening ||
+                                                                    x == ScreeningPatientStatus.Screening ||
+                                                                    x == ScreeningPatientStatus.ConsentCompleted ||
+                                                                    x == ScreeningPatientStatus.OnTrial).Select(e => new DropDownDto
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return result;
         }
     }
 }

@@ -53,7 +53,7 @@ namespace GSC.Data.Dto.Report
         public int? ChildProjectId { get; set; }
         
         public string SiteName { get; set; }
-       
+
     }
 
     public class ModuleNameDto : BaseDto

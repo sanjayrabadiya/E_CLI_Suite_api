@@ -932,6 +932,678 @@ namespace GSC.Respository.Etmf
             }
         }
 
+
+        public List<TreeValue> GetTreeviewFromChart(int id, EtmfChartType chartType)
+        {
+
+            //chartType
+            //1: core
+            //2: Recommended
+            //3: Missing
+            //4: Pending Review
+            //5: Pending Approve
+            //6: Final
+            //7: Incomplete
+            //8: Not Required
+
+            // Do Dynamic after complete task
+            // Level 1 : Project
+            // Level 2 : Country/Site/Trial Static Folder Name
+            // Level 3 : Country/Site/Trial Name
+            // Level 4 : Zone Name
+            // Level 5 : Section Name      Level 5.1 : Sub Section Name    Level 5.2 : Sub Section Artifact Name
+            // Level 6 : Artifact Name     
+
+            var projectWorkplaces = _context.ProjectWorkplace.Where(t => t.DeletedBy == null && t.ProjectId == id)
+                            .Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceArtificatedocument).ThenInclude(x => x.ProjectArtificateDocumentReview)
+                            .Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceArtificatedocument).ThenInclude(x => x.ProjectArtificateDocumentApprover)
+                            .Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.EtmfArtificateMasterLbrary)
+                            .AsNoTracking().ToList();
+            if (chartType == EtmfChartType.core)
+            {
+                projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Where(x => x.ProjectWorkPlaceZone.Where(x => x.ProjectWorkplaceSection.Where(x => x.ProjectWorkplaceArtificate.Where(x => x.ProjectWorkplaceArtificatedocument.Count == 0 && x.EtmfArtificateMasterLbrary.InclutionType == 2).ToList().Count > 0).ToList().Count > 0).ToList().Count > 0).ToList().Count > 0).ToList();
+            }
+            else if (chartType == EtmfChartType.Recommended)
+            {
+                projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Any(x => x.ProjectWorkplaceArtificate.Any(x => x.ProjectWorkplaceArtificatedocument.Count == 0 && x.EtmfArtificateMasterLbrary.InclutionType == 1))))).ToList();
+            }
+            else if (chartType == EtmfChartType.Missing)
+            {
+                projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Any(x => x.ProjectWorkplaceArtificate.Any(x => x.ProjectWorkplaceArtificatedocument.Count == 0))))).ToList();
+            }
+            else if (chartType == EtmfChartType.PendingReview)
+            {
+                projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Any(x => x.ProjectWorkplaceArtificate.Any(x => x.ProjectWorkplaceArtificatedocument.Any(x => x.ProjectArtificateDocumentReview.Count != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0)))))).ToList();
+                //ProjectWorkplaceArtificate = ProjectWorkplaceArtificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(x => x.ProjectArtificateDocumentReview.Count != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0));
+            }
+            else if (chartType == EtmfChartType.PendingApprove)
+            {
+                projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Any(x => x.ProjectWorkplaceArtificate.Any(x => x.ProjectWorkplaceArtificatedocument.Any(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null)))))).ToList();
+                //ProjectWorkplaceArtificate = ProjectWorkplaceArtificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null));
+            }
+            else if (chartType == EtmfChartType.Final)
+            {
+                projectWorkplaces = projectWorkplaces.Select(s => new ProjectWorkplace
+                {
+                    Id = s.Id,
+                    ProjectId = s.ProjectId,
+                    Project = s.Project,
+                    ProjectWorkplaceDetail = s.ProjectWorkplaceDetail.Select(st => new ProjectWorkplaceDetail
+                    {
+                        Id = st.Id,
+                        ProjectWorkplaceId = st.ProjectWorkplaceId,
+                        ProjectWorkplace = st.ProjectWorkplace,
+                        WorkPlaceFolderId = st.WorkPlaceFolderId,
+                        ItemId = st.ItemId,
+                        ItemName = st.ItemName,
+                        ProjectWorkPlaceZone = st.ProjectWorkPlaceZone.Select(si => new ProjectWorkPlaceZone
+                        {
+                            Id = si.Id,
+                            ProjectWorkplaceDetailId = si.ProjectWorkplaceDetailId,
+                            ProjectWorkplaceDetail = si.ProjectWorkplaceDetail,
+                            EtmfZoneMasterLibrary = si.EtmfZoneMasterLibrary,
+                            EtmfZoneMasterLibraryId = si.EtmfZoneMasterLibraryId,
+                            ProjectWorkplaceSection = si.ProjectWorkplaceSection.Select(sv => new ProjectWorkplaceSection
+                            {
+                                Id = sv.Id,
+                                ProjectWorkPlaceZoneId = sv.ProjectWorkPlaceZoneId,
+                                ProjectWorkPlaceZone = sv.ProjectWorkPlaceZone,
+                                EtmfSectionMasterLibrary = sv.EtmfSectionMasterLibrary,
+                                EtmfSectionMasterLibraryId = sv.EtmfSectionMasterLibraryId,
+                                ProjectWorkplaceArtificate = sv.ProjectWorkplaceArtificate.Select(su => new ProjectWorkplaceArtificate
+                                {
+                                    Id = su.Id,
+                                    ProjectWorkplaceSectionId = su.ProjectWorkplaceSectionId,
+                                    ProjectWorkplaceSection = su.ProjectWorkplaceSection,
+                                    EtmfArtificateMasterLbrary = su.EtmfArtificateMasterLbrary,
+                                    EtmfArtificateMasterLbraryId = su.EtmfArtificateMasterLbraryId,
+                                    ProjectWorkplaceArtificatedocument = su.ProjectWorkplaceArtificatedocument.Where(x => x.Status == ArtifactDocStatusType.Final).ToList()
+                                }).Where(x => x.ProjectWorkplaceArtificatedocument.Count > 0).ToList()
+                            }).Where(x => x.ProjectWorkplaceArtificate.Count > 0).ToList()
+                        }).Where(x => x.ProjectWorkplaceSection.Count > 0).ToList()
+                    }).Where(x => x.ProjectWorkPlaceZone.Count > 0).ToList()
+                }).Where(x => x.ProjectWorkplaceDetail.Count > 0).ToList();
+
+                //projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail
+                //.Where(y => y.ProjectWorkPlaceZone
+                //.Where(a => a.ProjectWorkplaceSection
+                //.Where(b => b.ProjectWorkplaceArtificate
+                //.Where(c => c.ProjectWorkplaceArtificatedocument.Where(d => d.Status == ArtifactDocStatusType.Final).Select(z => z.ProjectWorkplaceArtificateId).Contains(c.Id))
+                //.Select(z => z.ProjectWorkplaceSectionId).Contains(b.Id))
+                //.Select(z => z.ProjectWorkPlaceZoneId).Contains(a.Id))
+                //.Select(z => z.ProjectWorkplaceDetailId).Contains(y.Id))
+                //.Select(z => z.ProjectWorkplaceId).Contains(x.Id)).ToList();
+                ////projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Where(y => y.ProjectWorkPlaceZone.Where(z => z.ProjectWorkplaceSection.Where(a => a.ProjectWorkplaceArtificate.Where(b => b.ProjectWorkplaceArtificatedocument.Where(c => c.Status == ArtifactDocStatusType.Final).Select(x => x.ProjectWorkplaceArtificateId).Contains(b.Id)).Select(x => x.ProjectWorkplaceSectionId).Contains(a.Id)).Select(x => x.ProjectWorkPlaceZoneId).Contains(z.Id)).Select(x => x.ProjectWorkplaceDetailId).Contains(y.Id)).Select(x => x.ProjectWorkplaceId).Contains(x.Id)).ToList();
+                //var ddd = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail
+                //.Where(x => x.ProjectWorkPlaceZone
+                //.Where(x => x.ProjectWorkplaceSection
+                //.Where(x => x.ProjectWorkplaceArtificate
+                //.Where(x => x.ProjectWorkplaceArtificatedocument
+                //.Where(x => x.Status == ArtifactDocStatusType.Final).
+                //Select(z => z.ProjectWorkplaceArtificateId).Contains(x.Id))
+                //.Select(z => z.ProjectWorkplaceSectionId).Contains(x.Id))
+                //.Select(z => z.ProjectWorkPlaceZoneId).Contains(x.Id))
+                //.Select(z => z.ProjectWorkplaceDetailId).Contains(x.Id))
+                //.Select(z => z.ProjectWorkplaceId).Contains(x.Id)).ToList();
+                //v.ProjectWorkplaceArtificatedocument.Where(b => b.Status == ArtifactDocStatusType.Final)
+                //ProjectWorkplaceArtificate = ProjectWorkplaceArtificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(X => X.Status == ArtifactDocStatusType.Final));
+
+                //projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Any(x => x.ProjectWorkplaceArtificate
+                //.Any(x => x.ProjectWorkplaceArtificatedocument.Any(x => x.Status == ArtifactDocStatusType.Final)))))).ToList();
+
+                //projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Count() > 0 && x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Count() > 0)
+                //&& x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Count() > 0)) &&
+                //x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Any(x => x.ProjectWorkplaceArtificate.Count() > 0)))
+                //).ToList();
+
+                //projectWorkplaces = projectWorkplace.ProjectWorkplaceDetail.Where(x => x.ProjectWorkPlaceZone.Where(x => x.ProjectWorkplaceSection.Where(x => x.ProjectWorkplaceArtificate.Where(x => x.ProjectWorkplaceArtificatedocument.Count() > 0).ToList())));
+
+            }
+            else if (chartType == EtmfChartType.Incomplete)
+            {
+                projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Any(x => x.ProjectWorkplaceArtificate.Any(x => x.ProjectWorkplaceArtificatedocument.Any(x => x.ProjectArtificateDocumentReview.Count == 0)))))).ToList();
+                //ProjectWorkplaceArtificate = ProjectWorkplaceArtificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(X => X.ProjectArtificateDocumentReview.Count == 0));
+            }
+            else if (chartType == EtmfChartType.NotRequired)
+            {
+                projectWorkplaces = projectWorkplaces.Where(x => x.ProjectWorkplaceDetail.Any(x => x.ProjectWorkPlaceZone.Any(x => x.ProjectWorkplaceSection.Any(x => x.ProjectWorkplaceArtificate.Any(x => x.IsNotRequired == true))))).ToList();
+                //ProjectWorkplaceArtificate = ProjectWorkplaceArtificate.Where(x => x.IsNotRequired == true);
+            }
+            List<TreeValue> pvList = new List<TreeValue>();
+            TreeValue pvListObj = new TreeValue();
+            foreach (var b in projectWorkplaces)
+            {
+
+                pvListObj.Id = b.Id;
+                pvListObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                pvListObj.Text = _context.Project.Where(x => x.Id == b.ProjectId).FirstOrDefault().ProjectCode;
+                pvListObj.Level = 1;
+                pvListObj.Item = new List<TreeValue>();
+                pvListObj.ParentMasterId = b.ProjectId;
+                pvListObj.Icon = "folder";
+
+                TreeValue TrialFol = new TreeValue();
+                TrialFol.Id = 11111111;
+                TrialFol.RandomId = RandomPassword.CreateRandomPassword(6);
+                TrialFol.Text = "Trial";
+                TrialFol.Level = 2;
+                TrialFol.Icon = "folder";
+                TrialFol.WorkPlaceFolderId = WorkPlaceFolder.Trial;
+
+                TreeValue CountryFol = new TreeValue();
+                CountryFol.Id = 11111112;
+                CountryFol.RandomId = RandomPassword.CreateRandomPassword(6);
+                CountryFol.Text = "Country";
+                CountryFol.Level = 2;
+                CountryFol.Icon = "folder";
+                CountryFol.WorkPlaceFolderId = WorkPlaceFolder.Country;
+
+                TreeValue SiteFol = new TreeValue();
+                SiteFol.Id = 11111113;
+                SiteFol.RandomId = RandomPassword.CreateRandomPassword(6);
+                SiteFol.Text = "Site";
+                SiteFol.Level = 2;
+                SiteFol.Icon = "folder";
+                SiteFol.WorkPlaceFolderId = WorkPlaceFolder.Site;
+
+                CountryFol.Item = new List<TreeValue>();
+                SiteFol.Item = new List<TreeValue>();
+                #region Get Country
+                foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Country && x.DeletedBy == null))
+                {
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+
+                    TreeValue pvListdetaiObj = new TreeValue();
+                    pvListdetaiObj.Item = new List<TreeValue>();
+                    pvListdetaiObj.Id = 22222222;
+                    pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                    pvListdetaiObj.Text = c.ItemName;
+                    pvListdetaiObj.Level = 3;
+                    pvListdetaiObj.Icon = "folder";
+                    pvListdetaiObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                    pvListdetaiObj.IsAdd = rights != null ? rights.IsAdd : false;
+                    pvListdetaiObj.IsEdit = rights != null ? rights.IsEdit : false;
+                    pvListdetaiObj.IsDelete = rights != null ? rights.IsDelete : false;
+                    pvListdetaiObj.IsView = rights != null ? rights.IsView : false;
+                    pvListdetaiObj.IsExport = rights != null ? rights.IsExport : false;
+
+                    List<TreeValue> pvListZoneList = new List<TreeValue>();
+                    foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
+                    {
+                        d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+
+                        TreeValue pvListZoneObj = new TreeValue();
+                        pvListZoneObj.Id = d.Id;
+                        pvListZoneObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                        pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
+                        pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
+                        pvListZoneObj.Level = 4;
+                        pvListZoneObj.ParentMasterId = b.ProjectId;
+                        pvListZoneObj.Icon = "folder";
+                        pvListZoneObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                        pvListZoneObj.ZoneId = d.Id;
+                        pvListZoneObj.IsAdd = rights != null ? rights.IsAdd : false;
+                        pvListZoneObj.IsEdit = rights != null ? rights.IsEdit : false;
+                        pvListZoneObj.IsDelete = rights != null ? rights.IsDelete : false;
+                        pvListZoneObj.IsView = rights != null ? rights.IsView : false;
+                        pvListZoneObj.IsExport = rights != null ? rights.IsExport : false;
+
+                        List<TreeValue> pvListSectionList = new List<TreeValue>();
+                        foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
+                        {
+                            e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+
+                            TreeValue pvListSectionObj = new TreeValue();
+                            pvListSectionObj.Id = e.Id;
+                            pvListSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                            pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
+                            pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
+                            pvListSectionObj.Level = 5;
+                            pvListSectionObj.ZoneId = d.Id;
+                            pvListSectionObj.CountryId = c.Id;
+                            pvListSectionObj.ParentMasterId = b.ProjectId;
+                            pvListSectionObj.Icon = "folder";
+                            pvListSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                            pvListSectionObj.SectionId = e.Id;
+                            pvListSectionObj.IsAdd = rights != null ? rights.IsAdd : false;
+                            pvListSectionObj.IsEdit = rights != null ? rights.IsEdit : false;
+                            pvListSectionObj.IsDelete = rights != null ? rights.IsDelete : false;
+                            pvListSectionObj.IsView = rights != null ? rights.IsView : false;
+                            pvListSectionObj.IsExport = rights != null ? rights.IsExport : false;
+                            List<TreeValue> pvListArtificateList = new List<TreeValue>();
+                            var ProjectWorkplaceArtificate = e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null);
+                            foreach (var f in ProjectWorkplaceArtificate)
+                            {
+                                f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                TreeValue pvListArtificateObj = new TreeValue();
+                                pvListArtificateObj.Id = f.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
+                                pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
+                                pvListArtificateObj.Level = 6;
+
+                                pvListArtificateObj.CountryId = c.Id;
+                                pvListArtificateObj.SiteId = 0;
+                                pvListArtificateObj.ZoneId = d.Id;
+                                pvListArtificateObj.SectionId = e.Id;
+                                pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
+                                pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
+                                pvListArtificateObj.ArtificateId = f.Id;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+                                pvListArtificateList.Add(pvListArtificateObj);
+                            }
+
+                            #region Add sub section folder data
+                            List<TreeValue> pvListsubsectionList = new List<TreeValue>();
+                            var SectionData = _context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
+                            foreach (var s in SectionData)
+                            {
+
+                                TreeValue pvListArtificateObj = new TreeValue();
+                                pvListArtificateObj.Id = s.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                pvListArtificateObj.Text = s.SubSectionName;
+                                pvListArtificateObj.Level = 5.1;
+
+                                pvListArtificateObj.CountryId = c.Id;
+                                pvListArtificateObj.SiteId = 0;
+                                pvListArtificateObj.ZoneId = d.Id;
+                                pvListArtificateObj.SectionId = e.Id;
+                                pvListArtificateObj.SubSectionId = s.Id;
+                                pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "folder";
+                                pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+
+                                List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
+                                var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
+                                foreach (var itemartifact in artifactsubSectionData)
+                                {
+                                    TreeValue pvListartifactsubsectionobj = new TreeValue();
+                                    pvListartifactsubsectionobj.Id = itemartifact.Id;
+                                    pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                    pvListartifactsubsectionobj.Text = itemartifact.ArtifactName;
+                                    pvListartifactsubsectionobj.Level = 5.2;
+                                    pvListartifactsubsectionobj.CountryId = c.Id;
+                                    pvListartifactsubsectionobj.SiteId = 0;
+                                    pvListartifactsubsectionobj.ZoneId = d.Id;
+                                    pvListartifactsubsectionobj.SectionId = e.Id;
+                                    pvListartifactsubsectionobj.SubSectionId = s.Id;
+                                    pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
+                                    pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
+                                    pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
+                                    pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
+                                    pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
+                                    pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
+                                    pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
+                                    pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
+                                    pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
+                                    pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
+                                }
+                                pvListArtificateList.Add(pvListArtificateObj);
+                                pvListArtificateObj.Item = pvListartifactsubsectionList;
+                            }
+                            #endregion
+
+                            pvListSectionList.Add(pvListSectionObj);
+                            pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
+                        }
+                        pvListZoneList.Add(pvListZoneObj);
+                        pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
+                        pvListdetaiObj.Item.Add(pvListZoneObj);
+                    }
+
+                    pvListdetaiObj.Item = pvListdetaiObj.Item.OrderBy(x => x.Number).ToList();
+                    CountryFol.Item.Add(pvListdetaiObj);
+
+                }
+
+                #endregion
+
+                #region Get Site
+                foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site && x.DeletedBy == null))
+                {
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+
+                    TreeValue pvListdetaiObj = new TreeValue();
+                    pvListdetaiObj.Item = new List<TreeValue>();
+                    pvListdetaiObj.Id = 232323232;
+                    pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                    pvListdetaiObj.Text = c.ItemName;
+                    pvListdetaiObj.Level = 3;
+                    pvListdetaiObj.Icon = "folder";
+                    pvListdetaiObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                    pvListdetaiObj.IsAdd = rights != null ? rights.IsAdd : false;
+                    pvListdetaiObj.IsEdit = rights != null ? rights.IsEdit : false;
+                    pvListdetaiObj.IsDelete = rights != null ? rights.IsDelete : false;
+                    pvListdetaiObj.IsView = rights != null ? rights.IsView : false;
+                    pvListdetaiObj.IsExport = rights != null ? rights.IsExport : false;
+
+                    List<TreeValue> pvListZoneList = new List<TreeValue>();
+                    foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
+                    {
+                        d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+
+                        TreeValue pvListZoneObj = new TreeValue();
+                        pvListZoneObj.Id = d.Id;
+                        pvListZoneObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                        pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
+                        pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
+                        pvListZoneObj.Level = 4;
+                        pvListZoneObj.ParentMasterId = b.ProjectId;
+                        pvListZoneObj.Icon = "folder";
+                        pvListZoneObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                        pvListZoneObj.ZoneId = d.Id;
+                        pvListZoneObj.IsAdd = rights != null ? rights.IsAdd : false;
+                        pvListZoneObj.IsEdit = rights != null ? rights.IsEdit : false;
+                        pvListZoneObj.IsDelete = rights != null ? rights.IsDelete : false;
+                        pvListZoneObj.IsView = rights != null ? rights.IsView : false;
+                        pvListZoneObj.IsExport = rights != null ? rights.IsExport : false;
+
+                        List<TreeValue> pvListSectionList = new List<TreeValue>();
+                        foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
+                        {
+                            e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+
+                            TreeValue pvListSectionObj = new TreeValue();
+                            pvListSectionObj.Id = e.Id;
+                            pvListSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                            pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
+                            pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
+                            pvListSectionObj.Level = 5;
+                            pvListSectionObj.ZoneId = d.Id;
+                            pvListSectionObj.SiteId = c.Id;
+                            pvListSectionObj.ParentMasterId = b.ProjectId;
+                            pvListSectionObj.Icon = "folder";
+                            pvListSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                            pvListSectionObj.SectionId = e.Id;
+                            pvListSectionObj.IsAdd = rights != null ? rights.IsAdd : false;
+                            pvListSectionObj.IsEdit = rights != null ? rights.IsEdit : false;
+                            pvListSectionObj.IsDelete = rights != null ? rights.IsDelete : false;
+                            pvListSectionObj.IsView = rights != null ? rights.IsView : false;
+                            pvListSectionObj.IsExport = rights != null ? rights.IsExport : false;
+
+                            List<TreeValue> pvListArtificateList = new List<TreeValue>();
+                            var ProjectWorkplaceArtificate = e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null);
+                            foreach (var f in ProjectWorkplaceArtificate)
+                            {
+                                f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                TreeValue pvListArtificateObj = new TreeValue();
+                                pvListArtificateObj.Id = f.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
+                                pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
+                                pvListArtificateObj.Level = 6;
+
+                                pvListArtificateObj.CountryId = 0;
+                                pvListArtificateObj.SiteId = c.Id;
+                                pvListArtificateObj.ZoneId = d.Id;
+                                pvListArtificateObj.SectionId = e.Id;
+                                pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
+                                pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
+                                pvListArtificateObj.ArtificateId = f.Id;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+                                pvListArtificateList.Add(pvListArtificateObj);
+                            }
+
+                            #region Add sub section folder data
+                            List<TreeValue> pvListsubsectionList = new List<TreeValue>();
+                            var SectionData = _context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
+                            foreach (var s in SectionData)
+                            {
+
+                                TreeValue pvListArtificateObj = new TreeValue();
+                                pvListArtificateObj.Id = s.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                pvListArtificateObj.Text = s.SubSectionName;
+                                pvListArtificateObj.Level = 5.1;
+
+                                pvListArtificateObj.CountryId = 0;
+                                pvListArtificateObj.SiteId = c.Id;
+                                pvListArtificateObj.ZoneId = d.Id;
+                                pvListArtificateObj.SectionId = e.Id;
+                                pvListArtificateObj.SubSectionId = s.Id;
+                                pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "folder";
+                                pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+
+                                List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
+                                var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
+                                foreach (var itemartifact in artifactsubSectionData)
+                                {
+                                    TreeValue pvListartifactsubsectionobj = new TreeValue();
+                                    pvListartifactsubsectionobj.Id = itemartifact.Id;
+                                    pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                    pvListartifactsubsectionobj.Text = itemartifact.ArtifactName;
+                                    pvListartifactsubsectionobj.Level = 5.2;
+
+                                    pvListartifactsubsectionobj.CountryId = 0;
+                                    pvListartifactsubsectionobj.SiteId = c.Id;
+                                    pvListartifactsubsectionobj.ZoneId = d.Id;
+                                    pvListartifactsubsectionobj.SectionId = e.Id;
+                                    pvListartifactsubsectionobj.SubSectionId = s.Id;
+                                    pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
+                                    pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
+                                    pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
+                                    pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
+                                    pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
+                                    pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
+                                    pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
+                                    pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
+                                    pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
+                                    pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
+
+                                }
+                                pvListArtificateList.Add(pvListArtificateObj);
+                                pvListArtificateObj.Item = pvListartifactsubsectionList;
+                            }
+                            #endregion
+                            pvListSectionList.Add(pvListSectionObj);
+                            pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
+                        }
+
+                        pvListZoneList.Add(pvListZoneObj);
+                        pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
+                        pvListdetaiObj.Item.Add(pvListZoneObj);
+                    }
+                    pvListdetaiObj.Item = pvListdetaiObj.Item.OrderBy(x => x.Number).ToList();
+                    SiteFol.Item.Add(pvListdetaiObj);
+                }
+
+                #endregion
+
+                #region Get Trial
+                foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial && x.DeletedBy == null))
+                {
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+
+                    TreeValue pvListdetaiObj = new TreeValue();
+                    pvListdetaiObj.Id = 333333333;
+                    pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                    pvListdetaiObj.Text = c.ItemName;
+                    pvListdetaiObj.Level = 3;
+                    pvListdetaiObj.Icon = "folder";
+                    pvListdetaiObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                    pvListdetaiObj.IsAdd = rights != null ? rights.IsAdd : false;
+                    pvListdetaiObj.IsEdit = rights != null ? rights.IsEdit : false;
+                    pvListdetaiObj.IsDelete = rights != null ? rights.IsDelete : false;
+                    pvListdetaiObj.IsView = rights != null ? rights.IsView : false;
+                    pvListdetaiObj.IsExport = rights != null ? rights.IsExport : false;
+                    List<TreeValue> pvListZoneList = new List<TreeValue>();
+
+                    foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
+                    {
+                        d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+
+                        TreeValue pvListZoneObj = new TreeValue();
+                        pvListZoneObj.Id = d.Id;
+                        pvListZoneObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                        pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
+                        pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
+                        pvListZoneObj.Level = 4;
+                        pvListZoneObj.ParentMasterId = b.ProjectId;
+                        pvListZoneObj.Icon = "folder";
+                        pvListZoneObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                        pvListZoneObj.ZoneId = d.Id;
+                        pvListZoneObj.IsAdd = rights != null ? rights.IsAdd : false;
+                        pvListZoneObj.IsEdit = rights != null ? rights.IsEdit : false;
+                        pvListZoneObj.IsDelete = rights != null ? rights.IsDelete : false;
+                        pvListZoneObj.IsView = rights != null ? rights.IsView : false;
+                        pvListZoneObj.IsExport = rights != null ? rights.IsExport : false;
+                        List<TreeValue> pvListSectionList = new List<TreeValue>();
+                        foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
+                        {
+                            e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+
+                            TreeValue pvListSectionObj = new TreeValue();
+                            pvListSectionObj.Id = e.Id;
+                            pvListSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                            pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
+                            pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
+                            pvListSectionObj.Level = 5;
+                            pvListSectionObj.ZoneId = d.Id;
+                            pvListSectionObj.ParentMasterId = b.ProjectId;
+                            pvListSectionObj.Icon = "folder";
+                            pvListSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                            pvListSectionObj.SectionId = e.Id;
+                            pvListSectionObj.IsAdd = rights != null ? rights.IsAdd : false;
+                            pvListSectionObj.IsEdit = rights != null ? rights.IsEdit : false;
+                            pvListSectionObj.IsDelete = rights != null ? rights.IsDelete : false;
+                            pvListSectionObj.IsView = rights != null ? rights.IsView : false;
+                            pvListSectionObj.IsExport = rights != null ? rights.IsExport : false;
+                            List<TreeValue> pvListArtificateList = new List<TreeValue>();
+
+                            var ProjectWorkplaceArtificate = e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null);
+                            foreach (var f in ProjectWorkplaceArtificate)
+                            {
+                                f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                TreeValue pvListArtificateObj = new TreeValue();
+                                pvListArtificateObj.Id = f.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
+                                pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
+                                pvListArtificateObj.Level = 6;
+
+                                pvListArtificateObj.CountryId = 0;
+                                pvListArtificateObj.SiteId = 0;
+                                pvListArtificateObj.ZoneId = d.Id;
+                                pvListArtificateObj.SectionId = e.Id;
+                                pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
+                                pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsNotRequired = f.IsNotRequired;
+                                pvListArtificateObj.ArtificateId = f.Id;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+                                pvListArtificateList.Add(pvListArtificateObj);
+                            }
+
+                            #region Add sub section folder data
+                            List<TreeValue> pvListsubsectionList = new List<TreeValue>();
+                            var SectionData = _context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
+                            foreach (var s in SectionData)
+                            {
+
+                                TreeValue pvListArtificateObj = new TreeValue();
+                                pvListArtificateObj.Id = s.Id;
+                                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                pvListArtificateObj.Text = s.SubSectionName;
+                                pvListArtificateObj.Level = 5.1;
+
+                                pvListArtificateObj.CountryId = 0;
+                                pvListArtificateObj.SiteId = 0;
+                                pvListArtificateObj.ZoneId = d.Id;
+                                pvListArtificateObj.SectionId = e.Id;
+                                pvListArtificateObj.SubSectionId = s.Id;
+                                pvListArtificateObj.ParentMasterId = b.ProjectId;
+                                pvListArtificateObj.Icon = "folder";
+                                pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
+                                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
+                                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
+                                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
+                                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+                                #region MyRegion
+                                List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
+                                var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
+                                foreach (var itemartifact in artifactsubSectionData)
+                                {
+                                    TreeValue pvListartifactsubsectionobj = new TreeValue();
+                                    pvListartifactsubsectionobj.Id = itemartifact.Id;
+                                    pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
+                                    pvListartifactsubsectionobj.Text = itemartifact.ArtifactName;
+                                    pvListartifactsubsectionobj.Level = 5.2;
+                                    pvListartifactsubsectionobj.CountryId = 0;
+                                    pvListartifactsubsectionobj.SiteId = 0;
+                                    pvListartifactsubsectionobj.ZoneId = d.Id;
+                                    pvListartifactsubsectionobj.SectionId = e.Id;
+                                    pvListartifactsubsectionobj.SubSectionId = s.Id;
+                                    pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
+                                    pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
+                                    pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
+                                    pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                                    pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
+                                    pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
+                                    pvListartifactsubsectionobj.IsEdit = rights != null ? rights.IsEdit : false;
+                                    pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
+                                    pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
+                                    pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
+                                    pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
+                                }
+                                #endregion
+                                pvListArtificateList.Add(pvListArtificateObj);
+                                pvListArtificateObj.Item = pvListartifactsubsectionList;
+
+                            }
+                            #endregion
+                            pvListSectionList.Add(pvListSectionObj);
+                            pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
+                        }
+                        pvListZoneList.Add(pvListZoneObj);
+                        pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
+                    }
+
+                    TrialFol.Item = pvListZoneList.OrderBy(x => x.Number).ToList();
+                }
+
+                #endregion
+                pvListObj.Item.Add(TrialFol);
+                pvListObj.Item.Add(CountryFol);
+                pvListObj.Item.Add(SiteFol);
+            }
+
+            pvList.Add(pvListObj);
+
+            return pvList;
+        }
+
+
     }
     public class TreeValue
     {

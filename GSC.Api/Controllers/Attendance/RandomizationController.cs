@@ -390,6 +390,12 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("GetPatientVisits")]
         public IActionResult GetPatientVisits()
         {
+            var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            if (randomization != null && (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess))
+            {
+                ModelState.AddModelError("Message", "Please complete your Consent first");
+                return BadRequest(ModelState);
+            }
             var data = _randomizationRepository.GetPatientVisits();
             if (data == null || data.ToList().Count <= 0)
             {

@@ -306,6 +306,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectDesignVariableEncryptRoleRepository, ProjectDesignVariableEncryptRoleRepository>();
             services.AddScoped<ITemplatePermissionRepository, TemplatePermissionRepository>();
             services.AddScoped<IUserSettingRepository, UserSettingRepository>();
+            services.AddScoped<IScreeningNumberSettingsRepository, ScreeningNumberSettingsRepository>();
+            services.AddScoped<IRandomizationNumberSettingsRepository, RandomizationNumberSettingsRepository>();
 
         }
     }

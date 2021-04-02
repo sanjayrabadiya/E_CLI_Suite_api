@@ -6,6 +6,8 @@ using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.Master;
 using GSC.Common.Common;
 using GSC.Shared.Extension;
+using System.Collections.Generic;
+using GSC.Data.Entities.InformConcent;
 
 namespace GSC.Data.Entities.Attendance
 {
@@ -67,9 +69,8 @@ namespace GSC.Data.Entities.Attendance
         public int? CompanyId { get; set; }
         public Data.Entities.Master.Project Project { get; set; }
         public virtual ScreeningEntry ScreeningEntry { get; set; }
-
         public string WithdrawSignaturePath { get; set; }
         public int? UserId { get; set; }
-
+        public List<EconsentReviewDetails> EconsentReviewDetails { get; set; }
     }
 }

@@ -572,4 +572,26 @@ namespace GSC.Helper
         [Description("High")] High = 3
     }
 
+    public enum EtmfChartType : int
+    {
+        //1: core
+        //2: Recommended
+        //3: Missing
+        //4: Pending Review
+        //5: Pending Approve
+        //6: Final
+        //7: Incomplete
+        //8: Not Required
+        [Description("Nothing")] Nothing = 0,
+        [Description("core")] core = 1,
+        [Description("Recommended")] Recommended = 2,
+        [Description("Missing")] Missing = 3,
+        [Description("Pending Review")] PendingReview = 4,
+        [Description("Pending Approve")] PendingApprove = 5,
+        [Description("Final")] Final = 6,
+        [Description("Incomplete")] Incomplete = 7,
+        [Description("Not Required")] NotRequired = 8
+    }
+
+
 }
