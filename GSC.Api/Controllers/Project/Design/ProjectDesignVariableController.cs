@@ -357,7 +357,7 @@ namespace GSC.Api.Controllers.Project.Design
         [Route("GetDesignReport")]
         public IActionResult GetDesignReport([FromBody] ProjectDatabaseSearchDto search)
         {
-            return Ok(_projectDesignVariableValueRepository.GetDesignReport(search));
+            return _projectDesignVariableValueRepository.GetDesignReport(search);
         }
     }
 }
