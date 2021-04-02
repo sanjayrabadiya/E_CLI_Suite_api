@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 
@@ -10,5 +11,6 @@ namespace GSC.Respository.Screening
         IList<ScreeningAuditDto> GetAudits(int screeningTemplateValueId);
         void Save(ScreeningTemplateValueAudit audit);
         IList<ScreeningAuditDto> GetAuditHistoryByScreeningEntry(int id);
+        void GetDataEntryAuditReportHistory(ProjectDatabaseSearchDto filters);
     }
 }

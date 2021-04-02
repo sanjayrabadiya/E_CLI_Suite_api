@@ -302,6 +302,10 @@ namespace GSC.Api.Helpers
             CreateMap<PhaseManagement, PhaseManagementDto>().ReverseMap();
             CreateMap<ResourceType, ResourceTypeDto>().ReverseMap();
 
+            CreateMap<ProjectDesignVariableRelation, ProjectDesignVariableRelationDto>().ReverseMap();
+            CreateMap<ProjectDesignVariableEncryptRole, ProjectDesignVariableEncryptRoleDto>().ReverseMap();
+            CreateMap<TemplatePermission, TemplatePermissionDto>().ReverseMap();
+            CreateMap<UserSetting, UserSettingDto>().ReverseMap();
 
 
             //CreateMap<Users, UserDto>().ReverseMap();

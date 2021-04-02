@@ -316,6 +316,11 @@ namespace GSC.Domain.Context
         public DbSet<StudyPlan> StudyPlan { get; set; }
 
         public DbSet<StudyPlanTask> StudyPlanTask { get; set; }
+
+        public DbSet<ProjectDesignVariableRelation> ProjectDesignVariableRelation { get; set; }
+        public DbSet<ProjectDesignVariableEncryptRole> ProjectDesignVariableEncryptRole { get; set; }
+        public DbSet<TemplatePermission> TemplatePermission { get; set; }
+        public DbSet<UserSetting> UserSetting { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

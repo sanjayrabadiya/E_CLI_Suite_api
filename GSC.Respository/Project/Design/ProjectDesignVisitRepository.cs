@@ -18,11 +18,14 @@ namespace GSC.Respository.Project.Design
         IProjectDesignVisitRepository
     {
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IGSCContext _context;
         public ProjectDesignVisitRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
+            IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository) : base(context)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _projectDesignVariableRepository = projectDesignVariableRepository;
             _context = context;
         }
 
@@ -45,6 +48,9 @@ namespace GSC.Respository.Project.Design
                 .ThenInclude(d => d.Variables)
                 .ThenInclude(d => d.Values)
                 .ThenInclude(d => d.VariableValueLanguage.Where(x => x.DeletedBy == null))
+               .Include(d => d.Templates)
+                .ThenInclude(d => d.Variables)
+                .ThenInclude(d => d.Roles)
                 .AsNoTracking().FirstOrDefault();
 
             return visit;
@@ -106,6 +112,23 @@ namespace GSC.Respository.Project.Design
                 x.ProjectDesignPeriodId == objSave.ProjectDesignPeriodId && x.DeletedDate == null))
                 return "Duplicate Visit Name : " + objSave.DisplayName;
             return "";
+        }
+
+        public IList<DropDownDto> GetVisitDropDownByVariable(int projectDesignVariableId)
+        {
+            var variables = _projectDesignVariableRepository.FindByInclude(x=>x.Id==projectDesignVariableId,x=>x.ProjectDesignTemplate
+            , x => x.ProjectDesignTemplate.ProjectDesignVisit, x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod).FirstOrDefault();
+
+            var visits = All.Where(x => x.DeletedDate == null
+                                        && x.ProjectDesignPeriodId == variables.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId).OrderBy(t => t.DesignOrder).Select(
+                t => new DropDownDto
+                {
+                    Id = t.Id,
+                    Value = t.DisplayName,
+                    ExtraData = t.IsNonCRF
+                }).ToList();
+
+            return visits;
         }
     }
 }

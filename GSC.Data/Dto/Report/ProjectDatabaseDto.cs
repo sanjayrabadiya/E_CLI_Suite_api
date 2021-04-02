@@ -116,6 +116,7 @@ namespace GSC.Data.Dto.Report
         public int?[] VisitIds { get; set; }
         public int?[] TemplateIds { get; set; }
         public int?[] DomainIds { get; set; }
+        public int?[] VariableIds { get; set; }
         public bool ExcelFormat { get; set; }
         public int SelectedProject { get; set; }
         public DBDSReportFilter? FilterId { get; set; }

@@ -87,7 +87,10 @@ namespace GSC.Helper
         Numeric4Decimal = 7,
 
         [Description("Numeric With 5 Decimal")]
-        Numeric5Decimal = 8
+        Numeric5Decimal = 8,
+
+        [Description("Relation")]
+        Relation = 9
     }
 
     public enum ValidationType : short
@@ -141,7 +144,8 @@ namespace GSC.Helper
         [Description("ExcleTemplate")] ExcleTemplate = 8,
         [Description("Project Worksplace")] ProjectWorksplace = 9,
         [Description("Inform Consent")] InformConcent = 10,
-        [Description("DBDS Report")] DBDSReport = 7
+        [Description("DBDS Report")] DBDSReport = 7,
+        [Description("DataEntry Audit")] DataEntryAudit = 11
     }
 
     public enum AuditModule : short
@@ -451,14 +455,16 @@ namespace GSC.Helper
     {
         [Description("Dossier Report")] DossierReport = 1,
         [Description("Medra")] Medra = 2,
-        [Description("DBDS Report")] DBDSReport = 3
+        [Description("DBDS Report")] DBDSReport = 3,
+        [Description("DataEntry Audit")] DataEntryAudit = 4
     }
 
     public enum JobTypeEnum : short
     {
         [Description("Report")] Report = 1,
         [Description("Excel")] Excel = 2,
-        [Description("Csv")] Csv = 3
+        [Description("Csv")] Csv = 3,
+        [Description("Pdf")] Pdf = 4
     }
 
     public enum JobStatusType : short

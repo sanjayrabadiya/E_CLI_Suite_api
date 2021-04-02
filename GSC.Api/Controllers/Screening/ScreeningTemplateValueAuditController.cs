@@ -1,4 +1,5 @@
 ﻿using GSC.Api.Controllers.Common;
+using GSC.Data.Dto.Report;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,6 +33,15 @@ namespace GSC.Api.Controllers.Screening
             var auditHistory = _screeningTemplateValueAuditRepository.GetAuditHistoryByScreeningEntry(id);
 
             return Ok(auditHistory);
+        }
+
+        [HttpPost]
+        [Route("GetDataEntryAuditReportHistory")]
+        public IActionResult GetDataEntryAuditReportHistory([FromBody] ProjectDatabaseSearchDto filters)
+        {
+            if (filters.ProjectId.Length <= 0) return BadRequest();
+            _screeningTemplateValueAuditRepository.GetDataEntryAuditReportHistory(filters);
+            return Ok();
         }
     }
 }

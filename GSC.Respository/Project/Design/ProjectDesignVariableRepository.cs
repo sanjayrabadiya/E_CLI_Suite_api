@@ -244,5 +244,16 @@ namespace GSC.Respository.Project.Design
                 CollectionSources = c.CollectionSource
             }).ToList();
         }
+
+        //Added method By Vipul for Get Variable By Multiple Template DropDown
+        public IList<DropDownDto> GetVariableByMultipleTemplateDropDown(int?[] templateIds)
+        {
+            var result = All.Where(x => x.DeletedDate == null && templateIds.Contains(x.ProjectDesignTemplateId));
+            return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownDto
+            {
+                Id = c.Id,
+                Value = c.VariableName
+            }).ToList();
+        }
     }
 }

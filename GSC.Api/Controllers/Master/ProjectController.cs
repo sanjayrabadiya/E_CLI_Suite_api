@@ -529,13 +529,13 @@ namespace GSC.Api.Controllers.Master
         [Route("validatenoofStudy")]
         public async Task<IActionResult> ValidatenoofStudy()
         {
-            bool IsAddmoreStudy = false;
+            bool IsAddmoreStudy = true;
             int noofstudy = 0;
             if (!_environmentSetting.Value.IsPremise)
             {
-                noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Company/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
-                int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null && x.DeletedDate == null).Count();
-                if (studycount < noofstudy)
+                //noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Company/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
+                //int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null && x.DeletedDate == null).Count();
+                //if (studycount < noofstudy)
                     IsAddmoreStudy = true;
             }
             return Ok(IsAddmoreStudy);

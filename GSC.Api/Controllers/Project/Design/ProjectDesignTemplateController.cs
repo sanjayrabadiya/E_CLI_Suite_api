@@ -39,7 +39,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeLanguageRepository _variableLanguageRepository;
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
-
+        private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IVariableTemplateRepository variableTemplateRepository,
@@ -54,8 +54,8 @@ namespace GSC.Api.Controllers.Project.Design
             IVariabeLanguageRepository variableLanguageRepository,
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
             IVariabeValueLanguageRepository variableValueLanguageRepository,
-
-            IUnitOfWork uow, IMapper mapper)
+            IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
+        IUnitOfWork uow, IMapper mapper)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -73,6 +73,7 @@ namespace GSC.Api.Controllers.Project.Design
             _variableValueLanguageRepository = variableValueLanguageRepository;
             _projectDesignTemplateNoteRepository = projectDesignTemplateNoteRepository;
             _domainRepository = domainRepository;
+            _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
         }
 
         [HttpGet("{projectDesignVisitId}")]
@@ -240,8 +241,8 @@ namespace GSC.Api.Controllers.Project.Design
                     variable.Values.ToList().ForEach(r =>
                       {
                           r.Id = 0;
-                      //    if (r.SeqNo == 0)
-                              r.SeqNo = ++Seq;
+                          //    if (r.SeqNo == 0)
+                          r.SeqNo = ++Seq;
                           _projectDesignVariableValueRepository.Add(r);
                           //For variable value clone language
                           r.VariableValueLanguage.ToList().ForEach(x =>
@@ -250,6 +251,13 @@ namespace GSC.Api.Controllers.Project.Design
                                 _variableValueLanguageRepository.Add(x);
                             });
                       });
+
+                    // For encrypt clone
+                    variable.Roles.ToList().ForEach(r =>
+                    {
+                        r.Id = 0;
+                        _projectDesignVariableEncryptRoleRepository.Add(r);
+                    });
                 }
 
                 foreach (var note in projectDesignTemplate.ProjectDesignTemplateNote)
@@ -310,6 +318,7 @@ namespace GSC.Api.Controllers.Project.Design
                     //For variable clone language
                     variable.VariableLanguage.ToList().ForEach(r =>
                     {
+                        r.Id = 0;
                         r.ProjectDesignVariable = variable;
                         _variableLanguageRepository.Add(r);
                     });
@@ -317,8 +326,16 @@ namespace GSC.Api.Controllers.Project.Design
                     //For variable note clone language
                     variable.VariableNoteLanguage.ToList().ForEach(r =>
                     {
+                        r.Id = 0;
                         r.ProjectDesignVariable = variable;
                         _variableNoteLanguageRepository.Add(r);
+                    });
+
+                    // For encrypt clone
+                    variable.Roles.ToList().ForEach(r =>
+                    {
+                        r.Id = 0;
+                        _projectDesignVariableEncryptRoleRepository.Add(r);
                     });
 
                     variable.Id = 0;
@@ -331,6 +348,7 @@ namespace GSC.Api.Controllers.Project.Design
                         //For variable value clone language
                         variableValue.VariableValueLanguage.ToList().ForEach(x =>
                         {
+                            x.Id = 0;
                             x.ProjectDesignVariableValue = variableValue;
                             _variableValueLanguageRepository.Add(x);
                         });
@@ -479,5 +497,6 @@ namespace GSC.Api.Controllers.Project.Design
         {
             return Ok(_projectDesignTemplateRepository.GetTemplateDropDownAnnotation(projectDesignVisitId));
         }
+
     }
 }

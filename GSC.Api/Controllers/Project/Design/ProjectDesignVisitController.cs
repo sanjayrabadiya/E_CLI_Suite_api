@@ -30,6 +30,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeLanguageRepository _variableLanguageRepository;
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
+        private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         public ProjectDesignVisitController(IProjectDesignVisitRepository projectDesignVisitRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
@@ -42,7 +43,8 @@ namespace GSC.Api.Controllers.Project.Design
             ITemplateNoteLanguageRepository templateNoteLanguageRepository,
             IVariabeLanguageRepository variableLanguageRepository,
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
-            IVariabeValueLanguageRepository variableValueLanguageRepository)
+            IVariabeValueLanguageRepository variableValueLanguageRepository,
+            IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _uow = uow;
@@ -58,6 +60,7 @@ namespace GSC.Api.Controllers.Project.Design
             _variableLanguageRepository = variableLanguageRepository;
             _variableNoteLanguageRepository = variableNoteLanguageRepository;
             _variableValueLanguageRepository = variableValueLanguageRepository;
+            _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
         }
 
         [HttpGet("{id}/{projectDesignPeriodId}")]
@@ -193,27 +196,34 @@ namespace GSC.Api.Controllers.Project.Design
 
                             //For variable value clone language
                             value.VariableValueLanguage.ToList().ForEach(x =>
-                        {
-                            x.Id = 0;
-                            _variableValueLanguageRepository.Add(x);
-                        });
+                            {
+                                x.Id = 0;
+                                _variableValueLanguageRepository.Add(x);
+                            });
 
                         });
                         _projectDesignVariableRepository.Add(variable);
 
                         //For variable clone language
                         variable.VariableLanguage.ToList().ForEach(r =>
-                    {
-                        r.Id = 0;
-                        _variableLanguageRepository.Add(r);
-                    });
+                        {
+                            r.Id = 0;
+                            _variableLanguageRepository.Add(r);
+                        });
+
+                        // For encrypt clone
+                        variable.Roles.ToList().ForEach(r =>
+                        {
+                            r.Id = 0;
+                            _projectDesignVariableEncryptRoleRepository.Add(r);
+                        });
 
                         //For variable note clone language
                         variable.VariableNoteLanguage.ToList().ForEach(r =>
-                    {
-                        r.Id = 0;
-                        _variableNoteLanguageRepository.Add(r);
-                    });
+                        {
+                            r.Id = 0;
+                            _variableNoteLanguageRepository.Add(r);
+                        });
 
                     });
 
@@ -298,6 +308,13 @@ namespace GSC.Api.Controllers.Project.Design
             _uow.Save();
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetVisitDropDownByVariable/{projectDesignVariableId}")]
+        public IActionResult GetVisitDropDownByVariable(int projectDesignVariableId)
+        {
+            return Ok(_projectDesignVisitRepository.GetVisitDropDownByVariable(projectDesignVariableId));
         }
     }
 }

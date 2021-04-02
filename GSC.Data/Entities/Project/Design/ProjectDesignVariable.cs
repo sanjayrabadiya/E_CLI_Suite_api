@@ -35,6 +35,7 @@ namespace GSC.Data.Entities.Project.Design
         public string UnitAnnotation { get; set; }
         public PrintType PrintType { get; set; }
         public bool IsDocument { get; set; }
+        public bool IsEncrypt { get; set; }
         public IList<ProjectDesignVariableValue> Values { get; set; } = null;
         public IList<ProjectDesignVariableRemarks> Remarks { get; set; } = null;
         public Unit Unit { get; set; }
@@ -52,5 +53,7 @@ namespace GSC.Data.Entities.Project.Design
         public List<VariableLanguage> VariableLanguage { get; set; }
         public List<VariableNoteLanguage> VariableNoteLanguage { get; set; }
         public Alignment? Alignment { get; set; }
+
+        public IList<ProjectDesignVariableEncryptRole> Roles { get; set; } = null;
     }
 }

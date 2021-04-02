@@ -4,6 +4,7 @@ using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
+using GSC.Data.Dto.Report;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -23,11 +24,13 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
+        private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
 
         public ProjectDesignVariableController(IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
+            IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             IUnitOfWork uow, IMapper mapper,
             IVariableRepository variableRepository)
         {
@@ -35,6 +38,7 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
+            _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
             _uow = uow;
             _mapper = mapper;
             _variableRepository = variableRepository;
@@ -44,7 +48,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x=>x.SeqNo), t => t.Remarks)
+            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x => x.SeqNo), t => t.Remarks, t => t.Roles.Where(x => x.DeletedDate == null))
                 .FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             return Ok(variableDto);
@@ -77,6 +81,12 @@ namespace GSC.Api.Controllers.Project.Design
             {
                 _projectDesignVariableValueRepository.Add(item);
             }
+
+            foreach (var item in variable.Roles)
+            {
+                _projectDesignVariableEncryptRoleRepository.Add(item);
+            }
+
             _uow.Save();
             return Ok(variable.Id);
         }
@@ -110,6 +120,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             UpdateVariableValues(variable);
             UpdateVariableRemarks(variable);
+            UpdateVariableEncryptRole(variable);
 
             _projectDesignVariableRepository.Update(variable);
             _uow.Save();
@@ -213,8 +224,30 @@ namespace GSC.Api.Controllers.Project.Design
                 _projectDesignVariableValueRepository.Add(item);
             }
 
-            foreach(var value in updatevalues)
+            foreach (var value in updatevalues)
                 _projectDesignVariableValueRepository.Update(value);
+        }
+
+        private void UpdateVariableEncryptRole(ProjectDesignVariable variable)
+        {
+            // get role by projectdesign variable id
+            var data = _projectDesignVariableEncryptRoleRepository.FindBy(x => x.ProjectDesignVariableId == variable.Id && x.DeletedDate == null).ToList();
+
+            foreach (var item in variable.Roles)
+            {
+                var role = data.Where(t => t.RoleId == item.RoleId).FirstOrDefault();
+                // add role if new select in dropdown
+                if (role == null)
+                    _projectDesignVariableEncryptRoleRepository.Add(item);
+            }
+            var RoleIds = variable.Roles.Select(x => new { x.RoleId }).ToList();
+            //delete role if not select in dropdown and exists in table
+            var Exists = data.Where(x => !RoleIds.Any(t => t.RoleId == x.RoleId)).ToList();
+            if (Exists.Count != 0)
+                foreach (var item in Exists)
+                {
+                    _projectDesignVariableEncryptRoleRepository.Delete(item);
+                }
         }
 
         private void UpdateVariableRemarks(ProjectDesignVariable variable)
@@ -310,6 +343,21 @@ namespace GSC.Api.Controllers.Project.Design
         {
             return Ok(
                 _projectDesignVariableRemarksRepository.GetProjectDesignVariableRemarksDropDown(projectDesignVariableId));
+        }
+
+        [HttpPost]
+        [Route("GetVariableByMultipleTemplateDropDown")]
+        public IActionResult GetVariableByMultipleTemplateDropDown([FromBody] ProjectDatabaseSearchDto filters)
+        {
+            return Ok(_projectDesignVariableRepository.GetVariableByMultipleTemplateDropDown(filters.TemplateIds));
+        }
+
+        //Get designREport
+        [HttpPost]
+        [Route("GetDesignReport")]
+        public IActionResult GetDesignReport([FromBody] ProjectDatabaseSearchDto search)
+        {
+            return Ok(_projectDesignVariableValueRepository.GetDesignReport(search));
         }
     }
 }

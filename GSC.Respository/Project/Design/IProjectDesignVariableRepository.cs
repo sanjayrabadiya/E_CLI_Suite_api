@@ -24,6 +24,7 @@ namespace GSC.Respository.Project.Design
 
         //Added method By Vipul 22092020 for visit status in project design get only date and datetime variable
         IList<DropDownVaribleDto> GetVariabeAnnotationDropDownForVisitStatus(int projectDesignTemplateId);
+        IList<DropDownDto> GetVariableByMultipleTemplateDropDown(int?[] templateIds);
 
     }
 }

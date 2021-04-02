@@ -40,8 +40,8 @@ namespace GSC.Respository.Project.Design
                 .ThenInclude(d => d.VariableLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.VariableNoteLanguage.Where(x => x.DeletedBy == null))
-               // .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
-              //  .ThenInclude(d => d.Roles.Where(x => x.DeletedBy == null))
+                .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
+                .ThenInclude(d => d.Roles.Where(x => x.DeletedBy == null))
                 .AsNoTracking().FirstOrDefault();
 
             return template;
