@@ -6,6 +6,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
@@ -38,6 +39,8 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IRandomizationRepository _randomizationRepository;
+        private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
+        private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
 
         public ProjectController(IProjectRepository projectRepository,
             IDesignTrialRepository designTrialRepository,
@@ -50,7 +53,10 @@ namespace GSC.Api.Controllers.Master
             ICentreUserService centreUserService,
             IJwtTokenAccesser jwtTokenAccesser,
             IOptions<EnvironmentSetting> environmentSetting,
-            IRandomizationRepository randomizationRepository)
+            IRandomizationRepository randomizationRepository,
+            IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
+            IScreeningNumberSettingsRepository screeningNumberSettingsRepository
+            )
         {
             _projectRepository = projectRepository;
             _designTrialRepository = designTrialRepository;
@@ -65,6 +71,8 @@ namespace GSC.Api.Controllers.Master
             _jwtTokenAccesser = jwtTokenAccesser;
             _environmentSetting = environmentSetting;
             _randomizationRepository = randomizationRepository;
+            _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
+            _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
