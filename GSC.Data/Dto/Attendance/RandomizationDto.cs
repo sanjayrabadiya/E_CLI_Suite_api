@@ -37,7 +37,7 @@ namespace GSC.Data.Dto.Attendance
         public string LegalLastName { get; set; }
         public string LegalEmergencyCoNumber { get; set; }
         public string LegalEmail { get; set; }
-        public int? LegalRelationship { get; set; }
+        public Relationship? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
         public int? StateId { get; set; }
         public int? CountryId { get; set; }
@@ -86,7 +86,7 @@ namespace GSC.Data.Dto.Attendance
         public string LegalLastName { get; set; }
         public string LegalEmergencyCoNumber { get; set; }
         public string LegalEmail { get; set; }
-        public int? LegalRelationship { get; set; }
+        public string LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
         public string CityName { get; set; }
         public string StateName { get; set; }

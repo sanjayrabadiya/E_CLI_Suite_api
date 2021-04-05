@@ -8,6 +8,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Report;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -69,16 +70,16 @@ namespace GSC.Respository.Project.Design
                 VariableAlias = r.ProjectDesignVariable.VariableAlias,
                 VariableAnnotation = r.ProjectDesignVariable.Annotation,
                 VariableCategoryName = r.ProjectDesignVariable.VariableCategoryName,
-                Role = "Role",//r.ProjectDesignVariable.RoleVariableType.GetDescription(),
-                CoreType = "Core Type",// r.ProjectDesignVariable.CoreVariableType.GetDescription(),
-                CollectionSource = "Collection Source", // r.ProjectDesignVariable.CollectionSource,
-                DataType = "Data Type", // r.ProjectDesignVariable.DataType,
+                Role = r.ProjectDesignVariable.RoleVariableType.GetDescription(),
+                CoreType = r.ProjectDesignVariable.CoreVariableType.GetDescription(),
+                CollectionSource = r.ProjectDesignVariable.CollectionSource.GetDescription(),
+                DataType = r.ProjectDesignVariable.DataType.GetDescription(),
                 IsNa = r.ProjectDesignVariable.IsNa,
-                DateValidate = "Date Validate", // r.ProjectDesignVariable.DateValidate,
+                DateValidate = r.ProjectDesignVariable.DateValidate.GetDescription(),
                 UnitName = r.ProjectDesignVariable.Unit.UnitName,
                 UnitAnnotation = r.ProjectDesignVariable.UnitAnnotation,
                 CollectionAnnotation = r.ProjectDesignVariable.CollectionAnnotation,
-                ValidationType = "Validation Type", //r.ProjectDesignVariable.ValidationType,
+                ValidationType = r.ProjectDesignVariable.ValidationType.GetDescription(),
                 Length = r.ProjectDesignVariable.Length,
                 LowRangeValue = r.ProjectDesignVariable.LowRangeValue,
                 HighRangeValue = r.ProjectDesignVariable.HighRangeValue,
@@ -86,8 +87,6 @@ namespace GSC.Respository.Project.Design
                 IsDocument = r.ProjectDesignVariable.IsDocument,
                 Note = r.ProjectDesignVariable.Note,
                 IsEncrypt = r.ProjectDesignVariable.IsEncrypt,
-
-
             }).ToList();
 
 
@@ -98,7 +97,7 @@ namespace GSC.Respository.Project.Design
                 IXLWorksheet worksheet;
                 worksheet = workbook.Worksheets.Add();
 
-                worksheet.Rows(1, 2).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
                 worksheet.Cell(1, 1).Value = "STUDY CODE";
                 worksheet.Cell(1, 2).Value = "Visit";
                 worksheet.Cell(1, 3).Value = "Template";
@@ -127,7 +126,7 @@ namespace GSC.Respository.Project.Design
                 worksheet.Cell(1, 26).Value = "Variable Note";
                 worksheet.Cell(1, 27).Value = "Document";
                 worksheet.Cell(1, 28).Value = "Encrypt";
-                var j = 3;
+                var j = 2;
 
                 MainData.ForEach(d =>
                 {
@@ -159,30 +158,11 @@ namespace GSC.Respository.Project.Design
                     worksheet.Row(j).Cell(26).SetValue(d.Note);
                     worksheet.Row(j).Cell(27).SetValue(d.IsDocument);
                     worksheet.Row(j).Cell(28).SetValue(d.IsEncrypt);
-
                     j++;
                 });
 
-
-                //    string path = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.DataEntryAudit.ToString());
-                //    if (!Directory.Exists(path))
-                //    {
-                //        Directory.CreateDirectory(path);
-                //    }
-
-                //using (var stream = new MemoryStream())
-                //{
-                //    workbook.SaveAs(stream);
-                //    var content = stream.ToArray();
-                //    var memoryStream = new MemoryStream();
-                //memoryStream.CopyTo(workbook);
-                //}
-
                 MemoryStream memoryStream = new MemoryStream();
                 workbook.SaveAs(memoryStream);
-
-                // return stream;
-
                 memoryStream.Position = 0;
                 FileStreamResult fileStreamResult = new FileStreamResult(memoryStream, "application/vnd.ms-excel");
                 fileStreamResult.FileDownloadName = "Blank.xls";

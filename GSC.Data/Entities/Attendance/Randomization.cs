@@ -45,7 +45,7 @@ namespace GSC.Data.Entities.Attendance
         public string LegalLastName { get; set; }
         public string LegalEmergencyCoNumber { get; set; }
         public string LegalEmail { get; set; }
-        public int? LegalRelationship { get; set; }
+        public Relationship? LegalRelationship { get; set; }
         public bool LegalStatus { get; set; }
         public Country Country { get; set; }
         public State State { get; set; }

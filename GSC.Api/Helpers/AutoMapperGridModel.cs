@@ -126,6 +126,7 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                  .ForMember(x => x.Language, x => x.MapFrom(a => a.Language.LanguageName))
                  .ForMember(x => x.Gen, x => x.MapFrom(a => a.Gender.GetDescription()))
+                 .ForMember(x => x.LegalRelationship, x => x.MapFrom(a => a.LegalRelationship.GetDescription()))
                  .ForMember(x => x.PatientStatusName, x => x.MapFrom(a => a.PatientStatusId.GetDescription())).ReverseMap();
 
             CreateMap<ProjectWorkplace, ETMFWorkplaceGridDto>()

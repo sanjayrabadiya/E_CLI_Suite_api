@@ -235,7 +235,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "AddressLine2", DisplayName = "Address Line2" });
             _dictionaries.Add(new Dictionary { FieldName = "ZipCode", DisplayName = "ZipCode" });
             _dictionaries.Add(new Dictionary { FieldName = "LegalFirstName", DisplayName = "(LR)First Name" });
-
+            _dictionaries.Add(new Dictionary { FieldName = "LegalStatus", DisplayName = "Include Legal Authorised Representative" }); 
             _dictionaries.Add(new Dictionary { FieldName = "LegalMiddleName", DisplayName = "(LR)Middle Name" });
             _dictionaries.Add(new Dictionary { FieldName = "LegalLastName", DisplayName = "(LR)Last Name" });
             _dictionaries.Add(new Dictionary { FieldName = "LegalEmergencyCoNumber", DisplayName = "(LR)Contact Number" });
