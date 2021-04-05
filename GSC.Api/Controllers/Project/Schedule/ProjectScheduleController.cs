@@ -105,7 +105,9 @@ namespace GSC.Api.Controllers.Project.Schedule
                     var Template = _projectDesignTemplateRepository.Find(t.ProjectDesignTemplateId);
                     t.TemplateName = Template.TemplateName;
                     t.TemplateDesignOrder = Template.DesignOrder;
-                    t.Variables = _projectDesignVariableRepository.GetVariabeDropDown(t.ProjectDesignTemplateId);
+                    // Change by swati on 01/04/2021
+                    //t.Variables = _projectDesignVariableRepository.GetVariabeDropDown(t.ProjectDesignTemplateId);
+                    t.Variables = _projectDesignVariableRepository.GetVariabeAnnotationDropDown(t.ProjectDesignTemplateId, false);
                     t.PeriodName = _projectDesignPeriodRepository.Find(t.ProjectDesignPeriodId).DisplayName;
                     t.VisitName = _projectDesignVisitRepository.Find(t.ProjectDesignVisitId).DisplayName;
                     t.IsVariablLoaded = true;

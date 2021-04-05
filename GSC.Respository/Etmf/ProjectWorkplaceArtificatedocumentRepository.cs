@@ -124,14 +124,13 @@ namespace GSC.Respository.Etmf
         public List<CommonArtifactDocumentDto> GetDocumentList(int id)
         {
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
-            var reviewdocument = _context.ProjectArtificateDocumentReview.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId
-                                  //  && c.RoleId == _jwtTokenAccesser.RoleId
-                                  ).Select(x => x.ProjectWorkplaceArtificatedDocumentId).ToList();
-            if (reviewdocument == null || reviewdocument.Count == 0) return dataList;
+            //var reviewdocument = _context.ProjectArtificateDocumentReview.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId)
+            //    .Select(x => x.ProjectWorkplaceArtificatedDocumentId).ToList();
+            //if (reviewdocument == null || reviewdocument.Count == 0) return dataList;
 
             var documentList = All.Include(x => x.ProjectWorkplaceArtificate).Where(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null
-             && reviewdocument.Any(c => c == x.Id)
-            ).ToList();
+             //&& reviewdocument.Any(c => c == x.Id)
+             ).ToList();
 
             foreach (var item in documentList)
             {
@@ -171,8 +170,8 @@ namespace GSC.Respository.Etmf
                 obj.Artificatename = _etmfArtificateMasterLbraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId).ArtificateName;
                 obj.DocumentName = item.DocumentName;
                 obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
-                obj.DocPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
-                obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath);
+                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
+                obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.Reviewer = users;
                 obj.CreatedDate = item.CreatedDate;

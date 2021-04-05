@@ -16,7 +16,7 @@ namespace GSC.Data.Dto.Project.Schedule
         public int? NegativeDeviation { get; set; }
         public string TemplateName { get; set; }
         public int TemplateDesignOrder { get; set; }
-        public IList<DropDownDto> Variables { get; set; }
+        public IList<DropDownVaribleDto> Variables { get; set; }
         public bool IsVariablLoaded { get; set; }
         public int ProjectDesignPeriodId { get; set; }
         public int ProjectDesignVisitId { get; set; }
