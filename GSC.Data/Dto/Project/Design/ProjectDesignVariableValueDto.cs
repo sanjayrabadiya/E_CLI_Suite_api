@@ -46,10 +46,15 @@ namespace GSC.Data.Dto.Project.Design
     {
         public string StudyCode { get; set; }
         public string Visit { get; set; }
+        public int? VisitOrderId { get; set; }
+        public int? TemplateOrderId { get; set; }
+
         public string Template { get; set; }
         public bool IsRepeated { get; set; }
         public bool IsParticipantView { get; set; }
         public string DomainName { get; set; }
+        public int? VariableOrderId { get; set; }
+
         public string VariableName { get; set; }
         public string VariableCode { get; set; }
         public string VariableAlias { get; set; }
@@ -72,5 +77,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool? IsDocument { get; set; }
         public string Note { get; set; }
         public bool? IsEncrypt { get; set; }
+        public string EncryptRole { get; set; }
+        public string CollectionValue { get; set; }
     }
 }

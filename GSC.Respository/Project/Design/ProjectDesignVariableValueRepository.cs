@@ -40,54 +40,59 @@ namespace GSC.Respository.Project.Design
         // Design Report
         public FileStreamResult GetDesignReport(ProjectDatabaseSearchDto search)
         {
-            var query = All.AsQueryable();
-            query = query.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == search.ParentProjectId);
+            var query = _context.ProjectDesignVariable.AsQueryable();
+            query = query.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == search.ParentProjectId);
 
-            if (search.VisitIds != null)
-                query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.Id));
+            if (search.VisitIds != null && search.VisitIds.Length > 0)
+                query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisit.Id));
 
-            if (search.TemplateIds != null)
-                query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignVariable.ProjectDesignTemplate.Id));
+            if (search.TemplateIds != null && search.TemplateIds.Length > 0)
+                query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignTemplate.Id));
 
-            if (search.VariableIds != null)
-                query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignVariable.Id));
+            if (search.VariableIds != null && search.VariableIds.Length > 0)
+                query = query.Where(x => search.VisitIds.Contains(x.Id));
 
-           return GetItems(query, search);
+            return GetItems(query, search);
         }
 
-        public FileStreamResult GetItems(IQueryable<ProjectDesignVariableValue> query, ProjectDatabaseSearchDto filters)
+        public FileStreamResult GetItems(IQueryable<ProjectDesignVariable> query, ProjectDatabaseSearchDto filters)
         {
             var MainData = query.Select(r => new ProjectDesignReportDto
             {
-                StudyCode = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode,
-                Visit = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
-                Template = r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
-                DomainName = r.ProjectDesignVariable.Domain.DomainName,
-                IsRepeated = r.ProjectDesignVariable.ProjectDesignTemplate.IsRepeated,
-                IsParticipantView = r.ProjectDesignVariable.ProjectDesignTemplate.IsParticipantView,
-                VariableName = r.ProjectDesignVariable.VariableName,
-                VariableCode = r.ProjectDesignVariable.VariableCode,
-                VariableAlias = r.ProjectDesignVariable.VariableAlias,
-                VariableAnnotation = r.ProjectDesignVariable.Annotation,
-                VariableCategoryName = r.ProjectDesignVariable.VariableCategoryName,
-                Role = r.ProjectDesignVariable.RoleVariableType.GetDescription(),
-                CoreType = r.ProjectDesignVariable.CoreVariableType.GetDescription(),
-                CollectionSource = r.ProjectDesignVariable.CollectionSource.GetDescription(),
-                DataType = r.ProjectDesignVariable.DataType.GetDescription(),
-                IsNa = r.ProjectDesignVariable.IsNa,
-                DateValidate = r.ProjectDesignVariable.DateValidate.GetDescription(),
-                UnitName = r.ProjectDesignVariable.Unit.UnitName,
-                UnitAnnotation = r.ProjectDesignVariable.UnitAnnotation,
-                CollectionAnnotation = r.ProjectDesignVariable.CollectionAnnotation,
-                ValidationType = r.ProjectDesignVariable.ValidationType.GetDescription(),
-                Length = r.ProjectDesignVariable.Length,
-                LowRangeValue = r.ProjectDesignVariable.LowRangeValue,
-                HighRangeValue = r.ProjectDesignVariable.HighRangeValue,
-                DefaultValue = r.ProjectDesignVariable.DefaultValue,
-                IsDocument = r.ProjectDesignVariable.IsDocument,
-                Note = r.ProjectDesignVariable.Note,
-                IsEncrypt = r.ProjectDesignVariable.IsEncrypt,
-            }).ToList();
+                StudyCode = r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode,
+                VisitOrderId = r.ProjectDesignTemplate.ProjectDesignVisit.DesignOrder,
+                Visit = r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                Template = r.ProjectDesignTemplate.TemplateName,
+                TemplateOrderId = r.ProjectDesignTemplate.DesignOrder,
+                DomainName = r.Domain.DomainName,
+                IsRepeated = r.ProjectDesignTemplate.IsRepeated,
+                IsParticipantView = r.ProjectDesignTemplate.IsParticipantView,
+                VariableOrderId = r.DesignOrder,
+                VariableName = r.VariableName,
+                VariableCode = r.VariableCode,
+                VariableAlias = r.VariableAlias,
+                VariableAnnotation = r.Annotation,
+                VariableCategoryName = r.VariableCategoryName,
+                Role = r.RoleVariableType.GetDescription(),
+                CoreType = r.CoreVariableType.GetDescription(),
+                CollectionSource = r.CollectionSource.GetDescription(),
+                DataType = r.DataType.GetDescription(),
+                IsNa = r.IsNa,
+                DateValidate = r.DateValidate.GetDescription(),
+                UnitName = r.Unit.UnitName,
+                UnitAnnotation = r.UnitAnnotation,
+                CollectionAnnotation = r.CollectionAnnotation,
+                ValidationType = r.ValidationType.GetDescription(),
+                Length = r.Length,
+                LowRangeValue = r.LowRangeValue,
+                HighRangeValue = r.HighRangeValue,
+                DefaultValue = r.DefaultValue,
+                IsDocument = r.IsDocument,
+                Note = r.Note,
+                IsEncrypt = r.IsEncrypt,
+                EncryptRole = string.Join(", ", r.Roles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList()),
+                CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList())
+            }).ToList().OrderBy(x => x.VisitOrderId).ToList();
 
 
             #region Excel Report Design
@@ -126,40 +131,45 @@ namespace GSC.Respository.Project.Design
                 worksheet.Cell(1, 26).Value = "Variable Note";
                 worksheet.Cell(1, 27).Value = "Document";
                 worksheet.Cell(1, 28).Value = "Encrypt";
+                worksheet.Cell(1, 29).Value = "Encrypted Role";
+                worksheet.Cell(1, 30).Value = "Collection Value";
+
                 var j = 2;
 
                 MainData.ForEach(d =>
-                {
-                    worksheet.Row(j).Cell(1).SetValue(d.StudyCode);
-                    worksheet.Row(j).Cell(2).SetValue(d.Visit);
-                    worksheet.Row(j).Cell(3).SetValue(d.Template);
-                    worksheet.Row(j).Cell(4).SetValue(d.DomainName);
-                    worksheet.Row(j).Cell(5).SetValue(d.IsRepeated);
-                    worksheet.Row(j).Cell(6).SetValue(d.IsParticipantView);
-                    worksheet.Row(j).Cell(7).SetValue(d.VariableName);
-                    worksheet.Row(j).Cell(8).SetValue(d.VariableCode);
-                    worksheet.Row(j).Cell(9).SetValue(d.VariableAlias);
-                    worksheet.Row(j).Cell(10).SetValue(d.VariableAnnotation);
-                    worksheet.Row(j).Cell(11).SetValue(d.VariableCategoryName);
-                    worksheet.Row(j).Cell(12).SetValue(d.Role);
-                    worksheet.Row(j).Cell(13).SetValue(d.CoreType);
-                    worksheet.Row(j).Cell(14).SetValue(d.CollectionSource);
-                    worksheet.Row(j).Cell(15).SetValue(d.DataType);
-                    worksheet.Row(j).Cell(16).SetValue(d.IsNa);
-                    worksheet.Row(j).Cell(17).SetValue(d.DateValidate);
-                    worksheet.Row(j).Cell(18).SetValue(d.UnitName);
-                    worksheet.Row(j).Cell(19).SetValue(d.UnitAnnotation);
-                    worksheet.Row(j).Cell(20).SetValue(d.CollectionAnnotation);
-                    worksheet.Row(j).Cell(21).SetValue(d.ValidationType);
-                    worksheet.Row(j).Cell(22).SetValue(d.Length);
-                    worksheet.Row(j).Cell(23).SetValue(d.LowRangeValue);
-                    worksheet.Row(j).Cell(24).SetValue(d.HighRangeValue);
-                    worksheet.Row(j).Cell(25).SetValue(d.DefaultValue);
-                    worksheet.Row(j).Cell(26).SetValue(d.Note);
-                    worksheet.Row(j).Cell(27).SetValue(d.IsDocument);
-                    worksheet.Row(j).Cell(28).SetValue(d.IsEncrypt);
-                    j++;
-                });
+                            {
+                                worksheet.Row(j).Cell(1).SetValue(d.StudyCode);
+                                worksheet.Row(j).Cell(2).SetValue(d.Visit);
+                                worksheet.Row(j).Cell(3).SetValue(d.Template);
+                                worksheet.Row(j).Cell(4).SetValue(d.DomainName);
+                                worksheet.Row(j).Cell(5).SetValue(d.IsRepeated);
+                                worksheet.Row(j).Cell(6).SetValue(d.IsParticipantView);
+                                worksheet.Row(j).Cell(7).SetValue(d.VariableName);
+                                worksheet.Row(j).Cell(8).SetValue(d.VariableCode);
+                                worksheet.Row(j).Cell(9).SetValue(d.VariableAlias);
+                                worksheet.Row(j).Cell(10).SetValue(d.VariableAnnotation);
+                                worksheet.Row(j).Cell(11).SetValue(d.VariableCategoryName);
+                                worksheet.Row(j).Cell(12).SetValue(d.Role);
+                                worksheet.Row(j).Cell(13).SetValue(d.CoreType);
+                                worksheet.Row(j).Cell(14).SetValue(d.CollectionSource);
+                                worksheet.Row(j).Cell(15).SetValue(d.DataType);
+                                worksheet.Row(j).Cell(16).SetValue(d.IsNa);
+                                worksheet.Row(j).Cell(17).SetValue(d.DateValidate);
+                                worksheet.Row(j).Cell(18).SetValue(d.UnitName);
+                                worksheet.Row(j).Cell(19).SetValue(d.UnitAnnotation);
+                                worksheet.Row(j).Cell(20).SetValue(d.CollectionAnnotation);
+                                worksheet.Row(j).Cell(21).SetValue(d.ValidationType);
+                                worksheet.Row(j).Cell(22).SetValue(d.Length);
+                                worksheet.Row(j).Cell(23).SetValue(d.LowRangeValue);
+                                worksheet.Row(j).Cell(24).SetValue(d.HighRangeValue);
+                                worksheet.Row(j).Cell(25).SetValue(d.DefaultValue);
+                                worksheet.Row(j).Cell(26).SetValue(d.Note);
+                                worksheet.Row(j).Cell(27).SetValue(d.IsDocument);
+                                worksheet.Row(j).Cell(28).SetValue(d.IsEncrypt);
+                                worksheet.Row(j).Cell(29).SetValue(d.EncryptRole);
+                                worksheet.Row(j).Cell(30).SetValue(d.CollectionValue);
+                                j++;
+                            });
 
                 MemoryStream memoryStream = new MemoryStream();
                 workbook.SaveAs(memoryStream);
