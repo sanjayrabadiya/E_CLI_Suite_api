@@ -54,9 +54,9 @@ namespace GSC.Respository.InformConcent
 
         public List<EconsentSetupGridDto> GetEconsentSetupList(int projectid, bool isDeleted)
         {
-            IList<int> intList = new List<int>();
-            intList = _context.Project.Where(x => x.ParentProjectId == projectid).Select(y => y.Id).ToList();
-            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && intList.Contains(x.ProjectId)).
+            //IList<int> intList = new List<int>();
+            //intList = _context.Project.Where(x => x.ParentProjectId == projectid).Select(y => y.Id).ToList();
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectid). //intList.Contains(x.ProjectId
                    ProjectTo<EconsentSetupGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 

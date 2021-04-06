@@ -269,6 +269,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "SectionNo", DisplayName = "SectionNo" });
             _dictionaries.Add(new Dictionary { FieldName = "ReferenceTitle", DisplayName = "Reference Title" });
             _dictionaries.Add(new Dictionary { FieldName = "FilePath", DisplayName = "File Path" });
+            _dictionaries.Add(new Dictionary { FieldName = "PatientStatusId", DisplayName = "Patient Status" });
         }
 
 

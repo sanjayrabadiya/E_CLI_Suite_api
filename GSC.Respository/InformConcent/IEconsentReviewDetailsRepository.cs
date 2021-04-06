@@ -13,9 +13,9 @@ namespace GSC.Respository.InformConcent
     public interface IEconsentReviewDetailsRepository : IGenericRepository<EconsentReviewDetails>
     {
         string Duplicate(EconsentReviewDetailsDto objSave);
-        IList<DropDownDto> GetPatientDropdown(int projectid);
-        List<EconsentReviewDetailsDto> GetUnApprovedEconsentDocumentList(int patientid);
-        List<EconsentReviewDetailsDto> GetApprovedEconsentDocumentList(int projectid);
+        //IList<DropDownDto> GetPatientDropdown(int projectid);
+        //List<EconsentReviewDetailsDto> GetUnApprovedEconsentDocumentList(int patientid);
+        //List<EconsentReviewDetailsDto> GetApprovedEconsentDocumentList(int projectid);
         List<SectionsHeader> GetEconsentDocumentHeaders();
         List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId);
         string ImportSectionData(int id, int sectionno);
@@ -23,5 +23,6 @@ namespace GSC.Respository.InformConcent
         List<DashboardDto> GetEconsentMyTaskList(int ProjectId);
         void downloadpdf(CustomParameter param);
         List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForSubjectManagement(int patientid);
+        List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForPatientDashboard();
     }
 }

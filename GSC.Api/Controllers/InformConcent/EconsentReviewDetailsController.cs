@@ -28,6 +28,7 @@ using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using GSC.Shared.JWTAuth;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Drawing;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -167,11 +168,18 @@ namespace GSC.Api.Controllers.InformConcent
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
             var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.RandomizationId).ToList().FirstOrDefault();
             _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
-            if (project.InvestigatorContactId != null)
+            var EconsentApprovedroles = _context.EconsentSetupRoles.Where(x => x.EconsentDocumentId == Econsentsetup.Id).Select(x => x.RoleId);
+            var users = _context.ProjectRight.Where(x => x.ProjectId == randomization.ProjectId && EconsentApprovedroles.Contains(x.RoleId) && x.IsReviewDone == true).Select(x => x.UserId).Distinct();
+            var usersdata = _context.Users.Where(x => users.Contains(x.Id) && x.DeletedDate == null).ToList();
+            usersdata.ForEach(x =>
             {
-                var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
-                _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
-            }
+                _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(x.Email, x.UserName, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
+            });
+            //if (project.InvestigatorContactId != null)
+            //{
+            //    var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
+            //    _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
+            //}
             return Ok(econsentReviewDetail.Id);
         }
 
@@ -251,38 +259,45 @@ namespace GSC.Api.Controllers.InformConcent
 
             System.IO.File.Delete(filePath);
             if (_uow.Save() <= 0) throw new Exception("Creating Econsent review insert failed on save.");
-            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentSetupId).ToList().FirstOrDefault();
+            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentSetupId).FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
-            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.RandomizationId).ToList().FirstOrDefault();
+            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.RandomizationId).FirstOrDefault();
             _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
-            if (project.InvestigatorContactId != null)
+            var EconsentApprovedroles = _context.EconsentSetupRoles.Where(x => x.EconsentDocumentId == Econsentsetup.Id).Select(x => x.RoleId);
+            var users = _context.ProjectRight.Where(x => x.ProjectId == randomization.ProjectId && EconsentApprovedroles.Contains(x.RoleId) && x.IsReviewDone == true).Select(x => x.UserId).Distinct();
+            var usersdata = _context.Users.Where(x => users.Contains(x.Id) && x.DeletedDate == null).ToList();
+            usersdata.ForEach(x =>
             {
-                var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
-                _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
-            }
+                _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(x.Email, x.UserName, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
+            });
+            //if (project.InvestigatorContactId != null)
+            //{
+            //    var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
+            //    _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
+            //}
             return Ok(econsentReviewDetail.Id);
         }
 
-        [HttpGet]
-        [Route("GetPatientDropdown/{projectid}")]
-        public IActionResult GetPatientDropdown(int projectid)
-        {
-            return Ok(_econsentReviewDetailsRepository.GetPatientDropdown(projectid));
-        }
+        //[HttpGet]
+        //[Route("GetPatientDropdown/{projectid}")]
+        //public IActionResult GetPatientDropdown(int projectid)
+        //{
+        //    return Ok(_econsentReviewDetailsRepository.GetPatientDropdown(projectid));
+        //}
 
-        [HttpGet]
-        [Route("GetUnApprovedEconsentDocumentList/{patientid}")]
-        public IActionResult GetUnApprovedEconsentDocumentList(int patientid)
-        {
-            return Ok(_econsentReviewDetailsRepository.GetUnApprovedEconsentDocumentList(patientid));
-        }
+        //[HttpGet]
+        //[Route("GetUnApprovedEconsentDocumentList/{patientid}")]
+        //public IActionResult GetUnApprovedEconsentDocumentList(int patientid)
+        //{
+        //    return Ok(_econsentReviewDetailsRepository.GetUnApprovedEconsentDocumentList(patientid));
+        //}
 
-        [HttpGet]
-        [Route("GetApprovedEconsentDocumentList/{projectid}")]
-        public IActionResult GetApprovedEconsentDocumentList(int projectid)
-        {
-            return Ok(_econsentReviewDetailsRepository.GetApprovedEconsentDocumentList(projectid));
-        }
+        //[HttpGet]
+        //[Route("GetApprovedEconsentDocumentList/{projectid}")]
+        //public IActionResult GetApprovedEconsentDocumentList(int projectid)
+        //{
+        //    return Ok(_econsentReviewDetailsRepository.GetApprovedEconsentDocumentList(projectid));
+        //}
 
         [HttpPost]
         [Route("GetEconsentDocument")]
@@ -297,6 +312,13 @@ namespace GSC.Api.Controllers.InformConcent
         public IActionResult GetEconsentReviewDetailsForSubjectManagement(int patientid)
         {
             return Ok(_econsentReviewDetailsRepository.GetEconsentReviewDetailsForSubjectManagement(patientid));
+        }
+        
+        [HttpGet]
+        [Route("GetEconsentReviewDetailsForPatientDashboard")]
+        public IActionResult GetEconsentReviewDetailsForPatientDashboard()
+        {
+            return Ok(_econsentReviewDetailsRepository.GetEconsentReviewDetailsForPatientDashboard());
         }
 
         [HttpPut]

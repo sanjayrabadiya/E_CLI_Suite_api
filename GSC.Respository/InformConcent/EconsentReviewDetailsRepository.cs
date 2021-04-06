@@ -71,62 +71,63 @@ namespace GSC.Respository.InformConcent
 
         
 
-        public IList<DropDownDto> GetPatientDropdown(int projectid)
-        {
-            //var econsentsetups = _econsentSetupRepository.All.Where(x => x.ProjectId == projectid).ToList();
-            var data = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == projectid)
-                        join EconsentReviewDetails in _context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsReviewDoneByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentSetupId
-                        join nonregister in _context.Randomization.Where(x => x.DeletedDate == null && x.Id == 7) on EconsentReviewDetails.RandomizationId equals nonregister.Id //attendance.Id equals nonregister.AttendanceId
-                        //join attendance in _context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
+        //public IList<DropDownDto> GetPatientDropdown(int projectid)
+        //{
+        //    //var econsentsetups = _econsentSetupRepository.All.Where(x => x.ProjectId == projectid).ToList();
+        //    var data = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == projectid)
+        //                join EconsentReviewDetails in _context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsReviewDoneByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentSetupId
+        //                join nonregister in _context.Randomization.Where(x => x.DeletedDate == null && x.Id == 7) on EconsentReviewDetails.RandomizationId equals nonregister.Id //attendance.Id equals nonregister.AttendanceId
+        //                //join attendance in _context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
 
-                        select new DropDownDto
-                        {
-                            Id = nonregister.Id,
-                            Value = nonregister.Initial + " " + nonregister.ScreeningNumber
-                        }).Distinct().ToList();
+        //                select new DropDownDto
+        //                {
+        //                    Id = nonregister.Id,
+        //                    Value = nonregister.Initial + " " + nonregister.ScreeningNumber
+        //                }).Distinct().ToList();
 
-            return data;
-        }
+        //    return data;
+        //}
 
-        public List<EconsentReviewDetailsDto> GetUnApprovedEconsentDocumentList(int patientid)
-        {
-            var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.IsReviewDoneByInvestigator == false).
-                   ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            EconsentReviewDetails.ForEach(b =>
-            {
-                b.EconsentDocumentName = _econsentSetupRepository.Find((int)b.EconsentSetupId).DocumentName;
-            });
-            return EconsentReviewDetails;
-        }
+        //public List<EconsentReviewDetailsDto> GetUnApprovedEconsentDocumentList(int patientid)
+        //{
+        //    var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.IsReviewDoneByInvestigator == false).
+        //           ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        //    EconsentReviewDetails.ForEach(b =>
+        //    {
+        //        b.EconsentDocumentName = _econsentSetupRepository.Find((int)b.EconsentSetupId).DocumentName;
+        //    });
+        //    return EconsentReviewDetails;
+        //}
 
-        public List<EconsentReviewDetailsDto> GetApprovedEconsentDocumentList(int projectid)
-        {
-            var data = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == projectid)
-                        join EconsentReviewDetails in _context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsReviewDoneByInvestigator == true) on econsentsetups.Id equals EconsentReviewDetails.EconsentSetupId
-                        join nonregister in _context.Randomization.Where(x => x.DeletedDate == null) on EconsentReviewDetails.RandomizationId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
-                        //join attendance in _context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
+        //public List<EconsentReviewDetailsDto> GetApprovedEconsentDocumentList(int projectid)
+        //{
+        //    var data = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == projectid)
+        //                join EconsentReviewDetails in _context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsReviewDoneByInvestigator == true) on econsentsetups.Id equals EconsentReviewDetails.EconsentSetupId
+        //                join nonregister in _context.Randomization.Where(x => x.DeletedDate == null) on EconsentReviewDetails.RandomizationId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
+        //                //join attendance in _context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
 
-                        select new EconsentReviewDetailsDto
-                        {
-                            Id = EconsentReviewDetails.Id,
-                            EconsentSetupId = EconsentReviewDetails.EconsentSetupId,
-                            EconsentDocumentName = econsentsetups.DocumentName,
-                            RandomizationName = nonregister.Initial + " " + nonregister.ScreeningNumber,
-                            RandomizationId = EconsentReviewDetails.RandomizationId,
-                            patientapproveddatetime = EconsentReviewDetails.patientapproveddatetime,
-                            investigatorRevieweddatetime = EconsentReviewDetails.investigatorRevieweddatetime
-                        }).ToList();
+        //                select new EconsentReviewDetailsDto
+        //                {
+        //                    Id = EconsentReviewDetails.Id,
+        //                    EconsentSetupId = EconsentReviewDetails.EconsentSetupId,
+        //                    EconsentDocumentName = econsentsetups.DocumentName,
+        //                    RandomizationName = nonregister.Initial + " " + nonregister.ScreeningNumber,
+        //                    RandomizationId = EconsentReviewDetails.RandomizationId,
+        //                    patientapproveddatetime = EconsentReviewDetails.patientapproveddatetime,
+        //                    investigatorRevieweddatetime = EconsentReviewDetails.investigatorRevieweddatetime
+        //                }).ToList();
 
-            return data;
-        }
+        //    return data;
+        //}
 
         public List<SectionsHeader> GetEconsentDocumentHeaders()
         {
             //var noneregister = _context.Randomization.Where(x => x.Id == patientId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(patientId);
-            var noneregister = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(patientId);
-            if (noneregister == null) return new List<SectionsHeader>();                                                      
+            var noneregister = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();//_noneRegisterRepository.Find(patientId);
+            if (noneregister == null) return new List<SectionsHeader>();
+            var studyId = _projectRepository.Find(noneregister.ProjectId).ParentProjectId;
             var econsentReviewDetails = FindBy(x => x.RandomizationId == noneregister.Id).ToList();
-            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == noneregister.ProjectId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
+            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
 
             var Econsentdocuments = (from econsentsetups in Edocuments
                                      join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId into ps
@@ -396,9 +397,9 @@ namespace GSC.Respository.InformConcent
 
         public List<DashboardDto> GetEconsentMyTaskList(int ProjectId)
         {
-            var result = (from project in _context.Project.Where(x => x.Id == ProjectId)
-                          join childproject in _context.Project.Where(x => x.ParentProjectId != null) on project.Id equals childproject.ParentProjectId
-                          join econsentsetups in _context.EconsentSetup on childproject.Id equals econsentsetups.ProjectId
+            var result = (//from project in _context.Project.Where(x => x.Id == ProjectId)
+                          //join childproject in _context.Project.Where(x => x.ParentProjectId != null) on project.Id equals childproject.ParentProjectId
+                          from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null)
                          join EconsentReviewDetails in _context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentSetupId
                          join nonregister in _context.Randomization.Where(x => x.DeletedDate == null) on EconsentReviewDetails.RandomizationId equals nonregister.Id//attendance.Id equals nonregister.AttendanceId
                                                                                                                                                                  //join attendance in _context.Attendance.Where(x => x.DeletedDate == null) on EconsentReviewDetails.AttendanceId equals attendance.Id
@@ -427,6 +428,29 @@ namespace GSC.Respository.InformConcent
         {
             var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.IsReviewedByPatient == true && x.EconsentSetup.Roles.Any(t => t.RoleId == _jwtTokenAccesser.RoleId)).
                    ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            return EconsentReviewDetails;
+        }
+
+        public List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForPatientDashboard()
+        {
+            var randomization = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            if (randomization == null)
+                return new List<EconsentReviewDetailsDto>();
+            var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
+            var econsentReviewDetails = FindBy(x => x.RandomizationId == randomization.Id).ToList();
+            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyid && x.LanguageId == randomization.LanguageId && x.DeletedDate == null).ToList();
+            //var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == randomizationId).
+            //       ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var EconsentReviewDetails = (from econsentsetups in Edocuments
+                                         join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId into ps
+                                     from p in ps.DefaultIfEmpty()
+                                     select new EconsentReviewDetailsDto
+                                     {
+                                         Id = (p == null) ? 0 : p.Id,
+                                         EconsentDocumentName = econsentsetups.DocumentName,
+                                         IsReviewedByPatient = (p == null) ? false : p.IsReviewedByPatient,
+                                         IsReviewDoneByInvestigator = (p == null) ? false : p.IsReviewDoneByInvestigator
+                                     }).ToList();
             return EconsentReviewDetails;
         }
     }

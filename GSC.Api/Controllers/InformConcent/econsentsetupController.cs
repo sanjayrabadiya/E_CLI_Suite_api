@@ -25,6 +25,7 @@ using Microsoft.AspNetCore.Mvc;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -270,7 +271,7 @@ namespace GSC.Api.Controllers.InformConcent
                 }
                 throw new Exception($"Creating EConsent File failed on save.");
             }
-            var result = (from patients in _context.Randomization.Where(x => x.ProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId)
+            var result = (from patients in _context.Randomization.Include(x => x.Project).Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId)
                           join status in _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id) on (int)patients.PatientStatusId equals status.PatientStatusId
                           select new Randomization
                           {

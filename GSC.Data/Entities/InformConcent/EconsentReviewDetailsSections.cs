@@ -11,6 +11,7 @@ namespace GSC.Data.Entities.InformConcent
         public int EconsentReviewDetailId { get; set; }
         public int SectionNo { get; set; }
         public int TimeInSeconds { get; set; }
+        public bool IsAgree { get; set; }
 
         [ForeignKey("EconsentReviewDetailId")]
         public EconsentReviewDetails EconsentReviewDetails { get; set; }

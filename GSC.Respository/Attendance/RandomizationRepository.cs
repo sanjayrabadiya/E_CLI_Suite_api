@@ -612,8 +612,10 @@ namespace GSC.Respository.Attendance
 
         public void SendEmailOfStartEconsent(Randomization randomization)
         {
-            var projectname = _projectRepository.Find(randomization.ProjectId).ProjectCode;
-            var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == randomization.ProjectId && x.LanguageId == randomization.LanguageId && x.DeletedDate == null)
+            //var projectname = _projectRepository.Find(randomization.ProjectId).ProjectCode;
+            var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
+            var study = _projectRepository.Find((int)studyid);
+            var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == study.Id && x.LanguageId == randomization.LanguageId && x.DeletedDate == null)
                                      join status in _context.EconsentSetupPatientStatus.Where(a => a.PatientStatusId == (int)randomization.PatientStatusId && a.DeletedDate == null) on econsentsetups.Id equals status.EconsentDocumentId
                                      select new EconsentSetup
                                      {
@@ -627,7 +629,7 @@ namespace GSC.Respository.Attendance
             }
             if (Econsentdocuments.Count > 0)
             {
-                _emailSenderRespository.SendEmailOfStartEconsent(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, documentname, projectname);
+                _emailSenderRespository.SendEmailOfStartEconsent(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, documentname, study.ProjectCode);
             }
         }
 
@@ -635,10 +637,11 @@ namespace GSC.Respository.Attendance
         public void ChangeStatustoConsentInProgress()
         {
 
-            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening || randomization.PatientStatusId == ScreeningPatientStatus.Screening)
             {
-                var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == randomization.ProjectId && x.LanguageId == randomization.LanguageId && x.DeletedDate == null)
+                var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == (int)studyid && x.LanguageId == randomization.LanguageId && x.DeletedDate == null)
                                          join status in _context.EconsentSetupPatientStatus.Where(a => a.PatientStatusId == (int)randomization.PatientStatusId && a.DeletedDate == null) on econsentsetups.Id equals status.EconsentDocumentId
                                          select new EconsentSetup
                                          {
@@ -666,6 +669,7 @@ namespace GSC.Respository.Attendance
         public void ChangeStatustoConsentCompleted(int id)
         {
             var randomization = Find(id);
+            var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
             {
                 if (_econsentReviewDetailsRepository.FindByInclude(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).ToList().Count > 0)
@@ -673,7 +677,7 @@ namespace GSC.Respository.Attendance
                 }
                 else
                 {
-                    var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.DeletedDate == null && x.LanguageId == randomization.LanguageId && x.ProjectId == randomization.ProjectId).ToList()
+                    var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.DeletedDate == null && x.LanguageId == randomization.LanguageId && x.ProjectId == (int)studyid).ToList()
                                              join doc in _econsentReviewDetailsRepository.FindByInclude(x => x.RandomizationId == id && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == true).ToList() on econsentsetups.Id equals doc.EconsentSetupId into ps
                                              from p in ps.DefaultIfEmpty()
                                              select new EconsentSetup
@@ -735,16 +739,17 @@ namespace GSC.Respository.Attendance
 
         }
 
-        public void ChangeStatustoWithdrawal(FileModel fileModel)
+        public void ChangeStatustoWithdrawal()
         {
+            //public void ChangeStatustoWithdrawal(FileModel fileModel)
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
-            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
+            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
             {
-                if (fileModel.Base64?.Length > 0)
-                {
-                    randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
-                        _context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
-                }
+                //if (fileModel.Base64?.Length > 0)
+                //{
+                //    randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
+                //        _context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
+                //}
                 randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
                 Update(randomization);
             }

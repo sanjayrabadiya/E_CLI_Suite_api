@@ -10,6 +10,7 @@ namespace GSC.Data.Dto.InformConcent
         public int EconsentReviewDetailId { get; set; }
         public int SectionNo { get; set; }
         public int TimeInSeconds { get; set; }
+        public bool IsAgree { get; set; }
         public List<EconsentReviewDetailsSectionsDto> EconsentReviewDetailsSections { get; set; }
     }
 }
