@@ -73,7 +73,7 @@ namespace GSC.Respository.Etmf
                 {
                     UserId = c.UserId,
                     Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
-                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
+                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == false),
                 }).Where(x => x.IsSelected == false).ToList();
             return users;
         }
@@ -190,7 +190,7 @@ namespace GSC.Respository.Etmf
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.Reviewed.GetDescription(),
                     Level = 6
-                }).OrderBy(x => x.Id).ToList();
+                }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
         }
@@ -216,7 +216,7 @@ namespace GSC.Respository.Etmf
                     CreatedByUser = _context.Users.Where(x => x.Id == s.UserId).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.SendBack.GetDescription()
-                }).OrderBy(x => x.Id).ToList();
+                }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
         }

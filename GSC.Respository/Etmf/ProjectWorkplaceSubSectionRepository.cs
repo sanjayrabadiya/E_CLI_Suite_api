@@ -135,7 +135,7 @@ namespace GSC.Respository.Etmf
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Trial.GetDescription(),
-                data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName);
+                data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName);
                 path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Trial.GetDescription(),
                    data.ZonName.Trim(), data.SectionName.Trim(), projectWorkplaceSubSectionDto.SubSectionName.Trim());
             }

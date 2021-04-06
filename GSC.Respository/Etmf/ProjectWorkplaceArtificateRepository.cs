@@ -53,10 +53,13 @@ namespace GSC.Respository.Etmf
                 {
                     ProjectWorkplaceArtificateId = y.Id,
                     EtmfArtificateMasterLbraryId = y.EtmfArtificateMasterLbraryId,
+                    FolderId = y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId,
                     FolderName = ((WorkPlaceFolder)y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription()
                     + " - " + y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName,
                     ParentArtificateId = y.ParentArtificateId
                 }).ToList();
+
+            result = result.OrderBy(z => z.FolderId == 3 ? 1 : z.FolderId == 1 ? 2 : 2).ToList();
 
             return result;
         }

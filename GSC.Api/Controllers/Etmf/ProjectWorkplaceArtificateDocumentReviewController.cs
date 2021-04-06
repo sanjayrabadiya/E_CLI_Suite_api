@@ -96,7 +96,7 @@ namespace GSC.Api.Controllers.Etmf
             && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.DeletedDate == null).FirstOrDefault();
 
             projectArtificateDocumentReviewDto.IsSendBack = true;
-            projectArtificateDocumentReviewDto.SendBackDate = DateTime.Now;
+            projectArtificateDocumentReviewDto.SendBackDate = _jwtTokenAccesser.GetClientDate();
             var projectArtificateDocumentReview = _mapper.Map<ProjectArtificateDocumentReview>(projectArtificateDocumentReviewDto);
             _projectWorkplaceArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);
 
