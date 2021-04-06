@@ -275,5 +275,6 @@ namespace GSC.Domain.Context
         DbSet<UserSetting> UserSetting { get; set; }
         DbSet<RandomizationNumberSettings> RandomizationNumberSettings { get; set; }
         DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }
+        DbSet<VisitLanguage> VisitLanguage { get; set; }
     }
 }

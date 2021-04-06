@@ -41,7 +41,9 @@ namespace GSC.Respository.Project.Design
         public FileStreamResult GetDesignReport(ProjectDatabaseSearchDto search)
         {
             var query = _context.ProjectDesignVariable.AsQueryable();
-            query = query.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == search.ParentProjectId);
+            query = query.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == search.ParentProjectId
+            && x.ProjectDesignTemplate.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.DeletedDate == null
+            && x.DeletedDate == null);
 
             if (search.VisitIds != null && search.VisitIds.Length > 0)
                 query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisit.Id));
@@ -91,8 +93,12 @@ namespace GSC.Respository.Project.Design
                 Note = r.Note,
                 IsEncrypt = r.IsEncrypt,
                 EncryptRole = string.Join(", ", r.Roles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList()),
-                CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList())
+                CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList()),
+                //    ProjectDesignLanguages = GetVisitLanguageData(r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id)
             }).ToList().OrderBy(x => x.VisitOrderId).ToList();
+
+            var VisitLanguageData = GetVisitLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
+
 
 
             #region Excel Report Design
@@ -100,7 +106,7 @@ namespace GSC.Respository.Project.Design
             using (var workbook = new XLWorkbook())
             {
                 IXLWorksheet worksheet;
-                worksheet = workbook.Worksheets.Add();
+                worksheet = workbook.Worksheets.Add("Design");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
                 worksheet.Cell(1, 1).Value = "STUDY CODE";
@@ -171,6 +177,22 @@ namespace GSC.Respository.Project.Design
                                 j++;
                             });
 
+                worksheet = workbook.Worksheets.Add("Visit Language");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Visit";
+                worksheet.Cell(1, 2).Value = "Language";
+                worksheet.Cell(1, 3).Value = "Conversion";
+
+                var v = 2;
+                VisitLanguageData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(v).Cell(1).SetValue(d.Name);
+                    worksheet.Row(v).Cell(2).SetValue(d.Language);
+                    worksheet.Row(v).Cell(3).SetValue(d.Value);
+                    v++;
+                });
+
                 MemoryStream memoryStream = new MemoryStream();
                 workbook.SaveAs(memoryStream);
                 memoryStream.Position = 0;
@@ -179,6 +201,19 @@ namespace GSC.Respository.Project.Design
                 return fileStreamResult;
             }
             #endregion
+        }
+
+        public IList<ProjectDesignLanguageReportDto> GetVisitLanguageData(int ProjectDesignPeriodId)
+        {
+            var visits = new List<int>();
+            visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return _context.VisitLanguage.Where(t => visits.Contains(t.ProjectDesignVisitId) && t.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            {
+                Name = r.ProjectDesignVisit.DisplayName,
+                Language = r.Language.LanguageName,
+                Value = r.Display
+            }).ToList();
         }
     }
 }

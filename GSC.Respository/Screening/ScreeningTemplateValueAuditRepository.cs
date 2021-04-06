@@ -110,16 +110,16 @@ namespace GSC.Respository.Screening
 
             query = query.Where(x => sites.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId));
 
-            if (search.SubjectIds != null)
+            if (search.SubjectIds != null && search.SubjectIds.Length > 0)
                 query = query.Where(x => search.SubjectIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Id));
 
-            if (search.VisitIds != null)
+            if (search.VisitIds != null && search.VisitIds.Length > 0)
                 query = query.Where(x => search.VisitIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId));
 
-            if (search.TemplateIds != null)
+            if (search.TemplateIds != null && search.TemplateIds.Length > 0)
                 query = query.Where(x => search.VisitIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplateId));
 
-            if (search.VariableIds != null)
+            if (search.VariableIds != null && search.VariableIds.Length > 0)
                 query = query.Where(x => search.VisitIds.Contains(x.ScreeningTemplateValue.ProjectDesignVariableId));
 
             GetItems(query, search);

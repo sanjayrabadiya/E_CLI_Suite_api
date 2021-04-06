@@ -35,7 +35,7 @@ namespace GSC.Data.Dto.Project.Design
         public int SeqNo { get; set; }
     }
 
-    public class ProjectDesignVariableValueDropDown 
+    public class ProjectDesignVariableValueDropDown
     {
         public int Id { get; set; }
         public string ValueCode { get; set; }
@@ -79,5 +79,13 @@ namespace GSC.Data.Dto.Project.Design
         public bool? IsEncrypt { get; set; }
         public string EncryptRole { get; set; }
         public string CollectionValue { get; set; }
+        public IList<ProjectDesignLanguageReportDto> ProjectDesignLanguages { get; set; }
+    }
+
+    public class ProjectDesignLanguageReportDto
+    {
+        public string Name { get; set; }
+        public string Language { get; set; }
+        public string Value { get; set; }
     }
 }
