@@ -135,7 +135,7 @@ namespace GSC.Respository.ProjectRight
                                 ProjectId = item.Id,
                                 IsReview = true,
                                 ReviewDate = _jwtTokenAccesser.GetClientDate()// DateTime.Now.ToUniversalTime()
-                    });
+                            });
                         else
                             Add(new ProjectDocumentReview
                             {
@@ -349,27 +349,50 @@ namespace GSC.Respository.ProjectRight
             }).OrderBy(o => o.Id).ToList();
         }
 
+
         public List<ProjectDropDown> GetChildProjectDropDownProjectRight(int ParentProjectId)
         {
             // changes by swati for child project
-            var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == ParentProjectId
-                                             && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
+            var projectList = _context.Project.Where(x => x.ParentProjectId == ParentProjectId
+                                             && _context.ProjectRight.Any(a => a.ProjectId == x.Id
                                                                               && a.UserId == _jwtTokenAccesser.UserId &&
                                                                               a.RoleId == _jwtTokenAccesser.RoleId
                                                                               && a.DeletedDate == null &&
                                                                               a.RollbackReason == null) &&
                                              x.DeletedDate == null).Select(c => new ProjectDropDown
                                              {
-                                                 Id = c.ProjectId,
-                                                 Value = c.Project.ProjectCode,
-                                                 Code = c.Project.ProjectCode,
-                                                 ParentProjectId = (int)c.Project.ParentProjectId,
-                                                 CountryId = c.Project.ManageSite.City.State.CountryId
+                                                 Id = c.Id,
+                                                 Value = c.ProjectCode,
+                                                 Code = c.ProjectCode,
+                                                 ParentProjectId = (int)c.ParentProjectId,
+                                                 CountryId = c.ManageSite.City.State.CountryId
                                              }).OrderBy(o => o.Value).Distinct().ToList();
 
             if (projectList == null || projectList.Count == 0) return null;
             return projectList;
         }
+
+        //public List<ProjectDropDown> GetChildProjectDropDownProjectRight(int ParentProjectId)
+        //{
+        //    // changes by swati for child project
+        //    var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == ParentProjectId
+        //                                     && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
+        //                                                                      && a.UserId == _jwtTokenAccesser.UserId &&
+        //                                                                      a.RoleId == _jwtTokenAccesser.RoleId
+        //                                                                      && a.DeletedDate == null &&
+        //                                                                      a.RollbackReason == null) &&
+        //                                     x.DeletedDate == null).Select(c => new ProjectDropDown
+        //                                     {
+        //                                         Id = c.ProjectId,
+        //                                         Value = c.Project.ProjectCode,
+        //                                         Code = c.Project.ProjectCode,
+        //                                         ParentProjectId = (int)c.Project.ParentProjectId,
+        //                                         CountryId = c.Project.ManageSite.City.State.CountryId
+        //                                     }).OrderBy(o => o.Value).Distinct().ToList();
+
+        //    if (projectList == null || projectList.Count == 0) return null;
+        //    return projectList;
+        //}
 
         public ProjectDashBoardDto GetCompleteTrainingDashboard(int id)
         {

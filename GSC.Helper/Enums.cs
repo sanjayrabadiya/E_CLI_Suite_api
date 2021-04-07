@@ -87,10 +87,7 @@ namespace GSC.Helper
         Numeric4Decimal = 7,
 
         [Description("Numeric With 5 Decimal")]
-        Numeric5Decimal = 8,
-
-        [Description("Relation")]
-        Relation = 9
+        Numeric5Decimal = 8
     }
 
     public enum ValidationType : short
@@ -122,7 +119,8 @@ namespace GSC.Helper
         [Description("PartialDate")] PartialDate = 11,
         [Description("Scale Horizontal")] HorizontalScale = 12,
         [Description("Scale Vertical")] VerticalScale = 13,
-        [Description("Numeric Scale")] NumericScale = 14
+        [Description("Numeric Scale")] NumericScale = 14,
+        [Description("Relation")] Relation = 15
     }
 
     public enum VolunteerStatus : short
