@@ -113,6 +113,21 @@ namespace GSC.Respository.Etmf
         {
             var userId = EtmfUserPermissionDto.First().UserId;
 
+            var DeleteAll = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0 && (!x.IsAdd && !x.IsEdit && !x.IsDelete && !x.IsView && !x.IsExport)).ToList();
+            var UpdateDeleteAll = DeleteAll.Where(t => t.EtmfUserPermissionId > 0).ToList();
+
+            foreach (var item in UpdateDeleteAll)
+            {
+                var existing = All.Where(t => t.DeletedDate == null && t.UserId == userId && t.ProjectWorkplaceDetailId == item.ProjectWorkplaceDetailId).FirstOrDefault();
+                if (existing.IsAdd == item.IsAdd && existing.IsEdit == item.IsEdit && existing.IsDelete == item.IsDelete
+                    && existing.IsView == item.IsView && existing.IsExport == item.IsExport) { }
+                else
+                {
+                    Delete(existing);
+                    _context.Save();
+                }
+            }
+
             EtmfUserPermissionDto = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0 && (x.IsAdd || x.IsEdit || x.IsDelete || x.IsView || x.IsExport)).ToList();
 
             var ToAdd = EtmfUserPermissionDto.Where(x => x.EtmfUserPermissionId == null).ToList();
