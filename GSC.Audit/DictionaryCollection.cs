@@ -270,6 +270,105 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ReferenceTitle", DisplayName = "Reference Title" });
             _dictionaries.Add(new Dictionary { FieldName = "FilePath", DisplayName = "File Path" });
             _dictionaries.Add(new Dictionary { FieldName = "PatientStatusId", DisplayName = "Patient Status" });
+
+            //ProjectArtificateDocumentApprover
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceArtificatedDocumentId", DisplayName = "Project Workplace Artificated Document" });
+            _dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "User" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsApproved", DisplayName = "Is Approved" });
+            _dictionaries.Add(new Dictionary { FieldName = "Comment", DisplayName = "Comment" });
+
+            //EtmfArtificateMasterLbrary
+            _dictionaries.Add(new Dictionary { FieldName = "EtmfSectionMasterLibraryId", DisplayName = "Etmf Section Master Library" });
+            _dictionaries.Add(new Dictionary { FieldName = "ArtificateNo", DisplayName = "Artificate No" });
+            _dictionaries.Add(new Dictionary { FieldName = "ArtificateName", DisplayName = "Artificate Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "InclutionType", DisplayName = "Inclution Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "DeviceSponDoc", DisplayName = "Device SponDoc" });
+            _dictionaries.Add(new Dictionary { FieldName = "DeviceInvesDoc", DisplayName = "Device InvesDoc" });
+            _dictionaries.Add(new Dictionary { FieldName = "NondeviceSponDoc", DisplayName = "Non device Spon Doc" });
+            _dictionaries.Add(new Dictionary { FieldName = "studyArtificates", DisplayName = "Study Artificates" });
+            _dictionaries.Add(new Dictionary { FieldName = "TrailLevelDoc", DisplayName = "Trail Level Doc" });
+            _dictionaries.Add(new Dictionary { FieldName = "CountryLevelDoc", DisplayName = "Country Level Doc" });
+            _dictionaries.Add(new Dictionary { FieldName = "SiteLevelDoc", DisplayName = "Site Level Doc" });
+
+            //EtmfSectionMasterLibrary
+            _dictionaries.Add(new Dictionary { FieldName = "EtmfZoneMasterLibraryId", DisplayName = "Etmf Zone Master Library" });
+            _dictionaries.Add(new Dictionary { FieldName = "SectionName", DisplayName = "Section Name" });
+
+            //EtmfUserPermission
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceDetailId", DisplayName = "Project Workplace Detail" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsView", DisplayName = "Is View" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsAdd", DisplayName = "Is Add" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsEdit", DisplayName = "Is Edit" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsDelete", DisplayName = "Is Delete" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsExport", DisplayName = "Is Export" });
+            _dictionaries.Add(new Dictionary { FieldName = "ModifiedAuditReasonId", DisplayName = "Reason" });
+            _dictionaries.Add(new Dictionary { FieldName = "ModifiedRollbackReason", DisplayName = "Modified Rollback Reason" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsRevoked", DisplayName = "Is Revoked" });
+            _dictionaries.Add(new Dictionary { FieldName = "AuditReasonId", DisplayName = "Audit Reason" });
+            _dictionaries.Add(new Dictionary { FieldName = "RollbackReason", DisplayName = "Rollback Reason" });
+
+            //EtmfZoneMasterLibrary
+            _dictionaries.Add(new Dictionary { FieldName = "ZoneNo", DisplayName = "Zone No" });
+            _dictionaries.Add(new Dictionary { FieldName = "ZonName", DisplayName = "Zon Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "FileName", DisplayName = "File Name" });
+
+            //ProjectArtificateDocumentComment
+            _dictionaries.Add(new Dictionary { FieldName = "Response", DisplayName = "Response" });
+            _dictionaries.Add(new Dictionary { FieldName = "ResponseBy", DisplayName = "Response By" });
+            _dictionaries.Add(new Dictionary { FieldName = "ResponseDate", DisplayName = "Response Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsClose", DisplayName = "Is Close" });
+            _dictionaries.Add(new Dictionary { FieldName = "CloseBy", DisplayName = "Close By" });
+            _dictionaries.Add(new Dictionary { FieldName = "CloseDate", DisplayName = "Close Date" });
+
+            //ProjectArtificateDocumentHistory
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceArtificateDocumentId", DisplayName = "Project Workplace Artificate Document" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectArtificateDocumentReviewId", DisplayName = "Project Artificate Document Review" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectArtificateDocumentApproverId", DisplayName = "Project Artificate Document Approver" });
+
+            //ProjectArtificateDocumentReview
+            _dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsSendBack", DisplayName = "Is SendBack" });
+            _dictionaries.Add(new Dictionary { FieldName = "SendBackDate", DisplayName = "SendBack Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "Message", DisplayName = "Message" });
+
+            //ProjectSubSecArtificateDocumentApprover
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceSubSecArtificateDocumentId", DisplayName = "Project Workplace SubSec Artificate Document" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectSubSecArtificateDocumentReviewId", DisplayName = "Project SubSec Artificate Document Review" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectSubSecArtificateDocumentApproverId", DisplayName = "Project SubSec Artificate Document Approver" });
+
+            //ProjectWorkplaceDetail
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceId", DisplayName = "Project Workplace" });
+            _dictionaries.Add(new Dictionary { FieldName = "WorkPlaceFolderId", DisplayName = "WorkPlace Folder" });
+            _dictionaries.Add(new Dictionary { FieldName = "ItemId", DisplayName = "Item" });
+            _dictionaries.Add(new Dictionary { FieldName = "ItemName", DisplayName = "Item Name" });
+
+            //ProjectWorkplaceArtificate
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceSectionId", DisplayName = "Project Workplace Section" });
+            _dictionaries.Add(new Dictionary { FieldName = "EtmfArtificateMasterLbraryId", DisplayName = "Etmf Artificate Master Library" });
+            _dictionaries.Add(new Dictionary { FieldName = "ParentArtificateId", DisplayName = "Parent Artificate" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsNotRequired", DisplayName = "Is NotRequired" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceArtificateId", DisplayName = "Project Workplace Artificate" });
+
+            //ProjectWorkplaceArtificatedocument
+            _dictionaries.Add(new Dictionary { FieldName = "DocPath", DisplayName = "Doc Path" });
+            _dictionaries.Add(new Dictionary { FieldName = "Status", DisplayName = "Status" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsAccepted", DisplayName = "Is Accepted" });
+            _dictionaries.Add(new Dictionary { FieldName = "ParentDocumentId", DisplayName = "Parent Document" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsMoved", DisplayName = "Is Moved" });
+
+            //ProjectWorkplaceSection
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkPlaceZoneId", DisplayName = "Project WorkPlace Zone" });
+
+            //ProjectWorkplaceSubSecArtificatedocument
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceSubSectionArtifactId", DisplayName = "Project Workplace SubSection Artifact" });
+
+            //ProjectWorkplaceSubSection
+            _dictionaries.Add(new Dictionary { FieldName = "SubSectionName", DisplayName = "SubSection Name" });
+
+            //ProjectWorkplaceSubSectionArtifact
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceSubSectionId", DisplayName = "Project Workplace SubSection" });
+            _dictionaries.Add(new Dictionary { FieldName = "ArtifactName", DisplayName = "Artifact Name" });
+
         }
 
 
