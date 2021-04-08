@@ -81,10 +81,12 @@ namespace GSC.Api.Controllers.Project.Design
             {
                 _projectDesignVariableValueRepository.Add(item);
             }
-
-            foreach (var item in variable.Roles)
+            if (variable.IsEncrypt)
             {
-                _projectDesignVariableEncryptRoleRepository.Add(item);
+                foreach (var item in variable.Roles)
+                {
+                    _projectDesignVariableEncryptRoleRepository.Add(item);
+                }
             }
 
             _uow.Save();
