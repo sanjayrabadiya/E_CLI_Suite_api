@@ -26,5 +26,7 @@ namespace GSC.Data.Dto.Etmf
         public string Comment { get; set; }
         public string UserName { get; set; }
         public bool? IsApproved { get; set; }
+        public string Reason { get; set; }
+        public string ReasonOth { get; set; }
     }
 }

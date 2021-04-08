@@ -190,6 +190,7 @@ namespace GSC.Respository.Etmf
                 obj.Approver = ApproverName;
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
+                obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId || reviewerList.Contains(_jwtTokenAccesser.UserId);
                 dataList.Add(obj);
             }
             return dataList;

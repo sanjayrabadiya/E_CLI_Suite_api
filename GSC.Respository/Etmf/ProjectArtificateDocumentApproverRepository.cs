@@ -134,23 +134,44 @@ namespace GSC.Respository.Etmf
         // Get atrificate doc approver history
         public List<ProjectArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id)
         {
-            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Include(x => x.ProjectArtificateDocumentHistory)
-                .Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
-                .Select(x => new ProjectArtificateDocumentApproverHistory
-                {
-                    Id = x.Id,
-                    DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
-                    ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
-                    UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
-                    UserId = x.UserId,
-                    IsApproved = x.IsApproved,
-                    ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId,
-                    CreatedDate = x.CreatedDate,
-                    CreatedByUser = x.CreatedByUser.UserName,
-                    ModifiedDate = x.ModifiedDate,
-                    ModifiedByUser = x.ModifiedByUser.UserName,
-                    Comment = x.Comment,
-                }).OrderByDescending(x => x.Id).ToList();
+            //var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Include(x => x.ProjectArtificateDocumentHistory)
+            //    .Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
+            //    .Select(x => new ProjectArtificateDocumentApproverHistory
+            //    {
+            //        Id = x.Id,
+            //        DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
+            //        ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
+            //        UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+            //        UserId = x.UserId,
+            //        IsApproved = x.IsApproved,
+            //        ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId,
+            //        CreatedDate = x.CreatedDate,
+            //        CreatedByUser = x.CreatedByUser.UserName,
+            //        ModifiedDate = x.ModifiedDate,
+            //        ModifiedByUser = x.ModifiedByUser.UserName,
+            //        Comment = x.Comment,
+            //    }).OrderByDescending(x => x.Id).ToList();
+
+            var result = (from approver in _context.ProjectArtificateDocumentApprover.Include(x => x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
+                          join auditReason in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectArtificateDocumentApprover" && x.ColumnName == "Is Approved") 
+                          on approver.Id equals auditReason.RecordId
+                          select new ProjectArtificateDocumentApproverHistory
+                          {
+                              Id = approver.Id,
+                              DocumentName = approver.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
+                              ProjectArtificateDocumentHistoryId = approver.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
+                              UserName = _context.Users.Where(y => y.Id == approver.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+                              UserId = approver.UserId,
+                              IsApproved = approver.IsApproved,
+                              ProjectWorkplaceArtificatedDocumentId = approver.ProjectWorkplaceArtificatedDocumentId,
+                              CreatedDate = approver.CreatedDate,
+                              CreatedByUser = approver.CreatedByUser.UserName,
+                              ModifiedDate = approver.ModifiedDate,
+                              ModifiedByUser = approver.ModifiedByUser.UserName,
+                              Comment = approver.Comment,
+                              Reason = auditReason.Reason,
+                              ReasonOth = auditReason.ReasonOth
+                          }).OrderByDescending(x => x.Id).ToList();
 
             return result;
         }

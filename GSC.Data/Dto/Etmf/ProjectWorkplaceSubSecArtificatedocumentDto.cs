@@ -52,6 +52,7 @@ namespace GSC.Data.Dto.Etmf
         public int CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public bool SendBy { get; set; }
+        public bool AddedBy { get; set; }
         public bool IsSendBack { get; set; }
         public string ReviewStatus { get; set; }
         public bool IsReview { get; set; }
