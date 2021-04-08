@@ -134,22 +134,22 @@ namespace GSC.Respository.Etmf
         // Get atrificate doc approver history
         public List<ProjectArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id)
         {
-            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Include(x => x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).Include(x => x.ProjectArtificateDocumentHistory)
+                .Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
                 .Select(x => new ProjectArtificateDocumentApproverHistory
                 {
                     Id = x.Id,
                     DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
-                    //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
                     ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
                     UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                     UserId = x.UserId,
                     IsApproved = x.IsApproved,
                     ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId,
                     CreatedDate = x.CreatedDate,
-                    CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+                    CreatedByUser = x.CreatedByUser.UserName,
                     ModifiedDate = x.ModifiedDate,
-                    ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
-                    Comment = x.Comment
+                    ModifiedByUser = x.ModifiedByUser.UserName,
+                    Comment = x.Comment,
                 }).OrderByDescending(x => x.Id).ToList();
 
             return result;
