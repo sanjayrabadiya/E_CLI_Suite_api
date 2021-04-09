@@ -13,6 +13,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -270,7 +271,8 @@ namespace GSC.Respository.Screening
             if (filters.SiteId != null)
             {
                 sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
-            } else
+            }
+            else
             {
                 sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
             }
@@ -285,7 +287,7 @@ namespace GSC.Respository.Screening
                                                 && (filters.VisitIds == null || filters.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId))
                                                 && u.ProjectDesignTemplate.DeletedDate == null)
                              on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                             join value in _context.ScreeningTemplateValue.Where(val => val.DeletedDate == null 
+                             join value in _context.ScreeningTemplateValue.Where(val => val.DeletedDate == null
                                           && val.ProjectDesignVariable.DeletedDate == null)
                              on template.Id equals value.ScreeningTemplateId
                              join query in _context.ScreeningTemplateValueQuery on value.Id equals query.ScreeningTemplateValueId
@@ -377,7 +379,7 @@ namespace GSC.Respository.Screening
                                        Convert.ToString(query.IsSystem ? " - System" : "")
                              }).ToList();
 
-            var queryGeneratedBy = queryData.GroupBy(item => new { item.Value})
+            var queryGeneratedBy = queryData.GroupBy(item => new { item.Value })
                 .Select(z => new QueryManagementDto { Id = z.FirstOrDefault().Id, Value = z.Key.Value }).ToList();
             return queryGeneratedBy;
         }
@@ -386,6 +388,7 @@ namespace GSC.Respository.Screening
         {
             var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
             var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
+            var ProjectDesignId = _context.ProjectDesign.Where(x => x.ProjectId == projectId).FirstOrDefault().Id;
 
             var dataEntryData = (from value in _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit)
                                  .ThenInclude(x => x.ScreeningEntry)
@@ -400,8 +403,21 @@ namespace GSC.Respository.Screening
                                      Id = user.Id,
                                      Value = role == null || string.IsNullOrEmpty(role.RoleName)
                                          ? user.UserName
-                                         : user.UserName + "(" + role.RoleName + ")"
+                                         : user.UserName + "(" + role.RoleName + ")",
+                                     RoleId = role == null ? 0 : role.Id
                                  }).ToList();
+
+            var Workflow = (from workflow in _context.ProjectWorkflow.Where(t => t.ProjectDesignId == ProjectDesignId)
+                            join workflowlevelIndependent in _context.ProjectWorkflowIndependent.Where(x => x.DeletedDate == null
+                            && (x.IsStartTemplate == true || x.IsDataEntryUser == true))
+                            on workflow.Id equals workflowlevelIndependent.ProjectWorkflowId
+                            select new QueryManagementDto
+                            {
+                                Id = workflowlevelIndependent.Id,
+                                RoleId = workflowlevelIndependent.SecurityRoleId
+                            }).ToList();
+
+            dataEntryData = dataEntryData.Where(x => Workflow.Any(y => y.RoleId == x.RoleId)).ToList();
 
             var dataEntryBy = dataEntryData.GroupBy(item => new { item.Value, item.Id })
                 .Select(z => new DropDownDto { Id = z.Key.Id, Value = z.Key.Value }).ToList();
@@ -503,7 +519,7 @@ namespace GSC.Respository.Screening
             r.QueryStatus == QueryStatus.Closed &&
             r.ScreeningTemplateValue.ProjectDesignVariable.DeletedDate == null && r.ScreeningTemplateValue.DeletedDate == null);
 
-            queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x=>x.Status).ToList().ForEach(x => x.Total = closeQueries);
+            queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x => x.Status).ToList().ForEach(x => x.Total = closeQueries);
 
 
             if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))

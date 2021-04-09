@@ -63,6 +63,7 @@ namespace GSC.Data.Dto.Report
         public string RandomizationNumber { get; set; }
         public int projectId { get; set; }
         public string ProjectCode { get; set; }
+        public int? RoleId { get; set; }
     }
 
     public class QuerySearchDto : BaseDto
