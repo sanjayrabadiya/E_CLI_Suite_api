@@ -314,7 +314,8 @@ namespace GSC.Respository.Screening
                                  DataEntryByName = role == null || string.IsNullOrEmpty(role.RoleName)
                                          ? user.UserName
                                          : user.UserName + "(" + role.RoleName + ")",
-                                 ScreeningTemplateValue = template.ProjectDesignTemplate.TemplateName,
+                                 ScreeningTemplateValue = template.RepeatSeqNo == null && template.ParentId == null ? template.ProjectDesignTemplate.DesignOrder + ". " + template.ProjectDesignTemplate.TemplateName
+                                            : template.ProjectDesignTemplate.DesignOrder + "." + template.RepeatSeqNo + " " + template.ProjectDesignTemplate.TemplateName,
                                  Visit = template.ScreeningVisit.ProjectDesignVisit.DisplayName +
                                          Convert.ToString(template.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + template.ScreeningVisit.RepeatedVisitNumber),
                                  FieldName = value.ProjectDesignVariable.VariableName,
