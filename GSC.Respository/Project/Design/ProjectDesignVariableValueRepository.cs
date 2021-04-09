@@ -98,14 +98,20 @@ namespace GSC.Respository.Project.Design
             }).ToList().OrderBy(x => x.VisitOrderId).ToList();
 
             var VisitLanguageData = GetVisitLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
+            var TemplateLanguageData = GetTemplateLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
+            var TemplateNoteLanguageData = GetTemplateNoteLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
 
-
+            var VariableLanguageData = GetVariableLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
+            var VariableNoteLanguageData = GetVariableNoteLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
+            var VariableValueLanguageData = GetVariableValueLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
 
             #region Excel Report Design
             var repeatdata = new List<RepeatTemplateDto>();
             using (var workbook = new XLWorkbook())
             {
                 IXLWorksheet worksheet;
+
+                #region ProjectDesign sheet
                 worksheet = workbook.Worksheets.Add("Design");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
@@ -177,6 +183,9 @@ namespace GSC.Respository.Project.Design
                                 j++;
                             });
 
+                #endregion ProjectDesign sheet
+
+                #region Add Visit language sheet
                 worksheet = workbook.Worksheets.Add("Visit Language");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
@@ -187,11 +196,124 @@ namespace GSC.Respository.Project.Design
                 var v = 2;
                 VisitLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(v).Cell(1).SetValue(d.Name);
+                    worksheet.Row(v).Cell(1).SetValue(d.VisitName);
                     worksheet.Row(v).Cell(2).SetValue(d.Language);
                     worksheet.Row(v).Cell(3).SetValue(d.Value);
                     v++;
                 });
+                #endregion Add Visit language sheet
+
+                #region Add template language sheet
+                worksheet = workbook.Worksheets.Add("Template Language");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Visit";
+                worksheet.Cell(1, 2).Value = "Template";
+                worksheet.Cell(1, 3).Value = "Language";
+                worksheet.Cell(1, 4).Value = "Conversion";
+
+                var t = 2;
+                TemplateLanguageData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(t).Cell(1).SetValue(d.VisitName);
+                    worksheet.Row(t).Cell(2).SetValue(d.TemplateName);
+                    worksheet.Row(t).Cell(3).SetValue(d.Language);
+                    worksheet.Row(t).Cell(4).SetValue(d.Value);
+                    t++;
+                });
+                #endregion Add template language sheet
+
+                #region Add template note language sheet
+                worksheet = workbook.Worksheets.Add("Template Note Lang");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Visit";
+                worksheet.Cell(1, 2).Value = "Template";
+                worksheet.Cell(1, 3).Value = "Note";
+                worksheet.Cell(1, 4).Value = "Language";
+                worksheet.Cell(1, 5).Value = "Conversion";
+
+                var tn = 2;
+                TemplateNoteLanguageData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(tn).Cell(1).SetValue(d.VisitName);
+                    worksheet.Row(tn).Cell(2).SetValue(d.TemplateName);
+                    worksheet.Row(tn).Cell(3).SetValue(d.Note);
+                    worksheet.Row(tn).Cell(4).SetValue(d.Language);
+                    worksheet.Row(tn).Cell(5).SetValue(d.Value);
+                    tn++;
+                });
+                #endregion Add template note language sheet
+
+                #region Add variable language sheet
+                worksheet = workbook.Worksheets.Add("Variable Language");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Visit";
+                worksheet.Cell(1, 2).Value = "Template";
+                worksheet.Cell(1, 3).Value = "Variable";
+                worksheet.Cell(1, 4).Value = "Language";
+                worksheet.Cell(1, 5).Value = "Conversion";
+
+                var vl = 2;
+                VariableLanguageData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(vl).Cell(1).SetValue(d.VisitName);
+                    worksheet.Row(vl).Cell(2).SetValue(d.TemplateName);
+                    worksheet.Row(vl).Cell(3).SetValue(d.VariableName);
+                    worksheet.Row(vl).Cell(4).SetValue(d.Language);
+                    worksheet.Row(vl).Cell(5).SetValue(d.Value);
+                    vl++;
+                });
+                #endregion Add variable language sheet
+
+                #region Add variable note language sheet
+                worksheet = workbook.Worksheets.Add("Variable Note Lang");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Visit";
+                worksheet.Cell(1, 2).Value = "Template"; 
+                worksheet.Cell(1, 3).Value = "Variable";
+                worksheet.Cell(1, 4).Value = "Note";
+                worksheet.Cell(1, 5).Value = "Language";
+                worksheet.Cell(1, 6).Value = "Conversion";
+
+                var vn = 2;
+                VariableNoteLanguageData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(vn).Cell(1).SetValue(d.VisitName);
+                    worksheet.Row(vn).Cell(2).SetValue(d.TemplateName);
+                    worksheet.Row(vn).Cell(2).SetValue(d.VariableName);
+                    worksheet.Row(vn).Cell(3).SetValue(d.Note);
+                    worksheet.Row(vn).Cell(4).SetValue(d.Language);
+                    worksheet.Row(vn).Cell(5).SetValue(d.Value);
+                    vn++;
+                });
+                #endregion Add variable note language sheet
+
+                #region Add variable value language sheet
+                worksheet = workbook.Worksheets.Add("Variable value Lang");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Visit";
+                worksheet.Cell(1, 2).Value = "Template";
+                worksheet.Cell(1, 3).Value = "Variable";
+                worksheet.Cell(1, 4).Value = "Value";
+                worksheet.Cell(1, 5).Value = "Language";
+                worksheet.Cell(1, 6).Value = "Conversion";
+
+                var vv = 2;
+                VariableValueLanguageData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(vv).Cell(1).SetValue(d.VisitName);
+                    worksheet.Row(vv).Cell(2).SetValue(d.TemplateName);
+                    worksheet.Row(vv).Cell(2).SetValue(d.VariableName);
+                    worksheet.Row(vv).Cell(3).SetValue(d.VariableValue);
+                    worksheet.Row(vv).Cell(4).SetValue(d.Language);
+                    worksheet.Row(vv).Cell(5).SetValue(d.Value);
+                    vv++;
+                });
+                #endregion Add variable value language sheet
 
                 MemoryStream memoryStream = new MemoryStream();
                 workbook.SaveAs(memoryStream);
@@ -210,7 +332,73 @@ namespace GSC.Respository.Project.Design
 
             return _context.VisitLanguage.Where(t => visits.Contains(t.ProjectDesignVisitId) && t.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
             {
-                Name = r.ProjectDesignVisit.DisplayName,
+                VisitName = r.ProjectDesignVisit.DisplayName,
+                Language = r.Language.LanguageName,
+                Value = r.Display
+            }).ToList();
+        }
+
+        public IList<ProjectDesignLanguageReportDto> GetTemplateLanguageData(int ProjectDesignPeriodId)
+        {
+            return _context.TemplateLanguage.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
+            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            {
+                VisitName = r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                TemplateName = r.ProjectDesignTemplate.TemplateName,
+                Language = r.Language.LanguageName,
+                Value = r.Display
+            }).ToList();
+        }
+
+        public IList<ProjectDesignLanguageReportDto> GetTemplateNoteLanguageData(int ProjectDesignPeriodId)
+        {
+            return _context.TemplateNoteLanguage.Where(x => x.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
+            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            {
+                VisitName = r.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                TemplateName = r.ProjectDesignTemplateNote.ProjectDesignTemplate.TemplateName,
+                Note = r.ProjectDesignTemplateNote.Note,
+                Language = r.Language.LanguageName,
+                Value = r.Display
+            }).ToList();
+        }
+
+        public IList<ProjectDesignLanguageReportDto> GetVariableLanguageData(int ProjectDesignPeriodId)
+        {
+            return _context.VariableLanguage.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
+            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            {
+                VisitName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                TemplateName = r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
+                VariableName = r.ProjectDesignVariable.VariableName,
+                Language = r.Language.LanguageName,
+                Value = r.Display
+            }).ToList();
+        }
+
+        public IList<ProjectDesignLanguageReportDto> GetVariableNoteLanguageData(int ProjectDesignPeriodId)
+        {
+            return _context.VariableNoteLanguage.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
+            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            {
+                VisitName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                TemplateName = r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
+                VariableName = r.ProjectDesignVariable.VariableName,
+                Note = r.ProjectDesignVariable.Note,
+                Language = r.Language.LanguageName,
+                Value = r.Display
+            }).ToList();
+        }
+
+        public IList<ProjectDesignLanguageReportDto> GetVariableValueLanguageData(int ProjectDesignPeriodId)
+        {
+            return _context.VariableValueLanguage.Where(x => x.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
+            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            {
+                VisitName = r.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                TemplateName = r.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
+                VariableName = r.ProjectDesignVariableValue.ProjectDesignVariable.VariableName,
+                VariableValue = r.ProjectDesignVariableValue.ValueName,
                 Language = r.Language.LanguageName,
                 Value = r.Display
             }).ToList();

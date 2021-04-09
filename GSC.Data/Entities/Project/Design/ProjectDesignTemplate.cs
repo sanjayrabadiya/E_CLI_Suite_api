@@ -25,5 +25,6 @@ namespace GSC.Data.Entities.Project.Design
 
         public IList<ProjectDesignTemplateNote> ProjectDesignTemplateNote { get; set; }
         public List<TemplateLanguage> TemplateLanguage { get; set; }
+        public List<TemplatePermission> TemplatePermission { get; set; }
     }
 }

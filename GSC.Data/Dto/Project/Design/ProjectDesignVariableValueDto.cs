@@ -79,12 +79,15 @@ namespace GSC.Data.Dto.Project.Design
         public bool? IsEncrypt { get; set; }
         public string EncryptRole { get; set; }
         public string CollectionValue { get; set; }
-        public IList<ProjectDesignLanguageReportDto> ProjectDesignLanguages { get; set; }
     }
 
     public class ProjectDesignLanguageReportDto
     {
-        public string Name { get; set; }
+        public string VisitName { get; set; }
+        public string TemplateName { get; set; }
+        public string VariableName { get; set; }
+        public string Note { get; set; }
+        public string VariableValue { get; set; }
         public string Language { get; set; }
         public string Value { get; set; }
     }

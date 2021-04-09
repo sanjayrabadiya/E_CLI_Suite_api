@@ -276,5 +276,10 @@ namespace GSC.Domain.Context
         DbSet<RandomizationNumberSettings> RandomizationNumberSettings { get; set; }
         DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }
         DbSet<VisitLanguage> VisitLanguage { get; set; }
+        DbSet<TemplateLanguage> TemplateLanguage { get; set; }
+        DbSet<TemplateNoteLanguage> TemplateNoteLanguage { get; set; }
+        DbSet<VariableLanguage> VariableLanguage { get; set; }
+        DbSet<VariableNoteLanguage> VariableNoteLanguage { get; set; }
+        DbSet<VariableValueLanguage> VariableValueLanguage { get; set; }
     }
 }

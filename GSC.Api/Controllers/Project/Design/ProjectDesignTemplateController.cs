@@ -40,6 +40,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
+        private readonly ITemplatePermissionRepository _templatePermissioRepository;
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IVariableTemplateRepository variableTemplateRepository,
@@ -55,6 +56,7 @@ namespace GSC.Api.Controllers.Project.Design
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
             IVariabeValueLanguageRepository variableValueLanguageRepository,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
+            ITemplatePermissionRepository templatePermissioRepository,
         IUnitOfWork uow, IMapper mapper)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
@@ -74,6 +76,7 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignTemplateNoteRepository = projectDesignTemplateNoteRepository;
             _domainRepository = domainRepository;
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
+            _templatePermissioRepository = templatePermissioRepository;
         }
 
         [HttpGet("{projectDesignVisitId}")]
@@ -272,6 +275,12 @@ namespace GSC.Api.Controllers.Project.Design
                         _templateNoteLanguageRepository.Add(x);
                     });
 
+                }
+
+                foreach (var permission in projectDesignTemplate.TemplatePermission)
+                {
+                    permission.Id = 0;
+                    _templatePermissioRepository.Add(permission);
                 }
 
                 projectDesignTemplate.ProjectDesignVisit = null;
