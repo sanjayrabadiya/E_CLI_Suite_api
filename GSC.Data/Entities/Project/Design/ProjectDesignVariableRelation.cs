@@ -7,7 +7,7 @@ namespace GSC.Data.Entities.Project.Design
     {
         public int ProjectDesignVariableId { get; set; }
         public int ProjectDesignRelationVariableId { get; set; }
-        public int ProjectDesignSuggestionVariableId { get; set; }
+       // public int ProjectDesignSuggestionVariableId { get; set; }
         public ProjectDesignVariable ProjectDesignVariable { get; set; }
     }
 }
