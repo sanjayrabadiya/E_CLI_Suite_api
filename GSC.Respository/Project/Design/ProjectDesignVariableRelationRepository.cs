@@ -40,8 +40,8 @@ namespace GSC.Respository.Project.Design
             {
                 Id = t.Id,
                 ProjectDesignVariableName = t.ProjectDesignVariable.VariableName,
-                ProjectDesignTemplateName = t.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
-                ProjectDesignVisitName = t.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                ProjectDesignTemplateName = _context.ProjectDesignVariable.Where(r=>r.Id==t.ProjectDesignRelationVariableId).FirstOrDefault().ProjectDesignTemplate.TemplateName,
+                ProjectDesignVisitName = _context.ProjectDesignVariable.Where(r => r.Id == t.ProjectDesignRelationVariableId).FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                 ProjectDesignRelationVariableName = _context.ProjectDesignVariable.Where(r => r.Id == t.ProjectDesignRelationVariableId).FirstOrDefault().VariableName,
                 // ProjectDesignSuggestionVariableId = t.ProjectDesignSuggestionVariableId
             }).FirstOrDefault();
