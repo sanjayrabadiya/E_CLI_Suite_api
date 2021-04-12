@@ -13,6 +13,7 @@ namespace GSC.Shared.Configuration
         {
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<SafeIPAddress>(configuration.GetSection("safeIPAddress"));
+            services.Configure<VideoAPISettings>(configuration.GetSection("VideoAPISettings"));
             services.Configure<EnvironmentSetting>(configuration.GetSection("EnvironmentSetting"));
             var environmentSetting = new EnvironmentSetting();
             configuration.GetSection("EnvironmentSetting").Bind(environmentSetting);
@@ -37,5 +38,11 @@ namespace GSC.Shared.Configuration
     public class SafeIPAddress
     {
         public List<string> IpList { get; set; }
+    }
+
+    public class VideoAPISettings
+    {
+        public string API_KEY { get; set; }
+        public string API_SECRET { get; set; }
     }
 }

@@ -342,6 +342,7 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentReviewDetails, EconsentReviewDetailsDto>()
                 .ForMember(x => x.EconsentDocumentName, x => x.MapFrom(a => a.EconsentSetup.DocumentName))
                 .ReverseMap();
+            CreateMap<EConsentVideo, EConsentVideoDto>().ReverseMap();
         }
     }
 }

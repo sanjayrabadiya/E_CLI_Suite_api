@@ -591,5 +591,19 @@ namespace GSC.Helper
         [Description("Not Required")] NotRequired = 8
     }
 
+    public enum VideoCallStatus : int
+    {
+        [Description("Not Answered")] NotAnswered = 1,
+        [Description("Call Declined")] CallDeclined = 2,
+        [Description("Call Accepted")] CallAccepted = 3,
+        [Description("Call End By Sender Before Connecting")] CallEndBySenderBeforeConnecting = 4
+    }
+
+    public enum VideoCallStatusCallEndBy : int
+    {
+        [Description("Sender")] Sender = 1,
+        [Description("Receiver")] Receiver = 2
+    }
+
 
 }

@@ -932,6 +932,57 @@ namespace GSC.Respository.Etmf
             }
         }
 
+        public List<ProjectWorkplace> GetProjectWorkplacesFinalData(int id)
+        {
+            var projectWorkplaces = _context.ProjectWorkplace.Where(t => t.DeletedBy == null && t.ProjectId == id)
+                            .Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceArtificatedocument).ThenInclude(x => x.ProjectArtificateDocumentReview)
+                            .Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceArtificatedocument).ThenInclude(x => x.ProjectArtificateDocumentApprover)
+                            .Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.EtmfArtificateMasterLbrary)
+                            .AsNoTracking().ToList();
+
+            projectWorkplaces = projectWorkplaces.Select(s => new ProjectWorkplace
+            {
+                Id = s.Id,
+                ProjectId = s.ProjectId,
+                Project = s.Project,
+                ProjectWorkplaceDetail = s.ProjectWorkplaceDetail.Select(st => new ProjectWorkplaceDetail
+                {
+                    Id = st.Id,
+                    ProjectWorkplaceId = st.ProjectWorkplaceId,
+                    ProjectWorkplace = st.ProjectWorkplace,
+                    WorkPlaceFolderId = st.WorkPlaceFolderId,
+                    ItemId = st.ItemId,
+                    ItemName = st.ItemName,
+                    ProjectWorkPlaceZone = st.ProjectWorkPlaceZone.Select(si => new ProjectWorkPlaceZone
+                    {
+                        Id = si.Id,
+                        ProjectWorkplaceDetailId = si.ProjectWorkplaceDetailId,
+                        ProjectWorkplaceDetail = si.ProjectWorkplaceDetail,
+                        EtmfZoneMasterLibrary = si.EtmfZoneMasterLibrary,
+                        EtmfZoneMasterLibraryId = si.EtmfZoneMasterLibraryId,
+                        ProjectWorkplaceSection = si.ProjectWorkplaceSection.Select(sv => new ProjectWorkplaceSection
+                        {
+                            Id = sv.Id,
+                            ProjectWorkPlaceZoneId = sv.ProjectWorkPlaceZoneId,
+                            ProjectWorkPlaceZone = sv.ProjectWorkPlaceZone,
+                            EtmfSectionMasterLibrary = sv.EtmfSectionMasterLibrary,
+                            EtmfSectionMasterLibraryId = sv.EtmfSectionMasterLibraryId,
+                            ProjectWorkplaceArtificate = sv.ProjectWorkplaceArtificate.Select(su => new ProjectWorkplaceArtificate
+                            {
+                                Id = su.Id,
+                                ProjectWorkplaceSectionId = su.ProjectWorkplaceSectionId,
+                                ProjectWorkplaceSection = su.ProjectWorkplaceSection,
+                                EtmfArtificateMasterLbrary = su.EtmfArtificateMasterLbrary,
+                                EtmfArtificateMasterLbraryId = su.EtmfArtificateMasterLbraryId,
+                                ProjectWorkplaceArtificatedocument = su.ProjectWorkplaceArtificatedocument.Where(x => x.Status == ArtifactDocStatusType.Final).ToList()
+                            }).Where(x => x.ProjectWorkplaceArtificatedocument.Count > 0).ToList()
+                        }).Where(x => x.ProjectWorkplaceArtificate.Count > 0).ToList()
+                    }).Where(x => x.ProjectWorkplaceSection.Count > 0).ToList()
+                }).Where(x => x.ProjectWorkPlaceZone.Count > 0).ToList()
+            }).Where(x => x.ProjectWorkplaceDetail.Count > 0).ToList();
+            return projectWorkplaces;
+        }
+
 
         public List<TreeValue> GetTreeviewFromChart(int id, EtmfChartType chartType)
         {
