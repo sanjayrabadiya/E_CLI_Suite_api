@@ -56,12 +56,19 @@ namespace GSC.Respository.Etmf
                     FolderId = y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId,
                     FolderName = ((WorkPlaceFolder)y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription()
                     + " - " + y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName,
+                    ItemId = y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId,
                     ParentArtificateId = y.ParentArtificateId
                 }).ToList();
 
-            result = result.OrderBy(z => z.FolderId == 3 ? 1 : z.FolderId == 1 ? 2 : 2).ToList();
+            var Trial = result.Where(x => x.FolderId == 3).ToList();
+            var Country = result.Where(x => x.FolderId == 1).OrderBy(x => x.ItemId).ToList();
+            var site = result.Where(x => x.FolderId == 2).OrderBy(x => x.ItemId).ToList();
+            List<WorkplaceFolderDto> obj = new List<WorkplaceFolderDto>();
+            obj.AddRange(Trial);
+            obj.AddRange(Country);
+            obj.AddRange(site);
 
-            return result;
+            return obj;
         }
 
         public WorkplaceChartDto GetDocChart(WorkplaceChartFilterDto filters)

@@ -20,6 +20,7 @@ namespace GSC.Data.Dto.Etmf
         public int EtmfArtificateMasterLbraryId { get; set; }
         public string FolderName { get; set; }
         public int FolderId { get; set; }
+        public int ItemId { get; set; }
         public int DocumentId { get; set; }
     }
 
