@@ -357,7 +357,7 @@ namespace GSC.Api.Controllers.UserMgt
 
                     _uow.Save();
 
-                    //await _hubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
+                    await _hubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
                     return Ok();
                 }
                 else
