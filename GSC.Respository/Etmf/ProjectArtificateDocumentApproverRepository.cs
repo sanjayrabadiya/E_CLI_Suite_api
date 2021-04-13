@@ -116,6 +116,8 @@ namespace GSC.Respository.Etmf
                     Id = s.Id,
                     TaskInformation =
                     ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription() + " | " +
+                    (s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName == null ? "" :
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName + " | ") +
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
@@ -153,7 +155,7 @@ namespace GSC.Respository.Etmf
             //    }).OrderByDescending(x => x.Id).ToList();
 
             var result = (from approver in _context.ProjectArtificateDocumentApprover.Include(x => x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
-                          join auditReason in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectArtificateDocumentApprover" && x.ColumnName == "Is Approved") 
+                          join auditReason in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectArtificateDocumentApprover" && x.ColumnName == "Is Approved")
                           on approver.Id equals auditReason.RecordId
                           select new ProjectArtificateDocumentApproverHistory
                           {
