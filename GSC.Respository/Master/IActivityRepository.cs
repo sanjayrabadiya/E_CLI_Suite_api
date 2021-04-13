@@ -8,5 +8,6 @@ namespace GSC.Respository.Master
     public interface IActivityRepository : IGenericRepository<Activity>
     {
         List<DropDownDto> GetActivityDropDown();
+        List<ActivityGridDto> GetActivityList(bool isDeleted);
     }
 }

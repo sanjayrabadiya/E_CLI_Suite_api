@@ -35,11 +35,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var activitys = _activityRepository.All.Where(x =>
-                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            ).ToList();
-            var activitysDto = _mapper.Map<IEnumerable<ActivityDto>>(activitys);
+            var activitysDto = _activityRepository.GetActivityList(isDeleted);
             return Ok(activitysDto);
         }
 

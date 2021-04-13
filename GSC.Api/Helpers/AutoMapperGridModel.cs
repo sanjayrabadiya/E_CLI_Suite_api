@@ -254,6 +254,7 @@ namespace GSC.Api.Helpers
                    .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                    .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
                   .ReverseMap();
+            CreateMap<Activity, ActivityGridDto>().ReverseMap();
         }
     }
 }
