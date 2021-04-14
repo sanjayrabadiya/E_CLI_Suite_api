@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Entities.Etmf;
@@ -11,21 +8,15 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
-using Microsoft.AspNetCore.Mvc;
-using Syncfusion.EJ2.DocumentEditor;
-using GSC.Api.Helpers;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using Syncfusion.DocIORenderer;
-using Syncfusion.Pdf;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using Syncfusion.EJ2.PdfViewer;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GSC.Api.Controllers.Etmf

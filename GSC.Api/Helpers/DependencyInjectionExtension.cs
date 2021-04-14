@@ -309,7 +309,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IScreeningNumberSettingsRepository, ScreeningNumberSettingsRepository>();
             services.AddScoped<IRandomizationNumberSettingsRepository, RandomizationNumberSettingsRepository>();
             services.AddScoped<IEConsentVideoRepository, EConsentVideoRepository>();
-
+            services.AddScoped<IManageMonitoringRepository, ManageMonitoringRepository>();
         }
     }
 }

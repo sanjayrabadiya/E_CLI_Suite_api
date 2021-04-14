@@ -42,6 +42,8 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsRepeated", DisplayName = "Is Repeated" });
             _dictionaries.Add(new Dictionary { FieldName = "ActivityCode", DisplayName = "Activity Code" });
             _dictionaries.Add(new Dictionary { FieldName = "ActivityName", DisplayName = "Activity Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "ActivityId", DisplayName = "Activity Name", SourceColumn = "ActivityName", TableName = "Activity", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "VariableTemplateId", DisplayName = "Form", SourceColumn = "TemplateName", TableName = "VariableTemplate", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "DomainId", DisplayName = "Domain", SourceColumn = "DomainName", TableName = "Domain", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "CategoryName", DisplayName = "Category Name" });
             _dictionaries.Add(new Dictionary { FieldName = "CategoryCode", DisplayName = "Category Code" });

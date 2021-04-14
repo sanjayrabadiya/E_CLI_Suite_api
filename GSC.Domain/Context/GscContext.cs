@@ -324,6 +324,7 @@ namespace GSC.Domain.Context
         public DbSet<RandomizationNumberSettings> RandomizationNumberSettings { get; set; }
         public DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }
         public DbSet<EConsentVideo> EConsentVideo { get; set; }
+        public DbSet<ManageMonitoring> ManageMonitoring { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

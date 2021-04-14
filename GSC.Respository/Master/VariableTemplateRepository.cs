@@ -34,6 +34,15 @@ namespace GSC.Respository.Master
                 .OrderBy(o => o.Value).ToList();
         }
 
+        public List<DropDownDto> GetVariableTemplateNonCRFDropDown()
+        {
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null
+                    && x.ActivityMode == Helper.ActivityMode.Generic)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode })
+                .OrderBy(o => o.Value).ToList();
+        }
+
         public List<DropDownDto> GetVariableTemplateByDomainId(int domainId)
         {
             return All.Where(x =>

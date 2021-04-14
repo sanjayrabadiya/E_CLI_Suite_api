@@ -232,6 +232,13 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
+        [Route("GetVariableTemplateNonCRFDropDown")]
+        public IActionResult GetVariableTemplateNonCRFDropDown()
+        {
+            return Ok(_variableTemplateRepository.GetVariableTemplateNonCRFDropDown());
+        }
+
+        [HttpGet]
         [Route("GetVariableTemplateByDomainId/{domainId}")]
         public IActionResult GetVariableTemplateByDomainId(int domainId)
         {

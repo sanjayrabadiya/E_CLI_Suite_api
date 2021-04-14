@@ -282,5 +282,6 @@ namespace GSC.Domain.Context
         DbSet<VariableNoteLanguage> VariableNoteLanguage { get; set; }
         DbSet<VariableValueLanguage> VariableValueLanguage { get; set; }
         DbSet<EConsentVideo> EConsentVideo { get; set; }
+        DbSet<ManageMonitoring> ManageMonitoring { get; set; }
     }
 }
