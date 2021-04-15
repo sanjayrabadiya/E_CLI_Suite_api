@@ -196,7 +196,7 @@ namespace GSC.Respository.EmailSender
             url = url.Replace("##Mobile##", "91" + mobile);
             url = url.Replace("##senderid##", smssetting.SenderId);
             url = url.Replace("##route##", "4");
-            url = url.Replace("##message##", smstemplate);//emailMessage.MessageBody
+            url = url.Replace("##message##", Uri.EscapeDataString(smstemplate));//emailMessage.MessageBody
             if (DLTTemplateId != null && DLTTemplateId != "")
                 url = url.Replace("##DLTTemplateId##", DLTTemplateId);
             else
