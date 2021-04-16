@@ -605,5 +605,20 @@ namespace GSC.Helper
         [Description("Receiver")] Receiver = 2
     }
 
+    public enum Position
+    {
+        Above,
+        Below,
+        Child,
+        None
+    }
+    public enum ActivityType : short
+    {
+        [Description("Finish-Finish")] FF = 1,
+        [Description("Finish-Start")] FS = 2,
+        [Description("Start-Finish")] SF = 3,
+        [Description("Start-Start")] SS = 4
+    }
+
 
 }

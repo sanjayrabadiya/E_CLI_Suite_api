@@ -41,6 +41,16 @@ namespace GSC.Api.Controllers.CTMS
             var tasklist = _taskMasterRepository.GetTasklist(isDeleted, templateId);
             return Ok(tasklist);
         }
+
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var task = _taskMasterRepository.Find(id);
+            var taskDto = _mapper.Map<TaskmasterDto>(task);            
+            return Ok(taskDto);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] TaskmasterDto taskmasterDto)
         {
@@ -53,6 +63,11 @@ namespace GSC.Api.Controllers.CTMS
             //    ModelState.AddModelError("Message", validate);
             //    return BadRequest(ModelState);
             //}       
+            if (tastMaster.IsMileStone || tastMaster.Duration == 0)
+            {
+                tastMaster.Duration = 0;
+                tastMaster.IsMileStone = true;
+            }
             tastMaster.TaskOrder = _taskMasterRepository.UpdateTaskOrder(taskmasterDto);
             _taskMasterRepository.Add(tastMaster);         
 
@@ -67,6 +82,11 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var taskmaster = _mapper.Map<TaskMaster>(taskmasterDto);
+            if (taskmaster.IsMileStone || taskmaster.Duration == 0)
+            {
+                taskmaster.Duration = 0;
+                taskmaster.IsMileStone = true;
+            }
             _taskMasterRepository.Update(taskmaster);
             if (_uow.Save() <= 0) throw new Exception("Updating Task Master failed on save.");
 
@@ -94,6 +114,29 @@ namespace GSC.Api.Controllers.CTMS
         }
 
 
+        [HttpGet("ConverttoMileStone/{id}")]
+        public IActionResult ConverttoMileStone(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var milestonetask = _taskMasterRepository.Find(id);
+            milestonetask.IsMileStone = true;            
+            milestonetask.Duration = 0;
+            _taskMasterRepository.Update(milestonetask);
+            _uow.Save();       
+            return Ok(id);
+        }
+
+        [HttpGet("ConverttoTask/{id}")]
+        public IActionResult ConverttoTask(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var milestonetask = _taskMasterRepository.Find(id);
+            milestonetask.IsMileStone = false;            
+            milestonetask.Duration = 1;
+            _taskMasterRepository.Update(milestonetask);
+            _uow.Save();           
+            return Ok(id);
+        }
 
     }
 }

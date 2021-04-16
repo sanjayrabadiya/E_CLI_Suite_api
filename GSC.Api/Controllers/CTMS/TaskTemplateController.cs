@@ -31,47 +31,47 @@ namespace GSC.Api.Controllers.CTMS
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var studytrackertemplate = _taskTemplateRepository.GetStudyTrackerList(isDeleted);
-            return Ok(studytrackertemplate);
+            var tasktemplate = _taskTemplateRepository.GetStudyTrackerList(isDeleted);
+            return Ok(tasktemplate);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] TaskTemplateDto studytrackerDto)
+        public IActionResult Post([FromBody] TaskTemplateDto tasktemplateDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            studytrackerDto.Id = 0;
-            var studyTracker = _mapper.Map<TaskTemplate>(studytrackerDto);
-            var validate = _taskTemplateRepository.Duplicate(studyTracker);
+            tasktemplateDto.Id = 0;
+            var taskTemplate = _mapper.Map<TaskTemplate>(tasktemplateDto);
+            var validate = _taskTemplateRepository.Duplicate(taskTemplate);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
 
-            _taskTemplateRepository.Add(studyTracker);
+            _taskTemplateRepository.Add(taskTemplate);
             if (_uow.Save() <= 0) throw new Exception("Creating Study Tracker template failed on save.");
-            return Ok(studyTracker.Id);
+            return Ok(taskTemplate.Id);
         }
 
 
         [HttpPut]
-        public IActionResult Put([FromBody] TaskTemplateDto studytrackerDto)
+        public IActionResult Put([FromBody] TaskTemplateDto tasktemplateDto)
         {
-            if (studytrackerDto.Id <= 0) return BadRequest();
+            if (tasktemplateDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var studyTracker = _mapper.Map<TaskTemplate>(studytrackerDto);
-            var validate = _taskTemplateRepository.Duplicate(studyTracker);
+            var taskTemplate = _mapper.Map<TaskTemplate>(tasktemplateDto);
+            var validate = _taskTemplateRepository.Duplicate(taskTemplate);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            _taskTemplateRepository.AddOrUpdate(studyTracker);
+            _taskTemplateRepository.Update(taskTemplate);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Study Tracker Template failed on save.");
-            return Ok(studyTracker.Id);
+            return Ok(taskTemplate.Id);
         }
 
         [HttpDelete("{id}")]

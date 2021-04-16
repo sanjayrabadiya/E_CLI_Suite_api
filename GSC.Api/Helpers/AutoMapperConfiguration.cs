@@ -344,6 +344,10 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
             CreateMap<EConsentVideo, EConsentVideoDto>().ReverseMap();
             CreateMap<ManageMonitoring, ManageMonitoringDto>().ReverseMap();
+            CreateMap<StudyPlanTaskDto, StudyPlanTask>().ReverseMap();
+            CreateMap<StudyPlantaskParameterDto, StudyPlanTask>().ReverseMap();
+            //CreateMap<DependentTaskParameterDto, DependentTask>().ReverseMap();
+            CreateMap<HolidayMasterDto, HolidayMaster>().ReverseMap();
         }
     }
 }

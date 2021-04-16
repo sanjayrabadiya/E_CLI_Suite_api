@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -19,6 +20,9 @@ namespace GSC.Data.Dto.CTMS
         public bool IsMileStone { get; set; }
         [Required(ErrorMessage = "Duration is required.")]
         public int Duration { get; set; }
+        public int? DependentTaskId { get; set; }
+        public ActivityType? ActivityType { get; set; }
+        public int OffSet { get; set; }
 
 
     }

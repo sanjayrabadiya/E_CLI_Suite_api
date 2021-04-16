@@ -10,5 +10,7 @@ namespace GSC.Respository.CTMS
     public interface IStudyPlanRepository : IGenericRepository<StudyPlan>
     {
         List<StudyPlanGridDto> GetStudyplanList(bool isDeleted);
+        string ImportTaskMasterData(StudyPlan studyplan);
+        string Duplicate(StudyPlan objSave);
     }
 }

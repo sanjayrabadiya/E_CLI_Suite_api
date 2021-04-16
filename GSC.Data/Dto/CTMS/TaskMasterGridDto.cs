@@ -13,6 +13,7 @@ namespace GSC.Data.Dto.CTMS
         public int TaskTemplateId { get; set;}
         public int TaskOrder { get; set;}
         public int Duration { get; set; }
+        public string Predecessor { get; set; }
 
     }
 }

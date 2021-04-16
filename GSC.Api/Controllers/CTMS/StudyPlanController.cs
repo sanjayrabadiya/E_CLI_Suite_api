@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using GSC.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
@@ -40,35 +41,75 @@ namespace GSC.Api.Controllers.CTMS
 
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
-        {
+        {          
             var studyplan = _studyPlanRepository.GetStudyplanList(isDeleted);
-            return Ok(studyplan);                      
+            return Ok(studyplan);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var studyplan = _studyPlanRepository.Find(id);
+            var studyplandetail = _mapper.Map<StudyPlanDto>(studyplan);
+            return Ok(studyplandetail);
+        }
 
         [HttpPost]
         public IActionResult Post([FromBody] StudyPlanDto studyplanDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             studyplanDto.Id = 0;
-            var studyplan = _mapper.Map<StudyPlan>(studyplanDto);  
+            var studyplan = _mapper.Map<StudyPlan>(studyplanDto);
+            var validatecode = _studyPlanRepository.Duplicate(studyplan);
+            if (!string.IsNullOrEmpty(validatecode))
+            {
+                ModelState.AddModelError("Message", validatecode);
+                return BadRequest(ModelState);
+            }
             _studyPlanRepository.Add(studyplan);
             if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
-
-            var taskdata= _taskMasterRepository.FindBy(x => x.TaskTemplateId == studyplanDto.TaskTemplateId).ToList();
-            
-            foreach (var item in taskdata)
+            var validate = _studyPlanRepository.ImportTaskMasterData(studyplan);
+            if (!string.IsNullOrEmpty(validate))
             {
-                var task = _mapper.Map<StudyPlanTask>(item);
-                task.StudyPlanId = studyplan.Id;
-                task.StartDate = DateTime.Now;
-                task.EndDate = DateTime.Now;
-                task.isMileStone = true;
-                task.Progress = 80;
-                //_studyPlanTaskRepository.Add(task);
+                ModelState.AddModelError("Message", validate);
+                _studyPlanRepository.Remove(studyplan);
                 _uow.Save();
+                return BadRequest(ModelState);
             }
             return Ok(studyplan.Id);
+        }
+
+        [HttpPut]
+        public IActionResult Put([FromBody] StudyPlanDto studyplanDto)
+        {
+            if (studyplanDto.Id <= 0) return BadRequest();
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var studyplan = _mapper.Map<StudyPlan>(studyplanDto);
+            var validatecode = _studyPlanRepository.Duplicate(studyplan);
+            if (!string.IsNullOrEmpty(validatecode))
+            {
+                ModelState.AddModelError("Message", validatecode);
+                return BadRequest(ModelState);
+            }
+            _studyPlanRepository.Update(studyplan);
+            if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+            return Ok(studyplan.Id);
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var record = _studyPlanRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+
+            _studyPlanRepository.Delete(record);
+            _uow.Save();
+
+            return Ok();
         }
 
         [HttpPatch("{id}")]
@@ -77,12 +118,12 @@ namespace GSC.Api.Controllers.CTMS
             var record = _studyPlanRepository.Find(id);
             if (record == null)
                 return NotFound();
-            //var validate = _studyTrackerTemplateRepository.Duplicate(record);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+            var validatecode = _studyPlanRepository.Duplicate(record);
+            if (!string.IsNullOrEmpty(validatecode))
+            {
+                ModelState.AddModelError("Message", validatecode);
+                return BadRequest(ModelState);
+            }
             _studyPlanRepository.Active(record);
             _uow.Save();
 

@@ -283,7 +283,8 @@ namespace GSC.Respository.Master
                 {
                     Id = c.Id,
                     IsStatic = c.IsStatic,
-                    Value = c.ProjectCode + " - " + c.ProjectName,
+                    //Value = c.ProjectCode + " - " + c.ProjectName,
+                    Value = c.ProjectCode,
                     ParentProjectId = c.ParentProjectId ?? c.Id
                 }).OrderBy(o => o.Value).ToList();
 

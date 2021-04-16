@@ -310,6 +310,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IRandomizationNumberSettingsRepository, RandomizationNumberSettingsRepository>();
             services.AddScoped<IEConsentVideoRepository, EConsentVideoRepository>();
             services.AddScoped<IManageMonitoringRepository, ManageMonitoringRepository>();
+            services.AddScoped<IHolidayMasterRepository, HolidayMasterRepository>();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using GSC.Common;
 using GSC.Common.Base;
+using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.AdverseEvent;
 using GSC.Data.Entities.Attendance;
@@ -283,5 +284,7 @@ namespace GSC.Domain.Context
         DbSet<VariableValueLanguage> VariableValueLanguage { get; set; }
         DbSet<EConsentVideo> EConsentVideo { get; set; }
         DbSet<ManageMonitoring> ManageMonitoring { get; set; }
+        DbSet<DependentTaskDto> DependentTaskDto { get; set; }
+        DbSet<HolidayMaster> HolidayMaster { get; set; }
     }
 }

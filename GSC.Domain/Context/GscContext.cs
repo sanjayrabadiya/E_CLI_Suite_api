@@ -7,6 +7,7 @@ using GSC.Common;
 using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.AdverseEvent;
 using GSC.Data.Entities.Attendance;
@@ -325,6 +326,8 @@ namespace GSC.Domain.Context
         public DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }
         public DbSet<EConsentVideo> EConsentVideo { get; set; }
         public DbSet<ManageMonitoring> ManageMonitoring { get; set; }
+        public DbSet<DependentTaskDto> DependentTaskDto { get; set; }
+        public DbSet<HolidayMaster> HolidayMaster { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

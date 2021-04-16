@@ -372,6 +372,17 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceSubSectionId", DisplayName = "Project Workplace SubSection" });
             _dictionaries.Add(new Dictionary { FieldName = "ArtifactName", DisplayName = "Artifact Name" });
 
+            //Task Master
+            _dictionaries.Add(new Dictionary { FieldName = "TaskName", DisplayName = "Task Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "Duration", DisplayName = "Duration" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Project", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "TaskTemplateId", DisplayName = "Template", SourceColumn = "TemplateCode", TableName = "TaskTemplate", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "StartDate", DisplayName = "StartDate" });
+            _dictionaries.Add(new Dictionary { FieldName = "EndDate", DisplayName = "EndDate" });
+            _dictionaries.Add(new Dictionary { FieldName = "ActualStartDate", DisplayName = "ActualStartDate" });
+            _dictionaries.Add(new Dictionary { FieldName = "ActualEndDate", DisplayName = "ActualEndDate" });
+
         }
 
 

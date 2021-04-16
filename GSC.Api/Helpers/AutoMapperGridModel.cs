@@ -260,6 +260,19 @@ namespace GSC.Api.Helpers
                    .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))
                    .ForMember(x => x.VariableTemplate, x => x.MapFrom(a => a.VariableTemplate.TemplateName))
                   .ReverseMap();
+
+            CreateMap<TaskMaster, TaskMasterGridDto>()
+                .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
+                .ReverseMap();
+
+            CreateMap<StudyPlanTask, StudyPlanTaskDto>()
+                           .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
+                           //.ForMember(x => x.IsManual, x => x.MapFrom(a => a.ParentId==0? true:false))
+                           .ForMember(x => x.IsManual, x => x.MapFrom(a => a.Duration == 0 ? false : true))
+                          .ReverseMap();
+            CreateMap<HolidayMaster, HolidayMasterGridDto>()
+                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ReverseMap();
         }
     }
 }
