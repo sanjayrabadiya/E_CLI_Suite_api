@@ -113,22 +113,5 @@ namespace GSC.Respository.Project.Design
                 return "Duplicate Visit Name : " + objSave.DisplayName;
             return "";
         }
-
-        public IList<DropDownDto> GetVisitDropDownByVariable(int projectDesignVariableId)
-        {
-            var variables = _projectDesignVariableRepository.FindByInclude(x=>x.Id==projectDesignVariableId,x=>x.ProjectDesignTemplate
-            , x => x.ProjectDesignTemplate.ProjectDesignVisit, x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod).FirstOrDefault();
-
-            var visits = All.Where(x => x.DeletedDate == null
-                                        && x.ProjectDesignPeriodId == variables.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId).OrderBy(t => t.DesignOrder).Select(
-                t => new DropDownDto
-                {
-                    Id = t.Id,
-                    Value = t.DisplayName,
-                    ExtraData = t.IsNonCRF
-                }).ToList();
-
-            return visits;
-        }
     }
 }

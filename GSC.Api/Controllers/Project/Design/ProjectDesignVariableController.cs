@@ -298,22 +298,6 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_projectDesignVariableRepository.GetVariabeAnnotationByDomainDropDown(domainId, projectId));
         }
 
-        //Not Use in front please check and remove if not use comment  by vipul
-        [HttpGet]
-        [Route("GetTargetVariabeAnnotationDropDown/{projectDesignTemplateId}")]
-        public IActionResult GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId)
-        {
-            return Ok(_projectDesignVariableRepository.GetTargetVariabeAnnotationDropDown(projectDesignTemplateId));
-        }
-
-        [HttpGet]
-        [Route("GetVariabeAnnotationDropDownForProjectDesign/{projectDesignTemplateId}")]
-        public IActionResult GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId)
-        {
-            return Ok(
-                _projectDesignVariableRepository.GetVariabeAnnotationDropDownForProjectDesign(projectDesignTemplateId));
-        }
-
         [HttpGet]
         [Route("GetAnnotationDropDown/{projectDesignId}/{isFormula}")]
         public IActionResult GetAnnotationDropDown(int projectDesignId, bool isFormula)
@@ -360,6 +344,15 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult GetDesignReport([FromBody] ProjectDatabaseSearchDto search)
         {
             return _projectDesignVariableValueRepository.GetDesignReport(search);
+        }
+
+
+        [HttpGet]
+        [Route("GetProjectDesignVariableRelation/{id}")]
+        public IActionResult GetProjectDesignVariableRelation(int id)
+        {
+           var result=_projectDesignVariableRepository.GetProjectDesignVariableRelation(id);
+            return Ok(result);
         }
     }
 }

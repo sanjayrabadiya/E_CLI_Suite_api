@@ -270,7 +270,6 @@ namespace GSC.Domain.Context
         DbSet<TaskMaster> TaskMaster { get; set; }
         DbSet<StudyPlan> StudyPlan { get; set; }
         DbSet<StudyPlanTask> StudyPlanTask { get; set; }
-        DbSet<ProjectDesignVariableRelation> ProjectDesignVariableRelation { get; set; }
         DbSet<ProjectDesignVariableEncryptRole> ProjectDesignVariableEncryptRole { get; set; }
         DbSet<TemplatePermission> TemplatePermission { get; set; }
         DbSet<UserSetting> UserSetting { get; set; }

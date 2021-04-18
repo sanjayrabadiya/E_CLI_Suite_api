@@ -26,18 +26,7 @@ namespace GSC.Respository.Project.Design
             _context = context;
         }
 
-        public IList<DropDownDto> GetVariabeDropDown(int projectDesignTemplateId)
-        {
-            return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId)
-                .OrderBy(o => o.DesignOrder)
-                .Select(c => new DropDownDto
-                {
-                    Id = c.Id,
-                    Value = c.VariableName,
-                    Code = c.CoreVariableType.ToString(),
-                    ExtraData = c.DesignOrder
-                }).OrderBy(o => o.ExtraData).ToList();
-        }
+
 
         public IList<DropDownVaribleDto> GetVariabeAnnotationDropDown(int projectDesignTemplateId, bool isFormula)
         {
@@ -50,7 +39,7 @@ namespace GSC.Respository.Project.Design
             return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownVaribleDto
             {
                 Id = c.Id,
-                Value = c.DesignOrder + ". "+ c.VariableName +
+                Value = c.DesignOrder + ". " + c.VariableName +
                                          Convert.ToString(string.IsNullOrEmpty(c.Annotation) ? "" : " [" + c.Annotation + "]"),
                 Code = c.Annotation,
                 DataType = c.DataType,
@@ -91,35 +80,8 @@ namespace GSC.Respository.Project.Design
             return grpresult;
         }
 
-        //Not Use in front please check and remove if not use comment  by vipul
-        public IList<DropDownVaribleDto> GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId)
-        {
-            var query =
-                from c in _context.ProjectDesignVariable
-                where c.ProjectDesignTemplateId == projectDesignTemplateId &&
-                      !(from o in _context.ProjectScheduleTemplate
-                        where o.DeletedDate == null
-                        select o.ProjectDesignVariableId)
-                          .Contains(c.Id)
-                select c;
 
-
-            return query.Where(x => x.DeletedDate == null
-                                    && x.ProjectDesignTemplateId == projectDesignTemplateId).OrderBy(o => o.DesignOrder)
-                .Select(c => new DropDownVaribleDto
-                {
-                    Id = c.Id,
-                    Value = c.VariableName +
-                            Convert.ToString(string.IsNullOrEmpty(c.Annotation) ? "" : " [" + c.Annotation + "]"),
-                    Code = c.Annotation,
-                    DataType = c.DataType,
-                    CollectionSources = c.CollectionSource,
-                    ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList())
-                }).ToList();
-        }
-
-
-        public IList<DropDownDto> GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId)
+        public IList<DropDownDto> GetVariabeDropDown(int projectDesignTemplateId)
         {
             return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId)
                 .OrderBy(o => o.DesignOrder)
@@ -131,6 +93,7 @@ namespace GSC.Respository.Project.Design
                     ExtraData = c.DesignOrder
                 }).OrderBy(o => o.ExtraData).ToList();
         }
+
 
 
         public string Duplicate(ProjectDesignVariable objSave)
@@ -156,11 +119,6 @@ namespace GSC.Respository.Project.Design
                              x.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId &&
                              x.VariableAlias == objSave.VariableAlias && !string.IsNullOrEmpty(x.VariableAlias) &&
                              x.DeletedDate == null)) return "Duplicate Variable Alias: " + objSave.VariableAlias;
-
-            //if (All.Any(x => x.Id != objSave.Id && x.VariableAlias == objSave.VariableAlias && x.DeletedDate == null))
-            //{
-            //    return "Duplicate Variable alias : " + objSave.VariableAlias;
-            //}
 
             return "";
         }
@@ -197,7 +155,7 @@ namespace GSC.Respository.Project.Design
                 CollectionSources = c.Key.CollectionSources,
                 VisitName = string.Join(", ", variableResult.Where(v => v.Value == c.Key.Value).Select(r => r.VisitName).ToList()),
                 ExtraData = variableResult.FirstOrDefault(v => v.Value == c.Key.Value)?.ExtraData
-            }).Where(x=>x.Value != null).ToList();
+            }).Where(x => x.Value != null).ToList();
         }
 
         //Added method By Vipul 25062020
@@ -254,6 +212,18 @@ namespace GSC.Respository.Project.Design
                 Id = c.Id,
                 Value = c.VariableName
             }).ToList();
+        }
+
+        public ProjectDesignVariableRelationDto GetProjectDesignVariableRelation(int id)
+        {
+            return All.Where(x => x.Id == id).Select(t => new ProjectDesignVariableRelationDto
+            {
+                Id = t.Id,
+                RelationProjectDesignVariableId = t.RelationProjectDesignVariableId ?? 0,
+                ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                ProjectDesignVisitId = t.ProjectDesignTemplate.ProjectDesignVisitId
+            }).FirstOrDefault();
+
         }
     }
 }

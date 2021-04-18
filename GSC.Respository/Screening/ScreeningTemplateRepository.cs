@@ -130,6 +130,11 @@ namespace GSC.Respository.Screening
                     if (!string.IsNullOrWhiteSpace(variable.ScreeningValue) || variable.IsNaValue)
                         variable.IsValid = true;
 
+                    if (variable.CollectionSource == CollectionSources.Relation)
+                    {
+                        variable.Values = _screeningTemplateValueRepository.GetScreeningRelation(0, screeningTemplateBasic.ScreeningEntryId);
+                    }
+
                     if (variable.Values != null)
                         variable.Values.ToList().ForEach(val =>
                         {
@@ -540,7 +545,7 @@ namespace GSC.Respository.Screening
 
         public string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel)
         {
-            if (myReview) 
+            if (myReview)
                 return "My Review";
 
             if (basicDetail.Status != ScreeningTemplateStatus.Completed && basicDetail.ReviewLevel != null &&

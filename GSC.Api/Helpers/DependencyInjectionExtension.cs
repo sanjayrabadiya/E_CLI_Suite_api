@@ -302,7 +302,6 @@ namespace GSC.Api.Helpers
             services.AddScoped<IStudyPlanRepository, StudyPlanRepository>();
             services.AddScoped<IStudyPlanTaskRepository, StudyPlanTaskRepository>();
             services.AddScoped<IPdfViewerRepository, PdfViewerRepository>();
-            services.AddScoped<IProjectDesignVariableRelationRepository, ProjectDesignVariableRelationRepository>();
             services.AddScoped<IProjectDesignVariableEncryptRoleRepository, ProjectDesignVariableEncryptRoleRepository>();
             services.AddScoped<ITemplatePermissionRepository, TemplatePermissionRepository>();
             services.AddScoped<IUserSettingRepository, UserSettingRepository>();

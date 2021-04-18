@@ -2,6 +2,8 @@
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
@@ -259,7 +261,8 @@ namespace GSC.Respository.Screening
             if (filters.SiteId != null)
             {
                 sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
-            } else
+            }
+            else
             {
                 sites = _context.Project.Where(x => x.ParentProjectId == filters.ParentProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
             }
@@ -858,6 +861,44 @@ namespace GSC.Respository.Screening
                 }
             }
             #endregion
+        }
+
+        public List<ScreeningVariableValueDto> GetScreeningRelation(int projectDesignVariableId, int screeningEntryId)
+        {
+            var result = All.Where(x => x.DeletedDate == null &&
+                                   x.ScreeningTemplate.DeletedDate == null &&
+                                   x.ScreeningTemplate.ScreeningVisit.DeletedDate == null &&
+                                   x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId &&
+                                   x.ProjectDesignVariableId == projectDesignVariableId).OrderBy(o => o.CreatedDate)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.ProjectDesignVariableId,
+                    ValueName = c.Value,
+                    c.ProjectDesignVariable.CollectionSource,
+                    SeqNo = c.ScreeningTemplate.RepeatSeqNo == null ? c.ScreeningTemplate.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(c.ScreeningTemplate.ProjectDesignTemplate.DesignOrder.ToString() + "." + c.ScreeningTemplate.RepeatSeqNo.Value.ToString())
+                }).ToList();
+
+            var relations = new List<ScreeningVariableValueDto>();
+
+            result.ForEach(x =>
+            {
+                var relationValue = new ScreeningVariableValueDto();
+                relationValue.Id = x.Id;
+                relationValue.ProjectDesignVariableId = x.ProjectDesignVariableId;
+                relationValue.ValueName = x.SeqNo + "- " + x.ValueName;
+                if (x.CollectionSource.IsDropDownCollection())
+                {
+                    int.TryParse(x.ValueName, out int projectDesignVariableValueId);
+                    relationValue.ValueName = x.SeqNo + "- " + _context.ProjectDesignVariableValue.Where(b => b.Id == projectDesignVariableValueId).Select(
+                        t => _jwtTokenAccesser.Language != 1 ? t.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : t.ValueName).FirstOrDefault();
+
+                }
+                relations.Add(relationValue);
+            });
+
+
+            return relations;
         }
     }
 }

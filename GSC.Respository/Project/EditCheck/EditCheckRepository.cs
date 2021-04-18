@@ -203,7 +203,7 @@ namespace GSC.Respository.Project.EditCheck
                          string.IsNullOrEmpty(x.CollectionValue)
                              ? ""
                              :
-                               IsMultiCollection(x.CollectionSource)
+                               x.CollectionSource.IsDropDownCollection()
                                        ? string.Join(", ", _context.ProjectDesignVariableValue
                                                    .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
                                                    Select(a => a.ValueName).ToList())
@@ -263,7 +263,7 @@ namespace GSC.Respository.Project.EditCheck
 
             data.ForEach(x =>
             {
-                if ((IsMultiCollection(x.CollectionSource) || IsInFilter(x.Operator)) && !string.IsNullOrEmpty(x.CollectionValue))
+                if ((x.CollectionSource.IsDropDownCollection() || IsInFilter(x.Operator)) && !string.IsNullOrEmpty(x.CollectionValue))
                 {
                     x.CollectionValue = Convert.ToString(IsInFilter(x.Operator) ? "(" : "") + string.Join(", ", _context.ProjectDesignVariableValue
                                                    .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
@@ -288,15 +288,6 @@ namespace GSC.Respository.Project.EditCheck
                 collectionValue.Split(",").ToList().ForEach(x => { result.Add(Convert.ToInt32(x)); });
             }
             return result;
-        }
-
-        bool IsMultiCollection(CollectionSources? collectionSources)
-        {
-            return collectionSources != null & (collectionSources == CollectionSources.ComboBox ||
-                                   collectionSources == CollectionSources.RadioButton ||
-                                   collectionSources == CollectionSources.NumericScale ||
-                                   collectionSources == CollectionSources.CheckBox ||
-                                   collectionSources == CollectionSources.MultiCheckBox);
         }
 
 
@@ -369,7 +360,7 @@ namespace GSC.Respository.Project.EditCheck
                 var operatorName = x.Operator.GetDescription();
 
                 var collectionValue = (string.IsNullOrEmpty(x.CollectionValue) ? ""
-                         : IsMultiCollection(x.CollectionSource) ?
+                         : x.CollectionSource.IsDropDownCollection() ?
                          Convert.ToString(IsInFilter(x.Operator) ? "(" : "") +
                          string.Join(", ", _context.ProjectDesignVariableValue
                          .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).

@@ -34,6 +34,7 @@ namespace GSC.Data.Dto.Project.Design
         public string Label { get; set; }
         public int SeqNo { get; set; }
     }
+  
 
     public class ProjectDesignVariableValueDropDown
     {

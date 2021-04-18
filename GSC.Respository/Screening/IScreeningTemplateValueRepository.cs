@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
@@ -25,5 +26,7 @@ namespace GSC.Respository.Screening
         List<TemplateTotalQueryDto> GetQueryStatusBySubject(int screeningEntryId);
 
         List<VariableQueryDto> GetTemplateQueryList(int screeningTemplateId);
+
+        List<ScreeningVariableValueDto> GetScreeningRelation(int projectDesignVariableId, int screeningEntryId);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 
 namespace GSC.Respository.Project.Design
@@ -14,10 +15,6 @@ namespace GSC.Respository.Project.Design
 
         IList<DropDownVaribleDto> GetVariabeAnnotationDropDown(int projectDesignTemplateId, bool isFormula);
 
-        IList<DropDownDto> GetVariabeAnnotationDropDownForProjectDesign(int projectDesignTemplateId);
-
-        IList<DropDownVaribleDto> GetTargetVariabeAnnotationDropDown(int projectDesignTemplateId);
-
         IList<DropDownVaribleAnnotationDto> GetVariabeAnnotationByDomainDropDown(int domainId, int projectId);
 
         IList<DropDownVaribleDto> GetTargetVariabeAnnotationForScheduleDropDown(int projectDesignTemplateId);
@@ -25,6 +22,8 @@ namespace GSC.Respository.Project.Design
         //Added method By Vipul 22092020 for visit status in project design get only date and datetime variable
         IList<DropDownVaribleDto> GetVariabeAnnotationDropDownForVisitStatus(int projectDesignTemplateId);
         IList<DropDownDto> GetVariableByMultipleTemplateDropDown(int?[] templateIds);
+
+        ProjectDesignVariableRelationDto GetProjectDesignVariableRelation(int id);
 
     }
 }

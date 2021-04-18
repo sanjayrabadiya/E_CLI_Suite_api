@@ -14,6 +14,5 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetVisitsByProjectDesignId(int projectDesignId);
         string Duplicate(ProjectDesignVisit objSave);
         IList<ProjectDesignVisitBasicDto> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId);
-        IList<DropDownDto> GetVisitDropDownByVariable(int projectDesignVariableId);
     }
 }

@@ -310,11 +310,5 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
-        [HttpGet]
-        [Route("GetVisitDropDownByVariable/{projectDesignVariableId}")]
-        public IActionResult GetVisitDropDownByVariable(int projectDesignVariableId)
-        {
-            return Ok(_projectDesignVisitRepository.GetVisitDropDownByVariable(projectDesignVariableId));
-        }
     }
 }

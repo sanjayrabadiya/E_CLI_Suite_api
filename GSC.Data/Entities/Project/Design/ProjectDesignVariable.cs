@@ -42,8 +42,10 @@ namespace GSC.Data.Entities.Project.Design
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public int DesignOrder { get; set; }
         public VariableCategory VariableCategory { get; set; }
+        public int? RelationProjectDesignVariableId { get; set; }
 
-        [NotMapped] public string VariableCategoryName { get; set; }
+        [NotMapped] 
+        public string VariableCategoryName { get; set; }
 
         public VariableCategoryType? SystemType { get; set; }
         public bool IsNa { get; set; }
