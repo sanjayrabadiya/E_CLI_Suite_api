@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using ClosedXML.Excel;
@@ -108,7 +109,11 @@ namespace GSC.Respository.Screening
             else
                 sites = _context.Project.Where(x => x.ParentProjectId == search.ParentProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
 
-            query = query.Where(x => sites.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId));
+            query = query.Where(x => sites.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
+            && x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.DeletedDate == null
+            && x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DeletedDate == null
+             && x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DeletedDate == null
+             && x.ScreeningTemplateValue.ProjectDesignVariable.DeletedDate == null);
 
             if (search.SubjectIds != null && search.SubjectIds.Length > 0)
                 query = query.Where(x => search.SubjectIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Id));
@@ -138,9 +143,7 @@ namespace GSC.Respository.Screening
                 IpAddress = r.IpAddress,
                 NewValue = r.Value,
                 Note = r.Note,
-                OldValue = !string.IsNullOrEmpty(r.Value) && string.IsNullOrEmpty(r.OldValue)
-                                       ? "Default"
-                                       : r.OldValue,
+                OldValue = !string.IsNullOrEmpty(r.Value) && string.IsNullOrEmpty(r.OldValue) ? "Default" : r.OldValue,
                 Reason = r.AuditReason.ReasonName,
                 ReasonOth = r.ReasonOth,
                 Role = r.UserRole,
@@ -148,12 +151,14 @@ namespace GSC.Respository.Screening
                 TimeZone = r.TimeZone,
                 User = r.UserName,
                 Variable = r.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
-                Visit = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
+                Visit = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                Convert.ToString(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
                 SiteCode = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
                 PatientInitial = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial,
                 ScreeningNo = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 RandomizationNo = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
-                StudyCode = ProjectCode
+                StudyCode = ProjectCode,
+                CollectionSource = r.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource
 
             }).OrderByDescending(t => t.CreatedDate).ToList();
 
@@ -171,7 +176,7 @@ namespace GSC.Respository.Screening
 
             if (!filters.ExcelFormat)
             {
-              
+
                 #region PDF Report Design
                 //Create a new PDF document
                 using (PdfDocument doc = new PdfDocument())
@@ -323,6 +328,61 @@ namespace GSC.Respository.Screening
                         worksheet.Row(j).Cell(6).SetValue(d.Visit);
                         worksheet.Row(j).Cell(7).SetValue(d.Template);
                         worksheet.Row(j).Cell(8).SetValue(d.Variable);
+
+                        #region old value
+                        //if (d.CollectionSource == CollectionSources.DateTime && d.OldValue != "Default")
+                        //{
+                        //    DateTime dDate;
+                        //    string variablevalueformat = d.OldValue;
+                        //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                        //    worksheet.Row(j).Cell(9).SetValue(dt);
+                        //}
+                        //else if (d.CollectionSource == CollectionSources.Date && d.OldValue != "Default")
+                        //{
+                        //    DateTime dDate;
+                        //    string variablevalueformat = d.OldValue;
+                        //    string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                        //    worksheet.Row(j).Cell(9).SetValue(dt);
+                        //}
+                        //else if (d.CollectionSource == CollectionSources.Time && d.OldValue != "Default")
+                        //{
+                        //    string variablevalueformat = d.OldValue;
+                        //    var dt = "";//!string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                        //    worksheet.Row(j).Cell(9).SetValue(dt);
+                        //}
+                        //else
+                        //{
+                        //    worksheet.Row(j).Cell(9).SetValue(d.OldValue);
+                        //}
+                        #endregion old value
+                        #region new value
+                        //if (d.CollectionSource == CollectionSources.DateTime)
+                        //{
+                        //    DateTime dDate;
+                        //    string variablevalueformat = d.NewValue;
+                        //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                        //    worksheet.Row(j).Cell(10).SetValue(dt);
+                        //}
+                        //else if (d.CollectionSource == CollectionSources.Date)
+                        //{
+                        //    DateTime dDate;
+                        //    string variablevalueformat = d.NewValue;
+                        //    string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                        //    worksheet.Row(j).Cell(10).SetValue(dt);
+                        //}
+
+                        //else if (d.CollectionSource == CollectionSources.Time)
+                        //{
+                        //    DateTime dDate;
+                        //    string variablevalueformat = d.NewValue;
+                        //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                        //    worksheet.Row(j).Cell(10).SetValue(dt);
+                        //}
+                        //else
+                        //{
+                        //    worksheet.Row(j).Cell(10).SetValue(d.NewValue);
+                        //}
+                        #endregion old value
                         worksheet.Row(j).Cell(9).SetValue(d.OldValue);
                         worksheet.Row(j).Cell(10).SetValue(d.NewValue);
                         worksheet.Row(j).Cell(11).SetValue(d.User);
