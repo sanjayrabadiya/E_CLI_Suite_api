@@ -374,7 +374,6 @@ namespace GSC.Api.Controllers.Attendance
         {
             _randomizationRepository.ChangeStatustoConsentInProgress();
             _uow.Save();
-            //if (_uow.Save() <= 0) throw new Exception("Updating status failed on save.");
             return Ok();
         }
 

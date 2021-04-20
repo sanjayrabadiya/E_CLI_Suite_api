@@ -123,18 +123,12 @@ namespace GSC.Api.Controllers.InformConcent
                 _econsentChatRepository.Update(messages[i]);
             }
             _uow.Save();
-            try
-            {
-                var connection = ConnectedUser.Ids.Where(x => x.userId == senderId).ToList().FirstOrDefault();
+              var connection = ConnectedUser.Ids.Where(x => x.userId == senderId).ToList().FirstOrDefault();
                 if (connection != null)
                 {
                     var connectionId = connection.connectionId;
                     await _hubcontext.Clients.Client(connectionId).SendAsync("AllMessageRead", _jwtTokenAccesser.UserId);
                 }
-            } catch(Exception ex)
-            {
-
-            }
             return Ok();
         }
     }

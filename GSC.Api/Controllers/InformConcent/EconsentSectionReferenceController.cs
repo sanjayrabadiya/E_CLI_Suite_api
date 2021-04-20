@@ -121,7 +121,6 @@ namespace GSC.Api.Controllers.InformConcent
             document.SectionNo = econsentSectionReferenceDto.SectionNo;
             document.ReferenceTitle = econsentSectionReferenceDto.ReferenceTitle;
             document.EconsentSetupId = econsentSectionReferenceDto.EconsentSetupId;
-            //var econsentSectionReference = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
             _econsentSectionReferenceRepository.Update(document);
 
             if (_uow.Save() <= 0)
@@ -187,8 +186,6 @@ namespace GSC.Api.Controllers.InformConcent
             Stream stream = System.IO.File.OpenRead(path);
             string extension = System.IO.Path.GetExtension(path);
             string type = "";
-            //string[] validextensions = { "jpg", "jpeg", "bmp", "gif", "png", "docx", "doc", "pdf", "webm", "mkv", "flv", "vob", "ogv", "ogg", "avi", "mov", "wmv", "yuv", "mp4", "m4p", "m4v", "m4v" };
-            //string json = ImportWordDocument(stream);
             EconsentSectionReferenceDocumentType econsentSectionReferenceDocument = new EconsentSectionReferenceDocumentType();
            if (extension == ".docx" || extension == ".doc")
             {

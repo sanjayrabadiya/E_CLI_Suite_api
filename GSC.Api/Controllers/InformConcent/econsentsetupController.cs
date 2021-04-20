@@ -85,14 +85,10 @@ namespace GSC.Api.Controllers.InformConcent
         public IActionResult Get(int projectid,bool isDeleted)
         {
             var econsentSetups = _econsentSetupRepository.GetEconsentSetupList(projectid,isDeleted);
-                //_econsentSetupRepository.FindByInclude(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderByDescending(x => x.Id).ToList();
-
             foreach (var item in econsentSetups)
             {
                 item.LanguageName = _languageRepository.Find(item.LanguageId).LanguageName;
                 item.ProjectName = _projectRepository.Find(item.ProjectId).ProjectCode;
-                item.DocumentTypeName = "";//_documentTypeRepository.Find(item.DocumentTypeId).TypeName;
-                //item.PatientStatusName = _patientStatusRepository.Find(item.PatientStatusId).StatusName;
                 item.IsDeleted = isDeleted;
             }
             return Ok(econsentSetups);
@@ -142,8 +138,6 @@ namespace GSC.Api.Controllers.InformConcent
             econsentSetupDto.Id = record.Id;
             econsentSetupDto.LanguageId = record.LanguageId;
             econsentSetupDto.Version = record.Version;
-            econsentSetupDto.PatientStatus = record.PatientStatus;
-            econsentSetupDto.Roles = record.Roles;
 
             var validate = _econsentSetupRepository.Duplicate(econsentSetupDto);
             if (!string.IsNullOrEmpty(validate))
@@ -246,11 +240,11 @@ namespace GSC.Api.Controllers.InformConcent
 
             var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
 
-            EconsentSetupPatientStatus econsentSetupPatientStatus = new EconsentSetupPatientStatus();
-            econsentSetupPatientStatus.Id = 0;
-            econsentSetupPatientStatus.EconsentDocumentId = 0;
-            econsentSetupPatientStatus.PatientStatusId = (int)ScreeningPatientStatus.ConsentInProcess;
-            econsent.PatientStatus.Add(econsentSetupPatientStatus);
+            //EconsentSetupPatientStatus econsentSetupPatientStatus = new EconsentSetupPatientStatus();
+            //econsentSetupPatientStatus.Id = 0;
+            //econsentSetupPatientStatus.EconsentDocumentId = 0;
+            //econsentSetupPatientStatus.PatientStatusId = (int)ScreeningPatientStatus.ConsentInProcess;
+            //econsent.PatientStatus.Add(econsentSetupPatientStatus);
 
             _econsentSetupRepository.Add(econsent);
             for (int i = 0; i <= econsent.PatientStatus.Count - 1; i++)
@@ -287,14 +281,17 @@ namespace GSC.Api.Controllers.InformConcent
             string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
             for (var i = 0; i <= result.Count - 1; i++)
             {
-                if (result[i].PatientStatusId == ScreeningPatientStatus.ConsentCompleted || result[i].PatientStatusId == ScreeningPatientStatus.OnTrial)
+                if (result[i].PatientStatusId == ScreeningPatientStatus.ConsentInProcess || result[i].PatientStatusId == ScreeningPatientStatus.ReConsentInProcess || result[i].PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
                 {
                     EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
                     econsentReviewDetails.RandomizationId = result[i].Id;
                     econsentReviewDetails.EconsentSetupId = econsent.Id;
                     econsentReviewDetails.IsReviewedByPatient = false;
                     _econsentReviewDetailsRepository.Add(econsentReviewDetails);
-                    _randomizationRepository.ChangeStatustoReConsentInProgress(result[i].Id);
+                    if (result[i].PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
+                    {
+                        _randomizationRepository.ChangeStatustoReConsentInProgress(result[i].Id);
+                    }
                 }
                 if (result[i].Email != "")
                 {
@@ -335,14 +332,12 @@ namespace GSC.Api.Controllers.InformConcent
 
             var document = _econsentSetupRepository.Find(econsentSetupDto.Id);
             document.ProjectId = econsentSetupDto.ProjectId;
-            document.DocumentTypeId = econsentSetupDto.DocumentTypeId;
             document.DocumentName = econsentSetupDto.DocumentName;
             document.LanguageId = econsentSetupDto.LanguageId;
             document.Version = econsentSetupDto.Version;
             document.PatientStatus = econsentSetupDto.PatientStatus;
             document.Roles = econsentSetupDto.Roles;
             document.OriginalFileName = econsentSetupDto.OriginalFileName;
-            //document.PatientStatusId = econsentSetupDto.PatientStatusId;
 
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
                 {
@@ -356,7 +351,7 @@ namespace GSC.Api.Controllers.InformConcent
                 _econsentSetupPatientStatusRepository.Remove(item);
             }
 
-            var RolesDelete = _econsentSetupRolesRepository.FindBy(x => x.EconsentDocumentId == document.Id).ToList();//_context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsentSetup.Id).ToList();
+            var RolesDelete = _econsentSetupRolesRepository.FindBy(x => x.EconsentDocumentId == document.Id).ToList();
             foreach (var item in RolesDelete)
             {
                 _econsentSetupRolesRepository.Remove(item);

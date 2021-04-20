@@ -11,7 +11,6 @@ namespace GSC.Data.Entities.InformConcent
     {
 
         public int ProjectId { get; set; }
-        public int DocumentTypeId { get; set; }
         public string DocumentName { get; set; }
         public string DocumentPath { get; set; }
         public string Version { get; set; }

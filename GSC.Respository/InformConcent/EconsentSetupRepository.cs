@@ -39,7 +39,7 @@ namespace GSC.Respository.InformConcent
         {
             if (All.Any(x => x.Id != objSave.Id && x.Version == objSave.Version && x.LanguageId == objSave.LanguageId && x.DeletedDate == null))
             {
-                return "Duplicate Dictionary";
+                return "Duplicate Document";
             }
             return "";
         }

@@ -102,7 +102,7 @@ namespace GSC.Api.Controllers.InformConcent
             var randomizationId = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault().Id;
             econsentReviewDetailsDto.RandomizationId = randomizationId;
             var econsentReviewDetail = _mapper.Map<EconsentReviewDetails>(econsentReviewDetailsDto);
-            econsentReviewDetail.patientapproveddatetime = DateTime.Now;
+            econsentReviewDetail.patientapproveddatetime = _jwtTokenAccesser.GetClientDate();
             var validate = _econsentReviewDetailsRepository.Duplicate(econsentReviewDetailsDto);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -175,11 +175,6 @@ namespace GSC.Api.Controllers.InformConcent
             {
                 _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(x.Email, x.UserName, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
             });
-            //if (project.InvestigatorContactId != null)
-            //{
-            //    var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
-            //    _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
-            //}
             return Ok(econsentReviewDetail.Id);
         }
 
@@ -190,7 +185,7 @@ namespace GSC.Api.Controllers.InformConcent
 
             var econsentReviewDetail = _mapper.Map<EconsentReviewDetails>(econsentReviewDetailsDto);
             var original = _econsentReviewDetailsRepository.Find(econsentReviewDetail.Id);
-            econsentReviewDetail.patientapproveddatetime = DateTime.Now;
+            econsentReviewDetail.patientapproveddatetime = _jwtTokenAccesser.GetClientDate();
             econsentReviewDetail.RandomizationId = original.RandomizationId;
             var validate = _econsentReviewDetailsRepository.Duplicate(econsentReviewDetailsDto);
             if (!string.IsNullOrEmpty(validate))
@@ -270,34 +265,8 @@ namespace GSC.Api.Controllers.InformConcent
             {
                 _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(x.Email, x.UserName, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
             });
-            //if (project.InvestigatorContactId != null)
-            //{
-            //    var investigator = _investigatorContactRepository.Find((int)project.InvestigatorContactId);
-            //    _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(investigator.EmailOfInvestigator, investigator.NameOfInvestigator, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
-            //}
             return Ok(econsentReviewDetail.Id);
         }
-
-        //[HttpGet]
-        //[Route("GetPatientDropdown/{projectid}")]
-        //public IActionResult GetPatientDropdown(int projectid)
-        //{
-        //    return Ok(_econsentReviewDetailsRepository.GetPatientDropdown(projectid));
-        //}
-
-        //[HttpGet]
-        //[Route("GetUnApprovedEconsentDocumentList/{patientid}")]
-        //public IActionResult GetUnApprovedEconsentDocumentList(int patientid)
-        //{
-        //    return Ok(_econsentReviewDetailsRepository.GetUnApprovedEconsentDocumentList(patientid));
-        //}
-
-        //[HttpGet]
-        //[Route("GetApprovedEconsentDocumentList/{projectid}")]
-        //public IActionResult GetApprovedEconsentDocumentList(int projectid)
-        //{
-        //    return Ok(_econsentReviewDetailsRepository.GetApprovedEconsentDocumentList(projectid));
-        //}
 
         [HttpPost]
         [Route("GetEconsentDocument")]
@@ -329,7 +298,7 @@ namespace GSC.Api.Controllers.InformConcent
 
             var econsentReviewDetails = _econsentReviewDetailsRepository.Find(econsentReviewDetailsDto.Id);
             econsentReviewDetails.IsReviewDoneByInvestigator = true;
-            econsentReviewDetails.investigatorRevieweddatetime = DateTime.Now;
+            econsentReviewDetails.investigatorRevieweddatetime = _jwtTokenAccesser.GetClientDate();
             econsentReviewDetails.ReviewDoneByRoleId = _jwtTokenAccesser.RoleId;
             econsentReviewDetails.ReviewDoneByUserId = _jwtTokenAccesser.UserId;
             econsentReviewDetails.IsApproved = econsentReviewDetailsDto.IsApproved;
@@ -340,17 +309,11 @@ namespace GSC.Api.Controllers.InformConcent
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
 
-            try
-            {
                 if (econsentReviewDetails.pdfpath != null)
                 {
                     string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
                     System.IO.File.Delete(oldpdfpath);
                 }
-            }
-            catch(Exception ex)
-            {
-            }
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
             filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.InformConcent.ToString(), docName);
 
@@ -438,11 +401,9 @@ namespace GSC.Api.Controllers.InformConcent
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var docName = Path.Combine(upload.DocumentUrl, econsentreviewdetails.pdfpath);
             CustomParameter param = new CustomParameter();
-            param.documentData = docName;//"https://dev2.clinvigilant.com/Documents/Project/6d79f9fb-92e6-49c1-9837-2811d2b8e52f.pdf";//docName
+            param.documentData = docName;
             param.fileName = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
             return Ok(param);
-            //return Ok();
-
         }
 
     }

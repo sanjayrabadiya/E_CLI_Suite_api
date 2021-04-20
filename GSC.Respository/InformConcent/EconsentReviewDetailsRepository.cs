@@ -127,18 +127,18 @@ namespace GSC.Respository.InformConcent
             if (noneregister == null) return new List<SectionsHeader>();
             var studyId = _projectRepository.Find(noneregister.ProjectId).ParentProjectId;
             var econsentReviewDetails = FindBy(x => x.RandomizationId == noneregister.Id).ToList();
-            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
+            var econsentpatientstatus = _context.EconsentSetupPatientStatus.Where(x => x.PatientStatusId == (int)noneregister.PatientStatusId && x.DeletedDate == null).Select(x => x.EconsentDocumentId);
+            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null && econsentpatientstatus.Contains(x.Id)).ToList();
 
             var Econsentdocuments = (from econsentsetups in Edocuments
-                                     join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId into ps
-                                     from p in ps.DefaultIfEmpty()
+                                     join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId
                                      select new EConsentDocumentHeader
                                      {
                                          DocumentId = econsentsetups.Id,
                                          DocumentName = econsentsetups.DocumentName,
                                          DocumentPath = econsentsetups.DocumentPath,
-                                         ReviewId = (p == null) ? 0 : p.Id,
-                                         IsReviewed = (p == null) ? false : p.IsReviewedByPatient
+                                         ReviewId = doc.Id,
+                                         IsReviewed = doc.IsReviewedByPatient
                                      }).ToList();
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
@@ -367,7 +367,7 @@ namespace GSC.Respository.InformConcent
             }
             sign = sign.Replace("_volunterlabel_", "Volunteer");
             sign = sign.Replace("_voluntername_", randomization.ScreeningNumber + " " + randomization.Initial);
-            sign = sign.Replace("_datetime_", (econsentreviewdetails.patientapproveddatetime == null) ? DateTime.Now.ToString() : econsentreviewdetails.patientapproveddatetime.ToString());
+            sign = sign.Replace("_datetime_", (econsentreviewdetails.patientapproveddatetime == null) ? _jwtTokenAccesser.GetClientDate().ToString() : econsentreviewdetails.patientapproveddatetime.ToString());
             var jsonObj2 = JObject.Parse(sign);
             jsonObj.Merge(jsonObj2, new JsonMergeSettings
             {
@@ -382,7 +382,7 @@ namespace GSC.Respository.InformConcent
                 sign2 = sign2.Replace("_volunterlabel_", "Investigator");
                 sign2 = sign2.Replace("_imagepath_", signinvestigatorbase64);
                 sign2 = sign2.Replace("_voluntername_", user.UserName);
-                sign2 = sign2.Replace("_datetime_", econsentreviewdetails.investigatorRevieweddatetime == null ? DateTime.Now.ToString() : econsentreviewdetails.investigatorRevieweddatetime.ToString());
+                sign2 = sign2.Replace("_datetime_", econsentreviewdetails.investigatorRevieweddatetime == null ? _jwtTokenAccesser.GetClientDate().ToString() : econsentreviewdetails.investigatorRevieweddatetime.ToString());
                 var jsonObj3 = JObject.Parse(sign2);
                 jsonObj.Merge(jsonObj3, new JsonMergeSettings
                 {
