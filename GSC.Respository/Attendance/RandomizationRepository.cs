@@ -63,6 +63,7 @@ namespace GSC.Respository.Attendance
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
+        private readonly IUnitOfWork _uow;
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -83,7 +84,8 @@ namespace GSC.Respository.Attendance
             IRoleRepository roleRepository,
             IManageSiteRepository manageSiteRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting,
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
-            IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository)
+            IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
+            IUnitOfWork uow)
             : base(context)
         {
             _userRepository = userRepository;
@@ -109,6 +111,7 @@ namespace GSC.Respository.Attendance
             _environmentSetting = environmentSetting;
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
+            _uow = uow;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -606,7 +609,7 @@ namespace GSC.Respository.Attendance
                 var userdata = _userRepository.Find((int)randomization.UserId);
                 //var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
                 var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
-                await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp, studydata.ProjectName, randomization.PrimaryContactNumber, sendtype, studydata.IsSendEmail, studydata.IsSendSMS);
+                await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp, studydata.ProjectCode, randomization.PrimaryContactNumber, sendtype, studydata.IsSendEmail, studydata.IsSendSMS);
             }
         }
 
@@ -639,7 +642,7 @@ namespace GSC.Respository.Attendance
 
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
             var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
-            if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening || randomization.PatientStatusId == ScreeningPatientStatus.Screening)
+            if (randomization.PatientStatusId != ScreeningPatientStatus.ConsentInProcess && randomization.PatientStatusId != ScreeningPatientStatus.ReConsentInProcess)
             {
                 var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == (int)studyid && x.LanguageId == randomization.LanguageId && x.DeletedDate == null)
                                          join status in _context.EconsentSetupPatientStatus.Where(a => a.PatientStatusId == (int)randomization.PatientStatusId && a.DeletedDate == null) on econsentsetups.Id equals status.EconsentDocumentId
@@ -650,15 +653,18 @@ namespace GSC.Respository.Attendance
                                          }).ToList();
                 if (Econsentdocuments.Count > 0)
                 {
-                    //for (var i = 0; i < Econsentdocuments.Count; i++)
-                    //{
-                    //    EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
-                    //    econsentReviewDetails.RandomizationId = randomization.Id;
-                    //    econsentReviewDetails.EconsentSetupId = Econsentdocuments[i].Id;
-                    //    econsentReviewDetails.IsReviewedByPatient = false;
-                    //    _econsentReviewDetailsRepository.Add(econsentReviewDetails);
-                    //}
-
+                    for (var i = 0; i < Econsentdocuments.Count; i++)
+                    {
+                        if (_context.EconsentReviewDetails.Where(x => x.RandomizationId == randomization.Id && x.EconsentSetupId == Econsentdocuments[i].Id).ToList().Count <= 0)
+                        {
+                            EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
+                            econsentReviewDetails.RandomizationId = randomization.Id;
+                            econsentReviewDetails.EconsentSetupId = Econsentdocuments[i].Id;
+                            econsentReviewDetails.IsReviewedByPatient = false;
+                            _econsentReviewDetailsRepository.Add(econsentReviewDetails);
+                            _uow.Save();
+                        }
+                    }
                     randomization.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
                     Update(randomization);
                 }
