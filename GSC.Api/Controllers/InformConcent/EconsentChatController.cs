@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.InformConcent;
-using GSC.Domain.Context;
 using GSC.Respository.InformConcent;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -19,21 +16,19 @@ namespace GSC.Api.Controllers.InformConcent
     [ApiController]
     public class EconsentChatController : ControllerBase
     {
+        // note: messagehub not accessible in repository so all the messagehub related logic written in this class
         private readonly IUnitOfWork _uow;
-        private readonly IMapper _mapper;
         private readonly IEconsentChatRepository _econsentChatRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IHubContext<MessageHub> _hubcontext;
 
         public EconsentChatController(IUnitOfWork uow,
-                                        IMapper mapper,
                                         IJwtTokenAccesser jwtTokenAccesser,
                                         IHubContext<MessageHub> hubcontext,
                                         IEconsentChatRepository econsentChatRepository)
         {
             _econsentChatRepository = econsentChatRepository;
             _uow = uow;
-            _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _hubcontext = hubcontext;
         }
@@ -42,6 +37,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("GetChatUsersList")]
         public IActionResult GetChatUsersList()
         {
+            // display users for chat
             var users = _econsentChatRepository.GetChatUsersList();
             return Ok(users);
         }
@@ -50,6 +46,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("GetEconsentChat/{userid}")]
         public IActionResult GetEconsentChat(int userid)
         {
+            // display messages of selected user
             var data = _econsentChatRepository.GetEconsentChat(userid);
             return Ok(data);
         }
@@ -58,6 +55,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("GetUnReadMessagecount")]
         public IActionResult GetUnReadMessagecount()
         {
+            // unread message count
             var data = _econsentChatRepository.GetUnReadMessagecount();
             return Ok(data);
         }
@@ -65,6 +63,7 @@ namespace GSC.Api.Controllers.InformConcent
         [HttpPost]
         public IActionResult Post([FromBody] EconsentChat econsentChat)
         {
+            // insert message details in econsentchat table
             _econsentChatRepository.Add(econsentChat);
             _uow.Save();
             return Ok(econsentChat);
@@ -74,6 +73,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("DeliverFlagUpdate")]
         public IActionResult DeliverFlagUpdate([FromBody] EconsentChat econsentChat)
         {
+            // delivered flag update when message delivered
             econsentChat.IsDelivered = true;
             econsentChat.DeliveredDateTime = DateTime.Now;
             _econsentChatRepository.Update(econsentChat);
@@ -85,6 +85,7 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("AllMessageDelivered/{receiverId}")]
         public async Task<IActionResult> AllMessageDelivered(int receiverId)
         {
+            // this method calls when user login then update delivered flag for all the unsend messages
             var messages = _econsentChatRepository.FindBy(x => x.ReceiverId == receiverId && x.IsDelivered == false).ToList();
             for (int i = 0; i < messages.Count; i++)
             {
@@ -110,25 +111,14 @@ namespace GSC.Api.Controllers.InformConcent
         [Route("AllMessageRead/{senderId}")]
         public async Task<IActionResult> AllMessageRead(int senderId)
         {
-            var messages = _econsentChatRepository.FindBy(x => x.SenderId == senderId && x.ReceiverId == _jwtTokenAccesser.UserId && x.IsRead == false).ToList();
-            for (int i = 0; i < messages.Count; i++)
+            //all message read flag update when user clicks on particular user chat
+            _econsentChatRepository.AllMessageRead(senderId);
+            var connection = ConnectedUser.Ids.Where(x => x.userId == senderId).ToList().FirstOrDefault();
+            if (connection != null)
             {
-                messages[i].IsRead = true;
-                messages[i].ReadDateTIme = DateTime.Now;
-                if (messages[i].IsDelivered == false)
-                {
-                    messages[i].IsDelivered = true;
-                    messages[i].DeliveredDateTime = DateTime.Now;
-                }
-                _econsentChatRepository.Update(messages[i]);
+                var connectionId = connection.connectionId;
+                await _hubcontext.Clients.Client(connectionId).SendAsync("AllMessageRead", _jwtTokenAccesser.UserId);
             }
-            _uow.Save();
-              var connection = ConnectedUser.Ids.Where(x => x.userId == senderId).ToList().FirstOrDefault();
-                if (connection != null)
-                {
-                    var connectionId = connection.connectionId;
-                    await _hubcontext.Clients.Client(connectionId).SendAsync("AllMessageRead", _jwtTokenAccesser.UserId);
-                }
             return Ok();
         }
     }

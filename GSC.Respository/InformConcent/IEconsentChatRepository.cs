@@ -5,6 +5,7 @@ using GSC.Data.Entities.UserMgt;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.InformConcent
 {
@@ -14,6 +15,6 @@ namespace GSC.Respository.InformConcent
 
         List<EconsentChat> GetEconsentChat(int userId);
         int GetUnReadMessagecount();
-        
+        void AllMessageRead(int senderId);
     }
 }

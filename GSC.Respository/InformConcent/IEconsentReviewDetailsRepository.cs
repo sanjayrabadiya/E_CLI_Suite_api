@@ -12,17 +12,15 @@ namespace GSC.Respository.InformConcent
 {
     public interface IEconsentReviewDetailsRepository : IGenericRepository<EconsentReviewDetails>
     {
-        string Duplicate(EconsentReviewDetailsDto objSave);
-        //IList<DropDownDto> GetPatientDropdown(int projectid);
-        //List<EconsentReviewDetailsDto> GetUnApprovedEconsentDocumentList(int patientid);
-        //List<EconsentReviewDetailsDto> GetApprovedEconsentDocumentList(int projectid);
         List<SectionsHeader> GetEconsentDocumentHeaders();
         List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId);
         string ImportSectionData(int id, int sectionno);
         string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails);
         List<DashboardDto> GetEconsentMyTaskList(int ProjectId);
-        void downloadpdf(CustomParameter param);
+        CustomParameter downloadpdf(int id);
         List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForSubjectManagement(int patientid);
         List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForPatientDashboard();
+        int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
+        int ApproveRejectEconsentDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
     }
 }

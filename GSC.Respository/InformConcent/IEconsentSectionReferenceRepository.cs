@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.InformConcent;
 using System;
@@ -10,5 +11,7 @@ namespace GSC.Respository.InformConcent
     public interface IEconsentSectionReferenceRepository : IGenericRepository<EconsentSectionReference>
     {
         List<DropDownDto> GetEconsentDocumentSectionDropDown(int documentId);
+        EconsentSectionReferenceDocumentType GetEconsentSectionReferenceDocument(int id);
+        void AddEconsentSectionReference(EconsentSectionReferenceDto econsentSectionReferenceDto);
     }
 }

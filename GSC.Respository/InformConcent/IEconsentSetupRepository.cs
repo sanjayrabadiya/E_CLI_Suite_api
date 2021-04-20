@@ -14,5 +14,9 @@ namespace GSC.Respository.InformConcent
         List<DropDownDto> GetEconsentDocumentDropDown(int projectId);
         List<DropDownDto> GetPatientStatusDropDown();
         List<EconsentSetupGridDto> GetEconsentSetupList(int projectid,bool isDeleted);
+        EconsentSetupDto GetEconsent(int id);
+        int AddEconsentSetup(EconsentSetupDto econsentSetupDto);
+        int UpdateEconsentSetup(EconsentSetupDto econsentSetupDto);
+        string validatebeforeadd(EconsentSetupDto econsentSetupDto);
     }
 }

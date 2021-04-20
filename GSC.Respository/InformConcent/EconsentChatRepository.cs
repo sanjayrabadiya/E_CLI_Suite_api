@@ -11,7 +11,7 @@ using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 
 namespace GSC.Respository.InformConcent
 {
@@ -21,16 +21,36 @@ namespace GSC.Respository.InformConcent
         private readonly IGSCContext _context;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _uow;
 
         public EconsentChatRepository(IGSCContext context,
                                     IJwtTokenAccesser jwtTokenAccesser,
                                     IMapper mapper,
-                                    IUserRepository userRepository) : base(context)
+                                    IUserRepository userRepository,
+                                    IUnitOfWork uow) : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _userRepository = userRepository;
             _mapper = mapper;
+            _uow = uow;
+        }
+
+        public void AllMessageRead(int senderId)
+        {
+            var messages = FindBy(x => x.SenderId == senderId && x.ReceiverId == _jwtTokenAccesser.UserId && x.IsRead == false).ToList();
+            for (int i = 0; i < messages.Count; i++)
+            {
+                messages[i].IsRead = true;
+                messages[i].ReadDateTIme = DateTime.Now;
+                if (messages[i].IsDelivered == false)
+                {
+                    messages[i].IsDelivered = true;
+                    messages[i].DeliveredDateTime = DateTime.Now;
+                }
+                Update(messages[i]);
+            }
+            _uow.Save();
         }
 
         public List<EConsentUserChatDto> GetChatUsersList()
@@ -71,34 +91,6 @@ namespace GSC.Respository.InformConcent
                 else
                     userschat[i].LastMessageStatus = "";
             }
-            //userschat.ForEach(e =>
-            //{
-            //    IList<int> intList = new List<int>() { e.Id, _jwtTokenAccesser.UserId };
-            //    var chatobj = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).ToList().OrderBy(t => t.SendDateTime).ToList().LastOrDefault();
-            //    e.LastMessage = chatobj == null ? "" : chatobj.Message;
-            //    e.UnReadMsgCount = FindBy(x => x.SenderId == e.Id && x.IsRead == false).ToList().Count;
-            //    if (chatobj != null)
-            //    {
-            //        if (chatobj.ReceiverId == _jwtTokenAccesser.UserId)
-            //        {
-            //            e.LastMessageStatus = "";
-            //        }
-            //        else if (chatobj.IsDelivered == false)
-            //        {
-            //            e.LastMessageStatus = "S";
-            //        }
-            //        else if (chatobj.IsDelivered == true && chatobj.IsRead == false)
-            //        {
-            //            e.LastMessageStatus = "D";
-            //        }
-            //        else if (chatobj.IsRead == true)
-            //        {
-            //            e.LastMessageStatus = "R";
-            //        }
-            //    }
-            //    else e.LastMessageStatus = "";
-                
-            //});
             return userschat;
         }
 
