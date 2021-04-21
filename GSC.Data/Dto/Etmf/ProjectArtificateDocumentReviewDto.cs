@@ -33,5 +33,7 @@ namespace GSC.Data.Dto.Etmf
         public string UserName { get; set; }
         public string Message { get; set; }
         public List<ProjectArtificateDocumentReviewDto> users { get; set; }
+        public string Reason { get; set; }
+        public string ReasonOth { get; set; }
     }
 }

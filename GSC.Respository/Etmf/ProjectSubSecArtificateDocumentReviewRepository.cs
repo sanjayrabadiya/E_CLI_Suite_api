@@ -137,25 +137,48 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectSubSecArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id)
         {
-            var result = All.Include(x => x.ProjectWorkplaceSubSecArtificateDocument).ThenInclude(x => x.ProjectSubSecArtificateDocumentHistory).Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id
-                          && x.UserId != x.ProjectWorkplaceSubSecArtificateDocument.CreatedBy)
-                .Select(x => new ProjectSubSecArtificateDocumentReviewHistory
-                {
-                    Id = x.Id,
-                    DocumentName = x.ProjectSubSecArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().DocumentName,
-                    //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
-                    ProjectArtificateDocumentHistoryId = x.ProjectSubSecArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().Id,
-                    UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
-                    IsSendBack = x.IsSendBack,
-                    UserId = x.UserId,
-                    ProjectWorkplaceSubSecArtificateDocumentId = x.ProjectWorkplaceSubSecArtificateDocumentId,
-                    CreatedDate = x.CreatedDate,
-                    CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
-                    ModifiedDate = x.ModifiedDate,
-                    ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
-                    SendBackDate = x.SendBackDate,
-                    Message = x.Message,
-                }).OrderByDescending(x => x.Id).ToList();
+            //var result = All.Include(x => x.ProjectWorkplaceSubSecArtificateDocument).ThenInclude(x => x.ProjectSubSecArtificateDocumentHistory).Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id
+            //              && x.UserId != x.ProjectWorkplaceSubSecArtificateDocument.CreatedBy)
+            //    .Select(x => new ProjectSubSecArtificateDocumentReviewHistory
+            //    {
+            //        Id = x.Id,
+            //        DocumentName = x.ProjectSubSecArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().DocumentName,
+            //        //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
+            //        ProjectArtificateDocumentHistoryId = x.ProjectSubSecArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().Id,
+            //        UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+            //        IsSendBack = x.IsSendBack,
+            //        UserId = x.UserId,
+            //        ProjectWorkplaceSubSecArtificateDocumentId = x.ProjectWorkplaceSubSecArtificateDocumentId,
+            //        CreatedDate = x.CreatedDate,
+            //        CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+            //        ModifiedDate = x.ModifiedDate,
+            //        ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
+            //        SendBackDate = x.SendBackDate,
+            //        Message = x.Message,
+            //    }).OrderByDescending(x => x.Id).ToList();
+
+            var result = (from review in _context.ProjectSubSecArtificateDocumentReview.Include(x => x.ProjectWorkplaceSubSecArtificateDocument).ThenInclude(x => x.ProjectSubSecArtificateDocumentHistory)
+                          .Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id && x.UserId != x.ProjectWorkplaceSubSecArtificateDocument.CreatedBy)
+                          join auditReason in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.ColumnName == "SendBack Date")
+                          on review.Id equals auditReason.RecordId
+                          select new ProjectSubSecArtificateDocumentReviewHistory
+                          {
+                              Id = review.Id,
+                              DocumentName = review.ProjectSubSecArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().DocumentName,
+                              ProjectArtificateDocumentHistoryId = review.ProjectSubSecArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().Id,
+                              UserName = _context.Users.Where(y => y.Id == review.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+                              IsSendBack = review.IsSendBack,
+                              UserId = review.UserId,
+                              ProjectWorkplaceSubSecArtificateDocumentId = review.ProjectWorkplaceSubSecArtificateDocumentId,
+                              CreatedDate = review.CreatedDate,
+                              CreatedByUser = review.CreatedByUser.UserName,
+                              ModifiedDate = review.ModifiedDate,
+                              ModifiedByUser = review.ModifiedByUser.UserName,
+                              SendBackDate = review.SendBackDate,
+                              Message = review.Message,
+                              Reason = auditReason.Reason,
+                              ReasonOth = auditReason.ReasonOth
+                          }).OrderByDescending(x => x.Id).ToList();
 
             return result;
         }
