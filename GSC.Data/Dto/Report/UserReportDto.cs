@@ -2,6 +2,7 @@
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using System;
 using System.Collections.Generic;
 
@@ -13,16 +14,16 @@ namespace GSC.Data.Dto.Report
         public int UserId { get; set; }
         public int?[] RoleIds { get; set; }
         public int?[] UserIds { get; set; }
-        private DateTime _FromDate;
+        private DateTime? _FromDate;
 
-        private DateTime _ToDate;
-        public DateTime FromDate
+        private DateTime? _ToDate;
+        public DateTime? FromDate
         {
             get => _FromDate.UtcDate();
             set => _FromDate = value.UtcDate();
         }
 
-        public DateTime ToDate
+        public DateTime? ToDate
         {
             get => _ToDate.UtcDate();
             set => _ToDate = value.UtcDate();
@@ -53,6 +54,7 @@ namespace GSC.Data.Dto.Report
         public int? ChildProjectId { get; set; }
         
         public string SiteName { get; set; }
+        public UserMasterUserType? UserType { get; set; }
 
     }
 

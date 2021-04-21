@@ -255,6 +255,7 @@ namespace GSC.Respository.UserMgt
                 user.IsLogin = true;
                 user.RoleTokenId = null;
                 user.LastLoginDate = DateTime.Now;
+                user.LastIpAddress = _jwtTokenAccesser.IpAddress;
                 login.LoginReportId =
                     _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName);
             }

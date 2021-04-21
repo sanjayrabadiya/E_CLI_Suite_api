@@ -652,21 +652,23 @@ namespace GSC.Respository.ProjectRight
                 filters.UserIds = null;
 
             var results = (from user in _context.Users.Where(t => ((t.DeletedBy != null && filters.UserId == 2) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) ||
-                           ((t.DeletedBy == null && filters.UserId == 3) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) || ((t.IsLogin == true && filters.UserId == 1) && (filters.UserIds == null || filters.UserIds.Contains(t.Id)))
-                          )
+                           ((t.DeletedBy == null && filters.UserId == 3) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) || ((t.IsLogin == true && filters.UserId == 1)
+                           && (filters.UserIds == null || filters.UserIds.Contains(t.Id))))
                            select new UserReportDto
                            {
-                               UserName = _context.Users.FirstOrDefault(b => b.Id == user.Id).UserName,
+                               UserName = user.UserName,
                                Session = "Active",
-                               CreatedBy = _context.Users.FirstOrDefault(b => b.Id == user.CreatedBy).UserName,
-                               DeletedBy = _context.Users.FirstOrDefault(b => b.Id == user.DeletedBy).UserName,
+                               CreatedBy = user.CreatedByUser.UserName,
+                               DeletedBy = user.DeletedByUser.UserName,
                                CreatedDate = user.CreatedDate,
                                DeletedDate = user.DeletedDate,
                                LoginTime = user.LastLoginDate.UtcDateTime(),
                                LastIpAddress = user.LastIpAddress,
-                               RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.Id).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
-                           }).ToList();//OrderBy(x => x.Id).ToList();
-            results = results.OrderBy(x => x.Id).ToList();
+                               RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.Id).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList()),
+                               UserType = user.UserType
+                           }).ToList();
+
+            results = results.Where(x=>x.UserType == Shared.Generic.UserMasterUserType.User).OrderBy(x => x.Id).ToList();
 
             results.ForEach(r =>
             {
@@ -702,16 +704,16 @@ namespace GSC.Respository.ProjectRight
             //                     RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.UserId).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
             //                 }).ToList();//OrderBy(x => x.Id).ToList();
 
-           var queryDtos = _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId))).Select(
-                x => new UserReportDto
-                {
-                    Id = x.Id,
-                    UserName = x.LoginName,
-                    LoginTime = x.LoginTime,
-                    LogOutTime = x.LogoutTime,
-                }).ToList();
+            var queryDtos = _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId))).Select(
+                 x => new UserReportDto
+                 {
+                     Id = x.Id,
+                     UserName = x.LoginName,
+                     LoginTime = x.LoginTime,
+                     LogOutTime = x.LogoutTime,
+                 }).ToList();
             queryDtos = queryDtos.OrderByDescending(x => x.Id).ToList();
-           
+
             return queryDtos;
         }
 
