@@ -128,7 +128,7 @@ namespace GSC.Api.Controllers.Master
             }
 
             /* Added by swati for effective Date on 02-06-2019 */
-            _languageRepository.AddOrUpdate(language);
+            _languageRepository.Update(language);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Language failed on save.");
 

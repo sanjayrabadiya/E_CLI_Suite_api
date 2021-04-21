@@ -162,7 +162,7 @@ namespace GSC.Report
             }
 
             //// add job Monitor
-            jobMonitoring.CompletedTime = DateTime.Now.UtcDateTime();
+            jobMonitoring.CompletedTime =_jwtTokenAccesser.GetClientDate();
             jobMonitoring.JobStatus = JobStatusType.Completed;
             jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
             jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
@@ -1045,7 +1045,7 @@ namespace GSC.Report
             }
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             // add job Monitor
-            jobMonitoring.CompletedTime = DateTime.Now.UtcDateTime();
+            jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
             jobMonitoring.JobStatus = JobStatusType.Completed;
             jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
             jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";

@@ -169,7 +169,7 @@ namespace GSC.Respository.Screening
             jobMonitoring.JobType = filters.ExcelFormat ? JobTypeEnum.Excel : JobTypeEnum.Pdf;
             jobMonitoring.JobStatus = JobStatusType.InProcess;
             jobMonitoring.SubmittedBy = _jwtTokenAccesser.UserId;
-            jobMonitoring.SubmittedTime = DateTime.Now.UtcDateTime();
+            jobMonitoring.SubmittedTime = _jwtTokenAccesser.GetClientDate();
             _jobMonitoringRepository.Add(jobMonitoring);
             _context.Save();
             #endregion
@@ -268,7 +268,7 @@ namespace GSC.Respository.Screening
                         #region Update Job Status
                         var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
                         string savepath = Path.Combine(documentUrl, FolderType.DataEntryAudit.ToString());
-                        jobMonitoring.CompletedTime = DateTime.Now.UtcDateTime();
+                        jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
                         jobMonitoring.JobStatus = JobStatusType.Completed;
                         jobMonitoring.FolderPath = savepath;
                         jobMonitoring.FolderName = FileName;
@@ -416,7 +416,7 @@ namespace GSC.Respository.Screening
                         #region Update Job Status
                         var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
                         string savepath = Path.Combine(documentUrl, FolderType.DataEntryAudit.ToString());
-                        jobMonitoring.CompletedTime = DateTime.Now.UtcDateTime();
+                        jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
                         jobMonitoring.JobStatus = JobStatusType.Completed;
                         jobMonitoring.FolderPath = savepath;
                         jobMonitoring.FolderName = FileName;

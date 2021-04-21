@@ -226,7 +226,7 @@ namespace GSC.Report
                 }
                 else
                 {
-                    var timediff = Convert.ToInt32((DateTime.Now - DateTime.Now.UtcDateTime()).TotalMinutes);
+                    var timediff = Convert.ToInt32((DateTime.Now - _jwtTokenAccesser.GetClientDate()).TotalMinutes);
                     logStatus = DateTime.Now + "===1. FileStart ===" + Environment.NewLine;
                     parentFolderName = _projectRepository.Find(projectId).ProjectCode + "-" + _projectRepository.Find(projectId).ProjectName + "_" + DateTime.Now.Ticks;
                     parentFolderName = parentFolderName.Trim().Replace(" ", "");
@@ -719,7 +719,7 @@ namespace GSC.Report
                 }
                 #region Update Job Status
                 logStatus += DateTime.Now + "===2. Job Update ===" + Environment.NewLine;
-                jobMonitoring.CompletedTime = DateTime.Now.UtcDateTime();
+                jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
                 jobMonitoring.JobStatus = JobStatusType.Completed;
                 jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
                 jobMonitoring.FolderName = parentFolderName + ".zip";
@@ -750,7 +750,7 @@ namespace GSC.Report
             {
                 string path = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, Enum.GetName(typeof(JobStatusType), JobStatusType.Log), fileInfo.ParentFolderName, fileInfo.ParentFolderName + ".txt");
                 jobMonitoring.JobStatus = JobStatusType.Log;
-                jobMonitoring.CompletedTime = DateTime.Now.UtcDateTime();
+                jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
                 jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, Enum.GetName(typeof(JobStatusType), JobStatusType.Log));
                 jobMonitoring.FolderName = parentFolderName + ".txt";
                 _reportBaseRepository.WriteLog(logStatus + Environment.NewLine + ex.Message, path, jobMonitoring);

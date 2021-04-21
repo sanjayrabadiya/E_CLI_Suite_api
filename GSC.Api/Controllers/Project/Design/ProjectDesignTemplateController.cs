@@ -16,6 +16,7 @@ using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Schedule;
 using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Design
@@ -41,6 +42,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         private readonly ITemplatePermissionRepository _templatePermissioRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IVariableTemplateRepository variableTemplateRepository,
@@ -57,7 +59,8 @@ namespace GSC.Api.Controllers.Project.Design
             IVariabeValueLanguageRepository variableValueLanguageRepository,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             ITemplatePermissionRepository templatePermissioRepository,
-        IUnitOfWork uow, IMapper mapper)
+        IUnitOfWork uow, IMapper mapper,
+         IJwtTokenAccesser jwtTokenAccesser)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -77,6 +80,7 @@ namespace GSC.Api.Controllers.Project.Design
             _domainRepository = domainRepository;
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
             _templatePermissioRepository = templatePermissioRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{projectDesignVisitId}")]
@@ -315,7 +319,7 @@ namespace GSC.Api.Controllers.Project.Design
 
                 foreach (var variable in clonnedTemplate)
                 {
-                    variable.DeletedDate = DateTime.Now.UtcDate();
+                    variable.DeletedDate = _jwtTokenAccesser.GetClientDate();
                     _projectDesignVariableRepository.Update(variable);
                 }
 

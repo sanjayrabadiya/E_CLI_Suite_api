@@ -125,7 +125,7 @@ namespace GSC.Api.Controllers.Report
             jobMonitoringDto.JobType = JobTypeEnum.Report;
             jobMonitoringDto.JobStatus = JobStatusType.InProcess;
             jobMonitoringDto.SubmittedBy = _jwtTokenAccesser.UserId;
-            jobMonitoringDto.SubmittedTime = DateTime.Now.UtcDateTime();
+            jobMonitoringDto.SubmittedTime = _jwtTokenAccesser.GetClientDate();
             jobMonitoringDto.JobDetails = (DossierPdfStatus)reportSetting.PdfStatus;
             var jobMonitoring = _mapper.Map<JobMonitoring>(jobMonitoringDto);
             _jobMonitoringRepository.Add(jobMonitoring);

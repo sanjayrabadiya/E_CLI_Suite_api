@@ -68,7 +68,7 @@ namespace GSC.Respository.Attendance
         {
             attendance.RoleId = _jwtTokenAccesser.RoleId;
             attendance.UserId = _jwtTokenAccesser.UserId;
-            attendance.AttendanceDate = DateTime.Now.UtcDateTime();
+            attendance.AttendanceDate = _jwtTokenAccesser.GetClientDate();
             attendance.IsTesting = _context.ProjectDesignPeriod.Any(x =>
                 x.ProjectDesign.IsUnderTesting && x.Id == attendance.ProjectDesignPeriodId);
             attendance.AttendanceHistory =
@@ -337,7 +337,7 @@ namespace GSC.Respository.Attendance
             if (attendanceDto.AttendanceType == DataEntryType.Screening)
                 if (All.Any(x =>
                     x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == DataEntryType.Screening &&
-                    x.AttendanceDate.ToShortDateString() == DateTime.Now.UtcDate().ToShortDateString() &&
+                    x.AttendanceDate.ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString() &&
                     x.DeletedDate == null))
                     return "Volunteer already present today";
             if (attendanceDto.AttendanceType == DataEntryType.Project)
