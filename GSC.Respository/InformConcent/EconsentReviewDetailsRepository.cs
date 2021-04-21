@@ -38,10 +38,8 @@ namespace GSC.Respository.InformConcent
     public class EconsentReviewDetailsRepository : GenericRespository<EconsentReviewDetails>, IEconsentReviewDetailsRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
-        private readonly IInvestigatorContactRepository _investigatorContactRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
@@ -51,8 +49,6 @@ namespace GSC.Respository.InformConcent
 
         public EconsentReviewDetailsRepository(IGSCContext context, 
                                                 IJwtTokenAccesser jwtTokenAccesser,
-                                                IEconsentSetupRepository econsentSetupRepository,
-                                                IInvestigatorContactRepository investigatorContactRepository,
                                                 IProjectRepository projectRepository,
                                                 IUserRepository userRepository,
                                                 IMapper mapper,
@@ -63,9 +59,7 @@ namespace GSC.Respository.InformConcent
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _econsentSetupRepository = econsentSetupRepository;
             _mapper = mapper;
-            _investigatorContactRepository = investigatorContactRepository;
             _projectRepository = projectRepository;
             _userRepository = userRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -154,7 +148,7 @@ namespace GSC.Respository.InformConcent
         public List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId)
         {
             // this method is called from Econsent setup page, when clicking on eye icon in the grid (display section wise documents)
-            var Econsentdocument = _econsentSetupRepository.FindByInclude(x => x.Id == documentId).ToList().FirstOrDefault();
+            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == documentId).ToList().FirstOrDefault();
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
@@ -201,7 +195,7 @@ namespace GSC.Respository.InformConcent
         {
             // this method is called when clicking particular sections from the left side grid in Inform consent page (patient portal)
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var Econsentdocument = _econsentSetupRepository.Find(id);
+            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == id).FirstOrDefault();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
@@ -261,7 +255,7 @@ namespace GSC.Respository.InformConcent
         {
             // this method is called when patient reviewed document and completes the signature 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var Econsentdocument = _econsentSetupRepository.Find(econsentreviewdetails.EconsentSetupId);
+            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetails.EconsentSetupId).FirstOrDefault();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
             string path = FullPath;
             if (!System.IO.File.Exists(path))

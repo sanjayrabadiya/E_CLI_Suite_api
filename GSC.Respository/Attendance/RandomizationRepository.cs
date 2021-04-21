@@ -48,15 +48,12 @@ namespace GSC.Respository.Attendance
         private readonly ICountryRepository _countryRepository;
         private readonly ICityRepository _cityRepository;
         private readonly IMapper _mapper;
-        private readonly IPatientStatusRepository _patientStatusRepository;
-        private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IProjectRepository _projectRepository;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly ISiteTeamRepository _siteTeamRepository;
-        private readonly IUserOtpRepository _userOtpRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IManageSiteRepository _manageSiteRepository;
         private readonly ICentreUserService _centreUserService;
@@ -74,13 +71,10 @@ namespace GSC.Respository.Attendance
             ICountryRepository countryRepository,
             ICityRepository cityRepository,
              IMapper mapper,
-             IPatientStatusRepository patientStatusRepository,
              IEmailSenderRespository emailSenderRespository,
             IProjectRepository projectRepository,
-            IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IProjectRightRepository projectRightRepository,
             ISiteTeamRepository siteTeamRepository,
-            IUserOtpRepository userOtpRepository,
             IRoleRepository roleRepository,
             IManageSiteRepository manageSiteRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting,
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
@@ -96,15 +90,12 @@ namespace GSC.Respository.Attendance
             _countryRepository = countryRepository;
             _cityRepository = cityRepository;
             _mapper = mapper;
-            _patientStatusRepository = patientStatusRepository;
             _emailSenderRespository = emailSenderRespository;
             _projectRepository = projectRepository;
-            _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _siteTeamRepository = siteTeamRepository;
-            _userOtpRepository = userOtpRepository;
             _roleRepository = roleRepository;
             _manageSiteRepository = manageSiteRepository;
             _centreUserService = centreUserService;
@@ -661,7 +652,7 @@ namespace GSC.Respository.Attendance
                             econsentReviewDetails.RandomizationId = randomization.Id;
                             econsentReviewDetails.EconsentSetupId = Econsentdocuments[i].Id;
                             econsentReviewDetails.IsReviewedByPatient = false;
-                            _econsentReviewDetailsRepository.Add(econsentReviewDetails);
+                            _context.EconsentReviewDetails.Add(econsentReviewDetails);
                             _uow.Save();
                         }
                     }
@@ -678,13 +669,13 @@ namespace GSC.Respository.Attendance
             var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
             {
-                if (_econsentReviewDetailsRepository.FindByInclude(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).ToList().Count > 0)
+                if (_context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).ToList().Count > 0)
                 {
                 }
                 else
                 {
                     var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.DeletedDate == null && x.LanguageId == randomization.LanguageId && x.ProjectId == (int)studyid).ToList()
-                                             join doc in _econsentReviewDetailsRepository.FindByInclude(x => x.RandomizationId == id && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == true).ToList() on econsentsetups.Id equals doc.EconsentSetupId into ps
+                                             join doc in _context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == true).ToList() on econsentsetups.Id equals doc.EconsentSetupId into ps
                                              from p in ps.DefaultIfEmpty()
                                              select new EconsentSetup
                                              {
