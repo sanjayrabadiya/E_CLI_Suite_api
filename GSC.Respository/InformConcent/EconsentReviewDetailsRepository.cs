@@ -313,6 +313,7 @@ namespace GSC.Respository.InformConcent
 
             json = jsonObj.ToString();
             stream.Close();
+            stream.Dispose();
             return json;
         }
 
