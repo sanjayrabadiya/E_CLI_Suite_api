@@ -125,8 +125,20 @@ namespace GSC.Respository.InformConcent
                 }
                 throw new Exception($"Creating EConsent File failed on save.");
             }
-            var result = (from patients in _context.Randomization.Include(x => x.Project).Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId)
-                          join status in _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id) on (int)patients.PatientStatusId equals status.PatientStatusId
+            var patientstatus = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id).ToList();
+            EconsentSetupPatientStatus econsentSetupPatientStatus = new EconsentSetupPatientStatus();
+            econsentSetupPatientStatus.Id = 0;
+            econsentSetupPatientStatus.EconsentDocumentId = econsent.Id;
+            econsentSetupPatientStatus.PatientStatusId = (int)ScreeningPatientStatus.ConsentInProcess;
+            EconsentSetupPatientStatus econsentSetupPatientStatus1 = new EconsentSetupPatientStatus();
+            econsentSetupPatientStatus1.Id = 0;
+            econsentSetupPatientStatus1.EconsentDocumentId = econsent.Id;
+            econsentSetupPatientStatus1.PatientStatusId = (int)ScreeningPatientStatus.ReConsentInProcess;
+            patientstatus.Add(econsentSetupPatientStatus);
+            patientstatus.Add(econsentSetupPatientStatus1);
+
+            var result = (from patients in _context.Randomization.Include(x => x.Project).Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId).ToList()
+                          join status in patientstatus on (int)patients.PatientStatusId equals status.PatientStatusId
                           select new Randomization
                           {
                               Id = patients.Id,
@@ -167,6 +179,7 @@ namespace GSC.Respository.InformConcent
                     _emailSenderRespository.SendEmailOfEconsentDocumentuploaded(result[i].Email, patientName, econsent.DocumentName, projectcode);
                 }
             }
+            _uow.Save();
             return econsent.Id;
         }
 
