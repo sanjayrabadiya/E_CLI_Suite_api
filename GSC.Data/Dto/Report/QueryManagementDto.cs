@@ -2,6 +2,7 @@
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 
 namespace GSC.Data.Dto.Report
 {
@@ -64,6 +65,7 @@ namespace GSC.Data.Dto.Report
         public int projectId { get; set; }
         public string ProjectCode { get; set; }
         public int? RoleId { get; set; }
+        public UserMasterUserType? UserType { get; set; }
     }
 
     public class QuerySearchDto : BaseDto

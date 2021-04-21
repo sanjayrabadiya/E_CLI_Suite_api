@@ -20,32 +20,20 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class DashboardController : BaseController
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
         private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApproverRepository;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
 
-        public DashboardController(IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
+        public DashboardController(
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
-            IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository
+            )
         {
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
-            _uow = uow;
-            _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;

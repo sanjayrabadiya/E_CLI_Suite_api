@@ -404,7 +404,8 @@ namespace GSC.Respository.Screening
                                      Value = role == null || string.IsNullOrEmpty(role.RoleName)
                                          ? user.UserName
                                          : user.UserName + "(" + role.RoleName + ")",
-                                     RoleId = role == null ? 0 : role.Id
+                                     RoleId = role == null ? 0 : role.Id,
+                                     UserType = user.UserType
                                  }).ToList();
 
             var Workflow = (from workflow in _context.ProjectWorkflow.Where(t => t.ProjectDesignId == ProjectDesignId)
@@ -417,7 +418,7 @@ namespace GSC.Respository.Screening
                                 RoleId = workflowlevelIndependent.SecurityRoleId
                             }).ToList();
 
-            dataEntryData = dataEntryData.Where(x => Workflow.Any(y => y.RoleId == x.RoleId)).ToList();
+            dataEntryData = dataEntryData.Where(x => Workflow.Any(y => y.RoleId == x.RoleId) && x.UserType == UserMasterUserType.User).ToList();
 
             var dataEntryBy = dataEntryData.GroupBy(item => new { item.Value, item.Id })
                 .Select(z => new DropDownDto { Id = z.Key.Id, Value = z.Key.Value }).ToList();
