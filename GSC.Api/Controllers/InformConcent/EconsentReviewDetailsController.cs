@@ -59,6 +59,22 @@ namespace GSC.Api.Controllers.InformConcent
         }
 
         [HttpGet]
+        [Route("GetEconsentSectionHeaders/{id}")]
+        public IActionResult GetEconsentSectionHeaders(int id)
+        {
+            var sectionsHeaders = _econsentReviewDetailsRepository.GetEconsentSectionHeaders(id);
+            return Ok(sectionsHeaders);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var data = _econsentReviewDetailsRepository.Find(id);
+            return Ok(data);
+        }
+
+        [HttpGet]
         [Route("GetEconsentDocumentHeadersByDocumentId/{documentId}")]
         public IActionResult GetEconsentDocumentHeadersByDocumentId(int documentId)
         {

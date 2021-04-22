@@ -32,6 +32,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Drawing;
+using GSC.Shared.Extension;
 
 namespace GSC.Respository.InformConcent
 {
@@ -68,11 +69,11 @@ namespace GSC.Respository.InformConcent
             _randomizationRepository = randomizationRepository;
         }
 
-        public List<SectionsHeader> GetEconsentDocumentHeaders()
+        public List<EConsentDocumentHeader> GetEconsentDocumentHeaders()
         {
             // this method calls when patient login and click on menu inform consent, documents with headers displays on left side returned in this API
             var noneregister = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
-            if (noneregister == null) return new List<SectionsHeader>();
+            if (noneregister == null) return new List<EConsentDocumentHeader>();
             var studyId = _projectRepository.Find(noneregister.ProjectId).ParentProjectId;
             var econsentReviewDetails = FindBy(x => x.RandomizationId == noneregister.Id).ToList();
            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
@@ -89,55 +90,61 @@ namespace GSC.Respository.InformConcent
                                      }).ToList();
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
-            int seqNo = 0;
-            int documentid = 0;
+            List<EConsentDocumentHeader> returndata = new List<EConsentDocumentHeader>();
             foreach (var document in Econsentdocuments)
             {
                 var FullPath = System.IO.Path.Combine(upload.DocumentPath, document.DocumentPath);
-                string path = FullPath;
-                if (System.IO.File.Exists(path))
+                if (System.IO.File.Exists(FullPath))
                 {
-                    Stream stream = System.IO.File.OpenRead(path);
-                    EJ2WordDocument doc = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
-                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
-                    stream.Close();
-                    doc.Dispose();
-                    JObject jsonstr = JObject.Parse(json);
-                    Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
-                    int sectioncount = 1;
-                    foreach (var e1 in jsonobj.sections)
+                    returndata.Add(document);
+                }
+            }
+            return returndata;
+        }
+
+        public List<SectionsHeader> GetEconsentSectionHeaders(int id)
+        {
+            var econsentreviewdetail = Find(id);
+            var document = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetail.EconsentSetupId).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var FullPath = System.IO.Path.Combine(upload.DocumentPath, document.DocumentPath);
+            string path = FullPath;
+            List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
+            if (System.IO.File.Exists(path))
+            {
+                Stream stream = System.IO.File.OpenRead(path);
+                EJ2WordDocument doc = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
+                stream.Close();
+                doc.Dispose();
+                JObject jsonstr = JObject.Parse(json);
+                Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
+                int sectioncount = 1;
+                foreach (var e1 in jsonobj.sections)
+                {
+                    foreach (var e2 in e1.blocks)
                     {
-                        foreach (var e2 in e1.blocks)
+                        if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
                         {
-                            if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
+                            SectionsHeader sectionsHeader = new SectionsHeader();
+                            sectionsHeader.sectionNo = sectioncount;
+                            sectionsHeader.sectionName = "Section " + sectioncount.ToString();
+                            string headerstring = "";
+                            foreach (var e3 in e2.inlines)
                             {
-                                SectionsHeader sectionsHeader = new SectionsHeader();
-                                sectionsHeader.sectionNo = sectioncount;
-                                sectionsHeader.sectionName = "Section " + sectioncount.ToString();
-                                string headerstring = "";
-                                foreach (var e3 in e2.inlines)
+                                if (e3.text != null)
                                 {
-                                    if (e3.text != null)
-                                    {
-                                        headerstring = headerstring + e3.text;
-                                    }
+                                    headerstring = headerstring + e3.text;
                                 }
-                                sectionsHeader.header = headerstring;
-                                sectionsHeader.documentId = document.DocumentId;
-                                sectionsHeader.documentReviewId = document.ReviewId; 
-                                sectionsHeader.documentName = document.DocumentName;
-                                if (documentid != document.DocumentId)
-                                {
-                                    seqNo++;
-                                }
-                                documentid = document.DocumentId;
-                                sectionsHeader.seqNo = seqNo;
-                                sectionsHeader.isReadCompelete = document.IsReviewed;
-                                sectionsHeader.isReviewed = document.IsReviewed;
-                                sectionsHeaders.Add(sectionsHeader);
-                                sectioncount++;
                             }
+                            sectionsHeader.header = headerstring;
+                            sectionsHeader.documentId = document.Id;
+                            sectionsHeader.documentReviewId = econsentreviewdetail.Id;
+                            sectionsHeader.documentName = document.DocumentName;
+                            sectionsHeader.isReadCompelete = econsentreviewdetail.IsReviewedByPatient;
+                            sectionsHeader.isReviewed = econsentreviewdetail.IsReviewedByPatient;
+                            sectionsHeaders.Add(sectionsHeader);
+                            sectioncount++;
                         }
                     }
                 }
@@ -322,16 +329,17 @@ namespace GSC.Respository.InformConcent
             // method calls in dashboard My Task
             var result = (
                           from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null)
+                          join econsentroles in _context.EconsentSetupRoles.Where(x => x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null) on econsentsetups.Id equals econsentroles.EconsentDocumentId 
                          join EconsentReviewDetails in _context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentSetupId
-                         join nonregister in _context.Randomization.Where(x => x.DeletedDate == null) on EconsentReviewDetails.RandomizationId equals nonregister.Id
+                         join nonregister in _context.Randomization.Where(x => x.DeletedDate == null && (x.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || x.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)) on EconsentReviewDetails.RandomizationId equals nonregister.Id
 
              select new DashboardDto
              {
                  Id = EconsentReviewDetails.Id,
                  TaskInformation = econsentsetups.DocumentName + " for " + nonregister.Initial + " " + nonregister.ScreeningNumber + " is Pending approve from your side",
-                 ExtraData = EconsentReviewDetails.Id
+                 ExtraData = EconsentReviewDetails.Id,
+                 Module = MyTaskModule.InformConsent.GetDescription(),
              }).ToList();
-
             return result;
         }
 
@@ -492,9 +500,11 @@ namespace GSC.Respository.InformConcent
 
             Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(fileStream, Syncfusion.DocIO.FormatType.Automatic);
 
+            stream.Close();
             stream.Dispose();
+            fileStream.Close();
             fileStream.Dispose();
-
+            
             DocIORenderer render = new DocIORenderer();
             render.Settings.PreserveFormFields = true;
             PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
@@ -531,9 +541,11 @@ namespace GSC.Respository.InformConcent
             if (!Directory.Exists(outputFile)) Directory.CreateDirectory(Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF"));
             FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
             outputStream.WriteTo(file);
+            file.Close();
             file.Dispose();
+            outputStream.Close();
             outputStream.Dispose();
-
+            
             econsentReviewDetails.pdfpath = pdfpath;
 
             Update(econsentReviewDetails);
@@ -555,5 +567,8 @@ namespace GSC.Respository.InformConcent
             if (_uow.Save() <= 0) throw new Exception(econsentReviewDetailsDto.IsApproved == true ? "Approving failed" : "Rejecting failed");
             return econsentReviewDetails.Id;
         }
+
+
+       
     }
 }

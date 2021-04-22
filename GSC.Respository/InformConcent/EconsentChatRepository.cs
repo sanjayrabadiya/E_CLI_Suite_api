@@ -59,12 +59,17 @@ namespace GSC.Respository.InformConcent
             var users = new List<User>();
             if (user.UserType == Shared.Generic.UserMasterUserType.Patient)
             {
-                users = _userRepository.FindBy(x => x.Id != _jwtTokenAccesser.UserId && x.DeletedDate == null && x.IsLocked == false && x.UserType != Shared.Generic.UserMasterUserType.Patient &&
+                var usersidlist = new List<int>();
+                var siteid = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault().ProjectId;
+                usersidlist = _context.SiteTeam.Where(x => x.ProjectId == siteid).ToList().Select(t => t.UserId).ToList();
+                users = _userRepository.FindBy(x => usersidlist.Contains(x.Id) && x.DeletedDate == null && x.IsLocked == false && x.UserType != Shared.Generic.UserMasterUserType.Patient &&
                         (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)).ToList();
             } else
             {
+                var siteids = new List<int>();
+                siteids = _context.SiteTeam.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).Select(t => t.ProjectId).ToList();
                 var userids = new List<int>();
-                userids = _context.Randomization.Where(x => x.PatientStatusId != Helper.ScreeningPatientStatus.Completed && x.PatientStatusId != Helper.ScreeningPatientStatus.ScreeningFailure && x.DeletedDate == null && x.UserId != null).Select(x => (int)x.UserId).ToList();
+                userids = _context.Randomization.Where(x => x.PatientStatusId != Helper.ScreeningPatientStatus.Completed && x.PatientStatusId != Helper.ScreeningPatientStatus.ScreeningFailure && x.DeletedDate == null && x.UserId != null && siteids.Contains(x.ProjectId)).Select(x => (int)x.UserId).ToList();
                 users = _userRepository.FindBy(x => x.Id != _jwtTokenAccesser.UserId && x.DeletedDate == null && userids.Contains(x.Id) && x.IsLocked == false && x.UserType == Shared.Generic.UserMasterUserType.Patient &&
                         (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)).ToList();
             }

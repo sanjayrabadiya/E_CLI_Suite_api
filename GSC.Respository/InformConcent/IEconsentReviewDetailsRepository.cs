@@ -12,7 +12,8 @@ namespace GSC.Respository.InformConcent
 {
     public interface IEconsentReviewDetailsRepository : IGenericRepository<EconsentReviewDetails>
     {
-        List<SectionsHeader> GetEconsentDocumentHeaders();
+        List<EConsentDocumentHeader> GetEconsentDocumentHeaders();
+        List<SectionsHeader> GetEconsentSectionHeaders(int id);
         List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId);
         string ImportSectionData(int id, int sectionno);
         string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails);
