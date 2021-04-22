@@ -276,7 +276,7 @@ namespace GSC.Audit
 
             //ProjectArtificateDocumentApprover
             _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceArtificatedDocumentId", DisplayName = "Project Workplace Artificated Document" });
-            _dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "User" });
+           // _dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "User" });
             _dictionaries.Add(new Dictionary { FieldName = "IsApproved", DisplayName = "Is Approved" });
             _dictionaries.Add(new Dictionary { FieldName = "Comment", DisplayName = "Comment" });
 
@@ -329,7 +329,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ProjectArtificateDocumentApproverId", DisplayName = "Project Artificate Document Approver" });
 
             //ProjectArtificateDocumentReview
-            _dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role" });
+           // _dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSendBack", DisplayName = "Is SendBack" });
             _dictionaries.Add(new Dictionary { FieldName = "SendBackDate", DisplayName = "SendBack Date" });
             _dictionaries.Add(new Dictionary { FieldName = "Message", DisplayName = "Message" });
@@ -383,6 +383,10 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ActualStartDate", DisplayName = "ActualStartDate" });
             _dictionaries.Add(new Dictionary { FieldName = "ActualEndDate", DisplayName = "ActualEndDate" });
 
+
+            // medical team
+            _dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role", SourceColumn = "RoleShortName", TableName = "SecurityRole", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "Project Manager", SourceColumn = "UserName", TableName = "Users", PkName = "Id" });
         }
 
 
