@@ -21,15 +21,17 @@ namespace GSC.Respository.CTMS
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IHolidayMasterRepository _holidayMasterRepository;
+        private readonly IWeekEndMasterRepository _weekEndMasterRepository;
 
         public StudyPlanRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IHolidayMasterRepository holidayMasterRepository) : base(context)
+            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
             _holidayMasterRepository = holidayMasterRepository;
+            _weekEndMasterRepository = weekEndMasterRepository;
         }
 
         public List<StudyPlanGridDto> GetStudyplanList(bool isDeleted)
@@ -41,7 +43,8 @@ namespace GSC.Respository.CTMS
         public string ImportTaskMasterData(StudyPlan studyplan)
         {
             var holidaylist = _holidayMasterRepository.GetHolidayList(studyplan.ProjectId);
-            WorkingDayHelper.InitholidayDate(holidaylist);
+            var weekendlist = _weekEndMasterRepository.GetworkingDayList(studyplan.ProjectId);
+            WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
             var tasklist = _context.TaskMaster.Where(x => x.TaskTemplateId == studyplan.TaskTemplateId)
                 .Select(t => new StudyPlanTask

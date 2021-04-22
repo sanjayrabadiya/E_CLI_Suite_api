@@ -327,6 +327,7 @@ namespace GSC.Domain.Context
         public DbSet<ManageMonitoring> ManageMonitoring { get; set; }
         public DbSet<DependentTaskDto> DependentTaskDto { get; set; }
         public DbSet<HolidayMaster> HolidayMaster { get; set; }
+        public DbSet<WeekEndMaster> WeekEndMaster { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

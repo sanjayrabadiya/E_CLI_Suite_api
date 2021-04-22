@@ -38,4 +38,12 @@ namespace GSC.Data.Dto.CTMS
      public int OffSet { get; set; }
 
     }
+
+    public class NextWorkingDateParameterDto
+    {
+        public int StudyPlanId { get; set; }
+        public int Duration { get; set; }
+        public DateTime StartDate { get; set; }
+
+    }
 }

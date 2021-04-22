@@ -344,6 +344,12 @@ namespace GSC.Api.Helpers
             CreateMap<StudyPlantaskParameterDto, StudyPlanTask>().ReverseMap();
             //CreateMap<DependentTaskParameterDto, DependentTask>().ReverseMap();
             CreateMap<HolidayMasterDto, HolidayMaster>().ReverseMap();
+            CreateMap<HolidayMasterListDto, HolidayMaster>()
+              .ForMember(x => x.HolidayName, x => x.MapFrom(a => a.Label))
+              .ForMember(x => x.FromDate, x => x.MapFrom(a => a.From))
+              .ForMember(x => x.ToDate, x => x.MapFrom(a => a.To))
+              .ReverseMap();
+            CreateMap<WeekEndparameterDto, WeekEndMaster>().ReverseMap();
         }
     }
 }

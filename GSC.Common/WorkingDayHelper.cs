@@ -7,15 +7,17 @@ namespace GSC.Common
     public static class WorkingDayHelper
     {
         private static List<DateTime> Holidays = new List<DateTime>();
+        public static List<string> WorkingDay = new List<string>();
 
         //Holidays.Add(new DateTime(DateTime.Now.Year, 1, 1));
         //Holidays.Add(new DateTime(DateTime.Now.Year, 1, 5));
         //Holidays.Add(new DateTime(DateTime.Now.Year, 3, 10));
         //Holidays.Add(new DateTime(DateTime.Now.Year, 12, 25));
 
-        public static void InitholidayDate(List<DateTime> holidaydates)
+        public static void InitholidayDate(List<DateTime> holidaydates, List<string> WorkingDaylist)
         {
             Holidays = holidaydates;
+            WorkingDay = WorkingDaylist;
         }
 
         private static bool IsHoliday(DateTime date)
@@ -25,8 +27,34 @@ namespace GSC.Common
 
         private static bool IsWeekend(DateTime date)
         {
-            return date.DayOfWeek == DayOfWeek.Saturday
-                || date.DayOfWeek == DayOfWeek.Sunday;
+
+            switch (date.DayOfWeek)
+            {
+                case DayOfWeek.Sunday:
+                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Sunday));
+                    //return true;
+                case DayOfWeek.Monday:
+                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Monday));
+                // return false;
+                case DayOfWeek.Tuesday:
+                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Tuesday));
+                // return false;
+                case DayOfWeek.Wednesday:
+                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Wednesday));
+                //return false;
+                case DayOfWeek.Thursday:
+                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Thursday));
+                //return false;
+                case DayOfWeek.Friday:
+                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Friday));
+                //return false; 
+                default:
+                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Saturday));
+                    // return true;                    
+            }
+
+            //return date.DayOfWeek == DayOfWeek.Saturday
+             //   || date.DayOfWeek == DayOfWeek.Sunday;
         }
         public static DateTime GetNextWorkingDay(DateTime date)
         {

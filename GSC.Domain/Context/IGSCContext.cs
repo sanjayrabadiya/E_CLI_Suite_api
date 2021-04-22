@@ -285,5 +285,6 @@ namespace GSC.Domain.Context
         DbSet<ManageMonitoring> ManageMonitoring { get; set; }
         DbSet<DependentTaskDto> DependentTaskDto { get; set; }
         DbSet<HolidayMaster> HolidayMaster { get; set; }
+        DbSet<WeekEndMaster> WeekEndMaster { get; set; }
     }
 }

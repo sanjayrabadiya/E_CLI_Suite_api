@@ -37,8 +37,8 @@ namespace GSC.Api.Controllers.CTMS
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var clientTypes = _holidayMasterRepository.GetHolidayList(isDeleted);
-            return Ok(clientTypes);            
+            var holidaylist = _holidayMasterRepository.GetHolidayList(isDeleted);
+            return Ok(holidaylist);            
         }
 
 
@@ -121,6 +121,14 @@ namespace GSC.Api.Controllers.CTMS
             _uow.Save();
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetProjectWiseHolidayList/{id}")]
+        public ActionResult GetProjectWiseHolidayList(int id)
+        {
+            var holidaylist = _holidayMasterRepository.GetProjectWiseHolidayList(id);
+            return Ok(holidaylist);          
         }
     }
 }

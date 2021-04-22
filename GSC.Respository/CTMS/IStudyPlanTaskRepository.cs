@@ -17,5 +17,6 @@ namespace GSC.Respository.CTMS
         void UpdateTaskOrderSequence(int StudyPlanId);
         string UpdateDependentTask(int StudyPlanTaskId);
         StudyPlanTask UpdateDependentTaskDate(StudyPlanTask StudyPlanTask);
+        DateTime GetNextWorkingDate(NextWorkingDateParameterDto parameterDto);
     }
 }
