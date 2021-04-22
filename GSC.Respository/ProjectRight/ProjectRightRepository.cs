@@ -631,10 +631,10 @@ namespace GSC.Respository.ProjectRight
                              {
                                  Id = project.Id,
                                  ProjectId = project.Id,
-                                 SiteName = string.IsNullOrEmpty(project.SiteName) ? project.ProjectName : project.SiteName,
+                                 SiteName = project.ProjectCode,
                                  UserName = user.UserName,
                                  RoleName = role.RoleName,
-                                 AssignedBy = user.UserName,
+                                 AssignedBy = _context.Users.FirstOrDefault(a => a.Id == projectRight.CreatedBy).UserName,
                                  AssignedDate = projectRight.CreatedDate,
                                  DocumentName = projectDocument.FileName,
                                  ReviewDate = projectDocumentReview.ReviewDate,
