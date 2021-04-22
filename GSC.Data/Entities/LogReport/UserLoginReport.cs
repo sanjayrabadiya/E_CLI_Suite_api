@@ -14,6 +14,7 @@ namespace GSC.Data.Entities.LogReport
         private DateTime? _LogoutTime;
         public int? UserId { get; set; }
         public string LoginName { get; set; }
+        public int? SecurityRoleId { get; set; }
 
         public DateTime LoginTime
         {
@@ -33,5 +34,6 @@ namespace GSC.Data.Entities.LogReport
         public string IpAddress { get; set; }
         [ForeignKey("UserId")]
         public User user { get; set; }
+        public SecurityRole SecurityRole { get; set; }
     }
 }

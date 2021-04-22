@@ -52,10 +52,9 @@ namespace GSC.Data.Dto.Report
         public string Session { get; set; }
         public int? ParentProjectId { get; set; }
         public int? ChildProjectId { get; set; }
-        
+        public int? SecurityRoleId { get; set; }
         public string SiteName { get; set; }
         public UserMasterUserType? UserType { get; set; }
-
     }
 
     public class ModuleNameDto : BaseDto

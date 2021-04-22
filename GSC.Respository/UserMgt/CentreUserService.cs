@@ -56,7 +56,7 @@ namespace GSC.Respository.UserMgt
                             result.ValidateMessage = "User is locked, Please contact your administrator";
                             await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{true}", "");
                         }
-                        _userLoginReportRepository.SaveLog(result.ValidateMessage, result.UserId, loginDto.UserName);
+                        _userLoginReportRepository.SaveLog(result.ValidateMessage, result.UserId, loginDto.UserName, loginDto.RoleId);
                     }
                 }
             }

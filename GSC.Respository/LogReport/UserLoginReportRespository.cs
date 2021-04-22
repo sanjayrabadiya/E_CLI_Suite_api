@@ -22,11 +22,12 @@ namespace GSC.Respository.LogReport
         }
 
 
-        public int SaveLog(string msg, int? userId, string userName)
+        public int SaveLog(string msg, int? userId, string userName, int? roleId)
         {
             var userLoginReport = new UserLoginReport();
             userLoginReport.UserId = userId;
             userLoginReport.LoginName = userName;
+            userLoginReport.SecurityRoleId = roleId;
             userLoginReport.Note = msg;
             userLoginReport.LoginTime = DateTime.Now;
             userLoginReport.IpAddress = _jwtTokenAccesser.IpAddress;

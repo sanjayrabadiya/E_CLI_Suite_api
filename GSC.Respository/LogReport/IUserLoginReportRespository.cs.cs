@@ -5,6 +5,6 @@ namespace GSC.Respository.LogReport
 {
     public interface IUserLoginReportRespository : IGenericRepository<UserLoginReport>
     {
-        int SaveLog(string msg, int? userId, string userName);
+        int SaveLog(string msg, int? userId, string userName, int? roleId);
     }
 }

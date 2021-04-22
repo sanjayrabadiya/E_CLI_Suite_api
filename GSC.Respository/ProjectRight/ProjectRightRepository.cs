@@ -634,13 +634,13 @@ namespace GSC.Respository.ProjectRight
                                  SiteName = string.IsNullOrEmpty(project.SiteName) ? project.ProjectName : project.SiteName,
                                  UserName = user.UserName,
                                  RoleName = role.RoleName,
-                                 AssignedBy = _context.ProjectRight.FirstOrDefault(a => a.CreatedBy == user.Id).User.UserName,
-                                 AssignedDate = _context.ProjectRight.FirstOrDefault(a => a.ProjectId == (project.ParentProjectId == null ? project.Id : project.ParentProjectId)).CreatedDate.UtcDateTime(),
+                                 AssignedBy = user.UserName,
+                                 AssignedDate = projectRight.CreatedDate,
                                  DocumentName = projectDocument.FileName,
                                  ReviewDate = projectDocumentReview.ReviewDate,
                                  TrainerName = trainer.UserName,
-                                 TrainingType = _context.ProjectDocumentReview.FirstOrDefault(a => (a.ProjectDocumentId == projectDocument.Id) && (a.UserId == projectRight.UserId) && (a.ProjectId == projectDocument.ProjectId)).TrainingType.ToString(),
-                                 TrainingDuration = _context.ProjectDocumentReview.Where(c => c.ProjectId == projectRight.ProjectId && c.UserId == projectRight.UserId && c.ProjectDocumentId == projectDocument.Id).FirstOrDefault().TrainingDuration,
+                                 TrainingType = projectDocumentReview.TrainingType.GetDescription(),
+                                 TrainingDuration = projectDocumentReview.TrainingDuration,
                                  ReviewNote = projectDocumentReview.ReviewNote,
                              }).OrderBy(x => x.Id).ToList();
 
@@ -648,14 +648,13 @@ namespace GSC.Respository.ProjectRight
         }
         public IList<UserReportDto> GetUserReportList(UserReportSearchDto filters)
         {
-            if (filters.UserIds != null && filters.UserIds.ToList().Count <= 0)
-                filters.UserIds = null;
-
-            var results = (from user in _context.Users.Where(t => ((t.DeletedBy != null && filters.UserId == 2) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) ||
-                           ((t.DeletedBy == null && filters.UserId == 3) && (filters.UserIds == null || filters.UserIds.Contains(t.Id))) || ((t.IsLogin == true && filters.UserId == 1)
-                           && (filters.UserIds == null || filters.UserIds.Contains(t.Id))))
+            var results = (from user in _context.Users.Where(t => (filters.UserId == 2 && (t.DeletedBy != null || t.IsLocked == true || (t.ValidFrom.HasValue && t.ValidFrom.Value > DateTime.Now
+                            || t.ValidTo.HasValue && t.ValidTo.Value < DateTime.Now)))
+                            || (t.DeletedBy == null && filters.UserId == 3)
+                            || (t.IsLogin == true && filters.UserId == 1))
                            select new UserReportDto
                            {
+                               Id = user.Id,
                                UserName = user.UserName,
                                Session = "Active",
                                CreatedBy = user.CreatedByUser.UserName,
@@ -664,57 +663,33 @@ namespace GSC.Respository.ProjectRight
                                DeletedDate = user.DeletedDate,
                                LoginTime = user.LastLoginDate.UtcDateTime(),
                                LastIpAddress = user.LastIpAddress,
-                               RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.Id).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList()),
+                               RoleName = string.Join(", ", user.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList()),
                                UserType = user.UserType
                            }).ToList();
 
-            results = results.Where(x=>x.UserType == Shared.Generic.UserMasterUserType.User).OrderBy(x => x.Id).ToList();
+            results = results.Where(x => x.UserType == Shared.Generic.UserMasterUserType.User).OrderBy(x => x.Id).ToList();
 
-            results.ForEach(r =>
+            if (filters.UserId == 1)
             {
-                if (filters.UserId == 1)
-                {
-                    r.RoleName = _context.SecurityRole.FirstOrDefault(a => a.Id == _jwtTokenAccesser.RoleId).RoleName;
-                }
-            });
+                results = results.Select(x => { x.RoleName = _context.UserLoginReport.Where(a => a.UserId == x.Id).OrderByDescending(x => x.Id).Select(x => x.SecurityRole.RoleName).FirstOrDefault(); return x; }).ToList();
+            }
 
             return results;
         }
         public IList<UserReportDto> GetLoginLogoutReportList(UserReportSearchDto filters)
         {
-            if (filters.UserIds != null && filters.UserIds.ToList().Count <= 0)
-                filters.UserIds = null;
+            var result = _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4)
+                .Select(x => new UserReportDto
+                {
+                    Id = x.Id,
+                    UserName = x.LoginName,
+                    LoginTime = x.LoginTime,
+                    LogOutTime = x.LogoutTime,
+                    SecurityRoleId = x.SecurityRoleId,
+                    RoleName = x.SecurityRole.RoleName
+                }).OrderByDescending(x => x.Id).ToList();
 
-            //var parent = _context.Project.Where(x => (x.Id == filters.ProjectId) || (x.ParentProjectId == filters.ProjectId)).Select(x => x.Id).ToList();
-
-            //var userlis = _context.ProjectRight.Where(u => filters.ProjectId == null || parent.Contains(u.ProjectId)).ToList();
-
-
-            //var queryDtos = (from user in _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId)))
-            //                 join projectRight in _context.ProjectRight.Where(u => filters.ProjectId == null || parent.Contains(u.ProjectId))
-            //                 on user.UserId equals projectRight.UserId
-            //                 join project in _context.Project on projectRight.ProjectId equals project.Id
-            //                 select new UserReportDto
-            //                 {
-            //                     UserName = user.LoginName,
-            //                     ParentProjectId = project.Id,
-            //                     SiteName = string.IsNullOrEmpty(project.SiteName) ? project.ProjectName : project.SiteName,
-            //                     LoginTime = _context.UserLoginReport.FirstOrDefault(a => a.UserId == projectRight.UserId).LoginTime.UtcDateTime(),
-            //                     LogOutTime = user.LoginTime.UtcDateTime(),
-            //                     RoleName = string.Join(" ,", _context.Users.FirstOrDefault(b => b.Id == user.UserId).UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())
-            //                 }).ToList();//OrderBy(x => x.Id).ToList();
-
-            var queryDtos = _context.UserLoginReport.Where(t => t.DeletedBy == null && filters.UserId == 4 && (filters.UserIds == null || filters.UserIds.Contains(t.UserId))).Select(
-                 x => new UserReportDto
-                 {
-                     Id = x.Id,
-                     UserName = x.LoginName,
-                     LoginTime = x.LoginTime,
-                     LogOutTime = x.LogoutTime,
-                 }).ToList();
-            queryDtos = queryDtos.OrderByDescending(x => x.Id).ToList();
-
-            return queryDtos;
+            return result;
         }
 
         public List<ProjectDocumentReviewDto> EtmfUserDropDown(int projectId, int? userId)

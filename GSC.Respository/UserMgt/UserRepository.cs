@@ -129,14 +129,14 @@ namespace GSC.Respository.UserMgt
             if (user == null)
             {
                 userViewModel.ValidateMessage = "Invalid username";
-                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, null, userName);
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, null, userName, null);
                 return userViewModel;
             }
 
             if (user.IsLocked)
             {
                 userViewModel.ValidateMessage = "User is locked, Please contact your administrator";
-                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, null, userName);
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, null, userName, null);
                 return userViewModel;
             }
 
@@ -150,14 +150,14 @@ namespace GSC.Respository.UserMgt
                     Update(user);
                     _context.Save();
                     userViewModel.ValidateMessage = "User is locked, Please contact your administrator";
-                    _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
+                    _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName, null);
                     return userViewModel;
                 }
 
                 Update(user);
                 _context.Save();
                 userViewModel.ValidateMessage = "Invalid Password and Login Attempt : " + user.FailedLoginAttempts;
-                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName, null);
                 return userViewModel;
             }
 
@@ -166,7 +166,7 @@ namespace GSC.Respository.UserMgt
             {
 
                 userViewModel.ValidateMessage = "User not active, Please contact your administrator";
-                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName);
+                _userLoginReportRepository.SaveLog(userViewModel.ValidateMessage, user.Id, userName, null);
                 return userViewModel;
             }
 
@@ -257,7 +257,7 @@ namespace GSC.Respository.UserMgt
                 user.LastLoginDate = DateTime.Now;
                 user.LastIpAddress = _jwtTokenAccesser.IpAddress;
                 login.LoginReportId =
-                    _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName);
+                    _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName, roleId);
             }
 
 
