@@ -8,6 +8,7 @@ namespace GSC.Data.Dto.Report
     public class ProjectTrainigAccessSearchDto : BaseDto
     {
         public int ProjectId { get; set; }
+        public int? SiteId { get; set; }
         public int?[] RoleIds { get; set; }
         public int?[] UserIds { get; set; }
     }
