@@ -551,7 +551,7 @@ namespace GSC.Respository.InformConcent
             Update(econsentReviewDetails);
             System.IO.File.Delete(filePath);
 
-
+            _uow.Save();
             var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetails.EconsentSetupId).ToList().FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
             var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetails.RandomizationId).ToList().FirstOrDefault();
