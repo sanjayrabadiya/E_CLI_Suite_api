@@ -418,7 +418,9 @@ namespace GSC.Respository.InformConcent
             Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(fileStream, Syncfusion.DocIO.FormatType.Automatic);
 
             stream.Dispose();
+            stream.Close();
             fileStream.Dispose();
+            fileStream.Close();
 
             DocIORenderer render = new DocIORenderer();
             render.Settings.PreserveFormFields = true;
@@ -436,7 +438,10 @@ namespace GSC.Respository.InformConcent
             FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
             outputStream.WriteTo(file);
             file.Dispose();
+            file.Close();
             outputStream.Dispose();
+            outputStream.Close();
+
 
             econsentReviewDetail.pdfpath = pdfpath;
             econsentReviewDetail.IsReviewedByPatient = true;
@@ -484,8 +489,14 @@ namespace GSC.Respository.InformConcent
 
             if (econsentReviewDetails.pdfpath != null)
             {
-                string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
-                System.IO.File.Delete(oldpdfpath);
+                try
+                {
+                    string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
+                    System.IO.File.Delete(oldpdfpath);
+                } catch(Exception ex)
+                {
+
+                }
             }
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
             filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.InformConcent.ToString(), docName);
@@ -564,7 +575,7 @@ namespace GSC.Respository.InformConcent
                 randomizationdata.PatientStatusId = ScreeningPatientStatus.Withdrawal;
                 _randomizationRepository.Update(randomizationdata);
             }
-            if (_uow.Save() <= 0) throw new Exception(econsentReviewDetailsDto.IsApproved == true ? "Approving failed" : "Rejecting failed");
+            _uow.Save();
             return econsentReviewDetails.Id;
         }
 
