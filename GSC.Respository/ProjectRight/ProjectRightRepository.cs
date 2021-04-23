@@ -622,14 +622,23 @@ namespace GSC.Respository.ProjectRight
 
         public IList<ProjectTrainingDto> GetProjectTrainingReportList(ProjectTrainigAccessSearchDto filters)
         {
-            var parent = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
-            var queryDtos = (from projectRight in _context.ProjectRight.Where(t => t.ProjectId == filters.ProjectId
+            var sites = new List<int>();
+            if (filters.SiteId != null)
+            {
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
+            }
+            else
+            {
+                sites = _context.Project.Where(x => x.Id == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
+            }
+
+            var queryDtos = (from projectRight in _context.ProjectRight.Where(t => (filters.SiteId != null ? t.ProjectId == filters.SiteId : sites.Contains(t.ProjectId))
                                      && (filters.UserIds == null || filters.UserIds.Contains(t.UserId))
                                      && (filters.RoleIds == null || filters.RoleIds.Contains(t.RoleId)))
                              join project in _context.Project on projectRight.ProjectId equals project.Id
                              join auditReasonTemp in _context.AuditReason on projectRight.AuditReasonId equals auditReasonTemp.Id into auditReasonTempDto
                              from auditReason in auditReasonTempDto.DefaultIfEmpty()
-                             join projectDocument in _context.ProjectDocument.Where(x => x.DeletedDate == null) on parent != null ? parent : projectRight.ProjectId equals projectDocument.ProjectId
+                             join projectDocument in _context.ProjectDocument.Where(x => x.DeletedDate == null) on projectRight.ProjectId equals projectDocument.ProjectId
                              join projectDocumentReviewTemp in _context.ProjectDocumentReview on new { x = projectDocument.Id, y = projectRight.UserId, z = projectRight.ProjectId } equals new { x = projectDocumentReviewTemp.ProjectDocumentId, y = projectDocumentReviewTemp.UserId, z = projectDocumentReviewTemp.ProjectId } into projectDocumentReviewDto
                              from projectDocumentReview in projectDocumentReviewDto.DefaultIfEmpty()
                              where projectDocumentReview.DeletedDate == null

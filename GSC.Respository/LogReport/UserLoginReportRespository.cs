@@ -29,7 +29,7 @@ namespace GSC.Respository.LogReport
             userLoginReport.LoginName = userName;
             userLoginReport.SecurityRoleId = roleId;
             userLoginReport.Note = msg;
-            userLoginReport.LoginTime = DateTime.Now;
+            userLoginReport.LoginTime = _jwtTokenAccesser.GetClientDate();
             userLoginReport.IpAddress = _jwtTokenAccesser.IpAddress;
             Add(userLoginReport);
              _context.Save();
