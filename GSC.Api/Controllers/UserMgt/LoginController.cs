@@ -10,6 +10,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Configuration;
+using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +33,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly ICentreUserService _centreUserService;
         private readonly IMapper _mapper;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
-
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public LoginController(
             IUserRoleRepository userRoleRepository,
@@ -43,7 +44,8 @@ namespace GSC.Api.Controllers.UserMgt
             IConfiguration configuration,
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService, IMapper mapper,
-            ILoginPreferenceRepository loginPreferenceRepository
+            ILoginPreferenceRepository loginPreferenceRepository,
+            IJwtTokenAccesser jwtTokenAccesser
             )
         {
             _userRoleRepository = userRoleRepository;
@@ -56,6 +58,7 @@ namespace GSC.Api.Controllers.UserMgt
             _centreUserService = centreUserService;
             _mapper = mapper;
             _loginPreferenceRepository = loginPreferenceRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpPost]
@@ -289,7 +292,7 @@ namespace GSC.Api.Controllers.UserMgt
             user.IsLogin = false;
             _userRepository.Update(user);
 
-            userLoginReport.LogoutTime = DateTime.Now;
+            userLoginReport.LogoutTime = _jwtTokenAccesser.GetClientDate();
             _userLoginReportRepository.Update(userLoginReport);
 
             _uow.Save();
@@ -319,7 +322,7 @@ namespace GSC.Api.Controllers.UserMgt
             user.IsLogin = false;
             _userRepository.Update(user);
 
-            userLoginReport.LogoutTime = DateTime.Now;
+            userLoginReport.LogoutTime = _jwtTokenAccesser.GetClientDate();
             _userLoginReportRepository.Update(userLoginReport);
 
             _uow.Save();
