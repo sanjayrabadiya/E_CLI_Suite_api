@@ -40,6 +40,10 @@ namespace GSC.Api.Controllers.InformConcent
             // display section reference data in grid
             var econsentSectionReferences = _econsentSectionReferenceRepository.FindByInclude(x => x.EconsentSetupId == documentId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderByDescending(x => x.Id).ToList();
             var econsentSectionReferenceDto = _mapper.Map<IEnumerable<EconsentSectionReferenceDto>>(econsentSectionReferences).ToList();
+            foreach (var item in econsentSectionReferenceDto)
+            {
+                item.IsDeleted = isDeleted;
+            }
             return Ok(econsentSectionReferenceDto);
         }
 
