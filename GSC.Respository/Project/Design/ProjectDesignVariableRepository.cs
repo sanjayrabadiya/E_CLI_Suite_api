@@ -219,7 +219,7 @@ namespace GSC.Respository.Project.Design
             return All.Where(x => x.Id == id).Select(t => new ProjectDesignVariableRelationDto
             {
                 Id = t.Id,
-                RelationProjectDesignVariableId = t.RelationProjectDesignVariableId ?? 0,
+                RelationProjectDesignVariableId = t.Id,
                 ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                 ProjectDesignVisitId = t.ProjectDesignTemplate.ProjectDesignVisitId
             }).FirstOrDefault();
