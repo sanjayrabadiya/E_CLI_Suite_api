@@ -130,9 +130,9 @@ namespace GSC.Respository.Screening
                     if (!string.IsNullOrWhiteSpace(variable.ScreeningValue) || variable.IsNaValue)
                         variable.IsValid = true;
 
-                    if (variable.CollectionSource == CollectionSources.Relation)
+                    if (variable.CollectionSource == CollectionSources.Relation && variable.RelationProjectDesignVariableId > 0)
                     {
-                        variable.Values = _screeningTemplateValueRepository.GetScreeningRelation(0, screeningTemplateBasic.ScreeningEntryId);
+                        variable.Values = _screeningTemplateValueRepository.GetScreeningRelation(variable.RelationProjectDesignVariableId ?? 0, screeningTemplateBasic.ScreeningEntryId);
                     }
 
                     if (variable.Values != null)

@@ -91,6 +91,7 @@ namespace GSC.Respository.Project.Design
                         DefaultValue = x.DefaultValue,
                         LowRangeValue = x.LowRangeValue,
                         HighRangeValue = x.HighRangeValue,
+                        RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
                         PrintType = x.PrintType,
                         Values = x.Values.Where(x => x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
                         {

@@ -122,6 +122,7 @@ namespace GSC.Data.Dto.Project.Design
         public string ValidationMessage { get; set; }
         public Alignment? Alignment { get; set; }
 
+        public int? RelationProjectDesignVariableId { get; set; }
     }
 
     public class EditCheckIds
