@@ -109,6 +109,11 @@ namespace GSC.Respository.Screening
 
             var values = GetScreeningValues(screeningTemplateBasic.Id);
 
+            designTemplateDto.Variables.
+                Where(x => x.CollectionSource == CollectionSources.Relation && x.RelationProjectDesignVariableId > 0).ToList().ForEach(t =>
+                    t.Values = _screeningTemplateValueRepository.GetScreeningRelation(t.RelationProjectDesignVariableId ?? 0, screeningTemplateBasic.ScreeningEntryId)
+                );
+
             values.ForEach(t =>
             {
                 var variable = designTemplateDto.Variables.FirstOrDefault(v => v.ProjectDesignVariableId == t.ProjectDesignVariableId);
@@ -129,11 +134,6 @@ namespace GSC.Respository.Screening
                     variable.DocFullPath = t.DocPath != null ? documentUrl + t.DocPath : null;
                     if (!string.IsNullOrWhiteSpace(variable.ScreeningValue) || variable.IsNaValue)
                         variable.IsValid = true;
-
-                    if (variable.CollectionSource == CollectionSources.Relation && variable.RelationProjectDesignVariableId > 0)
-                    {
-                        variable.Values = _screeningTemplateValueRepository.GetScreeningRelation(variable.RelationProjectDesignVariableId ?? 0, screeningTemplateBasic.ScreeningEntryId);
-                    }
 
                     if (variable.Values != null)
                         variable.Values.ToList().ForEach(val =>
