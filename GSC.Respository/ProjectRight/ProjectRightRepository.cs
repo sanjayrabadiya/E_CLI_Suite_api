@@ -682,7 +682,7 @@ namespace GSC.Respository.ProjectRight
                                DeletedBy = user.DeletedByUser.UserName,
                                CreatedDate = user.CreatedDate,
                                DeletedDate = user.DeletedDate,
-                               LoginTime = user.LastLoginDate.UtcDateTime(),
+                               LoginTime = user.LastLoginDate,
                                LastIpAddress = user.LastIpAddress,
                                RoleName = string.Join(", ", user.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList()),
                                UserType = user.UserType
