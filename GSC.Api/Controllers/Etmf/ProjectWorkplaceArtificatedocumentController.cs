@@ -247,11 +247,11 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(json);
         }
 
-        [Route("GetEtmfZoneDropdown")]
+        [Route("GetEtmfZoneDropdown/{projectId}")]
         [HttpGet]
-        public IActionResult GetEtmfZoneDropdown()
+        public IActionResult GetEtmfZoneDropdown(int projectId)
         {
-            var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfZoneDropdown();
+            var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfZoneDropdown(projectId);
             return Ok(data);
         }
 
@@ -293,6 +293,14 @@ namespace GSC.Api.Controllers.Etmf
             var FullPath = Path.Combine(upload.DocumentUrl, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, history.DocumentName);
             obj.FullDocPath = FullPath;
             return Ok(obj);
+        }
+
+        [Route("GetEtmfCountrySiteDropdown/{projectId}/{folderId}")]
+        [HttpGet]
+        public IActionResult GetEtmfCountrySiteDropdown(int projectId, int folderId)
+        {
+            var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfCountrySiteDropdown(projectId, folderId);
+            return Ok(data);
         }
     }
 }

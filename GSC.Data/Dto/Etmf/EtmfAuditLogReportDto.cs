@@ -5,7 +5,7 @@ using System.Text;
 
 namespace GSC.Data.Dto.Etmf
 {
-    public class EtmfAuditLogReportDto
+    public class EtmfAuditLogReportDto : BaseDto
     {
         public string projectCode { get; set; }
         public string folderName { get; set; }
@@ -21,6 +21,13 @@ namespace GSC.Data.Dto.Etmf
         public DateTime? actionDate { get; set; }
         public string auditReason { get; set; }
         public string auditComment { get; set; }
+        public int? ParentArtificateId { get; set; }
+        public int? CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? DeletedDate { get; set; }
+        public int? DeletedBy { get; set; }
+        public DateTime? ModifiedDate { get; set; }
+        public int? ModifiedBy { get; set; }
     }
 
     public class EtmfAuditLogReportSearchDto : BaseDto

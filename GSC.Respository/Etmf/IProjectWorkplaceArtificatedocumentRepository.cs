@@ -20,7 +20,7 @@ namespace GSC.Respository.Etmf
         ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto);
         ProjectWorkplaceArtificatedocument AddMovedDocument(WorkplaceFolderDto item);
         List<DropDownDto> GetEtmfCountrySiteDropdown(int projectId, int folderId);
-        List<DropDownDto> GetEtmfZoneDropdown();
+        List<DropDownDto> GetEtmfZoneDropdown(int projectId);
         List<DropDownDto> GetEtmfSectionDropdown(int zoneId);
         List<DropDownDto> GetEtmfArtificateDropdown(int sectionId);
         IList<EtmfAuditLogReportDto> GetEtmfAuditLogReport(EtmfAuditLogReportSearchDto filters);
