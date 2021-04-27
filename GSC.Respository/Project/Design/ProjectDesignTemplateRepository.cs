@@ -174,7 +174,7 @@ namespace GSC.Respository.Project.Design
 
         public IList<DropDownDto> GetClonnedTemplateDropDown(int id)
         {
-            var templates = All.Where(x => x.DeletedDate == null
+            var templates = All.Where(x => x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null
                                            && x.ParentId == id).OrderBy(t => t.DesignOrder).Select(t => new DropDownDto
                                            {
                                                Id = t.Id,
