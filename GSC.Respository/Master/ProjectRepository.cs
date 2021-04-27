@@ -324,7 +324,7 @@ namespace GSC.Respository.Master
                 {
                     Id = c.Id,
                     Value = c.ProjectCode,
-                    CountryId = c.CountryId,
+                    CountryId = c.ManageSite.City.State.CountryId,
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? 0
