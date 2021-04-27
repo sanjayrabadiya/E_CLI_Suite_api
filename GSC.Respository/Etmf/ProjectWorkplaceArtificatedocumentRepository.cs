@@ -38,6 +38,7 @@ namespace GSC.Respository.Etmf
         private readonly IEtmfZoneMasterLibraryRepository _etmfZoneMasterLibraryRepository;
         private readonly IEtmfSectionMasterLibraryRepository _etmfSectionMasterLibraryRepository;
         private readonly IAuditTrailCommonRepository _auditTrailCommonRepository;
+
         public ProjectWorkplaceArtificatedocumentRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
            IUserRepository userRepository,
@@ -340,6 +341,7 @@ namespace GSC.Respository.Etmf
 
         public IList<EtmfAuditLogReportDto> GetEtmfAuditLogReport(EtmfAuditLogReportSearchDto filters)
         {
+            var ProjectCode = _context.Project.Where(x => x.Id == filters.projectId).FirstOrDefault().ProjectCode;
             var workplace = _context.ProjectWorkplace.Where(x => x.ProjectId == filters.projectId).ToList().FirstOrDefault();
             var workplacedetail = new List<int>();
             if (filters.folderId != null)
@@ -387,17 +389,17 @@ namespace GSC.Respository.Etmf
             var workplaceartificatedocument = new List<int>();
             workplaceartificatedocument = FindByInclude(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).Select(y => y.Id).ToList();
 
+            #region section
             var projectWorkplaceArtificatedocuments = All.Include(x => x.ProjectWorkplaceArtificate).
                 ThenInclude(x => x.EtmfArtificateMasterLbrary).
                 Include(x => x.ProjectWorkplaceArtificate).
                 ThenInclude(x => x.ProjectWorkplaceSection).
                 ThenInclude(x => x.ProjectWorkPlaceZone).
                 ThenInclude(x => x.ProjectWorkplaceDetail).
-                ThenInclude(x => x.ProjectWorkplace).
-                ThenInclude(x => x.Project).
                 Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.EtmfSectionMasterLibrary).
                 Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.EtmfZoneMasterLibrary)
                 .Where(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).OrderByDescending(x => x.Id).ToList();
+
             var projectWorkplaceArtificatedocumentreviews = _context.ProjectArtificateDocumentReview.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var projectWorkplaceArtificatedocumentapprover = _context.ProjectArtificateDocumentApprover.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null).ToList();
@@ -405,7 +407,7 @@ namespace GSC.Respository.Etmf
             var Documents = projectWorkplaceArtificatedocuments.Select(r => new EtmfAuditLogReportDto
             {
                 Id = r.Id,
-                projectCode = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
+                projectCode = ProjectCode,
                 folderName = ((WorkPlaceFolder)r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
                 countrysiteName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName,
                 zoneName = r.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
@@ -413,7 +415,7 @@ namespace GSC.Respository.Etmf
                 artificateName = r.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName,
                 documentName = r.DocumentName,
                 version = r.Version,
-                status = ((ArtifactDocStatusType)r.Status).GetDescription(),
+                status = r.Status.GetDescription(),
                 ParentArtificateId = r.ProjectWorkplaceArtificate.ParentArtificateId,
                 CreatedBy = r.CreatedBy,
                 CreatedDate = r.CreatedDate,
@@ -447,10 +449,9 @@ namespace GSC.Respository.Etmf
                                 version = doc.version,
                                 status = doc.status,
                                 action = "Send for Review",
-                                userName = _userRepository.Find((int)review.UserId).UserName,
+                                userName = _userRepository.Find(review.UserId).UserName,
                                 actionDate = review.CreatedDate
                             }).ToList();
-
 
             var sendBackData = (from doc in Documents
                                 join review in projectWorkplaceArtificatedocumentreviews on doc.Id equals review.ProjectWorkplaceArtificatedDocumentId
@@ -541,8 +542,185 @@ namespace GSC.Respository.Etmf
                 //auditReason = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason?.ReasonName
                 return r;
             }).ToList();
+            #endregion
 
-            return cretaedData.Union(sendData).Union(sendBackData).Union(sendforApproveData).Union(ApprovedData).Union(deletedData).Union(supersededata).Union(finaldata).OrderByDescending(x => x.actionDate).ToList();
+            #region SubSection
+            var projectWorkplaceSubsectionDocuments = _context.ProjectWorkplaceSubSecArtificatedocument.Include(x => x.ProjectWorkplaceSubSectionArtifact)
+                .ThenInclude(x => x.ProjectWorkplaceSubSection)
+                .ThenInclude(x => x.ProjectWorkplaceSection)
+                .ThenInclude(x => x.ProjectWorkPlaceZone)
+                .ThenInclude(x => x.ProjectWorkplaceDetail)
+                .Include(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkplaceSubSection).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.EtmfSectionMasterLibrary)
+                .Include(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkplaceSubSection).ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.EtmfZoneMasterLibrary)
+                .Where(x => workplacesection.Contains(x.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSectionId))
+                .OrderByDescending(x => x.Id).ToList();
+
+            var SubSecDocuments = projectWorkplaceSubsectionDocuments.Select(r => new EtmfAuditLogReportDto
+            {
+                Id = r.Id,
+                projectCode = ProjectCode,
+                folderName = ((WorkPlaceFolder)r.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
+                countrysiteName = r.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName,
+                zoneName = r.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
+                sectionName = r.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+                subSectionName = r.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.SubSectionName,
+                artificateName = r.ProjectWorkplaceSubSectionArtifact.ArtifactName,
+                documentName = r.DocumentName,
+                version = r.Version,
+                status = r.Status.GetDescription(),
+                CreatedBy = r.CreatedBy,
+                CreatedDate = r.CreatedDate,
+                DeletedDate = r.DeletedDate,
+                DeletedBy = r.DeletedBy,
+                ModifiedDate = r.ModifiedDate
+            }).ToList();
+
+            var projectWorkplaceSubSecdocumentreviews = _context.ProjectSubSecArtificateDocumentReview.Where(x => SubSecDocuments.Select(x => x.Id).Contains(x.ProjectWorkplaceSubSecArtificateDocumentId)).ToList();
+            var projectWorkplaceSubSecdocumentapprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => SubSecDocuments.Select(x => x.Id).Contains(x.ProjectWorkplaceSubSecArtificateDocumentId)).ToList();
+            var SubSecAuditTrialData = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceSubSecArtificatedocument" && x.Reason != null).ToList();
+
+            var SubSecCretaedData = SubSecDocuments.Select(r =>
+            {
+                r.action = "Created";
+                r.userName = _userRepository.Find((int)r.CreatedBy).UserName;
+                r.actionDate = r.CreatedDate;
+                r.auditComment = SubSecAuditTrialData.Where(x => x.Action == "Added" && x.ColumnName == "Document Name" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth;
+                r.auditReason = SubSecAuditTrialData.Where(x => x.Action == "Added" && x.ColumnName == "Document Name" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason;
+                return r;
+            }).ToList();
+
+            var SubSecSendData = (from doc in SubSecDocuments
+                                  join review in projectWorkplaceSubSecdocumentreviews on doc.Id equals review.ProjectWorkplaceSubSecArtificateDocumentId
+                                  where doc.CreatedBy != review.UserId
+                                  select new EtmfAuditLogReportDto
+                                  {
+                                      projectCode = doc.projectCode,
+                                      folderName = doc.folderName,
+                                      countrysiteName = doc.countrysiteName,
+                                      zoneName = doc.zoneName,
+                                      sectionName = doc.sectionName,
+                                      subSectionName = doc.subSectionName,
+                                      artificateName = doc.artificateName,
+                                      documentName = doc.documentName,
+                                      version = doc.version,
+                                      status = doc.status,
+                                      action = "Send for Review",
+                                      userName = _userRepository.Find(review.UserId).UserName,
+                                      actionDate = review.CreatedDate
+                                  }).ToList();
+
+            var SubSecSendBackData = (from doc in SubSecDocuments
+                                      join review in projectWorkplaceSubSecdocumentreviews on doc.Id equals review.ProjectWorkplaceSubSecArtificateDocumentId
+                                      where review.IsSendBack == true
+                                      select new EtmfAuditLogReportDto
+                                      {
+                                          projectCode = doc.projectCode,
+                                          folderName = doc.folderName,
+                                          countrysiteName = doc.countrysiteName,
+                                          zoneName = doc.zoneName,
+                                          sectionName = doc.sectionName,
+                                          subSectionName = doc.subSectionName,
+                                          artificateName = doc.artificateName,
+                                          documentName = doc.documentName,
+                                          version = doc.version,
+                                          status = doc.status,
+                                          action = "Send Back",
+                                          userName = _userRepository.Find(review.UserId).UserName,
+                                          actionDate = review.SendBackDate
+                                      }).ToList();
+
+            var SubSecSendforApproveData = (from doc in SubSecDocuments
+                                            join approve in projectWorkplaceSubSecdocumentapprover on doc.Id equals approve.ProjectWorkplaceSubSecArtificateDocumentId
+                                            select new EtmfAuditLogReportDto
+                                            {
+                                                projectCode = doc.projectCode,
+                                                folderName = doc.folderName,
+                                                countrysiteName = doc.countrysiteName,
+                                                zoneName = doc.zoneName,
+                                                sectionName = doc.sectionName,
+                                                subSectionName = doc.subSectionName,
+                                                artificateName = doc.artificateName,
+                                                documentName = doc.documentName,
+                                                version = doc.version,
+                                                status = doc.status,
+                                                action = "Send for Approve",
+                                                userName = _userRepository.Find(approve.UserId).UserName,
+                                                actionDate = approve.CreatedDate
+                                            }).ToList();
+
+            var SubSecApprovedData = (from doc in SubSecDocuments
+                                      join approve in projectWorkplaceSubSecdocumentapprover on doc.Id equals approve.ProjectWorkplaceSubSecArtificateDocumentId
+                                      where approve.IsApproved != null
+                                      select new EtmfAuditLogReportDto
+                                      {
+                                          projectCode = doc.projectCode,
+                                          folderName = doc.folderName,
+                                          countrysiteName = doc.countrysiteName,
+                                          zoneName = doc.zoneName,
+                                          sectionName = doc.sectionName,
+                                          subSectionName = doc.subSectionName,
+                                          artificateName = doc.artificateName,
+                                          documentName = doc.documentName,
+                                          version = doc.version,
+                                          status = doc.status,
+                                          action = approve.IsApproved == true ? "Approved" : "Rejected",
+                                          userName = _userRepository.Find((int)approve.UserId).UserName,
+                                          actionDate = approve.ModifiedDate,
+                                          auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.ReasonOth,
+                                          auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.Reason,
+                                      }).ToList();
+
+            var SubSecDeletedData = SubSecDocuments.Where(x => x.DeletedDate != null).Select(r =>
+            {
+                r.action = "Delete";
+                r.userName = _userRepository.Find((int)r.DeletedBy).UserName;
+                r.actionDate = r.DeletedDate;
+                r.auditComment = SubSecAuditTrialData.Where(x => x.Action == "Deleted" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth;
+                r.auditReason = SubSecAuditTrialData.Where(x => x.Action == "Deleted" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason;
+                return r;
+            }).ToList();
+
+            var SubSecSupersedeData = SubSecDocuments.Where(x => x.status == ArtifactDocStatusType.Supersede.GetDescription()).Select(r =>
+            {
+                r.action = "Supersede";
+                r.userName = _userRepository.Find((int)r.CreatedBy).UserName;
+                r.actionDate = SubSecAuditTrialData.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Supersede" && x.RecordId == r.Id).ToList().FirstOrDefault()?.CreatedDate;
+                r.auditComment = SubSecAuditTrialData.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Supersede" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth;
+                r.auditReason = SubSecAuditTrialData.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Supersede" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason;
+                return r;
+            }).ToList();
+
+            var SubSecFinalData = SubSecDocuments.Where(x => x.status == ArtifactDocStatusType.Final.GetDescription()).Select(r =>
+            {
+                r.action = "Final";
+                r.userName = _userRepository.Find((int)r.CreatedBy).UserName;
+                r.actionDate = r.ModifiedDate;
+                //actionDate = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.CreatedDate,
+                //auditComment = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth,
+                //auditReason = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason?.ReasonName
+                return r;
+            }).ToList();
+            #endregion
+
+            var result = new List<EtmfAuditLogReportDto>();
+            result.AddRange(cretaedData);
+            result.AddRange(sendData);
+            result.AddRange(sendBackData);
+            result.AddRange(sendforApproveData);
+            result.AddRange(ApprovedData);
+            result.AddRange(deletedData);
+            result.AddRange(supersededata);
+            result.AddRange(finaldata);
+
+            result.AddRange(SubSecCretaedData);
+            result.AddRange(SubSecSendData);
+            result.AddRange(SubSecSendBackData);
+            result.AddRange(SubSecSendforApproveData);
+            result.AddRange(SubSecApprovedData);
+            result.AddRange(SubSecDeletedData);
+            result.AddRange(SubSecSupersedeData);
+            result.AddRange(SubSecFinalData);
+            return result.OrderByDescending(x => x.actionDate).ToList();
         }
         public string ImportWordDocument(Stream stream, string FullPath)
         {

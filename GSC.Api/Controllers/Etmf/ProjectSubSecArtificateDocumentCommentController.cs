@@ -61,13 +61,13 @@ namespace GSC.Api.Controllers.Etmf
             if (!string.IsNullOrEmpty(projectSubSecArtificateDocumentCommentDto.Response) && projectSubSecArtificateDocumentCommentDto.ResponseDate == null)
             {
                 projectSubSecArtificateDocumentCommentDto.ResponseBy = _jwtTokenAccesser.UserId;
-                projectSubSecArtificateDocumentCommentDto.ResponseDate = DateTime.Now;
+                projectSubSecArtificateDocumentCommentDto.ResponseDate = _jwtTokenAccesser.GetClientDate();
             }
 
             if (projectSubSecArtificateDocumentCommentDto.IsClose)
             {
                 projectSubSecArtificateDocumentCommentDto.CloseBy = _jwtTokenAccesser.UserId;
-                projectSubSecArtificateDocumentCommentDto.CloseDate = DateTime.Now;
+                projectSubSecArtificateDocumentCommentDto.CloseDate = _jwtTokenAccesser.GetClientDate();
             }
 
             var projectSubSecArtificateDocumentComment = _mapper.Map<ProjectSubSecArtificateDocumentComment>(projectSubSecArtificateDocumentCommentDto);

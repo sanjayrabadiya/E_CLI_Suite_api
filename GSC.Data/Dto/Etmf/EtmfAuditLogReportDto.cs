@@ -12,6 +12,7 @@ namespace GSC.Data.Dto.Etmf
         public string countrysiteName { get; set; }
         public string zoneName { get; set; }
         public string sectionName { get; set; }
+        public string subSectionName { get; set; }
         public string artificateName { get; set; }
         public string documentName { get; set; }
         public string version { get; set; }

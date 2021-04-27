@@ -97,7 +97,7 @@ namespace GSC.Respository.Etmf
             var existing = _context.EtmfUserPermission.Where(t => t.UserId == userId && ProjectWorksplace.Contains(t.ProjectWorkplaceDetailId)).ToList();
             if (existing.Any())
             {
-                existing = existing.Select(c => { c.DeletedBy = _jwtTokenAccesser.UserId; c.DeletedDate = DateTime.Now; return c; }).ToList();
+                existing = existing.Select(c => { c.DeletedBy = _jwtTokenAccesser.UserId; c.DeletedDate = _jwtTokenAccesser.GetClientDate(); return c; }).ToList();
                 _context.EtmfUserPermission.UpdateRange(existing);
                 _context.Save();
             }
@@ -235,7 +235,7 @@ namespace GSC.Respository.Etmf
                     item.RollbackReason = _jwtTokenAccesser.GetHeader("audit-reason-oth");
                     item.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
                     item.DeletedBy = _jwtTokenAccesser.UserId;
-                    item.DeletedDate = DateTime.Now;
+                    item.DeletedDate = _jwtTokenAccesser.GetClientDate();
                     Update(item);
                 }
             }
