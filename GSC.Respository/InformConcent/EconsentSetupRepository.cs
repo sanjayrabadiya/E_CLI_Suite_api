@@ -73,7 +73,7 @@ namespace GSC.Respository.InformConcent
             obj.RootName = "EconsentSetup";
             obj.FileModel = econsentSetupDto.FileModel;
 
-            if (All.Where(x => x.DocumentName == econsentSetupDto.DocumentName && x.LanguageId == econsentSetupDto.LanguageId && x.ProjectId == econsentSetupDto.ProjectId).ToList().Count > 0)
+            if (All.Where(x => x.DocumentName == econsentSetupDto.DocumentName && x.LanguageId == econsentSetupDto.LanguageId && x.ProjectId == econsentSetupDto.ProjectId && x.DeletedDate == null).ToList().Count > 0)
             {
                 return "Please add different document name";
             }
@@ -183,9 +183,9 @@ namespace GSC.Respository.InformConcent
             return econsent.Id;
         }
 
-        public string Duplicate(EconsentSetupDto objSave)
+        public string Duplicate(EconsentSetup objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.Version == objSave.Version && x.LanguageId == objSave.LanguageId && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.Version == objSave.Version && x.ProjectId == objSave.ProjectId && x.LanguageId == objSave.LanguageId && x.DeletedDate == null))
             {
                 return "Duplicate Document";
             }

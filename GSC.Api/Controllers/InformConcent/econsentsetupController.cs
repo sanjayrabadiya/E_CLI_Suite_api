@@ -59,12 +59,12 @@ namespace GSC.Api.Controllers.InformConcent
             var record = _econsentSetupRepository.Find(id);
             if (record == null)
                 return NotFound();
-            EconsentSetupDto econsentSetupDto = new EconsentSetupDto();
-            econsentSetupDto.Id = record.Id;
-            econsentSetupDto.LanguageId = record.LanguageId;
-            econsentSetupDto.Version = record.Version;
+            //EconsentSetupDto econsentSetupDto = new EconsentSetupDto();
+            //econsentSetupDto.Id = record.Id;
+            //econsentSetupDto.LanguageId = record.LanguageId;
+            //econsentSetupDto.Version = record.Version;
 
-            var validate = _econsentSetupRepository.Duplicate(econsentSetupDto);
+            var validate = _econsentSetupRepository.Duplicate(record);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);

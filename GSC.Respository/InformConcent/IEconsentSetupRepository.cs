@@ -10,7 +10,7 @@ namespace GSC.Respository.InformConcent
 {
     public interface IEconsentSetupRepository : IGenericRepository<EconsentSetup>
     {
-        string Duplicate(EconsentSetupDto objSave);
+        string Duplicate(EconsentSetup objSave);
         List<DropDownDto> GetEconsentDocumentDropDown(int projectId);
         List<DropDownDto> GetPatientStatusDropDown();
         List<EconsentSetupGridDto> GetEconsentSetupList(int projectid,bool isDeleted);
