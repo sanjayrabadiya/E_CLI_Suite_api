@@ -28,16 +28,20 @@ namespace GSC.Helper
             if (value == null)
                 return false;
             else
-                return value.IsDropDownCollection();
+                return (value == CollectionSources.ComboBox ||
+                                   value == CollectionSources.RadioButton ||
+                                   value == CollectionSources.NumericScale ||
+                                   value == CollectionSources.CheckBox ||
+                                   value == CollectionSources.MultiCheckBox);
         }
 
         public static bool IsDropDownCollection(this CollectionSources value)
         {
-            return value == CollectionSources.ComboBox ||
+            return (value == CollectionSources.ComboBox ||
                                    value == CollectionSources.RadioButton ||
                                    value == CollectionSources.NumericScale ||
                                    value == CollectionSources.CheckBox ||
-                                   value == CollectionSources.MultiCheckBox;
+                                   value == CollectionSources.MultiCheckBox);
         }
 
     }

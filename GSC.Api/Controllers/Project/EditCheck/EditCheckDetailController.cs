@@ -63,7 +63,9 @@ namespace GSC.Api.Controllers.Project.EditCheck
 
             if (editCheckDetailDto.VariableIds.Length > 0)
             {
-                if (!editCheckDetailDto.IsTarget && editCheckDetailDto.VariableIds.Length > 1 && string.IsNullOrEmpty(editCheckDetailDto.LogicalOperator))
+                var checkIsFormula = _editCheckRepository.All.Where(x => x.Id == editCheckDetailDto.EditCheckId).FirstOrDefault().IsFormula;
+
+                if (!editCheckDetailDto.IsTarget && !checkIsFormula && editCheckDetailDto.VariableIds.Length > 1 && string.IsNullOrEmpty(editCheckDetailDto.LogicalOperator))
                 {
                     return BadRequest("Please select Logical Operator");
                 }
