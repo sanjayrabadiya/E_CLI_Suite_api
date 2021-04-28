@@ -151,7 +151,6 @@ namespace GSC.Domain.Context
         DbSet<BlockCategory> BlockCategory { get; set; }
         DbSet<ScreeningHistory> ScreeningHistory { get; set; }
         DbSet<UserGridSetting> UserGridSetting { get; set; }
-        DbSet<VariableTemplateRight> VariableTemplateRight { get; set; }
         DbSet<ScreeningTemplateReview> ScreeningTemplateReview { get; set; }
         DbSet<PharmacyConfig> PharmacyConfig { get; set; }
         DbSet<BarcodeType> BarcodeType { get; set; }

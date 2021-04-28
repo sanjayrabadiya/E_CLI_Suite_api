@@ -207,7 +207,6 @@ namespace GSC.Api.Helpers
             CreateMap<UserRecentItem, UserRecentItemDto>().ReverseMap();
             CreateMap<ScreeningHistory, ScreeningHistoryDto>().ReverseMap();
             CreateMap<UserGridSetting, UserGridSettingDto>().ReverseMap();
-            CreateMap<VariableTemplateRight, VariableTemplateRightDto>().ReverseMap();
             CreateMap<PharmacyConfig, PharmacyConfigDto>().ReverseMap();
             CreateMap<BarcodeType, BarcodeTypeDto>().ReverseMap();
             CreateMap<PharmacyTemplateValue, PharmacyTemplateValueDto>().ReverseMap();

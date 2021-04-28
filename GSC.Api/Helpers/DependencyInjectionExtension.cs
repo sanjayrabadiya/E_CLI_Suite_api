@@ -174,7 +174,6 @@ namespace GSC.Api.Helpers
             services.AddScoped<IScreeningTemplateValueChildRepository, ScreeningTemplateValueChildRepository>();
             services.AddScoped<IScreeningTemplateRemarksChildRepository, ScreeningTemplateRemarksChildRepository>();
             services.AddScoped<IUserGridSettingRepository, UserGridSettingRepository>();
-            services.AddScoped<IVariableTemplateRightRepository, VariableTemplateRightRepository>();
             services.AddScoped<IScreeningTemplateReviewRepository, ScreeningTemplateReviewRepository>();
             services.AddScoped<IDocumentNameRepository, DocumentNameRepository>();
             services.AddScoped<IClientTypeRepository, ClientTypeRepository>();
