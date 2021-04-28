@@ -423,6 +423,12 @@ namespace GSC.Respository.ProjectRight
 
             projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
             {
+                if (project.ParentProjectId == null)
+                {
+                    projectDocumentReview.ParentProjectCode = projectDocumentReview.ProjectNumber;
+                    projectDocumentReview.ProjectNumber = null;
+                }
+
                 var projectRight = _context.ProjectRight.Where(a =>
                     a.ProjectId == projectDocumentReview.ProjectId
                     && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
