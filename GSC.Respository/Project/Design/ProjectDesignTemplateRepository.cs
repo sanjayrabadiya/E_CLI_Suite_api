@@ -31,7 +31,7 @@ namespace GSC.Respository.Project.Design
             var template = _context.ProjectDesignTemplate.
                 Where(t => t.Id == id && t.DeletedDate == null)
                 .Include(d => d.TemplateLanguage.Where(x => x.DeletedBy == null))
-                .Include(d => d.TemplatePermission.Where(x => x.DeletedBy == null))
+                .Include(d => d.ProjectDesingTemplateRestriction.Where(x => x.DeletedBy == null))
                 .Include(d => d.ProjectDesignTemplateNote.Where(x => x.DeletedBy == null))
                 .ThenInclude(d => d.TemplateNoteLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))

@@ -302,7 +302,7 @@ namespace GSC.Api.Helpers
             CreateMap<ResourceType, ResourceTypeDto>().ReverseMap();
 
             CreateMap<ProjectDesignVariableEncryptRole, ProjectDesignVariableEncryptRoleDto>().ReverseMap();
-            CreateMap<TemplatePermission, TemplatePermissionDto>().ReverseMap();
+            CreateMap<ProjectDesingTemplateRestriction, ProjectDesingTemplateRestrictionDto>().ReverseMap();
             CreateMap<UserSetting, UserSettingDto>().ReverseMap();
 
             CreateMap<Project, StydyDetails>()

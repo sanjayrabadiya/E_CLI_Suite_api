@@ -270,7 +270,7 @@ namespace GSC.Domain.Context
         DbSet<StudyPlan> StudyPlan { get; set; }
         DbSet<StudyPlanTask> StudyPlanTask { get; set; }
         DbSet<ProjectDesignVariableEncryptRole> ProjectDesignVariableEncryptRole { get; set; }
-        DbSet<TemplatePermission> TemplatePermission { get; set; }
+        DbSet<ProjectDesingTemplateRestriction> ProjectDesingTemplateRestriction { get; set; }
         DbSet<UserSetting> UserSetting { get; set; }
         DbSet<RandomizationNumberSettings> RandomizationNumberSettings { get; set; }
         DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }

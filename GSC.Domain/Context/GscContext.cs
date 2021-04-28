@@ -318,7 +318,7 @@ namespace GSC.Domain.Context
         public DbSet<StudyPlanTask> StudyPlanTask { get; set; }
 
         public DbSet<ProjectDesignVariableEncryptRole> ProjectDesignVariableEncryptRole { get; set; }
-        public DbSet<TemplatePermission> TemplatePermission { get; set; }
+        public DbSet<ProjectDesingTemplateRestriction> ProjectDesingTemplateRestriction { get; set; }
         public DbSet<UserSetting> UserSetting { get; set; }
         public DbSet<RandomizationNumberSettings> RandomizationNumberSettings { get; set; }
         public DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }

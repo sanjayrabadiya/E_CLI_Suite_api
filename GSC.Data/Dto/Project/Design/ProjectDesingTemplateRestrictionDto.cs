@@ -7,7 +7,7 @@ using System.Text;
 
 namespace GSC.Data.Dto.Project.Design
 {
-    public class TemplatePermissionDto : BaseDto
+    public class ProjectDesingTemplateRestrictionDto : BaseDto
     {
         public int SecurityRoleId { get; set; }
         public int ProjectDesignTemplateId { get; set; }

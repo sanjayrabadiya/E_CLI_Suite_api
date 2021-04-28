@@ -41,7 +41,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
-        private readonly ITemplatePermissionRepository _templatePermissioRepository;
+        private readonly IProjectDesingTemplateRestrictionRepository _templatePermissioRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
@@ -58,7 +58,7 @@ namespace GSC.Api.Controllers.Project.Design
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
             IVariabeValueLanguageRepository variableValueLanguageRepository,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
-            ITemplatePermissionRepository templatePermissioRepository,
+            IProjectDesingTemplateRestrictionRepository templatePermissioRepository,
         IUnitOfWork uow, IMapper mapper,
          IJwtTokenAccesser jwtTokenAccesser)
         {
@@ -281,7 +281,7 @@ namespace GSC.Api.Controllers.Project.Design
 
                 }
 
-                foreach (var permission in projectDesignTemplate.TemplatePermission)
+                foreach (var permission in projectDesignTemplate.ProjectDesingTemplateRestriction)
                 {
                     permission.Id = 0;
                     _templatePermissioRepository.Add(permission);

@@ -11,22 +11,22 @@ using System.Text;
 
 namespace GSC.Respository.Project.Design
 {
-    public class TemplatePermissionRepository : GenericRespository<TemplatePermission>, ITemplatePermissionRepository
+    public class ProjectDesingTemplateRestrictionRepository : GenericRespository<Data.Entities.Project.Design.ProjectDesingTemplateRestriction>, IProjectDesingTemplateRestrictionRepository
     {
         private readonly IGSCContext _context;
         private readonly IRoleRepository _roleRepository;
 
-        public TemplatePermissionRepository(IGSCContext context, IRoleRepository roleRepository, IJwtTokenAccesser jwtTokenAccesser) : base(context)
+        public ProjectDesingTemplateRestrictionRepository(IGSCContext context, IRoleRepository roleRepository, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
             _context = context;
             _roleRepository = roleRepository;
         }
 
-        public List<TemplatePermissionDto> GetTemplatePermissionDetails(int ProjectDesignTemplateId)
+        public List<Data.Dto.Project.Design.ProjectDesingTemplateRestrictionDto> GetProjectDesingTemplateRestrictionDetails(int ProjectDesignTemplateId)
         {
            // Get security role
             var SecurityRole = _context.SecurityRole.Where(t => t.DeletedDate == null && t.Id != 2)
-                .Select(t => new TemplatePermissionDto
+                .Select(t => new ProjectDesingTemplateRestrictionDto
                 {
                     SecurityRoleId = t.Id,
                     RoleName = t.RoleName,
@@ -46,17 +46,17 @@ namespace GSC.Respository.Project.Design
             return SecurityRole.ToList();
         }
 
-        public void Save(List<TemplatePermission> templatePermission)
+        public void Save(List<Data.Entities.Project.Design.ProjectDesingTemplateRestriction> projectDesingTemplateRestriction)
         {
             // Get only that data which is has add or edit permission
-            templatePermission = templatePermission.Where(t => t.IsAdd || t.IsEdit).ToList();
-            _context.TemplatePermission.AddRange(templatePermission);
+            projectDesingTemplateRestriction = projectDesingTemplateRestriction.Where(t => t.IsAdd || t.IsEdit).ToList();
+            _context.ProjectDesingTemplateRestriction.AddRange(projectDesingTemplateRestriction);
             _context.Save();
         }
 
-        public void updatePermission(List<TemplatePermission> TemplatePermission)
+        public void updatePermission(List<Data.Entities.Project.Design.ProjectDesingTemplateRestriction> projectDesingTemplateRestriction)
         {
-            foreach (var item in TemplatePermission)
+            foreach (var item in projectDesingTemplateRestriction)
             {
                 // Get data from table if already exists 
                 var permission = All.Where(x => x.DeletedDate == null && x.SecurityRoleId == item.SecurityRoleId && x.ProjectDesignTemplateId == item.ProjectDesignTemplateId).FirstOrDefault();

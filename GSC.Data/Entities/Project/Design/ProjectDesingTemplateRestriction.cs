@@ -7,7 +7,7 @@ using System.Text;
 
 namespace GSC.Data.Entities.Project.Design
 {
-    public class TemplatePermission : BaseEntity, ICommonAduit
+    public class ProjectDesingTemplateRestriction : BaseEntity, ICommonAduit
     {
         public int SecurityRoleId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
