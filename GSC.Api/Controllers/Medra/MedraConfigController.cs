@@ -357,7 +357,7 @@ namespace GSC.Api.Controllers.Medra
                 if (record != null)
                 {
                     record.ModifiedBy = _jwtTokenAccesser.UserId;
-                    record.ModifiedDate = _jwtTokenAccesser.GetClientDate();// DateTime.Now.ToUniversalTime();
+                    record.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                     record.IsActive = false;
                     record.CreatedRole = _jwtTokenAccesser.RoleId;
                     var medra = _mapper.Map<MedraConfig>(record);
@@ -374,7 +374,7 @@ namespace GSC.Api.Controllers.Medra
             if (active != null)
             {
                 active.ModifiedBy = _jwtTokenAccesser.UserId;
-                active.ModifiedDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
+                active.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                 active.IsActive = true;
                 var medra = _mapper.Map<MedraConfig>(active);
                 _medraConfigRepository.Update(medra);

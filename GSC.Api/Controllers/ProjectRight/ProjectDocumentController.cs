@@ -116,7 +116,6 @@ namespace GSC.Api.Controllers.ProjectRight
                 return BadRequest(ModelState);
             }
             projectDocument.ModifiedBy = _jwtTokenAccesser.UserId;
-            //projectDocument.ModifiedDate = DateTime.Now.ToUniversalTime();
             projectDocument.ModifiedDate = _jwtTokenAccesser.GetClientDate();
             _projectDocumentRepository.Add(projectDocument);
 

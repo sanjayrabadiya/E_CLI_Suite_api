@@ -162,7 +162,7 @@ namespace GSC.Api.Controllers.Master
                 foreach (var varItem in details)
                 {
                     varItem.DeletedBy = _jwtTokenAccesser.UserId;
-                    varItem.DeletedDate = DateTime.Now;
+                    varItem.DeletedDate = _jwtTokenAccesser.GetClientDate();
                     _variableTemplateDetailRepository.Update(varItem);
                 }
 

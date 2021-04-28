@@ -155,7 +155,7 @@ namespace GSC.Api.Controllers.InformConcent
             // when user1 calls to user2 then user2 call accept then this method is called
             var eConsentVideo = _EConsentVideoRepository.Find(id);
             eConsentVideo.CallStatus = VideoCallStatus.CallAccepted;
-            eConsentVideo.CallStartTime = DateTime.Now;
+            eConsentVideo.CallStartTime = _jwtTokenAccesser.GetClientDate();
             _EConsentVideoRepository.Update(eConsentVideo);
             _uow.Save();
             return Ok();
@@ -168,7 +168,7 @@ namespace GSC.Api.Controllers.InformConcent
             //calls this method when any of the user end the call
             var eConsentVideo = _EConsentVideoRepository.Find(id);
             eConsentVideo.EndCallBy = (eConsentVideo.SenderUserId == _jwtTokenAccesser.UserId) ? VideoCallStatusCallEndBy.Sender : VideoCallStatusCallEndBy.Receiver;
-            eConsentVideo.CallEndTime = DateTime.Now;
+            eConsentVideo.CallEndTime = _jwtTokenAccesser.GetClientDate();
             _EConsentVideoRepository.Update(eConsentVideo);
             _uow.Save();
             if (eConsentVideo.EndCallBy == VideoCallStatusCallEndBy.Sender)

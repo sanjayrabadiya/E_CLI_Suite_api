@@ -77,7 +77,7 @@ namespace GSC.Api.Controllers.ProjectRight
                     projectid = result.ProjectId;
                     result.IsReview = true;
                     result.ReviewNote = projectDocumentReviewDto.ReviewNote;
-                    result.ReviewDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
+                    result.ReviewDate = _jwtTokenAccesser.GetClientDate();
                     result.TrainingType = projectDocumentReviewDto.TrainingType;
                     result.TrainerId = projectDocumentReviewDto.TrainerId;
                     result.TrainingDuration = projectDocumentReviewDto.TrainingDuration;
@@ -90,7 +90,7 @@ namespace GSC.Api.Controllers.ProjectRight
                     //Projectid = review.ProjectId;
                     review.IsReview = true;
                     review.ReviewNote = projectDocumentReviewDto.ReviewNote;
-                    review.ReviewDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
+                    review.ReviewDate = _jwtTokenAccesser.GetClientDate();
                     review.TrainingType = projectDocumentReviewDto.TrainingType;
                     review.TrainerId = projectDocumentReviewDto.TrainerId;
                     review.TrainingDuration = projectDocumentReviewDto.TrainingDuration;

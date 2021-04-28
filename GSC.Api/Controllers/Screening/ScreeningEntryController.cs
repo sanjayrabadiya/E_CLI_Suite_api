@@ -11,6 +11,7 @@ using GSC.Respository.Common;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.Volunteer;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Screening
@@ -25,6 +26,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IUnitOfWork _uow;
         private readonly IScreeningProgress _screeningProgress;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public ScreeningEntryController(IScreeningEntryRepository screeningEntryRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -32,7 +34,8 @@ namespace GSC.Api.Controllers.Screening
             IAttendanceRepository attendanceRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IScreeningProgress screeningProgress,
-            IScreeningVisitRepository screeningVisitRepository)
+            IScreeningVisitRepository screeningVisitRepository,
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _screeningEntryRepository = screeningEntryRepository;
             _uow = uow;
@@ -41,6 +44,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningProgress = screeningProgress;
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _screeningVisitRepository = screeningVisitRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{id}")]
@@ -102,7 +106,7 @@ namespace GSC.Api.Controllers.Screening
                 _projectDesignPeriodRepository.Find(attendance.ProjectDesignPeriodId).ProjectDesignId;
             screeningEntry.ProjectDesignPeriodId = attendance.ProjectDesignPeriodId;
             screeningEntry.ProjectId = attendance.ProjectId;
-            screeningEntry.ScreeningDate = DateTime.Now;
+            screeningEntry.ScreeningDate = _jwtTokenAccesser.GetClientDate();
 
             _screeningEntryRepository.SaveScreeningAttendance(screeningEntry, null);
 

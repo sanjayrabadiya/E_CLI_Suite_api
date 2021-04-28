@@ -10,6 +10,7 @@ using GSC.Data.Entities.Project.Workflow;
 using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Workflow
@@ -23,12 +24,14 @@ namespace GSC.Api.Controllers.Project.Workflow
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IUnitOfWork _uow;
         private readonly IProjectDesignRepository _projectDesignRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public ProjectWorkflowController(IProjectWorkflowRepository projectWorkflowRepository,
             IProjectWorkflowIndependentRepository projectWorkflowIndependentRepository,
             IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
             IUnitOfWork uow, IMapper mapper,
-            IProjectDesignRepository projectDesignRepository)
+            IProjectDesignRepository projectDesignRepository,
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _projectWorkflowRepository = projectWorkflowRepository;
             _projectWorkflowIndependentRepository = projectWorkflowIndependentRepository;
@@ -36,6 +39,7 @@ namespace GSC.Api.Controllers.Project.Workflow
             _uow = uow;
             _mapper = mapper;
             _projectDesignRepository = projectDesignRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{id}")]
@@ -145,7 +149,7 @@ namespace GSC.Api.Controllers.Project.Workflow
             }
             foreach (var item in deleteIndependents)
             {
-                item.DeletedDate = DateTime.Now;
+                item.DeletedDate = _jwtTokenAccesser.GetClientDate();
                 _projectWorkflowIndependentRepository.Update(item);
             }
             foreach (var item in addIndependents)
@@ -166,7 +170,7 @@ namespace GSC.Api.Controllers.Project.Workflow
             }
             foreach (var level in deleteLevels)
             {
-                level.DeletedDate = DateTime.Now;
+                level.DeletedDate = _jwtTokenAccesser.GetClientDate();
                 _projectWorkflowLevelRepository.Update(level);
             }
             foreach (var level in addLevels)

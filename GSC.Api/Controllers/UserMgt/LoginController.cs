@@ -350,7 +350,7 @@ namespace GSC.Api.Controllers.UserMgt
                     var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == result.UserId && t.LogoutTime == null).ToList();
                     userLoginReports.ForEach(t =>
                     {
-                        t.LogoutTime = DateTime.Now;
+                        t.LogoutTime = _jwtTokenAccesser.GetClientDate();
                         _userLoginReportRepository.Update(t);
                     });
 

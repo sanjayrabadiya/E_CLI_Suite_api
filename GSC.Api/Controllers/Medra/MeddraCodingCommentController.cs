@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.Medra
             var newHierarchy = _meddraMdHierarchyRepository.GetHierarchyData((int)meddraCodingCommentDto.MeddraSocTermId, (int)meddraCodingCommentDto.MeddraLowLevelTermId);
             if (recodeData != null)
             {
-                recodeData.ModifiedDate = DateTime.Now;
+                recodeData.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                 recodeData.ModifiedBy = _jwtTokenAccesser.UserId;
                 recodeData.CreatedRole = _jwtTokenAccesser.RoleId;
                 recodeData.MeddraLowLevelTermId = meddraCodingCommentDto.MeddraLowLevelTermId;

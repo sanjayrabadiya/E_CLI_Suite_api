@@ -75,7 +75,7 @@ namespace GSC.Api.Controllers.InformConcent
         {
             // delivered flag update when message delivered
             econsentChat.IsDelivered = true;
-            econsentChat.DeliveredDateTime = DateTime.Now;
+            econsentChat.DeliveredDateTime = _jwtTokenAccesser.GetClientDate();
             _econsentChatRepository.Update(econsentChat);
             _uow.Save();
             return Ok(econsentChat);
@@ -90,7 +90,7 @@ namespace GSC.Api.Controllers.InformConcent
             for (int i = 0; i < messages.Count; i++)
             {
                 messages[i].IsDelivered = true;
-                messages[i].DeliveredDateTime = DateTime.Now;
+                messages[i].DeliveredDateTime = _jwtTokenAccesser.GetClientDate();
                 _econsentChatRepository.Update(messages[i]);
             }
             _uow.Save();

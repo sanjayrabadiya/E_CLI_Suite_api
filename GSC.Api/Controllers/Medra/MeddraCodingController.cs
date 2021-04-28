@@ -121,7 +121,7 @@ namespace GSC.Api.Controllers.Medra
 
             if (recodeData != null)
             {
-                recodeData.ModifiedDate = DateTime.Now;
+                recodeData.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                 recodeData.ModifiedBy = _jwtTokenAccesser.UserId;
                 recodeData.CreatedRole = _jwtTokenAccesser.RoleId;
                 recodeData.MeddraLowLevelTermId = data.MeddraLowLevelTermId;
@@ -139,7 +139,7 @@ namespace GSC.Api.Controllers.Medra
             }
             else
             {
-                data.ModifiedDate = DateTime.Now;
+                data.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                 data.ModifiedBy = _jwtTokenAccesser.UserId;
                 data.CreatedRole = _jwtTokenAccesser.RoleId;
                 data.CodedType = CodedType.AutoCoded;
@@ -166,7 +166,7 @@ namespace GSC.Api.Controllers.Medra
                 var recodeData = _meddraCodingRepository.CheckForRecode((int)item);
                 if (recodeData != null)
                 {
-                    recodeData.ModifiedDate = DateTime.Now;
+                    recodeData.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                     recodeData.ModifiedBy = _jwtTokenAccesser.UserId;
                     recodeData.CreatedRole = _jwtTokenAccesser.RoleId;
                     recodeData.MeddraLowLevelTermId = data.MeddraLowLevelTermId;
@@ -185,7 +185,7 @@ namespace GSC.Api.Controllers.Medra
                     data.CodedType = CodedType.ManualCoded;
                     data.CodingType = CodedType.ManualCoded;
                     data.IsApproved = false;
-                    data.ModifiedDate = DateTime.Now;
+                    data.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                     data.ModifiedBy = _jwtTokenAccesser.UserId;
                     data.CreatedRole = _jwtTokenAccesser.RoleId;
                     var autoCode = _mapper.Map<MeddraCoding>(data);
@@ -208,7 +208,7 @@ namespace GSC.Api.Controllers.Medra
                 data.Id = 0;
                 data.ScreeningTemplateValueId = (int)item;
                 var recodeData = _meddraCodingRepository.GetRecordForComment((int)item);
-                recodeData.ApproveDate = DateTime.Now;
+                recodeData.ApproveDate = _jwtTokenAccesser.GetClientDate();
                 recodeData.ApprovedBy = _jwtTokenAccesser.UserId;
                 recodeData.IsApproved = true;
                 var medra = _mapper.Map<MeddraCoding>(recodeData);
