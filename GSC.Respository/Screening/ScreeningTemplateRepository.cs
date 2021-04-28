@@ -14,6 +14,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
+using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
@@ -33,13 +34,15 @@ namespace GSC.Respository.Screening
         private readonly IMapper _mapper;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
         private readonly IGSCContext _context;
+        private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         public ScreeningTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository, IMapper mapper,
             IProjectWorkflowRepository projectWorkflowRepository,
             IEditCheckImpactRepository editCheckImpactRepository,
             IScheduleRuleRespository scheduleRuleRespository,
-            IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository)
+            IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
+            IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository)
             : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -51,6 +54,7 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
             _editCheckImpactRepository = editCheckImpactRepository;
             _context = context;
+            _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
         }
 
         private ScreeningTemplateBasic GetScreeningTemplateBasic(int screeningTemplateId)
@@ -100,6 +104,14 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.ParentId != null)
                 designTemplateDto.IsRepeated = false;
 
+            var isRestriction = false;
+            if (_projectDesingTemplateRestrictionRepository.All.Any(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId && x.SecurityRoleId == _jwtTokenAccesser.RoleId))
+            {
+                designTemplateDto.IsSubmittedButton = false;
+                designTemplateDto.IsRepeated = false;
+                isRestriction = true;
+            }
+
             designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
             designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
             designTemplateDto.IsLocked = screeningTemplateBasic.IsLocked;
@@ -128,7 +140,9 @@ namespace GSC.Respository.Screening
                     variable.HasQueries = t.QueryStatus != null ? true : false;
                     variable.IsNaValue = t.IsNa;
                     variable.IsSystem = t.QueryStatus == QueryStatus.Closed ? false : t.IsSystem;
-                    variable.WorkFlowButton = SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
+                    
+                    if (!isRestriction)
+                        variable.WorkFlowButton = SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
 
                     variable.DocPath = t.DocPath != null ? t.DocPath : null;
                     variable.DocFullPath = t.DocPath != null ? documentUrl + t.DocPath : null;
@@ -164,6 +178,8 @@ namespace GSC.Respository.Screening
                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold))
                 designTemplateDto.IsSubmittedButton = false;
+
+
 
             return designTemplateDto;
         }
