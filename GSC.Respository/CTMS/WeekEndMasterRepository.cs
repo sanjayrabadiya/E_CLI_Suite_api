@@ -47,5 +47,29 @@ namespace GSC.Respository.CTMS
             }
             return weekendlis;
         }
+
+        public List<string> GetweekEndDay(int ProjectId)
+        {
+            var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).SingleOrDefault();
+            var weekendlis = new List<string>();
+            if (weekend != null)
+            {
+                if (weekend.Sunday == false)
+                    weekendlis.Add("Sunday");
+                if (weekend.Monday == false)
+                    weekendlis.Add("Monday");
+                if (weekend.Tuesday == false)
+                    weekendlis.Add("Tuesday");
+                if (weekend.Wednesday == false)
+                    weekendlis.Add("Wednesday");
+                if (weekend.Thursday == false)
+                    weekendlis.Add("Thursday");
+                if (weekend.Friday == false)
+                    weekendlis.Add("Friday");
+                if (weekend.Saturday == false)
+                    weekendlis.Add("Saturday");
+            }
+            return weekendlis;
+        }
     }
 }

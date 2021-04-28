@@ -9,5 +9,6 @@ namespace GSC.Respository.CTMS
     public interface IWeekEndMasterRepository : IGenericRepository<WeekEndMaster>
     {
         List<string> GetworkingDayList(int ProjectId);
+        List<string> GetweekEndDay(int ProjectId);
     }
 }

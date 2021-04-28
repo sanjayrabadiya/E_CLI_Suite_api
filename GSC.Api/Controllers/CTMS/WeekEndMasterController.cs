@@ -57,6 +57,16 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(workingDay);
         }
 
+        [HttpGet]
+        [Route("GetWeekEndDay/{studyPlanId}")]
+        public IActionResult GetWeekEndDay(int studyPlanId)
+        {
+            if (studyPlanId <= 0) return BadRequest();
+            int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
+            var weekendDay = _weekEndMasterRepository.GetweekEndDay(ProjectId);
+            return Ok(weekendDay);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] WeekEndparameterDto parameterDto)
         {
