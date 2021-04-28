@@ -70,8 +70,8 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetCountryByProjectIdDropDown(int ParentProjectId)
         {
 
-            var country = _context.Project.Include(x => x.ManageSite).Include(x => x.City).Include(x => x.State).Include(x => x.Country)
-                .Where(x => x.DeletedDate == null && x.ParentProjectId == ParentProjectId).Select(r => new DropDownDto
+            var country = _context.Project
+                .Where(x => x.DeletedDate == null && x.ParentProjectId == ParentProjectId && x.ManageSite != null).Select(r => new DropDownDto
                 {
                     Id = (int)r.ManageSite.City.State.CountryId,
                     Value = r.ManageSite.City.State.Country.CountryName,

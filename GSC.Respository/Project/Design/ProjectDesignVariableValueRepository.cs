@@ -94,7 +94,6 @@ namespace GSC.Respository.Project.Design
                 IsEncrypt = r.IsEncrypt,
                 EncryptRole = string.Join(", ", r.Roles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList()),
                 CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList()),
-                //    ProjectDesignLanguages = GetVisitLanguageData(r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id)
             }).ToList().OrderBy(x => x.VisitOrderId).ToList();
 
             var VisitLanguageData = GetVisitLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
