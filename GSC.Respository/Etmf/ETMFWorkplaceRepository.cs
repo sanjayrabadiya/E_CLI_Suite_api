@@ -175,6 +175,7 @@ namespace GSC.Respository.Etmf
                                 foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                                 {
                                     f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                    var Document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.ProjectWorkplaceArtificateId == f.Id).Count();
                                     TreeValue pvListArtificateObj = new TreeValue();
                                     pvListArtificateObj.Id = f.Id;
                                     pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
@@ -196,6 +197,7 @@ namespace GSC.Respository.Etmf
                                     pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
                                     pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
                                     pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+                                    pvListArtificateObj.DocumentCount = Document;
                                     pvListArtificateList.Add(pvListArtificateObj);
                                 }
 
@@ -229,6 +231,8 @@ namespace GSC.Respository.Etmf
                                     var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                     foreach (var itemartifact in artifactsubSectionData)
                                     {
+                                        var Document = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x => x.ProjectWorkplaceSubSectionArtifactId == itemartifact.Id).Count();
+
                                         TreeValue pvListartifactsubsectionobj = new TreeValue();
                                         pvListartifactsubsectionobj.Id = itemartifact.Id;
                                         pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
@@ -249,6 +253,7 @@ namespace GSC.Respository.Etmf
                                         pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
                                         pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
                                         pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
+                                        pvListartifactsubsectionobj.DocumentCount = Document;
                                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                     }
                                     pvListArtificateList.Add(pvListArtificateObj);
@@ -340,6 +345,7 @@ namespace GSC.Respository.Etmf
                                 foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                                 {
                                     f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                    var Document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.ProjectWorkplaceArtificateId == f.Id).Count();
                                     TreeValue pvListArtificateObj = new TreeValue();
                                     pvListArtificateObj.Id = f.Id;
                                     pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
@@ -362,6 +368,7 @@ namespace GSC.Respository.Etmf
                                     pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
                                     pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
                                     pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+                                    pvListArtificateObj.DocumentCount = Document;
                                     pvListArtificateList.Add(pvListArtificateObj);
                                 }
 
@@ -396,6 +403,7 @@ namespace GSC.Respository.Etmf
                                     var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                     foreach (var itemartifact in artifactsubSectionData)
                                     {
+                                        var Document = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x => x.ProjectWorkplaceSubSectionArtifactId == itemartifact.Id).Count();
                                         TreeValue pvListartifactsubsectionobj = new TreeValue();
                                         pvListartifactsubsectionobj.Id = itemartifact.Id;
                                         pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
@@ -418,6 +426,7 @@ namespace GSC.Respository.Etmf
                                         pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
                                         pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
                                         pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
+                                        pvListartifactsubsectionobj.DocumentCount = Document;
                                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
 
                                     }
@@ -504,6 +513,7 @@ namespace GSC.Respository.Etmf
                                 foreach (var f in e.ProjectWorkplaceArtificate.Where(x => x.DeletedBy == null))
                                 {
                                     f.EtmfArtificateMasterLbrary = _context.EtmfArtificateMasterLbrary.Find(f.EtmfArtificateMasterLbraryId);
+                                    var Document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.ProjectWorkplaceArtificateId == f.Id).Count();
                                     TreeValue pvListArtificateObj = new TreeValue();
                                     pvListArtificateObj.Id = f.Id;
                                     pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
@@ -525,6 +535,7 @@ namespace GSC.Respository.Etmf
                                     pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
                                     pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
                                     pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+                                    pvListArtificateObj.DocumentCount = Document;
                                     pvListArtificateList.Add(pvListArtificateObj);
                                 }
 
@@ -558,6 +569,8 @@ namespace GSC.Respository.Etmf
                                     var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
                                     foreach (var itemartifact in artifactsubSectionData)
                                     {
+                                        var Document = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x => x.ProjectWorkplaceSubSectionArtifactId == itemartifact.Id).Count();
+
                                         TreeValue pvListartifactsubsectionobj = new TreeValue();
                                         pvListartifactsubsectionobj.Id = itemartifact.Id;
                                         pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
@@ -578,6 +591,7 @@ namespace GSC.Respository.Etmf
                                         pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
                                         pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
                                         pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
+                                        pvListartifactsubsectionobj.DocumentCount = Document;
                                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                                     }
                                     #endregion
@@ -1687,5 +1701,6 @@ namespace GSC.Respository.Etmf
         public bool IsDelete { get; set; }
         public bool IsExport { get; set; }
         public bool IsNotRequired { get; set; }
+        public int DocumentCount { get; set; }
     }
 }
