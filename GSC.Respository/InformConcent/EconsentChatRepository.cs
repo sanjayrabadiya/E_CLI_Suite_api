@@ -64,7 +64,8 @@ namespace GSC.Respository.InformConcent
                 usersidlist = _context.SiteTeam.Where(x => x.ProjectId == siteid).ToList().Select(t => t.UserId).ToList();
                 users = _userRepository.FindBy(x => usersidlist.Contains(x.Id) && x.DeletedDate == null && x.IsLocked == false && x.UserType != Shared.Generic.UserMasterUserType.Patient &&
                         (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)).ToList();
-            } else
+            }
+            else
             {
                 var siteids = new List<int>();
                 siteids = _context.SiteTeam.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).Select(t => t.ProjectId).ToList();
@@ -81,6 +82,7 @@ namespace GSC.Respository.InformConcent
                 IList<int> intList = new List<int>() { userschat[i].Id, _jwtTokenAccesser.UserId };
                 var chatobj = chatdata.Where(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();//FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();
                 userschat[i].LastMessage = chatobj == null ? "" : chatobj.Message;
+                userschat[i].SendDateTime = chatobj?.SendDateTime;
                 userschat[i].UnReadMsgCount = chatdata.Where(x => x.SenderId == userschat[i].Id && x.IsRead == false).ToList().Count;
                 if (chatobj != null)
                 {
@@ -96,12 +98,12 @@ namespace GSC.Respository.InformConcent
                 else
                     userschat[i].LastMessageStatus = "";
             }
-            return userschat;
+            return userschat.OrderByDescending(x => x.SendDateTime).ToList();
         }
 
         public List<EconsentChat> GetEconsentChat(int userId)
         {
-            IList<int> intList = new List<int>() { userId,_jwtTokenAccesser.UserId };
+            IList<int> intList = new List<int>() { userId, _jwtTokenAccesser.UserId };
             var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).ToList();
             return data;
         }
