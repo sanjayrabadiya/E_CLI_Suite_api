@@ -179,7 +179,14 @@ namespace GSC.Respository.Screening
                screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold))
                 designTemplateDto.IsSubmittedButton = false;
 
-
+            designTemplateDto.Variables.Where(x => x.IsEncrypt == true).ToList().ForEach(c =>
+            {
+                c.ScreeningValueOld = null;
+                c.ScreeningValue = null;
+                c.HasQueries = false;
+                c.WorkFlowButton = null;
+                c.EditCheckValidation = null;
+            });
 
             return designTemplateDto;
         }
@@ -214,7 +221,7 @@ namespace GSC.Respository.Screening
             });
 
             var variableTargetResult = _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, false, false);
-            projectDesignTemplateDto.Variables.Where(x => x.IsEncrypt != true).ToList().ForEach(r =>
+            projectDesignTemplateDto.Variables.ToList().ForEach(r =>
             {
                 var singleResult = variableTargetResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
                 if (singleResult != null)
