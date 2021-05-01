@@ -138,7 +138,9 @@ namespace GSC.Respository.Project.Design
                         x.Values = values.Where(c => c.ProjectDesignVariableId == x.ProjectDesignVariableId).OrderBy(c => c.SeqNo).ToList();
 
                     if (x.IsEncrypt == true)
-                        x.ScreeningValue = "Restricted value...";
+                        x.IsNa = false;
+                  
+                        
                 });
 
                 result.Variables = variables;
