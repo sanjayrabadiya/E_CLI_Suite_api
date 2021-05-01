@@ -140,7 +140,7 @@ namespace GSC.Respository.Screening
                     variable.HasQueries = t.QueryStatus != null ? true : false;
                     variable.IsNaValue = t.IsNa;
                     variable.IsSystem = t.QueryStatus == QueryStatus.Closed ? false : t.IsSystem;
-                    
+
                     if (!isRestriction)
                         variable.WorkFlowButton = SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
 
@@ -214,7 +214,7 @@ namespace GSC.Respository.Screening
             });
 
             var variableTargetResult = _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, false, false);
-            projectDesignTemplateDto.Variables.ToList().ForEach(r =>
+            projectDesignTemplateDto.Variables.Where(x => x.IsEncrypt != true).ToList().ForEach(r =>
             {
                 var singleResult = variableTargetResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
                 if (singleResult != null)

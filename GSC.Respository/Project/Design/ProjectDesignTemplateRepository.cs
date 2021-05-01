@@ -18,12 +18,18 @@ namespace GSC.Respository.Project.Design
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
+        private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         public ProjectDesignTemplateRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
+            IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
+            IProjectDesignVariableValueRepository projectDesignVariableValueRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
+            _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
+            _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
         }
 
         public ProjectDesignTemplate GetTemplateClone(int id)
@@ -93,19 +99,10 @@ namespace GSC.Respository.Project.Design
                         HighRangeValue = x.HighRangeValue,
                         RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
                         PrintType = x.PrintType,
-                        Values = x.Values.Where(x => x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
-                        {
-                            Id = c.Id,
-                            ProjectDesignVariableId = c.ProjectDesignVariableId,
-                            ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
-                            SeqNo = c.SeqNo,
-                            Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
-                        }).ToList(),
                         Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
                         UnitName = x.Unit.UnitName,
                         DesignOrder = x.DesignOrder,
                         IsDocument = x.IsDocument,
-                        // IsEncrypt = x.IsEncrypt,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
                         SystemType = x.SystemType,
@@ -117,10 +114,31 @@ namespace GSC.Respository.Project.Design
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
                     }).OrderBy(r => r.DesignOrder).ToList();
 
+                var values = _projectDesignVariableValueRepository.All.
+                     Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
+                     {
+                         Id = c.Id,
+                         ProjectDesignVariableId = c.ProjectDesignVariableId,
+                         ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
+                         SeqNo = c.SeqNo,
+                         Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
+                     }).ToList();
+
+
+                var variableEncryptRole = _projectDesignVariableEncryptRoleRepository.All.
+                     Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id &&
+                     x.RoleId == _jwtTokenAccesser.RoleId &&
+                     x.DeletedDate == null).
+                     Select(t => t.ProjectDesignVariableId).ToList();
 
                 variables.ForEach(x =>
                 {
-                    x.Values = x.Values.OrderBy(c => c.SeqNo).ToList();
+                    x.IsEncrypt = variableEncryptRole.Any(t => t == x.ProjectDesignVariableId);
+                    if (x.IsEncrypt != true)
+                        x.Values = values.Where(c => c.ProjectDesignVariableId == x.ProjectDesignVariableId).OrderBy(c => c.SeqNo).ToList();
+
+                    if (x.IsEncrypt == true)
+                        x.ScreeningValue = "Restricted value...";
                 });
 
                 result.Variables = variables;
