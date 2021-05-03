@@ -68,7 +68,7 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public IActionResult GetTreeview()
         {
-            var projectworkplace = _eTMFWorkplaceRepository.GetTreeview(1);
+            var projectworkplace = _eTMFWorkplaceRepository.GetTreeview(1, null);
             return Ok(projectworkplace);
         }
 

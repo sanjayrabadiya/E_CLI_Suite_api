@@ -88,11 +88,11 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(projectworkplace);
         }
 
-        [Route("GetTreeview/{projectId}")]
+        [Route("GetTreeview/{projectId}/{chartType:int?}")]
         [HttpGet]
-        public IActionResult GetTreeview(int projectId)
+        public IActionResult GetTreeview(int projectId, EtmfChartType? chartType)
         {
-            var projectworkplace = _eTMFWorkplaceRepository.GetTreeview(projectId);
+            var projectworkplace = _eTMFWorkplaceRepository.GetTreeview(projectId, chartType);
             return Ok(projectworkplace);
         }
 
