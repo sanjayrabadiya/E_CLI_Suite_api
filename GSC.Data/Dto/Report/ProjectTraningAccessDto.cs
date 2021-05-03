@@ -19,7 +19,8 @@ namespace GSC.Data.Dto.Report
         public int? ParentProjectId { get; set; }
         public int UserId { get; set; }
         public int RoleId { get; set; }
-        public string SiteName { get; set; }
+        public string ProjectCode { get; set; }
+        public string SiteCode { get; set; }
         public string UserName { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string RoleName { get; set; }
@@ -43,7 +44,8 @@ namespace GSC.Data.Dto.Report
         public int ProjectId { get; set; }
         public int UserId { get; set; }
         public int RoleId { get; set; }
-        public string SiteName { get; set; }
+        public string ProjectCode { get; set; }
+        public string SiteCode { get; set; }
         public string UserName { get; set; }
         public string RoleName { get; set; }
         public int? AssignedById { get; set; }

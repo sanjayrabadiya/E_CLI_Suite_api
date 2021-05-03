@@ -96,14 +96,6 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(projectworkplace);
         }
 
-        [Route("GetTreeviewFromChart/{projectId}/{chartType}")]
-        [HttpGet]
-        public IActionResult GetTreeviewFromChart(int projectId, EtmfChartType chartType)
-        {
-            var projectworkplace = _eTMFWorkplaceRepository.GetTreeviewFromChart(projectId, chartType);
-            return Ok(projectworkplace);
-        }
-
         [HttpPost]
         public IActionResult Post([FromBody] ETMFWorkplaceDto eTMFWorkplaceDto)
         {

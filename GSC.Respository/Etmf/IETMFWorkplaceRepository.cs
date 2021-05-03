@@ -18,6 +18,5 @@ namespace GSC.Respository.Etmf
         ProjectWorkplace SaveFolderStructure(Data.Entities.Master.Project Project, List<ProjectDropDown> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList,string imageUrl);
         ProjectWorkplace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath);
         byte[] CreateZipFileOfWorkplace(int Id);
-        List<TreeValue> GetTreeviewFromChart(int id, EtmfChartType chartType);
     }
 }

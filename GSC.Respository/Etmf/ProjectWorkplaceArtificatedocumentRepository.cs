@@ -468,8 +468,10 @@ namespace GSC.Respository.Etmf
                                     version = doc.version,
                                     status = doc.status,
                                     action = "Send Back",
-                                    userName = _userRepository.Find((int)review.UserId).UserName,
-                                    actionDate = review.SendBackDate
+                                    userName = _userRepository.Find(review.UserId).UserName,
+                                    actionDate = review.SendBackDate,
+                                    auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
+                                    auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
                                 }).ToList();
 
             var sendforApproveData = (from doc in Documents
@@ -537,10 +539,10 @@ namespace GSC.Respository.Etmf
                 r.action = "Final";
                 r.userName = _userRepository.Find((int)r.CreatedBy).UserName;
                 r.actionDate = r.ModifiedDate;
-                //actionDate = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.CreatedDate,
-                //auditComment = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth,
-                //auditReason = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason?.ReasonName
-                return r;
+            //actionDate = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.CreatedDate,
+            //auditComment = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth,
+            //auditReason = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason?.ReasonName
+            return r;
             }).ToList();
             #endregion
 
@@ -626,7 +628,9 @@ namespace GSC.Respository.Etmf
                                           status = doc.status,
                                           action = "Send Back",
                                           userName = _userRepository.Find(review.UserId).UserName,
-                                          actionDate = review.SendBackDate
+                                          actionDate = review.SendBackDate,
+                                          auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
+                                          auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
                                       }).ToList();
 
             var SubSecSendforApproveData = (from doc in SubSecDocuments
@@ -695,10 +699,10 @@ namespace GSC.Respository.Etmf
                 r.action = "Final";
                 r.userName = _userRepository.Find((int)r.CreatedBy).UserName;
                 r.actionDate = r.ModifiedDate;
-                //actionDate = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.CreatedDate,
-                //auditComment = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth,
-                //auditReason = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason?.ReasonName
-                return r;
+            //actionDate = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.CreatedDate,
+            //auditComment = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.ReasonOth,
+            //auditReason = auditrialdata.Where(x => x.Action == "Modified" && x.ColumnName == "Status" && x.NewValue == "Final" && x.RecordId == r.Id).ToList().FirstOrDefault()?.Reason?.ReasonName
+            return r;
             }).ToList();
             #endregion
 
