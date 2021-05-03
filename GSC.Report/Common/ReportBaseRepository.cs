@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Common;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Custom;
+using GSC.Data.Dto.Report.Pdf;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Report;
 using GSC.Domain.Context;
@@ -517,5 +521,145 @@ namespace GSC.Report.Common
         //        }
         //    }
         //}
+
+        //public List<DossierPdfDataDto> GetpdfReportData()
+        //{
+        //    SqlParameter parameter = new SqlParameter("@projectId",13);
+        //    string sqlqry = @"select 
+        //                      pg.ProjectId
+        //                      ,pdv.ProjectDesignPeriodId
+        //                      ,pdt.ProjectDesignVisitId
+        //                      ,pdva.ProjectDesignTemplateId
+        //                      ,p.ProjectCode,
+        //                      p.ProjectName,
+        //                      pdv.DisplayName,
+        //                      pdt.TemplateCode,
+        //                      pdt.TemplateName,
+        //                      pdva.VariableName 
+        //                      ,d.DomainName
+        //                      ,d.DomainCode
+        //                      FROM Project p 
+        //                      INNER JOIN  ProjectDesign pg on pg.ProjectId=p.Id
+        //                      INNER JOIN ProjectDesignPeriod pdp on pg.Id=pdp.ProjectDesignId
+        //                      INNER JOIN ProjectDesignVisit pdv on pdv.ProjectDesignPeriodId=pdp.Id AND pdv.DeletedDate IS NULL 
+        //                      INNER JOIN ProjectDesignTemplate pdt on pdt.ProjectDesignVisitId=pdv.Id AND pdt.DeletedDate IS NULL
+        //                      INNER JOIN Domain d on d.Id=pdt.DomainId
+        //                      INNER JOIN ProjectDesignVariable pdva on pdva.ProjectDesignTemplateId=pdt.Id
+        //                      WHERE ProjectId=13  
+        //                      Order By pdv.DesignOrder,pdt.DesignOrder";
+        //    var finaldata = _context.FromSql <DossierPdfDataDto>(sqlqry).ToList();
+        //    return finaldata;
+        //}
+
+        public List<DossierReportDto> GetBlankPdfData(ReportSettingNew reportSetting)
+        {
+
+            var finaldata = _context.ProjectDesign.Where(x => x.ProjectId == reportSetting.ProjectId).Select(x => new DossierReportDto
+            {
+                ProjectDetails = new ProjectDetails { ProjectCode = x.Project.ProjectCode, ProjectName = x.Project.ProjectName, ClientId = x.Project.ClientId },
+                Period = x.ProjectDesignPeriods.Where(a => a.DeletedDate == null).Select(a => new ProjectDesignPeriodReportDto
+                {
+                    DisplayName = a.DisplayName,
+                    Visit = a.VisitList.Where(b => b.DeletedDate == null).Select(b => new ProjectDesignVisitList
+                    {
+                        DisplayName = b.DisplayName,
+                        DesignOrder = b.DesignOrder,
+                        ProjectDesignTemplatelist = b.Templates.Where(n => n.DeletedDate == null && (reportSetting.NonCRF == true ? n.VariableTemplate.ActivityMode == ActivityMode.Generic || n.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : n.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific)).Select(n => new ProjectDesignTemplatelist
+                        {
+                            TemplateCode = n.TemplateCode,
+                            TemplateName = n.TemplateName,
+                            DesignOrder = n.DesignOrder,
+                            Domain = new DomainReportDto { DomainCode = n.Domain.DomainCode, DomainName = n.Domain.DomainName },
+                            TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview }).ToList(),
+                            ProjectDesignVariable = n.Variables.Where(v => v.DeletedDate == null).Select(v => new ProjectDesignVariableReportDto
+                            {
+                                Id = v.Id,
+                                VariableName = v.VariableName,
+                                VariableCode = v.VariableCode,
+                                DesignOrder = v.DesignOrder,
+                                IsNa = v.IsNa,
+                                CollectionSource = v.CollectionSource,
+                                Annotation = v.Annotation,
+                                CollectionAnnotation = v.CollectionAnnotation,
+                                Note = v.Note,
+                                Unit = new UnitReportDto { UnitName = v.Unit.UnitName },
+                                Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList()
+                            }).ToList()
+                        }).ToList()
+                    }).OrderBy(d => d.DesignOrder).ToList()
+                }).ToList()
+            }).ToList();
+            return finaldata;
+        }
+
+        public List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting)
+        {
+
+            var finaldata = _context.ScreeningEntry.Where(a => reportSetting.SiteId.Contains(a.ProjectId) && a.DeletedDate == null &&
+              (reportSetting.SubjectIds == null || reportSetting.SubjectIds.Select(x => x.Id).ToList().Contains((int)a.RandomizationId)))
+              .Select(x => new DossierReportDto
+              {
+                  ScreeningNumber = x.Randomization.ScreeningNumber,
+                  Initial = x.Randomization.Initial,
+                  RandomizationNumber = x.Randomization.RandomizationNumber,
+                  ProjectDetails = new ProjectDetails
+                  {
+                      ProjectCode = x.Project.ProjectCode,
+                      ProjectName = x.Project.ProjectName,
+                      ClientId = x.Project.ClientId
+                  },
+                  Period = new List<ProjectDesignPeriodReportDto> {
+          new ProjectDesignPeriodReportDto {
+            DisplayName = x.ProjectDesignPeriod.DisplayName,
+              Visit = x.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate==null).Select(x => new ProjectDesignVisitList {
+                DisplayName = x.ProjectDesignVisit.DisplayName,
+                  DesignOrder = x.ProjectDesignVisit.DesignOrder,
+                  ProjectDesignTemplatelist = x.ScreeningTemplates.Where(a => a.Status != ScreeningTemplateStatus.Pending &&
+                    a.DeletedDate == null  && a.ProjectDesignTemplate.DeletedDate == null && (reportSetting.NonCRF == true ? a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic || a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific)).Select(a => new ProjectDesignTemplatelist {
+                    TemplateCode = a.ProjectDesignTemplate.TemplateCode,
+                      TemplateName = a.ProjectDesignTemplate.TemplateName,
+                      DesignOrder = a.ProjectDesignTemplate.DesignOrder,
+                      Domain = new DomainReportDto {
+                        DomainCode = a.ProjectDesignTemplate.Domain.DomainCode, DomainName = a.ProjectDesignTemplate.Domain.DomainName
+                      },
+                      TemplateNotes = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Select(n => new ProjectDesignTemplateNoteReportDto {
+                        Notes = n.Note, IsPreview = n.IsPreview
+                      }).ToList(),
+                      ProjectDesignVariable = a.ScreeningTemplateValues.Where(s => s.DeletedDate == null && s.ProjectDesignVariable.DeletedDate == null).Select(s => new ProjectDesignVariableReportDto {
+                        Id = s.ProjectDesignVariable.Id,
+                          VariableName = s.ProjectDesignVariable.VariableName,
+                          VariableCode = s.ProjectDesignVariable.VariableCode,
+                          DesignOrder = s.ProjectDesignVariable.DesignOrder,
+                          IsNa = s.ProjectDesignVariable.IsNa,
+                          CollectionSource = s.ProjectDesignVariable.CollectionSource,
+                          Annotation=s.ProjectDesignVariable.Annotation,
+                          CollectionAnnotation=s.ProjectDesignVariable.CollectionAnnotation,
+                          Note=s.ProjectDesignVariable.Note,
+                          Unit = new UnitReportDto {
+                            UnitName = s.ProjectDesignVariable.Unit.UnitName
+                          },
+                          Values = s.ProjectDesignVariable.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto {
+                            Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label
+                          }).ToList(),
+                          ScreeningValue= s.Value,
+                          ScreeningIsNa=s.IsNa,
+                          ScreeningTemplateValueId=s.Id,
+                          ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{Value=c.Value,ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,ScreeningTemplateValueId=c.ScreeningTemplateValueId,ValueName=c.ProjectDesignVariableValue.ValueName }).ToList()
+
+                      }).ToList(),
+                      ScreeningTemplateReview=a.ScreeningTemplateReview.Where(r=>r.DeletedDate==null).Select(r=>new ScreeningTemplateReviewReportDto{
+                      ScreeningTemplateId=r.ScreeningTemplateId,
+                      ReviewLevel=r.ReviewLevel,
+                      RoleId=r.RoleId,                    
+                      CreatedDate=r.CreatedDate
+                      }).ToList()
+                  }).ToList()
+              }).OrderBy(x=>x.DesignOrder).ToList()
+
+          }
+                  }
+              }).ToList();
+            return finaldata;
+        }
     }
 }

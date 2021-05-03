@@ -9,9 +9,10 @@ namespace GSC.Report
 {
     public interface IReportSyncfusion
     {
-        string BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
-        string DataGenerateReport(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
+        //string BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
+        //string DataGenerateReport(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
         FileStreamResult GetProjectDesign(ReportSettingNew reportSetting);
+        string DossierPdfReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
 
     }
 }

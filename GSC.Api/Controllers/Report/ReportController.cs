@@ -85,37 +85,14 @@ namespace GSC.Api.Controllers.Report
         {
             #region Report Setting Save
             var reportSettingForm = _projectDesignReportSettingRepository.All.Where(x => x.ProjectDesignId == reportSetting.ProjectId && x.CompanyId == reportSetting.CompanyId && x.DeletedBy == null).FirstOrDefault();
+            var objNew = _mapper.Map<ProjectDesignReportSetting>(reportSetting);
             if (reportSettingForm == null)
-            {
-                ProjectDesignReportSetting objNew = new ProjectDesignReportSetting();
-
-                objNew.ProjectDesignId = reportSetting.ProjectId;
-                objNew.IsClientLogo = reportSetting.IsClientLogo;
-                objNew.IsCompanyLogo = reportSetting.IsCompanyLogo;
-                objNew.IsInitial = reportSetting.IsInitial;
-                objNew.IsScreenNumber = reportSetting.IsScreenNumber;
-                objNew.IsSponsorNumber = reportSetting.IsSponsorNumber;
-                objNew.IsSubjectNumber = reportSetting.IsSubjectNumber;
-                objNew.LeftMargin = reportSetting.LeftMargin;
-                objNew.RightMargin = reportSetting.RightMargin;
-                objNew.TopMargin = reportSetting.TopMargin;
-                objNew.BottomMargin = reportSetting.BottomMargin;
+            {                           
                 _projectDesignReportSettingRepository.Add(objNew);
             }
             else
-            {
-                reportSettingForm.ProjectDesignId = reportSetting.ProjectId;
-                reportSettingForm.IsClientLogo = reportSetting.IsClientLogo;
-                reportSettingForm.IsCompanyLogo = reportSetting.IsCompanyLogo;
-                reportSettingForm.IsInitial = reportSetting.IsInitial;
-                reportSettingForm.IsScreenNumber = reportSetting.IsScreenNumber;
-                reportSettingForm.IsSponsorNumber = reportSetting.IsSponsorNumber;
-                reportSettingForm.IsSubjectNumber = reportSetting.IsSubjectNumber;
-                reportSettingForm.LeftMargin = reportSetting.LeftMargin;
-                reportSettingForm.RightMargin = reportSetting.RightMargin;
-                reportSettingForm.TopMargin = reportSetting.TopMargin;
-                reportSettingForm.BottomMargin = reportSetting.BottomMargin;
-
+            {              
+                 objNew.Id = reportSettingForm.Id;
                 _projectDesignReportSettingRepository.Update(reportSettingForm);
             }
             #endregion
@@ -131,12 +108,7 @@ namespace GSC.Api.Controllers.Report
             _jobMonitoringRepository.Add(jobMonitoring);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Job Monitoring failed on save.");
-
-            string message = "";
-            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                message= _reportSuncfusion.BlankReportGenerate(reportSetting, jobMonitoring);
-            else
-                message= _reportSuncfusion.DataGenerateReport(reportSetting, jobMonitoring);
+            string message = _reportSuncfusion.DossierPdfReportGenerate(reportSetting, jobMonitoring);
 
             if (!string.IsNullOrEmpty(message))
             {

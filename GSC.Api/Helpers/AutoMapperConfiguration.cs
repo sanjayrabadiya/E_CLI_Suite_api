@@ -349,6 +349,9 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.ToDate, x => x.MapFrom(a => a.To))
               .ReverseMap();
             CreateMap<WeekEndparameterDto, WeekEndMaster>().ReverseMap();
+            CreateMap<ReportSettingNew, ProjectDesignReportSetting>()
+               .ForMember(x => x.ProjectDesignId, y => y.MapFrom(a => a.ProjectId))            
+               .ReverseMap();
         }
     }
 }
