@@ -288,10 +288,11 @@ namespace GSC.Respository.Screening
             {
 
                 #region Main Query
+
                 var queryDtos = (from screening in _context.ScreeningEntry.Where(t => sites.Contains(t.ProjectId)//filters.ProjectId.Contains(t.ProjectId)
-                                 && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
-                                 && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.Id))
-                                 && t.DeletedDate == null)
+                                         && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
+                                         && (filters.SubjectIds == null || filters.SubjectIds.Count() == 0 || filters.SubjectIds.Contains(t.Id))
+                                         && t.DeletedDate == null)
                                  join template in _context.ScreeningTemplate.Where(u => (filters.TemplateIds == null
                                      || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
                                      && (filters.VisitIds == null || filters.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId))
@@ -359,7 +360,7 @@ namespace GSC.Respository.Screening
                                      SubjectNo = screening.RandomizationId != null ? randomization.ScreeningNumber : screening.Attendance.Volunteer.VolunteerNo,
                                      RandomizationNumber = screening.RandomizationId != null ? randomization.RandomizationNumber : "",
                                  }).ToList();
-                #endregion
+
 
                 var grpquery = queryDtos.OrderBy(d => d.VisitId).ThenBy(x => x.DesignOrder).GroupBy(x => new { x.DomainName, x.DomainId }).Select(y => new ProjectDatabaseDomainDto
                 {
@@ -378,17 +379,17 @@ namespace GSC.Respository.Screening
                             DesignOrderOfVariable = v.FirstOrDefault().DesignOrderOfVariable,
                             TemplateId = v.FirstOrDefault().TemplateId
                         }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList()
-                        : _context.ProjectDesignVariable.Where(v => v.DeletedDate == null
-                        && v.ProjectDesignTemplateId == y.FirstOrDefault().TemplateId).Select(x => new ProjectDatabaseVariableDto
-                        {
-                            VariableName = x.VariableName,
-                            Annotation = x.Annotation,
-                            UnitId = x.UnitId,
-                            Unit = x.Unit.UnitName,
-                            UnitAnnotation = x.UnitAnnotation,
-                            DesignOrderOfVariable = x.DesignOrder,
-                            TemplateId = x.ProjectDesignTemplateId
-                        }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList(),
+                          : _context.ProjectDesignVariable.Where(v => v.DeletedDate == null
+                          && v.ProjectDesignTemplateId == y.FirstOrDefault().TemplateId).Select(x => new ProjectDatabaseVariableDto
+                          {
+                              VariableName = x.VariableName,
+                              Annotation = x.Annotation,
+                              UnitId = x.UnitId,
+                              Unit = x.Unit.UnitName,
+                              UnitAnnotation = x.UnitAnnotation,
+                              DesignOrderOfVariable = x.DesignOrder,
+                              TemplateId = x.ProjectDesignTemplateId
+                          }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList(),
 
                     LstProjectDataBase = y.Where(v => v.VariableName != null).GroupBy(x => new { x.Initial, x.SubjectNo }).Select(s => new ProjectDatabaseInitialDto
                     {
@@ -423,6 +424,9 @@ namespace GSC.Respository.Screening
                 }).ToList();
 
                 MainData.Dbds = grpquery;
+
+                #endregion
+
             }
 
             if (filters.FilterId == DBDSReportFilter.MedDRA || filters.FilterId == null)

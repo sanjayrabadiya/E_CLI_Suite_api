@@ -12,7 +12,7 @@ namespace GSC.Data.Entities.Project.Design
         public int SecurityRoleId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public bool IsAdd { get; set; }
-        public bool IsEdit { get; set; }
+     //   public bool IsEdit { get; set; }
         public SecurityRole SecurityRole { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
     }

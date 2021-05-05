@@ -13,7 +13,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignTemplateId { get; set; }
         public string RoleName { get; set; }
         public bool IsAdd { get; set; }
-        public bool IsEdit { get; set; }
+        // public bool IsEdit { get; set; }
         public bool hasChild { get; set; }
         //public SecurityRole SecurityRole { get; set; }
         //public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
