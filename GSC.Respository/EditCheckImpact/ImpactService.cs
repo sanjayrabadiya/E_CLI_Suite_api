@@ -112,7 +112,7 @@ namespace GSC.Respository.EditCheckImpact
             if (annotation != null)
                 result.AddRange(annotation);
 
-            return result.OrderBy(t => t.EditCheckId).ToList();
+            return result.OrderBy(t => t.EditCheckId).OrderBy(t => t.EditCheckDetailId).ToList();
 
         }
 
