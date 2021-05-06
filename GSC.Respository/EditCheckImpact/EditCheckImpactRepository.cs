@@ -170,7 +170,7 @@ namespace GSC.Respository.EditCheckImpact
 
             targetEditCheckIds.ForEach(x =>
             {
-                var result = editCheckResult.Where(t => t.EditCheckId == x).ToList();
+                var result = editCheckResult.Where(t => t.EditCheckId == x).OrderBy(t => t.EditCheckDetailId).ToList();
 
                 VariableProcess(result.Where(x => !x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, false, status);
                 VariableProcess(result.Where(x => x.IsOnlyTarget).ToList(), screeningEntryId, screeningTemplateId, value, projectDesignTemplateId, projectDesignVariableId, editTargetValidation, isQueryRaise, screeningVisitId, projectDesignVisitId, isNa, false, status);
