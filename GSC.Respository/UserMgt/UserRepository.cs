@@ -304,8 +304,8 @@ namespace GSC.Respository.UserMgt
             if (_environmentSetting.Value.IsPremise)
             {
                 login = await _context.RefreshToken.Where(t =>
-                t.Token == refreshToken && t.ExpiredOn > _jwtTokenAccesser.GetClientDate()).FirstOrDefaultAsync();
-                //t.Token == refreshToken && t.ExpiredOn > DateTime.UtcNow).FirstOrDefaultAsync();
+               // t.Token == refreshToken && t.ExpiredOn > _jwtTokenAccesser.GetClientDate()).FirstOrDefaultAsync();
+                t.Token == refreshToken && t.ExpiredOn > DateTime.UtcNow).FirstOrDefaultAsync();
             }
             else
             {

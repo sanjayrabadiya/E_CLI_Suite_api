@@ -10,7 +10,6 @@ namespace GSC.Data.Dto.Project.Design
         [Required(ErrorMessage = "Range is required.")]
         public int Range { get; set; }
 
-        [Required(ErrorMessage = "Remarks is required.")]
         public string Remarks { get; set; }
 
         public string ScreeningValue { get; set; }

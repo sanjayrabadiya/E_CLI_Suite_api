@@ -8,7 +8,6 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Range is required.")]
         public string Range { get; set; }
 
-        [Required(ErrorMessage = "Remarks is required.")]
         public string Remark{ get; set; }
 
     }
