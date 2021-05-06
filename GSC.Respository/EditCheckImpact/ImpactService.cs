@@ -143,7 +143,7 @@ namespace GSC.Respository.EditCheckImpact
                 };
             });
 
-            return result.OrderBy(t => t.EditCheckId).ToList();
+            return result.OrderBy(t => t.EditCheckId).OrderBy(t => t.EditCheckDetailId).ToList();
         }
 
 
