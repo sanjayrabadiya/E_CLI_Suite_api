@@ -1406,9 +1406,10 @@ namespace GSC.Report
             PdfBookmark bookmark = AddBookmark(result, $"{vistitName}", true);
             foreach (var designt in designtemplate.OrderBy(i => i.DesignOrder))
             {
-                AddSection(bookmark, result, $"{designt.DesignOrder.ToString()}.{designt.TemplateName}");
-
-                result = AddString($"{designt.DesignOrder.ToString()}.{designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                string repeatSeqno = String.IsNullOrEmpty(designt.RepeatSeqNo.ToString())?" ": "."+ designt.RepeatSeqNo.ToString();
+                AddSection(bookmark, result, $"{designt.DesignOrder.ToString()} {repeatSeqno}.{designt.TemplateName}");
+                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat); result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno}.{designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 string notes = "";
                 for (int n = 0; n < designt.TemplateNotes.Count; n++)
                 {
@@ -1486,9 +1487,10 @@ namespace GSC.Report
                         }
                         else
                         {
-                            result = AddString(variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            result = AddString(variable.ScreeningValue == null ? " " : variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
-                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                        // result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     else if (variable.CollectionSource == CollectionSources.ComboBox)
                     {
@@ -1641,11 +1643,11 @@ namespace GSC.Report
                         }
                         else
                         {
-                            var dt = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat) : variable.ScreeningValue : "";
+                            var dttime = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variable.ScreeningValue : "";
 
                             PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
                             textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                            textBoxField.Text = dt;
+                            textBoxField.Text = dttime;
                             textBoxField.ReadOnly = true;
                             document.Form.Fields.Add(textBoxField);
 
@@ -1690,14 +1692,10 @@ namespace GSC.Report
                             textBoxField.ReadOnly = true;
                             document.Form.Fields.Add(textBoxField);
                             AddString(GeneralSettings.TimeFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
+                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     else if (variable.CollectionSource == CollectionSources.HorizontalScale)
-                    {
-                        result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                    }
-                    else if (variable.CollectionSource == CollectionSources.VerticalScale)
                     {
                         result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
@@ -1714,6 +1712,16 @@ namespace GSC.Report
 
                     //data
                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                }
+                foreach (var signature in designt.ScreeningTemplateReview)
+                {
+                    result = AddString($"{ signature.CreatedByUser}  ({signature.RoleName})", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
+                    result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    if (result.Bounds.Bottom + 30 >= 770)
+                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 30, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
                 }
             }
         }

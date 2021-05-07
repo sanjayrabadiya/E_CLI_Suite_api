@@ -18,8 +18,7 @@ namespace GSC.Data.Dto.Report.Pdf
     {
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
-        public int ClientId { get; set; }
-
+        public int ClientId { get; set; }        
     }
 
     public class ProjectDesignPeriodReportDto
@@ -42,11 +41,13 @@ namespace GSC.Data.Dto.Report.Pdf
         public string TemplateCode { get; set; }
         public string TemplateName { get; set; }
         public int DesignOrder { get; set; }
+        public int? RepeatSeqNo { get; set; }
         public DomainReportDto Domain { get; set; }
         public List<ProjectDesignTemplateNoteReportDto> TemplateNotes { get; set; }
         public List<ProjectDesignVariableReportDto> ProjectDesignVariable { get; set; }
 
         public List<ScreeningTemplateReviewReportDto> ScreeningTemplateReview { get; set; }
+      
     }
 
     public class DomainReportDto
@@ -113,4 +114,6 @@ namespace GSC.Data.Dto.Report.Pdf
         public DateTime? CreatedDate { get; set; }
         public string RoleName { get; set; }
     }
+
+  
 }
