@@ -48,8 +48,8 @@ namespace GSC.Report
 
 
         //private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;// GetVisitsByProjectDesignId
-       // private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-       // private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
+        // private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        // private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IReportBaseRepository _reportBaseRepository;
         private readonly ICompanyRepository _companyRepository;
@@ -1448,7 +1448,6 @@ namespace GSC.Report
                     PdfLayoutResult secondresult = result;
                     AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
-
                     if (variable.Unit != null)
                         AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                     if (variable.IsNa)
@@ -1465,7 +1464,7 @@ namespace GSC.Report
                         {
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
                             checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
-                            checkField.Style = PdfCheckBoxStyle.Check;                           
+                            checkField.Style = PdfCheckBoxStyle.Check;
                             if (variable.ScreeningIsNa)
                                 checkField.Checked = true;
                             checkField.ReadOnly = true;
@@ -1533,7 +1532,9 @@ namespace GSC.Report
                         }
                         else
                         {
-                            string variblevaluename = variable.Values.Where(x => x.Id == Convert.ToInt32(variable.ScreeningValue)).Select(x => x.ValueName).FirstOrDefault();
+                            string variblevaluename = "";
+                            if (!String.IsNullOrEmpty(variable.ScreeningValue))
+                                variblevaluename = variable.Values.Where(x => x.Id == Convert.ToInt32(variable.ScreeningValue)).Select(x => x.ValueName).SingleOrDefault();
                             foreach (var value in variable.Values.OrderBy(x => x.SeqNo))
                             {
                                 result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -1692,6 +1693,14 @@ namespace GSC.Report
                             result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                     }
+                    else if (variable.CollectionSource == CollectionSources.HorizontalScale)
+                    {
+                        result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    }
+                    else if (variable.CollectionSource == CollectionSources.VerticalScale)
+                    {
+                        result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    }
                     else
                     {
                         result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -1704,7 +1713,7 @@ namespace GSC.Report
                                 result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                     //data
-                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);                  
+                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                 }
             }
         }
