@@ -304,6 +304,7 @@ namespace GSC.Respository.UserMgt
             if (_environmentSetting.Value.IsPremise)
             {
                 login = await _context.RefreshToken.Where(t =>
+               // t.Token == refreshToken && t.ExpiredOn > _jwtTokenAccesser.GetClientDate()).FirstOrDefaultAsync();
                 t.Token == refreshToken && t.ExpiredOn > DateTime.UtcNow).FirstOrDefaultAsync();
             }
             else
@@ -323,7 +324,7 @@ namespace GSC.Respository.UserMgt
             return new RefreshTokenDto
             {
                 AccessToken = GenerateAccessToken(principal.Claims),
-                ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.Value.MinutesToExpiration),
+                ExpiredAfter = _jwtTokenAccesser.GetClientDate().AddMinutes(_settings.Value.MinutesToExpiration),
                 RefreshToken = refreshToken
             };
         }

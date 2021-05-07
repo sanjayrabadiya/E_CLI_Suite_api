@@ -334,7 +334,7 @@ namespace GSC.Respository.Project.EditCheck
                     ProjectDesignId = r.EditCheck.ProjectDesignId,
                     CollectionValue2 = r.CollectionValue2,
                     CollectionSource = r.ProjectDesignVariable.CollectionSource
-                }).ToList().OrderByDescending(v => v.LogicalOperator).OrderBy(r => r.Id).ToList();
+                }).ToList().OrderBy(r => r.Id).ToList();
 
             var last = result.LastOrDefault();
             result.ForEach(x =>

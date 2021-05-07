@@ -189,9 +189,11 @@ namespace GSC.Api.Controllers.Project.Design
                         });
 
                         variable.Id = 0;
+                        var Seq = 0;
                         variable.Values.ToList().ForEach(value =>
                         {
                             value.Id = 0;
+                            value.SeqNo = ++Seq;
                             _projectDesignVariableValueRepository.Add(value);
 
                             //For variable value clone language
