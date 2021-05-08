@@ -105,7 +105,8 @@ namespace GSC.Respository.Screening
                 designTemplateDto.IsRepeated = false;
 
             var isRestriction = false;
-            if (_projectDesingTemplateRestrictionRepository.All.Any(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId && x.SecurityRoleId == _jwtTokenAccesser.RoleId))
+            if (_projectDesingTemplateRestrictionRepository.All.Any(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId
+            && x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null))
             {
                 designTemplateDto.IsSubmittedButton = false;
                 designTemplateDto.IsRepeated = false;
@@ -149,7 +150,7 @@ namespace GSC.Respository.Screening
                     if (!string.IsNullOrWhiteSpace(variable.ScreeningValue) || variable.IsNaValue)
                         variable.IsValid = true;
 
-                    if (variable.Values != null)
+                    if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
                         variable.Values.ToList().ForEach(val =>
                         {
                             var childValue = t.Children.FirstOrDefault(v => v.ProjectDesignVariableValueId == val.Id);
