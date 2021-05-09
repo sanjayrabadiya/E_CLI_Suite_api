@@ -94,7 +94,7 @@ namespace GSC.Respository.Project.Design
                         ValidationType = x.ValidationType,
                         DataType = x.DataType,
                         Length = x.Length,
-                        DefaultValue = x.DefaultValue,
+                        DefaultValue = string.IsNullOrEmpty(x.DefaultValue) && x.CollectionSource == CollectionSources.HorizontalScale ? "1" : x.DefaultValue,
                         LowRangeValue = x.LowRangeValue,
                         HighRangeValue = x.HighRangeValue,
                         RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
@@ -139,8 +139,8 @@ namespace GSC.Respository.Project.Design
 
                     if (x.IsEncrypt == true)
                         x.IsNa = false;
-                  
-                        
+
+
                 });
 
                 result.Variables = variables;
