@@ -145,14 +145,19 @@ namespace GSC.Respository.Etmf
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
+                                pvListSectionObj = GetIcon(pvListSectionObj);
                             }
+
                             pvListZoneList.Add(pvListZoneObj);
                             pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
+                            pvListZoneObj = GetIcon(pvListZoneObj);
                             pvListdetaiObj.Item.Add(pvListZoneObj);
                         }
 
                         pvListdetaiObj.Item = pvListdetaiObj.Item.OrderBy(x => x.Number).ToList();
+                        pvListdetaiObj = GetIcon(pvListdetaiObj);
                         CountryFol.Item.Add(pvListdetaiObj);
+                        CountryFol = GetIcon(CountryFol);
                     }
                 }
 
@@ -184,14 +189,18 @@ namespace GSC.Respository.Etmf
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
+                                pvListSectionObj = GetIcon(pvListSectionObj);
                             }
 
                             pvListZoneList.Add(pvListZoneObj);
                             pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
+                            pvListZoneObj = GetIcon(pvListZoneObj);
                             pvListdetaiObj.Item.Add(pvListZoneObj);
                         }
                         pvListdetaiObj.Item = pvListdetaiObj.Item.OrderBy(x => x.Number).ToList();
+                        pvListdetaiObj = GetIcon(pvListdetaiObj);
                         SiteFol.Item.Add(pvListdetaiObj);
+                        SiteFol = GetIcon(SiteFol);
                     }
                 }
 
@@ -223,12 +232,15 @@ namespace GSC.Respository.Etmf
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
+                                pvListSectionObj = GetIcon(pvListSectionObj);
                             }
                             pvListZoneList.Add(pvListZoneObj);
                             pvListZoneObj.Item = pvListSectionList.OrderBy(x => x.Number).ToList();
+                            pvListZoneObj = GetIcon(pvListZoneObj);
                         }
 
                         TrialFol.Item = pvListZoneList.OrderBy(x => x.Number).ToList();
+                        TrialFol = GetIcon(TrialFol);
                     }
                 }
 
@@ -237,10 +249,28 @@ namespace GSC.Respository.Etmf
                 pvListObj.Item.Add(CountryFol);
                 pvListObj.Item.Add(SiteFol);
             }
-
+            pvListObj = GetIcon(pvListObj);
             pvList.Add(pvListObj);
-
             return pvList;
+        }
+
+        public TreeValue GetIcon(TreeValue data)
+        {
+            data.IconType = data.Item.Any(x => x.IconType == EtmfChartType.Missing) ? EtmfChartType.Missing :
+                            data.Item.Any(x => x.IconType == EtmfChartType.Incomplete) ? EtmfChartType.Incomplete :
+                            data.Item.Any(x => x.IconType == EtmfChartType.PendingReview) ? EtmfChartType.PendingReview :
+                            data.Item.Any(x => x.IconType == EtmfChartType.PendingApprove) ? EtmfChartType.PendingApprove :
+                            data.Item.Any(x => x.IconType == EtmfChartType.Final) ? EtmfChartType.Final :
+                            data.Item.Any(x => x.IconType == EtmfChartType.NotRequired) ? EtmfChartType.NotRequired
+                            : EtmfChartType.Nothing;
+            data.Icon = data.IconType == EtmfChartType.Missing ? "las la-folder-open text-missing eicon" :
+                        data.IconType == EtmfChartType.Incomplete ? "las la-folder-open text-incomeplete eicon" :
+                        data.IconType == EtmfChartType.PendingReview ? "las la-folder-open text-pendingreview eicon" :
+                        data.IconType == EtmfChartType.PendingApprove ? "las la-folder-open text-pendingapprove eicon" :
+                        data.IconType == EtmfChartType.Final ? "las la-folder-open text-final eicon" :
+                        data.IconType == EtmfChartType.NotRequired ? "las la-folder-open text-notreq eicon"
+                        : "las la-file-alt text-blue eicon";
+            return data;
         }
         public TreeValue GetWorksplaceDetails(EtmfUserPermission rights, ProjectWorkplaceDetail c)
         {
@@ -294,7 +324,7 @@ namespace GSC.Respository.Etmf
             pvListSectionObj.SiteId = folderType == WorkPlaceFolder.Site ? c.Id : 0;
             pvListSectionObj.SiteProjectId = folderType == WorkPlaceFolder.Site ? c.ItemId : 0;
             pvListSectionObj.ParentMasterId = b.ProjectId;
-            pvListSectionObj.Icon = "folder";
+            pvListSectionObj.Icon = "las la-folder-open text-blue eicon";
             pvListSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
             pvListSectionObj.SectionId = e.Id;
             pvListSectionObj.IsAdd = rights != null && rights.IsAdd;
@@ -323,24 +353,37 @@ namespace GSC.Respository.Etmf
                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
                 pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
                 pvListArtificateObj.Level = 6;
-
                 pvListArtificateObj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
                 pvListArtificateObj.SiteId = folderType == WorkPlaceFolder.Site ? c.Id : 0;
                 pvListArtificateObj.SiteProjectId = folderType == WorkPlaceFolder.Site ? c.ItemId : 0;
                 pvListArtificateObj.ZoneId = d.Id;
                 pvListArtificateObj.SectionId = e.Id;
                 pvListArtificateObj.ParentMasterId = b.ProjectId;
-                pvListArtificateObj.Icon = "las la-file-alt text-blue eicon";
                 pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
                 pvListArtificateObj.IsNotRequired = f.IsNotRequired;
                 pvListArtificateObj.ArtificateId = f.Id;
-                pvListArtificateObj.IsAdd = rights != null ? rights.IsAdd : false;
-                pvListArtificateObj.IsEdit = rights != null ? rights.IsEdit : false;
-                pvListArtificateObj.IsDelete = rights != null ? rights.IsDelete : false;
-                pvListArtificateObj.IsView = rights != null ? rights.IsView : false;
-                pvListArtificateObj.IsExport = rights != null ? rights.IsExport : false;
+                pvListArtificateObj.IsAdd = rights != null && rights.IsAdd;
+                pvListArtificateObj.IsEdit = rights != null && rights.IsEdit;
+                pvListArtificateObj.IsDelete = rights != null && rights.IsDelete;
+                pvListArtificateObj.IsView = rights != null && rights.IsView;
+                pvListArtificateObj.IsExport = rights != null && rights.IsExport;
                 pvListArtificateObj.DocumentCount = Document.Count();
                 //pvListArtificateList.Add(pvListArtificateObj);
+
+                pvListArtificateObj.Icon = Document.Count() == 0 ? "las la-file-alt text-missing eicon" :
+                    Document.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? "las la-file-alt text-incomeplete eicon" :
+                    Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? "las la-file-alt text-pendingreview eicon" :
+                    Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null).Count() != 0 ? "las la-file-alt text-pendingapprove eicon" :
+                    Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? "las la-file-alt text-final eicon" :
+                    f.IsNotRequired == true ? "las la-file-alt text-notreq eicon"
+                    : "las la-file-alt text-blue eicon";
+                pvListArtificateObj.IconType = Document.Count() == 0 ? EtmfChartType.Missing :
+                    Document.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? EtmfChartType.Incomplete :
+                    Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? EtmfChartType.PendingReview :
+                    Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null).Count() != 0 ? EtmfChartType.PendingApprove :
+                    Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? EtmfChartType.Final :
+                    f.IsNotRequired == true ? EtmfChartType.NotRequired
+                    : EtmfChartType.Nothing;
 
                 if (chartType == EtmfChartType.Nothing)
                 {
@@ -350,7 +393,11 @@ namespace GSC.Respository.Etmf
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
-                else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectArtificateDocumentReview.Count != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0).Count() != 0)
+                else if (chartType == EtmfChartType.Incomplete && Document.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count() != 0)
+                {
+                    pvListArtificateList.Add(pvListArtificateObj);
+                }
+                else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
@@ -362,50 +409,44 @@ namespace GSC.Respository.Etmf
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
-                else if (chartType == EtmfChartType.Incomplete && Document.Where(x => x.ProjectArtificateDocumentReview.Count() == 0).Count() != 0)
-                {
-                    pvListArtificateList.Add(pvListArtificateObj);
-                }
                 else if (chartType == EtmfChartType.NotRequired && f.IsNotRequired == true)
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
-                else if (chartType == EtmfChartType.core && f.EtmfArtificateMasterLbrary.InclutionType == 2 && Document.Count == 0)
+                else if (chartType == EtmfChartType.core && f.EtmfArtificateMasterLbrary.InclutionType == 2 && Document.Count() == 0)
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
-                else if (chartType == EtmfChartType.Recommended && f.EtmfArtificateMasterLbrary.InclutionType == 1 && Document.Count == 0)
+                else if (chartType == EtmfChartType.Recommended && f.EtmfArtificateMasterLbrary.InclutionType == 1 && Document.Count() == 0)
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
             }
 
             #region Add sub section folder data
-            List<TreeValue> pvListsubsectionList = new List<TreeValue>();
             var SectionData = _context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
             foreach (var s in SectionData)
             {
 
-                TreeValue pvListArtificateObj = new TreeValue();
-                pvListArtificateObj.Id = s.Id;
-                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
-                pvListArtificateObj.Text = s.SubSectionName;
-                pvListArtificateObj.Level = 5.1;
-
-                pvListArtificateObj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
-                pvListArtificateObj.SiteId = folderType == WorkPlaceFolder.Site ? c.Id : 0;
-                pvListArtificateObj.SiteProjectId = folderType == WorkPlaceFolder.Site ? c.ItemId : 0;
-                pvListArtificateObj.ZoneId = d.Id;
-                pvListArtificateObj.SectionId = e.Id;
-                pvListArtificateObj.SubSectionId = s.Id;
-                pvListArtificateObj.ParentMasterId = b.ProjectId;
-                pvListArtificateObj.Icon = "folder";
-                pvListArtificateObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
-                pvListArtificateObj.IsAdd = rights != null && rights.IsAdd;
-                pvListArtificateObj.IsEdit = rights != null && rights.IsEdit;
-                pvListArtificateObj.IsDelete = rights != null && rights.IsDelete;
-                pvListArtificateObj.IsView = rights != null && rights.IsView;
-                pvListArtificateObj.IsExport = rights != null && rights.IsExport;
+                TreeValue pvListSubSectionObj = new TreeValue();
+                pvListSubSectionObj.Id = s.Id;
+                pvListSubSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                pvListSubSectionObj.Text = s.SubSectionName;
+                pvListSubSectionObj.Level = 5.1;
+                pvListSubSectionObj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
+                pvListSubSectionObj.SiteId = folderType == WorkPlaceFolder.Site ? c.Id : 0;
+                pvListSubSectionObj.SiteProjectId = folderType == WorkPlaceFolder.Site ? c.ItemId : 0;
+                pvListSubSectionObj.ZoneId = d.Id;
+                pvListSubSectionObj.SectionId = e.Id;
+                pvListSubSectionObj.SubSectionId = s.Id;
+                pvListSubSectionObj.ParentMasterId = b.ProjectId;
+                pvListSubSectionObj.Icon = "las la-folder-open text-blue eicon";
+                pvListSubSectionObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
+                pvListSubSectionObj.IsAdd = rights != null && rights.IsAdd;
+                pvListSubSectionObj.IsEdit = rights != null && rights.IsEdit;
+                pvListSubSectionObj.IsDelete = rights != null && rights.IsDelete;
+                pvListSubSectionObj.IsView = rights != null && rights.IsView;
+                pvListSubSectionObj.IsExport = rights != null && rights.IsExport;
                 #region MyRegion
                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
                 var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
@@ -428,7 +469,6 @@ namespace GSC.Respository.Etmf
                     pvListartifactsubsectionobj.SubSectionId = s.Id;
                     pvListartifactsubsectionobj.ParentMasterId = b.ProjectId;
                     pvListartifactsubsectionobj.SubSectionArtificateId = itemartifact.Id;
-                    pvListartifactsubsectionobj.Icon = "las la-file-alt text-blue eicon";
                     pvListartifactsubsectionobj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
                     pvListartifactsubsectionobj.IsNotRequired = itemartifact.IsNotRequired;
                     pvListartifactsubsectionobj.IsAdd = rights != null ? rights.IsAdd : false;
@@ -439,6 +479,22 @@ namespace GSC.Respository.Etmf
                     pvListartifactsubsectionobj.DocumentCount = Document.Count();
                     //pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
 
+                    pvListartifactsubsectionobj.Icon = Document.Count() == 0 ? "las la-file-alt text-missing eicon" :
+                    Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? "las la-file-alt text-incomeplete eicon" :
+                    Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? "las la-file-alt text-pendingreview eicon" :
+                    Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null).Count() != 0 ? "las la-file-alt text-pendingapprove eicon" :
+                    Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? "las la-file-alt text-final eicon" :
+                    itemartifact.IsNotRequired == true ? "las la-file-alt text-notreq eicon"
+                    : "las la-file-alt text-blue eicon";
+
+                    pvListartifactsubsectionobj.IconType = Document.Count() == 0 ? EtmfChartType.Missing :
+                       Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? EtmfChartType.Incomplete :
+                       Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? EtmfChartType.PendingReview :
+                       Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null).Count() != 0 ? EtmfChartType.PendingApprove :
+                       Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? EtmfChartType.Final :
+                       itemartifact.IsNotRequired == true ? EtmfChartType.NotRequired
+                        : EtmfChartType.Nothing;
+
                     if (chartType == EtmfChartType.Nothing)
                     {
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
@@ -447,7 +503,11 @@ namespace GSC.Respository.Etmf
                     {
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
-                    else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0).Count() != 0)
+                    else if (chartType == EtmfChartType.Incomplete && Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count() != 0)
+                    {
+                        pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
+                    }
+                    else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
                     {
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
@@ -459,19 +519,28 @@ namespace GSC.Respository.Etmf
                     {
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
-                    else if (chartType == EtmfChartType.Incomplete && Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() == 0).Count() != 0)
-                    {
-                        pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
-                    }
                     else if (chartType == EtmfChartType.NotRequired && itemartifact.IsNotRequired == true)
                     {
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
                 }
                 #endregion
-                pvListArtificateList.Add(pvListArtificateObj);
-                pvListArtificateObj.Item = pvListartifactsubsectionList;
-
+                pvListArtificateList.Add(pvListSubSectionObj);
+                pvListSubSectionObj.Item = pvListartifactsubsectionList;
+                pvListSubSectionObj.IconType = pvListSubSectionObj.Item.Any(x => x.IconType == EtmfChartType.Missing) ? EtmfChartType.Missing :
+                                               pvListSubSectionObj.Item.Any(x => x.IconType == EtmfChartType.Incomplete) ? EtmfChartType.Incomplete :
+                                               pvListSubSectionObj.Item.Any(x => x.IconType == EtmfChartType.PendingReview) ? EtmfChartType.PendingReview :
+                                               pvListSubSectionObj.Item.Any(x => x.IconType == EtmfChartType.PendingApprove) ? EtmfChartType.PendingApprove :
+                                               pvListSubSectionObj.Item.Any(x => x.IconType == EtmfChartType.Final) ? EtmfChartType.Final :
+                                               pvListSubSectionObj.Item.Any(x => x.IconType == EtmfChartType.NotRequired) ? EtmfChartType.NotRequired
+                                               : EtmfChartType.Nothing;
+                pvListSubSectionObj.Icon = pvListSubSectionObj.IconType == EtmfChartType.Missing ? "las la-folder-open text-missing eicon" :
+                                        pvListSubSectionObj.IconType == EtmfChartType.Incomplete ? "las la-folder-open text-incomeplete eicon" :
+                                        pvListSubSectionObj.IconType == EtmfChartType.PendingReview ? "las la-folder-open text-pendingreview eicon" :
+                                        pvListSubSectionObj.IconType == EtmfChartType.PendingApprove ? "las la-folder-open text-pendingapprove eicon" :
+                                        pvListSubSectionObj.IconType == EtmfChartType.Final ? "las la-folder-open text-final eicon" :
+                                        pvListSubSectionObj.IconType == EtmfChartType.NotRequired ? "las la-folder-open text-notreq eicon"
+                                        : "las la-file-alt text-blue eicon";
             }
             #endregion
 
@@ -806,7 +875,7 @@ namespace GSC.Respository.Etmf
                 status = true;
                 return null;
             }
-        }       
+        }
     }
     public class TreeValue
     {
@@ -826,6 +895,8 @@ namespace GSC.Respository.Etmf
         public int SubSectionArtificateId { get; set; }
         public WorkPlaceFolder WorkPlaceFolderId { get; set; }
         public string Icon { get; set; }
+        public EtmfChartType IconType { get; set; }
+
         public string RandomId { get; set; }
         public bool IsAdd { get; set; }
         public bool IsEdit { get; set; }

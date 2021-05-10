@@ -149,18 +149,18 @@ namespace GSC.Respository.Etmf
             result.AllDocument = ArtificateDocument.Count() + SubSecArtificateDocument.Count();
             result.Final = ArtificateDocument.Where(x => x.Status == ArtifactDocStatusType.Final).Count() + SubSecArtificateDocument.Where(x => x.Status == ArtifactDocStatusType.Final).Count();
 
-            result.InComplete = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Count() == 0).Count() +
-                    SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() == 0).Count();
+            result.InComplete = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count() +
+                    SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count();
 
-            result.PendingReview = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Count != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0).Count()
-                + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(x => x.IsSendBack == false && x.ModifiedDate == null).Count() != 0).Count();
-            result.AllPendingReview = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Count != 0).Count()
-                + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0).Count();
+            result.PendingReview = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Count != 0 && x.ProjectArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count()
+                + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count();
+            result.AllPendingReview = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() != 0).Count()
+                + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() != 0).Count();
             result.NotRequired = Artificate.Where(x => x.IsNotRequired == true).Count()
                 + SubSectionArtificate.Where(x => x.IsNotRequired == true).Count();
 
-            result.CoreArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 2 && x.ProjectWorkplaceArtificatedocument.Count == 0).Count();
-            result.RecommendedArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 1 && x.ProjectWorkplaceArtificatedocument.Count == 0).Count();
+            result.CoreArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 2 && x.ProjectWorkplaceArtificatedocument.Count() == 0).Count();
+            result.RecommendedArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 1 && x.ProjectWorkplaceArtificatedocument.Count() == 0).Count();
             return result;
         }
     }

@@ -155,8 +155,9 @@ namespace GSC.Respository.Etmf
             //    }).OrderByDescending(x => x.Id).ToList();
 
             var result = (from approver in _context.ProjectArtificateDocumentApprover.Include(x => x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id)
-                          join auditReason in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectArtificateDocumentApprover" && x.ColumnName == "Is Approved")
-                          on approver.Id equals auditReason.RecordId
+                          join auditReasonTemp in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectArtificateDocumentApprover" && x.ColumnName == "Is Approved")
+                          on approver.Id equals auditReasonTemp.RecordId into auditReasonDto
+                          from auditReason in auditReasonDto.DefaultIfEmpty()
                           select new ProjectArtificateDocumentApproverHistory
                           {
                               Id = approver.Id,
