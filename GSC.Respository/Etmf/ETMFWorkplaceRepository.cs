@@ -88,14 +88,14 @@ namespace GSC.Respository.Etmf
             pvListObj.Level = 1;
             pvListObj.Item = new List<TreeValue>();
             pvListObj.ParentMasterId = projectWorkplaces.FirstOrDefault().ProjectId;
-            pvListObj.Icon = "folder";
+            pvListObj.Icon = "las la-folder-open text-blue eicon";
 
             TreeValue TrialFol = new TreeValue();
             TrialFol.Id = 11111111;
             TrialFol.RandomId = RandomPassword.CreateRandomPassword(6);
             TrialFol.Text = "Trial";
             TrialFol.Level = 2;
-            TrialFol.Icon = "folder";
+            TrialFol.Icon = "las la-folder-open text-blue eicon";
             TrialFol.WorkPlaceFolderId = WorkPlaceFolder.Trial;
 
             TreeValue CountryFol = new TreeValue();
@@ -103,7 +103,7 @@ namespace GSC.Respository.Etmf
             CountryFol.RandomId = RandomPassword.CreateRandomPassword(6);
             CountryFol.Text = "Country";
             CountryFol.Level = 2;
-            CountryFol.Icon = "folder";
+            CountryFol.Icon = "las la-folder-open text-blue eicon";
             CountryFol.WorkPlaceFolderId = WorkPlaceFolder.Country;
 
             TreeValue SiteFol = new TreeValue();
@@ -111,7 +111,7 @@ namespace GSC.Respository.Etmf
             SiteFol.RandomId = RandomPassword.CreateRandomPassword(6);
             SiteFol.Text = "Site";
             SiteFol.Level = 2;
-            SiteFol.Icon = "folder";
+            SiteFol.Icon = "las la-folder-open text-blue eicon";
             SiteFol.WorkPlaceFolderId = WorkPlaceFolder.Site;
 
             CountryFol.Item = new List<TreeValue>();
@@ -269,7 +269,7 @@ namespace GSC.Respository.Etmf
                         data.IconType == EtmfChartType.PendingApprove ? "las la-folder-open text-pendingapprove eicon" :
                         data.IconType == EtmfChartType.Final ? "las la-folder-open text-final eicon" :
                         data.IconType == EtmfChartType.NotRequired ? "las la-folder-open text-notreq eicon"
-                        : "las la-file-alt text-blue eicon";
+                        : "las la-folder-open text-blue eicon";
             return data;
         }
         public TreeValue GetWorksplaceDetails(EtmfUserPermission rights, ProjectWorkplaceDetail c)
@@ -280,7 +280,7 @@ namespace GSC.Respository.Etmf
             pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
             pvListdetaiObj.Text = c.ItemName;
             pvListdetaiObj.Level = 3;
-            pvListdetaiObj.Icon = "folder";
+            pvListdetaiObj.Icon = "las la-folder-open text-blue eicon";
             pvListdetaiObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
             pvListdetaiObj.IsAdd = rights != null && rights.IsAdd;
             pvListdetaiObj.IsEdit = rights != null && rights.IsEdit;
@@ -299,7 +299,7 @@ namespace GSC.Respository.Etmf
             pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
             pvListZoneObj.Level = 4;
             pvListZoneObj.ParentMasterId = b.ProjectId;
-            pvListZoneObj.Icon = "folder";
+            pvListZoneObj.Icon = "las la-folder-open text-blue eicon";
             pvListZoneObj.WorkPlaceFolderId = (WorkPlaceFolder)c.WorkPlaceFolderId;
             pvListZoneObj.ZoneId = d.Id;
             pvListZoneObj.IsAdd = rights != null && rights.IsAdd;
@@ -540,7 +540,7 @@ namespace GSC.Respository.Etmf
                                         pvListSubSectionObj.IconType == EtmfChartType.PendingApprove ? "las la-folder-open text-pendingapprove eicon" :
                                         pvListSubSectionObj.IconType == EtmfChartType.Final ? "las la-folder-open text-final eicon" :
                                         pvListSubSectionObj.IconType == EtmfChartType.NotRequired ? "las la-folder-open text-notreq eicon"
-                                        : "las la-file-alt text-blue eicon";
+                                        : "las la-folder-open text-blue eicon";
             }
             #endregion
 
