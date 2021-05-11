@@ -159,9 +159,11 @@ namespace GSC.Api.Controllers.Master
             var data = _variableRemarksRepository.FindBy(x => x.VariableId == variable.Id).ToList();
             var deleteRemarks = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             var addremarks = variable.Remarks.Where(x => x.Id == 0).ToList();
+            var updateremarks = variable.Remarks.Where(x => x.Id > 0).ToList();
             foreach (var value in deleteRemarks)
                 _variableRemarksRepository.Remove(value);
-
+            foreach (var value in updateremarks)
+                _variableRemarksRepository.Update(value);
             foreach (var item in addremarks)
             {
                 _variableRemarksRepository.Add(item);

@@ -51,6 +51,9 @@ namespace GSC.Respository.Project.Design
                .Include(d => d.Templates)
                 .ThenInclude(d => d.Variables)
                 .ThenInclude(d => d.Roles)
+                .Include(d=>d.Templates)
+                .ThenInclude(d=>d.Variables)
+                .ThenInclude(d=>d.Remarks)
                 .AsNoTracking().FirstOrDefault();
 
             return visit;
