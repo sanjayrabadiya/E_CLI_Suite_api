@@ -74,6 +74,10 @@ namespace GSC.Data.Dto.Report.Pdf
         public UnitReportDto Unit { get; set; }
         public bool IsNa { get; set; }
         public string Note { get; set; }
+        public string DefaultValue { get; set; }
+        public string LowRangeValue { get; set; }
+        public string HighRangeValue { get; set; }
+
         public CollectionSources CollectionSource { get; set; }
         public List<ProjectDesignVariableValueReportDto> Values { get; set; }
 

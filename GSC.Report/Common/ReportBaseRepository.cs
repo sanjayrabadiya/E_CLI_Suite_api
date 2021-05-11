@@ -582,6 +582,9 @@ namespace GSC.Report.Common
                                 Annotation = v.Annotation,
                                 CollectionAnnotation = v.CollectionAnnotation,
                                 Note = v.Note,
+                                DefaultValue = v.DefaultValue,
+                                LowRangeValue = v.LowRangeValue,
+                                HighRangeValue = v.HighRangeValue,
                                 Unit = new UnitReportDto { UnitName = v.Unit.UnitName },
                                 Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList()
                             }).ToList()
@@ -606,20 +609,20 @@ namespace GSC.Report.Common
                   {
                       ProjectCode = x.Project.ProjectCode,
                       ProjectName = x.Project.ProjectName,
-                      ClientId = x.Project.ClientId                      
+                      ClientId = x.Project.ClientId
                   },
                   Period = new List<ProjectDesignPeriodReportDto> {
           new ProjectDesignPeriodReportDto {
             DisplayName = x.ProjectDesignPeriod.DisplayName,
               Visit = x.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate==null).Select(x => new ProjectDesignVisitList {
-                  DisplayName = x.ProjectDesignVisit.DisplayName,
+                  DisplayName = x.RepeatedVisitNumber==null ?x.ProjectDesignVisit.DisplayName:x.ProjectDesignVisit.DisplayName+"_"+x.RepeatedVisitNumber,
                   DesignOrder = x.ProjectDesignVisit.DesignOrder,
                   ProjectDesignTemplatelist = x.ScreeningTemplates.Where(a => a.Status != ScreeningTemplateStatus.Pending &&
                     a.DeletedDate == null  && a.ProjectDesignTemplate.DeletedDate == null && (reportSetting.NonCRF == true ? a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic || a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific)).Select(a => new ProjectDesignTemplatelist {
                     TemplateCode = a.ProjectDesignTemplate.TemplateCode,
                       TemplateName = a.ProjectDesignTemplate.TemplateName,
                       DesignOrder = a.ProjectDesignTemplate.DesignOrder,
-                      RepeatSeqNo=a.RepeatSeqNo.Value,
+                      RepeatSeqNo=a.RepeatSeqNo,
                       Domain = new DomainReportDto {
                         DomainCode = a.ProjectDesignTemplate.Domain.DomainCode, DomainName = a.ProjectDesignTemplate.Domain.DomainName
                       },
@@ -651,7 +654,7 @@ namespace GSC.Report.Common
                       ScreeningTemplateReview=a.ScreeningTemplateReview.Where(r=>r.DeletedDate==null).Select(r=>new ScreeningTemplateReviewReportDto{
                       ScreeningTemplateId=r.ScreeningTemplateId,
                       ReviewLevel=r.ReviewLevel,
-                      RoleId=r.RoleId, 
+                      RoleId=r.RoleId,
                       RoleName=r.Role.RoleName,
                       CreatedByUser=r.CreatedByUser.UserName,
                       CreatedDate=r.CreatedDate
