@@ -35,6 +35,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IProjectDesignTemplateNoteRepository _projectDesignTemplateNoteRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+        private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly ITemplateLanguageRepository _templateLanguageRepository;
         private readonly ITemplateNoteLanguageRepository _templateNoteLanguageRepository;
         private readonly IVariabeLanguageRepository _variableLanguageRepository;
@@ -52,6 +53,7 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignTemplateNoteRepository projectDesignTemplateNoteRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+            IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
             ITemplateLanguageRepository templateLanguageRepository,
             ITemplateNoteLanguageRepository templateNoteLanguageRepository,
             IVariabeLanguageRepository variableLanguageRepository,
@@ -70,6 +72,7 @@ namespace GSC.Api.Controllers.Project.Design
             _projectScheduleTemplateRepository = projectScheduleTemplateRepository;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
+            _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _templateLanguageRepository = templateLanguageRepository;
             _templateNoteLanguageRepository = templateNoteLanguageRepository;
@@ -169,11 +172,13 @@ namespace GSC.Api.Controllers.Project.Design
 
                     //Added for Remarks
                     projectDesignVariable.Remarks = new List<ProjectDesignVariableRemarks>();
-
+                    var SeqNo = 0;
                     foreach (var variableRemark in variableDetail.Variable.Remarks)
                     {
                         var projectDesignVariableRemark = _mapper.Map<ProjectDesignVariableRemarks>(variableRemark);
                         projectDesignVariableRemark.Id = 0;
+                        projectDesignVariableRemark.SeqNo = ++valueOrder;
+                        _projectDesignVariableRemarksRepository.Add(projectDesignVariableRemark);
                         projectDesignVariable.Remarks.Add(projectDesignVariableRemark);
                     }
 
@@ -258,6 +263,23 @@ namespace GSC.Api.Controllers.Project.Design
                                 _variableValueLanguageRepository.Add(x);
                             });
                       });
+
+
+                    var RemarkSeq = 0;
+                    variable.Remarks.ToList().ForEach(r =>
+                    {
+                        r.Id = 0;
+                        //    if (r.SeqNo == 0)
+                        r.SeqNo = ++RemarkSeq;
+                        _projectDesignVariableRemarksRepository.Add(r);
+                        ////For variable value clone language
+                        //r.VariableRemarksLanguage.ToList().ForEach(x =>
+                        //{
+                        //    x.Id = 0;
+                        //    _variableValueLanguageRepository.Add(x);
+                        //});
+                    });
+
 
                     // For encrypt clone
                     variable.Roles.ToList().ForEach(r =>
@@ -365,6 +387,14 @@ namespace GSC.Api.Controllers.Project.Design
                             x.ProjectDesignVariableValue = variableValue;
                             _variableValueLanguageRepository.Add(x);
                         });
+                    }
+
+                    variable.Id = 0;
+                    foreach (var variableRemarks in variable.Remarks)
+                    {
+                        variableRemarks.Id = 0;
+                        variableRemarks.ProjectDesignVariable = variable;
+                        _projectDesignVariableRemarksRepository.Add(variableRemarks);
                     }
 
                     _projectDesignVariableRepository.Add(variable);

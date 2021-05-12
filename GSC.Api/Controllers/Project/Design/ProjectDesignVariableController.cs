@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x => x.SeqNo), t => t.Remarks, t => t.Roles.Where(x => x.DeletedDate == null))
+            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x => x.SeqNo), t => t.Remarks.OrderBy(x => x.SeqNo), t => t.Roles.Where(x => x.DeletedDate == null))
                 .FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             return Ok(variableDto);
@@ -81,6 +81,13 @@ namespace GSC.Api.Controllers.Project.Design
             {
                 _projectDesignVariableValueRepository.Add(item);
             }
+
+            foreach (var remarks in variable.Remarks)
+            {
+                _projectDesignVariableRemarksRepository.Add(remarks);
+            }
+
+
             if (variable.IsEncrypt)
             {
                 foreach (var item in variable.Roles)
@@ -261,8 +268,12 @@ namespace GSC.Api.Controllers.Project.Design
             foreach (var value in deletevalues)
                 _projectDesignVariableRemarksRepository.Remove(value);
 
+            var SeqNo = data.Count;
             foreach (var item in addvalues)
+            {
+                item.SeqNo = ++SeqNo;
                 _projectDesignVariableRemarksRepository.Add(item);
+            }
 
             foreach (var value in updatevalues)
                 _projectDesignVariableRemarksRepository.Update(value);

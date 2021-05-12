@@ -9,6 +9,6 @@ namespace GSC.Data.Dto.Master
         public string Range { get; set; }
 
         public string Remark{ get; set; }
-
+        public int SeqNo { get; set; }
     }
 }

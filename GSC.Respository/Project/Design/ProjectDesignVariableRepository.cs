@@ -34,7 +34,8 @@ namespace GSC.Respository.Project.Design
                                   && x.ProjectDesignTemplateId == projectDesignTemplateId);
 
             if (isFormula)
-                result = result.Where(x => (x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character) || (x.CollectionSource == CollectionSources.NumericScale));
+                result = result.Where(x => (x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character
+                || x.CollectionSource == CollectionSources.NumericScale || x.CollectionSource == CollectionSources.HorizontalScale));
 
             return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownVaribleDto
             {

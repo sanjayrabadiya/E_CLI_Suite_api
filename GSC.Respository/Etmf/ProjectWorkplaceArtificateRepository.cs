@@ -75,6 +75,18 @@ namespace GSC.Respository.Etmf
         {
             WorkplaceChartDto result = new WorkplaceChartDto();
             var Artificate = new List<ProjectWorkplaceArtificate>();
+
+            var WorkPlaceDetails = _context.ProjectWorkplaceDetail.Where(x => x.ProjectWorkplace.ProjectId == filters.ProjectId).ToList();
+            var rightsWorkplace = new List<int>();
+            foreach (var item in WorkPlaceDetails)
+            {
+                var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == item.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
+                if (rights != null && rights.IsView)
+                {
+                    rightsWorkplace.Add(item.Id);
+                }
+            }
+
             if (filters.SubSectionId == null || filters.SubSectionId == 0)
             {
                 Artificate = All.Include(y => y.ProjectWorkplaceArtificatedocument).Include(y => y.EtmfArtificateMasterLbrary).Include(y => y.ProjectWorkplaceSection)
@@ -82,6 +94,7 @@ namespace GSC.Respository.Etmf
                     .ThenInclude(y => y.ProjectWorkplaceDetail)
                     .ThenInclude(y => y.ProjectWorkplace)
                     .Where(y => y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == filters.ProjectId
+                    && rightsWorkplace.Contains(y.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetailId)
                     && y.DeletedDate == null).ToList();
             }
 
@@ -95,6 +108,7 @@ namespace GSC.Respository.Etmf
                 .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
                 .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
                 .Where(y => y.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == filters.ProjectId
+                && rightsWorkplace.Contains(y.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetailId)
                 && y.DeletedDate == null).ToList();
 
             if (filters.WorkPlaceFolderId > 0) SubSectionArtificate = SubSectionArtificate.Where(y => y.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId == filters.WorkPlaceFolderId).ToList();
@@ -107,12 +121,13 @@ namespace GSC.Respository.Etmf
             if (filters.SubSectionId == null || filters.SubSectionId == 0)
             {
                 ArtificateDocument = _context.ProjectWorkplaceArtificatedocument.Include(x => x.ProjectArtificateDocumentApprover)
-                .Include(x => x.ProjectArtificateDocumentReview).Include(x => x.ProjectArtificateDocumentComment)
-                .Include(x => x.ProjectArtificateDocumentHistory).Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceSection)
+                .Include(x => x.ProjectArtificateDocumentReview).Include(x => x.ProjectWorkplaceArtificate)
+                .ThenInclude(x => x.ProjectWorkplaceSection)
                 .ThenInclude(y => y.ProjectWorkPlaceZone)
                 .ThenInclude(y => y.ProjectWorkplaceDetail)
                 .ThenInclude(y => y.ProjectWorkplace)
                 .Where(y => y.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == filters.ProjectId
+                && rightsWorkplace.Contains(y.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetailId)
                 && y.DeletedDate == null).ToList();
             }
             if (filters.WorkPlaceFolderId > 0) ArtificateDocument = ArtificateDocument.Where(y => y.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId == filters.WorkPlaceFolderId).ToList();
@@ -121,14 +136,15 @@ namespace GSC.Respository.Etmf
             if (filters.ArtificateId > 0) ArtificateDocument = ArtificateDocument.Where(y => y.ProjectWorkplaceArtificate.Id == filters.ArtificateId).ToList();
 
             var SubSecArtificateDocument = _context.ProjectWorkplaceSubSecArtificatedocument.Include(x => x.ProjectSubSecArtificateDocumentApprover)
-                .Include(x => x.ProjectSubSecArtificateDocumentReview).Include(x => x.ProjectSubSecArtificateDocumentComment)
-                .Include(x => x.ProjectSubSecArtificateDocumentHistory).Include(x => x.ProjectWorkplaceSubSectionArtifact)
+                .Include(x => x.ProjectSubSecArtificateDocumentReview)
+                .Include(x => x.ProjectWorkplaceSubSectionArtifact)
                 .ThenInclude(x => x.ProjectWorkplaceSubSection)
                 .ThenInclude(x => x.ProjectWorkplaceSection)
                 .ThenInclude(y => y.ProjectWorkPlaceZone)
                 .ThenInclude(y => y.ProjectWorkplaceDetail)
                 .ThenInclude(y => y.ProjectWorkplace)
                 .Where(y => y.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == filters.ProjectId
+                && rightsWorkplace.Contains(y.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetailId)
                 && y.DeletedDate == null).ToList();
 
             if (filters.WorkPlaceFolderId > 0) SubSecArtificateDocument = SubSecArtificateDocument.Where(y => y.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId == filters.WorkPlaceFolderId).ToList();
@@ -147,6 +163,7 @@ namespace GSC.Respository.Etmf
                 + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.IsAccepted == null).Count();
 
             result.AllDocument = ArtificateDocument.Count() + SubSecArtificateDocument.Count();
+
             result.Final = ArtificateDocument.Where(x => x.Status == ArtifactDocStatusType.Final).Count() + SubSecArtificateDocument.Where(x => x.Status == ArtifactDocStatusType.Final).Count();
 
             result.InComplete = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() == 0).Count() +
@@ -156,11 +173,13 @@ namespace GSC.Respository.Etmf
                 + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Count != 0 && x.ProjectSubSecArtificateDocumentReview.GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count();
             result.AllPendingReview = ArtificateDocument.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() != 0).Count()
                 + SubSecArtificateDocument.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() != 0).Count();
+
             result.NotRequired = Artificate.Where(x => x.IsNotRequired == true).Count()
                 + SubSectionArtificate.Where(x => x.IsNotRequired == true).Count();
 
             result.CoreArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 2 && x.ProjectWorkplaceArtificatedocument.Count() == 0).Count();
             result.RecommendedArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 1 && x.ProjectWorkplaceArtificatedocument.Count() == 0).Count();
+
             return result;
         }
     }

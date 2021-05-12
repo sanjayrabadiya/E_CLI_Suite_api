@@ -30,6 +30,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeLanguageRepository _variableLanguageRepository;
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
+        private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         public ProjectDesignVisitController(IProjectDesignVisitRepository projectDesignVisitRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -38,6 +39,7 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
+            IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
             IVisitLanguageRepository visitLanguageRepository,
             ITemplateLanguageRepository templateLanguageRepository,
             ITemplateNoteLanguageRepository templateNoteLanguageRepository,
@@ -56,6 +58,7 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _visitLanguageRepository = visitLanguageRepository;
             _templateLanguageRepository = templateLanguageRepository;
+            _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
             _templateNoteLanguageRepository = templateNoteLanguageRepository;
             _variableLanguageRepository = variableLanguageRepository;
             _variableNoteLanguageRepository = variableNoteLanguageRepository;
@@ -204,6 +207,19 @@ namespace GSC.Api.Controllers.Project.Design
                             });
 
                         });
+
+
+                        variable.Id = 0;
+                        var RSeq = 0;
+                        variable.Remarks.ToList().ForEach(value =>
+                        {
+                            value.Id = 0;
+                            value.SeqNo = ++RSeq;
+                            _projectDesignVariableRemarksRepository.Add(value);
+                        });
+
+
+
                         _projectDesignVariableRepository.Add(variable);
 
                         //For variable clone language

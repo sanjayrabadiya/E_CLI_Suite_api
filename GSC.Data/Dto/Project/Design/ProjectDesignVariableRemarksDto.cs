@@ -11,7 +11,7 @@ namespace GSC.Data.Dto.Project.Design
         public int Range { get; set; }
 
         public string Remarks { get; set; }
-
+        public int SeqNo { get; set; }
         public string ScreeningValue { get; set; }
         public int ScreeningTemplateValueChildId { get; set; }
         public string ScreeningValueOld { get; set; }
@@ -26,6 +26,7 @@ namespace GSC.Data.Dto.Project.Design
         public string ScreeningValue { get; set; }
         public int ScreeningTemplateValueChildId { get; set; }
         public string ScreeningValueOld { get; set; }
+        public int SeqNo { get; set; }
     }
 
     public class ProjectDesignVariableRemarksDropDown

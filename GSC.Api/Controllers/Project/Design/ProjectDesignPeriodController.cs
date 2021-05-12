@@ -21,6 +21,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IUnitOfWork _uow;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
+        private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
 
         public ProjectDesignPeriodController(IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -28,7 +29,8 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
-            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository)
+            IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
+            IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository)
         {
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -38,6 +40,7 @@ namespace GSC.Api.Controllers.Project.Design
             _uow = uow;
             _mapper = mapper;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
+            _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
         }
 
         [HttpGet("{id}/{projectDesignId}")]
@@ -139,11 +142,23 @@ namespace GSC.Api.Controllers.Project.Design
                             });
 
                             variable.Id = 0;
+                            var SeqNo = 0;
                             variable.Values.ToList().ForEach(value =>
                             {
                                 value.Id = 0;
+                                value.SeqNo = ++SeqNo;
                                 _projectDesignVariableValueRepository.Add(value);
                             });
+
+                            variable.Id = 0;
+                            var RSeqNo = 0;
+                            variable.Remarks.ToList().ForEach(remarks =>
+                            {
+                                remarks.Id = 0;
+                                remarks.SeqNo = ++RSeqNo;
+                                _projectDesignVariableRemarksRepository.Add(remarks);
+                            });
+
                             _projectDesignVariableRepository.Add(variable);
                         });
                         _projectDesignTemplateRepository.Add(template);
