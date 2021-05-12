@@ -1456,21 +1456,21 @@ namespace GSC.Report
                         if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
                         {
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-                            checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
+                            checkField.Bounds = new RectangleF(410, result.Bounds.Y + 10, 10, 10);
                             checkField.Style = PdfCheckBoxStyle.Check;
                             document.Form.Fields.Add(checkField);
-                            AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(420, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                            AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                         }
                         else
                         {
                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-                            checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
+                            checkField.Bounds = new RectangleF(410, result.Bounds.Y + 10, 10, 10);
                             checkField.Style = PdfCheckBoxStyle.Check;
                             if (variable.ScreeningIsNa)
                                 checkField.Checked = true;
                             checkField.ReadOnly = true;
                             document.Form.Fields.Add(checkField);
-                            AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(420, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                            AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
 
                         }
                     }
