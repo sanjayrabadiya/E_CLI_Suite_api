@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x => x.SeqNo), t => t.Remarks.OrderBy(x => x.SeqNo), t => t.Roles.Where(x => x.DeletedDate == null))
+            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x => x.SeqNo),t => t.Roles.Where(x => x.DeletedDate == null))
                 .FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             return Ok(variableDto);
@@ -82,10 +82,10 @@ namespace GSC.Api.Controllers.Project.Design
                 _projectDesignVariableValueRepository.Add(item);
             }
 
-            foreach (var remarks in variable.Remarks)
-            {
-                _projectDesignVariableRemarksRepository.Add(remarks);
-            }
+            //foreach (var remarks in variable.Remarks)
+            //{
+            //    _projectDesignVariableRemarksRepository.Add(remarks);
+            //}
 
 
             if (variable.IsEncrypt)
@@ -128,7 +128,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             UpdateVariableValues(variable);
-            UpdateVariableRemarks(variable);
+           // UpdateVariableRemarks(variable);
             UpdateVariableEncryptRole(variable);
 
             _projectDesignVariableRepository.Update(variable);
@@ -259,25 +259,25 @@ namespace GSC.Api.Controllers.Project.Design
                 }
         }
 
-        private void UpdateVariableRemarks(ProjectDesignVariable variable)
-        {
-            var data = _projectDesignVariableRemarksRepository.FindBy(x => x.ProjectDesignVariableId == variable.Id).ToList();
-            var deletevalues = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-            var addvalues = variable.Remarks.Where(x => x.Id == 0).ToList();
-            var updatevalues = variable.Remarks.Where(x => x.Id != 0).ToList();
-            foreach (var value in deletevalues)
-                _projectDesignVariableRemarksRepository.Remove(value);
+        //private void UpdateVariableRemarks(ProjectDesignVariable variable)
+        //{
+        //    var data = _projectDesignVariableRemarksRepository.FindBy(x => x.ProjectDesignVariableId == variable.Id).ToList();
+        //    var deletevalues = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+        //    var addvalues = variable.Remarks.Where(x => x.Id == 0).ToList();
+        //    var updatevalues = variable.Remarks.Where(x => x.Id != 0).ToList();
+        //    foreach (var value in deletevalues)
+        //        _projectDesignVariableRemarksRepository.Remove(value);
 
-            var SeqNo = data.Count;
-            foreach (var item in addvalues)
-            {
-                item.SeqNo = ++SeqNo;
-                _projectDesignVariableRemarksRepository.Add(item);
-            }
+        //    var SeqNo = data.Count;
+        //    foreach (var item in addvalues)
+        //    {
+        //        item.SeqNo = ++SeqNo;
+        //        _projectDesignVariableRemarksRepository.Add(item);
+        //    }
 
-            foreach (var value in updatevalues)
-                _projectDesignVariableRemarksRepository.Update(value);
-        }
+        //    foreach (var value in updatevalues)
+        //        _projectDesignVariableRemarksRepository.Update(value);
+        //}
 
         // Merge with GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula} by vipul
         //[HttpGet]

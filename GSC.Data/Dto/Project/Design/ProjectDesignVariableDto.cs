@@ -43,7 +43,7 @@ namespace GSC.Data.Dto.Project.Design
         public string UnitAnnotation { get; set; }
         public PrintType? PrintType { get; set; }
         public IList<ProjectDesignVariableValueDto> Values { get; set; } = null;
-        public IList<ProjectDesignVariableRemarksDto> Remarks { get; set; } = null;
+       // public IList<ProjectDesignVariableRemarksDto> Remarks { get; set; } = null;
         public UnitDto Unit { get; set; }
         public int DesignOrder { get; set; }
         public bool? IsDocument { get; set; }
@@ -68,6 +68,7 @@ namespace GSC.Data.Dto.Project.Design
         public EditCheckTargetValidation EditCheckValidation { get; set; }
         public Alignment? Alignment { get; set; }
         public IList<ProjectDesignVariableEncryptRoleDto> Roles { get; set; } = null;
+        public int? LargeStep { get; set; }
     }
 
     public class DesignScreeningVariableDto
@@ -87,7 +88,7 @@ namespace GSC.Data.Dto.Project.Design
         public string HighRangeValue { get; set; }
         public PrintType PrintType { get; set; }
         public IList<ScreeningVariableValueDto> Values { get; set; } = null;
-        public IList<ScreeningVariableRemarksDto> Remarks { get; set; } = null;
+       // public IList<ScreeningVariableRemarksDto> Remarks { get; set; } = null;
         public string UnitName { get; set; }
         public int DesignOrder { get; set; }
         public bool? IsDocument { get; set; }
@@ -122,6 +123,8 @@ namespace GSC.Data.Dto.Project.Design
         public Alignment? Alignment { get; set; }
 
         public int? RelationProjectDesignVariableId { get; set; }
+        public int? LargeStep { get; set; }
+
     }
 
     public class EditCheckIds

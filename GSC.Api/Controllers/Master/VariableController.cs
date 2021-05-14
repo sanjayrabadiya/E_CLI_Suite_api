@@ -26,7 +26,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IVariableValueRepository _variableValueRepository;
-        private readonly IVariableRemarksRepository _variableRemarksRepository;
+      //  private readonly IVariableRemarksRepository _variableRemarksRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
 
         public VariableController(IVariableRepository variableRepository,
@@ -35,7 +35,7 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-            IVariableRemarksRepository variableRemarksRepository,
+          //  IVariableRemarksRepository variableRemarksRepository,
             IVariableTemplateRepository variableTemplateRepository)
         {
             _variableTemplateRepository = variableTemplateRepository;
@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.Master
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _variableValueRepository = variableValueRepository;
-            _variableRemarksRepository = variableRemarksRepository;
+       //     _variableRemarksRepository = variableRemarksRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -62,7 +62,8 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values, t => t.Remarks).FirstOrDefault();
+            var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values).FirstOrDefault();
+            // var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values, t => t.Remarks).FirstOrDefault();
 
             //if (variable.Values != null)
             //    variable.Values = variable.Values.Where(x => x.DeletedDate == null).ToList();
@@ -90,10 +91,10 @@ namespace GSC.Api.Controllers.Master
             {
                 _variableValueRepository.Add(item);
             }
-            foreach (var item in variable.Remarks)
-            {
-                _variableRemarksRepository.Add(item);
-            }
+            //foreach (var item in variable.Remarks)
+            //{
+            //    _variableRemarksRepository.Add(item);
+            //}
             if (_uow.Save() <= 0) throw new Exception("Creating Variable failed on save.");
 
             if (variableDto.CoreVariableType == Helper.CoreVariableType.Required)
@@ -126,7 +127,7 @@ namespace GSC.Api.Controllers.Master
             }
 
             UpdateVariableValues(variable);
-            UpdateVariableRemarks(variable);
+          //  UpdateVariableRemarks(variable);
             _variableRepository.Update(variable);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
@@ -154,21 +155,21 @@ namespace GSC.Api.Controllers.Master
 
         }
 
-        private void UpdateVariableRemarks(Variable variable)
-        {
-            var data = _variableRemarksRepository.FindBy(x => x.VariableId == variable.Id).ToList();
-            var deleteRemarks = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-            var addremarks = variable.Remarks.Where(x => x.Id == 0).ToList();
-            var updateremarks = variable.Remarks.Where(x => x.Id > 0).ToList();
-            foreach (var value in deleteRemarks)
-                _variableRemarksRepository.Remove(value);
-            foreach (var value in updateremarks)
-                _variableRemarksRepository.Update(value);
-            foreach (var item in addremarks)
-            {
-                _variableRemarksRepository.Add(item);
-            }
-        }
+        //private void UpdateVariableRemarks(Variable variable)
+        //{
+        //    var data = _variableRemarksRepository.FindBy(x => x.VariableId == variable.Id).ToList();
+        //    var deleteRemarks = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+        //    var addremarks = variable.Remarks.Where(x => x.Id == 0).ToList();
+        //    var updateremarks = variable.Remarks.Where(x => x.Id > 0).ToList();
+        //    foreach (var value in deleteRemarks)
+        //        _variableRemarksRepository.Remove(value);
+        //    foreach (var value in updateremarks)
+        //        _variableRemarksRepository.Update(value);
+        //    foreach (var item in addremarks)
+        //    {
+        //        _variableRemarksRepository.Add(item);
+        //    }
+        //}
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)

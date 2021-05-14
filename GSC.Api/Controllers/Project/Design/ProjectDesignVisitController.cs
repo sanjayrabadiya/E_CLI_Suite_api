@@ -209,14 +209,14 @@ namespace GSC.Api.Controllers.Project.Design
                         });
 
 
-                        variable.Id = 0;
-                        var RSeq = 0;
-                        variable.Remarks.ToList().ForEach(value =>
-                        {
-                            value.Id = 0;
-                            value.SeqNo = ++RSeq;
-                            _projectDesignVariableRemarksRepository.Add(value);
-                        });
+                        //variable.Id = 0;
+                        //var RSeq = 0;
+                        //variable.Remarks.ToList().ForEach(value =>
+                        //{
+                        //    value.Id = 0;
+                        //    value.SeqNo = ++RSeq;
+                        //    _projectDesignVariableRemarksRepository.Add(value);
+                        //});
 
 
 
