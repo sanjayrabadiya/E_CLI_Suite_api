@@ -34,6 +34,7 @@ namespace GSC.Data.Dto.CTMS
         public ActivityType? ActivityType { get; set; }
         public int OffSet { get; set; }
         public bool IsManual { get; set; }
+        public RefrenceType RefrenceType { get; set; }
     }
    
 }

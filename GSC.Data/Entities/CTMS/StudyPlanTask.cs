@@ -24,5 +24,6 @@ namespace GSC.Data.Entities.CTMS
         public int? DependentTaskId { get; set;}
         public ActivityType? ActivityType { get; set; }
         public int OffSet { get; set; }
+        public int ProjectId { get; set; }       
     }
 }

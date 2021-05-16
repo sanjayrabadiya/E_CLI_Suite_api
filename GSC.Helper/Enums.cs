@@ -620,6 +620,12 @@ namespace GSC.Helper
         [Description("Start-Finish")] SF = 3,
         [Description("Start-Start")] SS = 4
     }
+    public enum RefrenceType : short
+    {
+        [Description("Study")] Study = 1,
+        [Description("Sites")] Sites = 2,
+        [Description("Both")] Both = 3,
 
+    }
 
 }

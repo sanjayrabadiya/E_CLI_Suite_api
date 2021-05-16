@@ -10,5 +10,6 @@ namespace GSC.Respository.CTMS
     {
         List<string> GetworkingDayList(int ProjectId);
         List<string> GetweekEndDay(int ProjectId);
+        string ValidateweekEnd(int ProjectId);
     }
 }

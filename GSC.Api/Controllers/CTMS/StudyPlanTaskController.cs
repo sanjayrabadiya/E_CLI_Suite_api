@@ -8,6 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
@@ -36,10 +37,10 @@ namespace GSC.Api.Controllers.CTMS
             _studyPlanTaskRepository = studyPlanTaskRepository;
         }
 
-        [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}")]
-        public IActionResult Get(bool isDeleted, int StudyPlanId)
+        [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}/{ProjectId:int}")]
+        public IActionResult Get(bool isDeleted, int StudyPlanId,int ProjectId)
         {
-            var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId);
+            var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId, ProjectId);
             return Ok(studyplan);
         }
 
@@ -48,8 +49,7 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (id <= 0) return BadRequest();
             var task = _studyPlanTaskRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
-            var taskDto = _mapper.Map<StudyPlanTaskDto>(task);
-            //var datetime = WorkingDayHelper.GetNextWorkingDay(DateTime.Now, 4);
+            var taskDto = _mapper.Map<StudyPlanTaskDto>(task);            
             return Ok(taskDto);
         }
 
@@ -60,21 +60,8 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             taskmasterDto.Id = 0;
-            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-
-            // var validate = _studyPlanTaskRepository.ValidateTask(tastMaster);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-            //if (taskmasterDto.IsMileStone || taskmasterDto.StartDate.Date == taskmasterDto.EndDate.Date)
-            //{
-            //    tastMaster.isMileStone = true;
-            //    tastMaster.EndDate = taskmasterDto.StartDate;
-            //}
-            tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
-            //tastMaster.Duration = Duration(taskmasterDto.StartDate, taskmasterDto.EndDate);          
+            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);           
+            tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);            
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
@@ -87,31 +74,63 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            _studyPlanTaskRepository.Add(tastMaster);
-            _uow.Save();
-            string mvalidate = _studyPlanTaskRepository.UpdateDependentTask(taskmasterDto.StudyPlanId);
-            if (!string.IsNullOrEmpty(mvalidate))
-            {
-                ModelState.AddModelError("Message", mvalidate);
-                _studyPlanTaskRepository.Remove(tastMaster);
-                _uow.Save();
-                return BadRequest(ModelState);
-            }
+            //_studyPlanTaskRepository.Add(tastMaster);
+            //_uow.Save();
+             var tasklist= _studyPlanTaskRepository.Save(tastMaster, taskmasterDto.RefrenceType);
 
-            //  if (_uow.Save() <= 0) throw new Exception("Creating Task failed on save.");
-            //  if (taskmasterDto.ParentId > 0)
-            // _studyPlanTaskRepository.UpdateParentDate(taskmasterDto.ParentId);
+        //    var tasklist = new List<StudyPlanTask>();
+            // var parojectIds = new List<int>();
+           // int ParentProjectId = _context.StudyPlan.Where(x => x.Id == tastMaster.StudyPlanId).Select(x => x.ProjectId).SingleOrDefault();
+           // if (taskmasterDto.RefrenceType == RefrenceType.Study)
+           // {
+           //     //var data = new StudyPlanTask();
+           //     //data = taskData;
+           //     //data.ProjectId = ParentProjectId;
+           //     //tasklist.Add(data);
+           // }
+           // else if (taskmasterDto.RefrenceType == RefrenceType.Sites)
+           // {
+           //     //var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
+           //     //foreach (var sitesId in siteslist)
+           //     //{
+           //     //    var data = new StudyPlanTask();
+           //     //    data = _mapper.Map<StudyPlanTask>(taskData);
+           //     //    data.ProjectId = sitesId;
+           //     //    tasklist.Add(data);
+           //     //}
+           // }
+           // else
+           // {
+           //     // var w = new StudyPlanTask();
+           //     //  w = _mapper.Map<StudyPlanTask>(taskData);
+           //     tastMaster.ProjectId = ParentProjectId;
+           //     _studyPlanTaskRepository.Add(tastMaster);
 
-            //  _studyPlanTaskRepository.InsertDependentTask(taskmasterDto.DependentTask, tastMaster.Id);
+           //     var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
+           //     foreach (var sitesId in siteslist)
+           //     {
+           //         // var subdata = new StudyPlanTask();
+           //         // subdata = _mapper.Map<StudyPlanTask>(taskData);
+           //         tastMaster.ProjectId = sitesId;
+           //         _studyPlanTaskRepository.Add(tastMaster);
+           //     }
+           // }
+
+           //// _context.StudyPlanTask.AddRange(tasklist);
+           // _uow.Save();
+
+
+            //string mvalidate = _studyPlanTaskRepository.UpdateDependentTask(taskmasterDto.StudyPlanId);
+            //if (!string.IsNullOrEmpty(mvalidate))
+            //{
+            //    ModelState.AddModelError("Message", mvalidate);
+            //    _studyPlanTaskRepository.Remove(tastMaster);
+            //    _uow.Save();
+            //    return BadRequest(ModelState);
+            //}            
             _studyPlanTaskRepository.UpdateTaskOrderSequence(taskmasterDto.Id);
             return Ok(tastMaster.Id);
         }
-
-        //private int Duration(DateTime d1, DateTime d2)
-        //{
-        //    TimeSpan span = d2.Subtract(d1);
-        //    return (int)span.TotalDays;
-        //}
 
         [HttpPut]
         public IActionResult Put([FromBody] StudyPlantaskParameterDto taskmasterDto)
@@ -120,20 +139,7 @@ namespace GSC.Api.Controllers.CTMS
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-            //var validate = _studyPlanTaskRepository.ValidateTask(tastMaster);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-            //if (taskmasterDto.IsMileStone || taskmasterDto.StartDate.Date == taskmasterDto.EndDate.Date)
-            //{
-            //    tastMaster.isMileStone = true;
-            //    tastMaster.EndDate = taskmasterDto.StartDate;
-            //}
-            //tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
-            // tastMaster.Duration = Duration(taskmasterDto.StartDate, taskmasterDto.EndDate);
+            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);          
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
@@ -156,12 +162,7 @@ namespace GSC.Api.Controllers.CTMS
                 _studyPlanTaskRepository.Update(revertdata);
                 _uow.Save();
                 return BadRequest(ModelState);
-            }
-            // if (taskmasterDto.ParentId > 0)
-            // _studyPlanTaskRepository.UpdateParentDate(taskmasterDto.ParentId);
-            //     _studyPlanTaskRepository.InsertDependentTask(taskmasterDto.DependentTask, tastMaster.Id);
-
-            //_studyPlanTaskRepository.UpdateTaskOrderSequence(taskmasterDto.StudyPlanId);
+            }         
             return Ok(tastMaster.Id);
         }
 
@@ -220,9 +221,13 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult GetNetxtworkingDate([FromBody] NextWorkingDateParameterDto parameterDto)
         {
             if (parameterDto.StudyPlanId <= 0) return BadRequest();
-
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            //. if (StudyPlanId <= 0) return BadRequest();
+            var validate = _studyPlanTaskRepository.ValidateweekEnd(parameterDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             var nextworkingdate = _studyPlanTaskRepository.GetNextWorkingDate(parameterDto);
             return Ok(nextworkingdate);     
         }

@@ -71,5 +71,18 @@ namespace GSC.Respository.CTMS
             }
             return weekendlis;
         }
+
+        public string ValidateweekEnd(int ProjectId)
+        {
+            var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).SingleOrDefault();
+            if(weekend==null)
+                return "Please Select week End.";
+            if (weekend.Sunday==false && weekend.Monday==false && weekend.Tuesday==false && weekend.Wednesday==false && weekend.Thursday==false && weekend.Friday==false && weekend.Saturday == false)
+            {
+                return "Please Select week End.";
+            }
+            return "";
+        }
+        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,7 +10,7 @@ namespace GSC.Respository.CTMS
 {
     public interface IStudyPlanTaskRepository : IGenericRepository<StudyPlanTask>
     {
-        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId);
+        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId);
         int UpdateTaskOrder(StudyPlantaskParameterDto taskmasterDto);
         string ValidateTask(StudyPlanTask taskmasterDto);
         void UpdateParentDate(int? ParentId);
@@ -18,5 +19,7 @@ namespace GSC.Respository.CTMS
         string UpdateDependentTask(int StudyPlanTaskId);
         StudyPlanTask UpdateDependentTaskDate(StudyPlanTask StudyPlanTask);
         DateTime GetNextWorkingDate(NextWorkingDateParameterDto parameterDto);
+        string ValidateweekEnd(NextWorkingDateParameterDto parameterDto);
+        List<StudyPlanTask> Save(StudyPlanTask taskData, RefrenceType refrenceType);
     }
 }

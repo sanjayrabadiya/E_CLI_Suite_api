@@ -464,5 +464,33 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
         }
+
+        [HttpGet]
+        [Route("GetActivityType")]
+        public IActionResult GetActivityType()
+        {
+            var refrencetype = Enum.GetValues(typeof(ActivityType))
+                .Cast<ActivityType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+
+            return Ok(refrencetype);
+        }
+
+        [HttpGet]
+        [Route("GetRefrenceType")]
+        public IActionResult GetRefrenceType()
+        {
+            var refrencetype = Enum.GetValues(typeof(RefrenceType))
+                .Cast<RefrenceType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }

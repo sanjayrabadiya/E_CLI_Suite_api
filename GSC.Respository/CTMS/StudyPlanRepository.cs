@@ -84,31 +84,14 @@ namespace GSC.Respository.CTMS
             _context.Save();
 
             var studyplantasklist = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyplan.Id).ToList();
-           // var studyplanchildtasklist = studyplantasklist.Where(x => x.ParentId > 0 && x.StudyPlanId == studyplan.Id).ToList();
-
             studyplantasklist.ForEach(t =>
             {
                 t.ParentId = t.ParentId == 0 ? 0 : studyplantasklist.Where(x => x.TaskId == t.ParentId && t.StudyPlanId == studyplan.Id).SingleOrDefault().Id;
                 t.DependentTaskId = t.DependentTaskId == null ? 0 : studyplantasklist.Where(x => x.TaskId == t.DependentTaskId && t.StudyPlanId == studyplan.Id).SingleOrDefault().Id;
+                t.TaskId = 0;
             });
-
-            //studyplanchildtasklist.ForEach(t =>
-            //{
-            //    t.ParentId = studyplantasklist.Where(x => x.TaskId == t.ParentId && t.StudyPlanId == studyplan.Id).SingleOrDefault().Id;
-            //    t.DependentTaskId = t.DependentTaskId == null ? 0 : studyplantasklist.Where(x => x.TaskId == t.DependentTaskId && t.StudyPlanId == studyplan.Id).SingleOrDefault().Id;
-            //});
-
             _context.StudyPlanTask.UpdateRange(studyplantasklist);
             _context.Save();
-
-            //studyplantasklist.Where(i => i.ParentId == 0).ToList().ForEach(t =>
-            //{
-            //    t.StartDate = studyplantasklist.Where(x => x.ParentId == t.Id).Min(i => i.StartDate);
-            //    t.EndDate= studyplantasklist.Where(x => x.ParentId == t.Id).Max(i => i.EndDate);
-            //});
-
-            //_context.StudyPlanTask.UpdateRange(studyplantasklist);
-            //_context.Save();   
             return "";
         }
 

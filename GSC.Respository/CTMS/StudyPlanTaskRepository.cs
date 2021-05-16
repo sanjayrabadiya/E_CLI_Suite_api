@@ -34,21 +34,80 @@ namespace GSC.Respository.CTMS
             _weekEndMasterRepository = weekEndMasterRepository;
         }
 
-        public StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId)
+        public StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId)
         {
             var result = new StudyPlanTaskGridDto();
 
             var studyplan = _context.StudyPlan.Where(x => x.Id == StudyPlanId).FirstOrDefault();
             result.StartDate = studyplan.StartDate;
             result.EndDate = studyplan.EndDate;
-
-            var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == StudyPlanId).OrderBy(x => x.TaskOrder).
+            //var tt = _context.PlanTaskRelation.Where(x => x.ProjectId == 1 && x.DeletedDate == null).ToList();
+            var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectId == ProjectId).OrderBy(x => x.TaskOrder).
                    ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+
 
             result.StudyPlanTask = tasklist;
 
             return result;
 
+        }
+
+        public List<StudyPlanTask> Save(StudyPlanTask taskData, RefrenceType refrenceType)
+        {
+             var tasklist = new List<StudyPlanTask>();
+           // var parojectIds = new List<int>();
+            int ParentProjectId = _context.StudyPlan.Where(x => x.Id == taskData.StudyPlanId).Select(x => x.ProjectId).SingleOrDefault();
+            if (refrenceType == RefrenceType.Study)
+            {              
+                var data = new StudyPlanTask();           
+                data.ProjectId = ParentProjectId;              
+                tasklist.Add(data);            
+            }
+            else if(refrenceType == RefrenceType.Sites)
+            {
+                var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
+                foreach (var sitesId in siteslist)
+                {
+                    var data = new StudyPlanTask();
+                    data =_mapper.Map<StudyPlanTask>(taskData);
+                    data.ProjectId = sitesId;
+                    tasklist.Add(data);
+                }
+            }
+            else
+            {
+                var data = new StudyPlanTask();
+                data.ProjectId = ParentProjectId;
+                tasklist.Add(data);
+                var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
+                foreach (var sitesId in siteslist)
+                {
+                    data = new StudyPlanTask();
+                    data.ProjectId = sitesId;
+                    tasklist.Add(data);                   
+                }
+                tasklist.ForEach(t => {
+                    t.ProjectId = t.ProjectId;
+                    t.StudyPlanId = taskData.StudyPlanId;
+                    t.TaskId = taskData.TaskId;
+                    t.TaskName = taskData.TaskName;
+                    t.ParentId = taskData.ParentId;
+                    t.isMileStone = taskData.isMileStone;
+                    t.Duration = taskData.Duration;
+                    t.StartDate = taskData.StartDate;
+                    t.EndDate = taskData.EndDate;
+                    t.Progress = taskData.Progress;
+                    t.TaskOrder = taskData.TaskOrder;
+                    t.ActualStartDate = taskData.ActualStartDate;
+                    t.ActualEndDate = taskData.ActualEndDate;
+                    t.DependentTaskId = taskData.DependentTaskId;
+                    t.ActivityType = taskData.ActivityType;
+                    t.OffSet = taskData.OffSet;                   
+                });
+            }
+            _context.StudyPlanTask.AddRange(tasklist);
+            _context.Save();
+            return tasklist;
         }
 
         public int UpdateTaskOrder(StudyPlantaskParameterDto taskmasterDto)
@@ -375,6 +434,57 @@ namespace GSC.Respository.CTMS
             var nextworkingdate = WorkingDayHelper.AddBusinessDays(parameterDto.StartDate, parameterDto.Duration > 0 ? parameterDto.Duration - 1 : 0);
             return nextworkingdate;
         }
+        public string ValidateweekEnd(NextWorkingDateParameterDto parameterDto)
+        {
+            int ProjectId = _context.StudyPlan.Where(x => x.Id == parameterDto.StudyPlanId).SingleOrDefault().ProjectId;
+            return _weekEndMasterRepository.ValidateweekEnd(ProjectId);
+
+        }
+
+
+        //public void InsertPlanTaskRelation(int StudyPlanTaskId, RefrenceType refrenceType, int StudyPlanId)
+        //{
+        //    var planttaskdata = new List<PlanTaskRelation>();
+        //    int ParentProjectId = _context.StudyPlan.Where(x => x.Id == StudyPlanId).Select(x => x.ProjectId).SingleOrDefault();
+        //    if (refrenceType == RefrenceType.Study)
+        //    {
+        //        var plantask = new PlanTaskRelation();
+        //        plantask.ProjectId = ParentProjectId;
+        //        plantask.StudyPlanTaskId = StudyPlanTaskId;
+        //        planttaskdata.Add(plantask);
+        //        //_context.PlanTaskRelation.Add(plantaskrelation);
+        //    }
+        //    else if (refrenceType == RefrenceType.Sites)
+        //    {
+        //        var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
+        //        foreach (var sitesId in siteslist)
+        //        {
+        //            var plantask = new PlanTaskRelation();
+        //            plantask.ProjectId = sitesId;
+        //            plantask.StudyPlanTaskId = StudyPlanTaskId;
+        //            planttaskdata.Add(plantask);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        var plantask = new PlanTaskRelation();
+        //        plantask.ProjectId = ParentProjectId;
+        //        plantask.StudyPlanTaskId = StudyPlanTaskId;
+        //        planttaskdata.Add(plantask);
+        //        //_context.PlanTaskRelation.Add(plantaskrelation);
+        //        var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
+        //        foreach (var sitesId in siteslist)
+        //        {
+        //            plantask = new PlanTaskRelation();
+        //            plantask.ProjectId = sitesId;
+        //            plantask.StudyPlanTaskId = StudyPlanTaskId;
+        //            planttaskdata.Add(plantask);
+        //            //_context.PlanTaskRelation.AddRange(plantaskrelation);
+        //        }
+        //    }
+        //    _context.PlanTaskRelation.AddRange(planttaskdata);
+        //    _context.Save();
+        //}
 
     }
 }

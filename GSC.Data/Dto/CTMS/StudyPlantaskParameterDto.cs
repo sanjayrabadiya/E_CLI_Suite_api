@@ -28,6 +28,9 @@ namespace GSC.Data.Dto.CTMS
         public int? DependentTaskId { get; set; }
         public ActivityType? ActivityType { get; set; }
         public int OffSet { get; set; }
+        public int? SiteId { get; set; }
+        public RefrenceType RefrenceType { get; set; }
+
     }
 
     public class DependentTaskParameterDto : BaseDto
