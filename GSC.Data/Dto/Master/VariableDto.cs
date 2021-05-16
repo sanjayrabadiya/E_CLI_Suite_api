@@ -57,8 +57,8 @@ namespace GSC.Data.Dto.Master
         public DateValidateType? DateValidate { get; set; }
 
         public int? CompanyId { get; set; }
-
-        public IList<VariableRemarks> Remarks { get; set; } = null;
+        public int? LargeStep { get; set; }
+        //   public IList<VariableRemarks> Remarks { get; set; } = null;
         public Alignment? Alignment { get; set; }
     }
 

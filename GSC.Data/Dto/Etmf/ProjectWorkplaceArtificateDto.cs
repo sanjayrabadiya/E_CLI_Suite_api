@@ -52,4 +52,17 @@ namespace GSC.Data.Dto.Etmf
         public int? SubSectionArtificateId { get; set; }
 
     }
+
+    public class ChartReport
+    {
+        public string ProjectCode { get; set; }
+        public string WorkPlaceFolderType { get; set; }
+        public string WorkPlaceFolderName { get; set; }
+        public string ZoneName { get; set; }
+        public string SectionName { get; set; }
+        public string ArtificateName { get; set; }
+        public string SubSectionName { get; set; }
+        public string SubSectionArtificateName { get; set; }
+
+    }
 }

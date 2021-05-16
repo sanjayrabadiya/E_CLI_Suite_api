@@ -387,6 +387,17 @@ namespace GSC.Audit
             // medical team
             _dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role", SourceColumn = "RoleShortName", TableName = "SecurityRole", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "Project Manager", SourceColumn = "UserName", TableName = "Users", PkName = "Id" });
+
+            // Varable value
+          //  _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignVariableId", DisplayName = "Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "ValueCode", DisplayName = "Value Code" });
+            _dictionaries.Add(new Dictionary { FieldName = "ValueName", DisplayName = "Value Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "Lable", DisplayName = "Lable" });
+            _dictionaries.Add(new Dictionary { FieldName = "SeqNo", DisplayName = "Seq No" });
+            _dictionaries.Add(new Dictionary { FieldName = "Range", DisplayName = "Range" });
+            _dictionaries.Add(new Dictionary { FieldName = "Remarks", DisplayName = "Remarks" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "LargeStep", DisplayName = "Large Step" });
         }
 
 

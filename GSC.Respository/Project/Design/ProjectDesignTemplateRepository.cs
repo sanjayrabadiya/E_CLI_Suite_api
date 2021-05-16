@@ -47,8 +47,8 @@ namespace GSC.Respository.Project.Design
                 .ThenInclude(d => d.VariableLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.VariableNoteLanguage.Where(x => x.DeletedBy == null))
-                .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
-                .ThenInclude(d => d.Remarks.Where(x => x.DeletedBy == null).OrderBy(c => c.SeqNo))
+                //  .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
+                //  .ThenInclude(d => d.Remarks.Where(x => x.DeletedBy == null).OrderBy(c => c.SeqNo))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.Roles.Where(x => x.DeletedBy == null))
                 .AsNoTracking().FirstOrDefault();
@@ -97,11 +97,12 @@ namespace GSC.Respository.Project.Design
                         DataType = x.DataType,
                         Length = x.Length,
                         DefaultValue = string.IsNullOrEmpty(x.DefaultValue) && x.CollectionSource == CollectionSources.HorizontalScale ? "1" : x.DefaultValue,
+                        LargeStep = x.LargeStep,
                         LowRangeValue = x.LowRangeValue,
                         HighRangeValue = x.HighRangeValue,
                         RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
                         PrintType = x.PrintType,
-                        Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
+                        //Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
                         UnitName = x.Unit.UnitName,
                         DesignOrder = x.DesignOrder,
                         IsDocument = x.IsDocument,

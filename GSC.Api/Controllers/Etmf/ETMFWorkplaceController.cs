@@ -197,5 +197,13 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Creating ETMFWorkplace failed on save.");
             return Ok(SaveFolderStructure.Id);
         }
+
+        [Route("GetChartReport/{projectId}/{chartType:int?}")]
+        [HttpGet]
+        public IActionResult GetChartReport(int projectId, EtmfChartType? chartType)
+        {
+            var projectworkplace = _eTMFWorkplaceRepository.GetChartReport(projectId, chartType);
+            return Ok(projectworkplace);
+        }
     }
 }

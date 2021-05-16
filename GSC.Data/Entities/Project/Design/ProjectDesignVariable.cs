@@ -37,7 +37,7 @@ namespace GSC.Data.Entities.Project.Design
         public bool IsDocument { get; set; }
         public bool IsEncrypt { get; set; }
         public IList<ProjectDesignVariableValue> Values { get; set; } = null;
-        public IList<ProjectDesignVariableRemarks> Remarks { get; set; } = null;
+       // public IList<ProjectDesignVariableRemarks> Remarks { get; set; } = null;
         public Unit Unit { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public int DesignOrder { get; set; }
@@ -57,5 +57,6 @@ namespace GSC.Data.Entities.Project.Design
         public Alignment? Alignment { get; set; }
 
         public IList<ProjectDesignVariableEncryptRole> Roles { get; set; } = null;
+        public int? LargeStep { get; set; }
     }
 }

@@ -171,16 +171,16 @@ namespace GSC.Api.Controllers.Project.Design
                     }
 
                     //Added for Remarks
-                    projectDesignVariable.Remarks = new List<ProjectDesignVariableRemarks>();
-                    var SeqNo = 0;
-                    foreach (var variableRemark in variableDetail.Variable.Remarks)
-                    {
-                        var projectDesignVariableRemark = _mapper.Map<ProjectDesignVariableRemarks>(variableRemark);
-                        projectDesignVariableRemark.Id = 0;
-                        projectDesignVariableRemark.SeqNo = ++valueOrder;
-                        _projectDesignVariableRemarksRepository.Add(projectDesignVariableRemark);
-                        projectDesignVariable.Remarks.Add(projectDesignVariableRemark);
-                    }
+                    //projectDesignVariable.Remarks = new List<ProjectDesignVariableRemarks>();
+                    //var SeqNo = 0;
+                    //foreach (var variableRemark in variableDetail.Variable.Remarks)
+                    //{
+                    //    var projectDesignVariableRemark = _mapper.Map<ProjectDesignVariableRemarks>(variableRemark);
+                    //    projectDesignVariableRemark.Id = 0;
+                    //    projectDesignVariableRemark.SeqNo = ++valueOrder;
+                    //    _projectDesignVariableRemarksRepository.Add(projectDesignVariableRemark);
+                    //    projectDesignVariable.Remarks.Add(projectDesignVariableRemark);
+                    //}
 
                 }
 
@@ -265,20 +265,20 @@ namespace GSC.Api.Controllers.Project.Design
                       });
 
 
-                    var RemarkSeq = 0;
-                    variable.Remarks.ToList().ForEach(r =>
-                    {
-                        r.Id = 0;
-                        //    if (r.SeqNo == 0)
-                        r.SeqNo = ++RemarkSeq;
-                        _projectDesignVariableRemarksRepository.Add(r);
-                        ////For variable value clone language
-                        //r.VariableRemarksLanguage.ToList().ForEach(x =>
-                        //{
-                        //    x.Id = 0;
-                        //    _variableValueLanguageRepository.Add(x);
-                        //});
-                    });
+                    //var RemarkSeq = 0;
+                    //variable.Remarks.ToList().ForEach(r =>
+                    //{
+                    //    r.Id = 0;
+                    //    //    if (r.SeqNo == 0)
+                    //    r.SeqNo = ++RemarkSeq;
+                    //    _projectDesignVariableRemarksRepository.Add(r);
+                    //    ////For variable value clone language
+                    //    //r.VariableRemarksLanguage.ToList().ForEach(x =>
+                    //    //{
+                    //    //    x.Id = 0;
+                    //    //    _variableValueLanguageRepository.Add(x);
+                    //    //});
+                    //});
 
 
                     // For encrypt clone
@@ -389,13 +389,13 @@ namespace GSC.Api.Controllers.Project.Design
                         });
                     }
 
-                    variable.Id = 0;
-                    foreach (var variableRemarks in variable.Remarks)
-                    {
-                        variableRemarks.Id = 0;
-                        variableRemarks.ProjectDesignVariable = variable;
-                        _projectDesignVariableRemarksRepository.Add(variableRemarks);
-                    }
+                    //variable.Id = 0;
+                    //foreach (var variableRemarks in variable.Remarks)
+                    //{
+                    //    variableRemarks.Id = 0;
+                    //    variableRemarks.ProjectDesignVariable = variable;
+                    //    _projectDesignVariableRemarksRepository.Add(variableRemarks);
+                    //}
 
                     _projectDesignVariableRepository.Add(variable);
                 }

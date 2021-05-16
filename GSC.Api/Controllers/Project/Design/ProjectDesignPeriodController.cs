@@ -150,14 +150,14 @@ namespace GSC.Api.Controllers.Project.Design
                                 _projectDesignVariableValueRepository.Add(value);
                             });
 
-                            variable.Id = 0;
-                            var RSeqNo = 0;
-                            variable.Remarks.ToList().ForEach(remarks =>
-                            {
-                                remarks.Id = 0;
-                                remarks.SeqNo = ++RSeqNo;
-                                _projectDesignVariableRemarksRepository.Add(remarks);
-                            });
+                            //variable.Id = 0;
+                            //var RSeqNo = 0;
+                            //variable.Remarks.ToList().ForEach(remarks =>
+                            //{
+                            //    remarks.Id = 0;
+                            //    remarks.SeqNo = ++RSeqNo;
+                            //    _projectDesignVariableRemarksRepository.Add(remarks);
+                            //});
 
                             _projectDesignVariableRepository.Add(variable);
                         });
