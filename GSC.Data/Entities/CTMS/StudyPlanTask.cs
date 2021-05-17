@@ -3,6 +3,7 @@ using GSC.Common.Common;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace GSC.Data.Entities.CTMS
@@ -24,6 +25,8 @@ namespace GSC.Data.Entities.CTMS
         public int? DependentTaskId { get; set;}
         public ActivityType? ActivityType { get; set; }
         public int OffSet { get; set; }
-        public int ProjectId { get; set; }       
+        public int ProjectId { get; set; }
+        [ForeignKey("ParentId")]
+        public StudyPlanTask Parent { get; set; }
     }
 }

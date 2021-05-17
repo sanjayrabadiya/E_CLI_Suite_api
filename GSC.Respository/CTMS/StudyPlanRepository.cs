@@ -40,6 +40,7 @@ namespace GSC.Respository.CTMS
                    ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
 
         }
+
         public string ImportTaskMasterData(StudyPlan studyplan)
         {
             var holidaylist = _holidayMasterRepository.GetHolidayList(studyplan.ProjectId);
@@ -70,6 +71,8 @@ namespace GSC.Respository.CTMS
                 {
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
+                    t.Parent = t;
+                    t.DependentTaskId = data.DependentTaskId;
                 }
             });
 
@@ -83,15 +86,15 @@ namespace GSC.Respository.CTMS
             _context.StudyPlanTask.AddRange(tasklist);
             _context.Save();
 
-            var studyplantasklist = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyplan.Id).ToList();
-            studyplantasklist.ForEach(t =>
-            {
-                t.ParentId = t.ParentId == 0 ? 0 : studyplantasklist.Where(x => x.TaskId == t.ParentId && t.StudyPlanId == studyplan.Id).SingleOrDefault().Id;
-                t.DependentTaskId = t.DependentTaskId == null ? 0 : studyplantasklist.Where(x => x.TaskId == t.DependentTaskId && t.StudyPlanId == studyplan.Id).SingleOrDefault().Id;
-                t.TaskId = 0;
-            });
-            _context.StudyPlanTask.UpdateRange(studyplantasklist);
-            _context.Save();
+            //var studyplantasklist = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyplan.Id).ToList();
+            //studyplantasklist.ForEach(t =>
+            //{
+            //    t.ParentId = t.ParentId == 0 ? 0 : studyplantasklist.Where(x => x.TaskId == t.ParentId && t.StudyPlanId == studyplan.Id).SingleOrDefault().Id;
+            //    t.DependentTaskId = t.DependentTaskId == null ? 0 : studyplantasklist.Where(x => x.TaskId == t.DependentTaskId && t.StudyPlanId == studyplan.Id).SingleOrDefault().Id;
+            //    t.TaskId = 0;
+            //});
+            //_context.StudyPlanTask.UpdateRange(studyplantasklist);
+            //_context.Save();
             return "";
         }
 
