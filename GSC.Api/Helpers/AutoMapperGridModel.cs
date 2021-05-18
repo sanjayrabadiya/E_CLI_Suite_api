@@ -207,7 +207,10 @@ namespace GSC.Api.Helpers
 
             CreateMap<ProjectDesignTemplateNote, ProjectDesignTemplateNoteGridDto>()
                .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName)).ReverseMap();
-            CreateMap<EconsentSetup, EconsentSetupGridDto>().ReverseMap();
+            CreateMap<EconsentSetup, EconsentSetupGridDto>()
+                .ForMember(x => x.PatientStatusData, x => x.MapFrom(a => string.Join(", ", a.PatientStatus.ToList().Select(x => x.PatientStatus.StatusName))))
+                .ForMember(x => x.ApproveBy, x => x.MapFrom(a => string.Join(", ", a.Roles.ToList().Select(x => x.SecurityRole.RoleShortName))))
+                .ReverseMap();
 
             CreateMap<VisitLanguage, VisitLanguageGridDto>()
               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
