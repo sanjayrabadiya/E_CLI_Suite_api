@@ -208,11 +208,11 @@ namespace GSC.Respository.Etmf
                     DeletedDate = y.DeletedDate
                 }).ToList();
 
-            result = result.GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
+            result = result.OrderByDescending(x => x.Id).GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
             {
                 Id = x.FirstOrDefault().Id,
                 UserId = x.Key,
-                IsRevoke = x.LastOrDefault().DeletedDate == null ? false : true,
+                IsRevoke = x.FirstOrDefault().DeletedDate == null ? false : true,
                 UserName = x.FirstOrDefault().UserName,
                 CreatedDate = x.FirstOrDefault().CreatedDate
             }).OrderByDescending(x => x.Id).ToList();

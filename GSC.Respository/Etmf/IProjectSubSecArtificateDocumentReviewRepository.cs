@@ -11,7 +11,7 @@ namespace GSC.Respository.Etmf
         void SaveByDocumentIdInReview(int ProjectWorkplaceSubSecArtificateDocumentId);
         void SaveDocumentReview(List<ProjectSubSecArtificateDocumentReviewDto> ProjectSubSecArtificateDocumentReviewDto);
         void SendMailToReviewer(ProjectSubSecArtificateDocumentReviewDto ReviewDto);
-        List<ProjectSubSecArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId);
+        List<ProjectSubSecArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId, int ProjectDetailsId);
         List<ProjectSubSecArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id);
         void SendMailToSendBack(ProjectSubSecArtificateDocumentReview ReviewDto);
         List<DashboardDto> GetSendDocumentList(int ProjectId);

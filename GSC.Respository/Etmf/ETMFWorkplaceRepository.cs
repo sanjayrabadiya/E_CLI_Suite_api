@@ -322,6 +322,7 @@ namespace GSC.Respository.Etmf
             pvListSectionObj.ZoneId = d.Id;
             pvListSectionObj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
             pvListSectionObj.SiteId = folderType == WorkPlaceFolder.Site ? c.Id : 0;
+            pvListSectionObj.ProjectDetailsId = c.Id;
             pvListSectionObj.SiteProjectId = folderType == WorkPlaceFolder.Site ? c.ItemId : 0;
             pvListSectionObj.ParentMasterId = b.ProjectId;
             pvListSectionObj.Icon = "las la-folder-open text-blue eicon";
@@ -355,6 +356,7 @@ namespace GSC.Respository.Etmf
                 pvListArtificateObj.Level = 6;
                 pvListArtificateObj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
                 pvListArtificateObj.SiteId = folderType == WorkPlaceFolder.Site ? c.Id : 0;
+                pvListArtificateObj.ProjectDetailsId = c.Id;
                 pvListArtificateObj.SiteProjectId = folderType == WorkPlaceFolder.Site ? c.ItemId : 0;
                 pvListArtificateObj.ZoneId = d.Id;
                 pvListArtificateObj.SectionId = e.Id;
@@ -434,6 +436,7 @@ namespace GSC.Respository.Etmf
                 pvListSubSectionObj.Level = 5.1;
                 pvListSubSectionObj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
                 pvListSubSectionObj.SiteId = folderType == WorkPlaceFolder.Site ? c.Id : 0;
+                pvListSubSectionObj.ProjectDetailsId = c.Id;
                 pvListSubSectionObj.SiteProjectId = folderType == WorkPlaceFolder.Site ? c.ItemId : 0;
                 pvListSubSectionObj.ZoneId = d.Id;
                 pvListSubSectionObj.SectionId = e.Id;
@@ -462,6 +465,7 @@ namespace GSC.Respository.Etmf
                     pvListartifactsubsectionobj.Level = 5.2;
                     pvListartifactsubsectionobj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
                     pvListartifactsubsectionobj.SiteId = folderType == WorkPlaceFolder.Site ? c.Id : 0;
+                    pvListartifactsubsectionobj.ProjectDetailsId = c.Id;
                     pvListartifactsubsectionobj.SiteProjectId = folderType == WorkPlaceFolder.Site ? c.ItemId : 0;
                     pvListartifactsubsectionobj.ZoneId = d.Id;
                     pvListartifactsubsectionobj.SectionId = e.Id;
@@ -958,6 +962,7 @@ namespace GSC.Respository.Etmf
         public int ParentMasterId { get; set; }
         public int CountryId { get; set; }
         public int SiteId { get; set; }
+        public int ProjectDetailsId { get; set; }
         public int SiteProjectId { get; set; }
         public int ZoneId { get; set; }
         public int SectionId { get; set; }

@@ -48,16 +48,9 @@ namespace GSC.Respository.Etmf
             _projectRightRepository = projectRightRepository;
         }
 
-        public List<ProjectSubSecArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId)
+        public List<ProjectSubSecArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId, int ProjectDetailsId)
         {
-            //var users = _context.Users.Where(x => x.DeletedDate == null && x.Id != _jwtTokenAccesser.UserId && x.UserType == UserMasterUserType.User).Select(c => new ProjectSubSecArtificateDocumentReviewDto
-            //{
-            //    UserId = c.Id,
-            //    Name = c.UserName,
-            //    IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.Id && b.DeletedDate == null && b.IsSendBack == false),
-            //}).Where(x => x.IsSelected == false).ToList();
-
-            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId).ToList();
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
@@ -69,7 +62,15 @@ namespace GSC.Respository.Etmf
                     IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == false),
                 }).Where(x => x.IsSelected == false).ToList();
 
-            return users;
+            users.ForEach(x =>
+            {
+                var etmfUserPermissions = _context.EtmfUserPermission.Include(y => y.ProjectWorkplaceDetail)
+                                        .Where(y => y.ProjectWorkplaceDetailId == ProjectDetailsId && y.DeletedDate == null && y.UserId == x.UserId)
+                                        .OrderByDescending(x => x.Id).FirstOrDefault();
+                x.IsRights = etmfUserPermissions != null ? etmfUserPermissions.IsAdd || etmfUserPermissions.IsEdit || etmfUserPermissions.IsView : false;
+            });
+
+            return users.Where(x => x.IsRights == true).ToList();
         }
 
         public void SaveDocumentReview(List<ProjectSubSecArtificateDocumentReviewDto> ProjectSubSecArtificateDocumentReviewDto)

@@ -66,11 +66,11 @@ namespace GSC.Api.Controllers.Etmf
         /// Get user for send for review
         /// Created By Swati
         [HttpGet]
-        [Route("UserRoles/{Id}/{ProjectId}")]
-        public IActionResult UserRoles(int Id, int ProjectId)
+        [Route("UserRoles/{Id}/{ProjectId}/{ProjectDetailsId}")]
+        public IActionResult UserRoles(int Id, int ProjectId, int ProjectDetailsId)
         {
             if (Id <= 0) return BadRequest();
-            return Ok(_projectWorkplaceArtificateDocumentReviewRepository.UserRoles(Id, ProjectId));
+            return Ok(_projectWorkplaceArtificateDocumentReviewRepository.UserRoles(Id, ProjectId, ProjectDetailsId));
         }
 
         /// Save user for send for review

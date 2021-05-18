@@ -11,7 +11,7 @@ namespace GSC.Respository.Etmf
 {
     public interface IProjectArtificateDocumentApproverRepository : IGenericRepository<ProjectArtificateDocumentApprover>
     {
-        List<ProjectArtificateDocumentReviewDto> UserNameForApproval(int Id, int ProjectId);
+        List<ProjectArtificateDocumentReviewDto> UserNameForApproval(int Id, int ProjectId, int ProjectDetailsId);
         void SendMailForApprover(ProjectArtificateDocumentApproverDto ProjectArtificateDocumentApproverDto);
         List<DashboardDto> GetEtmfMyTaskList(int ProjectId);
         List<ProjectArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id);
