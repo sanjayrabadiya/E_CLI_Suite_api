@@ -1510,9 +1510,11 @@ namespace GSC.Report
                         }
                         else
                         {
+                            int Id;
+                            bool isNumeric = int.TryParse(variable.ScreeningValue, out Id);
                             string dropdownvalue = "";
-                            if (!String.IsNullOrEmpty(variable.ScreeningValue))
-                                dropdownvalue = variable.Values.Where(x => x.Id == Convert.ToInt32(variable.ScreeningValue)).Select(x => x.ValueName).FirstOrDefault();
+                            if (isNumeric)
+                                dropdownvalue = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).FirstOrDefault();
                             SizeF size = regularfont.MeasureString($"{dropdownvalue}");
                             result = AddString($"{dropdownvalue}", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
@@ -1536,9 +1538,11 @@ namespace GSC.Report
                         }
                         else
                         {
+                            int Id;
+                            bool isNumeric = int.TryParse(variable.ScreeningValue, out Id);
                             string variblevaluename = "";
-                            if (!String.IsNullOrEmpty(variable.ScreeningValue))
-                                variblevaluename = variable.Values.Where(x => x.Id == Convert.ToInt32(variable.ScreeningValue)).Select(x => x.ValueName).SingleOrDefault();
+                            if (isNumeric)
+                                variblevaluename = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).SingleOrDefault();
                             foreach (var value in variable.Values.OrderBy(x => x.SeqNo))
                             {
                                 result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -1714,7 +1718,7 @@ namespace GSC.Report
                             float xPos = 300;
                             result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, result.Bounds.Y + 20), new PointF(xPos + 180, result.Bounds.Y + 20));
                             float yPos = result.Bounds.Y + 10;
-                            float increment = (float) 180 / (_points.Count - 1);
+                            float increment = (float)180 / (_points.Count - 1);
                             float smallyPos = result.Bounds.Y + 5;
                             for (int i = 0; i < _points.Count; i++)
                             {
