@@ -528,7 +528,7 @@ namespace GSC.Respository.ProjectRight
                 sites = _context.Project.Where(x => x.Id == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
             }
 
-            var queryDtos = (from projectRight in _context.ProjectRight.Where(t => 
+            var queryDtos = (from projectRight in _context.ProjectRight.Where(t =>
                             (filters.SiteId != null ? t.ProjectId == filters.SiteId : sites.Contains(t.ProjectId))
                              && (filters.UserIds == null || filters.UserIds.Contains(t.UserId))
                              && (filters.RoleIds == null || filters.RoleIds.Contains(t.RoleId)))
@@ -536,9 +536,10 @@ namespace GSC.Respository.ProjectRight
                              join auditReasonTemp in _context.AuditReason on projectRight.AuditReasonId equals auditReasonTemp.Id into auditReasonTempDto
                              from auditReason in auditReasonTempDto.DefaultIfEmpty()
                              join projectDocument in _context.ProjectDocument.Where(x => x.DeletedDate == null) on projectRight.ProjectId equals projectDocument.ProjectId
-                             join projectDocumentReviewTemp in _context.ProjectDocumentReview on new { x = projectDocument.Id, y = projectRight.UserId, z = projectDocument.ProjectId } 
-                             equals new { x = projectDocumentReviewTemp.ProjectDocumentId, y = projectDocumentReviewTemp.UserId, z = projectDocumentReviewTemp.ProjectId } 
-                             into projectDocumentReviewDto from projectDocumentReview in projectDocumentReviewDto.DefaultIfEmpty()
+                             join projectDocumentReviewTemp in _context.ProjectDocumentReview on new { x = projectDocument.Id, y = projectRight.UserId, z = projectDocument.ProjectId }
+                             equals new { x = projectDocumentReviewTemp.ProjectDocumentId, y = projectDocumentReviewTemp.UserId, z = projectDocumentReviewTemp.ProjectId }
+                             into projectDocumentReviewDto
+                             from projectDocumentReview in projectDocumentReviewDto.DefaultIfEmpty()
                              where projectDocumentReview.DeletedDate == null
                              join trainerTemp in _context.Users on projectDocumentReview.TrainerId equals trainerTemp.Id into trainerDto
                              from trainer in trainerDto.DefaultIfEmpty()
@@ -551,7 +552,7 @@ namespace GSC.Respository.ProjectRight
                                  Id = project.Id,
                                  RoleName = role.RoleName,
                                  UserName = user.UserName,
-                                 ProjectCode = filters.SiteId != null ? _context.Project.Where(x=>x.Id == filters.ProjectId).FirstOrDefault().ProjectCode :project.ProjectCode,
+                                 ProjectCode = filters.SiteId != null ? _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ProjectCode : project.ProjectCode,
                                  SiteCode = filters.SiteId != null ? project.ProjectCode : null,
                                  AssignedDate = projectRight.CreatedDate.UtcDateTime(),
                                  AssignedBy = user.UserName,
@@ -723,11 +724,11 @@ namespace GSC.Respository.ProjectRight
                 .GroupBy(c => new { c.UserId, c.RoleId }, (key, group) => group.First());
 
             var etmf = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == projectId).ToList();
-            var etmfresult = etmf.GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
+            var etmfresult = etmf.OrderByDescending(x => x.Id).GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
             {
                 Id = x.FirstOrDefault().Id,
                 UserId = x.Key,
-                IsRevoke = x.LastOrDefault().DeletedDate == null ? false : true,
+                IsRevoke = x.FirstOrDefault().DeletedDate == null ? false : true,
                 CreatedDate = x.FirstOrDefault().CreatedDate
             }).ToList();
 
