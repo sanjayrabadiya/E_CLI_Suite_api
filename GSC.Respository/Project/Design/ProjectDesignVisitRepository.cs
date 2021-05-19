@@ -46,7 +46,7 @@ namespace GSC.Respository.Project.Design
                   .ThenInclude(d => d.VariableNoteLanguage.Where(x => x.DeletedBy == null))
                    .Include(d => d.Templates)
                 .ThenInclude(d => d.Variables)
-                .ThenInclude(d => d.Values)
+                .ThenInclude(d => d.Values.OrderBy(c => c.SeqNo))
                 .ThenInclude(d => d.VariableValueLanguage.Where(x => x.DeletedBy == null))
                .Include(d => d.Templates)
                 .ThenInclude(d => d.Variables)
