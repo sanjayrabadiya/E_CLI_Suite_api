@@ -86,5 +86,6 @@ namespace GSC.Data.Dto.Master
         public string LowRangeValue { get; set; }
         public string HighRangeValue { get; set; }
         public string CollectionValue { get; set; }
+        public int? LargeStep { get; set; }
     }
 }
