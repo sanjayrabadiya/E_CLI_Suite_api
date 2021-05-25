@@ -119,5 +119,12 @@ namespace GSC.Api.Controllers.Etmf
         {
             return Ok(_etmfUserPermissionRepository.GetSitesForEtmf(ProjectId));
         }
+
+        [HttpGet]
+        [Route("GetUsersByEtmfRights/{ProjectId}/{ProjectDetailsId}")]
+        public IActionResult GetUsersByEtmfRights(int ProjectId, int ProjectDetailsId)
+        {
+            return Ok(_etmfUserPermissionRepository.GetUsersByEtmfRights(ProjectId, ProjectDetailsId));
+        }
     }
 }

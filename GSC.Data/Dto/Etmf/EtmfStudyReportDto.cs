@@ -35,6 +35,7 @@ namespace GSC.Data.Dto.Etmf
         public int? folderId { get; set; }
         public int? countrySiteId { get; set; }
         public int? zoneId { get; set; }
+        public int? userId { get; set; }
         public int? sectionId { get; set; }
         public int? artificateId { get; set; }
         public int? statusId { get; set; }
