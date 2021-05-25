@@ -7,6 +7,7 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.ProjectRight;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +22,14 @@ namespace GSC.Respository.Etmf
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
+        private readonly IProjectRightRepository _projectRightRepository;
         public EtmfUserPermissionRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser)
+           IJwtTokenAccesser jwtTokenAccesser, IProjectRightRepository projectRightRepository)
            : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _projectRightRepository = projectRightRepository;
         }
 
         public List<EtmfUserPermissionDto> GetByUserId(int UserId, int ProjectId)
@@ -292,6 +295,39 @@ namespace GSC.Respository.Etmf
 
             return project;
 
+        }
+
+        public List<DropDownDto> GetUsersByEtmfRights(int ProjectId, int ProjectDetailsId)
+        {
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && (x.IsReviewDone == true || x.CreatedBy == x.UserId) && x.DeletedDate == null).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+            var users = latestProjectRight.Where(x => x.DeletedDate == null)
+                .Select(c => new ProjectArtificateDocumentReviewDto
+                {
+                    UserId = c.UserId,
+                    Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                }).ToList();
+
+            var result = new List<DropDownDto>();
+            users.ForEach(x =>
+            {
+                var etmfUserPermissions = All.Include(y => y.ProjectWorkplaceDetail)
+                                         .Where(y => y.ProjectWorkplaceDetailId == ProjectDetailsId && y.DeletedDate == null && y.UserId == x.UserId)
+                                         .OrderByDescending(x => x.Id).FirstOrDefault();
+                if (etmfUserPermissions != null)
+                {
+                    var obj = new DropDownDto();
+                    //obj.Id = etmfUserPermissions.Id;
+                    obj.Id = x.UserId;
+                    obj.Value = x.Name;
+                    obj.ExtraData = etmfUserPermissions != null ? etmfUserPermissions.IsDelete || etmfUserPermissions.IsView : false;
+                    result.Add(obj);
+                }
+            });
+
+            return result.Where(x => Convert.ToBoolean(x.ExtraData) == true).ToList();
         }
     }
 }

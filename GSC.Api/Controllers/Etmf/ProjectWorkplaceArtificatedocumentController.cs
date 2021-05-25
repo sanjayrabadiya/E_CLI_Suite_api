@@ -302,5 +302,16 @@ namespace GSC.Api.Controllers.Etmf
             var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfCountrySiteDropdown(projectId, folderId);
             return Ok(data);
         }
+
+        [HttpGet]
+        [Route("GetEtmfStudyReport")]
+        public IActionResult GetEtmfStudyReport([FromQuery] StudyReportSearchDto filters)
+        {
+            if (filters.projectId <= 0) return BadRequest();
+
+            var auditsDto = _projectWorkplaceArtificatedocumentRepository.GetEtmfStudyReport(filters);
+
+            return Ok(auditsDto);
+        }
     }
 }

@@ -12,6 +12,7 @@ using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -25,7 +26,6 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
@@ -34,7 +34,6 @@ namespace GSC.Api.Controllers.Etmf
             IUnitOfWork uow,
             IMapper mapper,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
-            IUploadSettingRepository uploadSettingRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository
@@ -43,7 +42,6 @@ namespace GSC.Api.Controllers.Etmf
             _uow = uow;
             _mapper = mapper;
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
-            _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
@@ -103,5 +101,24 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(ProjectArtificateDocumentApprover.Id);
         }
 
+        /// Delete approve
+        /// Created By Swati
+        [HttpPost]
+        [Route("DeleteDocumentApprover")]
+        public IActionResult DeleteDocumentApprover([FromBody] List<int> Data)
+        {
+            foreach (var item in Data)
+            {
+                var record = _projectArtificateDocumentApproverRepository.Find(item);
+
+                if (record == null)
+                    return NotFound();
+
+                _projectArtificateDocumentApproverRepository.Delete(record);
+            }
+
+            _uow.Save();
+            return Ok();
+        }
     }
 }
