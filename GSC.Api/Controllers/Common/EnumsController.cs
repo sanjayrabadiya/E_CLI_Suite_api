@@ -405,6 +405,18 @@ namespace GSC.Api.Controllers.Common
         }
 
         [HttpGet]
+        [Route("WorkplaceStatus")]
+        public IList<DropDownEnum> WorkplaceStatus()
+        {
+            return Enum.GetValues(typeof(WorkplaceStatus))
+                .Cast<WorkplaceStatus>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription(),
+                }).OrderBy(o => o.Id).ToList();
+        }
+
+        [HttpGet]
         [Route("HolidayType")]
         public IList<DropDownEnum> HolidayType()
         {

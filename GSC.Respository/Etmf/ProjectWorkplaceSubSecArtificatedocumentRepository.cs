@@ -163,7 +163,7 @@ namespace GSC.Respository.Etmf
 
             foreach (var item in documentList)
             {
-                var reviewerList = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId != item.CreatedBy).Select(z => z.UserId).Distinct().ToList();
+                var reviewerList = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId != item.CreatedBy && x.DeletedDate == null).Select(z => z.UserId).Distinct().ToList();
                 var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
@@ -174,7 +174,7 @@ namespace GSC.Respository.Etmf
                 var Review = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
                 && x.UserId != item.CreatedBy && x.DeletedDate == null).ToList();
 
-                var ApproveList = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id).OrderByDescending(x => x.Id).ToList()
+                var ApproveList = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList()
                     .GroupBy(v => v.UserId).Select(y => new ProjectSubSecArtificateDocumentApprover
                     {
                         Id = y.FirstOrDefault().Id,

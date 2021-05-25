@@ -25,41 +25,20 @@ namespace GSC.Api.Controllers.Etmf
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IProjectRepository _projectRepository;
         private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
-        private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
-        private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
         private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
-        public ProjectSubSecArtificateDocumentReviewController(IProjectRepository projectRepository,
-            IUnitOfWork uow,
-            IMapper mapper,
-            IETMFWorkplaceRepository eTMFWorkplaceRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
-            IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
-              IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser,
-              IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
-              IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository
-            )
+        public ProjectSubSecArtificateDocumentReviewController(IUnitOfWork uow,
+        IMapper mapper,
+        IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
+        IJwtTokenAccesser jwtTokenAccesser,
+        IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
+        IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository)
         {
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
-            _projectRepository = projectRepository;
             _uow = uow;
             _mapper = mapper;
-            _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
             _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
-            _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
-            _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
-            _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
@@ -101,6 +80,26 @@ namespace GSC.Api.Controllers.Etmf
 
             var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(projectArtificateDocumentReviewDto.ProjectWorkplaceSubSecArtificateDocumentId);
             _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, projectArtificateDocumentReviewDto.Id, null);
+            return Ok();
+        }
+
+        /// Delete review
+        /// Created By Swati
+        [HttpPost]
+        [Route("DeleteDocumentReview")]
+        public IActionResult DeleteDocumentReview([FromBody] List<int> Data)
+        {
+            foreach (var item in Data)
+            {
+                var record = _projectSubSecArtificateDocumentReviewRepository.Find(item);
+
+                if (record == null)
+                    return NotFound();
+
+                _projectSubSecArtificateDocumentReviewRepository.Delete(record);
+            }
+
+            _uow.Save();
             return Ok();
         }
     }

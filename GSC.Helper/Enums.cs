@@ -443,6 +443,12 @@ namespace GSC.Helper
         [Description("Site")] Site = 2,
         [Description("Trial")] Trial = 3,
     }
+
+    public enum WorkplaceStatus : short
+    {
+        [Description("Sent For Review")] SentForReview = 1,
+        [Description("Sent For Approve")] SentForApprove = 2,
+    }
     public enum HolidayType : short
     {
         [Description("Public")] Public = 1,

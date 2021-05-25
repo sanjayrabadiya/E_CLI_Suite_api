@@ -25,40 +25,22 @@ namespace GSC.Api.Controllers.Etmf
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IProjectRepository _projectRepository;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
-        private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
 
-        public ProjectWorkplaceArtificateDocumentReviewController(IProjectRepository projectRepository,
-            IUnitOfWork uow,
+        public ProjectWorkplaceArtificateDocumentReviewController(IUnitOfWork uow,
             IMapper mapper,
-            IETMFWorkplaceRepository eTMFWorkplaceRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
-              IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-              IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser,
-              IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository
-            )
+            IJwtTokenAccesser jwtTokenAccesser,
+            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository)
         {
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
-            _projectRepository = projectRepository;
             _uow = uow;
             _mapper = mapper;
-            _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
-            _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
-            _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
         }
@@ -105,6 +87,26 @@ namespace GSC.Api.Controllers.Etmf
 
             var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(projectArtificateDocumentReviewDto.ProjectWorkplaceArtificatedDocumentId);
             _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, projectArtificateDocumentReviewDto.Id, null);
+            return Ok();
+        }
+
+        /// Delete review
+        /// Created By Swati
+        [HttpPost]
+        [Route("DeleteDocumentReview")]
+        public IActionResult DeleteDocumentReview([FromBody] List<int> Data)
+        {
+            foreach (var item in Data)
+            {
+                var record = _projectWorkplaceArtificateDocumentReviewRepository.Find(item);
+
+                if (record == null)
+                    return NotFound();
+
+                _projectWorkplaceArtificateDocumentReviewRepository.Delete(record);
+            }
+
+            _uow.Save();
             return Ok();
         }
     }

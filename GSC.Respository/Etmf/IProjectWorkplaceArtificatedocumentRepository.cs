@@ -29,5 +29,6 @@ namespace GSC.Respository.Etmf
         string SaveDocumentInFolder(ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument, CustomParameter param);
         string ImportData(int Id);
         ProjectWorkplaceArtificatedocument WordToPdf(int Id);
+        IList<EtmfStudyReportDto> GetEtmfStudyReport(StudyReportSearchDto filters);
     }
 }
