@@ -227,7 +227,8 @@ namespace GSC.Respository.InformConcent
         public List<DropDownDto> GetPatientStatusDropDown()
         {
            var result = Enum.GetValues(typeof(ScreeningPatientStatus))
-                 .Cast<ScreeningPatientStatus>().Where(x => x == ScreeningPatientStatus.PreScreening ||
+                 .Cast<ScreeningPatientStatus>().Where(x => 
+                                                                    //x == ScreeningPatientStatus.PreScreening ||
                                                                     x == ScreeningPatientStatus.Screening ||
                                                                     x == ScreeningPatientStatus.ConsentCompleted ||
                                                                     x == ScreeningPatientStatus.OnTrial).Select(e => new DropDownDto

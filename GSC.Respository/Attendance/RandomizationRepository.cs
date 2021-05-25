@@ -734,14 +734,13 @@ namespace GSC.Respository.Attendance
                 }
             }
 
-        }
-
+        }        
         public void ChangeStatustoWithdrawal()
         {
             //public void ChangeStatustoWithdrawal(FileModel fileModel)
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
-            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
-            {
+            //if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
+            //{
                 //if (fileModel.Base64?.Length > 0)
                 //{
                 //    randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
@@ -749,7 +748,7 @@ namespace GSC.Respository.Attendance
                 //}
                 randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
                 Update(randomization);
-            }
+            //}
         }
 
         public DashboardPatientDto GetDashboardPatientDetail()

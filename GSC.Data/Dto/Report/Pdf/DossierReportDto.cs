@@ -77,6 +77,7 @@ namespace GSC.Data.Dto.Report.Pdf
         public string DefaultValue { get; set; }
         public string LowRangeValue { get; set; }
         public string HighRangeValue { get; set; }
+        public int? LargeStep { get; set; }
 
         public CollectionSources CollectionSource { get; set; }
         public List<ProjectDesignVariableValueReportDto> Values { get; set; }

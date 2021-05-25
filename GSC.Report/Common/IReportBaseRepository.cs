@@ -15,13 +15,9 @@ namespace GSC.Report.Common
         FileStreamResult ReportRun(string reportPath, SqlDataSource sqlDataSource);
         SqlDataSource DataSource(string strSql, SqlDataSourceParameterCollection parameter);
         FileStreamResult ReportRunNew(string reportPath, SqlDataSource sqlDataSource, ReportSettingNew reportSetiingNew, CompanyDataDto companyData, FileSaveInfo fileInfo);
-
         string CompleteJobMonitoring(JobMonitoring jobMonitoring);
-
         void WriteLog(string log, string path, JobMonitoring jobMonitoring);
-
         List<DossierReportDto> GetBlankPdfData(ReportSettingNew reportSetting);
         List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting);
-
     }
 }

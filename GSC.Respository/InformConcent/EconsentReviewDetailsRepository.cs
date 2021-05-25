@@ -33,6 +33,7 @@ using GSC.Respository.EmailSender;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Drawing;
 using GSC.Shared.Extension;
+using GSC.Data.Dto.Configuration;
 
 namespace GSC.Respository.InformConcent
 {
@@ -47,8 +48,9 @@ namespace GSC.Respository.InformConcent
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUnitOfWork _uow;
         private readonly IRandomizationRepository _randomizationRepository;
+        private readonly IAppSettingRepository _appSettingRepository;
 
-        public EconsentReviewDetailsRepository(IGSCContext context, 
+        public EconsentReviewDetailsRepository(IGSCContext context,
                                                 IJwtTokenAccesser jwtTokenAccesser,
                                                 IProjectRepository projectRepository,
                                                 IUserRepository userRepository,
@@ -56,7 +58,7 @@ namespace GSC.Respository.InformConcent
                                                 IUploadSettingRepository uploadSettingRepository,
                                                 IEmailSenderRespository emailSenderRespository,
                                                 IUnitOfWork uow,
-                                                IRandomizationRepository randomizationRepository) : base(context)
+                                                IRandomizationRepository randomizationRepository, IAppSettingRepository appSettingRepository) : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -67,6 +69,7 @@ namespace GSC.Respository.InformConcent
             _emailSenderRespository = emailSenderRespository;
             _uow = uow;
             _randomizationRepository = randomizationRepository;
+            _appSettingRepository = appSettingRepository;
         }
 
         public List<EConsentDocumentHeader> GetEconsentDocumentHeaders()
@@ -76,7 +79,7 @@ namespace GSC.Respository.InformConcent
             if (noneregister == null) return new List<EConsentDocumentHeader>();
             var studyId = _projectRepository.Find(noneregister.ProjectId).ParentProjectId;
             var econsentReviewDetails = FindBy(x => x.RandomizationId == noneregister.Id).ToList();
-           var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
+            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
 
             var Econsentdocuments = (from econsentsetups in Edocuments
                                      join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId
@@ -251,7 +254,7 @@ namespace GSC.Respository.InformConcent
                 }
             }
             jsonobj.sections = newsections;
-            string jsonnew = JsonConvert.SerializeObject(jsonobj,Formatting.None, new JsonSerializerSettings
+            string jsonnew = JsonConvert.SerializeObject(jsonobj, Formatting.None, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
@@ -260,6 +263,8 @@ namespace GSC.Respository.InformConcent
 
         public string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails)
         {
+            var generalSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+            generalSettings.TimeFormat = generalSettings.TimeFormat.Replace("a", "tt");
             // this method is called when patient reviewed document and completes the signature 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetails.EconsentSetupId).FirstOrDefault();
@@ -280,9 +285,10 @@ namespace GSC.Respository.InformConcent
             if (econsentreviewdetails.RandomizationId == 0)
             {
                 randomizationId = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault().Id;
-            } else
+            }
+            else
             {
-                 randomizationId = econsentreviewdetails.RandomizationId;
+                randomizationId = econsentreviewdetails.RandomizationId;
             }
             var randomization = _context.Randomization.Where(x => x.Id == randomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
             if (econsentreviewdetails.IsReviewedByPatient == true)
@@ -290,13 +296,15 @@ namespace GSC.Respository.InformConcent
                 string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetails.patientdigitalSignImagepath);
                 string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
                 sign = sign.Replace("_imagepath_", signRandombase64);
-            } else
+            }
+            else
             {
                 sign = sign.Replace("_imagepath_", econsentreviewdetails.patientdigitalSignBase64);
-            }
+            }            
             sign = sign.Replace("_volunterlabel_", "Volunteer");
+            sign = sign.Replace("Name", "Initial");
             sign = sign.Replace("_voluntername_", randomization.ScreeningNumber + " " + randomization.Initial);
-            sign = sign.Replace("_datetime_", (econsentreviewdetails.patientapproveddatetime == null) ? _jwtTokenAccesser.GetClientDate().ToString() : econsentreviewdetails.patientapproveddatetime.ToString());
+            sign = sign.Replace("_datetime_", (econsentreviewdetails.patientapproveddatetime == null) ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econsentreviewdetails.patientapproveddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
             var jsonObj2 = JObject.Parse(sign);
             jsonObj.Merge(jsonObj2, new JsonMergeSettings
             {
@@ -305,7 +313,7 @@ namespace GSC.Respository.InformConcent
 
             if (econsentreviewdetails.IsReviewedByPatient == true)
             {
-               var user = _userRepository.Find(_jwtTokenAccesser.UserId);
+                var user = _userRepository.Find(_jwtTokenAccesser.UserId);
                 string signinvestigatorbase64 = user.SignatureBase64String == null ? "" : user.SignatureBase64String;//DocumentService.ConvertBase64Image(investigatorsignaturepath);
                 sign2 = sign2.Replace("_volunterlabel_", "Investigator");
                 sign2 = sign2.Replace("_imagepath_", signinvestigatorbase64);
@@ -329,17 +337,17 @@ namespace GSC.Respository.InformConcent
             // method calls in dashboard My Task
             var result = (
                           from econsentsetups in _context.EconsentSetup.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null)
-                          join econsentroles in _context.EconsentSetupRoles.Where(x => x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null) on econsentsetups.Id equals econsentroles.EconsentDocumentId 
-                         join EconsentReviewDetails in _context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentSetupId
-                         join nonregister in _context.Randomization.Where(x => x.DeletedDate == null && (x.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || x.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)) on EconsentReviewDetails.RandomizationId equals nonregister.Id
+                          join econsentroles in _context.EconsentSetupRoles.Where(x => x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null) on econsentsetups.Id equals econsentroles.EconsentDocumentId
+                          join EconsentReviewDetails in _context.EconsentReviewDetails.Where(x => x.DeletedDate == null && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == false) on econsentsetups.Id equals EconsentReviewDetails.EconsentSetupId
+                          join nonregister in _context.Randomization.Where(x => x.DeletedDate == null && (x.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || x.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)) on EconsentReviewDetails.RandomizationId equals nonregister.Id
 
-             select new DashboardDto
-             {
-                 Id = EconsentReviewDetails.Id,
-                 TaskInformation = econsentsetups.DocumentName + " for " + nonregister.Initial + " " + nonregister.ScreeningNumber + " is Pending approve from your side",
-                 ExtraData = EconsentReviewDetails.Id,
-                 Module = MyTaskModule.InformConsent.GetDescription(),
-             }).ToList();
+                          select new DashboardDto
+                          {
+                              Id = EconsentReviewDetails.Id,
+                              TaskInformation = econsentsetups.DocumentName + " for " + nonregister.Initial + " " + nonregister.ScreeningNumber + " is Pending approve from your side",
+                              ExtraData = EconsentReviewDetails.Id,
+                              Module = MyTaskModule.InformConsent.GetDescription(),
+                          }).ToList();
             return result;
         }
 
@@ -374,13 +382,13 @@ namespace GSC.Respository.InformConcent
             var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyid && x.LanguageId == randomization.LanguageId && x.DeletedDate == null).ToList();
             var EconsentReviewDetails = (from econsentsetups in Edocuments
                                          join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId
-                                     select new EconsentReviewDetailsDto
-                                     {
-                                         Id = doc.Id,
-                                         EconsentDocumentName = econsentsetups.DocumentName,
-                                         IsReviewedByPatient = doc.IsReviewedByPatient,
-                                         IsReviewDoneByInvestigator = doc.IsReviewDoneByInvestigator
-                                     }).ToList();
+                                         select new EconsentReviewDetailsDto
+                                         {
+                                             Id = doc.Id,
+                                             EconsentDocumentName = econsentsetups.DocumentName,
+                                             IsReviewedByPatient = doc.IsReviewedByPatient,
+                                             IsReviewDoneByInvestigator = doc.IsReviewDoneByInvestigator
+                                         }).ToList();
             return EconsentReviewDetails;
         }
 
@@ -473,6 +481,8 @@ namespace GSC.Respository.InformConcent
 
         public int ApproveRejectEconsentDocument(EconsentReviewDetailsDto econsentReviewDetailsDto)
         {
+            var generalSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+            generalSettings.TimeFormat = generalSettings.TimeFormat.Replace("a", "tt");
             // calls when investigator approve/reject document
             var econsentReviewDetails = Find(econsentReviewDetailsDto.Id);
             econsentReviewDetails.IsReviewDoneByInvestigator = true;
@@ -493,7 +503,8 @@ namespace GSC.Respository.InformConcent
                 {
                     string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
                     System.IO.File.Delete(oldpdfpath);
-                } catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
 
                 }
@@ -515,7 +526,7 @@ namespace GSC.Respository.InformConcent
             stream.Dispose();
             fileStream.Close();
             fileStream.Dispose();
-            
+
             DocIORenderer render = new DocIORenderer();
             render.Settings.PreserveFormFields = true;
             PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
@@ -524,6 +535,17 @@ namespace GSC.Respository.InformConcent
             PdfGraphics graphics = pdfDocument.Pages[pagecount - 1].Graphics;
             PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 13, PdfFontStyle.Bold);
             PdfFont fontnormal = new PdfStandardFont(PdfFontFamily.TimesRoman, 13);
+
+            //var userdetails = _context.Users.Where(x => x.Id == econsentReviewDetails.ReviewDoneByUserId && x.DeletedDate==null).Include(x=>x.UserRoles).SingleOrDefault();
+
+            if (econsentReviewDetailsDto.IsApproved == true)            
+                graphics.DrawString("Approved By: ", fontbold, PdfBrushes.Black, new PointF(70, 300));                            
+            else            
+                graphics.DrawString("Reject By: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
+
+            graphics.DrawString(_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")", fontnormal, PdfBrushes.Black, new PointF(70, 320));
+            graphics.DrawString(Convert.ToDateTime(econsentReviewDetails.investigatorRevieweddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat), fontnormal, PdfBrushes.Black, new PointF(70, 340));
+
             if (econsentReviewDetailsDto.IsApproved == true)
                 graphics.DrawString("Approved Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 275));
             else
@@ -556,7 +578,7 @@ namespace GSC.Respository.InformConcent
             file.Dispose();
             outputStream.Close();
             outputStream.Dispose();
-            
+
             econsentReviewDetails.pdfpath = pdfpath;
 
             Update(econsentReviewDetails);
@@ -580,6 +602,6 @@ namespace GSC.Respository.InformConcent
         }
 
 
-       
+
     }
 }

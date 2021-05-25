@@ -585,6 +585,7 @@ namespace GSC.Report.Common
                                 DefaultValue = v.DefaultValue,
                                 LowRangeValue = v.LowRangeValue,
                                 HighRangeValue = v.HighRangeValue,
+                                LargeStep=v.LargeStep,
                                 Unit = new UnitReportDto { UnitName = v.Unit.UnitName },
                                 Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList()
                             }).ToList()

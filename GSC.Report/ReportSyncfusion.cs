@@ -1708,11 +1708,11 @@ namespace GSC.Report
                             List<string> _points = new List<string>();
                             int lowrangevalue = Convert.ToInt32(variable.LowRangeValue);
                             int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
-                            int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
+                            //int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
                             //logic
                             for (int i = lowrangevalue; i <= highragnevalue; i++)
                             {
-                                if ((i % stepvalue) == 0)
+                                if ((i % variable.LargeStep) == 0)
                                     _points.Add(i.ToString());
                             }
                             float xPos = 300;

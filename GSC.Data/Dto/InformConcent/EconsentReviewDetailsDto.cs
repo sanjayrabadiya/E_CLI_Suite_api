@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace GSC.Data.Dto.InformConcent
 {
-    public class EconsentReviewDetailsDto : BaseDto
+    public class EconsentReviewDetailsDto : BaseAuditDto
     {
         public int Id { get; set; }
         public int RandomizationId { get; set; }
