@@ -20,6 +20,6 @@ namespace GSC.Respository.CTMS
         StudyPlanTask UpdateDependentTaskDate(StudyPlanTask StudyPlanTask);
         DateTime GetNextWorkingDate(NextWorkingDateParameterDto parameterDto);
         string ValidateweekEnd(NextWorkingDateParameterDto parameterDto);
-        List<StudyPlanTask> Save(StudyPlanTask taskData, RefrenceType refrenceType);
+        List<StudyPlanTask> Save(StudyPlanTask taskData);
     }
 }

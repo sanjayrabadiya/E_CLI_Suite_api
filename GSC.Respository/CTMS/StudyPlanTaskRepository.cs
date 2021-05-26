@@ -42,7 +42,7 @@ namespace GSC.Respository.CTMS
             result.StartDate = studyplan.StartDate;
             result.EndDate = studyplan.EndDate;
             //var tt = _context.PlanTaskRelation.Where(x => x.ProjectId == 1 && x.DeletedDate == null).ToList();
-            var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectId == ProjectId).OrderBy(x => x.TaskOrder).
+            var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId== StudyPlanId).OrderBy(x => x.TaskOrder).
                    ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
 
@@ -52,18 +52,18 @@ namespace GSC.Respository.CTMS
 
         }
 
-        public List<StudyPlanTask> Save(StudyPlanTask taskData, RefrenceType refrenceType)
+        public List<StudyPlanTask> Save(StudyPlanTask taskData)
         {
              var tasklist = new List<StudyPlanTask>();
            // var parojectIds = new List<int>();
             int ParentProjectId = _context.StudyPlan.Where(x => x.Id == taskData.StudyPlanId).Select(x => x.ProjectId).SingleOrDefault();
-            if (refrenceType == RefrenceType.Study)
+            if (taskData.RefrenceType == RefrenceType.Study)
             {              
                 var data = new StudyPlanTask();           
                 data.ProjectId = ParentProjectId;              
                 tasklist.Add(data);            
             }
-            else if(refrenceType == RefrenceType.Sites)
+            else if(taskData.RefrenceType == RefrenceType.Sites)
             {
                 var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
                 foreach (var sitesId in siteslist)

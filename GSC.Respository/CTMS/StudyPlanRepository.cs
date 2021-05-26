@@ -22,16 +22,18 @@ namespace GSC.Respository.CTMS
         private readonly IGSCContext _context;
         private readonly IHolidayMasterRepository _holidayMasterRepository;
         private readonly IWeekEndMasterRepository _weekEndMasterRepository;
+        private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
 
         public StudyPlanRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository) : base(context)
+            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IStudyPlanTaskRepository studyPlanTaskRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
             _holidayMasterRepository = holidayMasterRepository;
             _weekEndMasterRepository = weekEndMasterRepository;
+            _studyPlanTaskRepository = studyPlanTaskRepository;
         }
 
         public List<StudyPlanGridDto> GetStudyplanList(bool isDeleted)
@@ -61,7 +63,8 @@ namespace GSC.Respository.CTMS
                     EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
                     DependentTaskId = t.DependentTaskId,
                     ActivityType = t.ActivityType,
-                    OffSet = t.OffSet
+                    OffSet = t.OffSet,
+                    RefrenceType = t.RefrenceType
                 }).ToList();
 
             tasklist.ForEach(t =>
@@ -72,7 +75,15 @@ namespace GSC.Respository.CTMS
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
                     t.Parent = t;
-                    t.DependentTaskId = data.DependentTaskId;
+                    t.DependentTask = tasklist.FirstOrDefault(d => d.TaskId == t.DependentTaskId);
+                    t.DependentTaskId = null;
+                    // t.DependentTaskId = data.DependentTaskId;
+                }
+
+                if (t.ParentId > 0)
+                {
+                    t.Parent = tasklist.FirstOrDefault(x => x.TaskId == t.ParentId);
+                    t.ParentId = null;
                 }
             });
 
@@ -82,9 +93,15 @@ namespace GSC.Respository.CTMS
                 if (!string.IsNullOrEmpty(validate))
                     return validate;
             }
-
+            //foreach (var item in tasklist)
+            //{
+            //    if (item.RefrenceType == RefrenceType.Sites)
+            //        _studyPlanTaskRepository.Add(item);
+                   
+            //}
             _context.StudyPlanTask.AddRange(tasklist);
             _context.Save();
+
 
             //var studyplantasklist = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyplan.Id).ToList();
             //studyplantasklist.ForEach(t =>

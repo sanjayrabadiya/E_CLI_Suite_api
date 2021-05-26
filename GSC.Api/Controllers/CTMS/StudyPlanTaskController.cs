@@ -55,7 +55,7 @@ namespace GSC.Api.Controllers.CTMS
 
 
 
-        [HttpPost]
+        [HttpPost]       
         public IActionResult Post([FromBody] StudyPlantaskParameterDto taskmasterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -74,52 +74,9 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            //_studyPlanTaskRepository.Add(tastMaster);
-            //_uow.Save();
-             var tasklist= _studyPlanTaskRepository.Save(tastMaster, taskmasterDto.RefrenceType);
-
-        //    var tasklist = new List<StudyPlanTask>();
-            // var parojectIds = new List<int>();
-           // int ParentProjectId = _context.StudyPlan.Where(x => x.Id == tastMaster.StudyPlanId).Select(x => x.ProjectId).SingleOrDefault();
-           // if (taskmasterDto.RefrenceType == RefrenceType.Study)
-           // {
-           //     //var data = new StudyPlanTask();
-           //     //data = taskData;
-           //     //data.ProjectId = ParentProjectId;
-           //     //tasklist.Add(data);
-           // }
-           // else if (taskmasterDto.RefrenceType == RefrenceType.Sites)
-           // {
-           //     //var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
-           //     //foreach (var sitesId in siteslist)
-           //     //{
-           //     //    var data = new StudyPlanTask();
-           //     //    data = _mapper.Map<StudyPlanTask>(taskData);
-           //     //    data.ProjectId = sitesId;
-           //     //    tasklist.Add(data);
-           //     //}
-           // }
-           // else
-           // {
-           //     // var w = new StudyPlanTask();
-           //     //  w = _mapper.Map<StudyPlanTask>(taskData);
-           //     tastMaster.ProjectId = ParentProjectId;
-           //     _studyPlanTaskRepository.Add(tastMaster);
-
-           //     var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
-           //     foreach (var sitesId in siteslist)
-           //     {
-           //         // var subdata = new StudyPlanTask();
-           //         // subdata = _mapper.Map<StudyPlanTask>(taskData);
-           //         tastMaster.ProjectId = sitesId;
-           //         _studyPlanTaskRepository.Add(tastMaster);
-           //     }
-           // }
-
-           //// _context.StudyPlanTask.AddRange(tasklist);
-           // _uow.Save();
-
-
+            _studyPlanTaskRepository.Add(tastMaster);
+            _uow.Save();
+           //  var tasklist= _studyPlanTaskRepository.Save(tastMaster);
             //string mvalidate = _studyPlanTaskRepository.UpdateDependentTask(taskmasterDto.StudyPlanId);
             //if (!string.IsNullOrEmpty(mvalidate))
             //{

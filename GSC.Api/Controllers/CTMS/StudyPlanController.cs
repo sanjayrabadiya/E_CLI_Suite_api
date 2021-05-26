@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using GSC.Api.Helpers;
 using GSC.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
@@ -41,7 +42,7 @@ namespace GSC.Api.Controllers.CTMS
 
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
-        {          
+        {
             var studyplan = _studyPlanRepository.GetStudyplanList(isDeleted);
             return Ok(studyplan);
         }
@@ -56,6 +57,7 @@ namespace GSC.Api.Controllers.CTMS
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] StudyPlanDto studyplanDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -69,14 +71,16 @@ namespace GSC.Api.Controllers.CTMS
             }
             _studyPlanRepository.Add(studyplan);
             if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+
             var validate = _studyPlanRepository.ImportTaskMasterData(studyplan);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                _studyPlanRepository.Remove(studyplan);
-                _uow.Save();
-                return BadRequest(ModelState);
-            }
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    _studyPlanRepository.Remove(studyplan);
+            //    _uow.Save();
+            //    return BadRequest(ModelState);
+            //}           
+            _uow.Save();
             return Ok(studyplan.Id);
         }
 

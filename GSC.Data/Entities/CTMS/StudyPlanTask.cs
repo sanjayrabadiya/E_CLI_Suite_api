@@ -25,8 +25,14 @@ namespace GSC.Data.Entities.CTMS
         public int? DependentTaskId { get; set;}
         public ActivityType? ActivityType { get; set; }
         public int OffSet { get; set; }
-        public int ProjectId { get; set; }
+        public int? ProjectId { get; set; }
+        public RefrenceType? RefrenceType { get; set; }
+
         [ForeignKey("ParentId")]
         public StudyPlanTask Parent { get; set; }
+
+        [ForeignKey("DependentTaskId")]
+        public StudyPlanTask DependentTask { get; set; }
+
     }
 }
