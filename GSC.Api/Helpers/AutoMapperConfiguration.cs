@@ -312,12 +312,11 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
 
             CreateMap<UserDto, RandomizationDto>()
-                 .ForMember(x => x.FirstName, y => y.MapFrom(a => a.FirstName))
-                 .ForMember(x => x.MiddleName, y => y.MapFrom(a => a.MiddleName))
-                 .ForMember(x => x.LastName, y => y.MapFrom(a => a.LastName))
-                 .ForMember(x => x.DateOfBirth, y => y.MapFrom(a => a.DateOfBirth))
-                 //.ForMember(x => x.Gender, y => y.MapFrom(a => a.GenderId))
-                 .ForMember(x => x.Email, y => y.MapFrom(a => a.Email))
+                 //.ForMember(x => x.FirstName, y => y.MapFrom(a => a.FirstName))
+                 //.ForMember(x => x.MiddleName, y => y.MapFrom(a => a.MiddleName))
+                 //.ForMember(x => x.LastName, y => y.MapFrom(a => a.LastName))
+                 //.ForMember(x => x.DateOfBirth, y => y.MapFrom(a => a.DateOfBirth))                 
+                 //.ForMember(x => x.Email, y => y.MapFrom(a => a.Email))
                  .ForMember(x => x.PrimaryContactNumber, y => y.MapFrom(a => a.Phone))
                  .ReverseMap();
 

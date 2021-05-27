@@ -13,10 +13,8 @@ namespace GSC.Respository.InformConcent
         string Duplicate(EconsentSetup objSave);
         List<DropDownDto> GetEconsentDocumentDropDown(int projectId);
         List<DropDownDto> GetPatientStatusDropDown();
-        List<EconsentSetupGridDto> GetEconsentSetupList(int projectid,bool isDeleted);
-        EconsentSetupDto GetEconsent(int id);
-        int AddEconsentSetup(EconsentSetupDto econsentSetupDto);
-        int UpdateEconsentSetup(EconsentSetupDto econsentSetupDto);
-        string validatebeforeadd(EconsentSetupDto econsentSetupDto);
+        List<EconsentSetupGridDto> GetEconsentSetupList(int projectid,bool isDeleted); 
+        string validateDocument(string path);
+        void SendDocumentEmailPatient(EconsentSetup econsent);
     }
 }

@@ -22,10 +22,11 @@ namespace GSC.Data.Dto.InformConcent
         public string DocumentPath { get; set; }
         public string Version { get; set; }
         public int LanguageId { get; set; }
-        public Data.Entities.Master.Project Project { get; set; }
-        public Language Language { get; set; }
+        //public Data.Entities.Master.Project Project { get; set; }
+       // public Language Language { get; set; }
         public string LanguageName { get; set; }
         public string ProjectName { get; set; }
+        //temp open remove this
         public FileModel FileModel { get; set; }
         public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
         public List<EconsentSetupRoles> Roles { get; set; }

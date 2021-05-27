@@ -1,7 +1,16 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using AutoMapper;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
+using GSC.Data.Entities.InformConcent;
+using GSC.Domain.Context;
+using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.InformConcent;
+using GSC.Shared.DocumentService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.InformConcent
@@ -10,23 +19,31 @@ namespace GSC.Api.Controllers.InformConcent
     [ApiController]
     public class econsentsetupController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IUploadSettingRepository _uploadSettingRepository; 
+        private readonly IGSCContext _context;
         public econsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IMapper mapper, IUploadSettingRepository uploadSettingRepository,             
+            IGSCContext context)
         {
             _econsentSetupRepository = econsentSetupRepository;
             _uow = uow;
+            _mapper = mapper;
+            _uploadSettingRepository = uploadSettingRepository;            
+            _context = context;
         }
 
 
         [HttpGet]
         [HttpGet("{projectid}/{isDeleted:bool?}")]
-        public IActionResult Get(int projectid,bool isDeleted)
+        public IActionResult Get(int projectid, bool isDeleted)
         {
             //Get Econsent document list for selected project
-            var econsentSetups = _econsentSetupRepository.GetEconsentSetupList(projectid,isDeleted);
+            var econsentSetups = _econsentSetupRepository.GetEconsentSetupList(projectid, isDeleted);
             return Ok(econsentSetups);
         }
 
@@ -34,10 +51,11 @@ namespace GSC.Api.Controllers.InformConcent
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            //calls when edit particular document
-            if (id <= 0)
-                return BadRequest();
-            return Ok(_econsentSetupRepository.GetEconsent(id));
+            //calls when edit particular document         
+            if (id <= 0) return BadRequest();
+            var ecincentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id, x => x.Roles, x => x.PatientStatus).FirstOrDefault();
+            var econcentsetupDto = _mapper.Map<EconsentSetupDto>(ecincentSetup);
+            return Ok(econcentsetupDto);
         }
 
         [HttpDelete("{id}")]
@@ -59,11 +77,6 @@ namespace GSC.Api.Controllers.InformConcent
             var record = _econsentSetupRepository.Find(id);
             if (record == null)
                 return NotFound();
-            //EconsentSetupDto econsentSetupDto = new EconsentSetupDto();
-            //econsentSetupDto.Id = record.Id;
-            //econsentSetupDto.LanguageId = record.LanguageId;
-            //econsentSetupDto.Version = record.Version;
-
             var validate = _econsentSetupRepository.Duplicate(record);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -76,35 +89,90 @@ namespace GSC.Api.Controllers.InformConcent
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] EconsentSetupDto econsentSetupDto)
         {
             // add econsent document
             if (!ModelState.IsValid)
-               return new UnprocessableEntityObjectResult(ModelState);
-            var validate = _econsentSetupRepository.validatebeforeadd(econsentSetupDto);
+                return new UnprocessableEntityObjectResult(ModelState);
+            
+            var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
+            var validate = _econsentSetupRepository.Duplicate(econsent);
             if (!string.IsNullOrEmpty(validate))
             {
-                ModelState.AddModelError("Message", validate);
+                ModelState.AddModelError("Message", validate);             
                 return BadRequest(ModelState);
             }
-            return Ok(_econsentSetupRepository.AddEconsentSetup(econsentSetupDto));
+            if (econsentSetupDto.FileModel?.Base64?.Length > 0)
+                econsent.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSetup");
+
+            string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsent.DocumentPath);
+            var validatedocument = _econsentSetupRepository.validateDocument(fullpath);
+            if (!string.IsNullOrEmpty(validatedocument))
+            {
+                ModelState.AddModelError("Message",validatedocument);
+                if (Directory.Exists(fullpath))
+                {
+                    Directory.Delete(fullpath, true);
+                }
+                return BadRequest(ModelState);
+            }
+            _econsentSetupRepository.Add(econsent);
+            _context.EconsentSetupPatientStatus.AddRange(econsent.PatientStatus);
+            _context.EconsentSetupRoles.AddRange(econsent.Roles);
+            if (_uow.Save() <= 0) throw new Exception($"Creating EConsent File failed on save.");
+            _econsentSetupRepository.SendDocumentEmailPatient(econsent);
+
+            return Ok(econsent.Id);            
         }
 
 
         [HttpPut]
+        [TransactionRequired]
         public IActionResult Put([FromBody] EconsentSetupDto econsentSetupDto)
         {
             //update econsent document
             if (econsentSetupDto.Id <= 0)
                 return BadRequest();
             if (!ModelState.IsValid)
-               return new UnprocessableEntityObjectResult(ModelState);
-            if (_econsentSetupRepository.All.Where(x => x.DocumentName == econsentSetupDto.DocumentName && x.LanguageId == econsentSetupDto.LanguageId && x.ProjectId == econsentSetupDto.ProjectId && x.Id != econsentSetupDto.Id).ToList().Count > 0)
+                return new UnprocessableEntityObjectResult(ModelState);
+            var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);            
+            var document = _econsentSetupRepository.Find(econsentSetupDto.Id);
+            var validate = _econsentSetupRepository.Duplicate(econsent);
+            if (!string.IsNullOrEmpty(validate))
             {
-                ModelState.AddModelError("Message", "Please add different document name");
+                ModelState.AddModelError("Message",validate);               
                 return BadRequest(ModelState);
             }
-            return Ok(_econsentSetupRepository.UpdateEconsentSetup(econsentSetupDto));
+            if (econsentSetupDto.FileModel?.Base64?.Length > 0)
+            {
+                econsent.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSetup");
+                string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsentSetupDto.DocumentPath);
+                var validatedocument = _econsentSetupRepository.validateDocument(fullpath);
+                if (!string.IsNullOrEmpty(validatedocument))
+                {
+                    ModelState.AddModelError("Message",validatedocument);
+                    if (Directory.Exists(fullpath))
+                    {
+                        Directory.Delete(fullpath, true);
+                    }
+                    return BadRequest(ModelState);
+                }
+            }
+            else
+            {
+                econsent.DocumentPath = document.DocumentPath;
+            }            
+            _econsentSetupRepository.Update(econsent);
+            var removepatientstatus = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id).ToList();
+            _context.EconsentSetupPatientStatus.RemoveRange(removepatientstatus);
+            var role = _context.EconsentSetupRoles.Where(x => x.EconsentDocumentId == econsent.Id).ToList();
+            _context.EconsentSetupRoles.RemoveRange(role);
+            if (_uow.Save() <= 0) throw new Exception($"Updating EConsent File failed on save.");
+            _context.EconsentSetupRoles.AddRange(econsent.Roles);
+            _context.EconsentSetupPatientStatus.AddRange(econsent.PatientStatus);
+            _uow.Save();
+            return Ok(econsent.Id);            
         }
 
         [HttpGet]
