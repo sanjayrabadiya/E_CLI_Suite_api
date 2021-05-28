@@ -634,4 +634,9 @@ namespace GSC.Helper
 
     }
 
+    public enum DepotType : short
+    {
+        [Description("Central")] Central = 1,
+        [Description("Local")] Local = 2
+    }
 }
