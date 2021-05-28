@@ -23,6 +23,7 @@ using GSC.Data.Dto.Project.Schedule;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.AdverseEvent;
@@ -49,6 +50,7 @@ using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
 using System.Linq;
@@ -351,6 +353,8 @@ namespace GSC.Api.Helpers
             CreateMap<ReportSettingNew, ProjectDesignReportSetting>()
                .ForMember(x => x.ProjectDesignId, y => y.MapFrom(a => a.ProjectId))            
                .ReverseMap();
+            CreateMap<SupplyLocation, SupplyLocationDto>().ReverseMap();
+            CreateMap<CentralDepot, CentralDepotDto>().ReverseMap();
         }
     }
 }

@@ -1,7 +1,7 @@
 using GSC.Common.Base;
 using GSC.Common.Common;
 
-namespace GSC.Data.Entities.Master
+namespace GSC.Data.Entities.SupplyManagement
 {
     public class ProductType : BaseEntity, ICommonAduit
     {

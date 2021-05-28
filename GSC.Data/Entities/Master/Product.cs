@@ -1,5 +1,6 @@
 using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.SupplyManagement;
 
 namespace GSC.Data.Entities.Master
 {

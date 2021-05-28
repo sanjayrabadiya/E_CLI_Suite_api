@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Master;
-using GSC.Data.Entities.Master;
-using GSC.Domain.Context;
+using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Respository.Configuration;
-using GSC.Respository.Master;
+using GSC.Respository.SupplyManagement;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GSC.Api.Controllers.Master
+namespace GSC.Api.Controllers.SupplyManagement
 {
     [Route("api/[controller]")]
     public class ProductTypeController : BaseController

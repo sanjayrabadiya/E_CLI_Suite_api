@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
+using GSC.Data.Entities.SupplyManagement;
 
 namespace GSC.Data.Dto.Master
 {

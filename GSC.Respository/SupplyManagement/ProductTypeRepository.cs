@@ -5,11 +5,13 @@ using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Master;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 
-namespace GSC.Respository.Master
+namespace GSC.Respository.SupplyManagement
 {
     public class ProductTypeRepository : GenericRespository<ProductType>, IProductTypeRepository
     {
@@ -28,8 +30,8 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetProductTypeDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.ProductTypeName, Code = c.ProductTypeCode})
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.ProductTypeName, Code = c.ProductTypeCode, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
 

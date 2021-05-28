@@ -29,6 +29,8 @@ using GSC.Data.Dto.LanguageSetup;
 using GSC.Data.Dto.Master.LanguageSetup;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.SupplyManagement;
+using GSC.Data.Dto.SupplyManagement;
 
 namespace GSC.Api.Helpers
 {
@@ -278,6 +280,13 @@ namespace GSC.Api.Helpers
             CreateMap<HolidayMaster, HolidayMasterGridDto>()
                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                 .ReverseMap();
+            CreateMap<SupplyLocation, SupplyLocationGridDto>().ReverseMap();
+
+            CreateMap<CentralDepot, CentralDepotGridDto>()
+         .ForMember(x => x.DepotType, x => x.MapFrom(a => a.DepotType.GetDescription()))
+         .ForMember(x => x.SupplyLocation, x => x.MapFrom(a => a.SupplyLocation.LocationName))
+         .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))
+         .ForMember(x => x.Country, x => x.MapFrom(a => a.Country.CountryName)).ReverseMap();
         }
     }
 }

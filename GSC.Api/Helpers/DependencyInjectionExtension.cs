@@ -42,6 +42,7 @@ using GSC.Common.Common;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.AdverseEvent;
 using GSC.Respository.CTMS;
+using GSC.Respository.SupplyManagement;
 
 namespace GSC.Api.Helpers
 {
@@ -310,6 +311,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IManageMonitoringRepository, ManageMonitoringRepository>();
             services.AddScoped<IHolidayMasterRepository, HolidayMasterRepository>();
             services.AddScoped<IWeekEndMasterRepository, WeekEndMasterRepository>();
+            services.AddScoped<ISupplyLocationRepository, SupplyLocationRepository>();
+            services.AddScoped<ICentralDepotRepository, CentralDepotRepository>();
         }
     }
 }

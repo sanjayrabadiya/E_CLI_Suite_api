@@ -504,5 +504,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+
+        [HttpGet]
+        [Route("GetDepotType")]
+        public IActionResult GetDepotType()
+        {
+            var refrencetype = Enum.GetValues(typeof(DepotType))
+                .Cast<DepotType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }

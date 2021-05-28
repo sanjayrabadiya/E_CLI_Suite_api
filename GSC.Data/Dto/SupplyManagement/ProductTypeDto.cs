@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 
-namespace GSC.Data.Dto.Master
+namespace GSC.Data.Dto.SupplyManagement
 {
     public class ProductTypeDto : BaseDto
     {

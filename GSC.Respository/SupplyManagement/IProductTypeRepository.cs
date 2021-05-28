@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
-using GSC.Data.Entities.Master;
+using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.SupplyManagement;
 
-namespace GSC.Respository.Master
+namespace GSC.Respository.SupplyManagement
 {
     public interface IProductTypeRepository : IGenericRepository<ProductType>
     {

@@ -28,6 +28,7 @@ using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
 using Microsoft.EntityFrameworkCore;
@@ -285,5 +286,7 @@ namespace GSC.Domain.Context
         DbSet<DependentTaskDto> DependentTaskDto { get; set; }
         DbSet<HolidayMaster> HolidayMaster { get; set; }
         DbSet<WeekEndMaster> WeekEndMaster { get; set; }
+        DbSet<SupplyLocation> SupplyLocation { get; set; }
+        DbSet<CentralDepot> CentralDepot { get; set; }
     }
 }

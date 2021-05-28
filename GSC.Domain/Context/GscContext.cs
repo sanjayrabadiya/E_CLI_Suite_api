@@ -35,6 +35,7 @@ using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
 using GSC.Shared.Configuration;
@@ -327,6 +328,8 @@ namespace GSC.Domain.Context
         public DbSet<DependentTaskDto> DependentTaskDto { get; set; }
         public DbSet<HolidayMaster> HolidayMaster { get; set; }
         public DbSet<WeekEndMaster> WeekEndMaster { get; set; }
+        public DbSet<SupplyLocation> SupplyLocation { get; set; }
+        public DbSet<CentralDepot> CentralDepot { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

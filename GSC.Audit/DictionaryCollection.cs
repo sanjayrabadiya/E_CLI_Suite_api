@@ -87,8 +87,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "MaritalStatusName", DisplayName = "Marital Status" });
             _dictionaries.Add(new Dictionary { FieldName = "OccupationName", DisplayName = "Occupation Name" });
             _dictionaries.Add(new Dictionary { FieldName = "PopulationName", DisplayName = "Population Name" });
-            _dictionaries.Add(new Dictionary { FieldName = "ProductTypeName", DisplayName = "Product Type Name" });
-            _dictionaries.Add(new Dictionary { FieldName = "ProductTypeCode", DisplayName = "Product Type Code" });
+           
             _dictionaries.Add(new Dictionary { FieldName = "RaceName", DisplayName = "Race Name" });
             _dictionaries.Add(new Dictionary { FieldName = "ReligionName", DisplayName = "Religion Name" });
             _dictionaries.Add(new Dictionary { FieldName = "RegulatoryTypeCode", DisplayName = "Regulatory Type Code" });
@@ -398,6 +397,25 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "Remarks", DisplayName = "Remarks" });
 
             _dictionaries.Add(new Dictionary { FieldName = "LargeStep", DisplayName = "Large Step" });
+
+            // ProducType
+            _dictionaries.Add(new Dictionary { FieldName = "ProductTypeName", DisplayName = "Product Type Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProductTypeCode", DisplayName = "Product Type Code" });
+            // Supply Location
+            _dictionaries.Add(new Dictionary { FieldName = "LocationCode", DisplayName = "Location Code" });
+            _dictionaries.Add(new Dictionary { FieldName = "LocationName", DisplayName = "Location Name" });
+
+            //Central Depot
+            _dictionaries.Add(new Dictionary { FieldName = "IsCompanyLevel", DisplayName = "Company Level" });
+            _dictionaries.Add(new Dictionary { FieldName = "DepotType", DisplayName = "Depot Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "SupplyLocationId", DisplayName = "Locaton", SourceColumn = "LocationName", TableName = "SupplyLocation", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "CountryId", DisplayName = "Country", SourceColumn = "CountryName", TableName = "Country", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Study", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "StorageArea", DisplayName = "Storage Area" });
+            _dictionaries.Add(new Dictionary { FieldName = "MinTemp", DisplayName = "Min Temp" });
+            _dictionaries.Add(new Dictionary { FieldName = "MaxTemp", DisplayName = "Max Temp" });
+            _dictionaries.Add(new Dictionary { FieldName = "MinHumidity", DisplayName = "Min Humidity" });
+            _dictionaries.Add(new Dictionary { FieldName = "MaxHumidity", DisplayName = "Max Humidity" });
         }
 
 
