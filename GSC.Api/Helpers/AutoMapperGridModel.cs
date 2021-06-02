@@ -287,6 +287,13 @@ namespace GSC.Api.Helpers
          .ForMember(x => x.SupplyLocation, x => x.MapFrom(a => a.SupplyLocation.LocationName))
          .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))
          .ForMember(x => x.Country, x => x.MapFrom(a => a.Country.CountryName)).ReverseMap();
+
+
+            CreateMap<StudyVersion, StudyVersionGridDto>()
+                .ForMember(x => x.StudyName, x => x.MapFrom(a => a.ProjectDesign.Project.ProjectCode))
+             //   .ForMember(x => x.GoLiveBy, x => x.MapFrom(a => a.User.UserName))
+                .ForMember(x => x.VisitStatus, x => x.MapFrom(a => string.Join(", ", a.StudyVersionVisitStatus.ToList().Select(x=>x.VisitStatus.DisplayName))))
+                .ReverseMap();
         }
     }
 }

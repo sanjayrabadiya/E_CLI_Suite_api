@@ -355,6 +355,7 @@ namespace GSC.Api.Helpers
                .ReverseMap();
             CreateMap<SupplyLocation, SupplyLocationDto>().ReverseMap();
             CreateMap<CentralDepot, CentralDepotDto>().ReverseMap();
+            CreateMap<StudyVersion, StudyVersionDto>().ReverseMap();
         }
     }
 }

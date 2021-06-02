@@ -330,6 +330,9 @@ namespace GSC.Domain.Context
         public DbSet<WeekEndMaster> WeekEndMaster { get; set; }
         public DbSet<SupplyLocation> SupplyLocation { get; set; }
         public DbSet<CentralDepot> CentralDepot { get; set; }
+
+        public DbSet<StudyVersion> StudyVersion { get; set; }
+        public DbSet<StudyVerionVisitStatus> StudyVerionVisitStatus { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();
