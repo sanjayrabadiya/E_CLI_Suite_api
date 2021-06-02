@@ -356,6 +356,24 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyLocation, SupplyLocationDto>().ReverseMap();
             CreateMap<CentralDepot, CentralDepotDto>().ReverseMap();
             CreateMap<StudyVersion, StudyVersionDto>().ReverseMap();
+
+            CreateMap<Volunteer, VolunteerGridDto>()
+               .ForMember(x => x.FoodType, x => x.MapFrom(a => a.FoodType.TypeName))
+               .ForMember(x => x.PopulationType, x => x.MapFrom(a => a.PopulationType.PopulationName))
+               .ForMember(x => x.MaritalStatus, x => x.MapFrom(a => a.MaritalStatus.MaritalStatusName))
+               .ForMember(x => x.Race, x => x.MapFrom(a => a.Race.RaceName))
+               .ForMember(x => x.Occupation, x => x.MapFrom(a => a.Occupation.OccupationName))
+               .ForMember(x => x.Religion, x => x.MapFrom(a => a.Religion.ReligionName))
+               .ForMember(x => x.Gender, x => x.MapFrom(a => a.GenderId))
+               .ReverseMap();
+            //CreateMap<VolunteerAddress, VolunteerAddressDto>().ReverseMap();
+            //CreateMap<VolunteerBiometric, VolunteerBiometricDto>().ReverseMap();
+            //CreateMap<VolunteerContact, VolunteerContactDto>().ReverseMap();
+            //CreateMap<VolunteerDocument, VolunteerDocumentDto>().ReverseMap();
+            //CreateMap<Volunteer, VolunteerDto>().ReverseMap();
+            CreateMap<VolunteerFood, VolunteerFoodDto>().ReverseMap();
+            //CreateMap<VolunteerHistory, VolunteerHistoryDto>().ReverseMap();
+            //CreateMap<VolunteerLanguage, VolunteerLanguageDto>().ReverseMap();
         }
     }
 }

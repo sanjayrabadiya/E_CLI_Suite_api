@@ -427,6 +427,9 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "GoLiveBy", DisplayName = "GoLive By" });
             _dictionaries.Add(new Dictionary { FieldName = "GoLiveOn", DisplayName = "GoLive On" });
             _dictionaries.Add(new Dictionary { FieldName = "IsRunning", DisplayName = "Is Running" });
+
+
+            _dictionaries.Add(new Dictionary { FieldName = "VolunteerNo", DisplayName = "Volunteer No", TableName = "Volunteer" });
         }
 
 
