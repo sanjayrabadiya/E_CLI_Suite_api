@@ -40,7 +40,7 @@ namespace GSC.Api.Controllers.Volunteer
             IUserRecentItemRepository userRecentItemRepository,
             IRolePermissionRepository rolePermissionRepository,
             IAttendanceRepository attendanceRepository)
-        {
+            {
             _volunteerRepository = volunteerRepository;
             _uow = uow;
             _locationRepository = locationRepository;
@@ -55,7 +55,7 @@ namespace GSC.Api.Controllers.Volunteer
         [HttpGet]
         public IActionResult Get()
         {
-            var volunteers = _volunteerRepository.GetVolunteerList();
+            var volunteers = _volunteerRepository.GetVolunteerDetail(false);
             return Ok(volunteers);
         }
 
@@ -91,13 +91,13 @@ namespace GSC.Api.Controllers.Volunteer
             volunteerDto.IsBlockDisplay =
                 _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock").IsView;
 
-            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            {
-                KeyId = volunteerDto.Id,
-                SubjectName = volunteerDto.VolunteerNo,
-                SubjectName1 = volunteer.FullName,
-                ScreenType = UserRecent.Volunteer
-            });
+            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
+            //{
+            //    KeyId = volunteerDto.Id,
+            //    SubjectName = volunteerDto.VolunteerNo,
+            //    SubjectName1 = volunteer.FullName,
+            //    ScreenType = UserRecent.Volunteer
+            //});
 
             return Ok(volunteerDto);
         }
@@ -120,16 +120,16 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerRepository.Add(volunteer);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer failed on save.");
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Inserted, volunteer.Id,
-                null, volunteerDto.Changes);
+            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Inserted, volunteer.Id,
+            //    null, volunteerDto.Changes);
 
-            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            {
-                KeyId = volunteer.Id,
-                SubjectName = volunteer.VolunteerNo,
-                SubjectName1 = volunteer.FullName,
-                ScreenType = UserRecent.Volunteer
-            });
+            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
+            //{
+            //    KeyId = volunteer.Id,
+            //    SubjectName = volunteer.VolunteerNo,
+            //    SubjectName1 = volunteer.FullName,
+            //    ScreenType = UserRecent.Volunteer
+            //});
 
             return Ok(volunteer.Id);
         }
@@ -154,8 +154,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerRepository.Update(volunteer);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer failed on save.");
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Updated, volunteer.Id,
-                null, volunteerDto.Changes);
+            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Updated, volunteer.Id,
+            //    null, volunteerDto.Changes);
 
             return Ok(volunteer.Id);
         }

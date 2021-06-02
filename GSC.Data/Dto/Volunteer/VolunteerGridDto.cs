@@ -47,6 +47,7 @@ namespace GSC.Data.Dto.Volunteer
         public string FullName => FirstName + " " + MiddleName + " " + LastName;
         public string ProfilePicPath { get; set; }
         public string Foods { get; set; }
+        public string FoodType { get; set; }
         public DateTime? RegisterDate { get; set; }
         public string StatusName { get; set; }
         public string Blocked { get; set; }

@@ -416,6 +416,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "MaxTemp", DisplayName = "Max Temp" });
             _dictionaries.Add(new Dictionary { FieldName = "MinHumidity", DisplayName = "Min Humidity" });
             _dictionaries.Add(new Dictionary { FieldName = "MaxHumidity", DisplayName = "Max Humidity" });
+            _dictionaries.Add(new Dictionary { FieldName = "VolunteerNo", DisplayName = "Volunteer No", TableName = "Volunteer" });
         }
 
 

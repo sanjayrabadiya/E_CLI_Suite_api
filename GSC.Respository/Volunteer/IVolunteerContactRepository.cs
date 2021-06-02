@@ -8,5 +8,6 @@ namespace GSC.Respository.Volunteer
     public interface IVolunteerContactRepository : IGenericRepository<VolunteerContact>
     {
         List<VolunteerContactDto> GetContactTypeList(int volunteerId);
+        //List<VolunteerContact> GetContacts(int volunteerId);
     }
 }

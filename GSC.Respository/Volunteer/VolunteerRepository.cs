@@ -17,6 +17,8 @@ using GSC.Respository.UserMgt;
 using Microsoft.EntityFrameworkCore;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace GSC.Respository.Volunteer
 {
@@ -33,6 +35,7 @@ namespace GSC.Respository.Volunteer
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IGSCContext _context;
+        private readonly IMapper _mapper;
 
         public VolunteerRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -43,7 +46,8 @@ namespace GSC.Respository.Volunteer
             IRolePermissionRepository rolePermissionRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
-            IScreeningTemplateRepository screeningTemplateRepository
+            IScreeningTemplateRepository screeningTemplateRepository,
+            IMapper mapper
         )
             : base(context)
         {
@@ -57,6 +61,13 @@ namespace GSC.Respository.Volunteer
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
             _context = context;
+            _mapper = mapper;
+        }
+
+        public List<VolunteerGridDto> GetVolunteerDetail(bool isDeleted)
+        {
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<VolunteerGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public IList<VolunteerGridDto> GetVolunteerList()
@@ -160,7 +171,8 @@ namespace GSC.Respository.Volunteer
                 "MaritalStatusId",
                 "PopulationTypeId",
                 "GenderId",
-                "AnnualIncome"
+                "AnnualIncome",
+                "FoodTypeId"
             };
 
             var inComplete = false;
@@ -189,11 +201,11 @@ namespace GSC.Respository.Volunteer
                 inComplete = true;
             }
 
-            if (!_context.VolunteerFood.Where(t => t.VolunteerId == id).Any())
-            {
-                message += "#Food ";
-                inComplete = true;
-            }
+            //if (!_context.VolunteerFood.Where(t => t.VolunteerId == id).Any())
+            //{
+            //    message += "#Food ";
+            //    inComplete = true;
+            //}
 
             if (!_context.VolunteerLanguage.Where(t => t.VolunteerId == id).Any())
             {
@@ -305,9 +317,9 @@ namespace GSC.Respository.Volunteer
             bool isSummary = false)
         {
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
-            var roleBlock = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock");
-            var roleScreening = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_screeningEntry");
-            var roleVolunteer = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerlist");
+            //var roleBlock = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock");
+            //var roleScreening = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_screeningEntry");
+            //var roleVolunteer = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerlist");
             var result = query.Select(x => new VolunteerGridDto
             {
                 Id = x.Id,
@@ -340,12 +352,12 @@ namespace GSC.Respository.Volunteer
                 RegisterDate = x.RegisterDate,
                 StatusName = x.Status.GetDescription(),
                 IsDeleted = x.DeletedDate != null,
-                Blocked = roleBlock.IsAdd && x.IsBlocked != null ? x.IsBlocked == true ? "Yes" :
-                     "No" :
-                     roleBlock.IsAdd ? "No" : "",
-                IsBlockDisplay = roleBlock.IsView && x.IsBlocked != null,
-                IsScreeningHisotry = roleScreening.IsView,
-                IsDeleteRole = roleVolunteer.IsDelete,
+                //Blocked = roleBlock.IsAdd && x.IsBlocked != null ? x.IsBlocked == true ? "Yes" :
+                //     "No" :
+                //     roleBlock.IsAdd ? "No" : "",
+                //IsBlockDisplay = roleBlock.IsView && x.IsBlocked != null,
+                //IsScreeningHisotry = roleScreening.IsView,
+                //IsDeleteRole = roleVolunteer.IsDelete,
                 IsScreening = x.IsScreening,
             }).OrderByDescending(x => x.Id).ToList();
 

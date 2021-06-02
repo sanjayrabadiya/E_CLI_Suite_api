@@ -48,6 +48,8 @@ namespace GSC.Data.Dto.Volunteer
 
         public int? PopulationTypeId { get; set; }
 
+        public int? FoodTypeId { get; set; }        
+
         public string Relationship { get; set; }
 
         public int? CompanyId { get; set; }

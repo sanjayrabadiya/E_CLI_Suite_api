@@ -11,6 +11,8 @@ namespace GSC.Data.Dto.Volunteer
 
         public bool IsCurrent { get; set; }
 
+        public bool IsPermanent { get; set; }        
+
         public DateTime? FromDate { get; set; }
 
         public DateTime? ToDate { get; set; }

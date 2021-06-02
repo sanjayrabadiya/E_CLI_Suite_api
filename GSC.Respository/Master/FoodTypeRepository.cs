@@ -39,11 +39,6 @@ namespace GSC.Respository.Master
             return "";
         }
 
-        List<DropDownDto> IFoodTypeRepository.GetFoodTypeDropDown()
-        {
-            throw new System.NotImplementedException();
-        }
-
         List<FoodTypeGridDto> IFoodTypeRepository.GetFoodTypeList(bool isDeleted)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).

@@ -14,6 +14,8 @@ namespace GSC.Data.Entities.Volunteer
 
         public bool IsCurrent { get; set; }
 
+        public bool IsPermanent { get; set; }
+
         public DateTime? FromDate
         {
             get => _FromDate?.UtcDate();
