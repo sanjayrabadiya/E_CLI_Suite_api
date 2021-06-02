@@ -15,5 +15,6 @@ namespace GSC.Data.Entities.Project.Design
         public Master.Project Project { get; set; }
         public ICollection<ProjectDesignPeriod> ProjectDesignPeriods { get; set; }
         public bool IsUnderTesting { get; set; }
+        public StudyVersion StudyVersion { get; set; }
     }
 }

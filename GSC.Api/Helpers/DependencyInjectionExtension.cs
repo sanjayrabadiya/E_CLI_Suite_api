@@ -313,6 +313,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IWeekEndMasterRepository, WeekEndMasterRepository>();
             services.AddScoped<ISupplyLocationRepository, SupplyLocationRepository>();
             services.AddScoped<ICentralDepotRepository, CentralDepotRepository>();
+            services.AddScoped<IStudyVersionRepository, StudyVersionRepository>();
+            services.AddScoped<IStudyVersionVisitStatusRepository, StudyVersionVisitStatusRepository>();
         }
     }
 }

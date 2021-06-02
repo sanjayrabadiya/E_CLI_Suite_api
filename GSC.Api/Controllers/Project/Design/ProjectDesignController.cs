@@ -31,12 +31,16 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
+        private readonly IStudyVersionRepository _studyVersionRepository;
+        private readonly IGSCContext _context;
 
         public ProjectDesignController(IProjectDesignRepository projectDesignRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
+            IGSCContext context,
+            IStudyVersionRepository studyVersionRepository,
             IUserRecentItemRepository userRecentItemRepository, IProjectRightRepository projectRightRepository)
         {
             _projectDesignRepository = projectDesignRepository;
@@ -45,6 +49,8 @@ namespace GSC.Api.Controllers.Project.Design
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
+            _studyVersionRepository = studyVersionRepository;
             _userRecentItemRepository = userRecentItemRepository;
             _projectRightRepository = projectRightRepository;
         }
@@ -88,10 +94,16 @@ namespace GSC.Api.Controllers.Project.Design
             projectDesignDto.IsActiveVersion = true;
             projectDesignDto.IsUnderTesting = true;
             var projectDesign = _mapper.Map<ProjectDesign>(projectDesignDto);
+            projectDesign.StudyVersion = new StudyVersion();
+
+            var studyVersion = _mapper.Map<StudyVersion>(projectDesign.StudyVersion);
+            studyVersion.IsGoLive = false;
+            studyVersion.VersionNumber = 1.0;
+            studyVersion.IsRunning = true;
+            _studyVersionRepository.Add(studyVersion);
             _projectDesignRepository.Add(projectDesign);
+
             _uow.Save();
-
-
             return Ok(projectDesign.Id);
         }
 
@@ -201,6 +213,15 @@ namespace GSC.Api.Controllers.Project.Design
                 return NotFound();
             record.IsUnderTesting = isUnderTesting;
             _projectDesignRepository.Update(record);
+
+            var version = _context.StudyVersion.Where(x=>x.ProjectDesignId == id).FirstOrDefault();
+            if (record == null)
+                return NotFound();
+            version.IsGoLive = true;
+            version.GoLiveBy = _jwtTokenAccesser.UserId;
+            version.GoLiveOn = _jwtTokenAccesser.GetClientDate();
+            _studyVersionRepository.Update(version);
+
             _uow.Save();
 
             return Ok();

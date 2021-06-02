@@ -288,5 +288,7 @@ namespace GSC.Domain.Context
         DbSet<WeekEndMaster> WeekEndMaster { get; set; }
         DbSet<SupplyLocation> SupplyLocation { get; set; }
         DbSet<CentralDepot> CentralDepot { get; set; }
+        DbSet<StudyVersion> StudyVersion { get; set; }
+        DbSet<StudyVerionVisitStatus> StudyVerionVisitStatus { get; set; }
     }
 }
