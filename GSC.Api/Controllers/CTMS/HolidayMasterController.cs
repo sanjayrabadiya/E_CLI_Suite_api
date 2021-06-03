@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
 {
-    [Route("api/[controller]")] 
+    [Route("api/[controller]")]
     public class HolidayMasterController : ControllerBase
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -25,7 +25,7 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IHolidayMasterRepository _holidayMasterRepository;
 
         public HolidayMasterController(IUnitOfWork uow, IMapper mapper,
-         IJwtTokenAccesser jwtTokenAccesser,IGSCContext context, IHolidayMasterRepository holidayMasterRepository)
+         IJwtTokenAccesser jwtTokenAccesser, IGSCContext context, IHolidayMasterRepository holidayMasterRepository)
         {
             _uow = uow;
             _mapper = mapper;
@@ -38,7 +38,7 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Get(bool isDeleted)
         {
             var holidaylist = _holidayMasterRepository.GetHolidayList(isDeleted);
-            return Ok(holidaylist);            
+            return Ok(holidaylist);
         }
 
 
@@ -48,6 +48,8 @@ namespace GSC.Api.Controllers.CTMS
             if (id <= 0) return BadRequest();
             var holiday = _holidayMasterRepository.Find(id);
             var holidayDto = _mapper.Map<HolidayMasterDto>(holiday);
+            holidayDto.SiteId = holidayDto.IsSite == true ? holidayDto.ProjectId : (int?)null;
+            holidayDto.ProjectId = holidayDto.IsSite == true ? (int)_context.Project.Find(holidayDto.ProjectId).ParentProjectId : holidayDto.ProjectId;
             return Ok(holidayDto);
         }
 
@@ -57,12 +59,7 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             holidayDto.Id = 0;
             var holiDay = _mapper.Map<HolidayMaster>(holidayDto);
-            //var validate = _holidayMasterRepository.Duplicate(clientType);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+
             _holidayMasterRepository.Add(holiDay);
             if (_uow.Save() <= 0) throw new Exception("Creating Holiday failed on save.");
             return Ok(holiDay.Id);
@@ -76,12 +73,7 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var holiDay = _mapper.Map<HolidayMaster>(holidayDto);
-            //var validate = _holidayMasterRepository.Duplicate(clientType);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+
             _holidayMasterRepository.Update(holiDay);
 
             if (_uow.Save() <= 0) throw new Exception("Updating holiday failed on save.");
@@ -110,13 +102,6 @@ namespace GSC.Api.Controllers.CTMS
             if (record == null)
                 return NotFound();
 
-            //var validate = _holidayMasterRepository.Duplicate(record);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-
             _holidayMasterRepository.Active(record);
             _uow.Save();
 
@@ -128,7 +113,7 @@ namespace GSC.Api.Controllers.CTMS
         public ActionResult GetProjectWiseHolidayList(int id)
         {
             var holidaylist = _holidayMasterRepository.GetProjectWiseHolidayList(id);
-            return Ok(holidaylist);          
+            return Ok(holidaylist);
         }
     }
 }

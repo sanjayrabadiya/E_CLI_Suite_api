@@ -333,7 +333,8 @@ namespace GSC.Respository.CTMS
         {
             int ProjectId = _context.StudyPlan.Where(x => x.Id == maintask.StudyPlanId).SingleOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            //var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            var weekendlist = new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
             if (maintask.DependentTaskId > 0)
@@ -377,7 +378,8 @@ namespace GSC.Respository.CTMS
             int studyPlanId = reftasklist.FirstOrDefault().StudyPlanId;
             int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).SingleOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            //var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            var weekendlist = new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
             //var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).SingleOrDefault();
             var maintask = reftasklist.Where(x => x.Id == StudyPlanTaskId && x.DeletedDate == null).SingleOrDefault();
@@ -429,7 +431,8 @@ namespace GSC.Respository.CTMS
         {
             int ProjectId = _context.StudyPlan.Where(x => x.Id == parameterDto.StudyPlanId).SingleOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            //var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            var weekendlist = new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
             var nextworkingdate = WorkingDayHelper.AddBusinessDays(parameterDto.StartDate, parameterDto.Duration > 0 ? parameterDto.Duration - 1 : 0);
             return nextworkingdate;
@@ -437,7 +440,8 @@ namespace GSC.Respository.CTMS
         public string ValidateweekEnd(NextWorkingDateParameterDto parameterDto)
         {
             int ProjectId = _context.StudyPlan.Where(x => x.Id == parameterDto.StudyPlanId).SingleOrDefault().ProjectId;
-            return _weekEndMasterRepository.ValidateweekEnd(ProjectId);
+            //return _weekEndMasterRepository.ValidateweekEnd(ProjectId);
+            return string.Empty;
 
         }
 

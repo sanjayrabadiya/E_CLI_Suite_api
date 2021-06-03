@@ -118,7 +118,7 @@ namespace GSC.Helper
         [Description("Multiline Text Box")] MultilineTextBox = 10,
         [Description("PartialDate")] PartialDate = 11,
         [Description("Scale Horizontal")] HorizontalScale = 12,
-     //   [Description("Scale Vertical")] VerticalScale = 13,
+        //   [Description("Scale Vertical")] VerticalScale = 13,
         [Description("Numeric Scale")] NumericScale = 14,
         [Description("Relation")] Relation = 15
     }
@@ -638,5 +638,28 @@ namespace GSC.Helper
     {
         [Description("Central")] Central = 1,
         [Description("Local")] Local = 2
+    }
+
+    public enum DayType : short
+    {
+        [Description("Sunday")] Sunday = 1,
+        [Description("Monday")] Monday = 2,
+        [Description("Tuesday")] Tuesday = 3,
+        [Description("Wednesday")] Wednesday = 4,
+        [Description("Thursday")] Thursday = 5,
+        [Description("Friday")] Friday = 6,
+        [Description("Saturday")] Saturday = 7,
+    }
+
+    public enum FrequencyType : short
+    {
+        [Description("All")] All = 1,
+        [Description("1st")] First = 2,
+        [Description("2nd")] Second = 3,
+        [Description("3rd")] Third = 4,
+        [Description("4th")] Fourth = 5,
+        [Description("5th")] Fifth = 6,
+        [Description("Odd(1,3,5)")] Odd = 7,
+        [Description("Even(2,4)")] Even = 8,
     }
 }

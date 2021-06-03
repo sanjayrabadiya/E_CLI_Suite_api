@@ -31,8 +31,12 @@ namespace GSC.Respository.CTMS
         {
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).
                    ProjectTo<HolidayMasterGridDto>(_mapper.ConfigurationProvider).ToList();
-            return result;
-
+            var data = result.Select(r =>
+            {
+                r.ProjectCode = r.IsSite == true ? _context.Project.Find(Convert.ToInt32(r.ProjectCode)).ProjectCode : r.ProjectCode;
+                return r;
+            }).ToList();
+            return data;
         }
 
         public List<DateTime> GetHolidayList(int projectId)
@@ -53,7 +57,7 @@ namespace GSC.Respository.CTMS
         public List<HolidayMasterListDto> GetProjectWiseHolidayList(int StudyPlanId)
         {
             int ProjectId = _context.StudyPlan.Where(x => x.Id == StudyPlanId).FirstOrDefault().ProjectId;
-            var result = All.Where(x => x.ProjectId== ProjectId &&  x.DeletedDate == null).OrderByDescending(x => x.Id).
+            var result = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).
                    ProjectTo<HolidayMasterListDto>(_mapper.ConfigurationProvider).ToList();
             return result;
 

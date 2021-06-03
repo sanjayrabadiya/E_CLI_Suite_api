@@ -430,6 +430,11 @@ namespace GSC.Audit
 
 
             _dictionaries.Add(new Dictionary { FieldName = "VolunteerNo", DisplayName = "Volunteer No", TableName = "Volunteer" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "FromDate", DisplayName = "From Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "ToDate", DisplayName = "To Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "AllWeekOff", DisplayName = "All WeekOff" });
+            _dictionaries.Add(new Dictionary { FieldName = "Frequency", DisplayName = "Frequency" });
         }
 
 

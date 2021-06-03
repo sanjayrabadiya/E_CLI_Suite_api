@@ -278,7 +278,8 @@ namespace GSC.Api.Helpers
                            .ForMember(x => x.IsManual, x => x.MapFrom(a => a.Duration == 0 ? false : true))
                           .ReverseMap();
             CreateMap<HolidayMaster, HolidayMasterGridDto>()
-                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite == true ? a.Project.ProjectCode : ""))
+                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.IsSite == true ? Convert.ToString(a.Project.ParentProjectId) : a.Project.ProjectCode))
                 .ReverseMap();
             CreateMap<SupplyLocation, SupplyLocationGridDto>().ReverseMap();
 
@@ -293,6 +294,13 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.StudyName, x => x.MapFrom(a => a.ProjectDesign.Project.ProjectCode))
              //   .ForMember(x => x.GoLiveBy, x => x.MapFrom(a => a.User.UserName))
                 .ForMember(x => x.VisitStatus, x => x.MapFrom(a => string.Join(", ", a.StudyVersionVisitStatus.ToList().Select(x=>x.VisitStatus.DisplayName))))
+                .ReverseMap();
+
+            CreateMap<WeekEndMaster, WeekEndGridDto>()
+                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.IsSite == true ? Convert.ToString(a.Project.ParentProjectId) : a.Project.ProjectCode))
+                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite == true ? a.Project.ProjectCode : ""))
+                .ForMember(x => x.AllWeekOff, x => x.MapFrom(a => a.AllWeekOff.GetDescription()))
+                .ForMember(x => x.Frequency, x => x.MapFrom(a => a.Frequency.GetDescription()))
                 .ReverseMap();
         }
     }

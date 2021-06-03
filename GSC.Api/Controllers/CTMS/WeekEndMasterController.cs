@@ -18,32 +18,45 @@ namespace GSC.Api.Controllers.CTMS
     [ApiController]
     public class WeekEndMasterController : ControllerBase
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         private readonly IWeekEndMasterRepository _weekEndMasterRepository;
 
         public WeekEndMasterController(IUnitOfWork uow, IMapper mapper,
-        IJwtTokenAccesser jwtTokenAccesser, IGSCContext context, IWeekEndMasterRepository weekEndMasterRepository)
+        IGSCContext context, IWeekEndMasterRepository weekEndMasterRepository)
         {
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _weekEndMasterRepository = weekEndMasterRepository;
         }
 
+        [HttpGet("{isDeleted:bool?}")]
+        public IActionResult Get(bool isDeleted)
+        {
+            var weekend = _weekEndMasterRepository.GetWeekendList(isDeleted);
+            return Ok(weekend);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var weekend = _weekEndMasterRepository.Find(id);
+            var weekendDto = _mapper.Map<WeekEndMasterDto>(weekend);
+            weekendDto.SiteId = weekendDto.IsSite == true ? weekendDto.ProjectId : (int?)null;
+            weekendDto.ProjectId = weekendDto.IsSite == true ? (int)_context.Project.Find(weekendDto.ProjectId).ParentProjectId : weekendDto.ProjectId;
+            return Ok(weekendDto);
+        }
+
 
         [HttpGet]
-        [Route("getweekendList/{id}")]
-        public IActionResult getweekendList(int id)
-         {
+        [Route("GetweekendList/{id}")]
+        public IActionResult GetweekendList(int id)
+        {
             if (id <= 0) return BadRequest();
-            var weekend = _weekEndMasterRepository.FindBy(x=>x.ProjectId==id).SingleOrDefault();
-            //var holidayDto = _mapper.Map<HolidayMasterDto>(holiday);
-            //if (weekend == null)
-            //    return Ok();
+            var weekend = _weekEndMasterRepository.FindBy(x => x.ProjectId == id).FirstOrDefault();
             return Ok(weekend);
         }
 
@@ -53,7 +66,7 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (studyPlanId <= 0) return BadRequest();
             int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
-            var workingDay = _weekEndMasterRepository.GetworkingDayList(ProjectId);        
+            var workingDay = _weekEndMasterRepository.GetworkingDayList(ProjectId);
             return Ok(workingDay);
         }
 
@@ -68,40 +81,62 @@ namespace GSC.Api.Controllers.CTMS
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] WeekEndparameterDto parameterDto)
+        public IActionResult Post([FromBody] WeekEndMasterDto weekEndMasterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            parameterDto.Id = 0;
-            var weekend = _mapper.Map<WeekEndMaster>(parameterDto);
-            //var validatecode = _weekEndMasterRepository.Duplicate(studyplan);
-            //if (!string.IsNullOrEmpty(validatecode))
-            //{
-            //    ModelState.AddModelError("Message", validatecode);
-            //    return BadRequest(ModelState);
-            //}
-            _weekEndMasterRepository.Add(weekend);
-            if (_uow.Save() <= 0) throw new Exception("weekend is failed on save.");           
-            return Ok(weekend.Id);
+            foreach (var item in weekEndMasterDto.ListAllWeekOff)
+            {
+                weekEndMasterDto.Id = 0;
+                weekEndMasterDto.AllWeekOff = (Helper.DayType?)item;
+                var weekend = _mapper.Map<WeekEndMaster>(weekEndMasterDto);
+
+                _weekEndMasterRepository.Add(weekend);
+            }
+            if (_uow.Save() <= 0) throw new Exception("weekend is failed on save.");
+            return Ok();
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] WeekEndparameterDto parameterDto)
+        public IActionResult Put([FromBody] WeekEndMasterDto weekEndMasterDto)
         {
-            if (parameterDto.Id <= 0) return BadRequest();
+            if (weekEndMasterDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var weekend = _mapper.Map<WeekEndMaster>(parameterDto);
-            //var validatecode = _studyPlanRepository.Duplicate(studyplan);
-            //if (!string.IsNullOrEmpty(validatecode))
-            //{
-            //    ModelState.AddModelError("Message", validatecode);
-            //    return BadRequest(ModelState);
-            //}
+            var weekend = _mapper.Map<WeekEndMaster>(weekEndMasterDto);
+
             _weekEndMasterRepository.Update(weekend);
+
             if (_uow.Save() <= 0) throw new Exception("Weekend is failed on save.");
             return Ok(weekend.Id);
         }
 
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var record = _weekEndMasterRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+
+            _weekEndMasterRepository.Delete(record);
+            _uow.Save();
+
+            return Ok();
+        }
+
+        [HttpPatch("{id}")]
+        public ActionResult Active(int id)
+        {
+            var record = _weekEndMasterRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+
+            _weekEndMasterRepository.Active(record);
+            _uow.Save();
+
+            return Ok();
+        }
 
     }
 }

@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
@@ -24,27 +26,41 @@ namespace GSC.Respository.CTMS
             _context = context;
         }
 
+        public List<WeekEndGridDto> GetWeekendList(bool isDeleted)
+        {
+            var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                   ProjectTo<WeekEndGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            var data = result.Select(r =>
+            {
+                r.ProjectCode = r.IsSite == true ? _context.Project.Find(Convert.ToInt32(r.ProjectCode)).ProjectCode : r.ProjectCode;
+                return r;
+            }).ToList();
+
+            return data;
+        }
+
         public List<string> GetworkingDayList(int ProjectId)
         {
             var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).SingleOrDefault();
             var weekendlis = new List<string>();
-            if (weekend != null)
-            {                
-                if (weekend.Sunday == true)
-                    weekendlis.Add("Sunday");
-                if (weekend.Monday == true)
-                    weekendlis.Add("Monday");
-                if (weekend.Tuesday == true)
-                    weekendlis.Add("Tuesday");
-                if (weekend.Wednesday == true)
-                    weekendlis.Add("Wednesday");
-                if (weekend.Thursday == true)
-                    weekendlis.Add("Thursday");
-                if (weekend.Friday == true)
-                    weekendlis.Add("Friday");
-                if (weekend.Saturday == true)
-                    weekendlis.Add("Saturday");
-            }
+            //if (weekend != null)
+            //{
+            //    if (weekend.Sunday == true)
+            //        weekendlis.Add("Sunday");
+            //    if (weekend.Monday == true)
+            //        weekendlis.Add("Monday");
+            //    if (weekend.Tuesday == true)
+            //        weekendlis.Add("Tuesday");
+            //    if (weekend.Wednesday == true)
+            //        weekendlis.Add("Wednesday");
+            //    if (weekend.Thursday == true)
+            //        weekendlis.Add("Thursday");
+            //    if (weekend.Friday == true)
+            //        weekendlis.Add("Friday");
+            //    if (weekend.Saturday == true)
+            //        weekendlis.Add("Saturday");
+            //}
             return weekendlis;
         }
 
@@ -52,37 +68,24 @@ namespace GSC.Respository.CTMS
         {
             var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).SingleOrDefault();
             var weekendlis = new List<string>();
-            if (weekend != null)
-            {
-                if (weekend.Sunday == false)
-                    weekendlis.Add("Sunday");
-                if (weekend.Monday == false)
-                    weekendlis.Add("Monday");
-                if (weekend.Tuesday == false)
-                    weekendlis.Add("Tuesday");
-                if (weekend.Wednesday == false)
-                    weekendlis.Add("Wednesday");
-                if (weekend.Thursday == false)
-                    weekendlis.Add("Thursday");
-                if (weekend.Friday == false)
-                    weekendlis.Add("Friday");
-                if (weekend.Saturday == false)
-                    weekendlis.Add("Saturday");
-            }
+            //if (weekend != null)
+            //{
+            //    if (weekend.Sunday == false)
+            //        weekendlis.Add("Sunday");
+            //    if (weekend.Monday == false)
+            //        weekendlis.Add("Monday");
+            //    if (weekend.Tuesday == false)
+            //        weekendlis.Add("Tuesday");
+            //    if (weekend.Wednesday == false)
+            //        weekendlis.Add("Wednesday");
+            //    if (weekend.Thursday == false)
+            //        weekendlis.Add("Thursday");
+            //    if (weekend.Friday == false)
+            //        weekendlis.Add("Friday");
+            //    if (weekend.Saturday == false)
+            //        weekendlis.Add("Saturday");
+            //}
             return weekendlis;
         }
-
-        public string ValidateweekEnd(int ProjectId)
-        {
-            var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).SingleOrDefault();
-            if(weekend==null)
-                return "Please Select week End.";
-            if (weekend.Sunday==false && weekend.Monday==false && weekend.Tuesday==false && weekend.Wednesday==false && weekend.Thursday==false && weekend.Friday==false && weekend.Saturday == false)
-            {
-                return "Please Select week End.";
-            }
-            return "";
-        }
-        
     }
 }

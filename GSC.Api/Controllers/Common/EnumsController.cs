@@ -518,5 +518,33 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+
+        [HttpGet]
+        [Route("GetDayType")]
+        public IActionResult GetDayType()
+        {
+            var refrencetype = Enum.GetValues(typeof(DayType))
+                .Cast<DayType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
+
+        [HttpGet]
+        [Route("GetFrequencyType")]
+        public IActionResult GetFrequencyType()
+        {
+            var refrencetype = Enum.GetValues(typeof(FrequencyType))
+                .Cast<FrequencyType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }

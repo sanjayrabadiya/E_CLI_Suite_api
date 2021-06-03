@@ -46,7 +46,8 @@ namespace GSC.Respository.CTMS
         public string ImportTaskMasterData(StudyPlan studyplan)
         {
             var holidaylist = _holidayMasterRepository.GetHolidayList(studyplan.ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetworkingDayList(studyplan.ProjectId);
+            //var weekendlist = _weekEndMasterRepository.GetworkingDayList(studyplan.ProjectId);
+            var weekendlist =  new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
             var tasklist = _context.TaskMaster.Where(x => x.TaskTemplateId == studyplan.TaskTemplateId)
