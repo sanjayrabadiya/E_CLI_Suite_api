@@ -143,7 +143,8 @@ namespace GSC.Helper
         [Description("Project Worksplace")] ProjectWorksplace = 9,
         [Description("Inform Consent")] InformConcent = 10,
         [Description("DBDS Report")] DBDSReport = 7,
-        [Description("DataEntry Audit")] DataEntryAudit = 11
+        [Description("DataEntry Audit")] DataEntryAudit = 11,
+        [Description("Study Design Audit")] StudyDesignAudit = 12
     }
 
     public enum AuditModule : short
@@ -460,7 +461,8 @@ namespace GSC.Helper
         [Description("Dossier Report")] DossierReport = 1,
         [Description("Medra")] Medra = 2,
         [Description("DBDS Report")] DBDSReport = 3,
-        [Description("DataEntry Audit")] DataEntryAudit = 4
+        [Description("DataEntry Audit")] DataEntryAudit = 4,
+        [Description("Project Design Audit")] ProjectDesignAudit = 5
     }
 
     public enum JobTypeEnum : short
