@@ -15,7 +15,7 @@ namespace GSC.Data.Entities.Project.Design
         public int ProjectDesignId { get; set; }
         public IList<StudyVerionVisitStatus> StudyVersionVisitStatus { get; set; } = null;
         public ProjectDesign ProjectDesign { get; set; }
-        public bool IsGoLive { get; set; }
+      // public bool IsGoLive { get; set; }
         public int? GoLiveBy { get; set; }
         public DateTime? GoLiveOn { get; set; }
         public bool IsRunning { get; set; }
