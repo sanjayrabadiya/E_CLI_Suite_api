@@ -93,7 +93,7 @@ namespace GSC.Api.Controllers.Report
             else
             {              
                  objNew.Id = reportSettingForm.Id;
-                _projectDesignReportSettingRepository.Update(reportSettingForm);
+                _projectDesignReportSettingRepository.Update(objNew);
             }
             #endregion
             JobMonitoringDto jobMonitoringDto = new JobMonitoringDto();

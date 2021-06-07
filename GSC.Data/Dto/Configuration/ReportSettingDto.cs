@@ -47,5 +47,6 @@ namespace GSC.Data.Dto.Configuration
         public int? TimezoneoffSet { get; set; }
         public string ClientDateTime { get; set; }
         public bool? NonCRF { get; set; }
+        public bool IsSectionDisplay { get; set; }
     }
 }

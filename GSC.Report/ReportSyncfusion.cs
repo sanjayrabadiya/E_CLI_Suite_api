@@ -44,12 +44,6 @@ namespace GSC.Report
     public class ReportSyncfusion : IReportSyncfusion
     {
         private IHostingEnvironment _hostingEnvironment;
-        private readonly IProjectDesignRepository _projectDesignRepository;
-
-
-        //private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;// GetVisitsByProjectDesignId
-        // private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-        // private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IReportBaseRepository _reportBaseRepository;
         private readonly ICompanyRepository _companyRepository;
@@ -64,29 +58,23 @@ namespace GSC.Report
         private readonly PdfFont watermarkerfornt = new PdfStandardFont(PdfFontFamily.TimesRoman, 120, PdfFontStyle.Bold);
         private readonly PdfFont largeheaderfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
         private readonly PdfFont headerfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold);
-        private readonly PdfFont regularfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
+        // private readonly PdfFont regularfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
         private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
-
+        private readonly PdfFont regularfont;
+        private readonly Stream fontStream;
 
         private PdfDocument document = null;
         private PdfLayoutResult tocresult = null;
         Dictionary<PdfPageBase, int> pages = new Dictionary<PdfPageBase, int>();
         private List<TocIndexCreate> _pagenumberset = new List<TocIndexCreate>();
 
-        public ReportSyncfusion(IHostingEnvironment hostingEnvironment, IProjectDesignRepository projectDesignRepository,
-        //    IProjectDesignVisitRepository projectDesignVisitRepository,
-        //IProjectDesignTemplateRepository projectDesignTemplateRepository, 
-        //IProjectDesignVariableRepository projectDesignVariableRepository,
+        public ReportSyncfusion(IHostingEnvironment hostingEnvironment,
         IUploadSettingRepository uploadSettingRepository, IReportBaseRepository reportBaseRepository, ICompanyRepository companyRepository,
         IClientRepository clientRepository, IGSCContext context, IAppSettingRepository appSettingRepository, IJwtTokenAccesser jwtTokenAccesser,
         IUserRepository userRepository, IEmailSenderRespository emailSenderRespository
         )
         {
             _hostingEnvironment = hostingEnvironment;
-            _projectDesignRepository = projectDesignRepository;
-            //_projectDesignVisitRepository = projectDesignVisitRepository;
-            //_projectDesignVariableRepository = projectDesignVariableRepository;
-            //_projectDesignTemplateRepository = projectDesignTemplateRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _reportBaseRepository = reportBaseRepository;
             _companyRepository = companyRepository;
@@ -96,94 +84,17 @@ namespace GSC.Report
             _jwtTokenAccesser = jwtTokenAccesser;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
+            fontStream = FilePathConvert();
+            regularfont = new PdfTrueTypeFont(fontStream, 12);
         }
 
-        //public string BlankReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
-        //{
-        //    var projectdetails = _projectDesignRepository.FindByInclude(i => i.ProjectId == reportSetting.ProjectId && i.Project.IsTestSite == false, i => i.Project).SingleOrDefault();
-        //    var projectDesignvisit = _projectDesignVisitRepository.GetVisitsByProjectDesignId(projectdetails.Id);
-
-        //    document = new PdfDocument();
-        //    document.PageSettings.Margins.Top = Convert.ToInt32(reportSetting.TopMargin * 100);
-        //    document.PageSettings.Margins.Bottom = Convert.ToInt32(reportSetting.BottomMargin * 100);
-        //    document.PageSettings.Margins.Left = Convert.ToInt32(reportSetting.LeftMargin * 100);
-        //    document.PageSettings.Margins.Right = Convert.ToInt32(reportSetting.RightMargin * 100);
-
-
-
-        //    DesignVisit(projectDesignvisit, reportSetting, projectdetails.Project.ProjectCode, projectdetails.Project.ClientId);
-
-
-        //    if (reportSetting.PdfType == 1)
-        //    {
-        //        foreach (PdfPage page in document.Pages)
-        //        {
-        //            // water marker                 
-        //            PdfGraphics graphics = page.Graphics;
-        //            //Draw watermark text
-        //            PdfGraphicsState state = graphics.Save();
-        //            graphics.SetTransparency(0.25f);
-        //            graphics.RotateTransform(-40);
-        //            graphics.DrawString("Draft", watermarkerfornt, PdfPens.LightBlue, PdfBrushes.LightBlue, new PointF(-100, 300));
-        //            graphics.Restore();
-        //        }
-        //    }
-        //    PdfBookmarkBase bookmarks = document.Bookmarks;
-        //    foreach (PdfBookmark bookmark in bookmarks)
-        //    {
-        //        IndexCreate(bookmark, false);
-        //        foreach (PdfBookmark subbookmark in bookmark)
-        //        {
-        //            IndexCreate(subbookmark, true);
-        //        }
-        //    }
-        //    SetPageNumber();
-        //    MemoryStream memoryStream = new MemoryStream();
-        //    document.Save(memoryStream);
-
-        //    var base_URL = _uploadSettingRepository.All.OrderByDescending(x => x.Id).FirstOrDefault().DocumentPath;
-        //    FileSaveInfo fileInfo = new FileSaveInfo();
-        //    fileInfo.Base_URL = base_URL;
-        //    fileInfo.ModuleName = Enum.GetName(typeof(JobNameType), jobMonitoring.JobName);
-        //    var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-
-        //    fileInfo.FolderType = Enum.GetName(typeof(DossierPdfStatus), jobMonitoring.JobDetails);
-        //    //fileInfo.ParentFolderName = projectdetails.Project.ProjectCode + "-" + projectdetails.Project.ProjectName + "_" + DateTime.Now.Ticks;
-        //    fileInfo.ParentFolderName = projectdetails.Project.ProjectCode + "_" + DateTime.Now.Ticks;
-        //    fileInfo.FileName = fileInfo.ParentFolderName.Replace("/", "") + ".pdf";
-        //    fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
-
-
-        //    string filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.FileName);
-
-        //    bool exists = Directory.Exists(filePath);
-        //    if (!exists)
-        //        Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
-
-        //    using (System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
-        //    {
-        //        memoryStream.WriteTo(fs);
-        //    }
-
-        //    //// add job Monitor
-        //    jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
-        //    jobMonitoring.JobStatus = JobStatusType.Completed;
-        //    jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
-        //    jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
-        //    var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);
-
-        //    string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
-        //    ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
-        //    Directory.Delete(Zipfilename, true);
-
-        //    var user = _userRepository.Find(_jwtTokenAccesser.UserId);
-        //    var ProjectName = projectdetails.Project.ProjectCode + "-" + projectdetails.Project.ProjectName;
-        //    string asa = Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType, jobMonitoring.FolderName);
-        //    var linkOfPdf = "<a href='" + asa + "'>Click Here</a>";
-        //    _emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
-        //    return "";
-        //}
-
+        private Stream FilePathConvert()
+        {
+            string path = _hostingEnvironment.WebRootPath + "/fonts/times.ttf";
+            byte[] file = File.ReadAllBytes(path);
+            Stream stream = new MemoryStream(file);
+            return stream;
+        }
         private PdfPageTemplateElement AddHeader(PdfDocument doc, string studyName, bool isClientLogo, bool isCompanyLogo, int ClientId)
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
@@ -257,8 +168,13 @@ namespace GSC.Report
 
             PdfCompositeField compositeField = new PdfCompositeField(font, brush, "Page {0} of {1}", pageNumber, count);
             compositeField.Bounds = footer.Bounds;
+            string prientedby = "Printed By : " + _jwtTokenAccesser.UserName + " (" + DateTime.Now.ToString("dd-MM-yyyy h:mm tt") + ")";
+            PdfCompositeField compositeFieldprintedby = new PdfCompositeField(font, brush, prientedby);
+            compositeFieldprintedby.Bounds = footer.Bounds;
 
-            compositeField.Draw(footer.Graphics, new PointF(footer.Width - 50, footer.Height - 10));
+            compositeField.Draw(footer.Graphics, new PointF(footer.Width - 70, footer.Height - 10));
+
+            compositeFieldprintedby.Draw(footer.Graphics, new PointF(footer.Width / 3, footer.Height - 10));
 
             PdfPen pen = new PdfPen(Color.Black, 1.0f);
             footer.Graphics.DrawLine(pen, 0, 0, footer.Width, 0);
@@ -268,6 +184,9 @@ namespace GSC.Report
 
         private PdfLayoutResult AddString(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
         {
+            //font.SetTextEncoding(Encoding.GetEncoding("Windows-1250"))
+            //PdfTrueTypeFont fonts = new PdfTrueTypeFont(new Font("Microsoft Sans Serif", 14), true);
+
             PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
             //Draws String       
             PdfStringFormat stringFormat = new PdfStringFormat();
@@ -340,594 +259,6 @@ namespace GSC.Report
             //Adds this annotation to a new page
             tocresult.Page.Annotations.Add(documentLinkAnnotation);
         }
-
-        //private void DesignVisit(IList<DropDownDto> designvisit, ReportSettingNew reportSetting, string projectCode, int ClientId)
-        //{
-        //    PdfSection SectionTOC = document.Sections.Add();
-        //    PdfPage pageTOC = SectionTOC.Pages.Add();
-
-        //    document.Template.Top = AddHeader(document, projectCode, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo), ClientId);
-        //    document.Template.Bottom = AddFooter(document);
-
-        //    PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-        //    //layoutFormat.Break = PdfLayoutBreakType.FitPage;
-        //    layoutFormat.Layout = PdfLayoutType.Paginate;
-        //    layoutFormat.Break = PdfLayoutBreakType.FitElement;
-
-        //    RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
-        //    tocresult = new PdfLayoutResult(pageTOC, bounds);
-
-        //    PdfStringFormat tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
-        //    PdfTextElement indexheader = new PdfTextElement("Table Of Content", largeheaderfont, PdfBrushes.Black);
-        //    indexheader.StringFormat = tocformat;
-        //    tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-
-        //    PdfStringFormat format = new PdfStringFormat();
-        //    format.Alignment = PdfTextAlignment.Left;
-        //    format.WordWrap = PdfWordWrapType.Word;
-
-        //    foreach (var template in designvisit)
-        //    {
-        //        var projecttemplate = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == template.Id && x.DeletedDate == null, x => x.ProjectDesignTemplateNote, x => x.Domain, x => x.VariableTemplate).Where(x => reportSetting.NonCRF == true ? x.VariableTemplate.ActivityMode == ActivityMode.Generic || x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
-        //        if (projecttemplate.Count > 0)
-        //        {
-        //            PdfSection SectionContent = document.Sections.Add();
-        //            PdfPage pageContent = SectionContent.Pages.Add();
-        //            SectionContent.Template.Top = VisitTemplateHeader(document, projectCode, template.Value, "", "", "", Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));
-
-        //            //if (reportSetting.NonCRF == true)
-        //            //    projecttemplate = projecttemplate.Where(x => x.VariableTemplate.ActivityMode == ActivityMode.Generic).ToList();
-        //            //else
-        //            //    projecttemplate = projecttemplate.Where(x => x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
-
-        //            DesignTemplate(projecttemplate, reportSetting, template.Value, pageContent);
-        //        }
-        //    }
-        //}
-        //private void DesignVisitData(List<ScreeningVisit> screeningVisits, ReportSettingNew reportSetting, string projectCode, ScreeningEntry screeningEntry)
-        //{
-        //    PdfSection SectionTOC = document.Sections.Add();
-        //    PdfStringFormat format = new PdfStringFormat();
-        //    format.Alignment = PdfTextAlignment.Left;
-        //    format.WordWrap = PdfWordWrapType.Word;
-        //    foreach (var visit in screeningVisits)
-        //    {
-        //        var screeningtemplate = _context.ScreeningTemplate.Include(x => x.ScreeningTemplateReview)
-        //           .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.ProjectDesignTemplateNote)
-        //           .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.VariableTemplate)
-        //           .Include(x => x.ProjectDesignTemplate).ThenInclude(i => i.Domain)
-        //           .Include(x => x.ScreeningTemplateValues).ThenInclude(x => x.ProjectDesignVariable)
-        //           .ThenInclude(x => x.Unit).Where(x => x.ScreeningVisitId == visit.Id)
-        //           .Where(x => x.Status != ScreeningTemplateStatus.Pending
-        //                && x.DeletedDate == null && x.ProjectDesignTemplate.DeletedDate == null && reportSetting.NonCRF == true ? x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic || x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific
-        //                )
-        //           .OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList();
-        //        //if (reportSetting.NonCRF == true)
-        //        //    screeningtemplate = screeningtemplate.Where(x => x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic).ToList();
-        //        //else
-        //        //    screeningtemplate = screeningtemplate.Where(x => x.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).ToList();
-        //        if (screeningtemplate.Count > 0)
-        //        {
-
-        //            var visitName = (_jwtTokenAccesser.Language != 1 ?
-        //            visit.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
-        //            : visit.ProjectDesignVisit.DisplayName) +
-        //                                     Convert.ToString(visit.RepeatedVisitNumber == null ? "" : "_" + visit.RepeatedVisitNumber);
-
-
-        //            PdfSection SectionContent = document.Sections.Add();
-        //            PdfPage pageContent = SectionContent.Pages.Add();
-        //            SectionContent.Template.Top = VisitTemplateHeader(document, screeningEntry.Project.ProjectCode, visitName, screeningEntry.Randomization.ScreeningNumber, screeningEntry.Randomization.RandomizationNumber, screeningEntry.Randomization.Initial, Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));
-        //            DesignTemplateWithData(screeningtemplate.OrderBy(x => x.ProjectDesignTemplate.DesignOrder).ToList(), reportSetting, visitName, pageContent);
-        //        }
-        //    }
-        //}
-
-        //private void DesignTemplate(IList<ProjectDesignTemplate> designtemplate, ReportSettingNew reportSetting, string vistitName, PdfPage sectioncontent)
-        //{
-        //    RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
-        //    PdfLayoutResult result = new PdfLayoutResult(sectioncontent, bounds);
-
-        //    PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-        //    //layoutFormat.Break = PdfLayoutBreakType.FitPage;
-        //    layoutFormat.Layout = PdfLayoutType.Paginate;
-        //    layoutFormat.Break = PdfLayoutBreakType.FitElement;
-
-        //    var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
-
-        //    PdfBookmark bookmark = AddBookmark(result, $"{vistitName}", true);
-        //    foreach (var designt in designtemplate.OrderBy(i => i.DesignOrder))
-        //    {
-        //        AddSection(bookmark, result, $"{designt.DesignOrder.ToString()}.{designt.TemplateName}");
-        //        // AddBookmark(result, $"{designt.DesignOrder.ToString()}.{designt.TemplateName}", false);
-        //        //bookmarks = document.Bookmarks.Add($"{index}.{designt.TemplateName}");
-        //        //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
-        //        //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
-
-        //        result = AddString($"{designt.DesignOrder.ToString()}.{designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
-        //        string notes = "";
-        //        for (int n = 0; n < designt.ProjectDesignTemplateNote.Count; n++)
-        //        {
-        //            if (designt.ProjectDesignTemplateNote[n].IsPreview)
-        //                notes += designt.ProjectDesignTemplateNote[n].Note + "\n ";
-        //        }
-        //        if (!string.IsNullOrEmpty(notes))
-        //            result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
-
-        //        AddString("Sr# ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-        //        AddString("Question", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Bottom + 20, 100, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-        //        result = AddString("Answers", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 20, 100, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-
-        //        PdfPen pen = new PdfPen(Color.Gray, 1f);
-        //        result.Page.Graphics.DrawLine(pen, 0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Bounds.Y + 20);
-
-        //        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-        //        //var variabledetails = _projectDesignVariableRepository.GetVariabeAnnotationDropDownForProjectDesign(designt.Id);
-        //        var variabledetails = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == designt.Id && x.DeletedDate == null).Include(x => x.Values).Include(x => x.Remarks).Include(x => x.Unit).ToList();
-
-        //        // var variablelist = _projectDesignVariableRepository.FindByInclude(t => t.ProjectDesignTemplateId == designt.Id && t.DeletedDate == null, t => t.Values, t => t.Remarks, t => t.Unit).ToList();                
-        //        foreach (var variable in variabledetails.OrderBy(i => i.DesignOrder))
-        //        {
-        //            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-        //            string annotation = String.IsNullOrEmpty(variable.Annotation) ? " " : $"[{variable.Annotation}]";
-        //            string CollectionAnnotation = String.IsNullOrEmpty(variable.CollectionAnnotation) ? " " : $"({variable.CollectionAnnotation})";
-        //            if (reportSetting.AnnotationType == true)
-        //                result = AddString($"{variable.VariableName}\n {annotation}   {CollectionAnnotation} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            else
-        //                result = AddString($"{variable.VariableName} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            PdfLayoutResult secondresult = result;
-        //            AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-
-        //            if (variable.Unit != null)
-        //                AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //            if (variable.IsNa)
-        //            {
-        //                PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-        //                checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
-        //                checkField.Style = PdfCheckBoxStyle.Check;
-        //                document.Form.Fields.Add(checkField);
-        //                AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(420, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //            }
-        //            if (variable.CollectionSource == CollectionSources.TextBox || variable.CollectionSource == CollectionSources.MultilineTextBox)
-        //            {
-        //                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
-        //                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                textBoxField.BorderWidth = 1;
-        //                textBoxField.BorderColor = new PdfColor(Color.Gray);
-        //                textBoxField.Multiline = true;
-        //                document.Form.Fields.Add(textBoxField);
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            else if (variable.CollectionSource == CollectionSources.ComboBox)
-        //            {
-        //                PdfComboBoxField comboBox = new PdfComboBoxField(result.Page, variable.Id.ToString());
-        //                comboBox.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                comboBox.BorderColor = new PdfColor(Color.Gray);
-        //                string ValueName = "";
-        //                foreach (var value in variable.Values)
-        //                {
-        //                    ValueName = value.ValueName;
-        //                    comboBox.Items.Add(new PdfListFieldItem(value.ValueName, value.Id.ToString()));
-        //                }
-        //                document.Form.Fields.Add(comboBox);
-        //                document.Form.SetDefaultAppearance(false);
-
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            else if (variable.CollectionSource == CollectionSources.RadioButton || variable.CollectionSource == CollectionSources.NumericScale)
-        //            {
-        //                foreach (var value in variable.Values.OrderBy(i => i.SeqNo))
-        //                {
-        //                    result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                    PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
-        //                    PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueCode.ToString());
-        //                    radioItem1.Bounds = new RectangleF(300, result.Bounds.Y, 13, 13);
-        //                    radioList.Items.Add(radioItem1);
-        //                    document.Form.Fields.Add(radioList);
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            else if (variable.CollectionSource == CollectionSources.MultiCheckBox)
-        //            {
-        //                foreach (var value in variable.Values.OrderBy(i => i.SeqNo))
-        //                {
-        //                    result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "UG");
-        //                    checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
-        //                    checkField.Style = PdfCheckBoxStyle.Check;
-        //                    //checkField.Checked = true;
-        //                    document.Form.Fields.Add(checkField);
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            else if (variable.CollectionSource == CollectionSources.CheckBox)
-        //            {
-        //                foreach (var value in variable.Values)
-        //                {
-        //                    result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-        //                    checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
-        //                    checkField.Style = PdfCheckBoxStyle.Check;
-        //                    document.Form.Fields.Add(checkField);
-        //                }
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            else if (variable.CollectionSource == CollectionSources.Date)
-        //            {
-        //                PdfTextBoxField field = new PdfTextBoxField(result.Page, "datePick");
-        //                field.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                //field.Actions.KeyPressed = new PdfJavaScriptAction("AFDate_KeystrokeEx(\"m/d/yy\")");
-        //                //field.Actions.Format = new PdfJavaScriptAction("AFDate_FormatEx(\"m/d/yy\")");
-        //                //field.Text = textvalue;
-        //                document.Form.Fields.Add(field);
-
-        //                AddString(GeneralSettings.DateFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            else if (variable.CollectionSource == CollectionSources.DateTime)
-        //            {
-        //                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
-        //                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                document.Form.Fields.Add(textBoxField);
-        //                AddString(GeneralSettings.DateFormat + " " + GeneralSettings.TimeFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            else if (variable.CollectionSource == CollectionSources.PartialDate)
-        //            {
-        //                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "PartialDate");
-        //                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                document.Form.Fields.Add(textBoxField);
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            else if (variable.CollectionSource == CollectionSources.Time)
-        //            {
-        //                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
-        //                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                document.Form.Fields.Add(textBoxField);
-        //                result = AddString(GeneralSettings.TimeFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //            }
-        //            else
-        //            {
-        //                result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-        //            //result = AddString("--last line ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            PdfLayoutResult thirdresult = result;
-        //            if (secondresult.Page == thirdresult.Page)
-        //                if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
-        //                    if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
-        //                        result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-        //        }
-        //    }
-        //}
-
-
-        //private void DesignTemplateWithData(IList<ScreeningTemplate> screeningTemplates, ReportSettingNew reportSetting, string vistitName, PdfPage sectioncontent)
-        //{
-        //    DateTime dDate;
-        //    RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
-        //    PdfLayoutResult result = new PdfLayoutResult(sectioncontent, bounds);
-
-        //    PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-        //    //layoutFormat.Break = PdfLayoutBreakType.FitPage;
-        //    layoutFormat.Layout = PdfLayoutType.Paginate;
-        //    layoutFormat.Break = PdfLayoutBreakType.FitElement;
-
-        //    //document.Form.SetDefaultAppearance(false);
-
-        //    PdfBookmark bookmark = AddBookmark(result, $"{vistitName}", true);
-        //    //PdfBookmark bookmarks = document.Bookmarks.Add(vistitName);
-        //    //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
-        //    //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
-
-        //    var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
-        //    GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
-
-        //    foreach (var template in screeningTemplates)
-        //    {
-        //        if (template.ScreeningTemplateValues.Where(x => x.DeletedDate == null
-        //                             && x.ProjectDesignVariable.DeletedDate == null)
-        //            .OrderBy(x => x.ProjectDesignVariable.DesignOrder).Count() > 0)
-        //        {
-        //            decimal DesignOrder = template.RepeatSeqNo == null ? template.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(template.ProjectDesignTemplate.DesignOrder.ToString() + "." + template.RepeatSeqNo.Value.ToString());
-
-        //            AddSection(bookmark, result, $"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName}");
-        //            //AddBookmark(result, $"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName}", false);
-        //            //bookmarks = document.Bookmarks.Add($"{index}.{template.ProjectDesignTemplate.TemplateName}");
-        //            //bookmarks.Destination = new PdfDestination(result.Page, new PointF(0, result.Bounds.Y + 20));
-        //            //bookmarks.Destination.Location = new PointF(0, result.Bounds.Y + 20);
-
-        //            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat); result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            result = AddString($"{DesignOrder.ToString()}.{template.ProjectDesignTemplate.TemplateName} -{template.ProjectDesignTemplate.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
-        //            string notes = "";
-        //            for (int n = 0; n < template.ProjectDesignTemplate.ProjectDesignTemplateNote.Count; n++)
-        //            {
-        //                notes += template.ProjectDesignTemplate.ProjectDesignTemplateNote[n].Note + "\n";
-        //            }
-        //            if (!string.IsNullOrEmpty(notes))
-        //                result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-        //            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
-
-        //            AddString("Sr# ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-        //            AddString("Question", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Bottom + 20, 100, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-        //            result = AddString("Answers", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 20, 100, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-
-        //            PdfPen pen = new PdfPen(Color.Gray, 1f);
-        //            result.Page.Graphics.DrawLine(pen, 0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Bounds.Y + 20);
-
-        //            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-        //            foreach (var variable in template.ScreeningTemplateValues.Where(x => x.DeletedDate == null
-        //                                && x.ProjectDesignVariable.DeletedDate == null)
-        //                .OrderBy(x => x.ProjectDesignVariable.DesignOrder).ToList())
-        //            {
-        //                //result = AddString($"{DesignOrder.ToString()}.{variable.ProjectDesignVariable.DesignOrder}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat); result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-        //                string annotation = String.IsNullOrEmpty(variable.ProjectDesignVariable.Annotation) ? "" : $"[{variable.ProjectDesignVariable.Annotation}]";
-        //                string CollectionAnnotation = String.IsNullOrEmpty(variable.ProjectDesignVariable.CollectionAnnotation) ? "" : $"({variable.ProjectDesignVariable.CollectionAnnotation})";
-
-        //                string Variablenotes = String.IsNullOrEmpty(variable.ProjectDesignVariable.Note) ? "" : variable.ProjectDesignVariable.Note;
-        //                if (!string.IsNullOrEmpty(Variablenotes))
-        //                    Variablenotes = "Notes :" + Variablenotes;
-
-        //                if (reportSetting.AnnotationType == true)
-        //                    result = AddString($"{variable.ProjectDesignVariable.VariableName}\n {annotation}   {CollectionAnnotation} \n {Variablenotes}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                else
-        //                    result = AddString($"{variable.ProjectDesignVariable.VariableName} \n {Variablenotes} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                PdfLayoutResult secondresult = result;
-        //                AddString($"{DesignOrder.ToString()}.{variable.ProjectDesignVariable.DesignOrder}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-        //                if (variable.ProjectDesignVariable.Unit != null)
-        //                    AddString(variable.ProjectDesignVariable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width - 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //                if (variable.ProjectDesignVariable.IsNa)
-        //                {
-        //                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-        //                    checkField.Bounds = new RectangleF(405, result.Bounds.Y + 10, 10, 10);
-        //                    checkField.Style = PdfCheckBoxStyle.Check;
-        //                    var isNa = variable.IsNa;
-
-        //                    if (isNa)
-        //                        checkField.Checked = true;
-        //                    checkField.ReadOnly = true;
-        //                    document.Form.Fields.Add(checkField);
-        //                    AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(420, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //                }
-
-        //                if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox || variable.ProjectDesignVariable.CollectionSource == CollectionSources.MultilineTextBox)
-        //                {
-        //                    result = AddString(variable.Value == null ? " " : variable.Value, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox)
-        //                {
-        //                    //PdfComboBoxField comboBox = new PdfComboBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
-        //                    //comboBox.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                    //comboBox.BorderColor = new PdfColor(Color.Gray);                   
-
-        //                    //var variablevalue = _context.ProjectDesignVariableValue.Where(b =>
-        //                    //                                b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id
-        //                    //                                ).ToList();
-
-        //                    var variblevaluename = _context.ProjectDesignVariableValue.Where(b =>
-        //                                                    b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id &&
-        //                                                    (variable.Value != null && variable.Value != "" &&
-        //                                                    b.Id == Convert.ToInt32(variable.Value))).ToList();
-        //                    //foreach (var value in variablevalue)
-        //                    //{                         
-        //                    //    comboBox.Items.Add(new PdfListFieldItem(value.ValueName, value.Id.ToString()));
-        //                    //}
-        //                    //int cvalue = variablevalue.FindIndex(x => x.ValueName == variblevaluename);
-        //                    ////comboBox.Editable = true;
-        //                    ////comboBox.ComplexScript = true;
-        //                    ////comboBox.ReadOnly = true;                       
-        //                    //document.Form.Fields.Add(comboBox);
-        //                    //document.Form.SetDefaultAppearance(false);
-        //                    //comboBox.SelectedIndex = 0;
-
-        //                    //PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
-        //                    //textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                    //textBoxField.Text = variblevaluename;
-        //                    //textBoxField.ReadOnly = true;
-        //                    //document.Form.Fields.Add(textBoxField);
-
-        //                    string dropdownvalue = variblevaluename != null && variblevaluename.Count > 0 ? variblevaluename.FirstOrDefault().ValueName : " ";
-        //                    SizeF size = regularfont.MeasureString($"{dropdownvalue}");
-        //                    //result.Page.Graphics.DrawString($"{variblevaluename}", regularfont, PdfBrushes.Black, new RectangleF(new PointF(300, result.Bounds.Y), size),);
-        //                    result = AddString($"{dropdownvalue}", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                    //result.Page.Graphics.DrawRectangle(PdfPens.Black, PdfBrushes.Transparent, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, size.Height));
-
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton || variable.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale)
-        //                {
-
-        //                    var variablevalue = _context.ProjectDesignVariableValue.Where(b =>
-        //                                             b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id && b.DeletedDate == null
-        //                                             ).ToList();
-
-        //                    var variblevaluename = _context.ProjectDesignVariableValue.Where(b =>
-        //                                                    b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id &&
-        //                                                     (variable.Value != null && variable.Value != "" &&
-        //                                                    b.Id == Convert.ToInt32(variable.Value))).ToList();
-        //                    //PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.ProjectDesignVariable.Id.ToString());
-        //                    //document.Form.Fields.Add(radioList);                     
-        //                    foreach (var value in variablevalue.OrderBy(x => x.SeqNo))
-        //                    {
-        //                        result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                        PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.ProjectDesignVariable.Id.ToString());
-        //                        document.Form.Fields.Add(radioList);
-
-        //                        PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueCode.ToString());
-        //                        radioItem1.Bounds = new RectangleF(300, result.Bounds.Y, 13, 13);
-        //                        radioList.Items.Add(radioItem1);
-        //                        radioList.ReadOnly = true;
-        //                        if (variblevaluename?.Count > 0)
-        //                            if (value.ValueName == variblevaluename.FirstOrDefault().ValueName)
-        //                                radioList.SelectedIndex = 0;
-        //                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                    }
-        //                    //if (variblevaluename?.Count > 0)
-        //                    //{
-        //                    //    int cvalue = variablevalue.FindIndex(x => x.ValueName == variblevaluename.FirstOrDefault().ValueName);
-        //                    //    radioList.SelectedIndex = cvalue;
-        //                    //}
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox)
-        //                {
-        //                    var variablevalue = _context.ProjectDesignVariableValue.Where(b =>
-        //                                            b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id
-        //                                            ).ToList();
-
-        //                    var variblevaluename = from stvc in _context.ScreeningTemplateValueChild.Where(x =>
-        //                                              x.DeletedDate == null && x.ScreeningTemplateValueId == variable.Id && x.Value == "true")
-        //                                           join prpjectdesignvalueTemp in _context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null)
-        //                                           on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into prpjectdesignvalueDto
-        //                                           from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
-        //                                           select prpjectdesignvalue.ValueName;
-        //                    foreach (var value in variablevalue.OrderBy(x => x.SeqNo))
-        //                    {
-        //                        result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                        PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
-        //                        checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
-        //                        checkField.Style = PdfCheckBoxStyle.Check;
-        //                        checkField.ReadOnly = true;
-        //                        if (variblevaluename.ToList().Contains(value.ValueName))
-        //                            checkField.Checked = true;
-        //                        document.Form.Fields.Add(checkField);
-
-        //                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                    }
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.CheckBox)
-        //                {
-        //                    var variablevalue = _context.ProjectDesignVariableValue.Where(b =>
-        //                                              b.ProjectDesignVariableId == variable.ProjectDesignVariable.Id);
-        //                    foreach (var value in variablevalue.OrderBy(x => x.SeqNo))
-        //                    {
-        //                        result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                        PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
-        //                        checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
-        //                        checkField.Style = PdfCheckBoxStyle.Check;
-        //                        checkField.Checked = true;
-        //                        checkField.ReadOnly = true;
-        //                        document.Form.Fields.Add(checkField);
-        //                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                    }
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.Date)
-        //                {
-
-        //                    var dt = !string.IsNullOrEmpty(variable.Value) ? DateTime.TryParse(variable.Value, out dDate) ? DateTime.Parse(variable.Value).UtcDateTime().ToString(GeneralSettings.DateFormat) : variable.Value : "";
-
-        //                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
-        //                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                    textBoxField.Text = dt;
-        //                    textBoxField.ReadOnly = true;
-        //                    document.Form.Fields.Add(textBoxField);
-
-
-        //                    AddString(GeneralSettings.DateFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.DateTime)
-        //                {
-
-        //                    var dttime = !string.IsNullOrEmpty(variable.Value) ? DateTime.TryParse(variable.Value, out dDate) ? DateTime.Parse(variable.Value).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variable.Value : "";
-
-        //                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.ProjectDesignVariable.Id.ToString());
-        //                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                    textBoxField.Text = dttime;
-        //                    textBoxField.ReadOnly = true;
-        //                    // document.Form.SetDefaultAppearance(true);
-        //                    document.Form.Fields.Add(textBoxField);
-        //                    AddString($"{GeneralSettings.DateFormat} {GeneralSettings.TimeFormat}", result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.PartialDate)
-        //                {
-        //                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "PartialDate");
-        //                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                    textBoxField.Text = variable.Value == null ? "" : variable.Value;
-        //                    textBoxField.ReadOnly = true;
-        //                    document.Form.Fields.Add(textBoxField);
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else if (variable.ProjectDesignVariable.CollectionSource == CollectionSources.Time)
-        //                {
-        //                    var time = !string.IsNullOrEmpty(variable.Value) ? DateTime.Parse(variable.Value).UtcDateTime().ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
-
-        //                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
-        //                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-        //                    textBoxField.Text = time;
-        //                    textBoxField.ReadOnly = true;
-        //                    document.Form.Fields.Add(textBoxField);
-        //                    AddString(GeneralSettings.TimeFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-        //                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                else
-        //                {
-        //                    result = AddString(variable.ProjectDesignVariable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                }
-        //                PdfLayoutResult thirdresult = result;
-        //                if (secondresult.Page == thirdresult.Page)
-        //                    if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
-        //                        if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
-        //                            result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-
-        //                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //            }
-
-        //            int projectdesignId = _context.ProjectDesign.Where(x => x.ProjectId == reportSetting.ProjectId).SingleOrDefault().Id;
-        //            var workflowlevel = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectdesignId).Include(x => x.Levels).ToList();
-        //            foreach (var workflow in workflowlevel)
-        //            {
-        //                var levels = workflow.Levels;
-        //                foreach (var level in levels)
-        //                {
-        //                    if (level.IsElectricSignature)
-        //                    {
-        //                        //var signature = template.ScreeningTemplateReview.Where(x => x.ScreeningTemplateId == template.Id && x.ReviewLevel > level.LevelNo - 1 && x.RoleId == level.SecurityRoleId).LastOrDefault();
-        //                        var signature = (from s in template.ScreeningTemplateReview
-        //                                         join u in _context.Users on s.CreatedBy equals u.Id
-        //                                         join sr in _context.SecurityRole on s.RoleId equals sr.Id
-        //                                         where s.ScreeningTemplateId == template.Id && s.ReviewLevel > level.LevelNo - 1 && s.RoleId == level.SecurityRoleId
-        //                                         select new
-        //                                         {
-        //                                             u.UserName,
-        //                                             u.FirstName,
-        //                                             u.LastName,
-        //                                             s.CreatedDate,
-        //                                             sr.RoleName
-        //                                         }).LastOrDefault();
-        //                        if (signature != null)
-        //                        {
-        //                            result = AddString($"{ signature.UserName}  ({signature.RoleName})", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-        //                            result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                            result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                            if (result.Bounds.Bottom + 30 >= 770)
-        //                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 30, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
         private PdfPageTemplateElement VisitTemplateHeader(PdfDocument doc, string projectcode, string vistName, string screeningNO, string subjectNo, string Initial, bool Isscreeningno, bool isSubjectNo, bool IsInitial, bool isSiteCode)
         {
             RectangleF rect = new RectangleF(0, 80, doc.Pages[0].GetClientSize().Width, 120);
@@ -948,177 +279,6 @@ namespace GSC.Report
                 header.Graphics.DrawString($"SiteCode :- {projectcode}", headerfont, PdfBrushes.Black, new RectangleF(0, 120, header.Width, header.Height), stringFormat);
             return header;
         }
-
-        //public string DataGenerateReport(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
-        //{
-        //    var subject = _context.ScreeningEntry.Include(s => s.ScreeningVisit).ThenInclude(s => s.ProjectDesignVisit).Include(x => x.Randomization).Include(x => x.Project)
-        //        .Where(a => reportSetting.SiteId.Contains(a.ProjectId) && a.DeletedDate == null &&
-        //      (reportSetting.SubjectIds == null || reportSetting.SubjectIds.Select(x => x.Id).ToList().Contains((int)a.RandomizationId))).ToList();
-
-        //    if (subject.Count == 0)
-        //        return "Data Entery is pending.";
-
-        //    var base_URL = _uploadSettingRepository.All.OrderByDescending(x => x.Id).FirstOrDefault().DocumentPath;
-        //    FileSaveInfo fileInfo = new FileSaveInfo();
-        //    fileInfo.Base_URL = base_URL;
-        //    fileInfo.ModuleName = Enum.GetName(typeof(JobNameType), jobMonitoring.JobName);
-        //    fileInfo.FolderType = Enum.GetName(typeof(DossierPdfStatus), jobMonitoring.JobDetails);
-
-
-        //    var parent = _context.Project.Where(x => x.Id == reportSetting.ProjectId).FirstOrDefault().ProjectCode;
-        //    fileInfo.ParentFolderName = parent + "_" + DateTime.Now.Ticks;
-        //    foreach (var item in subject)
-        //    {
-        //        document = new PdfDocument();
-        //        document.PageSettings.Margins.Top = Convert.ToInt32(reportSetting.TopMargin * 100);
-        //        document.PageSettings.Margins.Bottom = Convert.ToInt32(reportSetting.BottomMargin * 100);
-        //        document.PageSettings.Margins.Left = Convert.ToInt32(reportSetting.LeftMargin * 100);
-        //        document.PageSettings.Margins.Right = Convert.ToInt32(reportSetting.RightMargin * 100);
-
-
-        //        PdfSection SectionTOC = document.Sections.Add();
-        //        PdfPage pageTOC = SectionTOC.Pages.Add();
-
-        //        document.Template.Top = AddHeader(document, parent, Convert.ToBoolean(reportSetting.IsClientLogo), Convert.ToBoolean(reportSetting.IsCompanyLogo), item.Project.ClientId);
-        //        document.Template.Bottom = AddFooter(document);
-        //        PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-        //        //layoutFormat.Break = PdfLayoutBreakType.FitPage;
-        //        layoutFormat.Layout = PdfLayoutType.Paginate;
-        //        layoutFormat.Break = PdfLayoutBreakType.FitElement;
-
-        //        RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
-        //        tocresult = new PdfLayoutResult(pageTOC, bounds);
-
-        //        PdfStringFormat format = new PdfStringFormat();
-        //        format.Alignment = PdfTextAlignment.Left;
-        //        format.WordWrap = PdfWordWrapType.Word;
-
-        //        var visit = item.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null).OrderBy(o => o.ProjectDesignVisit.DesignOrder).ThenBy(t => t.RepeatedVisitNumber).ToList();
-        //        DesignVisitData(visit, reportSetting, item.Project.ProjectCode, item);
-
-
-        //        if (reportSetting.PdfType == 1)
-        //        {
-        //            foreach (PdfPage page in document.Pages)
-        //            {
-        //                // water marker                 
-        //                PdfGraphics graphics = page.Graphics;
-        //                //Draw watermark text
-        //                PdfGraphicsState state = graphics.Save();
-        //                graphics.SetTransparency(0.25f);
-        //                graphics.RotateTransform(-40);
-        //                graphics.DrawString("Draft", watermarkerfornt, PdfPens.LightBlue, PdfBrushes.LightBlue, new PointF(-100, 300));
-        //                graphics.Restore();
-        //            }
-        //        }
-        //        PdfBookmarkBase bookmarks = document.Bookmarks;
-        //        foreach (PdfBookmark bookmark in bookmarks)
-        //        {
-        //            IndexCreate(bookmark, false);
-        //            foreach (PdfBookmark subbookmark in bookmark)
-        //            {
-        //                IndexCreate(subbookmark, true);
-        //            }
-        //        }
-        //        SetPageNumber();
-        //        MemoryStream memoryStream = new MemoryStream();
-        //        document.Save(memoryStream);
-
-
-        //        //reportSettingNew.TimezoneoffSet = reportSettingNew.TimezoneoffSet * (-1);
-
-
-
-        //        fileInfo.FolderType = Enum.GetName(typeof(DossierPdfStatus), jobMonitoring.JobDetails);
-        //        fileInfo.FileName = item.Randomization.Initial.Replace("/", "") + ".pdf";
-        //        fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
-        //        fileInfo.ChildFolderName = item.Project.ProjectCode;
-
-        //        string fileName = fileInfo.FileName + ".pdf";
-        //        //string filePath = string.Empty;
-        //        string filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
-
-        //        bool exists = Directory.Exists(filePath);
-        //        if (!exists)
-        //            System.IO.Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName));
-
-        //        using (System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
-        //        {
-        //            memoryStream.WriteTo(fs);
-        //        }
-        //    }
-        //    var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-        //    // add job Monitor
-        //    jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
-        //    jobMonitoring.JobStatus = JobStatusType.Completed;
-        //    jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
-        //    jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
-        //    var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);
-
-
-        //    string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
-        //    ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
-        //    Directory.Delete(Zipfilename, true);
-
-        //    var user = _userRepository.Find(_jwtTokenAccesser.UserId);
-        //    var ProjectName = subject.FirstOrDefault().Project.ProjectCode + "-" + subject.FirstOrDefault().Project.ProjectName;
-        //    string asa = Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType, jobMonitoring.FolderName);
-        //    var linkOfPdf = "<a href='" + asa + "'>Click Here</a>";
-        //    _emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
-        //    return "";
-        //}
-
-        //public FileStreamResult GetProjectDesign(ReportSettingNew reportSetting)
-        //{
-        //    var projectdetails = _projectDesignRepository.FindByInclude(i => i.ProjectId == reportSetting.ProjectId, i => i.Project).SingleOrDefault();
-        //    var projectDesignvisit = _projectDesignVisitRepository.GetVisitsByProjectDesignId(projectdetails.Id);
-
-        //    document = new PdfDocument();
-        //    document.PageSettings.Margins.Top = Convert.ToInt32(reportSetting.TopMargin * 100);
-        //    document.PageSettings.Margins.Bottom = Convert.ToInt32(reportSetting.BottomMargin * 100);
-        //    document.PageSettings.Margins.Left = Convert.ToInt32(reportSetting.LeftMargin * 100);
-        //    document.PageSettings.Margins.Right = Convert.ToInt32(reportSetting.RightMargin * 100);
-
-
-
-        //    DesignVisit(projectDesignvisit, reportSetting, projectdetails.Project.ProjectCode, projectdetails.Project.ClientId);
-
-
-        //    if (reportSetting.PdfType == 1)
-        //    {
-        //        foreach (PdfPage page in document.Pages)
-        //        {
-        //            // water marker                 
-        //            PdfGraphics graphics = page.Graphics;
-        //            //Draw watermark text
-        //            PdfGraphicsState state = graphics.Save();
-        //            graphics.SetTransparency(0.25f);
-        //            graphics.RotateTransform(-40);
-        //            graphics.DrawString("Draft", watermarkerfornt, PdfPens.LightBlue, PdfBrushes.LightBlue, new PointF(-100, 300));
-        //            graphics.Restore();
-        //        }
-        //    }
-
-        //    PdfBookmarkBase bookmarks = document.Bookmarks;
-        //    //Iterates through bookmarks
-        //    foreach (PdfBookmark bookmark in bookmarks)
-        //    {
-        //        IndexCreate(bookmark, false);
-        //        foreach (PdfBookmark subbookmark in bookmark)
-        //        {
-        //            IndexCreate(subbookmark, true);
-        //        }               
-        //    }
-        //    SetPageNumber();
-        //    MemoryStream memoryStream = new MemoryStream();
-        //    document.Save(memoryStream);
-        //    memoryStream.Position = 0;
-        //    FileStreamResult fileStreamResult = new FileStreamResult(memoryStream, "application/pdf");
-        //    fileStreamResult.FileDownloadName = "blankreport.pdf";
-        //    return fileStreamResult;
-
-        //}
-
 
         public FileStreamResult GetProjectDesign(ReportSettingNew reportSetting)
         {
@@ -1419,8 +579,8 @@ namespace GSC.Report
                 if (!string.IsNullOrEmpty(notes))
                     result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                 result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
-
-                AddString("Sr# ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
+                if (!reportSetting.IsSectionDisplay)
+                    AddString("Sr# ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
                 AddString("Question", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Bottom + 20, 100, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
                 result = AddString("Answers", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 20, 100, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
 
@@ -1447,7 +607,8 @@ namespace GSC.Report
                     else
                         result = AddString($"{variable.VariableName} \n {Variablenotes} \n", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     PdfLayoutResult secondresult = result;
-                    AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    if (!reportSetting.IsSectionDisplay)
+                        AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                     if (variable.Unit != null)
                         AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
