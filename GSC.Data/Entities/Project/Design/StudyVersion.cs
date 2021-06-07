@@ -1,6 +1,8 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.UserMgt;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,5 +19,7 @@ namespace GSC.Data.Entities.Project.Design
         public int? GoLiveBy { get; set; }
         public DateTime? GoLiveOn { get; set; }
         public bool IsRunning { get; set; }
+      //  public int? VersionStatusId { get; set; }
+        public VersionStatus? VersionStatus { get; set; }
     }
 }

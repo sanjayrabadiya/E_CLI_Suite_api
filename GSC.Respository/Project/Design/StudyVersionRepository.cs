@@ -6,6 +6,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,7 +33,7 @@ namespace GSC.Respository.Project.Design
 
         public string Duplicate(StudyVersion objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.VersionNumber == objSave.VersionNumber && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.VersionNumber == objSave.VersionNumber && x.ProjectDesignId == objSave.ProjectDesignId && x.DeletedDate == null))
                 return "Duplicate version number: " + objSave.VersionNumber;
 
             return "";
@@ -81,22 +82,32 @@ namespace GSC.Respository.Project.Design
         public double GetVersionNumber(int ProjectDesignId)
         {
             var number = All.Where(x => x.DeletedDate == null && x.ProjectDesignId == ProjectDesignId).Select(c => new { Id = c.Id, number = c.VersionNumber }).OrderByDescending(x => x.Id).FirstOrDefault();
-            return number.number + 0.1;
+            return Math.Round(number.number + 0.1, 1);
         }
 
-        public void ActiveVersion(int Id,int ProjectDesignId)
+        public void ActiveVersion(int Id, int ProjectDesignId)
         {
-            var version = All.Where(x => x.ProjectDesignId == ProjectDesignId && x.DeletedDate == null && x.IsRunning).FirstOrDefault();
+            var version = All.Where(x => x.ProjectDesignId == ProjectDesignId && x.DeletedDate == null && x.VersionStatus == Helper.VersionStatus.GoLive).FirstOrDefault();
             if (version != null)
             {
                 version.IsRunning = false;
+                version.VersionStatus = Helper.VersionStatus.Archive;
                 Update(version);
             }
 
             var active = All.Where(x => x.Id == Id).FirstOrDefault();
             active.IsRunning = true;
+            active.VersionStatus = Helper.VersionStatus.GoLive;
+            active.GoLiveOn = _jwtTokenAccesser.GetClientDate();
+            active.GoLiveBy = _jwtTokenAccesser.UserId;
             Update(active);
             _context.Save();
+        }
+
+        public List<DropDownDto> GetVersionDropDown(int ProjectDesignId)
+        {
+            return All.Where(x => x.ProjectDesignId == ProjectDesignId)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.VersionNumber.ToString(), IsDeleted = c.DeletedDate != null,ExtraData = c.VersionStatus }).OrderBy(o => o.Value).ToList();
         }
     }
 }

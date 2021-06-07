@@ -15,5 +15,6 @@ namespace GSC.Respository.Project.Design
         void UpdateVisitStatus(StudyVersion studyVersion);
         double GetVersionNumber(int ProjectDesignId);
         void ActiveVersion(int Id, int ProjectDesignId);
+        List<DropDownDto> GetVersionDropDown(int ProjectDesignId);
     }
 }

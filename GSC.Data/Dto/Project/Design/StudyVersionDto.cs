@@ -1,5 +1,7 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +17,8 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsRunning { get; set; }
         public int? GoLiveBy { get; set; }
         public DateTime? GoLiveOn { get; set; }
+       // public int? VersionStatusId { get; set; }
+        public VersionStatus? VersionStatus { get; set; }
     }
 
     public class StudyVersionGridDto : BaseAuditDto
@@ -26,5 +30,6 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsRunning { get; set; }
         public string GoLiveBy { get; set; }
         public DateTime? GoLiveOn { get; set; }
+        public string VersionStatus { get; set; }
     }
 }

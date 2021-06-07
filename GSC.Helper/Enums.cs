@@ -664,4 +664,11 @@ namespace GSC.Helper
         [Description("Odd(1,3,5)")] Odd = 7,
         [Description("Even(2,4)")] Even = 8,
     }
+
+    public enum VersionStatus : short
+    {
+        [Description("On Trial")] OnTrial = 1,
+        [Description("Go Live")] GoLive = 2,
+        [Description("Archive")] Archive = 3,
+    }
 }
