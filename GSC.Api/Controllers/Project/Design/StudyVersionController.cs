@@ -71,6 +71,7 @@ namespace GSC.Api.Controllers.Project.Design
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             studyVersionDto.Id = 0;
+            studyVersionDto.VersionStatus = Helper.VersionStatus.OnTrial;
             var studyVersion = _mapper.Map<StudyVersion>(studyVersionDto);
             var validate = _studyVersionRepository.Duplicate(studyVersion);
             if (!string.IsNullOrEmpty(validate))
@@ -152,6 +153,13 @@ namespace GSC.Api.Controllers.Project.Design
         {
             _studyVersionRepository.ActiveVersion(Id, ProjectDesignId);
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetVersionDropDown/{ProjectDesignId}")]
+        public IActionResult GetVersionDropDown(int ProjectDesignId)
+        {
+            return Ok(_studyVersionRepository.GetVersionDropDown(ProjectDesignId));
         }
 
     }

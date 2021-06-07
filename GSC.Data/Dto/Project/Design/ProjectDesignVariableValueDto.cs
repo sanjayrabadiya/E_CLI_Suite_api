@@ -82,7 +82,7 @@ namespace GSC.Data.Dto.Project.Design
         public string CollectionValue { get; set; }
     }
 
-    public class ProjectDesignLanguageReportDto
+    public class ProjectDesignLanguageReportDto : BaseAuditDto
     {
         public string VisitName { get; set; }
         public string TemplateName { get; set; }

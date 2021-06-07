@@ -97,8 +97,9 @@ namespace GSC.Api.Controllers.Project.Design
             projectDesign.StudyVersion = new StudyVersion();
 
             var studyVersion = _mapper.Map<StudyVersion>(projectDesign.StudyVersion);
-            studyVersion.IsGoLive = false;
+           // studyVersion.IsGoLive = false;
             studyVersion.VersionNumber = 1.0;
+            studyVersion.VersionStatus = VersionStatus.OnTrial;
             studyVersion.IsRunning = true;
             _studyVersionRepository.Add(studyVersion);
             _projectDesignRepository.Add(projectDesign);
@@ -217,7 +218,8 @@ namespace GSC.Api.Controllers.Project.Design
             var version = _context.StudyVersion.Where(x=>x.ProjectDesignId == id).FirstOrDefault();
             if (record == null)
                 return NotFound();
-            version.IsGoLive = true;
+            version.VersionStatus = VersionStatus.GoLive;
+            //version.IsGoLive = true;
             version.GoLiveBy = _jwtTokenAccesser.UserId;
             version.GoLiveOn = _jwtTokenAccesser.GetClientDate();
             _studyVersionRepository.Update(version);
