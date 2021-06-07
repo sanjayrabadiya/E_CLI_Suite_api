@@ -81,14 +81,13 @@ namespace GSC.Api.Controllers.CTMS
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] WeekEndMasterDto weekEndMasterDto)
+        public IActionResult Post([FromBody] List<WeekEndMasterDto> weekEndMasterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            foreach (var item in weekEndMasterDto.ListAllWeekOff)
+            foreach (var item in weekEndMasterDto)
             {
-                weekEndMasterDto.Id = 0;
-                weekEndMasterDto.AllWeekOff = (Helper.DayType?)item;
-                var weekend = _mapper.Map<WeekEndMaster>(weekEndMasterDto);
+                item.Id = 0;
+                var weekend = _mapper.Map<WeekEndMaster>(item);
 
                 _weekEndMasterRepository.Add(weekend);
             }
@@ -97,17 +96,19 @@ namespace GSC.Api.Controllers.CTMS
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] WeekEndMasterDto weekEndMasterDto)
+        public IActionResult Put([FromBody] List<WeekEndMasterDto> weekEndMasterDto)
         {
-            if (weekEndMasterDto.Id <= 0) return BadRequest();
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            foreach (var item in weekEndMasterDto)
+            {
+                if (item.Id <= 0) return BadRequest();
+                if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var weekend = _mapper.Map<WeekEndMaster>(weekEndMasterDto);
+                var weekend = _mapper.Map<WeekEndMaster>(item);
 
-            _weekEndMasterRepository.Update(weekend);
-
+                _weekEndMasterRepository.Update(weekend);
+            }
             if (_uow.Save() <= 0) throw new Exception("Weekend is failed on save.");
-            return Ok(weekend.Id);
+            return Ok();
         }
 
         [HttpDelete("{id}")]
