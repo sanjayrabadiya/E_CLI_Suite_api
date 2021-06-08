@@ -142,13 +142,14 @@ namespace GSC.Api.Controllers.Project.Workflow
             //&& !projectWorkflow.Independents.Any(c => c.Id == x.Id)).ToList();
             var deleteIndependents = data.Where(t => projectWorkflow.Independents.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             var addIndependents = projectWorkflow.Independents.Where(x => x.Id == 0).ToList();
-
-            foreach (var item in projectWorkflow.Independents)
+            var updateValue = projectWorkflow.Independents.Where(x => x.Id != 0).ToList();
+            foreach (var item in updateValue)
             {
                 _projectWorkflowIndependentRepository.Update(item);
             }
             foreach (var item in deleteIndependents)
             {
+                item.DeletedBy = _jwtTokenAccesser.UserId;
                 item.DeletedDate = _jwtTokenAccesser.GetClientDate();
                 _projectWorkflowIndependentRepository.Update(item);
             }
@@ -164,12 +165,14 @@ namespace GSC.Api.Controllers.Project.Workflow
             //&& !projectWorkflow.Levels.Any(c => c.Id == x.Id)).ToList();
             var deleteLevels = data.Where(t => projectWorkflow.Levels.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             var addLevels = projectWorkflow.Levels.Where(x => x.Id == 0).ToList();
-            foreach (var item in projectWorkflow.Levels)
+            var updateValue = projectWorkflow.Levels.Where(x => x.Id != 0).ToList();
+            foreach (var item in updateValue)
             {
                 _projectWorkflowLevelRepository.Update(item);
             }
             foreach (var level in deleteLevels)
             {
+                level.DeletedBy = _jwtTokenAccesser.UserId;
                 level.DeletedDate = _jwtTokenAccesser.GetClientDate();
                 _projectWorkflowLevelRepository.Update(level);
             }
