@@ -20,5 +20,6 @@ namespace GSC.Data.Entities.Project.Design
         public decimal? TopMargin { get; set; }
         public decimal? BottomMargin { get; set; }
         public int? CompanyId { get; set; }
+        public bool? isSectionDisplay { get; set; }
     }
 }
