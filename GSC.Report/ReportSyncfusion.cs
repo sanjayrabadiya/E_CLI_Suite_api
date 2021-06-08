@@ -545,12 +545,12 @@ namespace GSC.Report
                     PdfSection SectionContent = document.Sections.Add();
                     PdfPage pageContent = SectionContent.Pages.Add();
                     SectionContent.Template.Top = VisitTemplateHeader(document, details.ProjectDetails.ProjectCode, template.DisplayName, details.ScreeningNumber, details.RandomizationNumber, details.Initial, Convert.ToBoolean(reportSetting.IsScreenNumber), Convert.ToBoolean(reportSetting.IsSubjectNumber), Convert.ToBoolean(reportSetting.IsInitial), Convert.ToBoolean(reportSetting.IsSiteCode));
-                    DesignTemplateReport(template.ProjectDesignTemplatelist, reportSetting, template.DisplayName, pageContent);
+                    DesignTemplateReport(template.ProjectDesignTemplatelist, reportSetting, template.DisplayName, pageContent,details.ProjectDetails.ProjectDesignId);
                 }
             }
         }
 
-        private void DesignTemplateReport(IList<ProjectDesignTemplatelist> designtemplate, ReportSettingNew reportSetting, string vistitName, PdfPage sectioncontent)
+        private void DesignTemplateReport(IList<ProjectDesignTemplatelist> designtemplate, ReportSettingNew reportSetting, string vistitName, PdfPage sectioncontent,int ProjectDesignId)
         {
             DateTime dDate;
             RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
@@ -797,7 +797,7 @@ namespace GSC.Report
                             textBoxField.ReadOnly = true;
                             document.Form.Fields.Add(textBoxField);
                         }
-                        AddString(GeneralSettings.DateFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                        AddString(GeneralSettings.DateFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                         result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     else if (variable.CollectionSource == CollectionSources.DateTime)
@@ -819,7 +819,7 @@ namespace GSC.Report
                             document.Form.Fields.Add(textBoxField);
 
                         }
-                        AddString(GeneralSettings.DateFormat + " " + GeneralSettings.TimeFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                        AddString(GeneralSettings.DateFormat.ToUpper() + " " + GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                         result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
                     else if (variable.CollectionSource == CollectionSources.PartialDate)
@@ -847,7 +847,7 @@ namespace GSC.Report
                             PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
                             textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
                             document.Form.Fields.Add(textBoxField);
-                            result = AddString(GeneralSettings.TimeFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                            result = AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                         }
                         else
                         {
@@ -858,7 +858,7 @@ namespace GSC.Report
                             textBoxField.Text = time;
                             textBoxField.ReadOnly = true;
                             document.Form.Fields.Add(textBoxField);
-                            AddString(GeneralSettings.TimeFormat, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                            AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                         }
                         result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                     }
@@ -915,19 +915,42 @@ namespace GSC.Report
                     //data
                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                 }
-                if (designt.ScreeningTemplateReview != null)
-                {
-                    foreach (var signature in designt.ScreeningTemplateReview)
-                    {
-                        result = AddString($"{ signature.CreatedByUser}  ({signature.RoleName})", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-                        result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        if (result.Bounds.Bottom + 30 >= 770)
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 30, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
+                var workflowlevel = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == ProjectDesignId).Include(x => x.Levels).ToList();
+                foreach (var workflow in workflowlevel)
+                {
+                    var levels = workflow.Levels;
+                    foreach (var level in levels)
+                    {
+                        if (level.IsElectricSignature)
+                        {                          
+                            var signature = designt.ScreeningTemplateReview.Where(s => s.ReviewLevel > level.LevelNo - 1 && s.RoleId == level.SecurityRoleId).LastOrDefault();
+                            if (signature != null)
+                            {
+                                result = AddString($"{ signature.CreatedByUser}  ({signature.RoleName})", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
+                                result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                if (result.Bounds.Bottom + 30 >= 770)
+                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 30, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                        }
                     }
                 }
+
+                //if (designt.ScreeningTemplateReview != null)
+                //{
+                //    foreach (var signature in designt.ScreeningTemplateReview)
+                //    {
+                //        result = AddString($"{ signature.CreatedByUser}  ({signature.RoleName})", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
+                //        result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                //        result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                //        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                //        if (result.Bounds.Bottom + 30 >= 770)
+                //            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 30, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                //    }
+                //}
             }
         }
 
