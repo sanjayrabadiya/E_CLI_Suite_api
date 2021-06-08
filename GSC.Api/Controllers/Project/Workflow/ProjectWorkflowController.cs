@@ -149,6 +149,7 @@ namespace GSC.Api.Controllers.Project.Workflow
             }
             foreach (var item in deleteIndependents)
             {
+                item.DeletedBy = _jwtTokenAccesser.UserId;
                 item.DeletedDate = _jwtTokenAccesser.GetClientDate();
                 _projectWorkflowIndependentRepository.Update(item);
             }
@@ -171,6 +172,7 @@ namespace GSC.Api.Controllers.Project.Workflow
             }
             foreach (var level in deleteLevels)
             {
+                level.DeletedBy = _jwtTokenAccesser.UserId;
                 level.DeletedDate = _jwtTokenAccesser.GetClientDate();
                 _projectWorkflowLevelRepository.Update(level);
             }
