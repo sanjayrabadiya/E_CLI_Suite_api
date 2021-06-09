@@ -137,8 +137,8 @@ namespace GSC.Respository.Etmf
             //result.InComplete = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentReview.Where(z => z.UserId != y.CreatedBy).Count() == 0)).Count()
             //    + SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentReview.Where(z => z.UserId != y.CreatedBy).Count() == 0)).Count();
 
-            result.InComplete = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(z => z.DeletedDate == null && z.ProjectArtificateDocumentReview.Any(y => y.DeletedDate == null && y.UserId != z.CreatedBy))).Count() +
-                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(z => z.DeletedDate == null && z.ProjectSubSecArtificateDocumentReview.Any(y => y.DeletedDate == null && y.UserId != z.CreatedBy))).Count();
+            result.InComplete = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(z => z.DeletedDate == null && z.ProjectArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != z.CreatedBy).Count() == 0)).Count() +
+                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(z => z.DeletedDate == null && z.ProjectSubSecArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != z.CreatedBy).Count() == 0)).Count();
 
             result.PendingReview = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentReview.Count != 0 && y.ProjectArtificateDocumentReview.GroupBy(z => z.UserId).LastOrDefault().Where(v => v.IsSendBack == false && v.ModifiedDate == null && v.UserId != y.CreatedBy).Count() != 0)).Count() +
                 SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentReview.Count != 0 && y.ProjectSubSecArtificateDocumentReview.GroupBy(z => z.UserId).LastOrDefault().Where(v => v.IsSendBack == false && v.ModifiedDate == null && v.UserId != y.CreatedBy).Count() != 0)).Count();
