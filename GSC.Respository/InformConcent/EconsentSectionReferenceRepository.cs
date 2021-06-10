@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
@@ -42,37 +43,45 @@ namespace GSC.Respository.InformConcent
             _mapper = mapper;
         }
 
-        public void AddEconsentSectionReference(EconsentSectionReferenceDto econsentSectionReferenceDto)
+        public IList<EconsentSectionReferenceDto> GetSectionReferenceList(bool isDeleted, int documentId)
         {
-            for (int i = 0; i < econsentSectionReferenceDto.FileModel.Count; i++)
-            {
-                Data.Dto.InformConcent.SaveFileDto obj = new Data.Dto.InformConcent.SaveFileDto();
-                obj.Path = _uploadSettingRepository.GetDocumentPath();
-                obj.FolderType = FolderType.InformConcent;
-                obj.RootName = "EconsentSectionReference";
-                obj.FileModel = econsentSectionReferenceDto.FileModel[i];
-
-                econsentSectionReferenceDto.Id = 0;
-
-                if (econsentSectionReferenceDto.FileModel[i]?.Base64?.Length > 0)
-                {
-                    econsentSectionReferenceDto.FilePath = DocumentService.SaveEconsentSectionReferenceFile(obj.FileModel, obj.Path, obj.FolderType, obj.RootName);
-                }
-
-                var econsentSectionReference = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
-
-                Add(econsentSectionReference);
-                string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.RootName);
-                if (_uow.Save() <= 0)
-                {
-                    if (Directory.Exists(root))
-                    {
-                        Directory.Delete(root, true);
-                    }
-                    throw new Exception($"Creating EConsent File failed on save.");
-                }
-            }
+           var sectionrefrence=  All.Where(x => x.EconsentSetupId == documentId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+                ProjectTo<EconsentSectionReferenceDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();                
+            return sectionrefrence;
         }
+
+        
+        //public void AddEconsentSectionReference(EconsentSectionReferenceDto econsentSectionReferenceDto)
+        //{
+        //    for (int i = 0; i < econsentSectionReferenceDto.FileModel.Count; i++)
+        //    {
+        //        Data.Dto.InformConcent.SaveFileDto obj = new Data.Dto.InformConcent.SaveFileDto();
+        //        obj.Path = _uploadSettingRepository.GetDocumentPath();
+        //        obj.FolderType = FolderType.InformConcent;
+        //        obj.RootName = "EconsentSectionReference";
+        //        obj.FileModel = econsentSectionReferenceDto.FileModel[i];
+
+        //        econsentSectionReferenceDto.Id = 0;
+
+        //        if (econsentSectionReferenceDto.FileModel[i]?.Base64?.Length > 0)
+        //        {
+        //            econsentSectionReferenceDto.FilePath = DocumentService.SaveEconsentSectionReferenceFile(obj.FileModel, obj.Path, obj.FolderType, obj.RootName);
+        //        }
+
+        //        var econsentSectionReference = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
+
+        //        Add(econsentSectionReference);
+        //        string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.RootName);
+        //        if (_uow.Save() <= 0)
+        //        {
+        //            if (Directory.Exists(root))
+        //            {
+        //                Directory.Delete(root, true);
+        //            }
+        //            throw new Exception($"Creating EConsent File failed on save.");
+        //        }
+        //    }
+        //}
 
         public List<DropDownDto> GetEconsentDocumentSectionDropDown(int documentId)
         {
@@ -145,7 +154,8 @@ namespace GSC.Respository.InformConcent
             }
             else if (extension == ".pdf")
             {
-                var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
+                //var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
+                var pdfupload = "http://localhost:52633/Documents/";
                 var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
                 type = "pdf";
                 econsentSectionReferenceDocument.type = type;
@@ -174,6 +184,14 @@ namespace GSC.Respository.InformConcent
                 return econsentSectionReferenceDocument;
             }
 
+        }
+
+        public IList<EconcentSectionRefrenceDetailListDto> GetSetionRefefrenceDetailList(int documentId, int sectionNo)
+        {
+            //_econsentSectionReferenceRepository.FindBy(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo).ToList();
+            var sectionRefrence = All.Where(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo).
+               ProjectTo<EconcentSectionRefrenceDetailListDto>(_mapper.ConfigurationProvider).ToList();
+            return sectionRefrence;
         }
     }
 }

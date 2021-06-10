@@ -20,4 +20,10 @@ namespace GSC.Data.Dto.InformConcent
         public string type { get; set; }
         public string data { get; set; }
     }
+
+    public class EconcentSectionRefrenceDetailListDto: BaseAuditDto
+    {        
+        public string ReferenceTitle { get; set; }
+        public string FilePath { get; set; }
+    }
 }

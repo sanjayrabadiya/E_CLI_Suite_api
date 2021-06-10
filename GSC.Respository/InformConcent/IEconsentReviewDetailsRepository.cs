@@ -16,11 +16,12 @@ namespace GSC.Respository.InformConcent
         List<SectionsHeader> GetEconsentSectionHeaders(int id);
         List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId);
         string ImportSectionData(int id, int sectionno);
-        string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails);
+        //string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails);
+        string GetEconsentDocument(EconsentDocumetViwerDto econsentreviewdetails);
         List<DashboardDto> GetEconsentMyTaskList(int ProjectId);
         CustomParameter downloadpdf(int id);
         List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForSubjectManagement(int patientid);
-        List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForPatientDashboard();
+        List<EconsentDocumentDetailsDto> GetEconsentReviewDetailsForPatientDashboard();
         int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
         int ApproveRejectEconsentDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
     }

@@ -17,14 +17,14 @@ namespace GSC.Api.Controllers.InformConcent
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class econsentsetupController : ControllerBase
+    public class EconsentsetupController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository; 
         private readonly IGSCContext _context;
-        public econsentsetupController(
+        public EconsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
             IUnitOfWork uow,
             IMapper mapper, IUploadSettingRepository uploadSettingRepository,             
@@ -147,7 +147,7 @@ namespace GSC.Api.Controllers.InformConcent
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
             {
                 econsent.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSetup");
-                string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsentSetupDto.DocumentPath);
+                string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsent.DocumentPath);
                 var validatedocument = _econsentSetupRepository.validateDocument(fullpath);
                 if (!string.IsNullOrEmpty(validatedocument))
                 {
@@ -175,6 +175,7 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(econsent.Id);            
         }
 
+        //not use check
         [HttpGet]
         [Route("GetEconsentDocumentDropDown/{projectId}")]
         public IActionResult GetEconsentDocumentDropDown(int projectId)

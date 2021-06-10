@@ -77,40 +77,52 @@ namespace GSC.Respository.InformConcent
             // this method calls when patient login and click on menu inform consent, documents with headers displays on left side returned in this API
             var noneregister = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
             if (noneregister == null) return new List<EConsentDocumentHeader>();
-            var studyId = _projectRepository.Find(noneregister.ProjectId).ParentProjectId;
-            var econsentReviewDetails = FindBy(x => x.RandomizationId == noneregister.Id).ToList();
-            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
+            //var studyId = _projectRepository.Find(noneregister.ProjectId).ParentProjectId;
+            //var econsentReviewDetails = FindBy(x => x.RandomizationId == noneregister.Id).ToList();
+            //var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyId && x.LanguageId == noneregister.LanguageId && x.DeletedDate == null).ToList();
 
-            var Econsentdocuments = (from econsentsetups in Edocuments
-                                     join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId
-                                     select new EConsentDocumentHeader
-                                     {
-                                         DocumentId = econsentsetups.Id,
-                                         DocumentName = econsentsetups.DocumentName,
-                                         DocumentPath = econsentsetups.DocumentPath,
-                                         ReviewId = doc.Id,
-                                         IsReviewed = doc.IsReviewedByPatient
-                                     }).ToList();
+            //var Econsentdocuments = (from econsentsetups in Edocuments
+            //                         join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId
+            //                         select new EConsentDocumentHeader
+            //                         {
+            //                             DocumentId = econsentsetups.Id,
+            //                             DocumentName = econsentsetups.DocumentName,
+            //                             DocumentPath = econsentsetups.DocumentPath,
+            //                             ReviewId = doc.Id,
+            //                             IsReviewed = doc.IsReviewedByPatient
+            //                         }).ToList();
 
+            //var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            //List<EConsentDocumentHeader> returndata = new List<EConsentDocumentHeader>();
+            //foreach (var document in Econsentdocuments)
+            //{
+            //    var FullPath = System.IO.Path.Combine(upload.DocumentPath, document.DocumentPath);
+            //    if (System.IO.File.Exists(FullPath))
+            //    {
+            //        returndata.Add(document);
+            //    }
+            //}
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            List<EConsentDocumentHeader> returndata = new List<EConsentDocumentHeader>();
-            foreach (var document in Econsentdocuments)
+            var result = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null && x.EconsentSetup.LanguageId == noneregister.LanguageId).Select(x => new EConsentDocumentHeader
             {
-                var FullPath = System.IO.Path.Combine(upload.DocumentPath, document.DocumentPath);
-                if (System.IO.File.Exists(FullPath))
-                {
-                    returndata.Add(document);
-                }
-            }
-            return returndata;
+                DocumentId = x.EconsentSetup.Id,
+                DocumentName = x.EconsentSetup.DocumentName,
+                DocumentPath = x.EconsentSetup.DocumentPath,
+                ReviewId = x.Id,
+                IsReviewed = x.IsReviewedByPatient
+            }).ToList();
+
+            result.ForEach(t => t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath));
+
+            return result;
         }
 
         public List<SectionsHeader> GetEconsentSectionHeaders(int id)
         {
-            var econsentreviewdetail = Find(id);
-            var document = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetail.EconsentSetupId).FirstOrDefault();
+            var econsentreviewdetail = FindByInclude(x => x.Id == id, x => x.EconsentSetup).FirstOrDefault();
+            // var document = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetail.EconsentSetupId).FirstOrDefault();
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = System.IO.Path.Combine(upload.DocumentPath, document.DocumentPath);
+            var FullPath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetail.EconsentSetup.DocumentPath);
             string path = FullPath;
             List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
             if (System.IO.File.Exists(path))
@@ -141,9 +153,9 @@ namespace GSC.Respository.InformConcent
                                 }
                             }
                             sectionsHeader.header = headerstring;
-                            sectionsHeader.documentId = document.Id;
+                            sectionsHeader.documentId = econsentreviewdetail.EconsentSetup.Id;
                             sectionsHeader.documentReviewId = econsentreviewdetail.Id;
-                            sectionsHeader.documentName = document.DocumentName;
+                            sectionsHeader.documentName = econsentreviewdetail.EconsentSetup.DocumentName;
                             sectionsHeader.isReadCompelete = econsentreviewdetail.IsReviewedByPatient;
                             sectionsHeader.isReviewed = econsentreviewdetail.IsReviewedByPatient;
                             sectionsHeaders.Add(sectionsHeader);
@@ -261,14 +273,87 @@ namespace GSC.Respository.InformConcent
             return jsonnew;
         }
 
-        public string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails)
+        //public string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails)
+        //{
+        //    var generalSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+        //    generalSettings.TimeFormat = generalSettings.TimeFormat.Replace("a", "tt");
+        //    // this method is called when patient reviewed document and completes the signature 
+        //    var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+        //    var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetails.EconsentSetupId).FirstOrDefault();
+        //    var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
+        //    string path = FullPath;
+        //    if (!System.IO.File.Exists(path))
+        //        return null;
+        //    Stream stream = System.IO.File.OpenRead(path);
+        //    string sfdtText = "";
+        //    EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+        //    sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+        //    wdocument.Dispose();
+        //    string json = sfdtText;
+        //    var jsonObj = JObject.Parse(json);
+        //    string sign = File.ReadAllText("Config//signaturefooterblock.json");
+        //    string sign2 = sign;
+        //    int randomizationId;
+        //    if (econsentreviewdetails.RandomizationId == 0)
+        //    {
+        //        randomizationId = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault().Id;
+        //    }
+        //    else
+        //    {
+        //        randomizationId = econsentreviewdetails.RandomizationId;
+        //    }
+        //    var randomization = _context.Randomization.Where(x => x.Id == randomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
+        //    if (econsentreviewdetails.IsReviewedByPatient == true)
+        //    {
+        //        string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetails.patientdigitalSignImagepath);
+        //        string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
+        //        sign = sign.Replace("_imagepath_", signRandombase64);
+        //    }
+        //    else
+        //    {
+        //        sign = sign.Replace("_imagepath_", econsentreviewdetails.patientdigitalSignBase64);
+        //    }
+        //    sign = sign.Replace("_volunterlabel_", "Volunteer");
+        //    sign = sign.Replace("Name", "Initial");
+        //    sign = sign.Replace("_voluntername_", randomization.ScreeningNumber + " " + randomization.Initial);
+        //    sign = sign.Replace("_datetime_", (econsentreviewdetails.patientapproveddatetime == null) ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econsentreviewdetails.patientapproveddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
+        //    var jsonObj2 = JObject.Parse(sign);
+        //    jsonObj.Merge(jsonObj2, new JsonMergeSettings
+        //    {
+        //        MergeArrayHandling = MergeArrayHandling.Union
+        //    });
+
+        //    if (econsentreviewdetails.IsReviewedByPatient == true)
+        //    {
+        //        var user = _userRepository.Find(_jwtTokenAccesser.UserId);
+        //        string signinvestigatorbase64 = user.SignatureBase64String == null ? "" : user.SignatureBase64String;//DocumentService.ConvertBase64Image(investigatorsignaturepath);
+        //        sign2 = sign2.Replace("_volunterlabel_", "Investigator");
+        //        sign2 = sign2.Replace("_imagepath_", signinvestigatorbase64);
+        //        sign2 = sign2.Replace("_voluntername_", user.UserName);
+        //        sign2 = sign2.Replace("_datetime_", econsentreviewdetails.investigatorRevieweddatetime == null ? _jwtTokenAccesser.GetClientDate().ToString() : econsentreviewdetails.investigatorRevieweddatetime.ToString());
+        //        var jsonObj3 = JObject.Parse(sign2);
+        //        jsonObj.Merge(jsonObj3, new JsonMergeSettings
+        //        {
+        //            MergeArrayHandling = MergeArrayHandling.Union
+        //        });
+        //    }
+
+        //    json = jsonObj.ToString();
+        //    stream.Close();
+        //    stream.Dispose();
+        //    return json;
+        //}
+
+
+        public string GetEconsentDocument(EconsentDocumetViwerDto econsentreviewdetails)
         {
             var generalSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             generalSettings.TimeFormat = generalSettings.TimeFormat.Replace("a", "tt");
             // this method is called when patient reviewed document and completes the signature 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetails.EconsentSetupId).FirstOrDefault();
-            var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
+            //var econsentdocument = _context.EconsentSetup.Where(x => x.Id == EconsentSetupId).FirstOrDefault();
+            var econcentreview = All.Where(x => x.Id == econsentreviewdetails.EconcentReviewDetailsId).Include(x => x.EconsentSetup).FirstOrDefault();
+            var FullPath = System.IO.Path.Combine(upload.DocumentPath, econcentreview.EconsentSetup.DocumentPath);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
                 return null;
@@ -281,44 +366,44 @@ namespace GSC.Respository.InformConcent
             var jsonObj = JObject.Parse(json);
             string sign = File.ReadAllText("Config//signaturefooterblock.json");
             string sign2 = sign;
-            int randomizationId;
-            if (econsentreviewdetails.RandomizationId == 0)
+            //int randomizationId;
+            //if (econsentreviewdetails.RandomizationId == 0)
+            //{
+            //    randomizationId = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault().Id;
+            //}
+            //else
+            //{
+            //    randomizationId = econsentreviewdetails.RandomizationId;
+            //}
+            var randomization = _context.Randomization.Where(x => x.Id == econcentreview.RandomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
+            if (econcentreview.IsReviewedByPatient)
             {
-                randomizationId = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault().Id;
-            }
-            else
-            {
-                randomizationId = econsentreviewdetails.RandomizationId;
-            }
-            var randomization = _context.Randomization.Where(x => x.Id == randomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
-            if (econsentreviewdetails.IsReviewedByPatient == true)
-            {
-                string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetails.patientdigitalSignImagepath);
+                string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econcentreview.patientdigitalSignImagepath);
                 string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
                 sign = sign.Replace("_imagepath_", signRandombase64);
             }
             else
             {
-                sign = sign.Replace("_imagepath_", econsentreviewdetails.patientdigitalSignBase64);
-            }            
+                sign = sign.Replace("_imagepath_", econsentreviewdetails.PatientdigitalSignBase64);
+            }
             sign = sign.Replace("_volunterlabel_", "Volunteer");
             sign = sign.Replace("Name", "Initial");
             sign = sign.Replace("_voluntername_", randomization.ScreeningNumber + " " + randomization.Initial);
-            sign = sign.Replace("_datetime_", (econsentreviewdetails.patientapproveddatetime == null) ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econsentreviewdetails.patientapproveddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
+            sign = sign.Replace("_datetime_", (econcentreview.patientapproveddatetime == null) ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econcentreview.patientapproveddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
             var jsonObj2 = JObject.Parse(sign);
             jsonObj.Merge(jsonObj2, new JsonMergeSettings
             {
                 MergeArrayHandling = MergeArrayHandling.Union
             });
 
-            if (econsentreviewdetails.IsReviewedByPatient == true)
+            if (econcentreview.IsReviewedByPatient == true)
             {
                 var user = _userRepository.Find(_jwtTokenAccesser.UserId);
                 string signinvestigatorbase64 = user.SignatureBase64String == null ? "" : user.SignatureBase64String;//DocumentService.ConvertBase64Image(investigatorsignaturepath);
                 sign2 = sign2.Replace("_volunterlabel_", "Investigator");
                 sign2 = sign2.Replace("_imagepath_", signinvestigatorbase64);
                 sign2 = sign2.Replace("_voluntername_", user.UserName);
-                sign2 = sign2.Replace("_datetime_", econsentreviewdetails.investigatorRevieweddatetime == null ? _jwtTokenAccesser.GetClientDate().ToString() : econsentreviewdetails.investigatorRevieweddatetime.ToString());
+                sign2 = sign2.Replace("_datetime_", econcentreview.investigatorRevieweddatetime == null ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econcentreview.investigatorRevieweddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
                 var jsonObj3 = JObject.Parse(sign2);
                 jsonObj.Merge(jsonObj3, new JsonMergeSettings
                 {
@@ -371,25 +456,30 @@ namespace GSC.Respository.InformConcent
             return EconsentReviewDetails;
         }
 
-        public List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForPatientDashboard()
+        public List<EconsentDocumentDetailsDto> GetEconsentReviewDetailsForPatientDashboard()
         {
             // display ICF details in patient dashboard
             var randomization = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
             if (randomization == null)
-                return new List<EconsentReviewDetailsDto>();
-            var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
-            var econsentReviewDetails = FindBy(x => x.RandomizationId == randomization.Id).ToList();
-            var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyid && x.LanguageId == randomization.LanguageId && x.DeletedDate == null).ToList();
-            var EconsentReviewDetails = (from econsentsetups in Edocuments
-                                         join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId
-                                         select new EconsentReviewDetailsDto
-                                         {
-                                             Id = doc.Id,
-                                             EconsentDocumentName = econsentsetups.DocumentName,
-                                             IsReviewedByPatient = doc.IsReviewedByPatient,
-                                             IsReviewDoneByInvestigator = doc.IsReviewDoneByInvestigator
-                                         }).ToList();
-            return EconsentReviewDetails;
+                return null;
+            // return new List<EconsentDocumentDetailsDto>();
+            //var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
+            //var econsentReviewDetails = FindBy(x => x.RandomizationId == randomization.Id).ToList();
+            //var Edocuments = _context.EconsentSetup.Where(x => x.ProjectId == (int)studyid && x.LanguageId == randomization.LanguageId && x.DeletedDate == null).ToList();
+            //var EconsentReviewDetails = (from econsentsetups in Edocuments
+            //                             join doc in econsentReviewDetails on econsentsetups.Id equals doc.EconsentSetupId
+            //                             select new EconsentDocumentDetailsDto
+            //                             {
+            //                                 Id = doc.Id,
+            //                                 EconsentDocumentName = econsentsetups.DocumentName,
+            //                                 IsReviewedByPatient = doc.IsReviewedByPatient,
+            //                                 IsReviewDoneByInvestigator = doc.IsReviewDoneByInvestigator
+            //                             }).ToList();
+
+            var result = All.Where(x => x.RandomizationId == randomization.Id && x.EconsentSetup.DeletedDate == null && x.EconsentSetup.LanguageId == randomization.LanguageId).
+                  ProjectTo<EconsentDocumentDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            return result;
         }
 
         public int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto)
@@ -499,15 +589,16 @@ namespace GSC.Respository.InformConcent
 
             if (econsentReviewDetails.pdfpath != null)
             {
-                try
-                {
+                //try
+                //{
                     string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
-                    System.IO.File.Delete(oldpdfpath);
-                }
-                catch (Exception ex)
-                {
+                    if (File.Exists(oldpdfpath))
+                        System.IO.File.Delete(oldpdfpath);
+                //}
+                //catch (Exception ex)
+                //{
 
-                }
+                //}
             }
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
             filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.InformConcent.ToString(), docName);
@@ -538,9 +629,9 @@ namespace GSC.Respository.InformConcent
 
             //var userdetails = _context.Users.Where(x => x.Id == econsentReviewDetails.ReviewDoneByUserId && x.DeletedDate==null).Include(x=>x.UserRoles).SingleOrDefault();
 
-            if (econsentReviewDetailsDto.IsApproved == true)            
-                graphics.DrawString("Approved By: ", fontbold, PdfBrushes.Black, new PointF(70, 300));                            
-            else            
+            if (econsentReviewDetailsDto.IsApproved == true)
+                graphics.DrawString("Approved By: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
+            else
                 graphics.DrawString("Reject By: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
 
             graphics.DrawString(_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")", fontnormal, PdfBrushes.Black, new PointF(70, 320));

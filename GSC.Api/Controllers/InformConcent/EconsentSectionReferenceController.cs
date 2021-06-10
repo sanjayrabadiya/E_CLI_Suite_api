@@ -10,6 +10,8 @@ using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.InformConcent;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Data.Entities.InformConcent;
+using System.IO;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -32,19 +34,20 @@ namespace GSC.Api.Controllers.InformConcent
             _uploadSettingRepository = uploadSettingRepository;
         }
 
-
+        //not use
         [HttpGet]
         [Route("GetSectionReference/{isDeleted}/{documentId}")]
         public IActionResult GetSectionReference(bool isDeleted, int documentId)
         {
             // display section reference data in grid
-            var econsentSectionReferences = _econsentSectionReferenceRepository.FindByInclude(x => x.EconsentSetupId == documentId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderByDescending(x => x.Id).ToList();
-            var econsentSectionReferenceDto = _mapper.Map<IEnumerable<EconsentSectionReferenceDto>>(econsentSectionReferences).ToList();
-            foreach (var item in econsentSectionReferenceDto)
-            {
-                item.IsDeleted = isDeleted;
-            }
-            return Ok(econsentSectionReferenceDto);
+            // var econsentSectionReferences = _econsentSectionReferenceRepository.FindByInclude(x => x.EconsentSetupId == documentId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderByDescending(x => x.Id).ToList();
+            //var econsentSectionReferenceDto = _mapper.Map<IEnumerable<EconsentSectionReferenceDto>>(econsentSectionReferences).ToList();
+            //foreach (var item in econsentSectionReferenceDto)
+            //{
+            //    item.IsDeleted = isDeleted;
+            //}
+            var sectionRefrencelist = _econsentSectionReferenceRepository.GetSectionReferenceList(isDeleted, documentId);
+            return Ok(sectionRefrencelist);
         }
 
         [HttpGet("{id}")]
@@ -62,8 +65,25 @@ namespace GSC.Api.Controllers.InformConcent
         {
             // add data for section reference
             if (!ModelState.IsValid)
-               return new UnprocessableEntityObjectResult(ModelState);
-            _econsentSectionReferenceRepository.AddEconsentSectionReference(econsentSectionReferenceDto);
+                return new UnprocessableEntityObjectResult(ModelState);
+            var sectionRef = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
+            foreach (var fileModeItem in econsentSectionReferenceDto.FileModel)
+            {
+                if (fileModeItem?.Base64?.Length > 0)
+                    sectionRef.FilePath = DocumentService.SaveEconsentSectionReferenceFile(fileModeItem, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
+                _econsentSectionReferenceRepository.Add(sectionRef);
+                string root = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent.ToString(), "EconsentSectionReference");
+                if (_uow.Save() <= 0)
+                {
+                    if (Directory.Exists(root))
+                    {
+                        Directory.Delete(root, true);
+                    }
+                    throw new Exception($"Creating Section Refrence failed on save.");
+                }
+            }
+            //if (_uow.Save() <= 0) throw new Exception($"Creating Section Refrence failed on save.");
+            //_econsentSectionReferenceRepository.AddEconsentSectionReference(econsentSectionReferenceDto);
             return Ok();
         }
 
@@ -75,15 +95,33 @@ namespace GSC.Api.Controllers.InformConcent
                 return BadRequest();
             if (!ModelState.IsValid)
                 return new UnprocessableEntityObjectResult(ModelState);
+            //var document = _econsentSectionReferenceRepository.Find(econsentSectionReferenceDto.Id);
+            //if (econsentSectionReferenceDto.FileModel != null && econsentSectionReferenceDto.FileModel[0]?.Base64?.Length > 0)
+            //    document.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel[0], _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
+            //document.SectionNo = econsentSectionReferenceDto.SectionNo;
+            //document.ReferenceTitle = econsentSectionReferenceDto.ReferenceTitle;
+            //document.EconsentSetupId = econsentSectionReferenceDto.EconsentSetupId;
+            //_econsentSectionReferenceRepository.Update(document);
+            //if (_uow.Save() <= 0)
+            //   throw new Exception($"Updating Econsent file failed on save.");
             var document = _econsentSectionReferenceRepository.Find(econsentSectionReferenceDto.Id);
-            if (econsentSectionReferenceDto.FileModel != null && econsentSectionReferenceDto.FileModel[0]?.Base64?.Length > 0)
-                document.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel[0], _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
-            document.SectionNo = econsentSectionReferenceDto.SectionNo;
-            document.ReferenceTitle = econsentSectionReferenceDto.ReferenceTitle;
-            document.EconsentSetupId = econsentSectionReferenceDto.EconsentSetupId;
-            _econsentSectionReferenceRepository.Update(document);
-            if (_uow.Save() <= 0)
-               throw new Exception($"Updating Econsent file failed on save.");
+            var sectionRefrence = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
+            if (econsentSectionReferenceDto.FileModel.Count > 1)
+            {
+                ModelState.AddModelError("Message", "Please Update only single file");
+                return BadRequest(ModelState);
+            }
+            if (econsentSectionReferenceDto.FileModel.Count > 0)
+            {
+                if (econsentSectionReferenceDto.FileModel[0]?.Base64?.Length > 0)
+                    sectionRefrence.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel[0], _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
+            }
+            else
+            {
+               sectionRefrence.FilePath = document.FilePath;
+            }
+            _econsentSectionReferenceRepository.Update(sectionRefrence);
+            if (_uow.Save() <= 0) throw new Exception($"Updating Econsent file failed on save.");
             return Ok(document.Id);
         }
 
@@ -125,8 +163,9 @@ namespace GSC.Api.Controllers.InformConcent
         public IActionResult GetEconsentDocumentSectionReference(int documentId, int sectionNo)
         {
             // in patient portal document review page right side section reference data comes from this api
-            var references = _econsentSectionReferenceRepository.FindBy(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo).ToList();
-            return Ok(references);
+            //   var references = _econsentSectionReferenceRepository.FindBy(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo).ToList();
+            var sectionrefrence = _econsentSectionReferenceRepository.GetSetionRefefrenceDetailList(documentId, sectionNo);
+            return Ok(sectionrefrence);
         }
 
         [HttpPost]

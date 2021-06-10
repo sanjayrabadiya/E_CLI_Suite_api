@@ -65,7 +65,7 @@ namespace GSC.Api.Controllers.InformConcent
             var sectionsHeaders = _econsentReviewDetailsRepository.GetEconsentSectionHeaders(id);
             return Ok(sectionsHeaders);
         }
-
+        
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -98,9 +98,17 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(_econsentReviewDetailsRepository.UpdateDocument(econsentReviewDetailsDto));
         }
 
+        //[HttpPost]
+        //[Route("GetEconsentDocument")]
+        //public IActionResult GetEconsentDocument([FromBody] EconsentReviewDetailsDto econsentreviewdetails)
+        //{
+        //    var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
+        //    return Ok(json);
+        //}
+
         [HttpPost]
         [Route("GetEconsentDocument")]
-        public IActionResult GetEconsentDocument([FromBody]EconsentReviewDetailsDto econsentreviewdetails)
+        public IActionResult GetEconsentDocument([FromBody] EconsentDocumetViwerDto econsentreviewdetails)
         {
             var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
             return Ok(json);

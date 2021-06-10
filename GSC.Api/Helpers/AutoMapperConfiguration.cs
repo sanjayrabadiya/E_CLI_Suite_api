@@ -374,6 +374,9 @@ namespace GSC.Api.Helpers
             CreateMap<VolunteerFood, VolunteerFoodDto>().ReverseMap();
             //CreateMap<VolunteerHistory, VolunteerHistoryDto>().ReverseMap();
             //CreateMap<VolunteerLanguage, VolunteerLanguageDto>().ReverseMap();
+            CreateMap<EconsentReviewDetails, EconsentDocumentDetailsDto>()
+                 .ForMember(x => x.EconsentDocumentName, y => y.MapFrom(a => a.EconsentSetup.DocumentName))
+                 .ReverseMap();
         }
     }
 }

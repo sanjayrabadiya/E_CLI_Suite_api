@@ -303,6 +303,8 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.AllWeekOff, x => x.MapFrom(a => a.AllWeekOff.GetDescription()))
                 .ForMember(x => x.Frequency, x => x.MapFrom(a => a.Frequency.GetDescription()))
                 .ReverseMap();
+            CreateMap<EconsentSectionReference, EconcentSectionRefrenceDetailListDto>().ReverseMap();
+            CreateMap<EconsentSectionReference, EconsentSectionReferenceDto>().ReverseMap();
         }
     }
 }

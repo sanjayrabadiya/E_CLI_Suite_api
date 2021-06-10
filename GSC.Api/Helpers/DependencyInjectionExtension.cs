@@ -314,7 +314,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyLocationRepository, SupplyLocationRepository>();
             services.AddScoped<ICentralDepotRepository, CentralDepotRepository>();
             services.AddScoped<IStudyVersionRepository, StudyVersionRepository>();
-            services.AddScoped<IStudyVersionVisitStatusRepository, StudyVersionVisitStatusRepository>();
+            services.AddScoped<IStudyVersionVisitStatusRepository, StudyVersionVisitStatusRepository>();            
         }
     }
 }

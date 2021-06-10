@@ -10,8 +10,10 @@ namespace GSC.Respository.InformConcent
 {
     public interface IEconsentSectionReferenceRepository : IGenericRepository<EconsentSectionReference>
     {
+        IList<EconsentSectionReferenceDto> GetSectionReferenceList(bool isDeleted, int documentId);
         List<DropDownDto> GetEconsentDocumentSectionDropDown(int documentId);
         EconsentSectionReferenceDocumentType GetEconsentSectionReferenceDocument(int id);
-        void AddEconsentSectionReference(EconsentSectionReferenceDto econsentSectionReferenceDto);
+        //void AddEconsentSectionReference(EconsentSectionReferenceDto econsentSectionReferenceDto);
+        IList<EconcentSectionRefrenceDetailListDto> GetSetionRefefrenceDetailList(int documentId, int sectionNo);
     }
 }

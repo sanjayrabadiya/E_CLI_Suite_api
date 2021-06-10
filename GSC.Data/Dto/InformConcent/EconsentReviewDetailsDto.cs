@@ -33,4 +33,18 @@ namespace GSC.Data.Dto.InformConcent
         public string? ApproveRejectReasonOth { get; set; }
 
     }
+
+    public class EconsentDocumentDetailsDto
+    {
+        public int Id { get; set; }
+        public string EconsentDocumentName { get; set; }
+        public bool IsReviewedByPatient { get; set; }
+        public bool IsReviewDoneByInvestigator { get; set; }
+    }
+
+    public class EconsentDocumetViwerDto
+    {
+        public int EconcentReviewDetailsId { get; set; }
+        public string PatientdigitalSignBase64 { get; set; }
+    }
 }

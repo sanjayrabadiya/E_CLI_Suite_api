@@ -669,31 +669,37 @@ namespace GSC.Respository.Attendance
             var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
             {
-                if (_context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).ToList().Count > 0)
+                //if (_context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).ToList().Count > 0)
+                //{
+                //}
+                //else
+                //{
+                //    var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.DeletedDate == null && x.LanguageId == randomization.LanguageId && x.ProjectId == (int)studyid).ToList()
+                //                             join doc in _context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == true).ToList() on econsentsetups.Id equals doc.EconsentSetupId into ps
+                //                             from p in ps.DefaultIfEmpty()
+                //                             select new EconsentSetup
+                //                             {
+                //                                 Id = (p == null) ? 0 : econsentsetups.Id
+                //                             }).ToList();
+
+
+                //    if (Econsentdocuments.Where(x => x.Id == 0).ToList().Count > 0)
+                //    {
+                //    }
+                //    else
+                //    {
+                //        randomization.PatientStatusId = ScreeningPatientStatus.ConsentCompleted;
+                //        Update(randomization);
+                //        _context.Save();
+                //    }
+                //}
+
+                if(_context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).Count() == 0)
                 {
+                    randomization.PatientStatusId = ScreeningPatientStatus.ConsentCompleted;
+                     Update(randomization);
+                    _context.Save();
                 }
-                else
-                {
-                    var Econsentdocuments = (from econsentsetups in _context.EconsentSetup.Where(x => x.DeletedDate == null && x.LanguageId == randomization.LanguageId && x.ProjectId == (int)studyid).ToList()
-                                             join doc in _context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == true).ToList() on econsentsetups.Id equals doc.EconsentSetupId into ps
-                                             from p in ps.DefaultIfEmpty()
-                                             select new EconsentSetup
-                                             {
-                                                 Id = (p == null) ? 0 : econsentsetups.Id
-                                             }).ToList();
-
-
-                    if (Econsentdocuments.Where(x => x.Id == 0).ToList().Count > 0)
-                    {
-                    }
-                    else
-                    {
-                        randomization.PatientStatusId = ScreeningPatientStatus.ConsentCompleted;
-                        Update(randomization);
-                        _context.Save();
-                    }
-                }
-
             }
         }
 

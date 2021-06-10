@@ -146,32 +146,33 @@ namespace GSC.Respository.InformConcent
             var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId && (patientstatus.Contains((int)x.PatientStatusId) || x.PatientStatusId== ScreeningPatientStatus.ConsentInProcess ||x.PatientStatusId== ScreeningPatientStatus.ReConsentInProcess)).Include(x => x.Project).ToList();
 
             string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
-            for (var i = 0; i <= result.Count - 1; i++)
+            //for (var i = 0; i <= result.Count - 1; i++)
+            foreach(var item in result)
             {
-                if (result[i].PatientStatusId == ScreeningPatientStatus.ConsentInProcess || result[i].PatientStatusId == ScreeningPatientStatus.ReConsentInProcess || result[i].PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
+                if (item.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || item.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess || item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
                 {
                     EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
-                    econsentReviewDetails.RandomizationId = result[i].Id;
+                    econsentReviewDetails.RandomizationId = item.Id;
                     econsentReviewDetails.EconsentSetupId = econsent.Id;
                     econsentReviewDetails.IsReviewedByPatient = false;
                     _econsentReviewDetailsRepository.Add(econsentReviewDetails);
-                    if (result[i].PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
+                    if (item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
                     {
-                        _randomizationRepository.ChangeStatustoReConsentInProgress(result[i].Id);
+                        _randomizationRepository.ChangeStatustoReConsentInProgress(item.Id);
                     }
                 }
-                if (result[i].Email != "")
+                if (item.Email != "")
                 {
                     string patientName = "";
-                    if (result[i].ScreeningNumber != "")
+                    if (item.ScreeningNumber != "")
                     {
-                        patientName = result[i].Initial + " " + result[i].ScreeningNumber;
+                        patientName = item.Initial + " " + item.ScreeningNumber;
                     }
                     else
                     {
-                        patientName = result[i].FirstName + " " + result[i].MiddleName + " " + result[i].LastName;
+                        patientName = item.FirstName + " " + item.MiddleName + " " + item.LastName;
                     }
-                    _emailSenderRespository.SendEmailOfEconsentDocumentuploaded(result[i].Email, patientName, econsent.DocumentName, projectcode);
+                    _emailSenderRespository.SendEmailOfEconsentDocumentuploaded(item.Email, patientName, econsent.DocumentName, projectcode);
                 }
             }
             _uow.Save();
