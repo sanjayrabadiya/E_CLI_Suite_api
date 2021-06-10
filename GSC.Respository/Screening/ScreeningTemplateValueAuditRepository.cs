@@ -330,61 +330,61 @@ namespace GSC.Respository.Screening
                         worksheet.Row(j).Cell(8).SetValue(d.Variable);
 
                         #region old value
-                        //if (d.CollectionSource == CollectionSources.DateTime && d.OldValue != "Default")
-                        //{
-                        //    DateTime dDate;
-                        //    string variablevalueformat = d.OldValue;
-                        //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                        //    worksheet.Row(j).Cell(9).SetValue(dt);
-                        //}
-                        //else if (d.CollectionSource == CollectionSources.Date && d.OldValue != "Default")
-                        //{
-                        //    DateTime dDate;
-                        //    string variablevalueformat = d.OldValue;
-                        //    string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
-                        //    worksheet.Row(j).Cell(9).SetValue(dt);
-                        //}
-                        //else if (d.CollectionSource == CollectionSources.Time && d.OldValue != "Default")
-                        //{
-                        //    string variablevalueformat = d.OldValue;
-                        //    var dt = "";//!string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
-                        //    worksheet.Row(j).Cell(9).SetValue(dt);
-                        //}
-                        //else
-                        //{
-                        //    worksheet.Row(j).Cell(9).SetValue(d.OldValue);
-                        //}
+                        if (d.CollectionSource == CollectionSources.DateTime && d.OldValue != "Default")
+                        {
+                            DateTime dDate;
+                            string variablevalueformat = d.OldValue;
+                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                            worksheet.Row(j).Cell(9).SetValue(dt);
+                        }
+                        else if (d.CollectionSource == CollectionSources.Date && d.OldValue != "Default")
+                        {
+                            DateTime dDate;
+                            string variablevalueformat = d.OldValue;
+                            string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                            worksheet.Row(j).Cell(9).SetValue(dt);
+                        }
+                        else if (d.CollectionSource == CollectionSources.Time && d.OldValue != "Default")
+                        {
+                            string variablevalueformat = d.OldValue;
+                            var dt = "";//!string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                            worksheet.Row(j).Cell(9).SetValue(dt);
+                        }
+                        else
+                        {
+                            worksheet.Row(j).Cell(9).SetValue(d.OldValue);
+                        }
                         #endregion old value
                         #region new value
-                        //if (d.CollectionSource == CollectionSources.DateTime)
-                        //{
-                        //    DateTime dDate;
-                        //    string variablevalueformat = d.NewValue;
-                        //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                        //    worksheet.Row(j).Cell(10).SetValue(dt);
-                        //}
-                        //else if (d.CollectionSource == CollectionSources.Date)
-                        //{
-                        //    DateTime dDate;
-                        //    string variablevalueformat = d.NewValue;
-                        //    string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
-                        //    worksheet.Row(j).Cell(10).SetValue(dt);
-                        //}
+                        if (d.CollectionSource == CollectionSources.DateTime)
+                        {
+                            DateTime dDate;
+                            string variablevalueformat = d.NewValue;
+                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                            worksheet.Row(j).Cell(10).SetValue(dt);
+                        }
+                        else if (d.CollectionSource == CollectionSources.Date)
+                        {
+                            DateTime dDate;
+                            string variablevalueformat = d.NewValue;
+                            string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                            worksheet.Row(j).Cell(10).SetValue(dt);
+                        }
 
-                        //else if (d.CollectionSource == CollectionSources.Time)
-                        //{
-                        //    DateTime dDate;
-                        //    string variablevalueformat = d.NewValue;
-                        //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
-                        //    worksheet.Row(j).Cell(10).SetValue(dt);
-                        //}
-                        //else
-                        //{
-                        //    worksheet.Row(j).Cell(10).SetValue(d.NewValue);
-                        //}
+                        else if (d.CollectionSource == CollectionSources.Time)
+                        {
+                            DateTime dDate;
+                            string variablevalueformat = d.NewValue;
+                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                            worksheet.Row(j).Cell(10).SetValue(dt);
+                        }
+                        else
+                        {
+                            worksheet.Row(j).Cell(10).SetValue(d.NewValue);
+                        }
                         #endregion old value
-                        worksheet.Row(j).Cell(9).SetValue(d.OldValue);
-                        worksheet.Row(j).Cell(10).SetValue(d.NewValue);
+                       // worksheet.Row(j).Cell(9).SetValue(d.OldValue);
+                       // worksheet.Row(j).Cell(10).SetValue(d.NewValue);
                         worksheet.Row(j).Cell(11).SetValue(d.User);
                         worksheet.Row(j).Cell(12).SetValue(d.Role);
                         worksheet.Row(j).Cell(13).SetValue(d.Reason);

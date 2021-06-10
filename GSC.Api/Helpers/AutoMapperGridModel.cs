@@ -270,6 +270,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<TaskMaster, TaskMasterGridDto>()
                 .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
+                .ForMember(x => x.RefrenceType, x => x.MapFrom(a => a.RefrenceType.GetDescription()))
                 .ReverseMap();
 
             CreateMap<StudyPlanTask, StudyPlanTaskDto>()
@@ -293,7 +294,7 @@ namespace GSC.Api.Helpers
             CreateMap<StudyVersion, StudyVersionGridDto>()
                 .ForMember(x => x.StudyName, x => x.MapFrom(a => a.ProjectDesign.Project.ProjectCode))
                 .ForMember(x => x.VersionStatus, x => x.MapFrom(a => a.VersionStatus.GetDescription()))
-                .ForMember(x => x.VisitStatus, x => x.MapFrom(a => string.Join(", ", a.StudyVersionVisitStatus.ToList().Select(x=>x.VisitStatus.DisplayName))))
+                .ForMember(x => x.VisitStatus, x => x.MapFrom(a => string.Join(", ", a.StudyVersionVisitStatus.ToList().Select(x => x.VisitStatus.DisplayName))))
                 .ReverseMap();
 
             CreateMap<WeekEndMaster, WeekEndGridDto>()

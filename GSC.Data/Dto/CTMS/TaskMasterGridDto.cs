@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +15,7 @@ namespace GSC.Data.Dto.CTMS
         public int TaskOrder { get; set;}
         public int Duration { get; set; }
         public string Predecessor { get; set; }
-
+        public int OffSet { get; set; }
+        public string RefrenceType { get; set; }
     }
 }
