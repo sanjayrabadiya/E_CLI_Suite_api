@@ -80,6 +80,7 @@ namespace GSC.Data.Entities.Volunteer
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string FullName { get; set; }
+        //public string FullName => FirstName + " " + MiddleName + " " + LastName;
         public bool? IsBlocked { get; set; }
         public bool IsScreening { get; set; }
         public VolunteerStatus Status { get; set; }

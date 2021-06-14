@@ -1,10 +1,11 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Volunteer
 {
-    public class VolunteerContact : BaseEntity
+    public class VolunteerContact : BaseEntity, ICommonAduit
     {
         public int VolunteerId { get; set; }
 

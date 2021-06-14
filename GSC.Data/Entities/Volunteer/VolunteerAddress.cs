@@ -1,11 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Volunteer
 {
-    public class VolunteerAddress : BaseEntity
+    public class VolunteerAddress : BaseEntity, ICommonAduit
     {
         private DateTime? _FromDate;
 

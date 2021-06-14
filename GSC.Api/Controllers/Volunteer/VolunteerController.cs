@@ -16,6 +16,8 @@ using GSC.Respository.Volunteer;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
+using GSC.Report;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GSC.Api.Controllers.Volunteer
 {
@@ -31,6 +33,7 @@ namespace GSC.Api.Controllers.Volunteer
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IVolunteerRepository _volunteerRepository;
+        private readonly IVolunteerSummaryReport _volunteerSummaryReport;
 
         public VolunteerController(IVolunteerRepository volunteerRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -39,8 +42,9 @@ namespace GSC.Api.Controllers.Volunteer
             IAuditTrailRepository auditTrailRepository,
             IUserRecentItemRepository userRecentItemRepository,
             IRolePermissionRepository rolePermissionRepository,
-            IAttendanceRepository attendanceRepository)
-            {
+            IAttendanceRepository attendanceRepository,
+            IVolunteerSummaryReport volunteerSummaryReport)
+        {
             _volunteerRepository = volunteerRepository;
             _uow = uow;
             _locationRepository = locationRepository;
@@ -50,12 +54,13 @@ namespace GSC.Api.Controllers.Volunteer
             _userRecentItemRepository = userRecentItemRepository;
             _rolePermissionRepository = rolePermissionRepository;
             _attendanceRepository = attendanceRepository;
+            _volunteerSummaryReport = volunteerSummaryReport;
         }
 
-        [HttpGet]
-        public IActionResult Get()
+        [HttpGet("{isDeleted:bool?}")]
+        public IActionResult Get(bool isDeleted)
         {
-            var volunteers = _volunteerRepository.GetVolunteerDetail(false);
+            var volunteers = "";//_volunteerRepository.GetVolunteerDetail(isDeleted);
             return Ok(volunteers);
         }
 
@@ -123,13 +128,13 @@ namespace GSC.Api.Controllers.Volunteer
             //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Inserted, volunteer.Id,
             //    null, volunteerDto.Changes);
 
-            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            //{
-            //    KeyId = volunteer.Id,
-            //    SubjectName = volunteer.VolunteerNo,
-            //    SubjectName1 = volunteer.FullName,
-            //    ScreenType = UserRecent.Volunteer
-            //});
+            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
+            {
+                KeyId = volunteer.Id,
+                SubjectName = volunteer.VolunteerNo,
+                SubjectName1 = volunteer.FullName,
+                ScreenType = UserRecent.Volunteer
+            });
 
             return Ok(volunteer.Id);
         }
@@ -213,7 +218,7 @@ namespace GSC.Api.Controllers.Volunteer
             return Ok(_volunteerRepository.GetVolunteerForAttendance(search));
         }
 
-       
+
 
         //[HttpGet]
         //[Route("getVolunteersForDataEntryByPeriodIdLocked/{projectDesignPeriodId}/{projectId}/{isLock}")]
@@ -221,6 +226,15 @@ namespace GSC.Api.Controllers.Volunteer
         //{
         //    return Ok(_volunteerRepository.getVolunteersForDataEntryByPeriodIdLocked(projectDesignPeriodId, projectId, isLock));
         //}
+
+        [HttpGet]
+        [Route("GetVolunteerSummary/{volunteerId}")]
+        [AllowAnonymous]
+        public IActionResult GetVolunteerSummary(int volunteerId)
+        {
+            var response = _volunteerSummaryReport.GetVolunteerSummaryDesign(volunteerId);
+            return response;
+        }
 
 
     }

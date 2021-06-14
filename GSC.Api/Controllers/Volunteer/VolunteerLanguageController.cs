@@ -32,11 +32,11 @@ namespace GSC.Api.Controllers.Volunteer
             _auditTrailRepository = auditTrailRepository;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{id}/{isDeleted:bool?}")]
+        public IActionResult Get(int id, bool isDeleted)
         {
             if (id <= 0) return BadRequest();
-            return Ok(_volunteerLanguageRepository.GetLanguages(id));
+            return Ok(_volunteerLanguageRepository.GetLanguages(id, isDeleted));
         }
 
 

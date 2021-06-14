@@ -25,9 +25,9 @@ namespace GSC.Respository.Volunteer
             existingLanguages.ForEach(Remove);
         }
 
-        public List<VolunteerLanguageDto> GetLanguages(int volunteerId)
+        public List<VolunteerLanguageDto> GetLanguages(int volunteerId, bool isDeleted)
         {
-            return FindByInclude(t => t.VolunteerId == volunteerId && t.DeletedDate == null, t => t.Language).Select(
+            return FindByInclude(t => (isDeleted ? t.DeletedDate != null : t.DeletedDate == null) && t.VolunteerId == volunteerId && t.DeletedDate == null, t => t.Language).Select(
                 t => new VolunteerLanguageDto
                 {
                     Id = t.Id,

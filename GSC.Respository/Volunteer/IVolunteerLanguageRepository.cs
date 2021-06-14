@@ -7,7 +7,7 @@ namespace GSC.Respository.Volunteer
 {
     public interface IVolunteerLanguageRepository : IGenericRepository<VolunteerLanguage>
     {
-        List<VolunteerLanguageDto> GetLanguages(int volunteerId);
+        List<VolunteerLanguageDto> GetLanguages(int volunteerId,bool isDelete);
         void RemoveExisting(int id, int volunteerId, int languageId);
     }
 }

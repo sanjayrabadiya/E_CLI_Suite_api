@@ -1,9 +1,10 @@
 using GSC.Common.Base;
 using GSC.Data.Entities.Master;
+using GSC.Common.Common;
 
 namespace GSC.Data.Entities.Volunteer
 {
-    public class VolunteerLanguage : BaseEntity
+    public class VolunteerLanguage : BaseEntity, ICommonAduit
     {
         public int VolunteerId { get; set; }
 

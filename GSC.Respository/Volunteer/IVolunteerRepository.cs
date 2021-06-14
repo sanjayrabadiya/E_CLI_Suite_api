@@ -12,7 +12,7 @@ namespace GSC.Respository.Volunteer
         VolunteerStatusCheck CheckStatus(int id);
         IList<DropDownDto> AutoCompleteSearch(string searchText, bool isAutoSearch = false);
         IList<VolunteerAttendaceDto> GetVolunteerForAttendance(VolunteerSearchDto search);
-        List<VolunteerGridDto> GetVolunteerDetail(bool isDeleted);
+        List<VolunteerGridDto> GetVolunteerDetail(bool isDeleted, int volunteerid);
 
 
         //IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock);

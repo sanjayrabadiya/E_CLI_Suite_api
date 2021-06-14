@@ -1,9 +1,10 @@
 using GSC.Common.Base;
+using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 
 namespace GSC.Data.Entities.Volunteer
 {
-    public class VolunteerDocument : BaseEntity
+    public class VolunteerDocument : BaseEntity, ICommonAduit
     {
         public int VolunteerId { get; set; }
 
