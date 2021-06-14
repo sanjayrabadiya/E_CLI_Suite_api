@@ -546,5 +546,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+
+        [HttpGet]
+        [Route("GetDbdsReportType")]
+        public IActionResult GetDbdsReportType()
+        {
+            var refrencetype = Enum.GetValues(typeof(DbdsReportType))
+                .Cast<DbdsReportType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }

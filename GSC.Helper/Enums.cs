@@ -671,4 +671,10 @@ namespace GSC.Helper
         [Description("Go Live")] GoLive = 2,
         [Description("Archive")] Archive = 3,
     }
+
+    public enum DbdsReportType : short
+    {
+        [Description("Domain")] Domain = 1,
+        [Description("Patient")] Patient = 2
+    }
 }
