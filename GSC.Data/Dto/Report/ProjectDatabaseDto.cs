@@ -65,11 +65,13 @@ namespace GSC.Data.Dto.Report
         public int DesignOrderOfVariable { get; set; }
         public string UnitAnnotation { get; set; }
         public int TemplateId { get; set; }
+        public string DomainName { get; set; }
     }
 
     public class ProjectDatabaseInitialDto
     {
         public string Initial { get; set; }
+        public string DomainName { get; set; }
         public int ProjectId { get; set; }
         public string ProjectCode { get; set; }
         public int? ParentProjectId { get; set; }
@@ -99,6 +101,7 @@ namespace GSC.Data.Dto.Report
     public class ProjectDatabaseItemDto
     {
         public int? ScreeningTemplateParentId { get; set; }
+        public string DomainName { get; set; }
         public string VariableName { get; set; }
         public int ScreeningTemplateId { get; set; }
         public int CollectionSource { get; set; }
@@ -120,6 +123,7 @@ namespace GSC.Data.Dto.Report
         public bool ExcelFormat { get; set; }
         public int SelectedProject { get; set; }
         public DBDSReportFilter? FilterId { get; set; }
+        public DbdsReportType? Type { get; set; }
     }
 
     public class RepeatTemplateDto
