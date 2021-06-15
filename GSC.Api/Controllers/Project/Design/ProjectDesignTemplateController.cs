@@ -483,10 +483,8 @@ namespace GSC.Api.Controllers.Project.Design
                 .ToList();
             orderedList.Remove(orderedList.First(t => t.Id == id));
 
-            if (orderedList.Count() < index)
-            {
-                index = index - 1;
-            }
+            if (index != 0)
+                index--;
 
             orderedList.Insert(index, template);
 

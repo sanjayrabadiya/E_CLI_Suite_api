@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x => x.SeqNo),t => t.Roles.Where(x => x.DeletedDate == null))
+            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x => x.SeqNo), t => t.Roles.Where(x => x.DeletedDate == null))
                 .FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             return Ok(variableDto);
@@ -128,7 +128,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             UpdateVariableValues(variable);
-           // UpdateVariableRemarks(variable);
+            // UpdateVariableRemarks(variable);
             UpdateVariableEncryptRole(variable);
 
             _projectDesignVariableRepository.Update(variable);
@@ -198,6 +198,9 @@ namespace GSC.Api.Controllers.Project.Design
                 .FindBy(t => t.ProjectDesignTemplateId == templateId && t.DeletedDate == null)
                 .OrderBy(t => t.DesignOrder).ToList();
             orderedList.Remove(orderedList.First(t => t.Id == id));
+
+            if (index != 0)
+                index--;
             orderedList.Insert(index, variable);
 
             var i = 0;
@@ -362,7 +365,7 @@ namespace GSC.Api.Controllers.Project.Design
         [Route("GetProjectDesignVariableRelation/{id}")]
         public IActionResult GetProjectDesignVariableRelation(int id)
         {
-           var result=_projectDesignVariableRepository.GetProjectDesignVariableRelation(id);
+            var result = _projectDesignVariableRepository.GetProjectDesignVariableRelation(id);
             return Ok(result);
         }
     }
