@@ -77,7 +77,7 @@ namespace GSC.Respository.Project.Design
                 VariableCode = r.VariableCode,
                 VariableAlias = r.VariableAlias,
                 VariableAnnotation = r.Annotation,
-                VariableCategoryName = r.VariableCategoryName,
+                VariableCategoryName = r.VariableCategory.CategoryName,
                 Role = r.RoleVariableType.GetDescription(),
                 CoreType = r.CoreVariableType.GetDescription(),
                 CollectionSource = r.CollectionSource.GetDescription(),
@@ -97,6 +97,7 @@ namespace GSC.Respository.Project.Design
                 IsEncrypt = r.IsEncrypt,
                 EncryptRole = string.Join(", ", r.Roles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList()),
                 CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList()),
+                DisplayValue = r.LargeStep
             }).ToList().OrderBy(x => x.VisitOrderId).ToList();
             var VisitStatusData = GetVisitStatusData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
             var TemplateNoteData = GetTemplateNoteData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
@@ -121,35 +122,37 @@ namespace GSC.Respository.Project.Design
                 worksheet.Cell(1, 1).Value = "STUDY CODE";
                 worksheet.Cell(1, 2).Value = "Period";
                 worksheet.Cell(1, 3).Value = "Visit";
-                worksheet.Cell(1, 4).Value = "Template";
-                worksheet.Cell(1, 5).Value = "Domain";
-                worksheet.Cell(1, 6).Value = "Repeate Template";
-                worksheet.Cell(1, 7).Value = "Participant view";
-                worksheet.Cell(1, 8).Value = "Variable Name";
-                worksheet.Cell(1, 9).Value = "Variable Code";
-                worksheet.Cell(1, 10).Value = "Variable Alias";
-                worksheet.Cell(1, 11).Value = "Variable Annotation";
-                worksheet.Cell(1, 12).Value = "Variable Category";
-                worksheet.Cell(1, 13).Value = "Role";
-                worksheet.Cell(1, 14).Value = "Core Type";
-                worksheet.Cell(1, 15).Value = "Collection Source";
-                worksheet.Cell(1, 16).Value = "DataType";
-                worksheet.Cell(1, 17).Value = "Na";
-                worksheet.Cell(1, 18).Value = "Date Validate";
-                worksheet.Cell(1, 19).Value = "Unit";
-                worksheet.Cell(1, 20).Value = "Unit Annotation";
-                worksheet.Cell(1, 21).Value = "Collection Annotation";
-                worksheet.Cell(1, 22).Value = "Validation Type";
-                worksheet.Cell(1, 23).Value = "Length";
-                worksheet.Cell(1, 24).Value = "Low Range";
-                worksheet.Cell(1, 25).Value = "High Range";
-                worksheet.Cell(1, 26).Value = "Default Value";
-                worksheet.Cell(1, 27).Value = "Variable Note";
-                worksheet.Cell(1, 28).Value = "Document";
-                worksheet.Cell(1, 29).Value = "Encrypt";
-                worksheet.Cell(1, 30).Value = "Encrypted Role";
-                worksheet.Cell(1, 31).Value = "Collection Value";
-
+                worksheet.Cell(1, 4).Value = "Repeate Visit";
+                worksheet.Cell(1, 5).Value = "Non-CRF Visit";
+                worksheet.Cell(1, 6).Value = "Template";
+                worksheet.Cell(1, 7).Value = "Domain";
+                worksheet.Cell(1, 8).Value = "Repeate Template";
+                worksheet.Cell(1, 9).Value = "Participant view";
+                worksheet.Cell(1, 10).Value = "Variable Name";
+                worksheet.Cell(1, 11).Value = "Variable Code";
+                worksheet.Cell(1, 12).Value = "Variable Alias";
+                worksheet.Cell(1, 13).Value = "Variable Annotation";
+                worksheet.Cell(1, 14).Value = "Variable Category";
+                worksheet.Cell(1, 15).Value = "Role";
+                worksheet.Cell(1, 16).Value = "Core Type";
+                worksheet.Cell(1, 17).Value = "Collection Source";
+                worksheet.Cell(1, 18).Value = "DataType";
+                worksheet.Cell(1, 19).Value = "Na";
+                worksheet.Cell(1, 20).Value = "Date Validate";
+                worksheet.Cell(1, 21).Value = "Unit";
+                worksheet.Cell(1, 22).Value = "Unit Annotation";
+                worksheet.Cell(1, 23).Value = "Collection Annotation";
+                worksheet.Cell(1, 24).Value = "Validation Type";
+                worksheet.Cell(1, 25).Value = "Length";
+                worksheet.Cell(1, 26).Value = "Low Range";
+                worksheet.Cell(1, 27).Value = "High Range";
+                worksheet.Cell(1, 28).Value = "Default Value";
+                worksheet.Cell(1, 29).Value = "Variable Note";
+                worksheet.Cell(1, 30).Value = "Document";
+                worksheet.Cell(1, 31).Value = "Encrypt";
+                worksheet.Cell(1, 32).Value = "Encrypted Role";
+                worksheet.Cell(1, 33).Value = "Collection Value";
+                worksheet.Cell(1, 34).Value = "Display Value";
                 var j = 2;
 
                 MainData.ForEach(d =>
@@ -157,34 +160,37 @@ namespace GSC.Respository.Project.Design
                                 worksheet.Row(j).Cell(1).SetValue(d.StudyCode);
                                 worksheet.Row(j).Cell(2).SetValue(d.Period);
                                 worksheet.Row(j).Cell(3).SetValue(d.Visit);
-                                worksheet.Row(j).Cell(4).SetValue(d.Template);
-                                worksheet.Row(j).Cell(5).SetValue(d.DomainName);
-                                worksheet.Row(j).Cell(6).SetValue(d.IsRepeated);
-                                worksheet.Row(j).Cell(7).SetValue(d.IsParticipantView);
-                                worksheet.Row(j).Cell(8).SetValue(d.VariableName);
-                                worksheet.Row(j).Cell(9).SetValue(d.VariableCode);
-                                worksheet.Row(j).Cell(10).SetValue(d.VariableAlias);
-                                worksheet.Row(j).Cell(11).SetValue(d.VariableAnnotation);
-                                worksheet.Row(j).Cell(12).SetValue(d.VariableCategoryName);
-                                worksheet.Row(j).Cell(13).SetValue(d.Role);
-                                worksheet.Row(j).Cell(14).SetValue(d.CoreType);
-                                worksheet.Row(j).Cell(15).SetValue(d.CollectionSource);
-                                worksheet.Row(j).Cell(16).SetValue(d.DataType);
-                                worksheet.Row(j).Cell(17).SetValue(d.IsNa);
-                                worksheet.Row(j).Cell(18).SetValue(d.DateValidate);
-                                worksheet.Row(j).Cell(19).SetValue(d.UnitName);
-                                worksheet.Row(j).Cell(20).SetValue(d.UnitAnnotation);
-                                worksheet.Row(j).Cell(21).SetValue(d.CollectionAnnotation);
-                                worksheet.Row(j).Cell(22).SetValue(d.ValidationType);
-                                worksheet.Row(j).Cell(23).SetValue(d.Length);
-                                worksheet.Row(j).Cell(24).SetValue(d.LowRangeValue);
-                                worksheet.Row(j).Cell(25).SetValue(d.HighRangeValue);
-                                worksheet.Row(j).Cell(26).SetValue(d.DefaultValue);
-                                worksheet.Row(j).Cell(27).SetValue(d.Note);
-                                worksheet.Row(j).Cell(28).SetValue(d.IsDocument);
-                                worksheet.Row(j).Cell(29).SetValue(d.IsEncrypt);
-                                worksheet.Row(j).Cell(30).SetValue(d.EncryptRole);
-                                worksheet.Row(j).Cell(31).SetValue(d.CollectionValue);
+                                worksheet.Row(j).Cell(4).SetValue(d.IsVisitRepeated);
+                                worksheet.Row(j).Cell(5).SetValue(d.IsNonCRF);
+                                worksheet.Row(j).Cell(6).SetValue(d.Template);
+                                worksheet.Row(j).Cell(7).SetValue(d.DomainName);
+                                worksheet.Row(j).Cell(8).SetValue(d.IsRepeated);
+                                worksheet.Row(j).Cell(9).SetValue(d.IsParticipantView);
+                                worksheet.Row(j).Cell(10).SetValue(d.VariableName);
+                                worksheet.Row(j).Cell(11).SetValue(d.VariableCode);
+                                worksheet.Row(j).Cell(12).SetValue(d.VariableAlias);
+                                worksheet.Row(j).Cell(13).SetValue(d.VariableAnnotation);
+                                worksheet.Row(j).Cell(14).SetValue(d.VariableCategoryName);
+                                worksheet.Row(j).Cell(15).SetValue(d.Role);
+                                worksheet.Row(j).Cell(16).SetValue(d.CoreType);
+                                worksheet.Row(j).Cell(17).SetValue(d.CollectionSource);
+                                worksheet.Row(j).Cell(18).SetValue(d.DataType);
+                                worksheet.Row(j).Cell(19).SetValue(d.IsNa);
+                                worksheet.Row(j).Cell(20).SetValue(d.DateValidate);
+                                worksheet.Row(j).Cell(21).SetValue(d.UnitName);
+                                worksheet.Row(j).Cell(22).SetValue(d.UnitAnnotation);
+                                worksheet.Row(j).Cell(23).SetValue(d.CollectionAnnotation);
+                                worksheet.Row(j).Cell(24).SetValue(d.ValidationType);
+                                worksheet.Row(j).Cell(25).SetValue(d.Length);
+                                worksheet.Row(j).Cell(26).SetValue(d.LowRangeValue);
+                                worksheet.Row(j).Cell(27).SetValue(d.HighRangeValue);
+                                worksheet.Row(j).Cell(28).SetValue(d.DefaultValue);
+                                worksheet.Row(j).Cell(29).SetValue(d.Note);
+                                worksheet.Row(j).Cell(30).SetValue(d.IsDocument);
+                                worksheet.Row(j).Cell(31).SetValue(d.IsEncrypt);
+                                worksheet.Row(j).Cell(32).SetValue(d.EncryptRole);
+                                worksheet.Row(j).Cell(33).SetValue(d.CollectionValue);
+                                worksheet.Row(j).Cell(34).SetValue(d.DisplayValue);
                                 j++;
                             });
 
