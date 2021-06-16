@@ -247,6 +247,8 @@ namespace GSC.Respository.EditCheckImpact
 
         public string GetProjectDesignVariableId(int projectDesignVariableId, string collectionSource)
         {
+            if (string.IsNullOrEmpty(collectionSource))
+                return null;
 
             var variableCollectionSource = _projectDesignVariableRepository.All.Where(x => x.Id == projectDesignVariableId && x.DeletedDate == null).Select(t => t.CollectionSource).FirstOrDefault();
 

@@ -46,7 +46,10 @@ namespace GSC.Data.Dto.Project.Design
     public class ProjectDesignReportDto
     {
         public string StudyCode { get; set; }
+        public string Period { get; set; }
         public string Visit { get; set; }
+        public bool IsVisitRepeated { get; set; }
+        public bool IsNonCRF { get; set; }
         public int? VisitOrderId { get; set; }
         public int? TemplateOrderId { get; set; }
 
@@ -84,6 +87,7 @@ namespace GSC.Data.Dto.Project.Design
 
     public class ProjectDesignLanguageReportDto : BaseAuditDto
     {
+        public string PeriodName { get; set; }
         public string VisitName { get; set; }
         public string TemplateName { get; set; }
         public string VariableName { get; set; }
@@ -91,5 +95,6 @@ namespace GSC.Data.Dto.Project.Design
         public string VariableValue { get; set; }
         public string Language { get; set; }
         public string Value { get; set; }
+        public string Status { get; set; }
     }
 }

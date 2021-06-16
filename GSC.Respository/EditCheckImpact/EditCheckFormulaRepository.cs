@@ -71,6 +71,12 @@ namespace GSC.Respository.EditCheckImpact
                     if (string.IsNullOrEmpty(r.InputValue))
                         r.InputValue = "0";
 
+                    if (!string.IsNullOrEmpty(r.CollectionValue) && r.CollectionValue == "0")
+                        r.CollectionValue = "";
+
+                    if (!string.IsNullOrEmpty(r.CollectionValue2) && r.CollectionValue2 == "0")
+                        r.CollectionValue2 = "";
+
                     if (r.Operator == Operator.SquareRoot)
                         ruleStr = ruleStr + $"{r.CollectionValue2}{r.StartParens}{"sqrt("}{r.InputValue}{")"}{r.EndParens}{r.CollectionValue}";
                     else

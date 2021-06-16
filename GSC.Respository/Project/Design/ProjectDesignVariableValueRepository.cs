@@ -62,8 +62,11 @@ namespace GSC.Respository.Project.Design
             var MainData = query.Select(r => new ProjectDesignReportDto
             {
                 StudyCode = r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode,
+                Period = r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitOrderId = r.ProjectDesignTemplate.ProjectDesignVisit.DesignOrder,
                 Visit = r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                IsVisitRepeated = r.ProjectDesignTemplate.ProjectDesignVisit.IsRepeated,
+                IsNonCRF = r.ProjectDesignTemplate.ProjectDesignVisit.IsNonCRF,
                 Template = r.ProjectDesignTemplate.TemplateName,
                 TemplateOrderId = r.ProjectDesignTemplate.DesignOrder,
                 DomainName = r.Domain.DomainName,
@@ -95,7 +98,8 @@ namespace GSC.Respository.Project.Design
                 EncryptRole = string.Join(", ", r.Roles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList()),
                 CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList()),
             }).ToList().OrderBy(x => x.VisitOrderId).ToList();
-
+            var VisitStatusData = GetVisitStatusData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
+            var TemplateNoteData = GetTemplateNoteData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
             var VisitLanguageData = GetVisitLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
             var TemplateLanguageData = GetTemplateLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
             var TemplateNoteLanguageData = GetTemplateNoteLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
@@ -115,89 +119,133 @@ namespace GSC.Respository.Project.Design
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
                 worksheet.Cell(1, 1).Value = "STUDY CODE";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Template";
-                worksheet.Cell(1, 4).Value = "Domain";
-                worksheet.Cell(1, 5).Value = "Repeate Template";
-                worksheet.Cell(1, 6).Value = "Participant view";
-                worksheet.Cell(1, 7).Value = "Variable Name";
-                worksheet.Cell(1, 8).Value = "Variable Code";
-                worksheet.Cell(1, 9).Value = "Variable Alias";
-                worksheet.Cell(1, 10).Value = "Variable Annotation";
-                worksheet.Cell(1, 11).Value = "Variable Category";
-                worksheet.Cell(1, 12).Value = "Role";
-                worksheet.Cell(1, 13).Value = "Core Type";
-                worksheet.Cell(1, 14).Value = "Collection Source";
-                worksheet.Cell(1, 15).Value = "DataType";
-                worksheet.Cell(1, 16).Value = "Na";
-                worksheet.Cell(1, 17).Value = "Date Validate";
-                worksheet.Cell(1, 18).Value = "Unit";
-                worksheet.Cell(1, 19).Value = "Unit Annotation";
-                worksheet.Cell(1, 20).Value = "Collection Annotation";
-                worksheet.Cell(1, 21).Value = "Validation Type";
-                worksheet.Cell(1, 22).Value = "Length";
-                worksheet.Cell(1, 23).Value = "Low Range";
-                worksheet.Cell(1, 24).Value = "High Range";
-                worksheet.Cell(1, 25).Value = "Default Value";
-                worksheet.Cell(1, 26).Value = "Variable Note";
-                worksheet.Cell(1, 27).Value = "Document";
-                worksheet.Cell(1, 28).Value = "Encrypt";
-                worksheet.Cell(1, 29).Value = "Encrypted Role";
-                worksheet.Cell(1, 30).Value = "Collection Value";
+                worksheet.Cell(1, 2).Value = "Period";
+                worksheet.Cell(1, 3).Value = "Visit";
+                worksheet.Cell(1, 4).Value = "Template";
+                worksheet.Cell(1, 5).Value = "Domain";
+                worksheet.Cell(1, 6).Value = "Repeate Template";
+                worksheet.Cell(1, 7).Value = "Participant view";
+                worksheet.Cell(1, 8).Value = "Variable Name";
+                worksheet.Cell(1, 9).Value = "Variable Code";
+                worksheet.Cell(1, 10).Value = "Variable Alias";
+                worksheet.Cell(1, 11).Value = "Variable Annotation";
+                worksheet.Cell(1, 12).Value = "Variable Category";
+                worksheet.Cell(1, 13).Value = "Role";
+                worksheet.Cell(1, 14).Value = "Core Type";
+                worksheet.Cell(1, 15).Value = "Collection Source";
+                worksheet.Cell(1, 16).Value = "DataType";
+                worksheet.Cell(1, 17).Value = "Na";
+                worksheet.Cell(1, 18).Value = "Date Validate";
+                worksheet.Cell(1, 19).Value = "Unit";
+                worksheet.Cell(1, 20).Value = "Unit Annotation";
+                worksheet.Cell(1, 21).Value = "Collection Annotation";
+                worksheet.Cell(1, 22).Value = "Validation Type";
+                worksheet.Cell(1, 23).Value = "Length";
+                worksheet.Cell(1, 24).Value = "Low Range";
+                worksheet.Cell(1, 25).Value = "High Range";
+                worksheet.Cell(1, 26).Value = "Default Value";
+                worksheet.Cell(1, 27).Value = "Variable Note";
+                worksheet.Cell(1, 28).Value = "Document";
+                worksheet.Cell(1, 29).Value = "Encrypt";
+                worksheet.Cell(1, 30).Value = "Encrypted Role";
+                worksheet.Cell(1, 31).Value = "Collection Value";
 
                 var j = 2;
 
                 MainData.ForEach(d =>
                             {
                                 worksheet.Row(j).Cell(1).SetValue(d.StudyCode);
-                                worksheet.Row(j).Cell(2).SetValue(d.Visit);
-                                worksheet.Row(j).Cell(3).SetValue(d.Template);
-                                worksheet.Row(j).Cell(4).SetValue(d.DomainName);
-                                worksheet.Row(j).Cell(5).SetValue(d.IsRepeated);
-                                worksheet.Row(j).Cell(6).SetValue(d.IsParticipantView);
-                                worksheet.Row(j).Cell(7).SetValue(d.VariableName);
-                                worksheet.Row(j).Cell(8).SetValue(d.VariableCode);
-                                worksheet.Row(j).Cell(9).SetValue(d.VariableAlias);
-                                worksheet.Row(j).Cell(10).SetValue(d.VariableAnnotation);
-                                worksheet.Row(j).Cell(11).SetValue(d.VariableCategoryName);
-                                worksheet.Row(j).Cell(12).SetValue(d.Role);
-                                worksheet.Row(j).Cell(13).SetValue(d.CoreType);
-                                worksheet.Row(j).Cell(14).SetValue(d.CollectionSource);
-                                worksheet.Row(j).Cell(15).SetValue(d.DataType);
-                                worksheet.Row(j).Cell(16).SetValue(d.IsNa);
-                                worksheet.Row(j).Cell(17).SetValue(d.DateValidate);
-                                worksheet.Row(j).Cell(18).SetValue(d.UnitName);
-                                worksheet.Row(j).Cell(19).SetValue(d.UnitAnnotation);
-                                worksheet.Row(j).Cell(20).SetValue(d.CollectionAnnotation);
-                                worksheet.Row(j).Cell(21).SetValue(d.ValidationType);
-                                worksheet.Row(j).Cell(22).SetValue(d.Length);
-                                worksheet.Row(j).Cell(23).SetValue(d.LowRangeValue);
-                                worksheet.Row(j).Cell(24).SetValue(d.HighRangeValue);
-                                worksheet.Row(j).Cell(25).SetValue(d.DefaultValue);
-                                worksheet.Row(j).Cell(26).SetValue(d.Note);
-                                worksheet.Row(j).Cell(27).SetValue(d.IsDocument);
-                                worksheet.Row(j).Cell(28).SetValue(d.IsEncrypt);
-                                worksheet.Row(j).Cell(29).SetValue(d.EncryptRole);
-                                worksheet.Row(j).Cell(30).SetValue(d.CollectionValue);
+                                worksheet.Row(j).Cell(2).SetValue(d.Period);
+                                worksheet.Row(j).Cell(3).SetValue(d.Visit);
+                                worksheet.Row(j).Cell(4).SetValue(d.Template);
+                                worksheet.Row(j).Cell(5).SetValue(d.DomainName);
+                                worksheet.Row(j).Cell(6).SetValue(d.IsRepeated);
+                                worksheet.Row(j).Cell(7).SetValue(d.IsParticipantView);
+                                worksheet.Row(j).Cell(8).SetValue(d.VariableName);
+                                worksheet.Row(j).Cell(9).SetValue(d.VariableCode);
+                                worksheet.Row(j).Cell(10).SetValue(d.VariableAlias);
+                                worksheet.Row(j).Cell(11).SetValue(d.VariableAnnotation);
+                                worksheet.Row(j).Cell(12).SetValue(d.VariableCategoryName);
+                                worksheet.Row(j).Cell(13).SetValue(d.Role);
+                                worksheet.Row(j).Cell(14).SetValue(d.CoreType);
+                                worksheet.Row(j).Cell(15).SetValue(d.CollectionSource);
+                                worksheet.Row(j).Cell(16).SetValue(d.DataType);
+                                worksheet.Row(j).Cell(17).SetValue(d.IsNa);
+                                worksheet.Row(j).Cell(18).SetValue(d.DateValidate);
+                                worksheet.Row(j).Cell(19).SetValue(d.UnitName);
+                                worksheet.Row(j).Cell(20).SetValue(d.UnitAnnotation);
+                                worksheet.Row(j).Cell(21).SetValue(d.CollectionAnnotation);
+                                worksheet.Row(j).Cell(22).SetValue(d.ValidationType);
+                                worksheet.Row(j).Cell(23).SetValue(d.Length);
+                                worksheet.Row(j).Cell(24).SetValue(d.LowRangeValue);
+                                worksheet.Row(j).Cell(25).SetValue(d.HighRangeValue);
+                                worksheet.Row(j).Cell(26).SetValue(d.DefaultValue);
+                                worksheet.Row(j).Cell(27).SetValue(d.Note);
+                                worksheet.Row(j).Cell(28).SetValue(d.IsDocument);
+                                worksheet.Row(j).Cell(29).SetValue(d.IsEncrypt);
+                                worksheet.Row(j).Cell(30).SetValue(d.EncryptRole);
+                                worksheet.Row(j).Cell(31).SetValue(d.CollectionValue);
                                 j++;
                             });
 
                 #endregion ProjectDesign sheet
 
+                #region Add Visit status sheet
+                worksheet = workbook.Worksheets.Add("Visit Status");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Period";
+                worksheet.Cell(1, 2).Value = "Visit";
+                worksheet.Cell(1, 3).Value = "Variable";
+                worksheet.Cell(1, 4).Value = "Status";
+
+                var vs = 2;
+                VisitStatusData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(vs).Cell(1).SetValue(d.PeriodName);
+                    worksheet.Row(vs).Cell(2).SetValue(d.VisitName);
+                    worksheet.Row(vs).Cell(3).SetValue(d.VariableName);
+                    worksheet.Row(vs).Cell(4).SetValue(d.Status);
+                    vs++;
+                });
+                #endregion Add Visit status sheet
+
+                #region Add template note sheet
+                worksheet = workbook.Worksheets.Add("Template Note");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Period";
+                worksheet.Cell(1, 2).Value = "Visit";
+                worksheet.Cell(1, 3).Value = "Template";
+                worksheet.Cell(1, 4).Value = "Note";
+
+                var tnote = 2;
+                TemplateNoteData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(tnote).Cell(1).SetValue(d.PeriodName);
+                    worksheet.Row(tnote).Cell(2).SetValue(d.VisitName);
+                    worksheet.Row(tnote).Cell(3).SetValue(d.TemplateName);
+                    worksheet.Row(tnote).Cell(4).SetValue(d.Note);
+                    tnote++;
+                });
+                #endregion Add template note sheet
+
                 #region Add Visit language sheet
                 worksheet = workbook.Worksheets.Add("Visit Language");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Visit";
-                worksheet.Cell(1, 2).Value = "Language";
-                worksheet.Cell(1, 3).Value = "Conversion";
+                worksheet.Cell(1, 1).Value = "Period";
+                worksheet.Cell(1, 2).Value = "Visit";
+                worksheet.Cell(1, 3).Value = "Language";
+                worksheet.Cell(1, 4).Value = "Conversion";
 
                 var v = 2;
                 VisitLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(v).Cell(1).SetValue(d.VisitName);
-                    worksheet.Row(v).Cell(2).SetValue(d.Language);
-                    worksheet.Row(v).Cell(3).SetValue(d.Value);
+                    worksheet.Row(v).Cell(1).SetValue(d.PeriodName);
+                    worksheet.Row(v).Cell(2).SetValue(d.VisitName);
+                    worksheet.Row(v).Cell(3).SetValue(d.Language);
+                    worksheet.Row(v).Cell(4).SetValue(d.Value);
                     v++;
                 });
                 #endregion Add Visit language sheet
@@ -206,18 +254,20 @@ namespace GSC.Respository.Project.Design
                 worksheet = workbook.Worksheets.Add("Template Language");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Visit";
-                worksheet.Cell(1, 2).Value = "Template";
-                worksheet.Cell(1, 3).Value = "Language";
-                worksheet.Cell(1, 4).Value = "Conversion";
+                worksheet.Cell(1, 1).Value = "Period";
+                worksheet.Cell(1, 2).Value = "Visit";
+                worksheet.Cell(1, 3).Value = "Template";
+                worksheet.Cell(1, 4).Value = "Language";
+                worksheet.Cell(1, 5).Value = "Conversion";
 
                 var t = 2;
                 TemplateLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(t).Cell(1).SetValue(d.VisitName);
-                    worksheet.Row(t).Cell(2).SetValue(d.TemplateName);
-                    worksheet.Row(t).Cell(3).SetValue(d.Language);
-                    worksheet.Row(t).Cell(4).SetValue(d.Value);
+                    worksheet.Row(t).Cell(1).SetValue(d.PeriodName);
+                    worksheet.Row(t).Cell(2).SetValue(d.VisitName);
+                    worksheet.Row(t).Cell(3).SetValue(d.TemplateName);
+                    worksheet.Row(t).Cell(4).SetValue(d.Language);
+                    worksheet.Row(t).Cell(5).SetValue(d.Value);
                     t++;
                 });
                 #endregion Add template language sheet
@@ -226,20 +276,22 @@ namespace GSC.Respository.Project.Design
                 worksheet = workbook.Worksheets.Add("Template Note Lang");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Visit";
-                worksheet.Cell(1, 2).Value = "Template";
-                worksheet.Cell(1, 3).Value = "Note";
-                worksheet.Cell(1, 4).Value = "Language";
-                worksheet.Cell(1, 5).Value = "Conversion";
+                worksheet.Cell(1, 1).Value = "Period";
+                worksheet.Cell(1, 2).Value = "Visit";
+                worksheet.Cell(1, 3).Value = "Template";
+                worksheet.Cell(1, 4).Value = "Note";
+                worksheet.Cell(1, 5).Value = "Language";
+                worksheet.Cell(1, 6).Value = "Conversion";
 
                 var tn = 2;
                 TemplateNoteLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(tn).Cell(1).SetValue(d.VisitName);
-                    worksheet.Row(tn).Cell(2).SetValue(d.TemplateName);
-                    worksheet.Row(tn).Cell(3).SetValue(d.Note);
-                    worksheet.Row(tn).Cell(4).SetValue(d.Language);
-                    worksheet.Row(tn).Cell(5).SetValue(d.Value);
+                    worksheet.Row(tn).Cell(1).SetValue(d.PeriodName);
+                    worksheet.Row(tn).Cell(2).SetValue(d.VisitName);
+                    worksheet.Row(tn).Cell(3).SetValue(d.TemplateName);
+                    worksheet.Row(tn).Cell(4).SetValue(d.Note);
+                    worksheet.Row(tn).Cell(5).SetValue(d.Language);
+                    worksheet.Row(tn).Cell(6).SetValue(d.Value);
                     tn++;
                 });
                 #endregion Add template note language sheet
@@ -248,20 +300,22 @@ namespace GSC.Respository.Project.Design
                 worksheet = workbook.Worksheets.Add("Variable Language");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Visit";
-                worksheet.Cell(1, 2).Value = "Template";
-                worksheet.Cell(1, 3).Value = "Variable";
-                worksheet.Cell(1, 4).Value = "Language";
-                worksheet.Cell(1, 5).Value = "Conversion";
+                worksheet.Cell(1, 1).Value = "Period";
+                worksheet.Cell(1, 2).Value = "Visit";
+                worksheet.Cell(1, 3).Value = "Template";
+                worksheet.Cell(1, 4).Value = "Variable";
+                worksheet.Cell(1, 5).Value = "Language";
+                worksheet.Cell(1, 6).Value = "Conversion";
 
                 var vl = 2;
                 VariableLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(vl).Cell(1).SetValue(d.VisitName);
-                    worksheet.Row(vl).Cell(2).SetValue(d.TemplateName);
-                    worksheet.Row(vl).Cell(3).SetValue(d.VariableName);
-                    worksheet.Row(vl).Cell(4).SetValue(d.Language);
-                    worksheet.Row(vl).Cell(5).SetValue(d.Value);
+                    worksheet.Row(vl).Cell(1).SetValue(d.PeriodName);
+                    worksheet.Row(vl).Cell(2).SetValue(d.VisitName);
+                    worksheet.Row(vl).Cell(3).SetValue(d.TemplateName);
+                    worksheet.Row(vl).Cell(4).SetValue(d.VariableName);
+                    worksheet.Row(vl).Cell(5).SetValue(d.Language);
+                    worksheet.Row(vl).Cell(6).SetValue(d.Value);
                     vl++;
                 });
                 #endregion Add variable language sheet
@@ -270,22 +324,24 @@ namespace GSC.Respository.Project.Design
                 worksheet = workbook.Worksheets.Add("Variable Note Lang");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Visit";
-                worksheet.Cell(1, 2).Value = "Template"; 
-                worksheet.Cell(1, 3).Value = "Variable";
-                worksheet.Cell(1, 4).Value = "Note";
-                worksheet.Cell(1, 5).Value = "Language";
-                worksheet.Cell(1, 6).Value = "Conversion";
+                worksheet.Cell(1, 1).Value = "Period";
+                worksheet.Cell(1, 2).Value = "Visit";
+                worksheet.Cell(1, 3).Value = "Template";
+                worksheet.Cell(1, 4).Value = "Variable";
+                worksheet.Cell(1, 5).Value = "Note";
+                worksheet.Cell(1, 6).Value = "Language";
+                worksheet.Cell(1, 7).Value = "Conversion";
 
                 var vn = 2;
                 VariableNoteLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(vn).Cell(1).SetValue(d.VisitName);
-                    worksheet.Row(vn).Cell(2).SetValue(d.TemplateName);
-                    worksheet.Row(vn).Cell(2).SetValue(d.VariableName);
-                    worksheet.Row(vn).Cell(3).SetValue(d.Note);
-                    worksheet.Row(vn).Cell(4).SetValue(d.Language);
-                    worksheet.Row(vn).Cell(5).SetValue(d.Value);
+                    worksheet.Row(vn).Cell(1).SetValue(d.PeriodName);
+                    worksheet.Row(vn).Cell(2).SetValue(d.VisitName);
+                    worksheet.Row(vn).Cell(3).SetValue(d.TemplateName);
+                    worksheet.Row(vn).Cell(4).SetValue(d.VariableName);
+                    worksheet.Row(vn).Cell(5).SetValue(d.Note);
+                    worksheet.Row(vn).Cell(6).SetValue(d.Language);
+                    worksheet.Row(vn).Cell(7).SetValue(d.Value);
                     vn++;
                 });
                 #endregion Add variable note language sheet
@@ -294,22 +350,24 @@ namespace GSC.Respository.Project.Design
                 worksheet = workbook.Worksheets.Add("Variable value Lang");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Visit";
-                worksheet.Cell(1, 2).Value = "Template";
-                worksheet.Cell(1, 3).Value = "Variable";
-                worksheet.Cell(1, 4).Value = "Value";
-                worksheet.Cell(1, 5).Value = "Language";
-                worksheet.Cell(1, 6).Value = "Conversion";
+                worksheet.Cell(1, 1).Value = "Period";
+                worksheet.Cell(1, 2).Value = "Visit";
+                worksheet.Cell(1, 3).Value = "Template";
+                worksheet.Cell(1, 4).Value = "Variable";
+                worksheet.Cell(1, 5).Value = "Value";
+                worksheet.Cell(1, 6).Value = "Language";
+                worksheet.Cell(1, 7).Value = "Conversion";
 
                 var vv = 2;
                 VariableValueLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(vv).Cell(1).SetValue(d.VisitName);
-                    worksheet.Row(vv).Cell(2).SetValue(d.TemplateName);
-                    worksheet.Row(vv).Cell(2).SetValue(d.VariableName);
-                    worksheet.Row(vv).Cell(3).SetValue(d.VariableValue);
-                    worksheet.Row(vv).Cell(4).SetValue(d.Language);
-                    worksheet.Row(vv).Cell(5).SetValue(d.Value);
+                    worksheet.Row(vv).Cell(1).SetValue(d.PeriodName);
+                    worksheet.Row(vv).Cell(2).SetValue(d.VisitName);
+                    worksheet.Row(vv).Cell(3).SetValue(d.TemplateName);
+                    worksheet.Row(vv).Cell(4).SetValue(d.VariableName);
+                    worksheet.Row(vv).Cell(5).SetValue(d.VariableValue);
+                    worksheet.Row(vv).Cell(6).SetValue(d.Language);
+                    worksheet.Row(vv).Cell(7).SetValue(d.Value);
                     vv++;
                 });
                 #endregion Add variable value language sheet
@@ -324,6 +382,18 @@ namespace GSC.Respository.Project.Design
             #endregion
         }
 
+        public IList<ProjectDesignLanguageReportDto> GetTemplateNoteData(int ProjectDesignPeriodId)
+        {
+            return _context.ProjectDesignTemplateNote.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
+            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            {
+                PeriodName = r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
+                VisitName = r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                TemplateName = r.ProjectDesignTemplate.TemplateName,
+                Note = r.Note
+            }).ToList();
+        }
+
         public IList<ProjectDesignLanguageReportDto> GetVisitLanguageData(int ProjectDesignPeriodId)
         {
             var visits = new List<int>();
@@ -331,9 +401,24 @@ namespace GSC.Respository.Project.Design
 
             return _context.VisitLanguage.Where(t => visits.Contains(t.ProjectDesignVisitId) && t.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
             {
+                PeriodName = r.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVisit.DisplayName,
                 Language = r.Language.LanguageName,
                 Value = r.Display
+            }).ToList();
+        }
+
+        public IList<ProjectDesignLanguageReportDto> GetVisitStatusData(int ProjectDesignPeriodId)
+        {
+            var visits = new List<int>();
+            visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return _context.ProjectDesignVisitStatus.Where(t => visits.Contains(t.ProjectDesignVisitId) && t.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            {
+                PeriodName = r.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
+                VisitName = r.ProjectDesignVisit.DisplayName,
+                VariableName = r.ProjectDesignVariable.VariableName,
+                Status = r.VisitStatusId.GetDescription()
             }).ToList();
         }
 
@@ -342,6 +427,7 @@ namespace GSC.Respository.Project.Design
             return _context.TemplateLanguage.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
             && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
             {
+                PeriodName = r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                 TemplateName = r.ProjectDesignTemplate.TemplateName,
                 Language = r.Language.LanguageName,
@@ -354,6 +440,7 @@ namespace GSC.Respository.Project.Design
             return _context.TemplateNoteLanguage.Where(x => x.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
             && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
             {
+                PeriodName = r.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                 TemplateName = r.ProjectDesignTemplateNote.ProjectDesignTemplate.TemplateName,
                 Note = r.ProjectDesignTemplateNote.Note,
@@ -367,6 +454,7 @@ namespace GSC.Respository.Project.Design
             return _context.VariableLanguage.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
             && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
             {
+                PeriodName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                 TemplateName = r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
                 VariableName = r.ProjectDesignVariable.VariableName,
@@ -380,6 +468,7 @@ namespace GSC.Respository.Project.Design
             return _context.VariableNoteLanguage.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
             && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
             {
+                PeriodName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                 TemplateName = r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
                 VariableName = r.ProjectDesignVariable.VariableName,
@@ -394,6 +483,7 @@ namespace GSC.Respository.Project.Design
             return _context.VariableValueLanguage.Where(x => x.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
             && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
             {
+                PeriodName = r.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                 TemplateName = r.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
                 VariableName = r.ProjectDesignVariableValue.ProjectDesignVariable.VariableName,
