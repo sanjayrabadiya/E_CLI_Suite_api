@@ -128,13 +128,13 @@ namespace GSC.Api.Controllers.Volunteer
             //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Inserted, volunteer.Id,
             //    null, volunteerDto.Changes);
 
-            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            {
-                KeyId = volunteer.Id,
-                SubjectName = volunteer.VolunteerNo,
-                SubjectName1 = volunteer.FullName,
-                ScreenType = UserRecent.Volunteer
-            });
+            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
+            //{
+            //    KeyId = volunteer.Id,
+            //    SubjectName = volunteer.VolunteerNo,
+            //    SubjectName1 = volunteer.FullName,
+            //    ScreenType = UserRecent.Volunteer
+            //});
 
             return Ok(volunteer.Id);
         }
