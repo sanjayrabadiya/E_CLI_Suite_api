@@ -396,7 +396,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "Range", DisplayName = "Range" });
             _dictionaries.Add(new Dictionary { FieldName = "Remarks", DisplayName = "Remarks" });
 
-            _dictionaries.Add(new Dictionary { FieldName = "LargeStep", DisplayName = "Large Step" });
+            //_dictionaries.Add(new Dictionary { FieldName = "LargeStep", DisplayName = "Large Step" });
 
             // ProducType
             _dictionaries.Add(new Dictionary { FieldName = "ProductTypeName", DisplayName = "Product Type Name" });
@@ -443,6 +443,35 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsSpeak", DisplayName = "Speak" });
             _dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
             _dictionaries.Add(new Dictionary { FieldName = "DocumentNameId", DisplayName = "Document Name", SourceColumn = "Name", TableName = "DocumentName", PkName = "Id" });
+
+            // Variable add column
+          //  _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignTemplateId", DisplayName = "Project Design Template", SourceColumn = "TemplateName", TableName = "ProjectDesignTemplate", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "VariableName", DisplayName = "Variable Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "VariableCode", DisplayName = "Variable Code" });
+            _dictionaries.Add(new Dictionary { FieldName = "VariableAlias", DisplayName = "Variable Alias" });
+            _dictionaries.Add(new Dictionary { FieldName = "Annotation", DisplayName = "Variable Annotation" });
+            _dictionaries.Add(new Dictionary { FieldName = "AnnotationTypeId", DisplayName = "Annotation Type", SourceColumn="AnnotationName", TableName = "AnnotationType", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "VariableCategoryId", DisplayName = "Variable Category", SourceColumn = "CategoryName", TableName = "VariableCategory", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsNa", DisplayName = "Is N/A?" });
+            _dictionaries.Add(new Dictionary { FieldName = "UnitId", DisplayName = "Unit", SourceColumn = "UnitName", TableName = "Unit", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "UnitAnnotation", DisplayName = "Unit Annotation" });
+            _dictionaries.Add(new Dictionary { FieldName = "CollectionAnnotation", DisplayName = "Collection Annotation" });
+            _dictionaries.Add(new Dictionary { FieldName = "LowRangeValue", DisplayName = "Low Range" });
+            _dictionaries.Add(new Dictionary { FieldName = "HighRangeValue", DisplayName = "High Range" });
+            _dictionaries.Add(new Dictionary { FieldName = "Length", DisplayName = "Length" });
+            _dictionaries.Add(new Dictionary { FieldName = "LargeStep", DisplayName = "Display Value" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsEncrypt", DisplayName = "Is Encrypt?" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsDocument", DisplayName = "Is Document?" });
+            _dictionaries.Add(new Dictionary { FieldName = "DefaultValue", DisplayName = "Default Value" });
+            _dictionaries.Add(new Dictionary { FieldName = "RelationProjectDesignVariableId", DisplayName = "Relation Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "Alignment", DisplayName = "Alignment"});
+
+
+            // Project design template note
+            _dictionaries.Add(new Dictionary { FieldName = "IsPreview", DisplayName = "Is Printable?" });
+
+            //   _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignVariableId", DisplayName = "Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
+
         }
 
 

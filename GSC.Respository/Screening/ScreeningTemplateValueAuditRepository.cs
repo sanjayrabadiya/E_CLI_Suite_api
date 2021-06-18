@@ -346,8 +346,9 @@ namespace GSC.Respository.Screening
                         }
                         else if (d.CollectionSource == CollectionSources.Time && d.OldValue != "Default")
                         {
+                            DateTime dDate;
                             string variablevalueformat = d.OldValue;
-                            var dt = "";//!string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
                             worksheet.Row(j).Cell(9).SetValue(dt);
                         }
                         else
