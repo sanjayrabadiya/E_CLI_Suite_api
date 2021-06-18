@@ -202,16 +202,18 @@ namespace GSC.Respository.Project.Design
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
                 worksheet.Cell(1, 1).Value = "Period";
                 worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Variable";
-                worksheet.Cell(1, 4).Value = "Status";
+                worksheet.Cell(1, 3).Value = "Template";
+                worksheet.Cell(1, 4).Value = "Variable";
+                worksheet.Cell(1, 5).Value = "Status";
 
                 var vs = 2;
                 VisitStatusData.ToList().ForEach(d =>
                 {
                     worksheet.Row(vs).Cell(1).SetValue(d.PeriodName);
                     worksheet.Row(vs).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(vs).Cell(3).SetValue(d.VariableName);
-                    worksheet.Row(vs).Cell(4).SetValue(d.Status);
+                    worksheet.Row(vs).Cell(3).SetValue(d.TemplateName);
+                    worksheet.Row(vs).Cell(4).SetValue(d.VariableName);
+                    worksheet.Row(vs).Cell(5).SetValue(d.Status);
                     vs++;
                 });
                 #endregion Add Visit status sheet
@@ -423,6 +425,7 @@ namespace GSC.Respository.Project.Design
             {
                 PeriodName = r.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVisit.DisplayName,
+                TemplateName =r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
                 VariableName = r.ProjectDesignVariable.VariableName,
                 Status = r.VisitStatusId.GetDescription()
             }).ToList();
