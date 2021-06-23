@@ -6,7 +6,7 @@ using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Volunteer
 {
-    public class VolunteerAddress : BaseEntity, ICommonAduit
+    public class VolunteerAddress : BaseEntity
     {
         private DateTime? _FromDate;
 

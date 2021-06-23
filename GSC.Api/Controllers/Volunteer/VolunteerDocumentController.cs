@@ -73,8 +73,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerDocumentRepository.Add(volunteerDocument);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer document failed on save.");
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Inserted,
-            //    volunteerDocument.Id, volunteerDocument.VolunteerId, volunteerDocumentDto.Changes);
+            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Inserted,
+                volunteerDocument.Id, volunteerDocument.VolunteerId, volunteerDocumentDto.Changes);
 
             return Ok(volunteerDocument.Id);
         }
@@ -105,8 +105,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerDocumentRepository.Update(volunteerDocument);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer document failed on save.");
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Updated,
-            //    volunteerDocument.Id, volunteerDocument.VolunteerId, volunteerDocumentDto.Changes);
+            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Updated,
+                volunteerDocument.Id, volunteerDocument.VolunteerId, volunteerDocumentDto.Changes);
 
             return Ok(volunteerDocument.Id);
         }

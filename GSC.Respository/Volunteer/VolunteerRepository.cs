@@ -64,7 +64,7 @@ namespace GSC.Respository.Volunteer
             _mapper = mapper;
         }
 
-        public List<VolunteerGridDto> GetVolunteerDetail(bool isDeleted,int volunteerid)
+        public List<VolunteerGridDto> GetVolunteerDetail(bool isDeleted, int volunteerid)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.Id == volunteerid).
                    ProjectTo<VolunteerGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
@@ -133,9 +133,12 @@ namespace GSC.Respository.Volunteer
             else
             {
                 if (search.FromAge.HasValue)
-                    query = query.Where(x => x.FromAge >= search.FromAge);
+                    //query = query.Where(x => x.FromAge >= search.FromAge);
+                    query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year - x.DateOfBirth.Value.Year) >= search.FromAge);
                 if (search.ToAge.HasValue)
-                    query = query.Where(x => x.FromAge <= search.ToAge);
+                    //query = query.Where(x => x.FromAge <= search.ToAge);
+                    //query = query.Where(x => x.DateOfBirth != null && CalculateAge(Convert.ToDateTime(x.DateOfBirth)) <= search.ToAge);
+                    query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year - x.DateOfBirth.Value.Year) <= search.ToAge);
                 if (!string.IsNullOrEmpty(search.VolunteerNo))
                     query = query.Where(x =>
                         x.VolunteerNo != null && x.VolunteerNo.ToLower().Contains(search.VolunteerNo.ToLower()));
@@ -194,6 +197,15 @@ namespace GSC.Respository.Volunteer
             var result = GetItems(query, true);
 
             return result;
+        }
+
+        private int CalculateAge(DateTime dob)
+        {
+            DateTime today = DateTime.Today;
+            int age = today.Year - dob.Year;
+            if (today.Month < dob.Month || (today.Month == dob.Month && today.Day < dob.Day))
+                age--;
+            return age;
         }
 
         public VolunteerStatusCheck CheckStatus(int id)

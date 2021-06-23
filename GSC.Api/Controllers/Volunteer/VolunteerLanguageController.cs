@@ -53,8 +53,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerLanguageRepository.Add(volunteerLanguage);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer language failed on save.");
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Inserted,
-            //    volunteerLanguage.Id, volunteerLanguage.VolunteerId, volunteerLanguageDto.Changes);
+            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Inserted,
+                volunteerLanguage.Id, volunteerLanguage.VolunteerId, volunteerLanguageDto.Changes);
 
             return Ok(volunteerLanguage.Id);
         }
@@ -74,8 +74,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerLanguageRepository.Update(volunteerLanguage);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer language failed on save.");
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Updated,
-            //    volunteerLanguage.Id, volunteerLanguage.VolunteerId, volunteerLanguageDto.Changes);
+            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Updated,
+                volunteerLanguageDto.Id, volunteerLanguage.VolunteerId, volunteerLanguageDto.Changes);
 
             return Ok(volunteerLanguage.Id);
         }

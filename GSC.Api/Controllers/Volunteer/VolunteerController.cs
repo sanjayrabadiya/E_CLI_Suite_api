@@ -125,8 +125,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerRepository.Add(volunteer);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer failed on save.");
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Inserted, volunteer.Id,
-            //    null, volunteerDto.Changes);
+            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Inserted, volunteer.Id,
+                null, volunteerDto.Changes);
 
             //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             //{
@@ -159,8 +159,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerRepository.Update(volunteer);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer failed on save.");
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Updated, volunteer.Id,
-            //    null, volunteerDto.Changes);
+            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Updated, volunteer.Id,
+                null, volunteerDto.Changes);
 
             return Ok(volunteer.Id);
         }

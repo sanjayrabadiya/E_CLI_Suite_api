@@ -75,9 +75,9 @@ namespace GSC.Api.Controllers.Volunteer
         public IActionResult Put([FromBody] VolunteerContactDto volunteerContactDto)
         {
 
-            //if (volunteerContactDto.Id <= 0) return BadRequest();
+            if (volunteerContactDto.Id <= 0) return BadRequest();
 
-            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             //var voluteerContact = _mapper.Map<VolunteerContact>(volunteerContactDto);
 
@@ -124,8 +124,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerContactRepository.Update(volunteerContact);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer contact failed on update.");
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerContact, AuditAction.Updated,
-            //    volunteerContact.Id, volunteerContact.VolunteerId, volunteerContactDto.Changes);
+           //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerContact, AuditAction.Updated,
+           //     volunteerContact.Id, volunteerContact.VolunteerId, volunteerContactDto.Changes);
 
             return Ok(volunteerContact.Id);
         }

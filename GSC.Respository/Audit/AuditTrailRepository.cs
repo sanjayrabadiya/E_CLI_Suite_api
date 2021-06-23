@@ -139,7 +139,7 @@ namespace GSC.Respository.Audit
                 TimeZone = x.TimeZone,
                 VolunteerName = _context.Volunteer
                     .Where(c => c.Id == x.RecordId && x.TableId == AuditTable.Volunteer || c.Id == x.ParentRecordId)
-                    .Select(a => a.VolunteerNo + " - " + a.FullName).FirstOrDefault()
+                    .Select(a => a.VolunteerNo + " - " + a.FirstName + " " + a.MiddleName + " " + a.LastName).FirstOrDefault()
             }).OrderByDescending(x => x.Id).ToList();
         }
     }
