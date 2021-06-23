@@ -283,7 +283,9 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentSectionReference, EconsentSectionReferenceDto>().ReverseMap();
             CreateMap<EconsentReviewDetailsSections, EconsentReviewDetailsSectionsDto>().ReverseMap();
             CreateMap<EconsentChat, EconsentChatDto>().ReverseMap();
-            CreateMap<Data.Entities.UserMgt.User, EConsentUserChatDto>().ReverseMap();
+            CreateMap<Data.Entities.UserMgt.User, EConsentUserChatDto>()
+                .ForMember(x => x.UserName, y => y.MapFrom(a => a.FirstName +" "+ a.LastName ))
+                .ReverseMap();
             CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
             CreateMap<Site, SiteDto>().ReverseMap();
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();

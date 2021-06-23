@@ -182,6 +182,15 @@ namespace GSC.Respository.EmailSender
             await SendSMS(mobile, emailMessage.MessageBody,emailMessage.DLTTemplateId);
         }
 
+        public void SendOfflineChatNotification(string toMail,string userName)
+        {
+            var emailMessage = ConfigureEmail("empreg", userName);
+            emailMessage.SendTo = toMail;
+            //emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password);
+            emailMessage.MessageBody = "Message offline alert";
+            _emailService.SendMail(emailMessage);
+        }
+
         public async Task SendSMS(string mobile,string messagebody,string? DLTTemplateId)
         {
             var smstemplate = messagebody;//emailMessage.MessageBody;

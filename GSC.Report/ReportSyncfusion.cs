@@ -525,7 +525,7 @@ namespace GSC.Report
             layoutFormat.Layout = PdfLayoutType.Paginate;
             //not fit page then next page
             layoutFormat.Break = PdfLayoutBreakType.FitElement;
-            
+
 
             RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
             tocresult = new PdfLayoutResult(pageTOC, bounds);
@@ -889,13 +889,13 @@ namespace GSC.Report
                         if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
                         {
                             List<string> _points = new List<string>();
-                            int lowrangevalue = Convert.ToInt32(variable.LowRangeValue);
+                            int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
                             int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
                             //int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
                             //logic
                             for (int i = lowrangevalue; i <= highragnevalue; i++)
                             {
-                                if ((i % variable.LargeStep) == 0)
+                                if ((i % variable.LargeStep == 0 ? 1 : variable.LargeStep) == 0)
                                     _points.Add(i.ToString());
                             }
                             float xPos = 300;

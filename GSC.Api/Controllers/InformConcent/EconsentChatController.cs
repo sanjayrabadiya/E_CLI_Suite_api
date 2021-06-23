@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.InformConcent;
+using GSC.Respository.EmailSender;
 using GSC.Respository.InformConcent;
+using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -21,16 +23,20 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IEconsentChatRepository _econsentChatRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IHubContext<MessageHub> _hubcontext;
+        private readonly IUserRepository _userRepository;
+        private readonly IEmailSenderRespository _emailSenderRespository;
 
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
                                         IHubContext<MessageHub> hubcontext,
-                                        IEconsentChatRepository econsentChatRepository)
+                                        IEconsentChatRepository econsentChatRepository,IUserRepository userRepository,IEmailSenderRespository emailSenderRespository)
         {
             _econsentChatRepository = econsentChatRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _hubcontext = hubcontext;
+            _userRepository = userRepository;
+            _emailSenderRespository = emailSenderRespository;
         }
 
         [HttpGet]
@@ -66,6 +72,13 @@ namespace GSC.Api.Controllers.InformConcent
             // insert message details in econsentchat table
             _econsentChatRepository.Add(econsentChat);
             _uow.Save();
+
+            var senderdetails = _userRepository.Find(econsentChat.ReceiverId);
+            //var connection = ConnectedUser.Ids.Where(x => x.userId == econsentChat.ReceiverId).Any();
+            //if (!senderdetails.IsLogin)
+            //{
+            //    _emailSenderRespository.SendOfflineChatNotification(senderdetails.Email, senderdetails.FirstName);
+            //}
             return Ok(econsentChat);
         }
 

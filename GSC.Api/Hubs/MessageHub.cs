@@ -1,4 +1,6 @@
-﻿using GSC.Data.Entities.InformConcent;
+﻿using GSC.Common.UnitOfWork;
+using GSC.Data.Entities.InformConcent;
+using GSC.Respository.InformConcent;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.SignalR;
 using Serilog;
@@ -14,9 +16,13 @@ namespace GSC.Api.Hubs
     public class MessageHub : Hub
     {
         private readonly IUserRepository _userRepository;
-        public MessageHub(IUserRepository userRepository)
+        private readonly IEconsentChatRepository _econsentChatRepository;
+        private readonly IUnitOfWork _uow;
+        public MessageHub(IUserRepository userRepository, IEconsentChatRepository econsentChatRepository, IUnitOfWork uow)
         {
             _userRepository = userRepository;
+            _econsentChatRepository = econsentChatRepository;
+            _uow = uow;
         }
 
         public async Task NewMessage(EconsentChat msg)
@@ -34,18 +40,17 @@ namespace GSC.Api.Hubs
             // ------------ send to single -----------------
             if (ConnectedUser.Ids.Where(x => x.userId == msg.ReceiverId).ToList().Count > 0)
             {
-                var connectionId = ConnectedUser.Ids.Where(x => x.userId == msg.ReceiverId).ToList().FirstOrDefault().connectionId;
-                await Clients.Client(connectionId).SendAsync("NewMessage", msg);
+                var connectionId = ConnectedUser.Ids.Where(x => x.userId == msg.ReceiverId).Select(t=>t.connectionId).ToList();
+                await Clients.Clients(connectionId).SendAsync("NewMessage", msg);
             }
             
         }
 
         public async Task MessageDelivered(EconsentChat msg)
         {
-            var connectionId = ConnectedUser.Ids.Where(x => x.userId == msg.SenderId).ToList().FirstOrDefault().connectionId;
-            await Clients.Client(connectionId).SendAsync("MessageDelivered", msg);
+            var connectionId = ConnectedUser.Ids.Where(x => x.userId == msg.SenderId).Select(t => t.connectionId).ToList();
+            await Clients.Clients(connectionId).SendAsync("MessageDelivered", msg);
         }
-
         public void RemoveUser()
         {
             var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();
@@ -79,8 +84,7 @@ namespace GSC.Api.Hubs
         {
             try
             {
-                var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();
-                await base.OnDisconnectedAsync(exception);
+                var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();               
                 if (user != null)
                 {
                     ConnectedUser.Ids.Remove(user);
@@ -88,6 +92,7 @@ namespace GSC.Api.Hubs
                     var isLogin = ConnectedUser.Ids.Any(x => x.userId == user.userId);
                     _userRepository.UpdateIsLogin(user.userId, isLogin);
                 }
+                 await base.OnDisconnectedAsync(exception);
             }
             catch(Exception ex) {
                 Log.Error(ex, "");

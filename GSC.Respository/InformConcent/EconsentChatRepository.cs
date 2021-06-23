@@ -66,8 +66,9 @@ namespace GSC.Respository.InformConcent
                 //        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)).ToList();
 
                 var projectId = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.UserId != null).Select(x => x.ProjectId).FirstOrDefault();
-                var medicalteam = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate==null).Select(x => x.UserId).ToList();
+                var medicalteam = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null).Select(x => x.UserId).ToList();
                 users = _userRepository.FindBy(x => medicalteam.Contains(x.Id) && x.DeletedDate == null && x.IsLocked == false && x.UserType != Shared.Generic.UserMasterUserType.Patient).ToList();
+
 
             }
             else
@@ -80,33 +81,38 @@ namespace GSC.Respository.InformConcent
                 //        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)).ToList();
 
                 var projectlist = _context.ProjectRight.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).Select(t => t.ProjectId).ToList();
-                var patientlist = _context.Randomization.Where(r => projectlist.Contains(r.ProjectId) && r.UserId != null && r.DeletedDate==null).Select(x => (int)x.UserId).ToList();
+                var patientlist = _context.Randomization.Where(r => projectlist.Contains(r.ProjectId) && r.UserId != null && r.DeletedDate == null).Select(x => (int)x.UserId).ToList();
                 users = _userRepository.FindBy(x => x.Id != _jwtTokenAccesser.UserId && x.DeletedDate == null && patientlist.Contains(x.Id) && x.IsLocked == false && x.UserType == Shared.Generic.UserMasterUserType.Patient).ToList();
             }
             var userschat = _mapper.Map<List<EConsentUserChatDto>>(users);
             var userintlist = users.Select(x => x.Id).ToList();
             var chatdata = FindBy(x => (x.SenderId == _jwtTokenAccesser.UserId || x.ReceiverId == _jwtTokenAccesser.UserId));
-            for (int i = 0; i <= userschat.Count - 1; i++)
+            //for (int i = 0; i <= userschat.Count - 1; i++)
+            userschat.ForEach(ch =>
             {
-                IList<int> intList = new List<int>() { userschat[i].Id, _jwtTokenAccesser.UserId };
+
+
+                // {
+                IList<int> intList = new List<int>() { ch.Id, _jwtTokenAccesser.UserId };
                 var chatobj = chatdata.Where(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();//FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();
-                userschat[i].LastMessage = chatobj == null ? "" : chatobj.Message;
-                userschat[i].SendDateTime = chatobj?.SendDateTime;
-                userschat[i].UnReadMsgCount = chatdata.Where(x => x.SenderId == userschat[i].Id && x.IsRead == false).ToList().Count;
+                ch.LastMessage = chatobj == null ? "" : chatobj.Message;
+                ch.SendDateTime = chatobj?.SendDateTime;
+                ch.UnReadMsgCount = chatdata.Where(x => x.SenderId == ch.Id && x.IsRead == false).ToList().Count;
                 if (chatobj != null)
                 {
                     if (chatobj.ReceiverId == _jwtTokenAccesser.UserId)
-                        userschat[i].LastMessageStatus = "";
+                        ch.LastMessageStatus = "";
                     else if (chatobj.IsDelivered == false)
-                        userschat[i].LastMessageStatus = "S";
+                        ch.LastMessageStatus = "S";
                     else if (chatobj.IsDelivered == true && chatobj.IsRead == false)
-                        userschat[i].LastMessageStatus = "D";
+                        ch.LastMessageStatus = "D";
                     else if (chatobj.IsRead == true)
-                        userschat[i].LastMessageStatus = "R";
+                        ch.LastMessageStatus = "R";
                 }
                 else
-                    userschat[i].LastMessageStatus = "";
-            }
+                    ch.LastMessageStatus = "";
+                //}
+            });
             return userschat.OrderByDescending(x => x.SendDateTime).ToList();
         }
 
