@@ -450,7 +450,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "VariableCode", DisplayName = "Variable Code" });
             _dictionaries.Add(new Dictionary { FieldName = "VariableAlias", DisplayName = "Variable Alias" });
             _dictionaries.Add(new Dictionary { FieldName = "Annotation", DisplayName = "Variable Annotation" });
-            _dictionaries.Add(new Dictionary { FieldName = "AnnotationTypeId", DisplayName = "Annotation Type", SourceColumn="AnnotationName", TableName = "AnnotationType", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "AnnotationTypeId", DisplayName = "Annotation Type", SourceColumn="AnnotationeName", TableName = "AnnotationType", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "VariableCategoryId", DisplayName = "Variable Category", SourceColumn = "CategoryName", TableName = "VariableCategory", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "IsNa", DisplayName = "Is N/A?" });
             _dictionaries.Add(new Dictionary { FieldName = "UnitId", DisplayName = "Unit", SourceColumn = "UnitName", TableName = "Unit", PkName = "Id" });
