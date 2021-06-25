@@ -466,6 +466,8 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "RelationProjectDesignVariableId", DisplayName = "Relation Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "Alignment", DisplayName = "Alignment"});
 
+            _dictionaries.Add(new Dictionary { FieldName = "Display", DisplayName = "Conversion" });
+
 
             // Project design template note
             _dictionaries.Add(new Dictionary { FieldName = "IsPreview", DisplayName = "Is Printable?" });

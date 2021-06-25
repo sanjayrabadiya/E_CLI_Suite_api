@@ -114,12 +114,15 @@ namespace GSC.Respository.Audit
             var projectDesignVisitStatusIds = _context.ProjectDesignVisitStatus
               .Where(t => visitIds.Contains(t.ProjectDesignVisitId)).Select(s => s.Id).ToList();
 
+            var templateNoteIds = _context.ProjectDesignTemplateNote
+              .Where(t => templateIds.Contains(t.ProjectDesignTemplateId)).Select(s => s.Id).ToList();
+
             var visitLanguageIds = _context.VisitLanguage
               .Where(t => visitIds.Contains(t.ProjectDesignVisitId)).Select(s => s.Id).ToList();
             var templateLanguageIds = _context.TemplateLanguage
               .Where(t => templateIds.Contains(t.ProjectDesignTemplateId)).Select(s => s.Id).ToList();
             var templateNoteLanguageIds = _context.TemplateNoteLanguage
-              .Where(t => templateIds.Contains(t.ProjectDesignTemplateNoteId)).Select(s => s.Id).ToList();
+              .Where(t => templateNoteIds.Contains(t.ProjectDesignTemplateNoteId)).Select(s => s.Id).ToList();
             var variableLanguageIds = _context.VariableLanguage
               .Where(t => variableIds.Contains(t.ProjectDesignVariableId)).Select(s => s.Id).ToList();
             var variableNoteLanguageIds = _context.VariableNoteLanguage
@@ -326,6 +329,29 @@ namespace GSC.Respository.Audit
             }
 
             displayLists = new List<ProjectDesignAuditReportDto>();
+            var TemplateNoteData = GetDesignItems("ProjectDesignTemplateNote", templateNoteIds, Project.ProjectCode);
+            if (TemplateNoteData != null || TemplateNoteData.Count() > 0)
+            {
+                var keys = TemplateNoteData.Select(t => t.Key).Distinct().ToList();
+                displayLists = _context.ProjectDesignTemplateNote.Where(x => keys.Contains(x.Id)).Select(t => new ProjectDesignAuditReportDto
+                {
+                    Key = t.Id,
+                    Template = t.ProjectDesignTemplate.TemplateCode + '-' + t.ProjectDesignTemplate.TemplateName,
+                    Visit = t.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                    Period = t.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName
+                }).ToList();
+
+                foreach (var x in TemplateNoteData)
+                {
+                    var nameDetail = displayLists.FirstOrDefault(t => t.Key == x.Key);
+                    x.Period = nameDetail.Period;
+                    x.Visit = nameDetail.Visit;
+                    x.Template = nameDetail.Template;
+                    x.Variable = nameDetail.Variable;
+                }
+            }
+
+            displayLists = new List<ProjectDesignAuditReportDto>();
             var TemplateNoteLanguageData = GetDesignItems("TemplateNoteLanguage", templateNoteLanguageIds,Project.ProjectCode);
             if (TemplateNoteLanguageData != null || TemplateNoteLanguageData.Count() > 0)
             {
@@ -429,7 +455,9 @@ namespace GSC.Respository.Audit
                 {
                     Key = t.Id,
                     Visit = t.ProjectDesignVisit.DisplayName,
-                    Period = t.ProjectDesignVisit.ProjectDesignPeriod.DisplayName
+                    Period = t.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
+                    Template = t.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode+"-"+ t.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
+                    Variable = t.ProjectDesignVariable.VariableCode + "-" + t.ProjectDesignVariable.VariableName
                 }).ToList();
 
                 foreach (var x in VisitStatusData)
@@ -548,17 +576,19 @@ namespace GSC.Respository.Audit
                 worksheet.Cell(1, 2).Value = "STUDY CODE";
                 worksheet.Cell(1, 3).Value = "Period";
                 worksheet.Cell(1, 4).Value = "Visit";
-                worksheet.Cell(1, 5).Value = "IP Address";
-                worksheet.Cell(1, 6).Value = "Action";
-                worksheet.Cell(1, 7).Value = "Field Name";
-                worksheet.Cell(1, 8).Value = "Old Value";
-                worksheet.Cell(1, 9).Value = "New Value";
-                worksheet.Cell(1, 10).Value = "Reason";
-                worksheet.Cell(1, 11).Value = "Comment";
-                worksheet.Cell(1, 12).Value = "User";
-                worksheet.Cell(1, 13).Value = "Role";
-                worksheet.Cell(1, 14).Value = "DateTime";
-                worksheet.Cell(1, 15).Value = "TimeZone";
+                worksheet.Cell(1, 5).Value = "Template";
+                worksheet.Cell(1, 6).Value = "Variable";
+                worksheet.Cell(1, 7).Value = "IP Address";
+                worksheet.Cell(1, 8).Value = "Action";
+                worksheet.Cell(1, 9).Value = "Field Name";
+                worksheet.Cell(1, 10).Value = "Old Value";
+                worksheet.Cell(1, 11).Value = "New Value";
+                worksheet.Cell(1, 12).Value = "Reason";
+                worksheet.Cell(1, 13).Value = "Comment";
+                worksheet.Cell(1, 14).Value = "User";
+                worksheet.Cell(1, 15).Value = "Role";
+                worksheet.Cell(1, 16).Value = "DateTime";
+                worksheet.Cell(1, 17).Value = "TimeZone";
 
                 j = 2;
                 VisitStatusData.ToList().ForEach(d =>
@@ -567,17 +597,19 @@ namespace GSC.Respository.Audit
                     worksheet.Row(j).Cell(2).SetValue(d.StudyCode);
                     worksheet.Row(j).Cell(3).SetValue(d.Period);
                     worksheet.Row(j).Cell(4).SetValue(d.Visit);
-                    worksheet.Row(j).Cell(5).SetValue(d.IpAddress);
-                    worksheet.Row(j).Cell(6).SetValue(d.Action);
-                    worksheet.Row(j).Cell(7).SetValue(d.FieldName);
-                    worksheet.Row(j).Cell(8).SetValue(d.OldValue);
-                    worksheet.Row(j).Cell(9).SetValue(d.NewValue);
-                    worksheet.Row(j).Cell(10).SetValue(d.Reason);
-                    worksheet.Row(j).Cell(11).SetValue(d.Comment);
-                    worksheet.Row(j).Cell(12).SetValue(d.User);
-                    worksheet.Row(j).Cell(13).SetValue(d.Role);
-                    worksheet.Row(j).Cell(14).SetValue(d.CreatedDate);
-                    worksheet.Row(j).Cell(15).SetValue(d.TimeZone);
+                    worksheet.Row(j).Cell(5).SetValue(d.Template);
+                    worksheet.Row(j).Cell(6).SetValue(d.Variable);
+                    worksheet.Row(j).Cell(7).SetValue(d.IpAddress);
+                    worksheet.Row(j).Cell(8).SetValue(d.Action);
+                    worksheet.Row(j).Cell(9).SetValue(d.FieldName);
+                    worksheet.Row(j).Cell(10).SetValue(d.OldValue);
+                    worksheet.Row(j).Cell(11).SetValue(d.NewValue);
+                    worksheet.Row(j).Cell(12).SetValue(d.Reason);
+                    worksheet.Row(j).Cell(13).SetValue(d.Comment);
+                    worksheet.Row(j).Cell(14).SetValue(d.User);
+                    worksheet.Row(j).Cell(15).SetValue(d.Role);
+                    worksheet.Row(j).Cell(16).SetValue(d.CreatedDate);
+                    worksheet.Row(j).Cell(17).SetValue(d.TimeZone);
                     j++;
                 });
                 #endregion Visit Status
@@ -800,6 +832,50 @@ namespace GSC.Respository.Audit
                     j++;
                 });
                 #endregion Add template language sheet
+
+                #region Add template note sheet
+                worksheet = workbook.Worksheets.Add("Template Note");
+
+                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheet.Cell(1, 1).Value = "Key";
+                worksheet.Cell(1, 2).Value = "STUDY CODE";
+                worksheet.Cell(1, 3).Value = "Period";
+                worksheet.Cell(1, 4).Value = "Visit";
+                worksheet.Cell(1, 5).Value = "Template";
+                worksheet.Cell(1, 6).Value = "IP Address";
+                worksheet.Cell(1, 7).Value = "Action";
+                worksheet.Cell(1, 8).Value = "Field Name";
+                worksheet.Cell(1, 9).Value = "Old Value";
+                worksheet.Cell(1, 10).Value = "New Value";
+                worksheet.Cell(1, 11).Value = "Reason";
+                worksheet.Cell(1, 12).Value = "Comment";
+                worksheet.Cell(1, 13).Value = "User";
+                worksheet.Cell(1, 14).Value = "Role";
+                worksheet.Cell(1, 15).Value = "DateTime";
+                worksheet.Cell(1, 16).Value = "TimeZone";
+
+                j = 2;
+                TemplateNoteData.ToList().ForEach(d =>
+                {
+                    worksheet.Row(j).Cell(1).SetValue(d.Key);
+                    worksheet.Row(j).Cell(2).SetValue(d.StudyCode);
+                    worksheet.Row(j).Cell(3).SetValue(d.Period);
+                    worksheet.Row(j).Cell(4).SetValue(d.Visit);
+                    worksheet.Row(j).Cell(5).SetValue(d.Template);
+                    worksheet.Row(j).Cell(6).SetValue(d.IpAddress);
+                    worksheet.Row(j).Cell(7).SetValue(d.Action);
+                    worksheet.Row(j).Cell(8).SetValue(d.FieldName);
+                    worksheet.Row(j).Cell(9).SetValue(d.OldValue);
+                    worksheet.Row(j).Cell(10).SetValue(d.NewValue);
+                    worksheet.Row(j).Cell(11).SetValue(d.Reason);
+                    worksheet.Row(j).Cell(12).SetValue(d.Comment);
+                    worksheet.Row(j).Cell(13).SetValue(d.User);
+                    worksheet.Row(j).Cell(14).SetValue(d.Role);
+                    worksheet.Row(j).Cell(15).SetValue(d.CreatedDate);
+                    worksheet.Row(j).Cell(16).SetValue(d.TimeZone);
+                    j++;
+                });
+                #endregion Add template note sheet
 
                 #region Add template note language sheet
                 worksheet = workbook.Worksheets.Add("Template Note Lang");

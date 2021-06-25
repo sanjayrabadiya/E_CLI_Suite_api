@@ -113,10 +113,9 @@ namespace GSC.Respository.Project.Design
             var repeatdata = new List<RepeatTemplateDto>();
             using (var workbook = new XLWorkbook())
             {
-                IXLWorksheet worksheet;
 
                 #region ProjectDesign sheet
-                worksheet = workbook.Worksheets.Add("Design");
+                IXLWorksheet worksheet = workbook.Worksheets.Add("Design");
 
                 worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
                 worksheet.Cell(1, 1).Value = "STUDY CODE";
@@ -196,189 +195,215 @@ namespace GSC.Respository.Project.Design
 
                 #endregion ProjectDesign sheet
 
-                #region Add Visit status sheet
-                worksheet = workbook.Worksheets.Add("Visit Status");
+                #region TempSheet
+                IXLWorksheet Temp = workbook.Worksheets.Add("Temp");
+                Temp.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                Temp.Cell(1, 1).Value = "Period";
+                Temp.Cell(1, 2).Value = "Visit";
+                Temp.Cell(1, 3).Value = "Template";
+                #endregion
 
-                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Period";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Template";
-                worksheet.Cell(1, 4).Value = "Variable";
-                worksheet.Cell(1, 5).Value = "Status";
+                #region Add Visit status sheet
+               // IXLWorksheet worksheetVisit = workbook.Worksheets.Add("Visit Status");
+                IXLWorksheet worksheetVisit = Temp.CopyTo("Visit Status");
+               // worksheetVisit.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                //worksheetVisit.Cell(1, 1).Value = "Period";
+                //worksheetVisit.Cell(1, 2).Value = "Visit";
+                //worksheetVisit.Cell(1, 3).Value = "Template";
+                worksheetVisit.Cell(1, 4).Value = "Variable";
+                worksheetVisit.Cell(1, 5).Value = "Status";
 
                 var vs = 2;
                 VisitStatusData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(vs).Cell(1).SetValue(d.PeriodName);
-                    worksheet.Row(vs).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(vs).Cell(3).SetValue(d.TemplateName);
-                    worksheet.Row(vs).Cell(4).SetValue(d.VariableName);
-                    worksheet.Row(vs).Cell(5).SetValue(d.Status);
+                    worksheetVisit.Row(vs).Cell(1).SetValue(d.PeriodName);
+                    worksheetVisit.Row(vs).Cell(2).SetValue(d.VisitName);
+                    worksheetVisit.Row(vs).Cell(3).SetValue(d.TemplateName);
+                    worksheetVisit.Row(vs).Cell(4).SetValue(d.VariableName);
+                    worksheetVisit.Row(vs).Cell(5).SetValue(d.Status);
                     vs++;
                 });
                 #endregion Add Visit status sheet
 
                 #region Add template note sheet
-                worksheet = workbook.Worksheets.Add("Template Note");
+                IXLWorksheet WorkSheetTNote =  Temp.CopyTo("Template Note");
+                  // IXLWorksheet WorkSheetTNote = workbook.Worksheets.Add("Template Note");
+                // worksheetVisit.Copy(type workbook.Worksheets[1]);
 
-                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Period";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Template";
-                worksheet.Cell(1, 4).Value = "Note";
 
+                //WorkSheetTNote.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                //WorkSheetTNote.Cell(1, 1).Value = "Period";
+                //WorkSheetTNote.Cell(1, 2).Value = "Visit";
+                //WorkSheetTNote.Cell(1, 3).Value = "Template";
+                WorkSheetTNote.Cell(1, 4).Value = "Note";
                 var tnote = 2;
                 TemplateNoteData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(tnote).Cell(1).SetValue(d.PeriodName);
-                    worksheet.Row(tnote).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(tnote).Cell(3).SetValue(d.TemplateName);
-                    worksheet.Row(tnote).Cell(4).SetValue(d.Note);
+                    WorkSheetTNote.Row(tnote).Cell(1).SetValue(d.PeriodName);
+                    WorkSheetTNote.Row(tnote).Cell(2).SetValue(d.VisitName);
+                    WorkSheetTNote.Row(tnote).Cell(3).SetValue(d.TemplateName);
+                    WorkSheetTNote.Row(tnote).Cell(4).SetValue(d.Note);
                     tnote++;
                 });
                 #endregion Add template note sheet
 
                 #region Add Visit language sheet
-                worksheet = workbook.Worksheets.Add("Visit Language");
+                //IXLWorksheet WorkSheetTLan = Temp.CopyTo("Visit Language");
+                IXLWorksheet worksheetVisitLan = workbook.Worksheets.Add("Visit Language");
 
-                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Period";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Language";
-                worksheet.Cell(1, 4).Value = "Conversion";
+                worksheetVisitLan.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                worksheetVisitLan.Cell(1, 1).Value = "Period";
+                worksheetVisitLan.Cell(1, 2).Value = "Visit";
+                worksheetVisitLan.Cell(1, 3).Value = "Language";
+                worksheetVisitLan.Cell(1, 4).Value = "Conversion";
 
                 var v = 2;
                 VisitLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(v).Cell(1).SetValue(d.PeriodName);
-                    worksheet.Row(v).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(v).Cell(3).SetValue(d.Language);
-                    worksheet.Row(v).Cell(4).SetValue(d.Value);
+                    worksheetVisitLan.Row(v).Cell(1).SetValue(d.PeriodName);
+                    worksheetVisitLan.Row(v).Cell(2).SetValue(d.VisitName);
+                    worksheetVisitLan.Row(v).Cell(3).SetValue(d.Language);
+                    worksheetVisitLan.Row(v).Cell(4).SetValue(d.Value);
                     v++;
                 });
                 #endregion Add Visit language sheet
 
                 #region Add template language sheet
-                worksheet = workbook.Worksheets.Add("Template Language");
+                IXLWorksheet WorkSheetTLan = Temp.CopyTo("Template Language");
+                //worksheet = workbook.Worksheets.Add("Template Language");
 
-                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Period";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Template";
-                worksheet.Cell(1, 4).Value = "Language";
-                worksheet.Cell(1, 5).Value = "Conversion";
+                //worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                //worksheet.Cell(1, 1).Value = "Period";
+                //worksheet.Cell(1, 2).Value = "Visit";
+                //worksheet.Cell(1, 3).Value = "Template";
+                WorkSheetTLan.Cell(1, 4).Value = "Language";
+                WorkSheetTLan.Cell(1, 5).Value = "Conversion";
 
                 var t = 2;
                 TemplateLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(t).Cell(1).SetValue(d.PeriodName);
-                    worksheet.Row(t).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(t).Cell(3).SetValue(d.TemplateName);
-                    worksheet.Row(t).Cell(4).SetValue(d.Language);
-                    worksheet.Row(t).Cell(5).SetValue(d.Value);
+                    WorkSheetTLan.Row(t).Cell(1).SetValue(d.PeriodName);
+                    WorkSheetTLan.Row(t).Cell(2).SetValue(d.VisitName);
+                    WorkSheetTLan.Row(t).Cell(3).SetValue(d.TemplateName);
+                    WorkSheetTLan.Row(t).Cell(4).SetValue(d.Language);
+                    WorkSheetTLan.Row(t).Cell(5).SetValue(d.Value);
                     t++;
                 });
                 #endregion Add template language sheet
 
                 #region Add template note language sheet
-                worksheet = workbook.Worksheets.Add("Template Note Lang");
+                IXLWorksheet WorkSheetTNoteLan = Temp.CopyTo("Template Note Lang");
+                //worksheet = workbook.Worksheets.Add("Template Note Lang");
 
-                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Period";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Template";
-                worksheet.Cell(1, 4).Value = "Note";
-                worksheet.Cell(1, 5).Value = "Language";
-                worksheet.Cell(1, 6).Value = "Conversion";
+                //worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                //worksheet.Cell(1, 1).Value = "Period";
+                //worksheet.Cell(1, 2).Value = "Visit";
+                //worksheet.Cell(1, 3).Value = "Template";
+                WorkSheetTNoteLan.Cell(1, 4).Value = "Note";
+                WorkSheetTNoteLan.Cell(1, 5).Value = "Language";
+                WorkSheetTNoteLan.Cell(1, 6).Value = "Conversion";
 
                 var tn = 2;
                 TemplateNoteLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(tn).Cell(1).SetValue(d.PeriodName);
-                    worksheet.Row(tn).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(tn).Cell(3).SetValue(d.TemplateName);
-                    worksheet.Row(tn).Cell(4).SetValue(d.Note);
-                    worksheet.Row(tn).Cell(5).SetValue(d.Language);
-                    worksheet.Row(tn).Cell(6).SetValue(d.Value);
+                    WorkSheetTNoteLan.Row(tn).Cell(1).SetValue(d.PeriodName);
+                    WorkSheetTNoteLan.Row(tn).Cell(2).SetValue(d.VisitName);
+                    WorkSheetTNoteLan.Row(tn).Cell(3).SetValue(d.TemplateName);
+                    WorkSheetTNoteLan.Row(tn).Cell(4).SetValue(d.Note);
+                    WorkSheetTNoteLan.Row(tn).Cell(5).SetValue(d.Language);
+                    WorkSheetTNoteLan.Row(tn).Cell(6).SetValue(d.Value);
                     tn++;
                 });
                 #endregion Add template note language sheet
 
                 #region Add variable language sheet
-                worksheet = workbook.Worksheets.Add("Variable Language");
+                IXLWorksheet WorkSheetVLan = Temp.CopyTo("Variable Language");
+                //worksheet = workbook.Worksheets.Add("Variable Language");
 
-                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Period";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Template";
-                worksheet.Cell(1, 4).Value = "Variable";
-                worksheet.Cell(1, 5).Value = "Language";
-                worksheet.Cell(1, 6).Value = "Conversion";
+                //worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                //worksheet.Cell(1, 1).Value = "Period";
+                //worksheet.Cell(1, 2).Value = "Visit";
+                //worksheet.Cell(1, 3).Value = "Template";
+                WorkSheetVLan.Cell(1, 4).Value = "Variable";
+                WorkSheetVLan.Cell(1, 5).Value = "Language";
+                WorkSheetVLan.Cell(1, 6).Value = "Conversion";
 
                 var vl = 2;
                 VariableLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(vl).Cell(1).SetValue(d.PeriodName);
-                    worksheet.Row(vl).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(vl).Cell(3).SetValue(d.TemplateName);
-                    worksheet.Row(vl).Cell(4).SetValue(d.VariableName);
-                    worksheet.Row(vl).Cell(5).SetValue(d.Language);
-                    worksheet.Row(vl).Cell(6).SetValue(d.Value);
+                    WorkSheetVLan.Cell(vl, 1).SetValue(d.PeriodName);
+                    WorkSheetVLan.Cell(vl, 2).SetValue(d.VisitName);
+                    WorkSheetVLan.Cell(vl, 3).SetValue(d.TemplateName);
+                    WorkSheetVLan.Cell(vl, 4).SetValue(d.VariableName);
+                    WorkSheetVLan.Cell(vl, 5).SetValue(d.Language);
+                    WorkSheetVLan.Cell(vl, 6).SetValue(d.Value);
+
+                    //WorkSheetVLan.Row(vl).Cell(1).SetValue(d.PeriodName);
+                    //WorkSheetVLan.Row(vl).Cell(2).SetValue(d.VisitName);
+                    //WorkSheetVLan.Row(vl).Cell(3).SetValue(d.TemplateName);
+                    //WorkSheetVLan.Row(vl).Cell(4).SetValue(d.VariableName);
+                    //WorkSheetVLan.Row(vl).Cell(5).SetValue(d.Language);
+                    //WorkSheetVLan.Row(vl).Cell(6).SetValue(d.Value);
                     vl++;
                 });
                 #endregion Add variable language sheet
 
                 #region Add variable note language sheet
-                worksheet = workbook.Worksheets.Add("Variable Note Lang");
+                IXLWorksheet WorkSheetVNoteLan = Temp.CopyTo("Variable Note Lang");
+                //worksheet = workbook.Worksheets.Add("Variable Note Lang");
 
-                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Period";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Template";
-                worksheet.Cell(1, 4).Value = "Variable";
-                worksheet.Cell(1, 5).Value = "Note";
-                worksheet.Cell(1, 6).Value = "Language";
-                worksheet.Cell(1, 7).Value = "Conversion";
+                //worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                //worksheet.Cell(1, 1).Value = "Period";
+                //worksheet.Cell(1, 2).Value = "Visit";
+                //worksheet.Cell(1, 3).Value = "Template";
+                WorkSheetVNoteLan.Cell(1, 4).Value = "Variable";
+                WorkSheetVNoteLan.Cell(1, 5).Value = "Note";
+                WorkSheetVNoteLan.Cell(1, 6).Value = "Language";
+                WorkSheetVNoteLan.Cell(1, 7).Value = "Conversion";
 
                 var vn = 2;
                 VariableNoteLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(vn).Cell(1).SetValue(d.PeriodName);
-                    worksheet.Row(vn).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(vn).Cell(3).SetValue(d.TemplateName);
-                    worksheet.Row(vn).Cell(4).SetValue(d.VariableName);
-                    worksheet.Row(vn).Cell(5).SetValue(d.Note);
-                    worksheet.Row(vn).Cell(6).SetValue(d.Language);
-                    worksheet.Row(vn).Cell(7).SetValue(d.Value);
+                    WorkSheetVNoteLan.Row(vn).Cell(1).SetValue(d.PeriodName);
+                    WorkSheetVNoteLan.Row(vn).Cell(2).SetValue(d.VisitName);
+                    WorkSheetVNoteLan.Row(vn).Cell(3).SetValue(d.TemplateName);
+                    WorkSheetVNoteLan.Row(vn).Cell(4).SetValue(d.VariableName);
+                    WorkSheetVNoteLan.Row(vn).Cell(5).SetValue(d.Note);
+                    WorkSheetVNoteLan.Row(vn).Cell(6).SetValue(d.Language);
+                    WorkSheetVNoteLan.Row(vn).Cell(7).SetValue(d.Value);
                     vn++;
                 });
                 #endregion Add variable note language sheet
 
                 #region Add variable value language sheet
-                worksheet = workbook.Worksheets.Add("Variable value Lang");
+                IXLWorksheet WorkSheetVvNoteLan = Temp.CopyTo("Variable value Lang");
 
-                worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                worksheet.Cell(1, 1).Value = "Period";
-                worksheet.Cell(1, 2).Value = "Visit";
-                worksheet.Cell(1, 3).Value = "Template";
-                worksheet.Cell(1, 4).Value = "Variable";
-                worksheet.Cell(1, 5).Value = "Value";
-                worksheet.Cell(1, 6).Value = "Language";
-                worksheet.Cell(1, 7).Value = "Conversion";
+                //   worksheet = workbook.Worksheets.Add("Variable value Lang");
+
+                //worksheet.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                //worksheet.Cell(1, 1).Value = "Period";
+                //worksheet.Cell(1, 2).Value = "Visit";
+                //worksheet.Cell(1, 3).Value = "Template";
+                WorkSheetVvNoteLan.Cell(1, 4).Value = "Variable";
+                WorkSheetVvNoteLan.Cell(1, 5).Value = "Value";
+                WorkSheetVvNoteLan.Cell(1, 6).Value = "Language";
+                WorkSheetVvNoteLan.Cell(1, 7).Value = "Conversion";
 
                 var vv = 2;
                 VariableValueLanguageData.ToList().ForEach(d =>
                 {
-                    worksheet.Row(vv).Cell(1).SetValue(d.PeriodName);
-                    worksheet.Row(vv).Cell(2).SetValue(d.VisitName);
-                    worksheet.Row(vv).Cell(3).SetValue(d.TemplateName);
-                    worksheet.Row(vv).Cell(4).SetValue(d.VariableName);
-                    worksheet.Row(vv).Cell(5).SetValue(d.VariableValue);
-                    worksheet.Row(vv).Cell(6).SetValue(d.Language);
-                    worksheet.Row(vv).Cell(7).SetValue(d.Value);
+                    WorkSheetVvNoteLan.Row(vv).Cell(1).SetValue(d.PeriodName);
+                    WorkSheetVvNoteLan.Row(vv).Cell(2).SetValue(d.VisitName);
+                    WorkSheetVvNoteLan.Row(vv).Cell(3).SetValue(d.TemplateName);
+                    WorkSheetVvNoteLan.Row(vv).Cell(4).SetValue(d.VariableName);
+                    WorkSheetVvNoteLan.Row(vv).Cell(5).SetValue(d.VariableValue);
+                    WorkSheetVvNoteLan.Row(vv).Cell(6).SetValue(d.Language);
+                    WorkSheetVvNoteLan.Row(vv).Cell(7).SetValue(d.Value);
                     vv++;
                 });
                 #endregion Add variable value language sheet
+
+                workbook.Worksheets.Delete("Temp");
 
                 MemoryStream memoryStream = new MemoryStream();
                 workbook.SaveAs(memoryStream);

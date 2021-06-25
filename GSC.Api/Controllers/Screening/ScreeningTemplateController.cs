@@ -217,7 +217,11 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
-            if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id && x.Status == ScreeningTemplateStatus.Reviewed && !x.IsRepeat))
+            //            if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id && x.Status == ScreeningTemplateStatus.Reviewed && !x.IsRepeat))
+            if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id
+                                                                            && x.CreatedBy == _jwtTokenAccesser.UserId &&
+                                                                            x.Status == ScreeningTemplateStatus.Reviewed
+                                                                            && x.RoleId == _jwtTokenAccesser.RoleId && !x.IsRepeat))
             {
                 ModelState.AddModelError("Message", "Template already review!");
                 return BadRequest(ModelState);
