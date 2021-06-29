@@ -243,7 +243,7 @@ namespace GSC.Respository.InformConcent
                         headercount++;
                     }
                     if (sectionno == headercount)
-                    {
+                    {                        
                         blocks.Add(e2);
                     }
                 }
@@ -253,7 +253,7 @@ namespace GSC.Respository.InformConcent
             {
                 jsonobj.sections[i].blocks = new List<Block>();
                 if (i == 0)
-                {
+                {                   
                     jsonobj.sections[0].blocks = blocks;
                 }
             }
@@ -261,7 +261,7 @@ namespace GSC.Respository.InformConcent
             for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
             {
                 if (jsonobj.sections[i].blocks.Count > 0)
-                {
+                {                    
                     newsections.Add(jsonobj.sections[i]);
                 }
             }
@@ -270,7 +270,7 @@ namespace GSC.Respository.InformConcent
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
-            return jsonnew;
+            return jsonnew;       
         }
 
         //public string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails)

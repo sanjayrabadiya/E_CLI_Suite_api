@@ -40,10 +40,9 @@ namespace GSC.Api.Hubs
             // ------------ send to single -----------------
             if (ConnectedUser.Ids.Where(x => x.userId == msg.ReceiverId).ToList().Count > 0)
             {
-                var connectionId = ConnectedUser.Ids.Where(x => x.userId == msg.ReceiverId).Select(t=>t.connectionId).ToList();
+                var connectionId = ConnectedUser.Ids.Where(x => x.userId == msg.ReceiverId).Select(t => t.connectionId).ToList();
                 await Clients.Clients(connectionId).SendAsync("NewMessage", msg);
             }
-            
         }
 
         public async Task MessageDelivered(EconsentChat msg)
@@ -74,7 +73,8 @@ namespace GSC.Api.Hubs
                     var isLogin = ConnectedUser.Ids.Any(x => x.userId == signalRUser.userId);
                     _userRepository.UpdateIsLogin(signalRUser.userId, isLogin);
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Error(ex, "");
             }
@@ -84,7 +84,7 @@ namespace GSC.Api.Hubs
         {
             try
             {
-                var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();               
+                var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();
                 if (user != null)
                 {
                     ConnectedUser.Ids.Remove(user);
@@ -92,14 +92,15 @@ namespace GSC.Api.Hubs
                     var isLogin = ConnectedUser.Ids.Any(x => x.userId == user.userId);
                     _userRepository.UpdateIsLogin(user.userId, isLogin);
                 }
-                 await base.OnDisconnectedAsync(exception);
+                await base.OnDisconnectedAsync(exception);
             }
-            catch(Exception ex) {
+            catch (Exception ex)
+            {
                 Log.Error(ex, "");
             }
         }
 
-       
+
 
     }
 
