@@ -24,24 +24,24 @@ namespace GSC.Respository.Volunteer
             _context = context;
         }
 
-        public IList<VolunteerBlockHistoryDto> GetVolunteerBlockHistoryById(int volunteerId)
+        public IList<VolunteerBlockHistoryGridDto> GetVolunteerBlockHistoryById(int volunteerId)
         {
-            //var volunteerBlcokHistory = _context.VolunteerBlockHistory.Where(x => x.DeletedDate == null && x.VolunteerId == volunteerId)
-            //    .ProjectTo<VolunteerBlockHistoryDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            return All.Where(x => x.DeletedDate == null && x.VolunteerId == volunteerId)
+                .ProjectTo<VolunteerBlockHistoryGridDto>(_mapper.ConfigurationProvider).ToList();
 
-            var result = _context.VolunteerBlockHistory.Where(x => x.DeletedDate == null && x.VolunteerId == volunteerId).Select(x => new VolunteerBlockHistoryDto
-            {
-                FromDate = x.FromDate,
-                ToDate = x.ToDate,
-                PermanentlyString = x.IsPermanently ? "Yes" : "No",
-                BlockString = x.IsBlock ? "Yes" : "No",
-                Note = x.Note,
-                UserName = x.CreatedByUser.UserName,
-                BlockDate = x.CreatedDate,
-                CategoryName = x.BlockCategory.BlockCategoryName
-            }).OrderByDescending(x => x.Id).ToList();
+            //return _context.VolunteerBlockHistory.Where(x => x.DeletedDate == null && x.VolunteerId == volunteerId).Select(x => new VolunteerBlockHistoryDto
+            // {
+            //     FromDate = x.FromDate,
+            //     ToDate = x.ToDate,
+            //     PermanentlyString = x.IsPermanently ? "Yes" : "No",
+            //     BlockString = x.IsBlock ? "Yes" : "No",
+            //     Note = x.Note,
+            //     UserName = x.CreatedByUser.UserName,
+            //     BlockDate = x.CreatedDate,
+            //     CategoryName = x.BlockCategory.BlockCategoryName
+            // }).OrderByDescending(x => x.Id).ToList();
 
-            return result;
+            //return result;
 
             //return FindByInclude(x => x.DeletedDate == null && x.VolunteerId == volunteerId, x => x.CreatedByUser,
             //    x => x.BlockCategory).Select(

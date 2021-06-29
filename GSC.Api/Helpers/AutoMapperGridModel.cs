@@ -31,6 +31,8 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Dto.Volunteer;
+using GSC.Data.Entities.Volunteer;
 
 namespace GSC.Api.Helpers
 {
@@ -305,6 +307,9 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
             CreateMap<EconsentSectionReference, EconcentSectionRefrenceDetailListDto>().ReverseMap();
             CreateMap<EconsentSectionReference, EconsentSectionReferenceDto>().ReverseMap();
+            CreateMap<VolunteerBlockHistory, VolunteerBlockHistoryGridDto>()
+               .ForMember(x => x.CategoryName, x => x.MapFrom(a => a.BlockCategory.BlockCategoryName))
+               .ReverseMap();
         }
     }
 }
