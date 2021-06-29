@@ -7,6 +7,6 @@ namespace GSC.Respository.Volunteer
 {
     public interface IVolunteerBlockHistoryRepository : IGenericRepository<VolunteerBlockHistory>
     {
-        IList<VolunteerBlockHistoryDto> GetVolunteerBlockHistoryById(int volunteerId);
+        IList<VolunteerBlockHistoryGridDto> GetVolunteerBlockHistoryById(int volunteerId);
     }
 }
