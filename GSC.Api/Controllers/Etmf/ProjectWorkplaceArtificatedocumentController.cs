@@ -185,6 +185,13 @@ namespace GSC.Api.Controllers.Etmf
             var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
             _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
 
+            var childDoc = _context.ProjectWorkplaceArtificatedocument.Where(x => x.ParentDocumentId == id && x.DeletedDate == null).ToList();
+            foreach (var obj in childDoc)
+            {
+                obj.Version = (double.Parse(projectWorkplaceArtificatedocumentDto.Version) + 1).ToString("0.0");
+                _projectWorkplaceArtificatedocumentRepository.Update(obj);
+            }
+
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
             return Ok(projectWorkplaceArtificatedocument.Id);
         }

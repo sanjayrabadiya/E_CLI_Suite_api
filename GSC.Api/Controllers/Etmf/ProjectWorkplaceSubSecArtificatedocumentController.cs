@@ -21,6 +21,7 @@ namespace GSC.Api.Controllers.Etmf
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
         private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
         private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
         private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApproverRepository;
@@ -30,10 +31,12 @@ namespace GSC.Api.Controllers.Etmf
             IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
             IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
             IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
-            IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository)
+            IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository,
+            IGSCContext context)
         {
             _uow = uow;
             _mapper = mapper;
+            _context = context;
             _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
             _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
@@ -157,6 +160,13 @@ namespace GSC.Api.Controllers.Etmf
 
             var projectWorkplaceSubSecArtificatedocument = _mapper.Map<ProjectWorkplaceSubSecArtificatedocument>(projectWorkplaceSubSecArtificatedocumentDto);
             _projectWorkplaceSubSecArtificatedocumentRepository.Update(projectWorkplaceSubSecArtificatedocument);
+
+            var childDoc = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x => x.ParentDocumentId == id && x.DeletedDate == null).ToList();
+            foreach (var obj in childDoc)
+            {
+                obj.Version = (double.Parse(projectWorkplaceSubSecArtificatedocumentDto.Version) + 1).ToString("0.0");
+                _projectWorkplaceSubSecArtificatedocumentRepository.Update(obj);
+            }
 
             if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
             return Ok(projectWorkplaceSubSecArtificatedocument.Id);

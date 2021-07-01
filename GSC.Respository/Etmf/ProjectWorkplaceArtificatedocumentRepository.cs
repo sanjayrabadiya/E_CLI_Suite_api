@@ -952,7 +952,7 @@ namespace GSC.Respository.Etmf
             document.DocumentName = string.IsNullOrEmpty(outputname) ? document.DocumentName : outputname;
             document.Status = ArtifactDocStatusType.Final;
             //document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
-            document.Version = "1.0";
+            //document.Version = "1.0";
             return document;
         }
 

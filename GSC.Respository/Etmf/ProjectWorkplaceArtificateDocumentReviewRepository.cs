@@ -235,6 +235,7 @@ namespace GSC.Respository.Etmf
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
+                    DocumentId = s.ProjectWorkplaceArtificatedDocumentId,
                     TaskInformation = ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription() + " | " +
                     (s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName == null ? "" :
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName + " | ") +
@@ -248,7 +249,12 @@ namespace GSC.Respository.Etmf
                     DataType = MyTaskMethodModule.SendBack.GetDescription()
                 }).OrderByDescending(x => x.CreatedDate).ToList();
 
-            return result;
+            result.ForEach(s =>
+            {
+                s.ExtraData = _context.ProjectArtificateDocumentApprover.Where(x => x.DeletedDate == null && x.ProjectWorkplaceArtificatedDocumentId == s.DocumentId).Count();
+            });
+
+            return result.Where(x => Convert.ToInt32(x.ExtraData) == 0).ToList();
         }
     }
 }

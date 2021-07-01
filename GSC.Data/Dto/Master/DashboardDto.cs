@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.Master
         public string CreatedByUser { get; set; }
         public string DataType { get; set; }
         public double Level { get; set; }
+        public int DocumentId { get; set; }
     }
 
     public class DashboardDetailsDto : BaseDto
