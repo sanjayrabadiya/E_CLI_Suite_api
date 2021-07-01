@@ -8,6 +8,11 @@ using Microsoft.AspNetCore.Authorization;
 using Syncfusion.EJ2.PdfViewer;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Hosting;
+using GSC.Respository.UserMgt;
+using GSC.Shared.Configuration;
+using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
+using GSC.Domain.Context;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,12 +24,19 @@ namespace GSC.Api.Controllers.Etmf
         public IMemoryCache _cache;
         private IHostingEnvironment _hostingEnvironment;
         private IPdfViewerRepository _pdfViewerRepository;
+        private readonly ICentreUserService _centreUserService;
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly IGSCContext _context;
         public PdfViewerController(IMemoryCache cache, IHostingEnvironment hostingEnvironment,
-            IPdfViewerRepository pdfViewerRepository)
+            IPdfViewerRepository pdfViewerRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting,
+            IGSCContext context)
         {
             _cache = cache;
             _hostingEnvironment = hostingEnvironment;
             _pdfViewerRepository = pdfViewerRepository;
+            _centreUserService = centreUserService;
+            _environmentSetting = environmentSetting;
+            _context = context;
         }
 
 
@@ -180,8 +192,14 @@ namespace GSC.Api.Controllers.Etmf
         [AllowAnonymous]
         [HttpPost]
         [Route("SaveDocument")]
-        public ActionResult SaveDocument([FromBody] Dictionary<string, string> jsonObject)
+        public async Task<IActionResult> SaveDocument([FromBody] Dictionary<string, string> jsonObject)
         {
+            var userName = Convert.ToString(jsonObject["userName"]);
+            var result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userName}");
+            int CompanyID = Convert.ToInt32(result.CompanyId);
+            _pdfViewerRepository.SetDbConnection(result.ConnectionString);
+
+            //await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
             _pdfViewerRepository.SaveDocument(jsonObject);
             return Ok();
         }
