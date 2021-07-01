@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using GSC.Shared.Configuration;
 using GSC.Data.Entities.UserMgt;
+using GSC.Data.Dto.Medra;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -464,5 +465,13 @@ namespace GSC.Api.Controllers.Attendance
         {
             return Ok(_randomizationRepository.GetSubjectStatus(projectId));
         }
+
+        [HttpPost]
+        [Route("GetSubjectForMeddraCodingDropDown")]
+        public IActionResult GetSubjectForMeddraCodingDropDown([FromBody] MeddraCodingSearchDto filters)
+        {
+            return Ok(_randomizationRepository.GetAttendanceForMeddraCodingDropDown(filters));
+        }
+
     }
 }

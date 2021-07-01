@@ -34,6 +34,7 @@ using GSC.Data.Entities.UserMgt;
 using GSC.Data.Dto.UserMgt;
 using GSC.Shared.Security;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Dto.Medra;
 
 namespace GSC.Respository.Attendance
 {
@@ -659,7 +660,7 @@ namespace GSC.Respository.Attendance
                     randomization.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
                     Update(randomization);
                 }
-                
+
             }
         }
 
@@ -694,10 +695,10 @@ namespace GSC.Respository.Attendance
                 //    }
                 //}
 
-                if(_context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).Count() == 0)
+                if (_context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).Count() == 0)
                 {
                     randomization.PatientStatusId = ScreeningPatientStatus.ConsentCompleted;
-                     Update(randomization);
+                    Update(randomization);
                     _context.Save();
                 }
             }
@@ -740,20 +741,20 @@ namespace GSC.Respository.Attendance
                 }
             }
 
-        }        
+        }
         public void ChangeStatustoWithdrawal()
         {
             //public void ChangeStatustoWithdrawal(FileModel fileModel)
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
             //if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
             //{
-                //if (fileModel.Base64?.Length > 0)
-                //{
-                //    randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
-                //        _context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
-                //}
-                randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
-                Update(randomization);
+            //if (fileModel.Base64?.Length > 0)
+            //{
+            //    randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
+            //        _context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
+            //}
+            randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
+            Update(randomization);
             //}
         }
 
@@ -942,5 +943,55 @@ namespace GSC.Respository.Attendance
             return result;
 
         }
+
+        public List<DropDownDto> GetAttendanceForMeddraCodingDropDown(MeddraCodingSearchDto filters)
+        {
+            var projectList = new List<int>();
+            int ProjectId = 0;
+            if (filters.ProjectId == 0)
+                ProjectId = filters.ProjectDesignId;
+            else
+                ProjectId = (int)filters.ProjectId;
+            projectList = GetProjectList(ProjectId);
+            if (projectList == null || projectList.Count == 0)
+                return new List<DropDownDto>();
+
+            var Isstatic = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().IsStatic;
+
+            if (Isstatic)
+            {
+                return All.Where(t => (t.CompanyId == null
+                               || t.CompanyId == _jwtTokenAccesser.CompanyId)
+                              && projectList.Any(c => c == t.ProjectId)
+                               // && t.Randomization.RandomizationNumber != null
+                               ).Select(r => new DropDownDto
+                               {
+                                   Id = r.Id,
+                                   Value = r.ScreeningNumber + "-" + r.Initial + "-" + r.RandomizationNumber
+                               }).ToList();
+            }
+            //else
+            //{
+            //    return All.Where(t => (t.CompanyId == null
+            //                   || t.CompanyId == _jwtTokenAccesser.CompanyId)
+            //                  && projectList.Any(c => c == t.ProjectId)
+            //                  && t.VolunteerId != null
+            //                  && t.ProjectSubject.Number != null
+            //                   ).Select(r => new DropDownDto
+            //                   {
+            //                       Id = r.Id,
+            //                       Value = r.Volunteer.VolunteerNo + "-" + r.Volunteer.AliasName + "-" + r.ProjectSubject.Number
+            //                   }).ToList();
+            //}
+
+            return null;
+        }
+
+        public List<int> GetProjectList(int ProjectId)
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            return _context.Project.Where(c => c.DeletedDate == null && (c.Id == ProjectId || c.ParentProjectId == ProjectId) && projectList.Any(t => t == c.Id)).Select(x => x.Id).ToList();
+        }
+
     }
 }

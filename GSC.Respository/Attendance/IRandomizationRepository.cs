@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Medra;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.Attendance;
@@ -41,5 +42,6 @@ namespace GSC.Respository.Attendance
 
         // Dashboard chart for Subject Status
         public List<DashboardQueryStatusDto> GetSubjectStatus(int projectId);
+        List<DropDownDto> GetAttendanceForMeddraCodingDropDown(MeddraCodingSearchDto filters);
     }
 }
