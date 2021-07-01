@@ -23,6 +23,12 @@ using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
+using Syncfusion.Pdf.Graphics;
+using Syncfusion.Drawing;
+using System.Data;
+using Syncfusion.Pdf.Grid;
+using Syncfusion.Pdf.Parsing;
+using GSC.Data.Dto.Configuration;
 
 namespace GSC.Respository.Etmf
 {
@@ -37,7 +43,9 @@ namespace GSC.Respository.Etmf
         private readonly IProjectRepository _projectRepository;
         private readonly IEtmfSectionMasterLibraryRepository _etmfSectionMasterLibraryRepository;
         private readonly IAuditTrailCommonRepository _auditTrailCommonRepository;
-
+        private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
+        private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
+        private readonly IAppSettingRepository _appSettingRepository;
         public ProjectWorkplaceArtificatedocumentRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
            IUserRepository userRepository,
@@ -45,7 +53,10 @@ namespace GSC.Respository.Etmf
            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
            IProjectRepository projectRepository,
            IEtmfSectionMasterLibraryRepository etmfSectionMasterLibraryRepository,
-           IAuditTrailCommonRepository auditTrailCommonRepository
+           IAuditTrailCommonRepository auditTrailCommonRepository,
+           IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
+           IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
+           IAppSettingRepository appSettingRepository
            )
            : base(context)
         {
@@ -58,6 +69,9 @@ namespace GSC.Respository.Etmf
             _projectRepository = projectRepository;
             _etmfSectionMasterLibraryRepository = etmfSectionMasterLibraryRepository;
             _auditTrailCommonRepository = auditTrailCommonRepository;
+            _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
+            _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
+            _appSettingRepository = appSettingRepository;
         }
 
         public int deleteFile(int id)
@@ -927,17 +941,20 @@ namespace GSC.Respository.Etmf
         public ProjectWorkplaceArtificatedocument WordToPdf(int Id)
         {
             var document = Find(Id);
-            var outputname = "";
+            var outputname = "";          
             if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
             {
                 var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
 
                 var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
-                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);               
                 Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
                 DocIORenderer render = new DocIORenderer();
                 render.Settings.PreserveFormFields = true;
                 PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+                //add signature
+                pdfDocument = CreateSignature(pdfDocument,Id);
+
                 render.Dispose();
                 wordDocument.Dispose();
                 MemoryStream outputStream = new MemoryStream();
@@ -949,11 +966,132 @@ namespace GSC.Respository.Etmf
                 FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
                 outputStream.WriteTo(file);
             }
+            else if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
+            {
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);                       
+                PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
+                 PdfDocument pdfDocument = new PdfDocument();
+                 pdfDocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
+                 pdfDocument = CreateSignature(pdfDocument,Id);
+
+                MemoryStream outputStream = new MemoryStream();
+                pdfDocument.Save(outputStream);
+                pdfDocument.Close();
+
+                outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
+                var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);              
+                FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+                outputStream.WriteTo(file);
+
+
+            }
             document.DocumentName = string.IsNullOrEmpty(outputname) ? document.DocumentName : outputname;
             document.Status = ArtifactDocStatusType.Final;
             //document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
             document.Version = "1.0";
             return document;
+        }
+
+        private PdfDocument CreateSignature(PdfDocument pdfDocument,int Id)
+        {        
+            PdfSection section = pdfDocument.Sections.Add();
+            PdfPage page = section.Pages.Add();
+            section.PageSettings.Margins.All = Convert.ToInt32(0.5 * 100);
+
+
+            RectangleF bounds = new RectangleF(page.GetClientSize().Width - 75, 0, 65f, 65f);
+            PdfLayoutResult layoutresult = null;
+            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();       
+            layoutFormat.Layout = PdfLayoutType.Paginate;        
+            layoutFormat.Break = PdfLayoutBreakType.FitElement;
+
+            PdfStringFormat tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
+            PdfTextElement indexheader = new PdfTextElement();
+            layoutresult = new PdfLayoutResult(page, bounds);
+
+            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
+            indexheader = new PdfTextElement("Review Document History", new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold), PdfBrushes.Black);
+            indexheader.StringFormat = tocformat;
+            layoutresult = indexheader.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height), layoutFormat);
+
+            PdfGridRow header;
+            PdfGridCellStyle headerStyle = new PdfGridCellStyle();
+            headerStyle.Borders.All = new PdfPen(Color.Black);
+            headerStyle.BackgroundBrush = new PdfSolidBrush(Color.Gray);
+            headerStyle.TextBrush = PdfBrushes.Black;
+            headerStyle.Font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12f, PdfFontStyle.Bold);
+
+            PdfGrid pdfGrid = new PdfGrid();
+            pdfGrid.DataSource = ReviewDocumentHistory(Id);          
+            header = pdfGrid.Headers[0];
+            header.ApplyStyle(headerStyle);
+            layoutresult = pdfGrid.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height));
+
+
+            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
+            indexheader = new PdfTextElement("Document Approval History", new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold), PdfBrushes.Black);
+            indexheader.StringFormat = tocformat;
+            layoutresult = indexheader.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height), layoutFormat);
+
+            pdfGrid = new PdfGrid();
+            pdfGrid.DataSource = DocumentApprovalhistory(Id);
+            header = pdfGrid.Headers[0];
+            header.ApplyStyle(headerStyle);
+            layoutresult = pdfGrid.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height));
+
+            return pdfDocument;
+        }
+
+
+        private DataTable ReviewDocumentHistory(int Id)
+        {
+
+            var History = _projectWorkplaceArtificateDocumentReviewRepository.GetArtificateDocumentHistory(Id);
+            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+
+            var dataTable = new DataTable();           
+            dataTable.Columns.Add("Key");
+            dataTable.Columns.Add("Document Name");
+            dataTable.Columns.Add("Sent By");
+            dataTable.Columns.Add("Sent For Review Date ");
+            dataTable.Columns.Add("Comment");
+            dataTable.Columns.Add("Sent To");
+            dataTable.Columns.Add("Review Status");
+            dataTable.Columns.Add("Review Date");
+            dataTable.Columns.Add("Reason");
+            dataTable.Columns.Add("ReasonDetails");
+            foreach (var item in History)
+            {
+                var CreatedDate = item.CreatedDate!=null ? Convert.ToDateTime(item.CreatedDate).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : "";
+                var SendBackDate = item.SendBackDate != null ? Convert.ToDateTime(item.SendBackDate).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : "";
+                dataTable.Rows.Add(new object[] { item.Id, item.DocumentName, item.CreatedByUser, CreatedDate, item.Message, item.UserName, item.IsSendBack, SendBackDate, item.Reason, item.ReasonOth });
+            }
+            return dataTable;
+        }
+
+        private DataTable DocumentApprovalhistory(int Id)
+        {
+            var History = _projectArtificateDocumentApproverRepository.GetArtificateDocumentApproverHistory(Id);
+            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+            var dataTable = new DataTable();      
+            dataTable.Columns.Add("Key");
+            dataTable.Columns.Add("Document Name");
+            dataTable.Columns.Add("Sent By");
+            dataTable.Columns.Add("sent Date");
+            dataTable.Columns.Add("Comment");
+            dataTable.Columns.Add("Approved");
+            dataTable.Columns.Add("Approved By");
+            dataTable.Columns.Add("Approved Date");
+            dataTable.Columns.Add("Reason");
+            dataTable.Columns.Add("ReasonDetails");
+            foreach (var item in History)
+            {
+                var CreatedDate = item.CreatedDate != null ? Convert.ToDateTime(item.CreatedDate).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : "";
+                var ModifiedDate = item.ModifiedDate != null ? Convert.ToDateTime(item.ModifiedDate).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : "";
+                dataTable.Rows.Add(new object[] { item.Id, item.DocumentName, item.CreatedByUser, CreatedDate, item.Comment, item.IsApproved, item.UserName, ModifiedDate, item.Reason, item.ReasonOth });
+            }
+            return dataTable;
         }
 
         public IList<EtmfStudyReportDto> GetEtmfStudyReport(StudyReportSearchDto filters)

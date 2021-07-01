@@ -29,7 +29,7 @@ namespace GSC.Respository.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
+        //private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
@@ -38,7 +38,7 @@ namespace GSC.Respository.Etmf
         private readonly IProjectRightRepository _projectRightRepository;
         public ProjectArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
-            IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
+            //IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
             IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
             IEmailSenderRespository emailSenderRespository,
@@ -50,7 +50,7 @@ namespace GSC.Respository.Etmf
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _mapper = mapper;
-            _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
+            //_projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _emailSenderRespository = emailSenderRespository;
@@ -97,7 +97,8 @@ namespace GSC.Respository.Etmf
                    .Where(x => x.ProjectWorkplaceArtificatedDocumentId == ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
             var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName;
 
-            var document = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId);
+            //var document = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId);
+            var document = _context.ProjectWorkplaceArtificatedocument.Where(x =>x.Id== ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
             var artificate = _projectWorkplaceArtificateRepository.FindByInclude(x => x.Id == document.ProjectWorkplaceArtificateId, x => x.EtmfArtificateMasterLbrary).FirstOrDefault();
             var user = _userRepository.Find(ProjectArtificateDocumentApproverDto.UserId);
 
@@ -191,7 +192,11 @@ namespace GSC.Respository.Etmf
 
             if (DocumentApprover.All(x => x.IsApproved == true))
             {
-                _projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(Id, true);
+                //_projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(Id, true);
+                var document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == Id).FirstOrDefault();
+                document.IsAccepted = true;
+                _context.ProjectWorkplaceArtificatedocument.Update(document);                
+                _context.Save();
             }
         }
     }
