@@ -316,6 +316,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IStudyVersionRepository, StudyVersionRepository>();
             services.AddScoped<IStudyVersionVisitStatusRepository, StudyVersionVisitStatusRepository>();
             services.AddScoped<IVolunteerSummaryReport, VolunteerSummaryReport>();
+            services.AddScoped<IVolunteerQueryRepository, VolunteerQueryRepository>();
         }
     }
 }

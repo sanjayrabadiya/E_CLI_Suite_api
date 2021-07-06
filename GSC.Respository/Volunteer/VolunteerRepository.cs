@@ -436,5 +436,27 @@ namespace GSC.Respository.Volunteer
 
             return number.ToUpper();
         }
+
+        public IList<DropDownDto> QueryAutoCompleteSearch(string searchText, bool isAutoSearch = false)
+        {
+            if (string.IsNullOrWhiteSpace(searchText)) return new List<DropDownDto>();
+            searchText = searchText.Trim();
+
+            var query = All.Where(x => x.DeletedDate == null && x.Status == VolunteerStatus.Completed).AsQueryable();
+
+            //query = query.Where(x => x.FullName.Contains(searchText) || x.VolunteerNo.Contains(searchText));
+            query = query.Where(x => x.FirstName.Contains(searchText) || x.MiddleName.Contains(searchText) || x.LastName.Contains(searchText) || x.VolunteerNo.Contains(searchText));
+
+            if (isAutoSearch)
+                query = query.Take(7);
+
+            return query.Select(t => new DropDownDto
+            {
+                Id = t.Id,
+                //Value = t.VolunteerNo + " " + t.FullName
+                Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
+            }).ToList();
+        }
+
     }
 }

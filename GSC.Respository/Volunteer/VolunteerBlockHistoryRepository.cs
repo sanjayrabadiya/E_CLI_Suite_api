@@ -28,34 +28,6 @@ namespace GSC.Respository.Volunteer
         {
             return All.Where(x => x.DeletedDate == null && x.VolunteerId == volunteerId)
                 .ProjectTo<VolunteerBlockHistoryGridDto>(_mapper.ConfigurationProvider).ToList();
-
-            //return _context.VolunteerBlockHistory.Where(x => x.DeletedDate == null && x.VolunteerId == volunteerId).Select(x => new VolunteerBlockHistoryDto
-            // {
-            //     FromDate = x.FromDate,
-            //     ToDate = x.ToDate,
-            //     PermanentlyString = x.IsPermanently ? "Yes" : "No",
-            //     BlockString = x.IsBlock ? "Yes" : "No",
-            //     Note = x.Note,
-            //     UserName = x.CreatedByUser.UserName,
-            //     BlockDate = x.CreatedDate,
-            //     CategoryName = x.BlockCategory.BlockCategoryName
-            // }).OrderByDescending(x => x.Id).ToList();
-
-            //return result;
-
-            //return FindByInclude(x => x.DeletedDate == null && x.VolunteerId == volunteerId, x => x.CreatedByUser,
-            //    x => x.BlockCategory).Select(
-            //    c => new VolunteerBlockHistoryDto
-            //    {
-            //        FromDate = c.FromDate,
-            //        ToDate = c.ToDate,
-            //        PermanentlyString = c.IsPermanently ? "Yes" : "No",
-            //        BlockString = c.IsBlock ? "Yes" : "No",
-            //        Note = c.Note,
-            //        UserName = c.CreatedByUser.UserName,
-            //        BlockDate = c.CreatedDate,
-            //        CategoryName = c.BlockCategory.BlockCategoryName
-            //    }).OrderByDescending(i => i.BlockDate).ToList();
         }
     }
 }

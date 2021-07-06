@@ -38,9 +38,6 @@ namespace GSC.Api.Controllers.Volunteer
         [HttpGet("{id}/{isDeleted:bool?}")]
         public IActionResult Get(int id, bool isDeleted)
         {
-            //if (id <= 0) return BadRequest();
-
-            //return Ok(_volunteerContactRepository.GetContacts(id));
             if (id <= 0) return BadRequest();
 
             return Ok(_volunteerContactRepository.GetContactTypeList(id));
@@ -49,24 +46,15 @@ namespace GSC.Api.Controllers.Volunteer
         [HttpPost]
         public IActionResult Post([FromBody] VolunteerContactDto volunteerContactDto)
         {
-            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            //volunteerContactDto.Id = 0;
-            //var volunteerContact = _mapper.Map<VolunteerContact>(volunteerContactDto);
-            //volunteerContact.Location = _locationRepository.SaveLocation(volunteerContact.Location);
-            //_locationRepository.Add(volunteerContact.Location);
-            //_volunteerContactRepository.Add(volunteerContact);
-            //if (_uow.Save() <= 0) throw new Exception("Creating Volunteer Contact failed on save.");
-            //var returnClientAddressDto = _mapper.Map<VolunteerContactDto>(volunteerContact);
-            //return CreatedAtAction("Get", new { id = volunteerContact.Id }, returnClientAddressDto);
-
-
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             volunteerContactDto.Id = 0;
             var volunteerContact = _mapper.Map<VolunteerContact>(volunteerContactDto);
             _volunteerContactRepository.Add(volunteerContact);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer contact failed on save.");
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerContact, AuditAction.Inserted,
-            //    volunteerContact.Id, volunteerContact.VolunteerId, volunteerContactDto.Changes);
+
+            if (volunteerContactDto.Changes != null)
+                _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerContact, AuditAction.Inserted,
+                volunteerContact.Id, volunteerContact.VolunteerId, volunteerContactDto.Changes);
 
             return Ok(volunteerContact.Id);
         }
@@ -79,53 +67,15 @@ namespace GSC.Api.Controllers.Volunteer
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            //var voluteerContact = _mapper.Map<VolunteerContact>(volunteerContactDto);
-
-            //voluteerContact.Location = _locationRepository.SaveLocation(voluteerContact.Location);
-
-            //if (voluteerContact.Location.Id > 0)
-            //    _locationRepository.Update(voluteerContact.Location);
-            //else
-            //    _locationRepository.Add(voluteerContact.Location);
-
-            //_volunteerContactRepository.Update(voluteerContact);
-
-            //if (_uow.Save() <= 0) throw new Exception("Updating Client address failed on save.");
-            //return Ok(voluteerContact.Id);
-
-
-            //if (volunteerContactDto.Id <= 0) return BadRequest();
-
-            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            //var voluteerContact = _mapper.Map<VolunteerContact>(volunteerContactDto);
-
-            ////var validate = _volunteerContactRepository.DuplicateContact(voluteerContact);
-            ////if (!string.IsNullOrEmpty(validate))
-            ////{
-            ////    ModelState.AddModelError("Message", validate);
-            ////    return BadRequest(ModelState);
-            ////}
-
-            //voluteerContact.Id = volunteerContactDto.Id;
-
-            ///* Added by swati for effective Date on 02-06-2019 */
-            //_volunteerContactRepository.AddOrUpdate(voluteerContact);
-
-            //if (_uow.Save() <= 0) throw new Exception("Updating client contact failed on save.");
-            //return Ok(voluteerContact.Id);
-
-
-
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
             var volunteerContact = _mapper.Map<VolunteerContact>(volunteerContactDto);
             volunteerContact.Id = volunteerContactDto.Id;
             _volunteerContactRepository.Update(volunteerContact);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer contact failed on update.");
 
-           //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerContact, AuditAction.Updated,
-           //     volunteerContact.Id, volunteerContact.VolunteerId, volunteerContactDto.Changes);
+
+            if (volunteerContactDto.Changes != null)
+                _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerContact, AuditAction.Updated,
+                    volunteerContact.Id, volunteerContact.VolunteerId, volunteerContactDto.Changes);
 
             return Ok(volunteerContact.Id);
         }

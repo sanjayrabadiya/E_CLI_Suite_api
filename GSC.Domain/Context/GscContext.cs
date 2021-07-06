@@ -340,6 +340,8 @@ namespace GSC.Domain.Context
             base.OnModelCreating(modelBuilder);
         }
 
+        public DbSet<VolunteerQuery> VolunteerQuery { get; set; }
+
 
     }
 

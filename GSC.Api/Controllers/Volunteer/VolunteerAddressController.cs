@@ -47,29 +47,19 @@ namespace GSC.Api.Controllers.Volunteer
         [HttpPost]
         public IActionResult Post([FromBody] VolunteerAddressDto volunteerAddressDto)
         {
-            
-
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             volunteerAddressDto.Id = 0;
             var volunteerAddress = _mapper.Map<VolunteerAddress>(volunteerAddressDto);
             volunteerAddress.Location = _locationRepository.SaveLocation(volunteerAddress.Location);
-            _locationRepository.Add(volunteerAddressDto.Location);
+            _locationRepository.Add(volunteerAddress.Location);
             _volunteerAddressRepository.Add(volunteerAddress);
-            if (_uow.Save() <= 0) throw new Exception("Creating client address failed on save.");
-            var returnClientAddressDto = _mapper.Map<VolunteerAddressDto>(volunteerAddress);
-            return CreatedAtAction("Get", new { id = volunteerAddress.Id }, returnClientAddressDto);
+            if (_uow.Save() <= 0) throw new Exception("Creating volunteer address failed on save.");
 
-            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            //volunteerAddressDto.Id = 0;
-            //var volunteerAddress = _mapper.Map<VolunteerAddress>(volunteerAddressDto);
-            //volunteerAddress.Location = _locationRepository.SaveLocation(volunteerAddress.Location);
-            //_volunteerAddressRepository.Add(volunteerAddress);
-            //if (_uow.Save() <= 0) throw new Exception("Creating volunteer address failed on save.");
+            if (volunteerAddressDto.Changes != null)
+                _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Inserted,
+                    volunteerAddress.Id, volunteerAddress.VolunteerId, volunteerAddressDto.Changes);
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Inserted,
-            //    volunteerAddress.Id, volunteerAddress.VolunteerId, volunteerAddressDto.Changes);
-
-            //return Ok(volunteerAddress.Id);
+            return Ok(volunteerAddress.Id);
         }
 
         [HttpPut]
@@ -81,11 +71,18 @@ namespace GSC.Api.Controllers.Volunteer
 
             var volunteerAddress = _mapper.Map<VolunteerAddress>(volunteerAddressDto);
             volunteerAddress.Location = _locationRepository.SaveLocation(volunteerAddress.Location);
+
+            if (volunteerAddress.Location.Id > 0)
+                _locationRepository.Update(volunteerAddress.Location);
+            else
+                _locationRepository.Add(volunteerAddress.Location);
+
             _volunteerAddressRepository.Update(volunteerAddress);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer address failed on save.");
 
-            //_auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Updated,
-            //    volunteerAddress.Id, volunteerAddress.VolunteerId, volunteerAddressDto.Changes);
+            if (volunteerAddressDto.Changes != null)
+                _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Updated,
+                volunteerAddress.Id, volunteerAddress.VolunteerId, volunteerAddressDto.Changes);
 
             return Ok(volunteerAddress.Id);
         }
