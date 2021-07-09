@@ -310,6 +310,18 @@ namespace GSC.Api.Helpers
             CreateMap<VolunteerBlockHistory, VolunteerBlockHistoryGridDto>()
                .ForMember(x => x.CategoryName, x => x.MapFrom(a => a.BlockCategory.BlockCategoryName))
                .ReverseMap();
+
+            CreateMap<PharmacyStudyProductType, PharmacyStudyProductTypeGridDto>()
+              .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))
+              .ForMember(x => x.ProductType, x => x.MapFrom(a => a.ProductType.ProductTypeName))
+              .ForMember(x => x.ProductUnitType, x => x.MapFrom(a => a.ProductUnitType.GetDescription()))
+              .ReverseMap();
+
+            CreateMap<ProductReceipt, ProductReceiptGridDto>()
+              .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
+              .ForMember(x => x.PharmacyStudyProductType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
+              .ForMember(x => x.StorageArea, x => x.MapFrom(a => a.CentralDepot.StorageArea))
+              .ReverseMap();
         }
     }
 }

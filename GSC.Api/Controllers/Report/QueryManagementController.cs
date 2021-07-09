@@ -47,5 +47,13 @@ namespace GSC.Api.Controllers.Report
 
             return Ok(auditsDto);
         }
+
+        [HttpGet]
+        [Route("GetScreeningQuery/{projectId}")]
+        public IActionResult GetScreeningQuery(int projectId)
+        {
+            return Ok(_screeningTemplateValueQueryRepository.GetScreeningQuery(projectId));
+        }
+
     }
 }

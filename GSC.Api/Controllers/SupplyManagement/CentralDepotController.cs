@@ -109,10 +109,17 @@ namespace GSC.Api.Controllers.SupplyManagement
         }
 
         [HttpGet]
-        [Route("GetCentralDepotDropDown")]
-        public IActionResult GetCentralDepotDropDown()
+        [Route("GetStorageAreaByDepoDropDown")]
+        public IActionResult GetStorageAreaByDepoDropDown()
         {
-            return Ok(_centralDepotRepository.GetCentralDepotDropDown());
+            return Ok(_centralDepotRepository.GetStorageAreaByDepoDropDown());
+        }
+
+        [HttpGet]
+        [Route("GetStorageAreaByProjectDropDown/{ProjectId}")]
+        public IActionResult GetStorageAreaByProjectDropDown(int ProjectId)
+        {
+            return Ok(_centralDepotRepository.GetStorageAreaByProjectDropDown(ProjectId));
         }
     }
 }

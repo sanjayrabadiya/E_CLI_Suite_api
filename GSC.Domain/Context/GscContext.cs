@@ -341,7 +341,8 @@ namespace GSC.Domain.Context
         }
 
         public DbSet<VolunteerQuery> VolunteerQuery { get; set; }
-
+        public DbSet<PharmacyStudyProductType> PharmacyStudyProductType { get; set; }
+        public DbSet<ProductReceipt> ProductReceipt { get; set; }
 
     }
 

@@ -27,10 +27,10 @@ namespace GSC.Respository.SupplyManagement
             _mapper = mapper;
         }
 
-        public List<DropDownDto> GetCentralDepotDropDown()
+        public List<DropDownDto> GetStorageAreaByDepoDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectId == null)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.StorageArea, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
@@ -39,6 +39,14 @@ namespace GSC.Respository.SupplyManagement
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<CentralDepotGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        }
+
+        public List<DropDownDto> GetStorageAreaByProjectDropDown(int ProjectId)
+        {
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectId == ProjectId)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.StorageArea, IsDeleted = c.DeletedDate != null })
+                .OrderBy(o => o.Value).ToList();
         }
     }
 }

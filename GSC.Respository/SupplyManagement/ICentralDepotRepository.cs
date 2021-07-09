@@ -8,7 +8,8 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface ICentralDepotRepository : IGenericRepository<CentralDepot>
     {
-        List<DropDownDto> GetCentralDepotDropDown();
+        List<DropDownDto> GetStorageAreaByDepoDropDown();
         List<CentralDepotGridDto> GetCentralDepotList(bool isDeleted);
+        List<DropDownDto> GetStorageAreaByProjectDropDown(int ProjectId);
     }
 }
