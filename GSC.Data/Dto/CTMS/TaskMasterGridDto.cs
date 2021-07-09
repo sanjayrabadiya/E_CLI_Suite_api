@@ -17,5 +17,6 @@ namespace GSC.Data.Dto.CTMS
         public string Predecessor { get; set; }
         public int OffSet { get; set; }
         public string RefrenceType { get; set; }
+        public string ActivityType { get; set; }
     }
 }

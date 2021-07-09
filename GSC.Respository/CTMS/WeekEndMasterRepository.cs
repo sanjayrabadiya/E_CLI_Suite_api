@@ -4,11 +4,14 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static GSC.Common.WorkingDayHelper;
 
 namespace GSC.Respository.CTMS
 {
@@ -40,10 +43,10 @@ namespace GSC.Respository.CTMS
             return data;
         }
 
-        public List<string> GetworkingDayList(int ProjectId)
+        public List<WeekendData> GetworkingDayList(int ProjectId)
         {
-            var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).SingleOrDefault();
-            var weekendlis = new List<string>();
+            var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).ToList();
+            var weekendlis = new List<WeekendData>();
             //if (weekend != null)
             //{
             //    if (weekend.Sunday == true)
@@ -61,13 +64,22 @@ namespace GSC.Respository.CTMS
             //    if (weekend.Saturday == true)
             //        weekendlis.Add("Saturday");
             //}
+            foreach (var item in weekend)
+            {
+                WeekendData obj = new WeekendData();
+                obj.Weekend = item.AllWeekOff.ToString();
+                obj.Frequency = ((FrequencyType)item.Frequency).GetDescription();
+                weekendlis.Add(obj);
+            }
             return weekendlis;
         }
 
         public List<string> GetweekEndDay(int ProjectId)
         {
-            var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).SingleOrDefault();
+            var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).ToList();
             var weekendlis = new List<string>();
+
+            var days = new List<string> { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
             //if (weekend != null)
             //{
             //    if (weekend.Sunday == false)
@@ -85,6 +97,8 @@ namespace GSC.Respository.CTMS
             //    if (weekend.Saturday == false)
             //        weekendlis.Add("Saturday");
             //}
+
+            weekendlis = days.Where(x => !weekend.Select(y => y.AllWeekOff.ToString()).Contains(x)).ToList();
             return weekendlis;
         }
     }

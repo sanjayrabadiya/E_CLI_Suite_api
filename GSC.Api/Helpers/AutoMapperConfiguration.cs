@@ -382,6 +382,7 @@ namespace GSC.Api.Helpers
             CreateMap<VolunteerQuery, VolunteerQueryDto>().ReverseMap();
             CreateMap<PharmacyStudyProductType, PharmacyStudyProductTypeDto>().ReverseMap();
             CreateMap<ProductReceipt, ProductReceiptDto>().ReverseMap();
+            CreateMap<StudyPlanTaskResourceDto, StudyPlanTaskResource>().ReverseMap();
         }
     }
 }

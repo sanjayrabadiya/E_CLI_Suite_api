@@ -319,6 +319,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVolunteerQueryRepository, VolunteerQueryRepository>();
             services.AddScoped<IPharmacyStudyProductTypeRepository, PharmacyStudyProductTypeRepository>();
             services.AddScoped<IProductReceiptRepository, ProductReceiptRepository>();
+            services.AddScoped<IStudyPlanTaskResourceRepository, StudyPlanTaskResourceRepository>();
         }
     }
 }

@@ -38,11 +38,12 @@ namespace GSC.Respository.CTMS
         {
             var result = new StudyPlanTaskGridDto();
 
-            var studyplan = _context.StudyPlan.Where(x => x.Id == StudyPlanId).FirstOrDefault();
+            var studyplan = _context.StudyPlan.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
             result.StartDate = studyplan.StartDate;
             result.EndDate = studyplan.EndDate;
-            //var tt = _context.PlanTaskRelation.Where(x => x.ProjectId == 1 && x.DeletedDate == null).ToList();
-            var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId== StudyPlanId).OrderBy(x => x.TaskOrder).
+            result.StudyPlanId = studyplan.Id;
+
+            var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
                    ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
 
@@ -54,22 +55,22 @@ namespace GSC.Respository.CTMS
 
         public List<StudyPlanTask> Save(StudyPlanTask taskData)
         {
-             var tasklist = new List<StudyPlanTask>();
-           // var parojectIds = new List<int>();
-            int ParentProjectId = _context.StudyPlan.Where(x => x.Id == taskData.StudyPlanId).Select(x => x.ProjectId).SingleOrDefault();
+            var tasklist = new List<StudyPlanTask>();
+            // var parojectIds = new List<int>();
+            int ParentProjectId = _context.StudyPlan.Where(x => x.Id == taskData.StudyPlanId).Select(x => x.ProjectId).FirstOrDefault();
             if (taskData.RefrenceType == RefrenceType.Study)
-            {              
-                var data = new StudyPlanTask();           
-                data.ProjectId = ParentProjectId;              
-                tasklist.Add(data);            
+            {
+                var data = new StudyPlanTask();
+                data.ProjectId = ParentProjectId;
+                tasklist.Add(data);
             }
-            else if(taskData.RefrenceType == RefrenceType.Sites)
+            else if (taskData.RefrenceType == RefrenceType.Sites)
             {
                 var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
                 foreach (var sitesId in siteslist)
                 {
                     var data = new StudyPlanTask();
-                    data =_mapper.Map<StudyPlanTask>(taskData);
+                    data = _mapper.Map<StudyPlanTask>(taskData);
                     data.ProjectId = sitesId;
                     tasklist.Add(data);
                 }
@@ -84,9 +85,10 @@ namespace GSC.Respository.CTMS
                 {
                     data = new StudyPlanTask();
                     data.ProjectId = sitesId;
-                    tasklist.Add(data);                   
+                    tasklist.Add(data);
                 }
-                tasklist.ForEach(t => {
+                tasklist.ForEach(t =>
+                {
                     t.ProjectId = t.ProjectId;
                     t.StudyPlanId = taskData.StudyPlanId;
                     t.TaskId = taskData.TaskId;
@@ -102,7 +104,7 @@ namespace GSC.Respository.CTMS
                     t.ActualEndDate = taskData.ActualEndDate;
                     t.DependentTaskId = taskData.DependentTaskId;
                     t.ActivityType = taskData.ActivityType;
-                    t.OffSet = taskData.OffSet;                   
+                    t.OffSet = taskData.OffSet;
                 });
             }
             _context.StudyPlanTask.AddRange(tasklist);
@@ -163,7 +165,6 @@ namespace GSC.Respository.CTMS
             }
         }
 
-
         public void UpdateParentDate(int? ParentId)
         {
             var tasklist = All.Where(i => i.Id == ParentId && i.DeletedDate == null).FirstOrDefault();
@@ -174,6 +175,7 @@ namespace GSC.Respository.CTMS
             Update(tasklist);
             _context.Save();
         }
+
         public void InsertDependentTask(List<DependentTaskParameterDto> dependentTasks, int StudyPlanTaskId)
         {
             //var tasklist = _context.DependentTask.Where(x => x.StudyPlanTaskId == StudyPlanTaskId && x.DeletedDate == null && dependentTasks.Count() > 0 ? !dependentTasks.Select(x => x.Id).Contains(x.Id) : x.StudyPlanTaskId == StudyPlanTaskId).ToList();
@@ -241,14 +243,13 @@ namespace GSC.Respository.CTMS
         //    _context.Save();
         //}
 
-
         private void UpdateDependentTaskDate(int StudyPlanTaskId)
         {
             // var dependenttask = _context.DependentTask.Where(x => x.StudyPlanTaskId == StudyPlanTaskId).ToList();
-            var dependenttask = All.Where(x => x.Id == StudyPlanTaskId).SingleOrDefault();
+            var dependenttask = All.Where(x => x.Id == StudyPlanTaskId).FirstOrDefault();
             //foreach (var item in dependenttask)
             //{
-            var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).SingleOrDefault();
+            var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).FirstOrDefault();
             if (dependenttask.ActivityType == ActivityType.FF)
             {
                 var task = All.Where(x => x.Id == dependenttask.DependentTaskId).FirstOrDefault();
@@ -280,6 +281,7 @@ namespace GSC.Respository.CTMS
             // }
             _context.Save();
         }
+
         public void UpdateTaskOrderSequence(int StudyPlanId)
         {
             var tasklist = All.Where(x => x.StudyPlanId == StudyPlanId && x.DeletedDate == null).OrderBy(x => x.TaskOrder).ToList();
@@ -292,7 +294,6 @@ namespace GSC.Respository.CTMS
             _context.StudyPlanTask.UpdateRange(tasklist);
             _context.Save();
         }
-
 
         private List<DependentTaskDto> GetRelatedChainId(int StudyPlanId)
         {
@@ -331,10 +332,10 @@ namespace GSC.Respository.CTMS
 
         public StudyPlanTask UpdateDependentTaskDate(StudyPlanTask maintask)
         {
-            int ProjectId = _context.StudyPlan.Where(x => x.Id == maintask.StudyPlanId).SingleOrDefault().ProjectId;
+            int ProjectId = _context.StudyPlan.Where(x => x.Id == maintask.StudyPlanId).FirstOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            //var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
-            var weekendlist = new List<string>();
+            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            //var weekendlist = new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
             if (maintask.DependentTaskId > 0)
@@ -372,17 +373,16 @@ namespace GSC.Respository.CTMS
             return null;
         }
 
-
         private string UpdateDependentTaskDate1(int StudyPlanTaskId, ref List<StudyPlanTask> reftasklist)
         {
             int studyPlanId = reftasklist.FirstOrDefault().StudyPlanId;
-            int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).SingleOrDefault().ProjectId;
+            int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            //var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
-            var weekendlist = new List<string>();
+            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            //var weekendlist = new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
             //var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).SingleOrDefault();
-            var maintask = reftasklist.Where(x => x.Id == StudyPlanTaskId && x.DeletedDate == null).SingleOrDefault();
+            var maintask = reftasklist.Where(x => x.Id == StudyPlanTaskId && x.DeletedDate == null).FirstOrDefault();
             if (maintask.ActivityType == ActivityType.FF)
             {
                 var task = reftasklist.Where(x => x.Id == maintask.DependentTaskId).FirstOrDefault();
@@ -426,17 +426,17 @@ namespace GSC.Respository.CTMS
             return "";
         }
 
-
         public DateTime GetNextWorkingDate(NextWorkingDateParameterDto parameterDto)
         {
-            int ProjectId = _context.StudyPlan.Where(x => x.Id == parameterDto.StudyPlanId).SingleOrDefault().ProjectId;
+            int ProjectId = _context.StudyPlan.Where(x => x.Id == parameterDto.StudyPlanId).FirstOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            //var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
-            var weekendlist = new List<string>();
+            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            //var weekendlist = new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
             var nextworkingdate = WorkingDayHelper.AddBusinessDays(parameterDto.StartDate, parameterDto.Duration > 0 ? parameterDto.Duration - 1 : 0);
             return nextworkingdate;
         }
+
         public string ValidateweekEnd(NextWorkingDateParameterDto parameterDto)
         {
             int ProjectId = _context.StudyPlan.Where(x => x.Id == parameterDto.StudyPlanId).SingleOrDefault().ProjectId;
