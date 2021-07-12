@@ -108,7 +108,7 @@ namespace GSC.Respository.Etmf
         // Get data for mytasklist on dashboard
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)
         {
-            var result = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
+            var result = All.Where(x => x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
                  && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection
                 .ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId)
                 .Select(s => new DashboardDto

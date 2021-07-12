@@ -10,6 +10,7 @@ namespace GSC.Data.Dto.CTMS
     public class StudyPlantaskParameterDto : BaseDto
     {
         public int StudyPlanId { get; set; }
+        public int? TaskId { get; set; }
         [Required(ErrorMessage = "Task Name is required.")]
         public string TaskName { get; set; }
         public int? ParentId { get; set; }

@@ -53,8 +53,6 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(taskDto);
         }
 
-
-
         [HttpPost]       
         public IActionResult Post([FromBody] StudyPlantaskParameterDto taskmasterDto)
         {
@@ -103,12 +101,12 @@ namespace GSC.Api.Controllers.CTMS
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
             }
-            var validate = _studyPlanTaskRepository.ValidateTask(tastMaster);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+            //var validate = _studyPlanTaskRepository.ValidateTask(tastMaster);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
             var revertdata = _studyPlanTaskRepository.Find(taskmasterDto.Id);
             _studyPlanTaskRepository.Update(tastMaster);
             if (_uow.Save() <= 0) throw new Exception("Updating Task failed on save.");

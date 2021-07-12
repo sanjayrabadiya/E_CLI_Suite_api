@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace GSC.Common
@@ -7,14 +9,9 @@ namespace GSC.Common
     public static class WorkingDayHelper
     {
         private static List<DateTime> Holidays = new List<DateTime>();
-        public static List<string> WorkingDay = new List<string>();
+        public static List<WeekendData> WorkingDay = new List<WeekendData>();
 
-        //Holidays.Add(new DateTime(DateTime.Now.Year, 1, 1));
-        //Holidays.Add(new DateTime(DateTime.Now.Year, 1, 5));
-        //Holidays.Add(new DateTime(DateTime.Now.Year, 3, 10));
-        //Holidays.Add(new DateTime(DateTime.Now.Year, 12, 25));
-
-        public static void InitholidayDate(List<DateTime> holidaydates, List<string> WorkingDaylist)
+        public static void InitholidayDate(List<DateTime> holidaydates, List<WeekendData> WorkingDaylist)
         {
             Holidays = holidaydates;
             WorkingDay = WorkingDaylist;
@@ -22,39 +19,42 @@ namespace GSC.Common
 
         private static bool IsHoliday(DateTime date)
         {
-           return Holidays.Contains(new DateTime(date.Year, date.Month, date.Day));         
+            return Holidays.Contains(new DateTime(date.Year, date.Month, date.Day));
         }
 
         private static bool IsWeekend(DateTime date)
         {
-
-            switch (date.DayOfWeek)
+            if (WorkingDay.Any(x => x.Weekend == date.DayOfWeek.ToString()))
             {
-                case DayOfWeek.Sunday:
-                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Sunday));
-                    //return true;
-                case DayOfWeek.Monday:
-                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Monday));
-                // return false;
-                case DayOfWeek.Tuesday:
-                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Tuesday));
-                // return false;
-                case DayOfWeek.Wednesday:
-                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Wednesday));
-                //return false;
-                case DayOfWeek.Thursday:
-                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Thursday));
-                //return false;
-                case DayOfWeek.Friday:
-                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Friday));
-                //return false; 
-                default:
-                    return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Saturday));
-                    // return true;                    
+                var result = WorkingDay.Where(x => x.Weekend == date.DayOfWeek.ToString()).FirstOrDefault();
+                if (result.Frequency == "All")
+                {
+                    return true;
+                }
+                else
+                {
+                    return Frequency(date, result.Frequency);
+                }
             }
+            //switch (date.DayOfWeek)
+            //{
+            //    case DayOfWeek.Sunday:
+            //        return !WorkingDay.Any(x => x.Weekend == DayOfWeek.Sunday.ToString());
+            //    case DayOfWeek.Monday:
+            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Monday));
+            //    case DayOfWeek.Tuesday:
+            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Tuesday));
+            //    case DayOfWeek.Wednesday:
+            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Wednesday));
+            //    case DayOfWeek.Thursday:
+            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Thursday));
+            //    case DayOfWeek.Friday:
+            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Friday));
+            //    default:
+            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Saturday));
+            //}
 
-            //return date.DayOfWeek == DayOfWeek.Saturday
-             //   || date.DayOfWeek == DayOfWeek.Sunday;
+            return false;
         }
         public static DateTime GetNextWorkingDay(DateTime date)
         {
@@ -62,6 +62,7 @@ namespace GSC.Common
             {
                 date = date.AddDays(1);
             } while (IsHoliday(date) || IsWeekend(date));
+            //while (IsHoliday(date));
             return date;
         }
 
@@ -71,59 +72,9 @@ namespace GSC.Common
             {
                 date = date.AddDays(-1);
             } while (IsHoliday(date) || IsWeekend(date));
+            //while (IsHoliday(date));
             return date;
         }
-
-        //public int GetWorkingDays(this DateTime current, DateTime finishDateExclusive, List<DateTime> excludedDates)
-        //{
-        //    Func<int, bool> isWorkingDay = days =>
-        //    {
-        //        var currentDate = current.AddDays(days);
-        //        var isNonWorkingDay =
-        //            currentDate.DayOfWeek == DayOfWeek.Saturday ||
-        //            currentDate.DayOfWeek == DayOfWeek.Sunday ||
-        //            excludedDates.Exists(excludedDate => excludedDate.Date.Equals(currentDate.Date));
-        //        return !isNonWorkingDay;
-        //    };
-
-        //    return Enumerable.Range(0, (finishDateExclusive - current).Days).Count(isWorkingDay);
-        //}
-
-        //public static DateTime AddDays(DateTime from, int days)
-        //{
-        //    int start = (int)from.DayOfWeek;
-        //    int end = (start + days);
-        //    int weeks = end / 7;
-        //    end = end + weeks;
-        //    DateTime result = from.AddDays(end - start);
-        //    if (result.DayOfWeek == DayOfWeek.Saturday)
-        //    {
-        //        result = result.AddDays(2);
-        //    }
-        //    else if (result.DayOfWeek == DayOfWeek.Sunday)
-        //    {
-        //        result = result.AddDays(1);
-        //    }
-        //    return result;
-        //}
-
-        //public static DateTime AddMinuesDay(DateTime from, int days)
-        //{
-        //    int start = (int)from.DayOfWeek;
-        //    int end = (start + days);
-        //    int weeks = end / 7;
-        //    end = end + weeks;
-        //    DateTime result = from.AddDays(end - start);
-        //    if (result.DayOfWeek == DayOfWeek.Saturday)
-        //    {
-        //        result = result.AddDays(-1);
-        //    }
-        //    else if (result.DayOfWeek == DayOfWeek.Sunday)
-        //    {
-        //        result = result.AddDays(-2);
-        //    }
-        //    return result;
-        //}
 
         public static DateTime AddBusinessDays(this DateTime current, int days)
         {
@@ -135,9 +86,8 @@ namespace GSC.Common
                 {
                     current = current.AddDays(sign);
                 }
-                //while (current.DayOfWeek == DayOfWeek.Saturday ||
-                //    current.DayOfWeek == DayOfWeek.Sunday);
                 while (IsHoliday(current) || IsWeekend(current));
+                //while (IsHoliday(current));
             }
             return current;
         }
@@ -157,6 +107,61 @@ namespace GSC.Common
             }
 
             return allDates;
+        }
+
+        public class WeekendData
+        {
+            public string Weekend { get; set; }
+            public string Frequency { get; set; }
+        }
+
+        public static bool Frequency(DateTime date, string frequency)
+        {
+            int WeekNumber = GetWeekNumberOfMonth(date);
+            List<int> data = new List<int>();
+            if (frequency == "Odd(1,3,5)")
+            {
+                data = new List<int> { 1, 3, 5 };
+            }
+            else if (frequency == "Even(2,4)")
+            {
+                data = new List<int> { 2, 4 };
+            }
+            else if (frequency == "1st")
+            {
+                data = new List<int> { 1 };
+            }
+            else if (frequency == "2nd")
+            {
+                data = new List<int> { 2 };
+            }
+            else if (frequency == "3rd")
+            {
+                data = new List<int> { 3 };
+            }
+            else if (frequency == "4th")
+            {
+                data = new List<int> { 4 };
+            }
+            else if (frequency == "5th")
+            {
+                data = new List<int> { 5 };
+            }
+
+            return data.Contains(WeekNumber);
+        }
+
+        public static int GetWeekNumberOfMonth(DateTime date)
+        {
+            decimal numberofday = date.Day;
+            decimal d = (Math.Floor(numberofday / 7)) + 1;
+
+            if ((numberofday) % 7 == 0)
+            {
+                return Convert.ToInt32((d)) - 1;
+            }
+            return Convert.ToInt32(d);
+
         }
     }
 }

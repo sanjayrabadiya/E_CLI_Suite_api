@@ -10,8 +10,6 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Respository.CTMS;
-using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -20,24 +18,18 @@ namespace GSC.Api.Controllers.CTMS
     [ApiController]
     public class StudyPlanController : ControllerBase
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IStudyPlanRepository _studyPlanRepository;
         private readonly IGSCContext _context;
-        private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
-        private readonly ITaskMasterRepository _taskMasterRepository;
 
         public StudyPlanController(IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, IGSCContext context, IStudyPlanTaskRepository studyPlanTaskRepository, ITaskMasterRepository taskMasterRepository)
+            IStudyPlanRepository studyPlanRepository, IGSCContext context)
         {
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _studyPlanRepository = studyPlanRepository;
             _context = context;
-            _studyPlanTaskRepository = studyPlanTaskRepository;
-            _taskMasterRepository = taskMasterRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -61,27 +53,49 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Post([FromBody] StudyPlanDto studyplanDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            studyplanDto.Id = 0;
-            var studyplan = _mapper.Map<StudyPlan>(studyplanDto);
-            var validatecode = _studyPlanRepository.Duplicate(studyplan);
-            if (!string.IsNullOrEmpty(validatecode))
-            {
-                ModelState.AddModelError("Message", validatecode);
-                return BadRequest(ModelState);
-            }
-            _studyPlanRepository.Add(studyplan);
-            if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+            var lstStudyPlan = new List<StudyPlanDto>();
+            lstStudyPlan.Add(studyplanDto);
 
-            var validate = _studyPlanRepository.ImportTaskMasterData(studyplan);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    _studyPlanRepository.Remove(studyplan);
-            //    _uow.Save();
-            //    return BadRequest(ModelState);
-            //}           
-            _uow.Save();
-            return Ok(studyplan.Id);
+            var TaskMaster = _context.TaskMaster.Where(x => x.TaskTemplateId == studyplanDto.TaskTemplateId).Any(x => x.RefrenceType == Helper.RefrenceType.Sites || x.RefrenceType == Helper.RefrenceType.Sites);
+            if (TaskMaster)
+            {
+                var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == studyplanDto.ProjectId).ToList();
+                sites.ForEach(s =>
+                {
+                    var data = new StudyPlanDto();
+                    data.StartDate = studyplanDto.StartDate;
+                    data.EndDate = studyplanDto.EndDate;
+                    data.ProjectId = s.Id;
+                    data.TaskTemplateId = studyplanDto.TaskTemplateId;
+                    lstStudyPlan.Add(data);
+                });
+            }
+
+            foreach (var item in lstStudyPlan)
+            {
+                item.Id = 0;
+                var studyplan = _mapper.Map<StudyPlan>(item);
+                var validatecode = _studyPlanRepository.Duplicate(studyplan);
+                if (!string.IsNullOrEmpty(validatecode))
+                {
+                    ModelState.AddModelError("Message", validatecode);
+                    return BadRequest(ModelState);
+                }
+                _studyPlanRepository.Add(studyplan);
+                if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+
+
+                var validate = _studyPlanRepository.ImportTaskMasterData(studyplan);
+                if (!string.IsNullOrEmpty(validate))
+                {
+                    ModelState.AddModelError("Message", validate);
+                    //_studyPlanRepository.Remove(studyplan);
+                    //_uow.Save();
+                    return BadRequest(ModelState);
+                }
+                //_uow.Save();
+            }
+            return Ok();
         }
 
         [HttpPut]
@@ -107,10 +121,15 @@ namespace GSC.Api.Controllers.CTMS
         {
             var record = _studyPlanRepository.Find(id);
 
-            if (record == null)
-                return NotFound();
+            var AllProject = _context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == record.ProjectId || x.Id == record.ProjectId)).ToList();
+            foreach (var item in AllProject)
+            {
+                var data = _studyPlanRepository.FindByInclude(x => x.DeletedDate == null && x.ProjectId == item.Id).FirstOrDefault();
+                if (data == null)
+                    return NotFound();
 
-            _studyPlanRepository.Delete(record);
+                _studyPlanRepository.Delete(data.Id);
+            }
             _uow.Save();
 
             return Ok();
@@ -120,15 +139,21 @@ namespace GSC.Api.Controllers.CTMS
         public ActionResult Active(int id)
         {
             var record = _studyPlanRepository.Find(id);
-            if (record == null)
-                return NotFound();
-            var validatecode = _studyPlanRepository.Duplicate(record);
-            if (!string.IsNullOrEmpty(validatecode))
+
+            var AllProject = _context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == record.ProjectId || x.Id == record.ProjectId)).ToList();
+            foreach (var item in AllProject)
             {
-                ModelState.AddModelError("Message", validatecode);
-                return BadRequest(ModelState);
+                var data = _studyPlanRepository.FindByInclude(x => x.DeletedDate != null && x.ProjectId == item.Id).FirstOrDefault();
+                if (data == null)
+                    return NotFound();
+                var validatecode = _studyPlanRepository.Duplicate(data);
+                if (!string.IsNullOrEmpty(validatecode))
+                {
+                    ModelState.AddModelError("Message", validatecode);
+                    return BadRequest(ModelState);
+                }
+                _studyPlanRepository.Active(data);
             }
-            _studyPlanRepository.Active(record);
             _uow.Save();
 
             return Ok();

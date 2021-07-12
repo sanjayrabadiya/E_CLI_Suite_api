@@ -277,8 +277,16 @@ namespace GSC.Api.Helpers
 
             CreateMap<StudyPlanTask, StudyPlanTaskDto>()
                            .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
-                           //.ForMember(x => x.IsManual, x => x.MapFrom(a => a.ParentId==0? true:false))
-                           .ForMember(x => x.IsManual, x => x.MapFrom(a => a.Duration == 0 ? false : true))
+                           .ForMember(x => x.IsManual, x => x.MapFrom(a => a.ParentId != 0 ? false : false))
+                           //.ForMember(x => x.IsManual, x => x.MapFrom(a => a.Duration == 0 ? false : true))
+                           .ForMember(x => x.EndDateDay, x => x.MapFrom(a => a.EndDate))
+                           .ForMember(x => x.StartDateDay, x => x.MapFrom(a => a.StartDate))
+                           .ForMember(x => x.DurationDay, x => x.MapFrom(a => a.Duration))
+                          .ReverseMap();
+
+            CreateMap<StudyPlanTaskResource, StudyPlanTaskResourceGridDto>()
+                           .ForMember(x => x.RoleName, x => x.MapFrom(a => a.SecurityRole.RoleShortName))
+                           .ForMember(x => x.UserName, x => x.MapFrom(a => a.User.FirstName + ' ' + a.User.LastName))
                           .ReverseMap();
             CreateMap<HolidayMaster, HolidayMasterGridDto>()
                 .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite == true ? a.Project.ProjectCode : ""))
@@ -310,6 +318,18 @@ namespace GSC.Api.Helpers
             CreateMap<VolunteerBlockHistory, VolunteerBlockHistoryGridDto>()
                .ForMember(x => x.CategoryName, x => x.MapFrom(a => a.BlockCategory.BlockCategoryName))
                .ReverseMap();
+
+            CreateMap<PharmacyStudyProductType, PharmacyStudyProductTypeGridDto>()
+              .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))
+              .ForMember(x => x.ProductType, x => x.MapFrom(a => a.ProductType.ProductTypeName))
+              .ForMember(x => x.ProductUnitType, x => x.MapFrom(a => a.ProductUnitType.GetDescription()))
+              .ReverseMap();
+
+            CreateMap<ProductReceipt, ProductReceiptGridDto>()
+              .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
+              .ForMember(x => x.PharmacyStudyProductType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
+              .ForMember(x => x.StorageArea, x => x.MapFrom(a => a.CentralDepot.StorageArea))
+              .ReverseMap();
         }
     }
 }

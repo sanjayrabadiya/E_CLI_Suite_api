@@ -114,7 +114,7 @@ namespace GSC.Domain.Context
         DbSet<TestGroup> TestGroup { get; set; }
         DbSet<AuditReason> AuditReason { get; set; }
         DbSet<AuditTrail> AuditTrail { get; set; }
-        
+
         DbSet<AppSetting> AppSetting { get; set; }
         DbSet<ProjectDesign> ProjectDesign { get; set; }
         DbSet<ProjectDesignPeriod> ProjectDesignPeriod { get; set; }
@@ -252,8 +252,8 @@ namespace GSC.Domain.Context
         DbSet<ProjectSubSecArtificateDocumentReview> ProjectSubSecArtificateDocumentReview { get; set; }
 
         DbSet<ProjectModuleRights> ProjectModuleRights { get; set; }
-         DbSet<VisitDeviationReport> VisitDeviationReport { get; set; }
-         DbSet<SiteTeam> SiteTeam { get; set; }
+        DbSet<VisitDeviationReport> VisitDeviationReport { get; set; }
+        DbSet<SiteTeam> SiteTeam { get; set; }
         DbSet<AppScreenPatient> AppScreenPatient { get; set; }
         DbSet<AppScreenPatientRights> AppScreenPatientRights { get; set; }
         DbSet<SMSSetting> SMSSetting { get; set; }
@@ -291,5 +291,9 @@ namespace GSC.Domain.Context
         DbSet<StudyVersion> StudyVersion { get; set; }
         DbSet<StudyVerionVisitStatus> StudyVerionVisitStatus { get; set; }
         DbSet<ProjectDesignTemplateNote> ProjectDesignTemplateNote { get; set; }
+        DbSet<VolunteerQuery> VolunteerQuery { get; set; }
+        DbSet<PharmacyStudyProductType> PharmacyStudyProductType { get; set; }
+        DbSet<ProductReceipt> ProductReceipt { get; set; }
+        DbSet<StudyPlanTaskResource> StudyPlanTaskResource { get; set; }
     }
 }

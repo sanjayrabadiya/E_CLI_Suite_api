@@ -330,7 +330,7 @@ namespace GSC.Domain.Context
         public DbSet<WeekEndMaster> WeekEndMaster { get; set; }
         public DbSet<SupplyLocation> SupplyLocation { get; set; }
         public DbSet<CentralDepot> CentralDepot { get; set; }
-
+        public DbSet<StudyPlanTaskResource> StudyPlanTaskResource { get; set; }
         public DbSet<StudyVersion> StudyVersion { get; set; }
         public DbSet<StudyVerionVisitStatus> StudyVerionVisitStatus { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -340,6 +340,9 @@ namespace GSC.Domain.Context
             base.OnModelCreating(modelBuilder);
         }
 
+        public DbSet<VolunteerQuery> VolunteerQuery { get; set; }
+        public DbSet<PharmacyStudyProductType> PharmacyStudyProductType { get; set; }
+        public DbSet<ProductReceipt> ProductReceipt { get; set; }
 
     }
 

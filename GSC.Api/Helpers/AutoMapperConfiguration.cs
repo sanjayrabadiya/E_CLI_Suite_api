@@ -379,6 +379,10 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentReviewDetails, EconsentDocumentDetailsDto>()
                  .ForMember(x => x.EconsentDocumentName, y => y.MapFrom(a => a.EconsentSetup.DocumentName))
                  .ReverseMap();
+            CreateMap<VolunteerQuery, VolunteerQueryDto>().ReverseMap();
+            CreateMap<PharmacyStudyProductType, PharmacyStudyProductTypeDto>().ReverseMap();
+            CreateMap<ProductReceipt, ProductReceiptDto>().ReverseMap();
+            CreateMap<StudyPlanTaskResourceDto, StudyPlanTaskResource>().ReverseMap();
         }
     }
 }

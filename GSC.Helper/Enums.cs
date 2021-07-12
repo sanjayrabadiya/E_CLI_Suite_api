@@ -144,7 +144,8 @@ namespace GSC.Helper
         [Description("Inform Consent")] InformConcent = 10,
         [Description("DBDS Report")] DBDSReport = 7,
         [Description("DataEntry Audit")] DataEntryAudit = 11,
-        [Description("Study Design Audit")] StudyDesignAudit = 12
+        [Description("Study Design Audit")] StudyDesignAudit = 12,
+        [Description("Product Receipt")] ProductReceipt = 13
     }
 
     public enum AuditModule : short
@@ -165,7 +166,9 @@ namespace GSC.Helper
         [Description("Report")] Report = 16,
         [Description("Site Management")] SiteManagement = 17,
         [Description("Study Output")] StudyOutput = 18,
-        [Description("Inform Consent")] InformConsent = 19
+        [Description("Inform Consent")] InformConsent = 19,
+        [Description("AdverseEvent")] AdverseEvent = 20,
+        [Description("CTMS")] CTMS = 22
     }
 
 
@@ -676,5 +679,11 @@ namespace GSC.Helper
     {
         [Description("Domain")] Domain = 1,
         [Description("Patient")] Patient = 2
+    }
+
+    public enum ProductUnitType : short
+    {
+        [Description("Kit")] Kit = 1,
+        [Description("Indivisual")] Indivisual = 2
     }
 }

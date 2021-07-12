@@ -560,5 +560,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+
+        [HttpGet]
+        [Route("GetProductUnitType")]
+        public IActionResult GetProductUnitType()
+        {
+            var refrencetype = Enum.GetValues(typeof(ProductUnitType))
+                .Cast<ProductUnitType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }
