@@ -26,7 +26,7 @@ namespace GSC.Respository.UserMgt
 
         public UserSettingDto GetProjectDefaultData()
         {
-            return All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).Select(t => new UserSettingDto
+            var userSetting = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null).Select(t => new UserSettingDto
             {
                 Id = t.Id,
                 ProjectId = t.ProjectId,
@@ -34,6 +34,14 @@ namespace GSC.Respository.UserMgt
                 CountryId = t.Project.ManageSite.CompanyId,
                 UserId = t.UserId,
             }).FirstOrDefault();
+            if (userSetting != null)
+                if (_context.ProjectRight.Any(x => x.ProjectId == userSetting.ProjectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate==null))
+                    return userSetting;
+                else
+                    return null;
+                
+            return userSetting;
+
         }
     }
 }

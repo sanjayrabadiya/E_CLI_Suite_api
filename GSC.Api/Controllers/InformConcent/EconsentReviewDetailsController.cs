@@ -19,12 +19,13 @@ using Syncfusion.Pdf;
 using GSC.Shared.JWTAuth;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Drawing;
+using GSC.Api.Controllers.Common;
 
 namespace GSC.Api.Controllers.InformConcent
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EconsentReviewDetailsController : ControllerBase
+    public class EconsentReviewDetailsController : BaseController
     {
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
@@ -97,14 +98,6 @@ namespace GSC.Api.Controllers.InformConcent
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             return Ok(_econsentReviewDetailsRepository.UpdateDocument(econsentReviewDetailsDto));
         }
-
-        //[HttpPost]
-        //[Route("GetEconsentDocument")]
-        //public IActionResult GetEconsentDocument([FromBody] EconsentReviewDetailsDto econsentreviewdetails)
-        //{
-        //    var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
-        //    return Ok(json);
-        //}
 
         [HttpPost]
         [Route("GetEconsentDocument")]

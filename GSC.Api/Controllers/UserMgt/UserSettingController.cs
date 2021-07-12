@@ -35,19 +35,21 @@ namespace GSC.Api.Controllers.UserMgt
         public IActionResult GetProjectDefaultData()
         {
             return Ok(_userSettingRepository.GetProjectDefaultData());
-        }
+        }    
 
         // Get project default data
         [HttpPost]
         public IActionResult Post([FromBody] int projectId)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var exists = _userSettingRepository.All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).FirstOrDefault();
+            var exists = _userSettingRepository.All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.RoleId==_jwtTokenAccesser.RoleId && x.DeletedDate == null).FirstOrDefault();
             if (exists == null)
             {
                 UserSetting userSetting = new UserSetting();
                 userSetting.ProjectId = projectId;
+                userSetting.RoleId = _jwtTokenAccesser.RoleId;
                 userSetting.UserId = _jwtTokenAccesser.UserId;
+
                 _userSettingRepository.Add(userSetting);
             }
             else

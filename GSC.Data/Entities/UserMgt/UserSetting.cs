@@ -10,6 +10,7 @@ namespace GSC.Data.Entities.UserMgt
     {
         public int UserId { get; set; }
         public int ProjectId { get; set; }
+        public int RoleId { get; set; }
         public Data.Entities.Master.Project Project { get; set; }
     }
 }

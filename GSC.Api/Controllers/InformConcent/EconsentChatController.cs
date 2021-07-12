@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GSC.Api.Controllers.Common;
 using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.InformConcent;
@@ -16,7 +17,7 @@ namespace GSC.Api.Controllers.InformConcent
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EconsentChatController : ControllerBase
+    public class EconsentChatController : BaseController
     {
         // note: messagehub not accessible in repository so all the messagehub related logic written in this class
         private readonly IUnitOfWork _uow;

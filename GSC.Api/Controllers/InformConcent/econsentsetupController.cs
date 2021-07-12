@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using AutoMapper;
+using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
@@ -17,7 +18,7 @@ namespace GSC.Api.Controllers.InformConcent
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EconsentsetupController : ControllerBase
+    public class EconsentsetupController : BaseController
     {
         private readonly IMapper _mapper;
         private readonly IEconsentSetupRepository _econsentSetupRepository;

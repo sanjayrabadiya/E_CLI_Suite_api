@@ -8,7 +8,6 @@ using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
-using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -49,40 +48,6 @@ namespace GSC.Respository.InformConcent
                 ProjectTo<EconsentSectionReferenceDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();                
             return sectionrefrence;
         }
-
-        
-        //public void AddEconsentSectionReference(EconsentSectionReferenceDto econsentSectionReferenceDto)
-        //{
-        //    for (int i = 0; i < econsentSectionReferenceDto.FileModel.Count; i++)
-        //    {
-        //        Data.Dto.InformConcent.SaveFileDto obj = new Data.Dto.InformConcent.SaveFileDto();
-        //        obj.Path = _uploadSettingRepository.GetDocumentPath();
-        //        obj.FolderType = FolderType.InformConcent;
-        //        obj.RootName = "EconsentSectionReference";
-        //        obj.FileModel = econsentSectionReferenceDto.FileModel[i];
-
-        //        econsentSectionReferenceDto.Id = 0;
-
-        //        if (econsentSectionReferenceDto.FileModel[i]?.Base64?.Length > 0)
-        //        {
-        //            econsentSectionReferenceDto.FilePath = DocumentService.SaveEconsentSectionReferenceFile(obj.FileModel, obj.Path, obj.FolderType, obj.RootName);
-        //        }
-
-        //        var econsentSectionReference = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
-
-        //        Add(econsentSectionReference);
-        //        string root = Path.Combine(obj.Path, obj.FolderType.ToString(), obj.RootName);
-        //        if (_uow.Save() <= 0)
-        //        {
-        //            if (Directory.Exists(root))
-        //            {
-        //                Directory.Delete(root, true);
-        //            }
-        //            throw new Exception($"Creating EConsent File failed on save.");
-        //        }
-        //    }
-        //}
-
         public List<DropDownDto> GetEconsentDocumentSectionDropDown(int documentId)
         {
             var document = _econsentSetupRepository.Find(documentId);
@@ -188,7 +153,6 @@ namespace GSC.Respository.InformConcent
 
         public IList<EconcentSectionRefrenceDetailListDto> GetSetionRefefrenceDetailList(int documentId, int sectionNo)
         {
-            //_econsentSectionReferenceRepository.FindBy(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo).ToList();
             var sectionRefrence = All.Where(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo).
                ProjectTo<EconcentSectionRefrenceDetailListDto>(_mapper.ConfigurationProvider).ToList();
             return sectionRefrence;

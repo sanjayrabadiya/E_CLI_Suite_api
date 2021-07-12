@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using GSC.Api.Controllers.Common;
 using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
@@ -22,7 +23,7 @@ namespace GSC.Api.Controllers.InformConcent
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EConsentVideoController : ControllerBase
+    public class EConsentVideoController : BaseController
     {
         //note: messagehub not accessible in repository so all the messagehub related logic written in this class
         private readonly IEConsentVideoRepository _EConsentVideoRepository;
