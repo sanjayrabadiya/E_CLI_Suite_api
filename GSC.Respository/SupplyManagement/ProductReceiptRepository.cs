@@ -33,9 +33,9 @@ namespace GSC.Respository.SupplyManagement
                 .OrderBy(o => o.Value).ToList();
         }
 
-        public List<ProductReceiptGridDto> GetProductReceiptList(bool isDeleted)
+        public List<ProductReceiptGridDto> GetProductReceiptList(int ProjectId,bool isDeleted)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == ProjectId).
                    ProjectTo<ProductReceiptGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 

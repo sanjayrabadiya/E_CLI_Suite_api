@@ -8,7 +8,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface IPharmacyStudyProductTypeRepository : IGenericRepository<PharmacyStudyProductType>
     {
-        List<PharmacyStudyProductTypeGridDto> GetPharmacyStudyProductTypeList(bool isDeleted);
+        List<PharmacyStudyProductTypeGridDto> GetPharmacyStudyProductTypeList(int ProjectId, bool isDeleted);
         List<DropDownDto> GetPharmacyStudyProductTypeDropDown(int ProjectId);
         string Duplicate(PharmacyStudyProductType objSave);
     }

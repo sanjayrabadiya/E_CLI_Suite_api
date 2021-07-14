@@ -32,11 +32,20 @@ namespace GSC.Api.Controllers.SupplyManagement
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        //[HttpGet("{isDeleted:bool?}")]
+        //public IActionResult Get(bool isDeleted)
+        //{
+        //    var productTypes = _pharmacyStudyProductTypeRepository.GetPharmacyStudyProductTypeList(isDeleted);
+        //    return Ok(productTypes);
+        //}
+
+        [HttpGet("GetPharmacyStudyProductTypeList/{projectId}/{isDeleted:bool?}")]
+        public IActionResult GetPharmacyStudyProductTypeList(int projectId, bool isDeleted)
         {
-            var productTypes = _pharmacyStudyProductTypeRepository.GetPharmacyStudyProductTypeList(isDeleted);
-            return Ok(productTypes);
+            var productType = _pharmacyStudyProductTypeRepository.GetPharmacyStudyProductTypeList(projectId, isDeleted);
+            return Ok(productType);
+
+            //return Ok();
         }
 
         [HttpPost]

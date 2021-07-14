@@ -418,10 +418,10 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "MaxHumidity", DisplayName = "Max Humidity" });
 
             //Version
-            _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignId", DisplayName = "ProjectDesignId" });
+           // _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignId", DisplayName = "Project Design" });
             _dictionaries.Add(new Dictionary { FieldName = "VersionNumber", DisplayName = "Version Number" });
-            _dictionaries.Add(new Dictionary { FieldName = "StudyVerionId", DisplayName = "StudyVerionId" });
-            _dictionaries.Add(new Dictionary { FieldName = "VisitStatusId", DisplayName = "VisitStatusId" });
+            _dictionaries.Add(new Dictionary { FieldName = "StudyVerionId", DisplayName = "Study Verion" });
+            _dictionaries.Add(new Dictionary { FieldName = "VisitStatusId", DisplayName = "Visit Status" });
 
             _dictionaries.Add(new Dictionary { FieldName = "IsGoLive", DisplayName = "Is GoLive" });
             _dictionaries.Add(new Dictionary { FieldName = "GoLiveBy", DisplayName = "GoLive By" });
@@ -487,6 +487,11 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ShipmentNo", DisplayName = "Shipment No" });
             _dictionaries.Add(new Dictionary { FieldName = "ConditionOfPackReceived", DisplayName = "Condition Of Pack Received" });
             _dictionaries.Add(new Dictionary { FieldName = "TransporterName", DisplayName = "Transporter Name" });
+
+            // Project design visit
+            _dictionaries.Add(new Dictionary { FieldName = "IsNonCRF", DisplayName = "Is Non-CRF" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignVariableId", DisplayName = "Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
+
 
 
         }

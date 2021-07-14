@@ -246,9 +246,7 @@ namespace GSC.Respository.Medra
                           ((filters.ProjectId != 0 ? se.ProjectId == filters.ProjectId : true))
                                   && ((filters.CountryId != 0 ? project.CountryId == filters.CountryId : true))
                                    && (filters.Status != null ? (filters.Status != CodedType.UnCoded ? meddraCoding.CodedType == filters.Status :
-                                   !(from o in Exists
-                                     where o.MeddraLowLevelTermId != null && o.MeddraSocTermId != null
-                                     select o.ScreeningTemplateValueId).Contains(value.Id)) : true)
+                                   !(from o in Exists where o.MeddraLowLevelTermId != null && o.MeddraSocTermId != null select o.ScreeningTemplateValueId).Contains(value.Id)) : true)
                                    && (filters.IsApproved != null ? (meddraCoding.IsApproved == true ? meddraCoding.IsApproved == filters.IsApproved :
                                    (from o in Exists where o.IsApproved == filters.IsApproved select o.ScreeningTemplateValueId).Contains(value.Id)) : true)
                                    && ((filters.FromDate.HasValue ? meddraCoding.CreatedDate >= filters.FromDate : true))

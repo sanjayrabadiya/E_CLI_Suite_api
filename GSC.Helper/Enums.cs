@@ -684,6 +684,6 @@ namespace GSC.Helper
     public enum ProductUnitType : short
     {
         [Description("Kit")] Kit = 1,
-        [Description("Indivisual")] Indivisual = 2
+        [Description("Individual")] Individual = 2
     }
 }
