@@ -22,20 +22,21 @@ namespace GSC.Api.Controllers.Etmf
     [Route("api/[controller]")]
     public class EtmfUserPermissionController : BaseController
     {
-
+        private readonly IGSCContext _context;
         private readonly IUnitOfWork _uow;
         private readonly IProjectWorkplaceDetailRepository _projectWorkplaceDetailRepository;
         private readonly IEtmfUserPermissionRepository _etmfUserPermissionRepository;
 
         public EtmfUserPermissionController(IUnitOfWork uow,
             IEtmfUserPermissionRepository etmfUserPermissionRepository,
-            IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository)
+            IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository, IGSCContext context)
         {
             _uow = uow;
             _etmfUserPermissionRepository = etmfUserPermissionRepository;
             _projectWorkplaceDetailRepository = projectWorkplaceDetailRepository;
+            _context = context;
         }
-         
+
         /// Get User for etmf rights
         /// Created By Swati
         [HttpGet("GetByUserId/{UserId}/{ProjectId}")]
@@ -43,13 +44,14 @@ namespace GSC.Api.Controllers.Etmf
         {
             if (UserId <= 0) return BadRequest();
 
-            var validate = _projectWorkplaceDetailRepository.FindByInclude(t => t.DeletedDate == null && t.ProjectWorkplace.ProjectId == ProjectId);
+            var ParentProject = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().ParentProjectId;
+            var validate = _projectWorkplaceDetailRepository.FindByInclude(t => t.DeletedDate == null && t.ProjectWorkplace.ProjectId == (ParentProject != null ? ParentProject : ProjectId));
             if (validate.Count() == 0)
             {
                 ModelState.AddModelError("Message", "Worksplace Not Created.");
                 return BadRequest(ModelState);
             }
-            var permissionDtos = _etmfUserPermissionRepository.GetByUserId(UserId, ProjectId);
+            var permissionDtos = _etmfUserPermissionRepository.GetByUserId(UserId, ProjectId, ParentProject);
 
             return Ok(permissionDtos);
         }
@@ -89,12 +91,12 @@ namespace GSC.Api.Controllers.Etmf
         /// Rollback all rights
         /// Created By Swati
         [HttpPut]
-        [Route("RollbackRight/{ProjectId}/{UserIds}")]
-        public IActionResult RollbackRight(int ProjectId, int[] UserIds)
+        [Route("RollbackRight")]
+        public IActionResult RollbackRight([FromBody] EtmfRightsSaveDto etmfRightsSaveDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            _etmfUserPermissionRepository.SaveProjectRollbackRight(ProjectId, UserIds);
+            _etmfUserPermissionRepository.SaveProjectRollbackRight(etmfRightsSaveDto.projectId, etmfRightsSaveDto.Ids);
 
             if (_uow.Save() < 0) throw new Exception("Project Revoke rights failed on save.");
 

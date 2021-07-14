@@ -33,4 +33,10 @@ namespace GSC.Data.Dto.Etmf
         public string ModifiedRollbackReason { get; set; }
 
     }
+
+    public class EtmfRightsSaveDto
+    {
+        public int[] Ids { get; set; }
+        public int projectId { get; set; }
+    }
 }

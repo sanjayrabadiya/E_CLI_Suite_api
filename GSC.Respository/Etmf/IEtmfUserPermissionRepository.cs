@@ -10,7 +10,7 @@ namespace GSC.Respository.Etmf
 {
    public interface IEtmfUserPermissionRepository : IGenericRepository<EtmfUserPermission>
     {
-        List<EtmfUserPermissionDto> GetByUserId(int UserId, int ProjectId);
+        List<EtmfUserPermissionDto> GetByUserId(int UserId, int ProjectId, int? ParentProject);
         void Save(List<EtmfUserPermission> EtmfUserPermission);
         void updatePermission(List<EtmfUserPermissionDto> etmfUserPermission);
         void AddEtmfAccessRights(List<ProjectWorkplaceDetail> ProjectWorkplaceDetail);
