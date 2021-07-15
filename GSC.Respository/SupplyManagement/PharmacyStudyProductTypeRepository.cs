@@ -31,9 +31,9 @@ namespace GSC.Respository.SupplyManagement
                 .OrderBy(o => o.Value).ToList();
         }
 
-        public List<PharmacyStudyProductTypeGridDto> GetPharmacyStudyProductTypeList(bool isDeleted)
+        public List<PharmacyStudyProductTypeGridDto> GetPharmacyStudyProductTypeList(int ProjectId,bool isDeleted)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == ProjectId).
                    ProjectTo<PharmacyStudyProductTypeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 

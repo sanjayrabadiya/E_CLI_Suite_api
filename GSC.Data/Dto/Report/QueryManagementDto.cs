@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Shared.Extension;
@@ -80,4 +82,40 @@ namespace GSC.Data.Dto.Report
         public string DataEntryBy { get; set; }
         public int? Status { get; set; }
     }
+
+    public class ScreeningQueryDto : BaseDto
+    {
+        public string ProjectCode { get; set; }
+        public string ReasonName { get; set; }
+        public string ReasonOth { get; set; }
+        public string StatusName { get; set; }
+        public string QueryDescription { get; set; }
+        public QueryStatus? QueryStatus { get; set; }
+        public string OldValue { get; set; }
+        public string ProjectDesignTemplateName { get; set; }
+        public string Visit { get; set; }
+        public string FieldName { get; set; }
+        public string VolunteerName { get; set; }
+        public string SubjectNo { get; set; }
+        public string RandomizationNumber { get; set; }
+        public string ClosedByName { get; set; }
+        public string Value { get; set; }
+        public string CreatedByName { get; set; }
+        public string ModifiedByName { get; set; }
+        public int CollectionSource { get; set; }
+        public string DataEntryByName { get; set; }
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? ModifiedDate { get; set; }
+
+        public DateTime? ClosedDate { get; set; }
+
+        public int ScreeningTemplateValueId { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public int ProjectDesignVariableId { get; set; }
+        
+        public DesignScreeningVariableDto Variables { get; set; }
+
+    }
+
 }

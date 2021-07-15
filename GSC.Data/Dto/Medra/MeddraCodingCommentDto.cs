@@ -25,13 +25,8 @@ namespace GSC.Data.Dto.Medra
         public long? NewPTCode { get; set; }
         public string ReasonName { get; set; }
         public string StatusName { get; set; }
-        private DateTime? _createdDate;
         
-        public DateTime? CreatedDate
-        {
-            get => _createdDate?.UtcDateTime();
-            set => _createdDate = value?.UtcDateTime();
-        }
+        public DateTime? CreatedDate { get; set; }
         public string CreatedByName { get; set; }
         public ButtonShow ShowButton { get; set; }
     }

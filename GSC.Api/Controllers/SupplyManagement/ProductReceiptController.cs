@@ -45,10 +45,19 @@ namespace GSC.Api.Controllers.SupplyManagement
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        //[HttpGet("{isDeleted:bool?}")]
+        //public IActionResult Get(bool isDeleted)
+        //{
+        //    return Ok(_productReceiptRepository.GetProductReceiptList(isDeleted));
+        //}
+
+        [HttpGet("GetProductReceiptList/{projectId}/{isDeleted:bool?}")]
+        public IActionResult GetProductReceiptList(int projectId, bool isDeleted)
         {
-            return Ok(_productReceiptRepository.GetProductReceiptList(isDeleted));
+            var productReciept = _productReceiptRepository.GetProductReceiptList(projectId, isDeleted);
+            return Ok(productReciept);
+
+            //return Ok();
         }
 
         [HttpPost]

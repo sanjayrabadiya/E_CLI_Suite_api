@@ -585,5 +585,11 @@ namespace GSC.Api.Controllers.Master
             return Ok(studycount);
         }
 
+        [HttpGet]
+        [Route("GetParentProjectDropDownStudyReport")]
+        public IActionResult GetParentProjectDropDownStudyReport()
+        {
+            return Ok(_projectRepository.GetParentProjectDropDownStudyReport());
+        }
     }
 }

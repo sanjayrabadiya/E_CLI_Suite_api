@@ -20,43 +20,23 @@ namespace GSC.Data.Dto.Medra
         public int? ApprovedBy { get; set; }
         public bool? IsApproved { get; set; }
         public int? CompanyId { get; set; }
-        private DateTime? _modifiedDate;
 
-        public DateTime? ModifiedDate
-        {
-            get => _modifiedDate.UtcDateTime();
-            set => _modifiedDate = value?.UtcDateTime();
-        }
+        public DateTime? ModifiedDate { get; set; }
         public int ModifiedBy { get; set; }
         public int CreatedRole { get; set; }
         public int?[] ScreeningTemplateValueIds { get; set; }
 
         public int? TemplateStatus { get; set; }
         public bool? ExtraData { get; set; }
-        private DateTime? _approveDate;
-        public DateTime? ApproveDate
-        {
-            get => _approveDate?.UtcDateTime();
-            set => _approveDate = value?.UtcDateTime();
-        }
+        public DateTime? ApproveDate { get; set; }
     }
 
     public class MeddraCodingSearchDto
     {
         public int? Id { get; set; }
         public int MeddraConfigId { get; set; }
-        private DateTime? _FromDate;
-        public DateTime? FromDate
-        {
-            get => _FromDate.UtcDate();
-            set => _FromDate = value.UtcDate();
-        }
-        private DateTime? _ToDate;
-        public DateTime? ToDate
-        {
-            get => _ToDate.UtcDate();
-            set => _ToDate = value.UtcDate();
-        }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
         public int? ProjectId { get; set; }
         public int ProjectDesignId { get; set; }
         public int ProjectDesignVariableId { get; set; }
@@ -78,12 +58,7 @@ namespace GSC.Data.Dto.Medra
         public int All { get; set; }
         public int? CodedData { get; set; }
         public int? ApprovalData { get; set; }
-        private DateTime? _ModifiedDate;
-        public DateTime? ModifiedDate
-        {
-            get => _ModifiedDate.UtcDate();
-            set => _ModifiedDate = value.UtcDate();
-        }
+        public DateTime? ModifiedDate { get; set; }
         public string ModifiedBy { get; set; }
         public string ModifiedByRole { get; set; }
 
@@ -118,13 +93,8 @@ namespace GSC.Data.Dto.Medra
         public string UpdatedBy { get; set; }
         public string UpdatedByRole { get; set; }
 
-        private DateTime? _lastUpdateOn;
 
-        public DateTime? LastUpdateOn
-        {
-            get => _lastUpdateOn?.UtcDateTime();
-            set => _lastUpdateOn = value?.UtcDateTime();
-        }
+        public DateTime? LastUpdateOn { get; set; }
 
         public int SocId { get; set; }
         public string SocCode { get; set; }

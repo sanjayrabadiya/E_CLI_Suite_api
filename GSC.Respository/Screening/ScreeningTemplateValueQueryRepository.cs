@@ -4,6 +4,7 @@ using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
@@ -11,6 +12,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
@@ -29,15 +31,18 @@ namespace GSC.Respository.Screening
         private readonly IGSCContext _context;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
+        private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         public ScreeningTemplateValueQueryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
+            IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
+            _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
             _context = context;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
@@ -666,7 +671,7 @@ namespace GSC.Respository.Screening
         }
 
 
-        public IList<QueryManagementDto> GetScreeningQuery(int projectId)
+        public IList<ScreeningQueryDto> GetScreeningQuery(int projectId)
         {
             var sites = new List<int>();
             var isParent = _context.Project.Where(x => x.Id == projectId && x.ParentProjectId == null).ToList().Select(x => x.Id).ToList();
@@ -691,7 +696,7 @@ namespace GSC.Respository.Screening
                              from user in userDto.DefaultIfEmpty()
                              join roleTemp in _context.SecurityRole on value.UserRoleId equals roleTemp.Id into roleDto
                              from role in roleDto.DefaultIfEmpty()
-                             select new QueryManagementDto
+                             select new ScreeningQueryDto
                              {
                                  Id = query.Id,
                                  ProjectCode = screening.Project.ProjectCode,
@@ -708,19 +713,21 @@ namespace GSC.Respository.Screening
                                  DataEntryByName = role == null || string.IsNullOrEmpty(role.RoleName)
                                          ? user.UserName
                                          : user.UserName + "(" + role.RoleName + ")",
-                                 ScreeningTemplateValue = template.RepeatSeqNo == null && template.ParentId == null ? template.ProjectDesignTemplate.DesignOrder + ". " + template.ProjectDesignTemplate.TemplateName
+                                 ProjectDesignTemplateName = template.RepeatSeqNo == null && template.ParentId == null ? template.ProjectDesignTemplate.DesignOrder + ". " + template.ProjectDesignTemplate.TemplateName
                                             : template.ProjectDesignTemplate.DesignOrder + "." + template.RepeatSeqNo + " " + template.ProjectDesignTemplate.TemplateName,
                                  Visit = template.ScreeningVisit.ProjectDesignVisit.DisplayName +
                                          Convert.ToString(template.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + template.ScreeningVisit.RepeatedVisitNumber),
                                  FieldName = value.ProjectDesignVariable.VariableName,
+                                 ProjectDesignVariableId=value.ProjectDesignVariableId,
                                  VolunteerName = screening.RandomizationId != null ? randomization.Initial : screening.Attendance.Volunteer.AliasName,
                                  SubjectNo = screening.RandomizationId != null ? randomization.ScreeningNumber : screening.Attendance.Volunteer.VolunteerNo,
                                  RandomizationNumber = screening.RandomizationId != null ? randomization.RandomizationNumber : "",
                                  ScreeningTemplateValueId = query.ScreeningTemplateValueId,
                                  CollectionSource = (int)value.ProjectDesignVariable.CollectionSource,
+                                 ProjectDesignTemplateId = template.ProjectDesignTemplateId
                              }).OrderBy(x => x.Id).ToList();
 
-            var groupbytemp = queryDtos.GroupBy(x => x.ScreeningTemplateValueId).Select(y => new QueryManagementDto
+            var groupbytemp = queryDtos.GroupBy(x => x.ScreeningTemplateValueId).Select(y => new ScreeningQueryDto
             {
                 Id = y.Last().Id,
                 ProjectCode = y.Last().ProjectCode,
@@ -730,7 +737,7 @@ namespace GSC.Respository.Screening
                 QueryDescription = y.Last().QueryDescription,
                 QueryStatus = y.Last().QueryStatus,
                 OldValue = y.Last().OldValue,
-                ScreeningTemplateValue = y.Last().ScreeningTemplateValue,
+                ProjectDesignTemplateName = y.Last().ProjectDesignTemplateName,
                 Visit = y.Last().Visit,
                 FieldName = y.Last().FieldName,
                 VolunteerName = y.Last().VolunteerName,
@@ -739,12 +746,15 @@ namespace GSC.Respository.Screening
                 ClosedByName = y.Where(a => a.QueryStatus == QueryStatus.Closed).LastOrDefault()?.CreatedByName,
                 Value = y.Last().Value,
                 CreatedByName = y.Where(a => a.QueryStatus == QueryStatus.Open).LastOrDefault()?.CreatedByName,
-                ModifieedByName = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedByName,
+                ModifiedByName = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedByName,
                 CollectionSource = y.Last().CollectionSource,
                 DataEntryByName = y.Last().DataEntryByName,
                 ClosedDate = y.Where(a => a.QueryStatus == QueryStatus.Closed).LastOrDefault()?.CreatedDate,
                 CreatedDate = y.Where(a => a.QueryStatus == QueryStatus.Open).LastOrDefault()?.CreatedDate,
                 ModifiedDate = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedDate,
+                ProjectDesignTemplateId = y.Last().ProjectDesignTemplateId,
+                ScreeningTemplateValueId =y.Last().ScreeningTemplateValueId,
+                ProjectDesignVariableId=y.Last().ProjectDesignVariableId
             }).ToList();
 
             //Where(q => (filters.Status == null
@@ -752,7 +762,56 @@ namespace GSC.Respository.Screening
             //    && (filters.QueryGenerateBy == null || filters.QueryGenerateBy.Contains(q.CreatedByName))
             //    && (filters.DataEntryBy == null || filters.DataEntryBy.Contains(q.DataEntryByName))).ToList();
 
+
+            groupbytemp.ForEach(r =>
+            {
+                r.Variables = _context.ProjectDesignVariable.Where(t => t.Id == r.ProjectDesignVariableId && t.DeletedDate == null)
+                    .Select(x => new DesignScreeningVariableDto
+                    {
+                        ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+                        ProjectDesignVariableId = x.Id,
+                        Id = x.Id,
+                        VariableName = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName),
+                        VariableCode = x.VariableCode,
+                        CollectionSource = x.CollectionSource,
+                        ValidationType = x.ValidationType,
+                        DataType = x.DataType,
+                        Length = x.Length,
+                        DefaultValue = string.IsNullOrEmpty(x.DefaultValue) && x.CollectionSource == CollectionSources.HorizontalScale ? "1" : x.DefaultValue,
+                        LargeStep = x.LargeStep,
+                        LowRangeValue = x.LowRangeValue,
+                        HighRangeValue = x.HighRangeValue,
+                        RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
+                        PrintType = x.PrintType,
+                        //Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
+                        UnitName = x.Unit.UnitName,
+                        DesignOrder = x.DesignOrder,
+                        IsDocument = x.IsDocument,
+                        VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
+                        SystemType = x.SystemType,
+                        IsNa = x.IsNa,
+                        DateValidate = x.DateValidate,
+                        Alignment = x.Alignment ?? Alignment.Right,
+                        Note = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
+                        ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
+                        Values = _projectDesignVariableValueRepository.All.
+                                      Where(y => y.ProjectDesignVariable.ProjectDesignTemplateId == x.Id && x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
+                                      {
+                                          Id = c.Id,
+                                          ProjectDesignVariableId = c.ProjectDesignVariableId,
+                                          ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
+                                          SeqNo = c.SeqNo,
+                                          Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
+                                      }).ToList(),
+                        HasQueries = true,
+                        ScreeningTemplateValueId = r.ScreeningTemplateValueId
+                    }).FirstOrDefault();
+            });
             return groupbytemp;
+
         }
 
 
@@ -804,7 +863,7 @@ namespace GSC.Respository.Screening
                 //CreatedByName = y.Where(a => a.QueryStatus == QueryStatus.Open).LastOrDefault()?.CreatedByName,
                 //ModifieedByName = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedByName,
                 // CollectionSource = y.Last().CollectionSource,
-                 DataEntryByName = r.Last().ScreeningTemplateValue.UserRoleId == null ? r.Last().ScreeningTemplateValue.CreatedByUser.UserName : r.Last().ScreeningTemplateValue.CreatedByUser.UserName + "(" + r.Last().ScreeningTemplateValue.SecurityRole.RoleName + ")",
+                DataEntryByName = r.Last().ScreeningTemplateValue.UserRoleId == null ? r.Last().ScreeningTemplateValue.CreatedByUser.UserName : r.Last().ScreeningTemplateValue.CreatedByUser.UserName + "(" + r.Last().ScreeningTemplateValue.SecurityRole.RoleName + ")",
                 //CreatedDate = y.Where(a => a.QueryStatus == QueryStatus.Open).LastOrDefault()?.CreatedDate,
                 //ModifiedDate = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedDate
             }).ToList();

@@ -17,13 +17,6 @@ namespace GSC.Data.Entities.Medra
         public int? UserRoleId { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
-        private DateTime? _createdDate;
-
-        public DateTime? CreatedDate
-        {
-            get => _createdDate?.UtcDateTime();
-            set => _createdDate = value?.UtcDateTime();
-        }
 
         public int? ReasonId { get; set; }
         public string ReasonOth { get; set; }

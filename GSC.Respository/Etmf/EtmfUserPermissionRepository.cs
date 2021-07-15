@@ -32,7 +32,7 @@ namespace GSC.Respository.Etmf
             _projectRightRepository = projectRightRepository;
         }
 
-        public List<EtmfUserPermissionDto> GetByUserId(int UserId, int ProjectId)
+        public List<EtmfUserPermissionDto> GetByUserId(int UserId, int ProjectId, int? ParentProject)
         {
             // Get workplace folder name
             var Worksplace = Enum.GetValues(typeof(WorkPlaceFolder))
@@ -42,11 +42,11 @@ namespace GSC.Respository.Etmf
                                 ItemId = Convert.ToInt16(e),
                                 ItemName = e.GetDescription(),
                                 hasChild = true,
-                            }).OrderBy(o => o.ItemId).ToList();
+                            }).Where(x => ParentProject != null ? x.ItemId == 2 : x.ItemId == 1 || x.ItemId == 3).OrderBy(o => o.ItemId).ToList();
 
             // Get child of workplace folder
             var ProjectWorkplaceDetail = _context.ProjectWorkplaceDetail.Include(t => t.ProjectWorkplace)
-                .Where(t => t.DeletedDate == null && t.ProjectWorkplace.ProjectId == ProjectId)
+                .Where(t => t.DeletedDate == null && (ParentProject == null ? t.ProjectWorkplace.ProjectId == ProjectId : t.ItemId == ProjectId))
                 .Select(t => new EtmfUserPermissionDto
                 {
                     ParentWorksplaceFolderId = t.WorkPlaceFolderId,
@@ -76,11 +76,11 @@ namespace GSC.Respository.Etmf
 
             Worksplace.ForEach(w =>
             {
-                w.IsAdd = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsAdd);
-                w.IsEdit = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsEdit);
-                w.IsDelete = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsDelete);
-                w.IsView = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsView);
-                w.IsExport = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsExport);
+                w.IsAdd = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsAdd);
+                w.IsEdit = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsEdit);
+                w.IsDelete = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsDelete);
+                w.IsView = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsView);
+                w.IsExport = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsExport);
                 w.IsAll = w.IsAdd && w.IsEdit && w.IsDelete && w.IsView && w.IsExport;
             });
 
@@ -199,9 +199,11 @@ namespace GSC.Respository.Etmf
 
         public List<EtmfUserPermissionDto> GetEtmfPermissionData(int ProjectId)
         {
+            var ParentProject = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().ParentProjectId;
             // get etmf rights list
             var result = All
-                .Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId)
+                .Where(x => (ParentProject == null ? x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId && (x.ProjectWorkplaceDetail.WorkPlaceFolderId == 3 || x.ProjectWorkplaceDetail.WorkPlaceFolderId == 1) 
+                : x.ProjectWorkplaceDetail.ItemId == ProjectId))
                 .Select(y => new EtmfUserPermissionDto
                 {
                     Id = y.Id,
@@ -215,7 +217,7 @@ namespace GSC.Respository.Etmf
             {
                 Id = x.FirstOrDefault().Id,
                 UserId = x.Key,
-                IsRevoke = x.FirstOrDefault().DeletedDate == null ? false : true,
+                IsRevoke = x.All(y => y.DeletedDate != null) ? true : false,
                 UserName = x.FirstOrDefault().UserName,
                 CreatedDate = x.FirstOrDefault().CreatedDate
             }).OrderByDescending(x => x.Id).ToList();

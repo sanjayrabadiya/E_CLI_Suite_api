@@ -238,6 +238,33 @@ namespace GSC.Respository.Master
             return ProjectList.Where(x => !AlreadyAdded.Any(c => c.ProjectId == x.Id)).ToList();
         }
 
+        public List<ProjectDropDown> GetParentProjectDropDownStudyReport()
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var AlreadyAdded = _context.ProjectWorkplace.Where(x => x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
+                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            var ProjectList = All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ParentProjectId == null
+                    && x.ProjectCode != null
+                    && projectList.Any(c => c == x.Id)
+                    )
+                  .Select(c => new ProjectDropDown
+                  {
+                      Id = c.Id,
+                      Value = c.ProjectCode,
+                      Code = c.ProjectCode,
+                      IsStatic = c.IsStatic,
+                      ParentProjectId = c.ParentProjectId ?? c.Id,
+                      IsDeleted = c.DeletedDate != null
+                  }).Distinct().OrderBy(o => o.Value).ToList();
+
+            return ProjectList.Where(x => AlreadyAdded.Any(c => c.ProjectId == x.Id)).ToList();
+        }
+
         public List<ProjectDropDown> GetParentStaticProjectDropDown()
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
