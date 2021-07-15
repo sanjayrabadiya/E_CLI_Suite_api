@@ -25,7 +25,7 @@ namespace GSC.Respository.Attendance
         void ChangeStatustoConsentCompleted(int id);
         void ChangeStatustoReConsentInProgress(int id);
         Task PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId);
-        void ChangeStatustoWithdrawal();
+        void ChangeStatustoWithdrawal(FileModel fileModel);
         DashboardPatientDto GetDashboardPatientDetail();
         //List<ProjectDesignVisitMobileDto> GetPatientVisits();
         List<ProjectDesignVisitMobileDto> GetPatientVisits();

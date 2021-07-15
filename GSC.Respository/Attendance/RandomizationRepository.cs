@@ -35,6 +35,19 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Shared.Security;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Medra;
+using GSC.Data.Dto.Configuration;
+using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
+using System.IO;
+using Newtonsoft.Json.Linq;
+using Syncfusion.Pdf.Parsing;
+using Syncfusion.Pdf.Security;
+using Syncfusion.DocIORenderer;
+using Syncfusion.Pdf;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using Newtonsoft.Json;
+using Syncfusion.Pdf.Graphics;
+using Syncfusion.Drawing;
 
 namespace GSC.Respository.Attendance
 {
@@ -62,6 +75,8 @@ namespace GSC.Respository.Attendance
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IAppSettingRepository _appSettingRepository;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -80,7 +95,8 @@ namespace GSC.Respository.Attendance
             IManageSiteRepository manageSiteRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting,
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
             IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IAppSettingRepository appSettingRepository, IUploadSettingRepository uploadSettingRepository)
             : base(context)
         {
             _userRepository = userRepository;
@@ -104,6 +120,8 @@ namespace GSC.Respository.Attendance
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
             _uow = uow;
+            _appSettingRepository = appSettingRepository;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -742,20 +760,103 @@ namespace GSC.Respository.Attendance
             }
 
         }
-        public void ChangeStatustoWithdrawal()
+        public void ChangeStatustoWithdrawal(FileModel fileModel)
         {
             //public void ChangeStatustoWithdrawal(FileModel fileModel)
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
             //if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
             //{
-            //if (fileModel.Base64?.Length > 0)
-            //{
-            //    randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
-            //        _context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
-            //}
+            //string signaturepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), randomization.WithdrawSignaturePath);
+            //if (File.Exists(signaturepath))
+            //    System.IO.File.Delete(signaturepath);
+            if (fileModel.Base64?.Length > 0)
+            {
+                randomization.WithdrawSignaturePath = new ImageService().ImageSave(fileModel,
+                    _context.UploadSetting.FirstOrDefault().ImagePath, FolderType.InformConcent);
+            }
+            withdrawPdf(randomization.Id, randomization.WithdrawSignaturePath, randomization);
+            randomization.WithdrawSignaturePath = randomization.WithdrawSignaturePath;
             randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
             Update(randomization);
             //}
+        }
+
+      
+        private void withdrawPdf(int Id, string imagepath,Randomization randomization)
+        {
+            var withdrawfile = _context.EconsentReviewDetails.Where(x => x.RandomizationId == Id).Include(x => x.EconsentSetup).ToList();
+
+            var generalSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+            generalSettings.TimeFormat = generalSettings.TimeFormat.Replace("a", "tt");
+            foreach (var item in withdrawfile)
+            {
+                if (item.IsReviewedByPatient != true)
+                {
+                    var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), item.EconsentSetup.DocumentPath);               
+                    FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                    Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                    DocIORenderer render = new DocIORenderer();
+                    render.Settings.PreserveFormFields = true;
+                    PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+                    //add signature
+                    //pdfDocument = CreateSignature(pdfDocument, Id);
+
+                    PdfPage page = pdfDocument.Pages.Add();
+                    PdfGraphics graphics = page.Graphics;
+                    //Load the image from the disk   
+                    FileStream logoinputstream = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{imagepath}", FileMode.Open, FileAccess.Read);
+                    PdfImage image = new PdfBitmap(logoinputstream);
+                    //Draw the image   
+
+                    PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
+                    PdfFont regular = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Regular);
+                    PdfStringFormat format = new PdfStringFormat();
+                    format.Alignment = PdfTextAlignment.Left;
+                    format.LineAlignment = PdfVerticalAlignment.Top;
+
+                    var reason = _jwtTokenAccesser.GetHeader("audit-reason-name");
+                    var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+
+                    graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
+                    graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);                    
+                    
+                    graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
+                    graphics.DrawImage(image, new PointF(70, 70), new SizeF(650, 150));
+                    graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 190), format);
+                    graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 190), format);
+
+                    graphics.DrawString("Withdraw By:", fontbold, PdfBrushes.Black, new PointF(70, 210), format);
+                    graphics.DrawString($"{_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")"}", regular, PdfBrushes.Black, new PointF(150, 210), format);
+
+                    graphics.DrawString("Withdraw Reason:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);                   
+                    graphics.DrawString($"{reason}", regular, PdfBrushes.Black, new PointF(180, 230), format);
+
+                    graphics.DrawString("Comment:", fontbold, PdfBrushes.Black, new PointF(70, 250), format);
+                    graphics.DrawString($"{reasonOth}", regular, PdfBrushes.Black, new PointF(70, 270), format);
+
+                    render.Dispose();
+                    wordDocument.Dispose();
+                    MemoryStream outputStream = new MemoryStream();
+                    pdfDocument.Save(outputStream);
+                    pdfDocument.Close();
+
+                    var outputname = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
+                    var pdfpath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
+                    var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), pdfpath);
+                    if (!Directory.Exists(outputFile)) Directory.CreateDirectory(Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF"));
+                    FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+                    outputStream.WriteTo(file);
+                    file.Close();
+                    file.Dispose();
+                    outputStream.Close();
+                    outputStream.Dispose();
+
+                    var reviewDetails = _context.EconsentReviewDetails.Find(item.Id);
+                    reviewDetails.pdfpath = pdfpath;
+                    _context.EconsentReviewDetails.Update(reviewDetails);
+                    _context.Save();
+                }
+            }
         }
 
         public DashboardPatientDto GetDashboardPatientDetail()

@@ -71,7 +71,7 @@ namespace GSC.Respository.InformConcent
         {
             // this method calls when patient login and click on menu inform consent, documents with headers displays on left side returned in this API
             var noneregister = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
-            if (noneregister == null) return new List<EConsentDocumentHeader>();           
+            if (noneregister == null) return new List<EConsentDocumentHeader>();
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var result = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null && x.EconsentSetup.LanguageId == noneregister.LanguageId).Select(x => new EConsentDocumentHeader
             {
@@ -213,7 +213,7 @@ namespace GSC.Respository.InformConcent
                         headercount++;
                     }
                     if (sectionno == headercount)
-                    {                        
+                    {
                         blocks.Add(e2);
                     }
                 }
@@ -223,7 +223,7 @@ namespace GSC.Respository.InformConcent
             {
                 jsonobj.sections[i].blocks = new List<Block>();
                 if (i == 0)
-                {                   
+                {
                     jsonobj.sections[0].blocks = blocks;
                 }
             }
@@ -231,7 +231,7 @@ namespace GSC.Respository.InformConcent
             for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
             {
                 if (jsonobj.sections[i].blocks.Count > 0)
-                {                    
+                {
                     newsections.Add(jsonobj.sections[i]);
                 }
             }
@@ -240,7 +240,7 @@ namespace GSC.Respository.InformConcent
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
-            return jsonnew;       
+            return jsonnew;
         }
 
         public string GetEconsentDocument(EconsentDocumetViwerDto econsentreviewdetails)
@@ -264,7 +264,7 @@ namespace GSC.Respository.InformConcent
             var jsonObj = JObject.Parse(json);
             string sign = File.ReadAllText("Config//signaturefooterblock.json");
             string sign2 = sign;
-          
+
             var randomization = _context.Randomization.Where(x => x.Id == econcentreview.RandomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
             if (econcentreview.IsReviewedByPatient)
             {
@@ -341,7 +341,9 @@ namespace GSC.Respository.InformConcent
         public List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForSubjectManagement(int patientid)
         {
             // use in subject management display documents patient wise
-            var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.IsReviewedByPatient == true && x.EconsentSetup.Roles.Any(t => t.RoleId == _jwtTokenAccesser.RoleId)).
+            //var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.IsReviewedByPatient == true && x.EconsentSetup.Roles.Any(t => t.RoleId == _jwtTokenAccesser.RoleId)).
+            //       ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.EconsentSetup.Roles.Any(t => t.RoleId == _jwtTokenAccesser.RoleId)).
                    ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return EconsentReviewDetails;
         }
@@ -409,7 +411,8 @@ namespace GSC.Respository.InformConcent
             var outputname = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
             var pdfpath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
             var outputFile = Path.Combine(upload.DocumentPath, pdfpath);
-            if (!Directory.Exists(outputFile)) Directory.CreateDirectory(Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF"));
+            if (!Directory.Exists(outputFile))
+                Directory.CreateDirectory(Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF"));
             FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
             outputStream.WriteTo(file);
             file.Dispose();
@@ -468,9 +471,9 @@ namespace GSC.Respository.InformConcent
             {
                 //try
                 //{
-                    string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
-                    if (File.Exists(oldpdfpath))
-                        System.IO.File.Delete(oldpdfpath);
+                string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
+                if (File.Exists(oldpdfpath))
+                    System.IO.File.Delete(oldpdfpath);
                 //}
                 //catch (Exception ex)
                 //{
@@ -515,20 +518,20 @@ namespace GSC.Respository.InformConcent
             graphics.DrawString(Convert.ToDateTime(econsentReviewDetails.investigatorRevieweddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat), fontnormal, PdfBrushes.Black, new PointF(70, 340));
 
             if (econsentReviewDetailsDto.IsApproved == true)
-                graphics.DrawString("Approved Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 275));
+                graphics.DrawString("Approved Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 360));
             else
-                graphics.DrawString("Reject Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 275));
+                graphics.DrawString("Reject Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 360));
 
             string reasonName = _context.AuditReason.Where(x => x.Id == econsentReviewDetailsDto.ApproveRejectReasonId).FirstOrDefault().ReasonName;
-            graphics.DrawString(reasonName, fontnormal, PdfBrushes.Black, new PointF(175, 275));
+            graphics.DrawString(reasonName, fontnormal, PdfBrushes.Black, new PointF(175, 360));
             if (econsentReviewDetailsDto.ApproveRejectReasonOth != null && econsentReviewDetailsDto.ApproveRejectReasonOth != "")
             {
                 if (econsentReviewDetailsDto.IsApproved == true)
-                    graphics.DrawString("Approved Comment: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
+                    graphics.DrawString("Approved Comment: ", fontbold, PdfBrushes.Black, new PointF(70, 380));
                 else
-                    graphics.DrawString("Reject Comment: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
+                    graphics.DrawString("Reject Comment: ", fontbold, PdfBrushes.Black, new PointF(70, 380));
 
-                graphics.DrawString(econsentReviewDetailsDto.ApproveRejectReasonOth, fontnormal, PdfBrushes.Black, new PointF(190, 300));
+                graphics.DrawString(econsentReviewDetailsDto.ApproveRejectReasonOth, fontnormal, PdfBrushes.Black, new PointF(70, 400));
             }
             render.Dispose();
             wordDocument.Dispose();

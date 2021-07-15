@@ -380,10 +380,11 @@ namespace GSC.Api.Controllers.Attendance
 
         [HttpPut]
         [Route("ChangeStatustoWithdrawal")]
-        public IActionResult ChangeStatustoWithdrawal()
+        public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
+        //public IActionResult ChangeStatustoWithdrawal()
         {
             //public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
-            _randomizationRepository.ChangeStatustoWithdrawal();
+            _randomizationRepository.ChangeStatustoWithdrawal(fileModel);
             _uow.Save();
             return Ok();
         }
