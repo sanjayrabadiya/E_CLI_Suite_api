@@ -41,5 +41,6 @@ namespace GSC.Respository.Master
         IList<ProjectDropDown> GetAllProjectsForDataEntry();
         List<ProjectDropDown> GetParentProjectDropDownEtmf();
         List<ProjectDropDown> GetParentProjectDropDownStudyReport();
+        IList<ProjectDropDown> GetProjectForAttendance(bool isStatic);
     }
 }

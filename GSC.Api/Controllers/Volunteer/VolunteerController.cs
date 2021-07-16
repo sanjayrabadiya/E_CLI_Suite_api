@@ -111,13 +111,24 @@ namespace GSC.Api.Controllers.Volunteer
         public IActionResult Post([FromBody] VolunteerDto volunteerDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var volunteer = _mapper.Map<Data.Entities.Volunteer.Volunteer>(volunteerDto);
+
+            if (!string.IsNullOrEmpty(volunteerDto.RefNo))
+            {
+                var validate = _volunteerRepository.DuplicateOldReference(volunteerDto);
+                if (!string.IsNullOrEmpty(validate))
+                {
+                    ModelState.AddModelError("Message", validate);
+                    return BadRequest(ModelState);
+                }
+            }
+
             volunteerDto.Id = 0;
             if (volunteerDto.FileModel?.Base64?.Length > 0)
                 volunteerDto.ProfilePic = new ImageService().ImageSave(volunteerDto.FileModel,
                     _uploadSettingRepository.GetImagePath(), FolderType.Volunteer);
 
-
-            var volunteer = _mapper.Map<Data.Entities.Volunteer.Volunteer>(volunteerDto);
             if (volunteer.Addresses != null)
                 foreach (var address in volunteer.Addresses)
                     address.Location = _locationRepository.SaveLocation(address.Location);
@@ -146,11 +157,21 @@ namespace GSC.Api.Controllers.Volunteer
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var volunteer = _mapper.Map<Data.Entities.Volunteer.Volunteer>(volunteerDto);
+
+            if(!string.IsNullOrEmpty(volunteerDto.RefNo))
+            {
+                var validate = _volunteerRepository.DuplicateOldReference(volunteerDto);
+                if (!string.IsNullOrEmpty(validate))
+                {
+                    ModelState.AddModelError("Message", validate);
+                    return BadRequest(ModelState);
+                }
+            }
+
             if (volunteerDto.FileModel?.Base64?.Length > 0)
                 volunteerDto.ProfilePic = new ImageService().ImageSave(volunteerDto.FileModel,
                     _uploadSettingRepository.GetImagePath(), FolderType.Volunteer);
-
-            var volunteer = _mapper.Map<Data.Entities.Volunteer.Volunteer>(volunteerDto);
 
             if (volunteer.Addresses != null)
                 foreach (var address in volunteer.Addresses)
@@ -235,7 +256,6 @@ namespace GSC.Api.Controllers.Volunteer
             var response = _volunteerSummaryReport.GetVolunteerSummaryDesign(volunteerId);
             return response;
         }
-
 
     }
 }

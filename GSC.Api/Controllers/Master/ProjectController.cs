@@ -591,5 +591,12 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_projectRepository.GetParentProjectDropDownStudyReport());
         }
+
+        [HttpGet]
+        [Route("GetProjectForAttendance/{isStatic}")]
+        public IActionResult GetProjectForAttendance(bool isStatic)
+        {
+            return Ok(_projectRepository.GetProjectForAttendance(isStatic));
+        }
     }
 }

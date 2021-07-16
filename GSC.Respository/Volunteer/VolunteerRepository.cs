@@ -134,11 +134,16 @@ namespace GSC.Respository.Volunteer
             {
                 if (search.FromAge.HasValue)
                     //query = query.Where(x => x.FromAge >= search.FromAge);
-                    query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year - x.DateOfBirth.Value.Year) >= search.FromAge);
+                    //query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year - x.DateOfBirth.Value.Year) >= search.FromAge);
+                    query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year -
+                        (DateTime.Today.Month < x.DateOfBirth.Value.Month || (DateTime.Today.Month == x.DateOfBirth.Value.Month && DateTime.Today.Day < x.DateOfBirth.Value.Day)
+                        ? x.DateOfBirth.Value.Year - 1 : x.DateOfBirth.Value.Year)) >= search.FromAge);
                 if (search.ToAge.HasValue)
                     //query = query.Where(x => x.FromAge <= search.ToAge);
-                    //query = query.Where(x => x.DateOfBirth != null && CalculateAge(Convert.ToDateTime(x.DateOfBirth)) <= search.ToAge);
-                    query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year - x.DateOfBirth.Value.Year) <= search.ToAge);
+                    //query = query.Where(x => x.DateOfBirth != null && CalculateAge(Convert.ToDateTime(x.DateOfBirth.Value)) <= search.ToAge);
+                    query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year -
+                    (DateTime.Today.Month < x.DateOfBirth.Value.Month || (DateTime.Today.Month == x.DateOfBirth.Value.Month && DateTime.Today.Day < x.DateOfBirth.Value.Day)
+                    ? x.DateOfBirth.Value.Year - 1 : x.DateOfBirth.Value.Year)) <= search.ToAge);
                 if (!string.IsNullOrEmpty(search.VolunteerNo))
                     query = query.Where(x =>
                         x.VolunteerNo != null && x.VolunteerNo.ToLower().Contains(search.VolunteerNo.ToLower()));
@@ -197,15 +202,6 @@ namespace GSC.Respository.Volunteer
             var result = GetItems(query, true);
 
             return result;
-        }
-
-        private int CalculateAge(DateTime dob)
-        {
-            DateTime today = DateTime.Today;
-            int age = today.Year - dob.Year;
-            if (today.Month < dob.Month || (today.Month == dob.Month && today.Day < dob.Day))
-                age--;
-            return age;
         }
 
         public VolunteerStatusCheck CheckStatus(int id)
@@ -274,30 +270,42 @@ namespace GSC.Respository.Volunteer
             {
                 volunteer.Status = VolunteerStatus.Completed;
                 volunteer.VolunteerNo = GetVolunteerNumber();
-                Update(volunteer);
-                _context.Save();
-                return new VolunteerStatusCheck
+
+                if (_context.Volunteer.Where(t => t.VolunteerNo == volunteer.VolunteerNo).Any())
                 {
-                    Id = id,
-                    VolunteerNo = volunteer.VolunteerNo,
-                    Status = VolunteerStatus.Completed,
-                    IsNew = true,
-                    StatusName = message
-                };
+                    return new VolunteerStatusCheck
+                    { Id = id, Status = VolunteerStatus.InCompleted, IsNew = false, StatusName = "Volunteer Number already exists." };
+                }
+                else
+                {
+                    Update(volunteer);
+                    _context.Save();
+                    return new VolunteerStatusCheck
+                    {
+                        Id = id,
+                        VolunteerNo = volunteer.VolunteerNo,
+                        Status = VolunteerStatus.Completed,
+                        IsNew = true,
+                        StatusName = message
+                    };
+                }
+
             }
 
             return new VolunteerStatusCheck
             { Id = id, Status = VolunteerStatus.InCompleted, IsNew = true, StatusName = message };
         }
 
-        public IList<VolunteerAttendaceDto> GetVolunteerForAttendance(VolunteerSearchDto search)
+        public IList<DropDownDto> GetVolunteerForAttendance(VolunteerSearchDto search)
         {
-            var query = All.Where(x => x.DeletedDate == null && x.Status == VolunteerStatus.Completed);
+            var query = All.Where(x => x.DeletedDate == null && x.Status == VolunteerStatus.Completed && (x.IsBlocked == false || x.IsBlocked == null));
 
             if (!string.IsNullOrEmpty(search.TextSearch))
             {
                 var volunterIds = AutoCompleteSearch(search.TextSearch.Trim());
-                query = query.Where(x => volunterIds.Any(a => a.Id == x.Id));
+                IEnumerable<int> ids = volunterIds.Select(x => x.Id).Distinct();
+                query = query.Where(x => ids.Contains(x.Id));
+                //query = query.Where(x => volunterIds.Any(a => a.Id == x.Id));
             }
 
             if (search.PeriodNo == 1)
@@ -318,24 +326,11 @@ namespace GSC.Respository.Volunteer
                                                                   t.ProjectId == projectId && t.VolunteerId == x.Id));
 
 
-            return query.Select(x => new VolunteerAttendaceDto
+            return query.Select(t => new DropDownDto
             {
-                Id = x.Id,
-                VolunteerNo = x.VolunteerNo,
-                RefNo = x.RefNo,
-                LastName = x.LastName,
-                FirstName = x.FirstName,
-                MiddleName = x.MiddleName,
-                AliasName = x.AliasName,
-                DateOfBirth = x.DateOfBirth,
-                FullName = x.FullName,
-                FromAge = x.FromAge,
-                ToAge = x.ToAge,
-                Gender = x.GenderId == null ? "" : ((Gender)x.GenderId).GetDescription(),
-                Race = x.Race.RaceName,
-                IsDeleted = x.DeletedDate != null,
-                Blocked = x.IsBlocked ?? false
-            }).OrderByDescending(x => x.FullName).ToList();
+                Id = t.Id,
+                Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
+            }).ToList();
         }
 
         public IList<DropDownDto> AutoCompleteSearch(string searchText, bool isAutoSearch = false)
@@ -456,6 +451,13 @@ namespace GSC.Respository.Volunteer
                 //Value = t.VolunteerNo + " " + t.FullName
                 Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
             }).ToList();
+        }
+
+        public string DuplicateOldReference(VolunteerDto objSave)
+        {
+            if (All.Any(x => x.Id != objSave.Id && x.RefNo == objSave.RefNo && x.DeletedDate == null))
+                return "Duplicate Refrence Number : " + objSave.RefNo;
+            return "";
         }
 
     }

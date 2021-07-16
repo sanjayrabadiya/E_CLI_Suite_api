@@ -10,9 +10,8 @@ namespace GSC.Data.Entities.Volunteer
 {
     public class Volunteer : BaseEntity
     {
-        private DateTime? _DateOfBirth;
-
-        private DateTime? _RegisterDate;
+        public DateTime? DateOfBirth { get; set; }
+        public DateTime? RegisterDate { get; set; }
         public string VolunteerNo { get; set; }
 
         public string RefNo { get; set; }
@@ -24,18 +23,6 @@ namespace GSC.Data.Entities.Volunteer
         public string MiddleName { get; set; }
 
         public string AliasName { get; set; }
-
-        public DateTime? DateOfBirth
-        {
-            get => _DateOfBirth?.UtcDate();
-            set => _DateOfBirth = value?.UtcDate();
-        }
-
-        public DateTime? RegisterDate
-        {
-            get => _RegisterDate?.UtcDate();
-            set => _RegisterDate = value?.UtcDate();
-        }
 
         public int? FromAge { get; set; }
 

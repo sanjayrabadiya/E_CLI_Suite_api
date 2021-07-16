@@ -13,16 +13,10 @@ namespace GSC.Data.Entities.Attendance
 {
     public class Attendance : BaseEntity, ICommonAduit
     {
-        private DateTime _AttendanceDate;
         public int ProjectId { get; set; }
         public int? VolunteerId { get; set; }
 
-        public DateTime AttendanceDate
-        {
-            get => _AttendanceDate.UtcDate();
-            set => _AttendanceDate = value.UtcDate();
-        }
-
+        public DateTime AttendanceDate { get; set; }
         public bool IsFingerPrint { get; set; }
         public int RoleId { get; set; }
         public int? AuditReasonId { get; set; }

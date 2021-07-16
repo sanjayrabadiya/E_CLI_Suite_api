@@ -8,20 +8,13 @@ namespace GSC.Data.Dto.Attendance
 {
     public class AttendanceDto : BaseDto
     {
-        private DateTime _AttendanceDate;
-
         [Required(ErrorMessage = "Project Name is required.")]
         public int ProjectId { get; set; }
 
         [Required(ErrorMessage = "Volunteer Name is required.")]
         public int? VolunteerId { get; set; }
 
-        public DateTime AttendanceDate
-        {
-            get => _AttendanceDate.UtcDate();
-            set => _AttendanceDate = value.UtcDate();
-        }
-
+        public DateTime AttendanceDate { get; set; }
         public bool IsFingerPrint { get; set; }
         public int RoleId { get; set; }
         public int ProjectDesignPeriodId { get; set; }

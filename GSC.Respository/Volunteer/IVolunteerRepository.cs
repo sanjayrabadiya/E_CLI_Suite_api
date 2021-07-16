@@ -11,10 +11,10 @@ namespace GSC.Respository.Volunteer
         IList<VolunteerGridDto> Search(VolunteerSearchDto search);
         VolunteerStatusCheck CheckStatus(int id);
         IList<DropDownDto> AutoCompleteSearch(string searchText, bool isAutoSearch = false);
-        IList<VolunteerAttendaceDto> GetVolunteerForAttendance(VolunteerSearchDto search);
+        IList<DropDownDto> GetVolunteerForAttendance(VolunteerSearchDto search);
         List<VolunteerGridDto> GetVolunteerDetail(bool isDeleted, int volunteerid);
         IList<DropDownDto> QueryAutoCompleteSearch(string searchText, bool isAutoSearch = false);
-
+        string DuplicateOldReference(VolunteerDto objSave);
 
         //IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock);
 

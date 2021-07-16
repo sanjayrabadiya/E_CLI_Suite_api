@@ -704,5 +704,26 @@ namespace GSC.Respository.Master
                 }).Distinct().ToList();
             return data;
         }
+        public IList<ProjectDropDown> GetProjectForAttendance(bool isStatic)
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var projects = All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.DeletedDate == null
+                    && x.IsStatic == isStatic
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode + " - " + c.ProjectName,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    AttendanceLimit = c.AttendanceLimit ?? 0
+                }).OrderBy(o => o.Value).ToList();
+
+            return projects;
+        }
     }
 }

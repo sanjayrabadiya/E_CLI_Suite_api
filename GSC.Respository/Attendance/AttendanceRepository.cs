@@ -131,7 +131,7 @@ namespace GSC.Respository.Attendance
                 AttendanceId = x.Id,
                 VolunteerId = x.VolunteerId,
                 ProjectDesignId = x.ProjectDesignPeriod.ProjectDesignId,
-                VolunteerName = x.Volunteer.FullName,
+                VolunteerName = x.Volunteer.FirstName + " " + x.Volunteer.MiddleName + " " + x.Volunteer.LastName,
                 VolunteerNumber = x.Volunteer.VolunteerNo,
                 Gender = x.Volunteer == null || x.Volunteer.GenderId == null ? "" : x.Volunteer.GenderId.ToString(),
                 ProjectCode = x.Project.ProjectCode,
@@ -154,6 +154,9 @@ namespace GSC.Respository.Attendance
                 IsReplaced = x.ProjectSubject != null && x.ProjectSubject.IsRepaced,
                 AttendanceScreeningEntryId = x.ScreeningEntry.Id,
                 IsScreeningStarted = x.ScreeningEntry != null ? true : false,
+                CreatedByUser = x.CreatedByUser.UserName,
+                ModifiedByUser = x.ModifiedByUser.UserName,
+                DeletedByUser = x.DeletedByUser.UserName,
                 CreatedDate = x.CreatedDate,
                 ModifiedDate = x.ModifiedDate,
                 DeletedDate = x.DeletedDate,
@@ -337,7 +340,9 @@ namespace GSC.Respository.Attendance
             if (attendanceDto.AttendanceType == DataEntryType.Screening)
                 if (All.Any(x =>
                     x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == DataEntryType.Screening &&
-                    x.AttendanceDate.ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString() &&
+                    //Convert.ToDateTime(x.AttendanceDate).ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString()  &&
+                    x.AttendanceDate.Date == _jwtTokenAccesser.GetClientDate().Date &&
+                    //x.AttendanceDate.ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString() &&
                     x.DeletedDate == null))
                     return "Volunteer already present today";
             if (attendanceDto.AttendanceType == DataEntryType.Project)
