@@ -807,7 +807,8 @@ namespace GSC.Respository.Screening
                                           Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
                                       }).ToList(),
                         HasQueries = true,
-                        ScreeningTemplateValueId = r.ScreeningTemplateValueId
+                        ScreeningTemplateValueId = r.ScreeningTemplateValueId,
+                        IsEncrypt = false
                     }).FirstOrDefault();
             });
             return groupbytemp;
