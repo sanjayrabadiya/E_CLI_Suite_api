@@ -31,6 +31,8 @@ namespace GSC.Respository.Etmf
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
+        public string Workplace = "AAAAAA";
+        
         public ETMFWorkplaceRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IMapper mapper, IUploadSettingRepository uploadSettingRepository,
@@ -83,7 +85,7 @@ namespace GSC.Respository.Etmf
 
 
             pvListObj.Id = projectWorkplaces.FirstOrDefault().Id;
-            pvListObj.RandomId = RandomPassword.CreateRandomPassword(6);
+            pvListObj.RandomId = Workplace;
             pvListObj.Text = _context.Project.Where(x => x.Id == projectWorkplaces.FirstOrDefault().ProjectId).FirstOrDefault().ProjectCode;
             pvListObj.Level = 1;
             pvListObj.Item = new List<TreeValue>();
@@ -92,27 +94,30 @@ namespace GSC.Respository.Etmf
 
             TreeValue TrialFol = new TreeValue();
             TrialFol.Id = 11111111;
-            TrialFol.RandomId = RandomPassword.CreateRandomPassword(6);
+            TrialFol.RandomId = "TTTTTT";
             TrialFol.Text = "Trial";
             TrialFol.Level = 2;
             TrialFol.Icon = "las la-folder-open text-blue eicon";
             TrialFol.WorkPlaceFolderId = WorkPlaceFolder.Trial;
+            TrialFol.ExpandData = string.Join(",", pvListObj.RandomId, TrialFol.RandomId);
 
             TreeValue CountryFol = new TreeValue();
             CountryFol.Id = 11111112;
-            CountryFol.RandomId = RandomPassword.CreateRandomPassword(6);
+            CountryFol.RandomId = "CCCCCC";
             CountryFol.Text = "Country";
             CountryFol.Level = 2;
             CountryFol.Icon = "las la-folder-open text-blue eicon";
             CountryFol.WorkPlaceFolderId = WorkPlaceFolder.Country;
+            CountryFol.ExpandData = string.Join(",", pvListObj.RandomId, CountryFol.RandomId);
 
             TreeValue SiteFol = new TreeValue();
             SiteFol.Id = 11111113;
-            SiteFol.RandomId = RandomPassword.CreateRandomPassword(6);
+            SiteFol.RandomId = "SSSSSS";
             SiteFol.Text = "Site";
             SiteFol.Level = 2;
             SiteFol.Icon = "las la-folder-open text-blue eicon";
             SiteFol.WorkPlaceFolderId = WorkPlaceFolder.Site;
+            SiteFol.ExpandData = string.Join(",", pvListObj.RandomId, SiteFol.RandomId );
 
             CountryFol.Item = new List<TreeValue>();
             SiteFol.Item = new List<TreeValue>();
@@ -125,23 +130,23 @@ namespace GSC.Respository.Etmf
 
                     if (rights != null ? rights.IsView : false)
                     {
-                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c);
+                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, CountryFol.RandomId);
 
                         List<TreeValue> pvListZoneList = new List<TreeValue>();
                         foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                         {
                             d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
                             // Get zone
-                            TreeValue pvListZoneObj = GetZone(rights, c, d, b);
+                            TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
 
                             List<TreeValue> pvListSectionList = new List<TreeValue>();
                             foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                             {
                                 e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
                                 // Get section
-                                TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Country, rights, c, d, b);
+                                TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Country, rights, c, d, b, pvListZoneObj.ExpandData);
                                 // Get artificate
-                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Country, chartType, rights, c, d, e, b);
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Country, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
@@ -169,23 +174,23 @@ namespace GSC.Respository.Etmf
                     var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
                     if (rights != null ? rights.IsView : false)
                     {
-                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c);
+                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, SiteFol.RandomId);
 
                         List<TreeValue> pvListZoneList = new List<TreeValue>();
                         foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                         {
                             d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
                             // Get zone
-                            TreeValue pvListZoneObj = GetZone(rights, c, d, b);
+                            TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
 
                             List<TreeValue> pvListSectionList = new List<TreeValue>();
                             foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                             {
                                 e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
                                 // Get section
-                                TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Site, rights, c, d, b);
+                                TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Site, rights, c, d, b, pvListZoneObj.ExpandData);
                                 // Get artificate
-                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Site, chartType, rights, c, d, e, b);
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Site, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
@@ -212,23 +217,23 @@ namespace GSC.Respository.Etmf
                     var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
                     if (rights != null ? rights.IsView : false)
                     {
-                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c);
+                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, TrialFol.RandomId);
                         List<TreeValue> pvListZoneList = new List<TreeValue>();
 
                         foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                         {
                             d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
                             // Get zone
-                            TreeValue pvListZoneObj = GetZone(rights, c, d, b);
+                            TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
 
                             List<TreeValue> pvListSectionList = new List<TreeValue>();
                             foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                             {
                                 e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
                                 // Get section
-                                TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Trial, rights, c, d, b);
+                                TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Trial, rights, c, d, b, pvListZoneObj.ExpandData);
                                 // Get Artificate
-                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Trial, chartType, rights, c, d, e, b);
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Trial, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
@@ -272,12 +277,12 @@ namespace GSC.Respository.Etmf
                         : "las la-folder-open text-blue eicon";
             return data;
         }
-        public TreeValue GetWorksplaceDetails(EtmfUserPermission rights, ProjectWorkplaceDetail c)
+        public TreeValue GetWorksplaceDetails(EtmfUserPermission rights, ProjectWorkplaceDetail c, string Data)
         {
             TreeValue pvListdetaiObj = new TreeValue();
             pvListdetaiObj.Id = Convert.ToInt32(RandomPassword.CreateRandomNumericNumber(6));
             pvListdetaiObj.Item = new List<TreeValue>();
-            pvListdetaiObj.RandomId = RandomPassword.CreateRandomPassword(6);
+            pvListdetaiObj.RandomId = "WD" + ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription().Substring(0, 2) + c.Id;
             pvListdetaiObj.Text = c.ItemName;
             pvListdetaiObj.Level = 3;
             pvListdetaiObj.Icon = "las la-folder-open text-blue eicon";
@@ -287,14 +292,15 @@ namespace GSC.Respository.Etmf
             pvListdetaiObj.IsDelete = rights != null && rights.IsDelete;
             pvListdetaiObj.IsView = rights != null && rights.IsView;
             pvListdetaiObj.IsExport = rights != null && rights.IsExport;
+            pvListdetaiObj.ExpandData = string.Join(",", Workplace, Data, pvListdetaiObj.RandomId);
             return pvListdetaiObj;
         }
 
-        public TreeValue GetZone(EtmfUserPermission rights, ProjectWorkplaceDetail c, ProjectWorkPlaceZone d, ProjectWorkplace b)
+        public TreeValue GetZone(EtmfUserPermission rights, ProjectWorkplaceDetail c, ProjectWorkPlaceZone d, ProjectWorkplace b, string data)
         {
             TreeValue pvListZoneObj = new TreeValue();
             pvListZoneObj.Id = d.Id;
-            pvListZoneObj.RandomId = RandomPassword.CreateRandomPassword(6);
+            pvListZoneObj.RandomId = "ZO" + ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription().Substring(0, 2) + d.Id;
             pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
             pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
             pvListZoneObj.Level = 4;
@@ -307,15 +313,16 @@ namespace GSC.Respository.Etmf
             pvListZoneObj.IsDelete = rights != null && rights.IsDelete;
             pvListZoneObj.IsView = rights != null && rights.IsView;
             pvListZoneObj.IsExport = rights != null && rights.IsExport;
+            pvListZoneObj.ExpandData = string.Join(",", data, pvListZoneObj.RandomId);
             return pvListZoneObj;
         }
 
         public TreeValue GetSection(ProjectWorkplaceSection e, WorkPlaceFolder folderType, EtmfUserPermission rights, ProjectWorkplaceDetail c,
-            ProjectWorkPlaceZone d, ProjectWorkplace b)
+            ProjectWorkPlaceZone d, ProjectWorkplace b, string data)
         {
             TreeValue pvListSectionObj = new TreeValue();
             pvListSectionObj.Id = e.Id;
-            pvListSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
+            pvListSectionObj.RandomId = "SE" + ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription().Substring(0, 2) + e.Id;
             pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
             pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
             pvListSectionObj.Level = 5;
@@ -333,11 +340,12 @@ namespace GSC.Respository.Etmf
             pvListSectionObj.IsDelete = rights != null && rights.IsDelete;
             pvListSectionObj.IsView = rights != null && rights.IsView;
             pvListSectionObj.IsExport = rights != null && rights.IsExport;
+            pvListSectionObj.ExpandData = string.Join(",", data, pvListSectionObj.RandomId);
             return pvListSectionObj;
         }
 
         public List<TreeValue> GetArtificate(List<ProjectWorkplaceArtificate> ArtificateList, WorkPlaceFolder folderType, EtmfChartType? chartType, EtmfUserPermission rights, ProjectWorkplaceDetail c,
-            ProjectWorkPlaceZone d, ProjectWorkplaceSection e, ProjectWorkplace b)
+            ProjectWorkPlaceZone d, ProjectWorkplaceSection e, ProjectWorkplace b, string data)
         {
             List<TreeValue> pvListArtificateList = new List<TreeValue>();
             foreach (var f in ArtificateList.Where(x => x.DeletedBy == null))
@@ -350,7 +358,7 @@ namespace GSC.Respository.Etmf
                                 .Where(x => x.ProjectWorkplaceArtificateId == f.Id && x.DeletedDate == null).ToList();
 
                 pvListArtificateObj.Id = f.Id;
-                pvListArtificateObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                pvListArtificateObj.RandomId = "AR" + ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription().Substring(0, 2) + f.Id;
                 pvListArtificateObj.Text = f.EtmfArtificateMasterLbrary.ArtificateName;
                 pvListArtificateObj.Number = f.EtmfArtificateMasterLbrary.ArtificateNo;
                 pvListArtificateObj.Level = 6;
@@ -369,6 +377,7 @@ namespace GSC.Respository.Etmf
                 pvListArtificateObj.IsDelete = rights != null && rights.IsDelete;
                 pvListArtificateObj.IsView = rights != null && rights.IsView;
                 pvListArtificateObj.IsExport = rights != null && rights.IsExport;
+                pvListArtificateObj.ExpandData = string.Join(",", data, pvListArtificateObj.RandomId);
                 pvListArtificateObj.DocumentCount = Document.Count();
 
                 pvListArtificateObj.Icon = Document.Count() == 0 && f.IsNotRequired == false ? "las la-file-alt text-missing eicon" :
@@ -431,7 +440,7 @@ namespace GSC.Respository.Etmf
 
                 TreeValue pvListSubSectionObj = new TreeValue();
                 pvListSubSectionObj.Id = s.Id;
-                pvListSubSectionObj.RandomId = RandomPassword.CreateRandomPassword(6);
+                pvListSubSectionObj.RandomId = "SS" + ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription().Substring(0, 2) + s.Id;
                 pvListSubSectionObj.Text = s.SubSectionName;
                 pvListSubSectionObj.Level = 5.1;
                 pvListSubSectionObj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
@@ -449,6 +458,7 @@ namespace GSC.Respository.Etmf
                 pvListSubSectionObj.IsDelete = rights != null && rights.IsDelete;
                 pvListSubSectionObj.IsView = rights != null && rights.IsView;
                 pvListSubSectionObj.IsExport = rights != null && rights.IsExport;
+                pvListSubSectionObj.ExpandData = string.Join(",", data, pvListSubSectionObj.RandomId);
                 #region MyRegion
                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
                 var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
@@ -460,7 +470,7 @@ namespace GSC.Respository.Etmf
 
                     TreeValue pvListartifactsubsectionobj = new TreeValue();
                     pvListartifactsubsectionobj.Id = itemartifact.Id;
-                    pvListartifactsubsectionobj.RandomId = RandomPassword.CreateRandomPassword(6);
+                    pvListartifactsubsectionobj.RandomId = "SSA" + ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription().Substring(0, 2) + itemartifact.Id;
                     pvListartifactsubsectionobj.Text = itemartifact.ArtifactName;
                     pvListartifactsubsectionobj.Level = 5.2;
                     pvListartifactsubsectionobj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
@@ -479,6 +489,7 @@ namespace GSC.Respository.Etmf
                     pvListartifactsubsectionobj.IsDelete = rights != null ? rights.IsDelete : false;
                     pvListartifactsubsectionobj.IsView = rights != null ? rights.IsView : false;
                     pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
+                    pvListartifactsubsectionobj.ExpandData = string.Join(",", pvListSubSectionObj.ExpandData, pvListSubSectionObj.RandomId);
                     pvListartifactsubsectionobj.DocumentCount = Document.Count();
                     //pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
 
@@ -899,23 +910,23 @@ namespace GSC.Respository.Etmf
 
                     if (rights != null && rights.IsView)
                     {
-                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c);
+                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, null);
 
                         foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
                         {
                             d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
                             // Get zone
-                            TreeValue pvListZoneObj = GetZone(rights, c, d, b);
+                            TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
 
                             foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
                             {
                                 e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
                                 // Get section
-                                TreeValue pvListSectionObj = GetSection(e, (WorkPlaceFolder)c.WorkPlaceFolderId, rights, c, d, b);
+                                TreeValue pvListSectionObj = GetSection(e, (WorkPlaceFolder)c.WorkPlaceFolderId, rights, c, d, b, pvListZoneObj.ExpandData);
                                 // Get artificate
-                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, (WorkPlaceFolder)c.WorkPlaceFolderId, chartType, rights, c, d, e, b);
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, (WorkPlaceFolder)c.WorkPlaceFolderId, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
 
-                                foreach (var artificate in pvListArtificateList.Where(x=>x.Level == 6).ToList())
+                                foreach (var artificate in pvListArtificateList.Where(x => x.Level == 6).ToList())
                                 {
                                     ChartReport obj = new ChartReport();
                                     obj.ProjectCode = Project.ProjectCode;
@@ -981,5 +992,6 @@ namespace GSC.Respository.Etmf
         public bool IsExport { get; set; }
         public bool IsNotRequired { get; set; }
         public int DocumentCount { get; set; }
+        public string ExpandData { get; set; }
     }
 }

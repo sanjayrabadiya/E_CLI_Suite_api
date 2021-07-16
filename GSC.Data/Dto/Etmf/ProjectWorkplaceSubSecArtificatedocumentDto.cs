@@ -43,6 +43,8 @@ namespace GSC.Data.Dto.Etmf
         public string DocPath { get; set; }
         public string FullDocPath { get; set; }
         public string Artificatename { get; set; }
+        public string SectionName { get; set; }
+        public string ZoneName { get; set; }
         public List<DocumentUsers> Reviewer { get; set; }
         public int Status { get; set; }
         public string StatusName { get; set; }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
@@ -17,7 +18,7 @@ namespace GSC.Api.Controllers.CTMS
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TaskMasterController : ControllerBase
+    public class TaskMasterController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;

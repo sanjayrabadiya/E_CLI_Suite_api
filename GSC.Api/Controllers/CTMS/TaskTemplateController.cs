@@ -1,5 +1,6 @@
 ﻿using System;
 using AutoMapper;
+using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
@@ -11,7 +12,7 @@ namespace GSC.Api.Controllers.CTMS
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TaskTemplateController : ControllerBase
+    public class TaskTemplateController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;

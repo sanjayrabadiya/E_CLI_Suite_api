@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GSC.Api.Controllers.CTMS
 {
     [Route("api/[controller]")]
-    public class HolidayMasterController : ControllerBase
+    public class HolidayMasterController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
