@@ -49,10 +49,10 @@ namespace GSC.Api.Controllers.Report
         }
 
         [HttpGet]
-        [Route("GetScreeningQuery/{projectId}")]
-        public IActionResult GetScreeningQuery(int projectId)
+        [Route("GetScreeningQuery/{parentProjectId}/{projectId}")]
+        public IActionResult GetScreeningQuery(int parentProjectId, int projectId)
         {
-            return Ok(_screeningTemplateValueQueryRepository.GetScreeningQuery(projectId));
+            return Ok(_screeningTemplateValueQueryRepository.GetScreeningQuery(parentProjectId, projectId));
         }
 
     }

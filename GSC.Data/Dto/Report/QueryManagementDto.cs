@@ -83,8 +83,9 @@ namespace GSC.Data.Dto.Report
         public int? Status { get; set; }
     }
 
-    public class ScreeningQueryDto : BaseDto
+    public class ScreeningQueryDto
     {
+        public int ScreeningTemplateValueId { get; set; }
         public string ProjectCode { get; set; }
         public string ReasonName { get; set; }
         public string ReasonOth { get; set; }
@@ -98,23 +99,17 @@ namespace GSC.Data.Dto.Report
         public string VolunteerName { get; set; }
         public string SubjectNo { get; set; }
         public string RandomizationNumber { get; set; }
-        public string ClosedByName { get; set; }
         public string Value { get; set; }
-        public string CreatedByName { get; set; }
-        public string ModifiedByName { get; set; }
         public int CollectionSource { get; set; }
-        public string DataEntryByName { get; set; }
-        public DateTime? CreatedDate { get; set; }
-
-        public DateTime? ModifiedDate { get; set; }
-
-        public DateTime? ClosedDate { get; set; }
-
-        public int ScreeningTemplateValueId { get; set; }
-        public int ProjectDesignTemplateId { get; set; }
+        public DateTime? LastUpdateDate { get; set; }
+        public string LastUpdateBy { get; set; }
+        public DateTime? LastQueryDate { get; set; }
+        public string LastQueryBy { get; set; }
+        public bool IsSystem { get; set; }
+        public short? AcknowledgeLevel { get; set; }
+        public short? ReviewLevel { get; set; }
+        public int? UserRoleId { get; set; }
         public int ProjectDesignVariableId { get; set; }
-        
-        public DesignScreeningVariableDto Variables { get; set; }
 
     }
 

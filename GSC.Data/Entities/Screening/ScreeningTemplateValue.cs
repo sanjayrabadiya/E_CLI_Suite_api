@@ -29,6 +29,8 @@ namespace GSC.Data.Entities.Screening
         public ProjectDesignVariable ProjectDesignVariable { get; set; }
         public ICollection<ScreeningTemplateValueComment> Comments { get; set; }
         public List<ScreeningTemplateValueChild> Children { get; set; }
+        public List<ScreeningTemplateValueAudit> ScreeningTemplateValueAudits { get; set; }
+        public List<ScreeningTemplateValueQuery> ScreeningTemplateValueQuerys { get; set; }
         public bool IsNa { get; set; }
         public int? UserRoleId { get; set; }
 
