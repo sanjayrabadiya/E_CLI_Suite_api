@@ -5,6 +5,7 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
+using GSC.Helper;
 
 namespace GSC.Respository.Screening
 {
@@ -37,5 +38,8 @@ namespace GSC.Respository.Screening
         IList<DropDownDto> GetDataEntryBy(int projectId);
         List<DashboardQueryStatusDto> GetDashboardOpenQuerySitewise(int projectId);
         IList<ScreeningQueryDto> GetScreeningQuery(int parentProjectId, int projectId);
+
+        void ReviewAllQuery(UpdateAllQueryStatus updateAllQueryStatus);
+        void AcknowledgeAllQuery(UpdateAllQueryStatus updateAllQueryStatus);
     }
 }

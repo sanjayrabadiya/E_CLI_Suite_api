@@ -174,12 +174,50 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
         }
 
+
+        public void ReviewAllQuery(UpdateAllQueryStatus updateAllQueryStatus)
+        {
+            var screeningTemplateValues = _screeningTemplateValueRepository.All.Where(x => updateAllQueryStatus.ScreeningTemplateValueIds.Contains(x.Id) && x.DeletedDate == null).ToList();
+            screeningTemplateValues.ForEach(x =>
+            {
+                if (updateAllQueryStatus.QueryStatus == QueryStatus.Reopened)
+                    x.AcknowledgeLevel = -1;
+                else
+                    x.AcknowledgeLevel = null;
+
+                x.QueryStatus = updateAllQueryStatus.QueryStatus;
+                _screeningTemplateValueRepository.Update(x);
+
+                var screeningTemplateValueQuery = new ScreeningTemplateValueQuery();
+                screeningTemplateValueQuery.QueryLevel = x.ReviewLevel;
+                screeningTemplateValueQuery.ScreeningTemplateValueId = x.Id;
+                screeningTemplateValueQuery.ReasonId = updateAllQueryStatus.ReasonId;
+                screeningTemplateValueQuery.ReasonOth = updateAllQueryStatus.ReasonOth;
+                Save(screeningTemplateValueQuery);
+            });
+        }
+
+        public void AcknowledgeAllQuery(UpdateAllQueryStatus updateAllQueryStatus)
+        {
+            var ids = updateAllQueryStatus.ScreeningTemplateValueIds.Distinct().ToList();
+            ids.ForEach(x =>
+            {
+                var screeningTemplateValueQuery = new ScreeningTemplateValueQuery();
+                screeningTemplateValueQuery.ScreeningTemplateValueId = x;
+                screeningTemplateValueQuery.ReasonId = updateAllQueryStatus.ReasonId;
+                screeningTemplateValueQuery.ReasonOth = updateAllQueryStatus.ReasonOth;
+                screeningTemplateValueQuery.Note = updateAllQueryStatus.Note;
+                AcknowledgeQuery(screeningTemplateValueQuery);
+            });
+        }
+
         public void AcknowledgeQuery(ScreeningTemplateValueQuery screeningTemplateValueQuery)
         {
             var screeningTemplateValue = _screeningTemplateValueRepository.Find(screeningTemplateValueQuery.ScreeningTemplateValueId);
             var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
 
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
+
 
             screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
             if (workFlowLevel.IsNoCRF)
@@ -715,9 +753,9 @@ namespace GSC.Respository.Screening
                               ReviewLevel = screeningValue.ReviewLevel,
                               UserRoleId = screeningValue.UserRoleId,
                               LastQueryDate = lastQuery.CreatedDate,
-                              ScreeningEntryId= screeningValue.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
+                              ScreeningEntryId = screeningValue.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
                               IsSystem = screeningValue.IsSystem,
-                              DesignOrder= screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
+                              DesignOrder = screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
                               ProjectDesignTemplateName = screeningValue.ScreeningTemplate.RepeatSeqNo == null && screeningValue.ScreeningTemplate.ParentId == null ?
                                  screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + screeningValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName
                                             : screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + screeningValue.ScreeningTemplate.RepeatSeqNo + " " + screeningValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,

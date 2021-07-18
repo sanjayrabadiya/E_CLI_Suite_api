@@ -114,6 +114,29 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningTemplateValueQuery.Id);
         }
 
+
+        [HttpPost("UpdateAllQueryStatus")]
+        [TransactionRequired]
+        public IActionResult UpdateAllQueryStatus([FromBody] UpdateAllQueryStatus updateAllQueryStatus)
+        {
+            if (updateAllQueryStatus != null)
+            {
+                if (updateAllQueryStatus.QueryStatus == QueryStatus.Acknowledge)
+                {
+                    _screeningTemplateValueQueryRepository.AcknowledgeAllQuery(updateAllQueryStatus);
+                }
+                if (updateAllQueryStatus.QueryStatus == QueryStatus.Reopened || updateAllQueryStatus.QueryStatus == QueryStatus.Closed)
+                {
+                    _screeningTemplateValueQueryRepository.ReviewAllQuery(updateAllQueryStatus);
+                }
+            }
+
+            _uow.Save();
+
+            return Ok();
+        }
+
+
         [HttpPost("review")]
         public IActionResult Review([FromBody] ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto)
         {

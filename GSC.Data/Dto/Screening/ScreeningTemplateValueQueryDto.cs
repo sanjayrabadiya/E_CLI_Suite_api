@@ -38,4 +38,15 @@ namespace GSC.Data.Dto.Screening
         public ICollection<ScreeningTemplateValueChild> Children { get; set; }
         public List<EditCheckIds> EditCheckIds { get; set; }
     }
+
+
+    public class UpdateAllQueryStatus
+    {
+        public List<int> ScreeningTemplateValueIds { get; set; }
+        public int? ReasonId { get; set; }
+        public string ReasonOth { get; set; }
+        public string Note { get; set; }
+        public QueryStatus QueryStatus { get; set; }
+
+    }
 }
