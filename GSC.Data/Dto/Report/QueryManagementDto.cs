@@ -105,10 +105,12 @@ namespace GSC.Data.Dto.Report
         public string LastUpdateBy { get; set; }
         public DateTime? LastQueryDate { get; set; }
         public string LastQueryBy { get; set; }
+        public int ScreeningEntryId { get; set; }
         public bool IsSystem { get; set; }
         public short? AcknowledgeLevel { get; set; }
         public short? ReviewLevel { get; set; }
         public int? UserRoleId { get; set; }
+        public int DesignOrder { get; set; }
         public int ProjectDesignVariableId { get; set; }
 
     }

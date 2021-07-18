@@ -715,7 +715,9 @@ namespace GSC.Respository.Screening
                               ReviewLevel = screeningValue.ReviewLevel,
                               UserRoleId = screeningValue.UserRoleId,
                               LastQueryDate = lastQuery.CreatedDate,
+                              ScreeningEntryId= screeningValue.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
                               IsSystem = screeningValue.IsSystem,
+                              DesignOrder= screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
                               ProjectDesignTemplateName = screeningValue.ScreeningTemplate.RepeatSeqNo == null && screeningValue.ScreeningTemplate.ParentId == null ?
                                  screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + screeningValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName
                                             : screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + screeningValue.ScreeningTemplate.RepeatSeqNo + " " + screeningValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,

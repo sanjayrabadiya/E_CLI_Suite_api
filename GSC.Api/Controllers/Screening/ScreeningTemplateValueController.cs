@@ -248,5 +248,12 @@ namespace GSC.Api.Controllers.Screening
         {
             return Ok(_screeningTemplateValueRepository.GetTemplateQueryList(id));
         }
+
+
+        [HttpGet("GetQueryVariableDetail/{id}/{screeningEntryId}")]
+        public IActionResult GetQueryVariableDetail(int id, int screeningEntryId)
+        {
+            return Ok(_screeningTemplateValueRepository.GetQueryVariableDetail(id, screeningEntryId));
+        }
     }
 }

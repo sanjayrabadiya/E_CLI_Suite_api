@@ -1,4 +1,6 @@
-﻿using ClosedXML.Excel;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using ClosedXML.Excel;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
@@ -42,12 +44,14 @@ namespace GSC.Respository.Screening
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
+        private readonly IMapper _mapper;
         public ScreeningTemplateValueRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IProjectDesignVariableRepository projectDesignVariableRepository, IAppSettingRepository appSettingRepository,
             IJobMonitoringRepository jobMonitoringRepository,
             IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
-            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository, IProjectWorkflowRepository projectWorkflowRepository)
+            IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
+            IProjectWorkflowRepository projectWorkflowRepository, IMapper mapper)
             : base(context)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
@@ -60,6 +64,7 @@ namespace GSC.Respository.Screening
             _uploadSettingRepository = uploadSettingRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
+            _mapper = mapper;
         }
 
         public void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId,
@@ -1118,6 +1123,96 @@ namespace GSC.Respository.Screening
 
 
             return relations;
+        }
+
+
+        public DesignScreeningVariableDto GetQueryVariableDetail(int id, int screeningEntryId)
+        {
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            var screeningValue = All.AsNoTracking().Where(t => t.Id == id)
+                   .ProjectTo<Data.Dto.Screening.ScreeningTemplateValueBasic>(_mapper.ConfigurationProvider).FirstOrDefault();
+            if (screeningValue != null)
+            {
+                var variableDetail = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == screeningValue.ProjectDesignVariableId)
+                     .Select(x => new DesignScreeningVariableDto
+                     {
+                         ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+                         ProjectDesignVariableId = x.Id,
+                         Id = x.Id,
+                         VariableName = (_jwtTokenAccesser.Language != 1 ?
+                         x.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName),
+                         VariableCode = x.VariableCode,
+                         CollectionSource = x.CollectionSource,
+                         ValidationType = x.ValidationType,
+                         DataType = x.DataType,
+                         Length = x.Length,
+                         DefaultValue = string.IsNullOrEmpty(x.DefaultValue) && x.CollectionSource == CollectionSources.HorizontalScale ? "1" : x.DefaultValue,
+                         LargeStep = x.LargeStep,
+                         LowRangeValue = x.LowRangeValue,
+                         HighRangeValue = x.HighRangeValue,
+                         RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
+                         PrintType = x.PrintType,
+                         UnitName = x.Unit.UnitName,
+                         DesignOrder = x.DesignOrder,
+                         IsDocument = x.IsDocument,
+                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
+                         x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
+                         SystemType = x.SystemType,
+                         IsNa = x.IsNa,
+                         DateValidate = x.DateValidate,
+                         Alignment = x.Alignment ?? Alignment.Right,
+                         Note = (_jwtTokenAccesser.Language != 1 ?
+                         x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
+                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
+                         Values = x.Values.Where(x => x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
+                         {
+                             Id = c.Id,
+                             ProjectDesignVariableId = c.ProjectDesignVariableId,
+                             ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
+                             SeqNo = c.SeqNo,
+                             Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
+                         }).ToList()
+
+                     }).FirstOrDefault();
+
+
+                if (variableDetail != null)
+                {
+                    if (variableDetail.CollectionSource == CollectionSources.Relation && variableDetail.RelationProjectDesignVariableId > 0)
+                        variableDetail.Values = GetScreeningRelation(variableDetail.RelationProjectDesignVariableId ?? 0, screeningEntryId);
+
+                    variableDetail.ScreeningValue = screeningValue.Value;
+                    variableDetail.ScreeningValueOld = screeningValue.IsNa ? "N/A" : screeningValue.Value;
+                    variableDetail.ScreeningTemplateValueId = screeningValue.Id;
+                    variableDetail.ScheduleDate = screeningValue.ScheduleDate;
+                    variableDetail.QueryStatus = screeningValue.QueryStatus;
+                    variableDetail.IsNaValue = screeningValue.IsNa;
+                    variableDetail.IsSystem = screeningValue.QueryStatus == QueryStatus.Closed ? false : screeningValue.IsSystem;
+
+
+                    variableDetail.DocPath = screeningValue.DocPath != null ? screeningValue.DocPath : null;
+                    variableDetail.DocFullPath = screeningValue.DocPath != null ? documentUrl + screeningValue.DocPath : null;
+
+
+                    if (variableDetail.Values != null && (variableDetail.CollectionSource == CollectionSources.CheckBox || variableDetail.CollectionSource == CollectionSources.MultiCheckBox))
+                        variableDetail.Values.ToList().ForEach(val =>
+                        {
+                            var childValue = screeningValue.Children.FirstOrDefault(v => v.ProjectDesignVariableValueId == val.Id);
+                            if (childValue != null)
+                            {
+                                val.ScreeningValue = childValue.Value;
+                                val.ScreeningValueOld = childValue.Value;
+                                val.ScreeningTemplateValueChildId = childValue.Id;
+                            }
+                        });
+
+
+                }
+
+                return variableDetail;
+
+            }
+            return null;
         }
     }
 }

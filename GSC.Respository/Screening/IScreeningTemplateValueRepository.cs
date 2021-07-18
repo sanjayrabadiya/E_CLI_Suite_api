@@ -28,5 +28,6 @@ namespace GSC.Respository.Screening
         List<VariableQueryDto> GetTemplateQueryList(int screeningTemplateId);
 
         List<ScreeningVariableValueDto> GetScreeningRelation(int projectDesignVariableId, int screeningEntryId);
+        DesignScreeningVariableDto GetQueryVariableDetail(int id, int screeningEntryId);
     }
 }
