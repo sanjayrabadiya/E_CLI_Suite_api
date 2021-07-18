@@ -184,21 +184,13 @@ namespace GSC.Respository.Master
 
         public List<ProjectDropDown> GetParentProjectDropDown()
         {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
-
-            var project = new List<int>();
-            projectList.ForEach(x =>
-            {
-                x = (int)All.Where(y => y.Id == x).Select(z => z.ParentProjectId == null ? z.Id : z.ParentProjectId).FirstOrDefault();
-                project.Add(x);
-            });
 
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && x.ParentProjectId == null
                     && x.ProjectCode != null
-                    && project.Any(c => c == x.Id))
+                    && projectList.Any(c => c == x.Id))
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,

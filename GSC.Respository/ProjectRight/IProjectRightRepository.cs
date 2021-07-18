@@ -25,6 +25,7 @@ namespace GSC.Respository.ProjectRight
         IList<UserReportDto> GetLoginLogoutReportList(UserReportSearchDto filters);
         List<ProjectDocumentReviewDto> EtmfUserDropDown(int projectId, int? userId);
         List<int> GetChildProjectRightIdList();
+        List<int> GetParentProjectRightIdList();
 
     }
 }

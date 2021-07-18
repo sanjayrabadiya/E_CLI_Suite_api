@@ -16,6 +16,7 @@ namespace GSC.Respository.Screening
         List<DataEntryTemplateCountDisplayTree> GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel);
         // Dashboard chart for data entry status
         List<DashboardQueryStatusDto> GetDataEntriesStatus(int projectId);
+        List<DataEntryTemplateCountDisplayTree> GetMyTemplateView(int parentProjectId, int projectId);
 
     }
 }

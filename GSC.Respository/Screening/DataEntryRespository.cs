@@ -388,6 +388,42 @@ namespace GSC.Respository.Screening
 
         }
 
+
+        public List<DataEntryTemplateCountDisplayTree> GetMyTemplateView(int parentProjectId, int projectId)
+        {
+            var projectDesignId = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId).Select(t => t.Id).FirstOrDefault();
+
+            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
+
+            var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisit.ScreeningEntry.ProjectId == projectId && s.DeletedDate == null && s.ReviewLevel == workflowlevel.LevelNo)
+                    .Select(t => new DataEntryTemplateCountDisplayTree
+                    {
+                        Id = t.Id,
+                        ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                        ScreeningVisitId = t.ScreeningVisitId,
+                        ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                        Status = t.Status,
+                        ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                        DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                        Progress = t.Progress ?? 0,
+                        ReviewLevel = t.ReviewLevel,
+                        IsLocked = t.IsLocked,
+                        MyReview = false,
+                        ParentId = t.ParentId,
+                        ScheduleDate = t.ScheduleDate,
+                        TemplateName = t.ProjectDesignTemplate.TemplateName,
+                        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                        SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
+                                            ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                                            : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                    }).ToList().OrderBy(t => t.DesignOrder).ToList();
+
+
+            return result;
+
+
+        }
+
         // Dashboard chart for data entry status
         public List<DashboardQueryStatusDto> GetDataEntriesStatus(int projectId)
         {

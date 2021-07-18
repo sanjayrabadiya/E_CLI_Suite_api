@@ -133,6 +133,12 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningVisitRepository.GetVisitStatus(projectId));
         }
 
+        [HttpGet]
+        [Route("GetMyTemplateView/{parentProjectId}/{projectId}")]
+        public IActionResult GetMyTemplateView(int parentProjectId, int projectId)
+        {
+            return Ok(_dataEntryRespository.GetMyTemplateView(parentProjectId, projectId));
+        }
 
     }
 }
