@@ -379,6 +379,17 @@ namespace GSC.Api.Controllers.Attendance
         }
 
         [HttpPut]
+        [Route("ConsentStart")]
+        public IActionResult ConsentStart()
+        {
+          var subjectDetail= _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).SingleOrDefault();
+            subjectDetail.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
+            _randomizationRepository.Update(subjectDetail);
+            _uow.Save();
+            return Ok();
+        }
+
+        [HttpPut]
         [Route("ChangeStatustoWithdrawal")]
         public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
         //public IActionResult ChangeStatustoWithdrawal()

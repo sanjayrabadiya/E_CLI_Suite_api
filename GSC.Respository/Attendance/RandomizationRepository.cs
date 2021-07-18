@@ -675,8 +675,8 @@ namespace GSC.Respository.Attendance
                             _uow.Save();
                         }
                     }
-                    randomization.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
-                    Update(randomization);
+                    //randomization.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
+                    //Update(randomization);
                 }
 
             }
