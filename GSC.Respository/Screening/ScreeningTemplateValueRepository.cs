@@ -1133,7 +1133,7 @@ namespace GSC.Respository.Screening
                    .ProjectTo<Data.Dto.Screening.ScreeningTemplateValueBasic>(_mapper.ConfigurationProvider).FirstOrDefault();
             if (screeningValue != null)
             {
-                var variableDetail = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == screeningValue.ProjectDesignVariableId)
+                var variableDetail = _context.ProjectDesignVariable.Where(t => t.Id == screeningValue.ProjectDesignVariableId)
                      .Select(x => new DesignScreeningVariableDto
                      {
                          ProjectDesignTemplateId = x.ProjectDesignTemplateId,
