@@ -28,7 +28,8 @@ namespace GSC.Respository.CTMS
         }
         public List<DropDownDto> GetTaskTemplateDropDown()
         {
-            return All.Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+            return All.Where(x => x.DeletedDate == null)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
         public List<TaskTemplateGridDto> GetStudyTrackerList(bool isDeleted)
