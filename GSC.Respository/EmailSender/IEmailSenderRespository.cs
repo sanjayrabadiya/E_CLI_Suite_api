@@ -24,5 +24,6 @@ namespace GSC.Respository.EmailSender
         Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile,int sendtype,bool isSendEmail,bool isSendSMS);
         Task SendAdverseEventAlertEMailtoInvestigator(string toMail, string mobile, string userName, string projectName, string patientname,string reportdate);
         void SendOfflineChatNotification(string toMail, string userName);
+        void SendWithDrawEmail(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
     }
 }

@@ -190,6 +190,47 @@ namespace GSC.Respository.EmailSender
             emailMessage.MessageBody = "Message offline alert";
             _emailService.SendMail(emailMessage);
         }
+        public void SendWithDrawEmail(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath)
+        {
+            var emailMessage = ConfigureEmail("WithdrawDocumentpatient", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientWithDrawDocument(emailMessage.MessageBody, userName, documentName, ProjectName, patientName);
+            emailMessage.Subject = ReplaceSubjectForPatientWithDraw(emailMessage.Subject, documentName, patientName);
+            emailMessage.Attachments.Add(new Attachment(filepath));
+            _emailService.SendMail(emailMessage);
+        }
+
+        private string ReplaceBodyForPatientWithDrawDocument(string body, string userName, string documentName, string projectName, string patientName)
+        {
+            body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##projectName##", projectName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>projectName</strong>##", "<strong>" + projectName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##patientname##", patientName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceSubjectForPatientWithDraw(string body, string documentName, string patientName)
+        {
+            body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##patientname##", patientName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
 
         public async Task SendSMS(string mobile,string messagebody,string? DLTTemplateId)
         {
