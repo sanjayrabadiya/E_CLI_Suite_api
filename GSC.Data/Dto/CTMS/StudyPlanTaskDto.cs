@@ -12,8 +12,8 @@ namespace GSC.Data.Dto.CTMS
     public class StudyPlanTaskGridDto
     {
         public int StudyPlanId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public List<StudyPlanTaskDto> StudyPlanTask { get; set; }
 
     }

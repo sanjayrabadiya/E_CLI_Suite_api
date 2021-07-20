@@ -402,6 +402,7 @@ namespace GSC.Respository.Screening
                         ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
                         ScreeningVisitId = t.ScreeningVisitId,
                         ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                        ProjectDesignPeriodId = t.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId,
                         Status = t.Status,
                         ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
                         DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),

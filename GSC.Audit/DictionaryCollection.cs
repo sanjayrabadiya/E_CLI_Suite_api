@@ -258,7 +258,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "PrefixScreeningNo", DisplayName = "Prefix Screening Number" });
             _dictionaries.Add(new Dictionary { FieldName = "ScreeningNoStartsWith", DisplayName = "Screening Number Starts with" });
 
-            _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Study", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Study Code", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignTemplateIdPatient", DisplayName = "Patient Template", SourceColumn = "ProjectDesignTemplateIdPatient", TableName = "ProjectDesignTemplate", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignTemplateIdInvestigator", DisplayName = "Investigator Template", SourceColumn = "ProjectDesignTemplateIdInvestigator", TableName = "ProjectDesignTemplate", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "SeveritySeqNo1", DisplayName = "Label for Low", SourceColumn = "SeveritySeqNo1", TableName = "ProjectDesignVariableValue", PkName = "Id" });

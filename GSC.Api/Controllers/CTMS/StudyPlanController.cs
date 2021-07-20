@@ -126,10 +126,10 @@ namespace GSC.Api.Controllers.CTMS
             foreach (var item in AllProject)
             {
                 var data = _studyPlanRepository.FindByInclude(x => x.DeletedDate == null && x.ProjectId == item.Id).FirstOrDefault();
-                if (data == null)
-                    return NotFound();
-
-                _studyPlanRepository.Delete(data.Id);
+                //if (data == null)
+                //    //return NotFound();
+                if (data != null)
+                    _studyPlanRepository.Delete(data.Id);
             }
             _uow.Save();
 

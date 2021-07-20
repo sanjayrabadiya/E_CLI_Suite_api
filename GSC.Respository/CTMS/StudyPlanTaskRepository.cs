@@ -39,15 +39,16 @@ namespace GSC.Respository.CTMS
             var result = new StudyPlanTaskGridDto();
 
             var studyplan = _context.StudyPlan.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
-            result.StartDate = studyplan.StartDate;
-            result.EndDate = studyplan.EndDate;
-            result.StudyPlanId = studyplan.Id;
+            result.StartDate = studyplan?.StartDate;
+            result.EndDate = studyplan?.EndDate;
+            result.StudyPlanId = StudyPlanId;
 
-            var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
-                   ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-
-
-            result.StudyPlanTask = tasklist;
+            if (studyplan != null)
+            {
+                var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
+               ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                result.StudyPlanTask = tasklist;
+            }
 
             return result;
 

@@ -111,6 +111,7 @@ namespace GSC.Data.Dto.Attendance
             set => _scheduleDate = value?.UtcDateTime();
         }
         public int? ParentId { get; set; }
+        public int? ProjectDesignPeriodId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public string ProjectDesignTemplateName { get; set; }
         public decimal DesignOrder { get; set; }
