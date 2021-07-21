@@ -79,7 +79,8 @@ namespace GSC.Respository.InformConcent
                 DocumentName = x.EconsentSetup.DocumentName,
                 DocumentPath = x.EconsentSetup.DocumentPath,
                 ReviewId = x.Id,
-                IsReviewed = x.IsReviewedByPatient
+                IsReviewed = x.IsReviewedByPatient,
+                TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds)
             }).ToList();
 
             result.ForEach(t => t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath));
@@ -89,7 +90,7 @@ namespace GSC.Respository.InformConcent
 
         public List<SectionsHeader> GetEconsentSectionHeaders(int id)
         {
-            var econsentreviewdetail = FindByInclude(x => x.Id == id, x => x.EconsentSetup).FirstOrDefault();
+            var econsentreviewdetail = FindByInclude(x => x.Id == id, x => x.EconsentSetup, x => x.EconsentReviewDetailsSections).FirstOrDefault();
             // var document = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetail.EconsentSetupId).FirstOrDefault();
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetail.EconsentSetup.DocumentPath);
@@ -128,6 +129,7 @@ namespace GSC.Respository.InformConcent
                             sectionsHeader.documentName = econsentreviewdetail.EconsentSetup.DocumentName;
                             sectionsHeader.isReadCompelete = econsentreviewdetail.IsReviewedByPatient;
                             sectionsHeader.isReviewed = econsentreviewdetail.IsReviewedByPatient;
+                            sectionsHeader.ReviewTime = econsentreviewdetail.EconsentReviewDetailsSections.Count > 0 ? econsentreviewdetail.EconsentReviewDetailsSections[sectioncount].TimeInSeconds : 0;
                             sectionsHeaders.Add(sectionsHeader);
                             sectioncount++;
                         }
@@ -268,7 +270,7 @@ namespace GSC.Respository.InformConcent
             var randomization = _context.Randomization.Where(x => x.Id == econcentreview.RandomizationId).ToList().FirstOrDefault();//_noneRegisterRepository.Find(randomizationId);
             if (econcentreview.IsReviewedByPatient)
             {
-                string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econcentreview.patientdigitalSignImagepath);
+                string randomizationsignaturepath = System.IO.Path.Combine(upload.DocumentPath, econcentreview.PatientdigitalSignImagepath);
                 string signRandombase64 = DocumentService.ConvertBase64Image(randomizationsignaturepath);
                 sign = sign.Replace("_imagepath_", signRandombase64);
             }
@@ -279,7 +281,7 @@ namespace GSC.Respository.InformConcent
             sign = sign.Replace("_volunterlabel_", "Volunteer");
             sign = sign.Replace("Name", "Initial");
             sign = sign.Replace("_voluntername_", randomization.ScreeningNumber + " " + randomization.Initial);
-            sign = sign.Replace("_datetime_", (econcentreview.patientapproveddatetime == null) ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econcentreview.patientapproveddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
+            sign = sign.Replace("_datetime_", (econcentreview.Patientapproveddatetime == null) ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econcentreview.Patientapproveddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
             var jsonObj2 = JObject.Parse(sign);
             jsonObj.Merge(jsonObj2, new JsonMergeSettings
             {
@@ -293,7 +295,7 @@ namespace GSC.Respository.InformConcent
                 sign2 = sign2.Replace("_volunterlabel_", "Investigator");
                 sign2 = sign2.Replace("_imagepath_", signinvestigatorbase64);
                 sign2 = sign2.Replace("_voluntername_", user.UserName);
-                sign2 = sign2.Replace("_datetime_", econcentreview.investigatorRevieweddatetime == null ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econcentreview.investigatorRevieweddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
+                sign2 = sign2.Replace("_datetime_", econcentreview.InvestigatorRevieweddatetime == null ? _jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat) : Convert.ToDateTime(econcentreview.InvestigatorRevieweddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat));
                 var jsonObj3 = JObject.Parse(sign2);
                 jsonObj.Merge(jsonObj3, new JsonMergeSettings
                 {
@@ -331,7 +333,7 @@ namespace GSC.Respository.InformConcent
             // after reviewed document patient can download pdf from dashboard
             var econsentreviewdetails = Find(id);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var docName = Path.Combine(upload.DocumentUrl, econsentreviewdetails.pdfpath);
+            var docName = Path.Combine(upload.DocumentUrl, econsentreviewdetails.Pdfpath);
             CustomParameter param = new CustomParameter();
             param.documentData = docName;
             param.fileName = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
@@ -366,15 +368,15 @@ namespace GSC.Respository.InformConcent
             // uptate method calls when patient review document
             var econsentReviewDetail = _mapper.Map<EconsentReviewDetails>(econsentReviewDetailsDto);
             var original = Find(econsentReviewDetail.Id);
-            econsentReviewDetail.patientapproveddatetime = _jwtTokenAccesser.GetClientDate();
+            econsentReviewDetail.Patientapproveddatetime = _jwtTokenAccesser.GetClientDate();
             econsentReviewDetail.RandomizationId = original.RandomizationId;
 
-            if (econsentReviewDetailsDto.patientdigitalSignBase64?.Length > 0)
+            if (econsentReviewDetailsDto.PatientdigitalSignBase64?.Length > 0)
             {
                 FileModel fileModel = new FileModel();
-                fileModel.Base64 = econsentReviewDetailsDto.patientdigitalSignBase64;
+                fileModel.Base64 = econsentReviewDetailsDto.PatientdigitalSignBase64;
                 fileModel.Extension = "png";
-                econsentReviewDetail.patientdigitalSignImagepath = new ImageService().ImageSave(fileModel,
+                econsentReviewDetail.PatientdigitalSignImagepath = new ImageService().ImageSave(fileModel,
                     _uploadSettingRepository.GetImagePath(), FolderType.InformConcent);
             }
 
@@ -384,7 +386,7 @@ namespace GSC.Respository.InformConcent
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
             filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.InformConcent.ToString(), docName);
 
-            Byte[] byteArray = Convert.FromBase64String(econsentReviewDetailsDto.documentData);
+            Byte[] byteArray = Convert.FromBase64String(econsentReviewDetailsDto.DocumentData);
             Stream stream = new MemoryStream(byteArray);
 
             FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -421,7 +423,7 @@ namespace GSC.Respository.InformConcent
             outputStream.Close();
 
 
-            econsentReviewDetail.pdfpath = pdfpath;
+            econsentReviewDetail.Pdfpath = pdfpath;
             econsentReviewDetail.IsReviewedByPatient = true;
             Update(econsentReviewDetail);
 
@@ -456,7 +458,7 @@ namespace GSC.Respository.InformConcent
             // calls when investigator approve/reject document
             var econsentReviewDetails = Find(econsentReviewDetailsDto.Id);
             econsentReviewDetails.IsReviewDoneByInvestigator = true;
-            econsentReviewDetails.investigatorRevieweddatetime = _jwtTokenAccesser.GetClientDate();
+            econsentReviewDetails.InvestigatorRevieweddatetime = _jwtTokenAccesser.GetClientDate();
             econsentReviewDetails.ReviewDoneByRoleId = _jwtTokenAccesser.RoleId;
             econsentReviewDetails.ReviewDoneByUserId = _jwtTokenAccesser.UserId;
             econsentReviewDetails.IsApproved = econsentReviewDetailsDto.IsApproved;
@@ -467,11 +469,11 @@ namespace GSC.Respository.InformConcent
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
 
-            if (econsentReviewDetails.pdfpath != null)
+            if (econsentReviewDetails.Pdfpath != null)
             {
                 //try
                 //{
-                string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.pdfpath);
+                string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.Pdfpath);
                 if (File.Exists(oldpdfpath))
                     System.IO.File.Delete(oldpdfpath);
                 //}
@@ -483,7 +485,7 @@ namespace GSC.Respository.InformConcent
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
             filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.InformConcent.ToString(), docName);
 
-            Byte[] byteArray = Convert.FromBase64String(econsentReviewDetailsDto.documentData);
+            Byte[] byteArray = Convert.FromBase64String(econsentReviewDetailsDto.DocumentData);
             Stream stream = new MemoryStream(byteArray);
 
             FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -515,7 +517,7 @@ namespace GSC.Respository.InformConcent
                 graphics.DrawString("Reject By: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
 
             graphics.DrawString(_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")", fontnormal, PdfBrushes.Black, new PointF(70, 320));
-            graphics.DrawString(Convert.ToDateTime(econsentReviewDetails.investigatorRevieweddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat), fontnormal, PdfBrushes.Black, new PointF(70, 340));
+            graphics.DrawString(Convert.ToDateTime(econsentReviewDetails.InvestigatorRevieweddatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat), fontnormal, PdfBrushes.Black, new PointF(70, 340));
 
             if (econsentReviewDetailsDto.IsApproved == true)
                 graphics.DrawString("Approved Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 360));
@@ -550,7 +552,7 @@ namespace GSC.Respository.InformConcent
             outputStream.Close();
             outputStream.Dispose();
 
-            econsentReviewDetails.pdfpath = pdfpath;
+            econsentReviewDetails.Pdfpath = pdfpath;
 
             Update(econsentReviewDetails);
             System.IO.File.Delete(filePath);
