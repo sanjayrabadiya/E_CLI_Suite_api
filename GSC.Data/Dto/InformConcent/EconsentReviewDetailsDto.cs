@@ -16,15 +16,15 @@ namespace GSC.Data.Dto.InformConcent
         public string EconsentDocumentName { get; set; }
         public string ApprovedByRole { get; set; }
         public int TotalNoSection { get; set; }
-        public DateTime? investigatorRevieweddatetime { get; set; }
-        public DateTime? patientapproveddatetime { get; set; }
-        public string? pdfpath { get; set; }
-        public string? documentData { get; set; }
+        public DateTime? InvestigatorRevieweddatetime { get; set; }
+        public DateTime? Patientapproveddatetime { get; set; }
+        public string? Pdfpath { get; set; }
+        public string? DocumentData { get; set; }
         public bool IsReviewedByPatient { get; set; }
 
-        public string? patientdigitalSignBase64 { get; set; }
+        public string? PatientdigitalSignBase64 { get; set; }
         //public string? investigatordigitalSignBase64 { get; set; }
-        public string? patientdigitalSignImagepath { get; set; }
+        public string? PatientdigitalSignImagepath { get; set; }
         //public string? investigatordigitalSignImagepath { get; set; }
         public List<EconsentReviewDetailsSectionsDto> EconsentReviewDetailsSections { get; set; }
         public int? ReviewDoneByUserId { get; set; }

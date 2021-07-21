@@ -17,6 +17,7 @@ namespace GSC.Helper
         public string header { get; set; }
         public bool isReadCompelete { get; set; }
         public bool isReviewed { get; set; }
+        public int ReviewTime { get; set; }
     }
 
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 

@@ -13,11 +13,11 @@ namespace GSC.Data.Entities.InformConcent
         public int EconsentSetupId { get; set; }
         public bool IsReviewDoneByInvestigator { get; set; }
         public int ReviewDoneByRoleId { get; set; }
-        public DateTime? investigatorRevieweddatetime { get; set; }
-        public DateTime? patientapproveddatetime { get; set; }
-        public string? pdfpath { get; set; }
+        public DateTime? InvestigatorRevieweddatetime { get; set; }
+        public DateTime? Patientapproveddatetime { get; set; }
+        public string? Pdfpath { get; set; }
         public bool IsReviewedByPatient { get; set; }
-        public string? patientdigitalSignImagepath { get; set; }
+        public string? PatientdigitalSignImagepath { get; set; }
         public Randomization Randomization { get; set; }
         public EconsentSetup EconsentSetup { get; set; }
         public List<EconsentReviewDetailsSections> EconsentReviewDetailsSections { get; set; }
