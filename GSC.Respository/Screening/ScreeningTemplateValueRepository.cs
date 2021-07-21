@@ -1128,12 +1128,15 @@ namespace GSC.Respository.Screening
 
         public DesignScreeningVariableDto GetQueryVariableDetail(int id, int screeningEntryId)
         {
+            DesignScreeningVariableDto variableDetail = null;
+
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+
             var screeningValue = All.AsNoTracking().Where(t => t.Id == id)
                    .ProjectTo<Data.Dto.Screening.ScreeningTemplateValueBasic>(_mapper.ConfigurationProvider).FirstOrDefault();
             if (screeningValue != null)
             {
-                var variableDetail = _context.ProjectDesignVariable.Where(t => t.Id == screeningValue.ProjectDesignVariableId)
+                 variableDetail = _context.ProjectDesignVariable.Where(t => t.Id == screeningValue.ProjectDesignVariableId)
                      .Select(x => new DesignScreeningVariableDto
                      {
                          ProjectDesignTemplateId = x.ProjectDesignTemplateId,
@@ -1174,45 +1177,42 @@ namespace GSC.Respository.Screening
                          }).ToList()
 
                      }).FirstOrDefault();
+            }
+
+            if (variableDetail != null)
+            {
+                if (variableDetail.CollectionSource == CollectionSources.Relation && variableDetail.RelationProjectDesignVariableId > 0)
+                    variableDetail.Values = GetScreeningRelation(variableDetail.RelationProjectDesignVariableId ?? 0, screeningEntryId);
+
+                variableDetail.ScreeningValue = screeningValue.Value;
+                variableDetail.ScreeningValueOld = screeningValue.IsNa ? "N/A" : screeningValue.Value;
+                variableDetail.ScreeningTemplateValueId = screeningValue.Id;
+                variableDetail.ScheduleDate = screeningValue.ScheduleDate;
+                variableDetail.QueryStatus = screeningValue.QueryStatus;
+                variableDetail.IsNaValue = screeningValue.IsNa;
+                variableDetail.IsSystem = screeningValue.QueryStatus == QueryStatus.Closed ? false : screeningValue.IsSystem;
 
 
-                if (variableDetail != null)
-                {
-                    if (variableDetail.CollectionSource == CollectionSources.Relation && variableDetail.RelationProjectDesignVariableId > 0)
-                        variableDetail.Values = GetScreeningRelation(variableDetail.RelationProjectDesignVariableId ?? 0, screeningEntryId);
-
-                    variableDetail.ScreeningValue = screeningValue.Value;
-                    variableDetail.ScreeningValueOld = screeningValue.IsNa ? "N/A" : screeningValue.Value;
-                    variableDetail.ScreeningTemplateValueId = screeningValue.Id;
-                    variableDetail.ScheduleDate = screeningValue.ScheduleDate;
-                    variableDetail.QueryStatus = screeningValue.QueryStatus;
-                    variableDetail.IsNaValue = screeningValue.IsNa;
-                    variableDetail.IsSystem = screeningValue.QueryStatus == QueryStatus.Closed ? false : screeningValue.IsSystem;
+                variableDetail.DocPath = screeningValue.DocPath != null ? screeningValue.DocPath : null;
+                variableDetail.DocFullPath = screeningValue.DocPath != null ? documentUrl + screeningValue.DocPath : null;
 
 
-                    variableDetail.DocPath = screeningValue.DocPath != null ? screeningValue.DocPath : null;
-                    variableDetail.DocFullPath = screeningValue.DocPath != null ? documentUrl + screeningValue.DocPath : null;
-
-
-                    if (variableDetail.Values != null && (variableDetail.CollectionSource == CollectionSources.CheckBox || variableDetail.CollectionSource == CollectionSources.MultiCheckBox))
-                        variableDetail.Values.ToList().ForEach(val =>
+                if (variableDetail.Values != null && (variableDetail.CollectionSource == CollectionSources.CheckBox || variableDetail.CollectionSource == CollectionSources.MultiCheckBox))
+                    variableDetail.Values.ToList().ForEach(val =>
+                    {
+                        var childValue = screeningValue.Children.FirstOrDefault(v => v.ProjectDesignVariableValueId == val.Id);
+                        if (childValue != null)
                         {
-                            var childValue = screeningValue.Children.FirstOrDefault(v => v.ProjectDesignVariableValueId == val.Id);
-                            if (childValue != null)
-                            {
-                                val.ScreeningValue = childValue.Value;
-                                val.ScreeningValueOld = childValue.Value;
-                                val.ScreeningTemplateValueChildId = childValue.Id;
-                            }
-                        });
+                            val.ScreeningValue = childValue.Value;
+                            val.ScreeningValueOld = childValue.Value;
+                            val.ScreeningTemplateValueChildId = childValue.Id;
+                        }
+                    });
 
-
-                }
-
-                return variableDetail;
 
             }
-            return null;
+
+            return variableDetail;
         }
     }
 }
