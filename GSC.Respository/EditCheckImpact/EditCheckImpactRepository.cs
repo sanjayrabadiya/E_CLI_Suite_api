@@ -225,7 +225,7 @@ namespace GSC.Respository.EditCheckImpact
                     r.Status = status;
                     r.ScreeningTemplateId = screeningTemplateId;
                 }
-                else if (r.IsSameTemplate || (isRepated && r.IsTarget))
+                else if ((r.IsSameTemplate && r.ProjectDesignTemplateId == projectDesignTemplateId) || (isRepated && r.IsTarget))
                 {
                     if (!r.ValueApply)
                     {
@@ -275,13 +275,13 @@ namespace GSC.Respository.EditCheckImpact
 
             var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget && r.ScreeningTemplateId > 0).ToList();
             targetResult.Where(r => r.Operator == Operator.Enable && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
-              {
-                  if (r.ValidateType == EditCheckValidateType.Passed)
-                      UpdateTemplateDisable(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId);
-                  else
-                      UpdateEnableTemplate(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r, editTargetValidation, isQueryRaise);
+                  {
+                      if (r.ValidateType == EditCheckValidateType.Passed)
+                          UpdateTemplateDisable(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId);
+                      else
+                          UpdateEnableTemplate(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r, editTargetValidation, isQueryRaise);
 
-              });
+                  });
             _context.Save();
 
             var variableResult = UpdateVariale(targetResult.Where(r => r.ScreeningTemplateId > 0 && (r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)).ToList(), screeningEntryId, screeningVisitId, true, isQueryRaise);
