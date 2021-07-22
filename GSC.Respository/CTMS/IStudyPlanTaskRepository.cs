@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Audit;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Helper;
@@ -21,5 +22,6 @@ namespace GSC.Respository.CTMS
         DateTime GetNextWorkingDate(NextWorkingDateParameterDto parameterDto);
         string ValidateweekEnd(NextWorkingDateParameterDto parameterDto);
         List<StudyPlanTask> Save(StudyPlanTask taskData);
+        List<AuditTrailCommonDto> GetStudyPlanTaskHistory(int id);
     }
 }

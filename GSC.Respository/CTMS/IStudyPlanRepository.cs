@@ -12,5 +12,7 @@ namespace GSC.Respository.CTMS
         List<StudyPlanGridDto> GetStudyplanList(bool isDeleted);
         string ImportTaskMasterData(StudyPlan studyplan);
         string Duplicate(StudyPlan objSave);
+        string ValidateTask(StudyPlanTask taskmasterDto, List<StudyPlanTask> tasklist, StudyPlan studyplan);
+        void PlanUpdate(int ProjectId);
     }
 }

@@ -96,6 +96,8 @@ namespace GSC.Api.Controllers.CTMS
                 }
                 //_uow.Save();
             }
+
+            _studyPlanRepository.PlanUpdate(studyplanDto.ProjectId);
             return Ok();
         }
 
@@ -112,6 +114,18 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validatecode);
                 return BadRequest(ModelState);
             }
+
+            //var TaskList = _context.StudyPlanTask.Where(x => x.DeletedDate == null && x.StudyPlanId == studyplanDto.Id).ToList();
+            //foreach (var item in TaskList)
+            //{
+            //    var ValidateTask = _studyPlanRepository.ValidateTask(item, TaskList, studyplan);
+            //    if (!string.IsNullOrEmpty(ValidateTask))
+            //    {
+            //        ModelState.AddModelError("Message", ValidateTask);
+            //        return BadRequest(ModelState);
+            //    }
+            //}
+
             _studyPlanRepository.Update(studyplan);
             if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
             return Ok(studyplan.Id);

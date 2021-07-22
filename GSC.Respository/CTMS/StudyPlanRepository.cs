@@ -94,7 +94,7 @@ namespace GSC.Respository.CTMS
 
             //foreach (var item in tasklist)
             //{
-            //    var validate = ValidateTask(item, tasklist);
+            //    var validate = ValidateTask(item, tasklist, studyplan);
             //    if (!string.IsNullOrEmpty(validate))
             //        return validate;
             //}
@@ -102,7 +102,26 @@ namespace GSC.Respository.CTMS
             _context.StudyPlanTask.AddRange(tasklist);
 
             _context.Save();
+
             return "";
+        }
+
+        public void PlanUpdate(int ProjectId)
+        {
+            var Projects = _context.Project.Where(x => x.Id == ProjectId || x.ParentProjectId == ProjectId).ToList();
+
+            var studyPlanList = _context.StudyPlan.Where(x => Projects.Select(x => x.Id).Contains(x.ProjectId) && x.DeletedDate == null).ToList();
+
+            var studyPlanTaskList = _context.StudyPlanTask.Where(x => x.DeletedDate == null && studyPlanList.Select(x => x.Id).Contains(x.StudyPlanId)).ToList();
+
+            studyPlanList.ForEach(i =>
+            {
+                i.StartDate = studyPlanTaskList.Min(x => x.StartDate);
+                i.EndDate = studyPlanTaskList.Max(x => x.EndDate);
+            });
+
+            _context.StudyPlan.UpdateRange(studyPlanList);
+            _context.Save();
         }
 
         private StudyPlanTask UpdateDependentTaskDate(StudyPlanTask maintask, ref List<StudyPlanTask> tasklist)
@@ -138,9 +157,9 @@ namespace GSC.Respository.CTMS
             return null;
         }
 
-        private string ValidateTask(StudyPlanTask taskmasterDto, List<StudyPlanTask> tasklist)
+        public string ValidateTask(StudyPlanTask taskmasterDto, List<StudyPlanTask> tasklist, StudyPlan studyplan)
         {
-            var studyplan = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault();
+            //var studyplan = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault();
             if (taskmasterDto.StartDate >= studyplan.StartDate && taskmasterDto.StartDate <= studyplan.EndDate
                 && taskmasterDto.EndDate <= studyplan.EndDate && taskmasterDto.EndDate >= studyplan.StartDate)
             {

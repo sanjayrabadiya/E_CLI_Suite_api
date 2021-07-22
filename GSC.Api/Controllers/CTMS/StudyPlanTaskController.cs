@@ -26,20 +26,23 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
+        private readonly IStudyPlanRepository _studyPlanRepository;
 
 
         public StudyPlanTaskController(IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, IGSCContext context, IStudyPlanTaskRepository studyPlanTaskRepository, ITaskMasterRepository taskMasterRepository)
+            IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, IGSCContext context, IStudyPlanTaskRepository studyPlanTaskRepository,
+            ITaskMasterRepository taskMasterRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _studyPlanTaskRepository = studyPlanTaskRepository;
+            _studyPlanRepository = studyPlanRepository;
         }
 
         [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}/{ProjectId:int}")]
-        public IActionResult Get(bool isDeleted, int StudyPlanId,int ProjectId)
+        public IActionResult Get(bool isDeleted, int StudyPlanId, int ProjectId)
         {
             var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId, ProjectId);
             return Ok(studyplan);
@@ -50,32 +53,32 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (id <= 0) return BadRequest();
             var task = _studyPlanTaskRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
-            var taskDto = _mapper.Map<StudyPlanTaskDto>(task);            
+            var taskDto = _mapper.Map<StudyPlanTaskDto>(task);
             return Ok(taskDto);
         }
 
-        [HttpPost]       
+        [HttpPost]
         public IActionResult Post([FromBody] StudyPlantaskParameterDto taskmasterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             taskmasterDto.Id = 0;
-            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);           
-            tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);            
+            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
+            tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
             }
-            var validate = _studyPlanTaskRepository.ValidateTask(tastMaster);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+            //var validate = _studyPlanTaskRepository.ValidateTask(tastMaster);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
             _studyPlanTaskRepository.Add(tastMaster);
             _uow.Save();
-           //  var tasklist= _studyPlanTaskRepository.Save(tastMaster);
+            //  var tasklist= _studyPlanTaskRepository.Save(tastMaster);
             //string mvalidate = _studyPlanTaskRepository.UpdateDependentTask(taskmasterDto.StudyPlanId);
             //if (!string.IsNullOrEmpty(mvalidate))
             //{
@@ -85,6 +88,10 @@ namespace GSC.Api.Controllers.CTMS
             //    return BadRequest(ModelState);
             //}            
             _studyPlanTaskRepository.UpdateTaskOrderSequence(taskmasterDto.Id);
+
+            var ProjectId = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault().ProjectId;
+            var ParentProjectId = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().ParentProjectId;
+            _studyPlanRepository.PlanUpdate((int)(ParentProjectId != null ? ParentProjectId : ProjectId));
             return Ok(tastMaster.Id);
         }
 
@@ -95,7 +102,7 @@ namespace GSC.Api.Controllers.CTMS
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);          
+            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
@@ -118,7 +125,11 @@ namespace GSC.Api.Controllers.CTMS
                 _studyPlanTaskRepository.Update(revertdata);
                 _uow.Save();
                 return BadRequest(ModelState);
-            }         
+            }
+
+            var ProjectId = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault().ProjectId;
+            var ParentProjectId = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().ParentProjectId;
+            _studyPlanRepository.PlanUpdate((int)(ParentProjectId != null ? ParentProjectId : ProjectId));
             return Ok(tastMaster.Id);
         }
 
@@ -185,8 +196,19 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
             var nextworkingdate = _studyPlanTaskRepository.GetNextWorkingDate(parameterDto);
-            return Ok(nextworkingdate);     
+            return Ok(nextworkingdate);
         }
+
+
+        [HttpGet("GetStudyPlanTaskHistory/{id}")]
+        public IActionResult GetStudyPlanTaskHistory(int id)
+        {
+            if (id <= 0) return BadRequest();
+
+            var result = _studyPlanTaskRepository.GetStudyPlanTaskHistory(id);
+            return Ok(result);
+        }
+
 
     }
 }
