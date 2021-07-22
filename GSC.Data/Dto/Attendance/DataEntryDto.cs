@@ -120,6 +120,8 @@ namespace GSC.Data.Dto.Attendance
         public string StatusName { get; set; }
         public bool MyReview { get; set; }
         public bool IsLocked { get; set; }
+        public string SubjectNo { get; set; }
+        public string RandomizationNumber { get; set; }
     }
 
 }

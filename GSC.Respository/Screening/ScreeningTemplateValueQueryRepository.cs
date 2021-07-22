@@ -760,7 +760,7 @@ namespace GSC.Respository.Screening
                                  screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + screeningValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName
                                             : screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + screeningValue.ScreeningTemplate.RepeatSeqNo + " " + screeningValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
                               Visit = screeningValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
-                                         Convert.ToString(screeningValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + screeningValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
+                                         Convert.ToString(screeningValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "-" + screeningValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
                               FieldName = screeningValue.ProjectDesignVariable.VariableName,
                               ProjectDesignVariableId = screeningValue.ProjectDesignVariableId,
                               VolunteerName = screeningValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ?

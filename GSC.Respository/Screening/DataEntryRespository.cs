@@ -400,6 +400,8 @@ namespace GSC.Respository.Screening
                     {
                         Id = t.Id,
                         ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                        SubjectNo=t.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
+                        RandomizationNumber = t.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
                         ScreeningVisitId = t.ScreeningVisitId,
                         ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                         ProjectDesignPeriodId = t.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId,
@@ -413,7 +415,7 @@ namespace GSC.Respository.Screening
                         ParentId = t.ParentId,
                         ScheduleDate = t.ScheduleDate,
                         TemplateName = t.ProjectDesignTemplate.TemplateName,
-                        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(t.ScreeningVisit.RepeatedVisitNumber == null ?"" : "-" + t.ScreeningVisit.RepeatedVisitNumber),
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
