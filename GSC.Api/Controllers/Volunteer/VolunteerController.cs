@@ -239,15 +239,6 @@ namespace GSC.Api.Controllers.Volunteer
             return Ok(_volunteerRepository.GetVolunteerForAttendance(search));
         }
 
-
-
-        //[HttpGet]
-        //[Route("getVolunteersForDataEntryByPeriodIdLocked/{projectDesignPeriodId}/{projectId}/{isLock}")]
-        //public IActionResult getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock)
-        //{
-        //    return Ok(_volunteerRepository.getVolunteersForDataEntryByPeriodIdLocked(projectDesignPeriodId, projectId, isLock));
-        //}
-
         [HttpGet]
         [Route("GetVolunteerSummary/{volunteerId}")]
         [AllowAnonymous]

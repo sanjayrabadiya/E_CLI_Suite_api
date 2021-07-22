@@ -259,7 +259,7 @@ namespace GSC.Report
             //Add layout format for grid pagination
             layoutFormat = new PdfGridLayoutFormat();
             layoutFormat.Layout = PdfLayoutType.Paginate;
-            //layoutFormat.Break = PdfLayoutBreakType.FitPage;
+            layoutFormat.Break = PdfLayoutBreakType.FitElement;
             //Draw grid to the page of PDF document
             header = pdfGridAddress.Headers[0];
             //Adds cell customizations
@@ -269,7 +269,7 @@ namespace GSC.Report
 
             }
             header.ApplyStyle(headerStyle);
-            tocresult = pdfGridAddress.Draw(page, new PointF(0, tocresult.Bounds.Bottom+ 10), layoutFormat);
+            tocresult = pdfGridAddress.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
 
             /* Contact Detail Grid */
@@ -292,7 +292,7 @@ namespace GSC.Report
 
             }
             //Draw grid to the resultant page of the first grid
-            tocresult = pdfContact.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Bottom + 10));
+            tocresult = pdfContact.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
             /* Language Detail Grid */
             tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
@@ -314,7 +314,7 @@ namespace GSC.Report
 
             }
             //Draw grid to the resultant page of the first grid
-            tocresult = pdfLanguage.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20));
+            tocresult = pdfLanguage.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
 
             /* Documnet Detail Grid */
@@ -335,8 +335,7 @@ namespace GSC.Report
 
             }
             //Draw grid to the resultant page of the first grid
-            tocresult = pdfVolDocumnet.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Bottom + 10));
-
+            tocresult = pdfVolDocumnet.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
             //Save and the document
             MemoryStream memoryStream = new MemoryStream();
@@ -399,9 +398,10 @@ namespace GSC.Report
             DataTable addressDetails = new DataTable();
 
             addressDetails.Columns.Add("Address");
-            addressDetails.Columns.Add("City");
-            addressDetails.Columns.Add("State");
             addressDetails.Columns.Add("Country");
+            addressDetails.Columns.Add("State");
+            addressDetails.Columns.Add("City");
+            addressDetails.Columns.Add("City Area");
             addressDetails.Columns.Add("Zip/Post Code");
             addressDetails.Columns.Add("Current Address?");
             addressDetails.Columns.Add("Parmenent Address?");
@@ -414,9 +414,10 @@ namespace GSC.Report
 
                     addressDetails.Rows.Add(new object[] {
                                                       address.Location.Address
+                                                      , address.Location.CountryName
+                                                      , address.Location.StateName
                                                     , address.Location.CityName
-                                                    , address.Location.StateName
-                                                    , address.Location.CountryName
+                                                    , address.Location.CityAreaName
                                                     , address.Location.Zip
                                                     , address.IsCurrent ? "YES" : "NO"
                                                     , address.IsPermanent ? "YES":"NO"
@@ -503,7 +504,7 @@ namespace GSC.Report
             DataTable documentDetails = new DataTable();
 
             documentDetails.Columns.Add("Document Type");
-            documentDetails.Columns.Add("File Name");
+            documentDetails.Columns.Add("Document Name");
             documentDetails.Columns.Add("Remark");
 
 
@@ -514,7 +515,7 @@ namespace GSC.Report
 
                     documentDetails.Rows.Add(new object[] {
                                                       document.DocumentType.TypeName
-                                                    , document.FileName
+                                                    , document.DocumentName.Name
                                                     , document.Note
                                                 });
                 }

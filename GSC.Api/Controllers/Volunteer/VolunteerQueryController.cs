@@ -70,6 +70,9 @@ namespace GSC.Api.Controllers.Volunteer
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var volunteerQueryValue = _volunteerQueryRepository.GetLatest(volunteerQueryCommentDto.VolunteerId,volunteerQueryCommentDto.FieldName);
 
+            if(volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryCommentDto.ReasonId == 0)
+                return BadRequest("Query already open for this field.");
+
             if (volunteerQueryValue == null)
                 volunteerQueryCommentDto.QueryStatus = CommentStatus.Open;
             else
