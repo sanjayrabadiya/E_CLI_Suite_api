@@ -274,8 +274,8 @@ namespace GSC.Respository.ProjectRight
         public List<int> GetParentProjectRightIdList()
         {
             return All.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId &&
-                                  c.RoleId == _jwtTokenAccesser.RoleId && c.project.ParentProjectId == null
-                                  && c.IsReviewDone).Select(x => x.ProjectId).ToList();
+                                  c.RoleId == _jwtTokenAccesser.RoleId
+                                  && c.IsReviewDone).Select(x => x.project.ParentProjectId ?? x.project.Id).Distinct().ToList();
         }
 
         public List<int> GetChildProjectRightIdList()
