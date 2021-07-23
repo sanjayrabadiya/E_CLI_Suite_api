@@ -37,9 +37,9 @@ namespace GSC.Respository.Medra
             return "";
         }
 
-        public List<StudyScopingDto> GetStudyScopingList(int projectId)
+        public List<StudyScopingDto> GetStudyScopingList(int projectId, bool isDeleted)
         {
-            var result = All.Where(r => r.ProjectId == projectId && r.DeletedDate == null).Select(x =>
+            var result = All.Where(r => r.ProjectId == projectId && (isDeleted ? r.DeletedDate != null : r.DeletedDate == null)).Select(x =>
                     new StudyScopingDto
                     {
                         Id = x.Id,
@@ -67,7 +67,8 @@ namespace GSC.Respository.Medra
                         CoderApproverName = _context.SecurityRole.Where(s => s.Id == x.CoderApprover && s.DeletedDate == null).FirstOrDefault().RoleName,
                         FieldName = x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName + "." +
                             x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName + "." +
-                            x.ProjectDesignVariable.ProjectDesignTemplate.TemplateName + "." + x.ProjectDesignVariable.VariableName
+                            x.ProjectDesignVariable.ProjectDesignTemplate.TemplateName + "." + x.ProjectDesignVariable.VariableName,
+                        IsDeleted = isDeleted
                     }).OrderBy(x => x.Id).ToList();
 
             foreach (var item in result)

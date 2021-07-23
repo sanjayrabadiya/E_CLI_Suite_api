@@ -75,10 +75,10 @@ namespace GSC.Api.Controllers.Medra
             return Ok(studyscopingDto);
         }
 
-        [HttpGet("GetStudyScopingList/{projectId}")]
-        public IActionResult GetStudyScopingList(int projectId)
+        [HttpGet("GetStudyScopingList/{projectId}/{isDeleted:bool?}")]
+        public IActionResult GetStudyScopingList(int projectId, bool isDeleted)
         {
-            return Ok(_studyScopingRepository.GetStudyScopingList(projectId));
+            return Ok(_studyScopingRepository.GetStudyScopingList(projectId, isDeleted));
         }
 
         [HttpPost]
