@@ -193,6 +193,7 @@ namespace GSC.Respository.Screening
                 screeningTemplateValueQuery.ScreeningTemplateValueId = x.Id;
                 screeningTemplateValueQuery.ReasonId = updateAllQueryStatus.ReasonId;
                 screeningTemplateValueQuery.ReasonOth = updateAllQueryStatus.ReasonOth;
+                screeningTemplateValueQuery.Note = updateAllQueryStatus.Note;
                 Save(screeningTemplateValueQuery);
             });
         }
@@ -721,7 +722,7 @@ namespace GSC.Respository.Screening
             var result = (from screeningValue in _context.ScreeningTemplateValue.Where(t =>
              t.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId && t.QueryStatus != null && t.QueryStatus != QueryStatus.Closed
                                  && t.ProjectDesignVariable.DeletedDate == null)
-                          let lastQuery = screeningValue.ScreeningTemplateValueQuerys.OrderByDescending(c => c.Id).Select(a => new
+                          let lastQuery = screeningValue.ScreeningTemplateValueQuerys.Where(b => b.QueryStatus == QueryStatus.Open).OrderByDescending(c => c.Id).Select(a => new
                           {
                               a.Note,
                               a.UserName,
