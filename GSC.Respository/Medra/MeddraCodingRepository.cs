@@ -186,9 +186,9 @@ namespace GSC.Respository.Medra
 
         public List<DropDownDto> MeddraCodingVariableDropDown(int ProjectId)
         {
-            var ParentProjectId = _context.ProjectDesign.Find(ProjectId).ProjectId;
+            //var ParentProjectId = _context.ProjectDesign.Find(ProjectId).ProjectId;
             List<DropDownDto> objList = new List<DropDownDto>();
-            var variable = _context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectId == ParentProjectId)
+            var variable = _context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectId == ProjectId)
             .Include(d => d.MedraConfig)
             .ThenInclude(d => d.Language)
             .Include(d => d.MedraConfig)
