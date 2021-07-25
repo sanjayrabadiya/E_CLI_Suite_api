@@ -51,6 +51,7 @@ namespace GSC.Report
         private PdfLayoutResult tocresult = null;
         Dictionary<PdfPageBase, int> pages = new Dictionary<PdfPageBase, int>();
         private List<TocIndexCreate> _pagenumberset = new List<TocIndexCreate>();
+        PdfGrid pdfGrid = null;
 
         public VolunteerSummaryReport(IHostingEnvironment hostingEnvironment,
             IGSCContext context,
@@ -100,48 +101,46 @@ namespace GSC.Report
             VolunteerSearchDto search = new VolunteerSearchDto();
             var volunteer = _volunteerRepository.GetVolunteerDetail(false, VolunteerID);
 
+            document = new PdfDocument();
 
-            //Create a new PDF document
-            PdfDocument doc = new PdfDocument();
+            document.PageSettings.Margins.Top = Convert.ToInt32(0.5 * 100);
+            document.PageSettings.Margins.Bottom = Convert.ToInt32(0.5 * 100);
+            document.PageSettings.Margins.Left = Convert.ToInt32(0.5 * 100);
+            document.PageSettings.Margins.Right = Convert.ToInt32(0.5 * 100);
 
-            //Add a page
-            PdfPage page = doc.Pages.Add();
+            PdfSection SectionTOC = document.Sections.Add();
+            PdfPage pageTOC = SectionTOC.Pages.Add();
 
-            doc.PageSettings.Margins.Top = Convert.ToInt32(0.5 * 100);
-            //doc.PageSettings.Margins.Bottom = Convert.ToInt32(0.5 * 100);
-            doc.PageSettings.Margins.Left = Convert.ToInt32(0.5 * 100);
-            doc.PageSettings.Margins.Right = Convert.ToInt32(0.5 * 100);
+            document.Template.Top = AddHeader(document, true, true, 1);
+            document.Template.Bottom = AddFooter(document);
 
-            PdfGraphics graphics = page.Graphics;
+            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
+            layoutFormat.Layout = PdfLayoutType.Paginate;
+            layoutFormat.Break = PdfLayoutBreakType.FitElement;
 
-            doc.Template.Top = AddHeader(doc);
-            doc.Template.Bottom = AddFooter(doc);
+            RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
+            tocresult = new PdfLayoutResult(pageTOC, bounds);
+
+            PdfGraphics graphics = pageTOC.Graphics;
+
+
 
             PdfSolidBrush brush = new PdfSolidBrush(new PdfColor(0, 0, 0));
-            RectangleF bounds = new RectangleF(page.GetClientSize().Width - 75, 0, 65f, 65f);
             PdfPen pens = new PdfPen(Color.Black);
 
             //Add a Volunteer Profile Image
 
             SizeF imageSize = new SizeF(65f, 65f);
-            var imagePath = _uploadSettingRepository.GetImagePath();
+            var imagePath = _uploadSettingRepository.GetWebImageUrl();
             if (File.Exists($"{imagePath}/{volunteer[0].ProfilePic}"))
             {
                 FileStream VoluntreerProfileinputstream = new FileStream($"{imagePath}/{volunteer[0].ProfilePic}", FileMode.Open, FileAccess.Read);
                 PdfImage img = new PdfBitmap(VoluntreerProfileinputstream);
-                var VoluntreerProfile = new PointF(page.GetClientSize().Width - 75, 0);
-                page.Graphics.DrawImage(img, VoluntreerProfile, imageSize);
-                page.Graphics.DrawRectangle(pens, new RectangleF(page.GetClientSize().Width - 75, 0, 65f, 65f));
+                var VoluntreerProfile = new PointF(pageTOC.GetClientSize().Width - 75, 0);
+                pageTOC.Graphics.DrawImage(img, VoluntreerProfile, imageSize);
+                pageTOC.Graphics.DrawRectangle(pens, new RectangleF(pageTOC.GetClientSize().Width - 75, 0, 65f, 65f));
 
             }
-
-            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-            //layoutFormat.Break = PdfLayoutBreakType.FitPage;
-            layoutFormat.Layout = PdfLayoutType.Paginate;
-            //not fit page then next page
-            layoutFormat.Break = PdfLayoutBreakType.FitElement;
-
-            tocresult = new PdfLayoutResult(page, bounds);
 
             PdfStringFormat tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
             PdfTextElement indexheader = new PdfTextElement();
@@ -149,7 +148,7 @@ namespace GSC.Report
             tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
             indexheader = new PdfTextElement(volunteer[0].FullName, headerfont, PdfBrushes.Black);
             indexheader.StringFormat = tocformat;
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 80, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
+            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
 
             tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
@@ -163,86 +162,55 @@ namespace GSC.Report
             indexheader.StringFormat = tocformat;
             tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(tocresult.Bounds.X, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
+            //Profile Details
+            tocresult = AddString("Old Reference Number", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].RefNo, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Registration Date", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(Convert.ToDateTime(volunteer[0].RegisterDate).ToString("dd-MM-yyyy"), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Date Of Birth", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(Convert.ToDateTime(volunteer[0].DateOfBirth).ToString("dd-MM-yyyy"), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Age", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].FromAge.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Religion", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].Religion, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Occupation", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].Occupation, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Educaiton Qualification", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].Education, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Race", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].Race, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Race", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].Race, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Type Of Population", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].PopulationType, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Gender", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].Gender, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Annual Income", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].AnnualIncome.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            tocresult = AddString("Food Type", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(volunteer[0].FoodType, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+            pageTOC.Graphics.Save();
+            pageTOC.Graphics.SetTransparency(1, 1, PdfBlendMode.Multiply);
 
             //Draw Rectangle For Profile Details
             brush = new PdfSolidBrush(new PdfColor(255, 255, 255));
-            bounds = new RectangleF(0, 100, page.GetClientSize().Width, 270);
-            page.Graphics.DrawRectangle(PdfPens.Black, brush, bounds);
+            bounds = new RectangleF(0, 30, pageTOC.GetClientSize().Width, tocresult.Bounds.Y);
+            pageTOC.Graphics.DrawRectangle(PdfPens.Black, brush, bounds);
 
-            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-
-            indexheader = new PdfTextElement("Old Reference Number", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 30, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].RefNo, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-
-            indexheader = new PdfTextElement("Registration Date", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(Convert.ToDateTime(volunteer[0].RegisterDate).ToString("dd-MM-yyyy"), regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Date Of Birth", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(Convert.ToDateTime(volunteer[0].DateOfBirth).ToString("dd-MM-yyyy"), regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Age", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].FromAge.ToString(), regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Religion", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].Religion, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Occupation", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].Occupation, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Educaiton Qualification", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].Education, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Race", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].Race, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Marital Status", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].MaritalStatus, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Type Of Population", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].PopulationType, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Gender", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].Gender, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Annual Income", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].AnnualIncome.ToString(), regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            indexheader = new PdfTextElement("Food Type", regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-            indexheader = new PdfTextElement(volunteer[0].FoodType, regularfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-
-            indexheader = new PdfTextElement("Address Details", headerfont, PdfBrushes.Black);
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 40, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-
-            PdfGridRow header;
+            PdfGridRow header = null;
 
             //Creates the header style
             PdfGridCellStyle headerStyle = new PdfGridCellStyle();
@@ -251,145 +219,42 @@ namespace GSC.Report
             headerStyle.TextBrush = PdfBrushes.Black;
             headerStyle.Font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12f, PdfFontStyle.Regular);
 
-
-            /* Address Detail Grid */
-            PdfGrid pdfGridAddress = new PdfGrid();
-            //Assign data source
-            pdfGridAddress.DataSource = DesginVoluteerAddress(VolunteerID);
             //Add layout format for grid pagination
             layoutFormat = new PdfGridLayoutFormat();
             layoutFormat.Layout = PdfLayoutType.Paginate;
             layoutFormat.Break = PdfLayoutBreakType.FitElement;
-            //Draw grid to the page of PDF document
-            header = pdfGridAddress.Headers[0];
-            //Adds cell customizations
-            for (int i = 0; i < pdfGridAddress.Columns.Count; i++)
-            {
-                pdfGridAddress.Columns[i].Format = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle);
 
-            }
-            header.ApplyStyle(headerStyle);
-            tocresult = pdfGridAddress.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
+            /* Address Detail Grid */
+            tocresult = AddString("Address Details", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 40, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
 
+            DesginVoluteerAddress(VolunteerID, header, headerStyle, layoutFormat);
 
             /* Contact Detail Grid */
-            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement("Contact Details", headerfont, PdfBrushes.Black);
-            indexheader.StringFormat = tocformat;
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
+            tocresult = AddString("Contact Details", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, (tocresult.Bounds.Bottom + 10) > 605 ? (tocresult.Page.GetClientSize().Height + 10) : (tocresult.Bounds.Bottom + 10), tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
 
-
-            //Create a PdfGrid
-            PdfGrid pdfContact = new PdfGrid();
-            //Assign data source
-            pdfContact.DataSource = DesginVoluteerContact(VolunteerID);
-            header = pdfContact.Headers[0];
-            //Adds cell customizations
-            header.ApplyStyle(headerStyle);
-            for (int i = 0; i < pdfContact.Columns.Count; i++)
-            {
-                pdfContact.Columns[i].Format = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle);
-
-            }
-            //Draw grid to the resultant page of the first grid
-            tocresult = pdfContact.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
+            DesginVoluteerContact(VolunteerID, header, headerStyle, layoutFormat);
 
             /* Language Detail Grid */
-            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement("Language Details", headerfont, PdfBrushes.Black);
-            indexheader.StringFormat = tocformat;
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
+            tocresult = AddString("Language Details", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, (tocresult.Bounds.Bottom + 10) > 605 ? (tocresult.Page.GetClientSize().Height + 10) : (tocresult.Bounds.Bottom + 10), tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
 
-
-            //Create a PdfGrid
-            PdfGrid pdfLanguage = new PdfGrid();
-            //Assign data source
-            pdfLanguage.DataSource = DesginVoluteerLanguage(VolunteerID);
-            header = pdfLanguage.Headers[0];
-            //Adds cell customizations
-            header.ApplyStyle(headerStyle);
-            for (int i = 0; i < pdfLanguage.Columns.Count; i++)
-            {
-                pdfLanguage.Columns[i].Format = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle);
-
-            }
-            //Draw grid to the resultant page of the first grid
-            tocresult = pdfLanguage.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
+            DesginVoluteerLanguage(VolunteerID, header, headerStyle, layoutFormat);
 
             /* Documnet Detail Grid */
-            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement("Document Details", headerfont, PdfBrushes.Black);
-            indexheader.StringFormat = tocformat;
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
+            tocresult = AddString("Document Details", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, (tocresult.Bounds.Bottom + 10) > 605 ? (tocresult.Page.GetClientSize().Height + 10) : (tocresult.Bounds.Bottom + 10), tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
 
-            ////Create a PdfGrid
-            PdfGrid pdfVolDocumnet = new PdfGrid();
-            //Assign data source
-            pdfVolDocumnet.DataSource = DesginVoluteerDocument(VolunteerID);
-            header = pdfVolDocumnet.Headers[0];
-            header.ApplyStyle(headerStyle);
-            for (int i = 0; i < pdfVolDocumnet.Columns.Count; i++)
-            {
-                pdfVolDocumnet.Columns[i].Format = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle);
+            DesginVoluteerDocument(VolunteerID, header, headerStyle, layoutFormat);
 
-            }
-            //Draw grid to the resultant page of the first grid
-            tocresult = pdfVolDocumnet.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
             //Save and the document
             MemoryStream memoryStream = new MemoryStream();
-            doc.Save(memoryStream);
+            document.Save(memoryStream);
             memoryStream.Position = 0;
             FileStreamResult fileStreamResult = new FileStreamResult(memoryStream, "application/pdf");
             fileStreamResult.FileDownloadName = "blankreport.pdf";
             return fileStreamResult;
         }
 
-        private void DesignVolunteerProfile(IList<VolunteerGridDto> volunteer)
-        {
-            PdfSection SectionTOC = document.Sections.Add();
-            PdfPage pageTOC = SectionTOC.Pages.Add();
-
-            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-            //layoutFormat.Break = PdfLayoutBreakType.FitPage;
-            layoutFormat.Layout = PdfLayoutType.Paginate;
-            layoutFormat.Break = PdfLayoutBreakType.FitElement;
-
-            //Create a solid brush
-            PdfBrush brush = new PdfSolidBrush(Color.Black);
-
-            //Set the font
-            PdfFont font = new PdfStandardFont(PdfFontFamily.Helvetica, 18);
-
-            //Create Pdf graphics for the page
-
-            RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
-            tocresult = new PdfLayoutResult(pageTOC, bounds);
-
-            PdfStringFormat headformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
-            PdfTextElement indexheader = new PdfTextElement("Volunteer Summary", largeheaderfont, PdfBrushes.Black);
-            indexheader.StringFormat = headformat;
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-
-            //RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
-            //tocresult = new PdfLayoutResult(pageTOC, bounds);
-
-            PdfStringFormat tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            PdfTextElement indexTitle = new PdfTextElement(volunteer[0].FullName, largeheaderfont, PdfBrushes.Black);
-            indexTitle.StringFormat = tocformat;
-            tocresult = indexTitle.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-
-            PdfStringFormat format = new PdfStringFormat();
-            format.Alignment = PdfTextAlignment.Left;
-            format.WordWrap = PdfWordWrapType.Word;
-
-
-        }
-
-        private DataTable DesginVoluteerAddress(int VolunteerID)
+        private void DesginVoluteerAddress(int VolunteerID, PdfGridRow header, PdfGridCellStyle headerStyle, PdfLayoutFormat pdfLayoutFormat)
         {
             var volunteerAddress = _volunteerAddressRepository.GetAddresses(VolunteerID);
 
@@ -424,10 +289,43 @@ namespace GSC.Report
                                                 });
                 }
             }
-            return addressDetails;
+            else
+            {
+                addressDetails.Rows.Add(new object[] {
+                                                      "No Record Found"
+                                                });
+            }
+
+
+            /* Address Detail Grid */
+            pdfGrid = new PdfGrid();
+            //Assign data source
+            pdfGrid.DataSource = addressDetails;
+            pdfGrid.AllowRowBreakAcrossPages = true;
+            if (pdfGrid.Rows.Count == 1)
+            {
+                PdfGridCell Addresscell = pdfGrid.Rows[0].Cells[0];
+                if (Addresscell.Value.ToString() == "No Record Found")
+                {
+                    Addresscell.ColumnSpan = 8;
+                    Addresscell.Value = "No Record Found.";
+                    Addresscell.StringFormat.Alignment = PdfTextAlignment.Justify;
+                }
+            }
+
+            //Draw grid to the page of PDF document
+            header = pdfGrid.Headers[0];
+            //Adds cell customizations
+            for (int i = 0; i < pdfGrid.Columns.Count; i++)
+            {
+                pdfGrid.Columns[i].Format = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle);
+
+            }
+            header.ApplyStyle(headerStyle);
+            tocresult = pdfGrid.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), pdfLayoutFormat);
         }
 
-        private DataTable DesginVoluteerContact(int VolunteerID)
+        private void DesginVoluteerContact(int VolunteerID, PdfGridRow header, PdfGridCellStyle headerStyle, PdfLayoutFormat pdfLayoutFormat)
         {
             var volunteercontact = _volunteerContactRepository.GetContactTypeList(VolunteerID);
 
@@ -456,11 +354,38 @@ namespace GSC.Report
                                                 });
                 }
             }
+            else
+            {
+                contactDetails.Rows.Add(new object[] {
+                                                      "No Record Found"
+                                                });
+            }
 
-            return contactDetails;
+            //Create a PdfGrid
+            pdfGrid = new PdfGrid();
+            pdfGrid.DataSource = contactDetails;
+            pdfGrid.AllowRowBreakAcrossPages = true;
+            if (pdfGrid.Rows.Count == 1)
+            {
+                PdfGridCell Contactcell = pdfGrid.Rows[0].Cells[0];
+                if (Contactcell.Value.ToString() == "No Record Found")
+                {
+                    Contactcell.ColumnSpan = 5;
+                    Contactcell.Value = "No Record Found.";
+                    Contactcell.StringFormat.Alignment = PdfTextAlignment.Justify;
+                }
+            }
+            header = pdfGrid.Headers[0];
+            header.ApplyStyle(headerStyle);
+            for (int i = 0; i < pdfGrid.Columns.Count; i++)
+            {
+                pdfGrid.Columns[i].Format = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle);
+
+            }
+            tocresult = pdfGrid.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), pdfLayoutFormat);
         }
 
-        private DataTable DesginVoluteerLanguage(int VolunteerID)
+        private void DesginVoluteerLanguage(int VolunteerID, PdfGridRow header, PdfGridCellStyle headerStyle, PdfLayoutFormat pdfLayoutFormat)
         {
             var volunteerLanguage = _volunteerLanguageRepository.GetLanguages(VolunteerID, false);
 
@@ -487,11 +412,41 @@ namespace GSC.Report
                                                 });
                 }
             }
+            else
+            {
+                languageDetails.Rows.Add(new object[] {
+                                                      "No Record Found"
+                                                });
+            }
 
-            return languageDetails;
+            //Create a PdfGrid
+            pdfGrid = new PdfGrid();
+            //Assign data source
+            pdfGrid.DataSource = languageDetails;
+            pdfGrid.AllowRowBreakAcrossPages = true;
+            if (pdfGrid.Rows.Count == 1)
+            {
+                PdfGridCell Languagecell = pdfGrid.Rows[0].Cells[0];
+                if (Languagecell.Value.ToString() == "No Record Found")
+                {
+                    Languagecell.ColumnSpan = 5;
+                    Languagecell.Value = "No Record Found.";
+                    Languagecell.StringFormat.Alignment = PdfTextAlignment.Justify;
+                }
+            }
+            header = pdfGrid.Headers[0];
+            //Adds cell customizations
+            header.ApplyStyle(headerStyle);
+            for (int i = 0; i < pdfGrid.Columns.Count; i++)
+            {
+                pdfGrid.Columns[i].Format = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle);
+
+            }
+            //Draw grid to the resultant page of the first grid
+            tocresult = pdfGrid.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), pdfLayoutFormat);
         }
 
-        private DataTable DesginVoluteerDocument(int VolunteerID)
+        private void DesginVoluteerDocument(int VolunteerID, PdfGridRow header, PdfGridCellStyle headerStyle, PdfLayoutFormat pdfLayoutFormat)
         {
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var volunteerDocument = _volunteerDocumentRepository
@@ -520,11 +475,38 @@ namespace GSC.Report
                                                 });
                 }
             }
+            else
+            {
+                documentDetails.Rows.Add(new object[] {
+                                                      "No Record Found"
+                                                });
+            }
 
-            return documentDetails;
+            pdfGrid = new PdfGrid();
+            pdfGrid.DataSource = documentDetails;
+            pdfGrid.AllowRowBreakAcrossPages = true;
+            if (pdfGrid.Rows.Count == 1)
+            {
+                PdfGridCell VolDocumnetcell = pdfGrid.Rows[0].Cells[0];
+                if (VolDocumnetcell.Value.ToString() == "No Record Found")
+                {
+                    VolDocumnetcell.ColumnSpan = 3;
+                    VolDocumnetcell.Value = "No Record Found.";
+                    VolDocumnetcell.StringFormat.Alignment = PdfTextAlignment.Justify;
+                }
+            }
+            header = pdfGrid.Headers[0];
+            header.ApplyStyle(headerStyle);
+            for (int i = 0; i < pdfGrid.Columns.Count; i++)
+            {
+                pdfGrid.Columns[i].Format = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle);
+
+            }
+            //Draw grid to the resultant page of the first grid
+            tocresult = pdfGrid.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), pdfLayoutFormat);
         }
 
-        private PdfPageTemplateElement AddHeader(PdfDocument doc)
+        private PdfPageTemplateElement AddHeader(PdfDocument doc, bool isClientLogo, bool isCompanyLogo, int ClientId)
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
@@ -532,29 +514,29 @@ namespace GSC.Report
             Color activeColor = Color.FromArgb(44, 71, 120);
             SizeF imageSize = new SizeF(50f, 50f);
 
-            //var imagePath = _uploadSettingRepository.GetImagePath();
-            //var companydetail = _companyRepository.All.Select(x => new { x.Logo, x.CompanyName }).FirstOrDefault();
-            //if (isCompanyLogo)
-            //{
-            //    if (File.Exists($"{imagePath}/{companydetail.Logo}") && !String.IsNullOrEmpty(companydetail.Logo))
-            //    {
-            //        FileStream logoinputstream = new FileStream($"{imagePath}/{companydetail.Logo}", FileMode.Open, FileAccess.Read);
-            //        PdfImage img = new PdfBitmap(logoinputstream);
-            //        var companylogo = new PointF(20, 0);
-            //        header.Graphics.DrawImage(img, companylogo, imageSize);
-            //    }
-            //}
-            //if (isClientLogo)
-            //{
-            //    var clientlogopath = _clientRepository.All.Where(x => x.Id == ClientId).Select(x => x.Logo).FirstOrDefault();
-            //    if (File.Exists($"{imagePath}/{clientlogopath}") && !String.IsNullOrEmpty(clientlogopath))
-            //    {
-            //        FileStream logoinputstream = new FileStream($"{imagePath}/{clientlogopath}", FileMode.Open, FileAccess.Read);
-            //        PdfImage img = new PdfBitmap(logoinputstream);
-            //        var imageLocation = new PointF(doc.Pages[0].GetClientSize().Width - imageSize.Width - 20, 0);
-            //        header.Graphics.DrawImage(img, imageLocation, imageSize);
-            //    }
-            //}
+            var imagePath = _uploadSettingRepository.GetImagePath();
+            var companydetail = _companyRepository.All.Select(x => new { x.Logo, x.CompanyName }).FirstOrDefault();
+            if (isCompanyLogo)
+            {
+                if (File.Exists($"{imagePath}/{companydetail.Logo}") && !String.IsNullOrEmpty(companydetail.Logo))
+                {
+                    FileStream logoinputstream = new FileStream($"{imagePath}/{companydetail.Logo}", FileMode.Open, FileAccess.Read);
+                    PdfImage img = new PdfBitmap(logoinputstream);
+                    var companylogo = new PointF(20, 0);
+                    header.Graphics.DrawImage(img, companylogo, imageSize);
+                }
+            }
+            if (isClientLogo)
+            {
+                var clientlogopath = _clientRepository.All.Where(x => x.Id == ClientId).Select(x => x.Logo).FirstOrDefault();
+                if (File.Exists($"{imagePath}/{clientlogopath}") && !String.IsNullOrEmpty(clientlogopath))
+                {
+                    FileStream logoinputstream = new FileStream($"{imagePath}/{clientlogopath}", FileMode.Open, FileAccess.Read);
+                    PdfImage img = new PdfBitmap(logoinputstream);
+                    var imageLocation = new PointF(doc.Pages[0].GetClientSize().Width - imageSize.Width - 20, 0);
+                    header.Graphics.DrawImage(img, imageLocation, imageSize);
+                }
+            }
 
             PdfSolidBrush brush = new PdfSolidBrush(activeColor);
             PdfPen pen = new PdfPen(Color.DarkBlue, 3f);
@@ -565,15 +547,11 @@ namespace GSC.Report
             format.LineAlignment = PdfVerticalAlignment.Top;
 
 
-            header.Graphics.DrawString($"Test Company", font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
+            header.Graphics.DrawString($"{companydetail.CompanyName}", font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
             brush = new PdfSolidBrush(Color.Gray);
             font = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
 
             header.Graphics.DrawString("Volunteer Registration Form", font, brush, new RectangleF(0, 20, header.Width, header.Height), format);
-            //brush = new PdfSolidBrush(Color.Gray);
-            //font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
-            //header.Graphics.DrawString($"Study Code :- XYZ", font, brush, new RectangleF(0, 40, header.Width, header.Height), format);
-
 
             format = new PdfStringFormat();
             format.Alignment = PdfTextAlignment.Left;
@@ -609,6 +587,19 @@ namespace GSC.Report
             footer.Graphics.DrawLine(pen, 0, 0, footer.Width, 0);
 
             return footer;
+        }
+
+        private PdfLayoutResult AddString(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
+        {
+            PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
+            //Draws String       
+            PdfStringFormat stringFormat = new PdfStringFormat();
+            stringFormat.MeasureTrailingSpaces = true;
+            stringFormat.WordWrap = PdfWordWrapType.Word;
+            richTextElement.StringFormat = stringFormat;
+
+            PdfLayoutResult result = richTextElement.Draw(page, position, pdfLayoutFormat);
+            return result;
         }
 
         private void SetPageNumber()

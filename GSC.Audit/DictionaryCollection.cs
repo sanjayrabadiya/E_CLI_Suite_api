@@ -480,6 +480,7 @@ namespace GSC.Audit
 
             // Product receipt
             _dictionaries.Add(new Dictionary { FieldName = "PharmacyStudyProductTypeId", DisplayName = "Study Product Type", SourceColumn = "ProductTypeName", TableName = "ProductType", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "ProductName", DisplayName = "Product Name" });
             _dictionaries.Add(new Dictionary { FieldName = "CentralDepotId", DisplayName = "Storage Area", SourceColumn = "StorageArea", TableName = "CentralDepot", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "ReceivedFromLocation", DisplayName = "Received From Location" });
             _dictionaries.Add(new Dictionary { FieldName = "ReceiptDate", DisplayName = "Receipt Date & Time" });
@@ -492,6 +493,31 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsNonCRF", DisplayName = "Is Non-CRF" });
             _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignVariableId", DisplayName = "Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
 
+            // Product Verification
+            _dictionaries.Add(new Dictionary { FieldName = "ProductReceiptId", DisplayName = "Product Receipt ID", TableName = "ProductReceipt", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "BatchLotId", DisplayName = "Batch/Lot Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "BatchLotNumber", DisplayName = "Batch/Lot No" });
+            _dictionaries.Add(new Dictionary { FieldName = "ManufactureBy", DisplayName = "Manufactured By" });
+            _dictionaries.Add(new Dictionary { FieldName = "MarketedBy", DisplayName = "Marketed By" });
+            _dictionaries.Add(new Dictionary { FieldName = "LabelClaim", DisplayName = "Label Claim" });
+            _dictionaries.Add(new Dictionary { FieldName = "DistributedBy", DisplayName = "Distributed By" });
+            _dictionaries.Add(new Dictionary { FieldName = "PackDesc", DisplayName = "Pack Desc" });
+            _dictionaries.Add(new Dictionary { FieldName = "MfgDate", DisplayName = "Market Authorization" });
+            _dictionaries.Add(new Dictionary { FieldName = "MfgDate", DisplayName = "Mfg Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "RetestExpiryId", DisplayName = "Re-Test/Expiry" });
+            _dictionaries.Add(new Dictionary { FieldName = "RetestExpiryDate", DisplayName = "Re-Test/Expiry Date" });
+
+            // Product Verification Detail
+            _dictionaries.Add(new Dictionary { FieldName = "ProductVerificationId", DisplayName = "Product Verification Id", TableName = "ProductVerification", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "QuantityVerification", DisplayName = "Quantity of Producation Use for Verification" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsAssayRequirement", DisplayName = "Assay Difference Verified & Meet Requirements" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsRetentionConfirm", DisplayName = "Quantity for Retention Samples Confirmed" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsSodiumVaporLamp", DisplayName = "Verification of IMP Done Under Sodium Vapor Lamp" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsProductDescription", DisplayName = "Product Description Checked With COLA/SPC/PACKAGE" });
+            _dictionaries.Add(new Dictionary { FieldName = "NumberOfBox", DisplayName = "No. of Boxes" });
+            _dictionaries.Add(new Dictionary { FieldName = "NumberOfQty", DisplayName = "No. of Qty/Boxes" });
+            _dictionaries.Add(new Dictionary { FieldName = "ReceivedQty", DisplayName = "Received Qty" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsConditionProduct", DisplayName = "Condition of Products Packs" });
 
 
         }

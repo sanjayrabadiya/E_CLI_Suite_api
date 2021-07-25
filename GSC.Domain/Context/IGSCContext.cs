@@ -295,5 +295,7 @@ namespace GSC.Domain.Context
         DbSet<PharmacyStudyProductType> PharmacyStudyProductType { get; set; }
         DbSet<ProductReceipt> ProductReceipt { get; set; }
         DbSet<StudyPlanTaskResource> StudyPlanTaskResource { get; set; }
+        DbSet<ProductVerification> ProductVerification { get; set; }
+        DbSet<ProductVerificationDetail> ProductVerificationDetail { get; set; }
     }
 }

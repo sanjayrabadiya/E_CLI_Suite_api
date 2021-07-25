@@ -1,0 +1,59 @@
+﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace GSC.Data.Dto.SupplyManagement
+{
+    public class ProductVerificationDto : BaseDto
+    {
+        public int? ProductReceiptId { get; set; }
+        public BatchLotType? BatchLotId { get; set; }
+        public string BatchLotNumber { get; set; }
+        public string ManufactureBy { get; set; }
+        public string MarketedBy { get; set; }
+        public string LabelClaim { get; set; }
+        public string DistributedBy { get; set; }
+        public string PackDesc { get; set; }
+        public string MarketAuthorization { get; set; }
+        public DateTime? MfgDate { get; set; }
+        public ReTestExpiry? RetestExpiryId { get; set; }
+        public DateTime? RetestExpiryDate { get; set; }
+        public int? CompanyId { get; set; }
+    }
+
+    public class ProductVerificationGridDto : BaseAuditDto
+    {
+        public int? ProductReceiptId { get; set; }
+        public string StudyCode { get; set; }
+        public string StorageArea { get; set; }
+        public string ProjectName { get; set; }
+        public string ProductType { get; set; }
+        public string ProductName { get; set; }
+        public string BatchLot { get; set; }
+        public string BatchLotNumber { get; set; }
+        public string ManufactureBy { get; set; }
+        public string MarketedBy { get; set; }
+        public string LabelClaim { get; set; }
+        public string DistributedBy { get; set; }
+        public string PackDesc { get; set; }
+        public string MarketAuthorization { get; set; }
+        public DateTime? MfgDate { get; set; }
+        public string RetestExpiry { get; set; }
+        public DateTime? RetestExpiryDate { get; set; }
+        public int? QuantityVerification { get; set; }
+        public string Description { get; set; }
+        public string Remarks { get; set; }
+        public bool? IsAssayRequirement { get; set; }
+        public bool? IsRetentionConfirm { get; set; }
+        public bool? IsSodiumVaporLamp { get; set; }
+        public bool? IsProductDescription { get; set; }
+        public int? NumberOfBox { get; set; }
+        public int? NumberOfQty { get; set; }
+        public int? ReceivedQty { get; set; }
+        public int? StorageId { get; set; }
+        public bool? IsConditionProduct { get; set; }
+        public int? CompanyId { get; set; }
+    }
+}

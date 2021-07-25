@@ -320,6 +320,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPharmacyStudyProductTypeRepository, PharmacyStudyProductTypeRepository>();
             services.AddScoped<IProductReceiptRepository, ProductReceiptRepository>();
             services.AddScoped<IStudyPlanTaskResourceRepository, StudyPlanTaskResourceRepository>();
+            services.AddScoped<IProductVerificationRepository, ProductVerificationRepository>();
+            services.AddScoped<IProductVerificationDetailRepository, ProductVerificationDetailRepository>();
+            services.AddScoped<IProductVerificationReport, ProductVerificationReport>();
+            
         }
     }
 }

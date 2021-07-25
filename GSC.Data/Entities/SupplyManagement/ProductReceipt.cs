@@ -11,6 +11,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public int ProjectId { get; set; }
         public int CentralDepotId { get; set; }
         public int PharmacyStudyProductTypeId { get; set; }
+        public string ProductName { get; set; }
         public string ReceivedFromLocation { get; set; }
         public DateTime ReceiptDate { get; set; }
         public string ReferenceNo { get; set; }

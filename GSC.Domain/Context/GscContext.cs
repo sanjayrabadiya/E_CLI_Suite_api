@@ -60,7 +60,7 @@ namespace GSC.Domain.Context
 
         }
 
-        
+
 
         public static DbContextOptions GetOptions(string connectionString)
         {
@@ -309,7 +309,7 @@ namespace GSC.Domain.Context
         public DbSet<AdverseEventSettings> AdverseEventSettings { get; set; }
         public DbSet<AEReportingValue> AEReportingValue { get; set; }
         public DbSet<EtmfUserPermission> EtmfUserPermission { get; set; }
-        public DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }   
+        public DbSet<AdverseEventSettingsLanguage> AdverseEventSettingsLanguage { get; set; }
         public DbSet<PhaseManagement> PhaseManagement { get; set; }
         public DbSet<ResourceType> ResourceType { get; set; }
         public DbSet<TaskTemplate> TaskTemplate { get; set; }
@@ -343,6 +343,8 @@ namespace GSC.Domain.Context
         public DbSet<VolunteerQuery> VolunteerQuery { get; set; }
         public DbSet<PharmacyStudyProductType> PharmacyStudyProductType { get; set; }
         public DbSet<ProductReceipt> ProductReceipt { get; set; }
+        public DbSet<ProductVerification> ProductVerification { get; set; }
+        public DbSet<ProductVerificationDetail> ProductVerificationDetail { get; set; }
 
     }
 

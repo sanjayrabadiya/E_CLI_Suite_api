@@ -330,6 +330,8 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.PharmacyStudyProductType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
               .ForMember(x => x.StorageArea, x => x.MapFrom(a => a.CentralDepot.StorageArea))
               .ReverseMap();
+
+            CreateMap<ProductVerification, ProductVerificationGridDto>().ReverseMap();
         }
     }
 }

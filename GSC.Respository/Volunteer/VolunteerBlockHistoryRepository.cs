@@ -27,7 +27,7 @@ namespace GSC.Respository.Volunteer
         public IList<VolunteerBlockHistoryGridDto> GetVolunteerBlockHistoryById(int volunteerId)
         {
             return All.Where(x => x.DeletedDate == null && x.VolunteerId == volunteerId)
-                .ProjectTo<VolunteerBlockHistoryGridDto>(_mapper.ConfigurationProvider).ToList();
+                .ProjectTo<VolunteerBlockHistoryGridDto>(_mapper.ConfigurationProvider).OrderByDescending(t => t.Id).ToList();
         }
     }
 }

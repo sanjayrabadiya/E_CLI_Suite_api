@@ -66,51 +66,8 @@ namespace GSC.Respository.Volunteer
 
         public List<VolunteerGridDto> GetVolunteerDetail(bool isDeleted, int volunteerid)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.Id == volunteerid).
+            return All.Where(x => x.Id == volunteerid).
                    ProjectTo<VolunteerGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            //bool isSummary = false;
-            //var volunteers = FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-            //var imageUrl = _uploadSettingRepository.GetWebImageUrl();
-            //var roleBlock = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock");
-            //var roleScreening = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_screeningEntry");
-            //var roleVolunteer = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerlist");
-            //var result = volunteers.Select(x => new VolunteerGridDto
-            //{
-            //    Id = x.Id,
-            //    VolunteerNo = x.VolunteerNo,
-            //    RefNo = x.RefNo,
-            //    LastName = x.LastName,
-            //    FirstName = x.FirstName,
-            //    MiddleName = x.MiddleName,
-            //    AliasName = x.AliasName,
-            //    DateOfBirth = x.DateOfBirth,
-            //    FromAge = x.FromAge,
-            //    ToAge = x.ToAge,
-            //    Religion = "",//x.Religion.ReligionName,
-            //    Occupation = "",//x.Occupation.OccupationName,
-            //    Education = "",//x.Education,
-            //    AnnualIncome = x.AnnualIncome,
-            //    Gender = x.GenderId == null ? "" : ((Gender)x.GenderId).GetDescription(),
-            //    Race = "",//x.Race.RaceName,
-            //    MaritalStatus = "",//x.MaritalStatus.MaritalStatusName,
-            //    PopulationType = "",//x.PopulationType.PopulationName,
-            //    FoodType = "",//x.FoodType.TypeName,
-            //    Relationship = x.Relationship,
-            //    Address = "",//x.Addresses.FirstOrDefault(a => a.IsCurrent).Location.FullAddress,
-            //    ProfilePicPath = imageUrl + (x.ProfilePic ?? DocumentService.DefulatProfilePic),
-            //    Foods = "",
-            //    RegisterDate = x.RegisterDate,
-            //    StatusName = x.Status.GetDescription(),
-            //    IsDeleted = x.DeletedDate != null,
-            //    Blocked = x.IsBlocked != null ? x.IsBlocked == true ? "Yes" : "No" : "No",
-            //    IsBlockDisplay = roleBlock.IsView && x.IsBlocked != null,
-            //    IsScreeningHisotry = roleScreening.IsView,
-            //    IsDeleteRole = roleVolunteer.IsDelete,
-            //    IsScreening = x.IsScreening,
-            //}).OrderByDescending(x => x.Id).ToList();
-
-            //return result;
-
         }
 
         public IList<VolunteerGridDto> GetVolunteerList()
@@ -133,14 +90,10 @@ namespace GSC.Respository.Volunteer
             else
             {
                 if (search.FromAge.HasValue)
-                    //query = query.Where(x => x.FromAge >= search.FromAge);
-                    //query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year - x.DateOfBirth.Value.Year) >= search.FromAge);
                     query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year -
                         (DateTime.Today.Month < x.DateOfBirth.Value.Month || (DateTime.Today.Month == x.DateOfBirth.Value.Month && DateTime.Today.Day < x.DateOfBirth.Value.Day)
                         ? x.DateOfBirth.Value.Year - 1 : x.DateOfBirth.Value.Year)) >= search.FromAge);
                 if (search.ToAge.HasValue)
-                    //query = query.Where(x => x.FromAge <= search.ToAge);
-                    //query = query.Where(x => x.DateOfBirth != null && CalculateAge(Convert.ToDateTime(x.DateOfBirth.Value)) <= search.ToAge);
                     query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year -
                     (DateTime.Today.Month < x.DateOfBirth.Value.Month || (DateTime.Today.Month == x.DateOfBirth.Value.Month && DateTime.Today.Day < x.DateOfBirth.Value.Day)
                     ? x.DateOfBirth.Value.Year - 1 : x.DateOfBirth.Value.Year)) <= search.ToAge);
@@ -305,7 +258,6 @@ namespace GSC.Respository.Volunteer
                 var volunterIds = AutoCompleteSearch(search.TextSearch.Trim());
                 IEnumerable<int> ids = volunterIds.Select(x => x.Id).Distinct();
                 query = query.Where(x => ids.Contains(x.Id));
-                //query = query.Where(x => volunterIds.Any(a => a.Id == x.Id));
             }
 
             if (search.PeriodNo == 1)
@@ -353,19 +305,6 @@ namespace GSC.Respository.Volunteer
                 Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
             }).ToList();
         }
-
-
-
-        //public IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock)
-        //{
-        //    var proId = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId ?? projectId;
-        //    var projectdesignId = _context.ProjectDesign.Where(x => x.ProjectId == proId && x.DeletedDate == null).FirstOrDefault().Id;
-        //    var PeriodId = _context.ProjectDesignPeriod.Where(x => x.ProjectDesignId == projectdesignId && x.DeletedDate == null).FirstOrDefault().Id;
-        //    var subjects = new List<DropDownDto>();
-
-
-        //    return null;
-        //}
 
         private IList<VolunteerGridDto> GetItems(IQueryable<Data.Entities.Volunteer.Volunteer> query,
             bool isSummary = false)

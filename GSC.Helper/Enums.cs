@@ -686,4 +686,16 @@ namespace GSC.Helper
         [Description("Kit")] Kit = 1,
         [Description("Individual")] Individual = 2
     }
+
+    public enum BatchLotType : short
+    {
+        [Description("Batch")] Batch = 1,
+        [Description("Lot")] Lot = 2
+    }
+
+    public enum ReTestExpiry : short
+    {
+        [Description("Re-Test")] ReTest = 1,
+        [Description("Expiry")] Expiry = 2
+    }
 }

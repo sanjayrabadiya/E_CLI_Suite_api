@@ -58,6 +58,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             return Ok(productTypeDto);
         }
 
+       
+
 
         [HttpPost]
         public IActionResult Post([FromBody] ProductTypeDto productTypeDto)
@@ -141,6 +143,16 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult GetProductTypeDropDown()
         {
             return Ok(_productTypeRepository.GetProductTypeDropDown());
+        }
+
+        [HttpPost]
+        [Route("PostVerified")]
+        public IActionResult PostVerified([FromBody] ProductVerificationDto productVerificationDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+
+            return Ok();
         }
     }
 }
