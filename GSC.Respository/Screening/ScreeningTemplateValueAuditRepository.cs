@@ -122,10 +122,10 @@ namespace GSC.Respository.Screening
                 query = query.Where(x => search.VisitIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId));
 
             if (search.TemplateIds != null && search.TemplateIds.Length > 0)
-                query = query.Where(x => search.VisitIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplateId));
+                query = query.Where(x => search.TemplateIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplateId));
 
             if (search.VariableIds != null && search.VariableIds.Length > 0)
-                query = query.Where(x => search.VisitIds.Contains(x.ScreeningTemplateValue.ProjectDesignVariableId));
+                query = query.Where(x => search.VariableIds.Contains(x.ScreeningTemplateValue.ProjectDesignVariableId));
 
             GetItems(query, search);
         }
