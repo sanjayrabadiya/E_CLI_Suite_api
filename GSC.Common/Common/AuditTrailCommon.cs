@@ -28,6 +28,7 @@ namespace GSC.Common.Common
         public string TimeZone { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int? CreatedBy { get; set; }
+        [NotMapped]
         public BaseEntity Entity { get; set; }
 
 

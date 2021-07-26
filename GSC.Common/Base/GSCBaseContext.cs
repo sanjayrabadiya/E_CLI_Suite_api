@@ -33,10 +33,9 @@ namespace GSC.Common.Base
         {
 
             SetAuditInformation();
-            var addChangeTracker = GetAuditTracker();
-            var audits = _commonSharedService.AuditTracker.GetAuditTracker(addChangeTracker, this);
+            var audits = _commonSharedService.AuditTracker.GetAuditTracker(GetAuditTracker(), this);
             var result = base.SaveChangesAsync(cancellationToken);
-            AduitSave(audits, addChangeTracker.ToList());
+            AduitSave(audits);
             return result;
         }
 
@@ -49,10 +48,9 @@ namespace GSC.Common.Base
         public int Save()
         {
             SetAuditInformation();
-            var addChangeTracker = GetAuditTracker();
-            var audits = _commonSharedService.AuditTracker.GetAuditTracker(addChangeTracker, this);
+            var audits = _commonSharedService.AuditTracker.GetAuditTracker(GetAuditTracker(), this);
             var result = base.SaveChanges();
-            AduitSave(audits, addChangeTracker.ToList());
+            AduitSave(audits);
             return result;
         }
 
@@ -166,7 +164,7 @@ namespace GSC.Common.Base
 
 
 
-        async void AduitSave(List<AuditTrailCommon> audits, List<EntityEntry> entities)
+        async void AduitSave(List<AuditTrailCommon> audits)
         {
             DetachAllEntities();
             if (audits != null && audits.Count() > 0)
