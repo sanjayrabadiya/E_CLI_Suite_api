@@ -22,7 +22,7 @@ namespace GSC.Common.Base
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
-       
+
 
 
         public DbSet<UserAduit> UserAduit { get; set; }
@@ -90,7 +90,7 @@ namespace GSC.Common.Base
             Entry(entity).State = EntityState.Added;
         }
 
-        public void SetDBConnection (string connectionString)
+        public void SetDBConnection(string connectionString)
         {
             var getConnection = this.Database.GetDbConnection();
             getConnection.ConnectionString = connectionString;
@@ -105,7 +105,7 @@ namespace GSC.Common.Base
         #endregion
         void SetAuditInformation()
         {
-        
+
             foreach (var entry in ChangeTracker.Entries<BaseEntity>())
                 if (entry.State == EntityState.Added)
                 {
@@ -137,7 +137,7 @@ namespace GSC.Common.Base
 
 
 
-        private IList<EntityEntry> GetAuditTracker() 
+        private IList<EntityEntry> GetAuditTracker()
         {
             ChangeTracker.DetectChanges();
             var result = new List<EntityEntry>();
@@ -164,7 +164,7 @@ namespace GSC.Common.Base
                 entry.State = EntityState.Detached;
         }
 
-        
+
 
         async void AduitSave(List<AuditTrailCommon> audits, List<EntityEntry> entities)
         {
@@ -175,7 +175,7 @@ namespace GSC.Common.Base
                 {
                     if (x.RecordId == 0)
                     {
-                        var entity = entities.FirstOrDefault(c => c.CurrentValues.EntityType.ClrType.Name == x.TableName);
+                        var entity = entities.FirstOrDefault(c => EF.Property<int>(c, "Id") > 0 && c.CurrentValues.EntityType.ClrType.Name == x.TableName);
                         x.RecordId = (entity.Entity as BaseEntity).Id;
                     }
 
