@@ -297,5 +297,7 @@ namespace GSC.Domain.Context
         DbSet<StudyPlanTaskResource> StudyPlanTaskResource { get; set; }
         DbSet<ProductVerification> ProductVerification { get; set; }
         DbSet<ProductVerificationDetail> ProductVerificationDetail { get; set; }
+        DbSet<LanguageConfiguration> LanguageConfiguration { get; set; }
+        DbSet<LanguageConfigurationDetails> LanguageConfigurationDetails { get; set; }
     }
 }

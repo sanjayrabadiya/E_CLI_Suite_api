@@ -332,6 +332,10 @@ namespace GSC.Api.Helpers
               .ReverseMap();
 
             CreateMap<ProductVerification, ProductVerificationGridDto>().ReverseMap();
+            CreateMap<LanguageConfiguration, LanguageConfigurationGridDto>().ReverseMap();
+            CreateMap<LanguageConfigurationDetails, LanguageConfigurationDetailsGridDto>()
+               .ForMember(x => x.LanguageName, y => y.MapFrom(a => a.Language.LanguageName))
+               .ReverseMap();
         }
     }
 }

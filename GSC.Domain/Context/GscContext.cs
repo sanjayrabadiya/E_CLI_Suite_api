@@ -345,6 +345,8 @@ namespace GSC.Domain.Context
         public DbSet<ProductReceipt> ProductReceipt { get; set; }
         public DbSet<ProductVerification> ProductVerification { get; set; }
         public DbSet<ProductVerificationDetail> ProductVerificationDetail { get; set; }
+        public DbSet<LanguageConfiguration> LanguageConfiguration { get; set; }
+        public DbSet<LanguageConfigurationDetails> LanguageConfigurationDetails { get; set; }
 
     }
 

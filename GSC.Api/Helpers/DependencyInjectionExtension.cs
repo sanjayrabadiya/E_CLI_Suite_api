@@ -323,7 +323,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProductVerificationRepository, ProductVerificationRepository>();
             services.AddScoped<IProductVerificationDetailRepository, ProductVerificationDetailRepository>();
             services.AddScoped<IProductVerificationReport, ProductVerificationReport>();
-            
+            services.AddScoped<ILanguageConfigurationRepository, LanguageConfigurationRepository>();
+
         }
     }
 }

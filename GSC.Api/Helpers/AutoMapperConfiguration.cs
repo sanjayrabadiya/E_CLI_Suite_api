@@ -385,6 +385,8 @@ namespace GSC.Api.Helpers
             CreateMap<StudyPlanTaskResourceDto, StudyPlanTaskResource>().ReverseMap();
             CreateMap<ProductVerification,ProductVerificationDto>().ReverseMap();
             CreateMap<ProductVerificationDetail,ProductVerificationDetailDto>().ReverseMap();
+            CreateMap<LanguageConfiguration, LanguageConfigurationDto>().ReverseMap();
+            CreateMap<LanguageConfigurationDetails, LanguageConfigurationDetailsDto>().ReverseMap();
         }
     }
 }
