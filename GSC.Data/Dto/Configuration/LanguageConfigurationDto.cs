@@ -9,7 +9,7 @@ namespace GSC.Data.Dto.Configuration
     {
         public string KeyCode { get; set; }
         public string KeyName { get; set; }
-        public string Message { get; set; }
+        public string DefaultMessage { get; set; }
         //public IList<LanguageConfigurationDetailsDto> LanguageConfigurationDetailslist { get; set; }
     }
 
@@ -17,6 +17,13 @@ namespace GSC.Data.Dto.Configuration
     {
         public int LanguageConfigurationId { get; set; }
         public int LanguageId { get; set; }       
+        public string Message { get; set; }
+    }
+
+    public class LanguageMessageDto
+    {
+        public string KeyCode { get; set; }
+        public string KeyName { get; set; }
         public string Message { get; set; }
     }
 }

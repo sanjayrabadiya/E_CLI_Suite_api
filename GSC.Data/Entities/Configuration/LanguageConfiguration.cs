@@ -10,7 +10,7 @@ namespace GSC.Data.Entities.Configuration
     {
         public string KeyCode { get; set; }
         public string KeyName { get; set; }
-        public string Message { get; set; }
+        public string DefaultMessage { get; set; }
         public IList<LanguageConfigurationDetails> LanguageConfigurationDetailslist { get; set; }
     }
 

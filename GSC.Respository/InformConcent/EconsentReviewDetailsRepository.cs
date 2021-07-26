@@ -129,7 +129,7 @@ namespace GSC.Respository.InformConcent
                             sectionsHeader.documentName = econsentreviewdetail.EconsentSetup.DocumentName;
                             sectionsHeader.isReadCompelete = econsentreviewdetail.IsReviewedByPatient;
                             sectionsHeader.isReviewed = econsentreviewdetail.IsReviewedByPatient;
-                            sectionsHeader.ReviewTime = econsentreviewdetail.EconsentReviewDetailsSections.Count > 0 ? econsentreviewdetail.EconsentReviewDetailsSections[sectioncount].TimeInSeconds : 0;
+                            sectionsHeader.ReviewTime = econsentreviewdetail.EconsentReviewDetailsSections.Count > 0 ? econsentreviewdetail.EconsentReviewDetailsSections[sectioncount - 1].TimeInSeconds : 0;
                             sectionsHeaders.Add(sectionsHeader);
                             sectioncount++;
                         }

@@ -13,5 +13,6 @@ namespace GSC.Respository.Configuration
         string Duplicate(LanguageConfiguration objSave);
         string DuplicateLanguage(LanguageConfigurationDetails objSave);
         List<LanguageConfigurationDetailsGridDto> GetLanguageDetails(int LanguageConfigurationDetailsId);
+        List<LanguageMessageDto> GetMultiLanguage();
     }
 }

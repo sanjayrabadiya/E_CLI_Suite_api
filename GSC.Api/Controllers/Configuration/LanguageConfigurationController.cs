@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Entities.Configuration;
@@ -15,7 +16,7 @@ namespace GSC.Api.Controllers.Configuration
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LanguageConfigurationController : ControllerBase
+    public class LanguageConfigurationController : BaseController
     {
         private readonly ILanguageConfigurationRepository _languageConfigurationRepository;
         private readonly IMapper _mapper;
@@ -146,13 +147,12 @@ namespace GSC.Api.Controllers.Configuration
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             languageconfiDetailDto.Id = 0;
             var languageConfiDetails = _mapper.Map<LanguageConfigurationDetails>(languageconfiDetailDto);
-            //var validate = _languageConfigurationRepository.DuplicateLanguage(languageConfiDetails);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-
+            var validate = _languageConfigurationRepository.DuplicateLanguage(languageConfiDetails);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             _context.LanguageConfigurationDetails.Add(languageConfiDetails);
             if (_uow.Save() <= 0) throw new Exception("Creating Language Configuration failed on save.");
             return Ok(languageConfiDetails.Id);
@@ -168,12 +168,12 @@ namespace GSC.Api.Controllers.Configuration
 
             var languageConfiDetails = _mapper.Map<LanguageConfigurationDetails>(languageconfiDetailDto);
             //languageConfi.Id = departmentDto.Id;
-            //var validate = _languageConfigurationRepository.DuplicateLanguage(languageConfiDetails);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+            var validate = _languageConfigurationRepository.DuplicateLanguage(languageConfiDetails);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             _context.LanguageConfigurationDetails.Update(languageConfiDetails);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Language Configuration failed on save.");
@@ -193,6 +193,14 @@ namespace GSC.Api.Controllers.Configuration
             _uow.Save();
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetMultiLanguage")]
+        public ActionResult GetMultiLanguage()
+        {
+            var details = _languageConfigurationRepository.GetMultiLanguage();
+            return Ok(details);
         }
     }
 }

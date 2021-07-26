@@ -9,7 +9,7 @@ namespace GSC.Data.Dto.Configuration
     {
         public string KeyCode { get; set; }
         public string KeyName { get; set; }
-        public string Message { get; set; }
+        public string DefaultMessage { get; set; }
     }
 
     public class LanguageConfigurationDetailsGridDto : BaseAuditDto
