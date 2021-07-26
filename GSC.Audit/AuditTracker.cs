@@ -89,7 +89,8 @@ namespace GSC.Audit
                                 IpAddress = _jwtTokenAccesser.IpAddress,
                                 Reason = reason,
                                 ReasonOth = reasonOth,
-                                TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
+                                TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone"),
+                                Entity = (dbEntry.Entity as BaseEntity)
                             };
                             auditTrailCommons.Add(auditTrailCommon);
                         });

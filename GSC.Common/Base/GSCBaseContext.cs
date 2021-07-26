@@ -175,8 +175,7 @@ namespace GSC.Common.Base
                 {
                     if (x.RecordId == 0)
                     {
-                        var entity = entities.FirstOrDefault(c => EF.Property<int>(c, "Id") > 0 && c.CurrentValues.EntityType.ClrType.Name == x.TableName);
-                        x.RecordId = (entity.Entity as BaseEntity).Id;
+                        x.RecordId = x.Entity.Id;
                     }
 
                     this.Entry(x).State = EntityState.Added;

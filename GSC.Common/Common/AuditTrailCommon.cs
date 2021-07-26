@@ -1,4 +1,6 @@
-﻿using GSC.Shared.Extension;
+﻿using GSC.Common.Base;
+using GSC.Shared.Extension;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -26,6 +28,7 @@ namespace GSC.Common.Common
         public string TimeZone { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int? CreatedBy { get; set; }
+        public BaseEntity Entity { get; set; }
 
 
     }
