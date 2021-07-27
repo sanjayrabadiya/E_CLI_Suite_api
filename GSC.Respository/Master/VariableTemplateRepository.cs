@@ -54,7 +54,7 @@ namespace GSC.Respository.Master
 
         public VariableTemplate GetTemplate(int id)
         {
-            var template = _context.VariableTemplate.Where(t => t.Id == id)
+            var template = _context.VariableTemplate.AsNoTracking().Where(t => t.Id == id)
                 .Include(d => d.VariableTemplateDetails)
                 .Include(t => t.Domain)
                 .Include(t => t.Notes)
