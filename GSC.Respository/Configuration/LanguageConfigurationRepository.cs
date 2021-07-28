@@ -66,9 +66,6 @@ namespace GSC.Respository.Configuration
                 Message = x.LanguageConfigurationDetailslist.Any(a => a.LanguageId == _jwtTokenAccesser.Language && a.LanguageConfigurationId == x.Id) ? x.LanguageConfigurationDetailslist.Where(a => a.LanguageId == _jwtTokenAccesser.Language && a.LanguageConfigurationId == x.Id).FirstOrDefault().Message : x.DefaultMessage              
             }).ToList();
             return detail;
-
-
-
         }
     }
 }

@@ -519,6 +519,14 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ReceivedQty", DisplayName = "Received Qty" });
             _dictionaries.Add(new Dictionary { FieldName = "IsConditionProduct", DisplayName = "Condition of Products Packs" });
 
+            //language Configration
+            _dictionaries.Add(new Dictionary { FieldName = "KeyCode", DisplayName = "Key Code" });
+            _dictionaries.Add(new Dictionary { FieldName = "KeyName", DisplayName = "Key Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "DefaultMessage", DisplayName = "Message" });
+
+            //language Configartion details
+            _dictionaries.Add(new Dictionary { FieldName = "LanguageId", DisplayName = "LanguageId", TableName = "LanguageName", PkName = "Id" });
+
 
         }
 
