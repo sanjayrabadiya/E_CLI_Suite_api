@@ -49,10 +49,10 @@ namespace GSC.Respository.Project.Design
                 query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisit.Id));
 
             if (search.TemplateIds != null && search.TemplateIds.Length > 0)
-                query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignTemplate.Id));
+                query = query.Where(x => search.TemplateIds.Contains(x.ProjectDesignTemplate.Id));
 
             if (search.VariableIds != null && search.VariableIds.Length > 0)
-                query = query.Where(x => search.VisitIds.Contains(x.Id));
+                query = query.Where(x => search.VariableIds.Contains(x.Id));
 
             return GetItems(query, search);
         }
@@ -99,15 +99,17 @@ namespace GSC.Respository.Project.Design
                 CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList()),
                 DisplayValue = r.LargeStep
             }).ToList().OrderBy(x => x.VisitOrderId).ToList();
-            var VisitStatusData = GetVisitStatusData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
-            var TemplateNoteData = GetTemplateNoteData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
-            var VisitLanguageData = GetVisitLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
-            var TemplateLanguageData = GetTemplateLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
-            var TemplateNoteLanguageData = GetTemplateNoteLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
 
-            var VariableLanguageData = GetVariableLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
-            var VariableNoteLanguageData = GetVariableNoteLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
-            var VariableValueLanguageData = GetVariableValueLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault());
+
+            var VisitStatusData = GetVisitStatusData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault(), filters);
+            var TemplateNoteData = GetTemplateNoteData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault(), filters);
+            var VisitLanguageData = GetVisitLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault(), filters);
+            var TemplateLanguageData = GetTemplateLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault(), filters);
+            var TemplateNoteLanguageData = GetTemplateNoteLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault(), filters);
+
+            var VariableLanguageData = GetVariableLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault(), filters);
+            var VariableNoteLanguageData = GetVariableNoteLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault(), filters);
+            var VariableValueLanguageData = GetVariableValueLanguageData(query.Select(r => r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.Id).FirstOrDefault(), filters);
 
             #region Excel Report Design
             var repeatdata = new List<RepeatTemplateDto>();
@@ -415,10 +417,19 @@ namespace GSC.Respository.Project.Design
             #endregion
         }
 
-        public IList<ProjectDesignLanguageReportDto> GetTemplateNoteData(int ProjectDesignPeriodId)
+        public IList<ProjectDesignLanguageReportDto> GetTemplateNoteData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)
         {
-            return _context.ProjectDesignTemplateNote.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
-            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            var templates = _context.ProjectDesignTemplateNote.Where(x => x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
+
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                templates = templates.Where(x => filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId) && x.DeletedDate ==null);
+
+
+            if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
+                templates = templates.Where(x => filters.TemplateIds.Contains(x.ProjectDesignTemplate.Id) && x.DeletedDate == null);
+
+
+            return templates.Select(r => new ProjectDesignLanguageReportDto
             {
                 PeriodName = r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
@@ -427,12 +438,25 @@ namespace GSC.Respository.Project.Design
             }).ToList();
         }
 
-        public IList<ProjectDesignLanguageReportDto> GetVisitLanguageData(int ProjectDesignPeriodId)
+        public IList<ProjectDesignLanguageReportDto> GetVisitLanguageData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)
         {
-            var visits = new List<int>();
-            visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+            var visits = _context.VisitLanguage.Where(x => x.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
 
-            return _context.VisitLanguage.Where(t => visits.Contains(t.ProjectDesignVisitId) && t.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                visits = visits.Where(x => filters.VisitIds.Contains(x.ProjectDesignVisitId) && x.DeletedDate==null);
+
+
+            //if (templateIds != null && templateIds.Count() > 0)
+            //    templates = templates.Where(x => templateIds.Contains(x.ProjectDesignTemplate.Id));
+
+
+            //var visits = new List<int>();
+            //if (visitIds != null && visitIds.Length > 0)
+            //    visits = visitIds.OfType<int>().ToList();
+            //else
+            //    visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return visits.Select(r => new ProjectDesignLanguageReportDto
             {
                 PeriodName = r.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVisit.DisplayName,
@@ -441,12 +465,20 @@ namespace GSC.Respository.Project.Design
             }).ToList();
         }
 
-        public IList<ProjectDesignLanguageReportDto> GetVisitStatusData(int ProjectDesignPeriodId)
+        public IList<ProjectDesignLanguageReportDto> GetVisitStatusData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)
         {
-            var visits = new List<int>();
-            visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+            var visits = _context.ProjectDesignVisitStatus.Where(x => x.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
 
-            return _context.ProjectDesignVisitStatus.Where(t => visits.Contains(t.ProjectDesignVisitId) && t.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                visits = visits.Where(x => filters.VisitIds.Contains(x.ProjectDesignVisitId) && x.DeletedDate == null);
+
+            //var visits = new List<int>();
+            //if (visitIds != null && visitIds.Length > 0)
+            //    visits= visitIds.OfType<int>().ToList();
+            //else
+            //visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return visits.Select(r => new ProjectDesignLanguageReportDto
             {
                 PeriodName = r.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVisit.DisplayName,
@@ -456,10 +488,24 @@ namespace GSC.Respository.Project.Design
             }).ToList();
         }
 
-        public IList<ProjectDesignLanguageReportDto> GetTemplateLanguageData(int ProjectDesignPeriodId)
+        public IList<ProjectDesignLanguageReportDto> GetTemplateLanguageData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)
         {
-            return _context.TemplateLanguage.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
-            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            var templates = _context.TemplateLanguage.Where(x => x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
+
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                templates = templates.Where(x => filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId) && x.DeletedDate == null);
+
+
+            if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
+                templates = templates.Where(x => filters.TemplateIds.Contains(x.ProjectDesignTemplate.Id) && x.DeletedDate == null);
+
+            //var templates = new List<int>();
+            //if (templateIds != null && templateIds.Length > 0)
+            //    templates = templateIds.OfType<int>().ToList();
+            //else
+            //    templates = _context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return templates.Select(r => new ProjectDesignLanguageReportDto
             {
                 PeriodName = r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
@@ -469,10 +515,24 @@ namespace GSC.Respository.Project.Design
             }).ToList();
         }
 
-        public IList<ProjectDesignLanguageReportDto> GetTemplateNoteLanguageData(int ProjectDesignPeriodId)
+        public IList<ProjectDesignLanguageReportDto> GetTemplateNoteLanguageData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)
         {
-            return _context.TemplateNoteLanguage.Where(x => x.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
-            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            var templates = _context.TemplateNoteLanguage.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
+
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                templates = templates.Where(x => filters.VisitIds.Contains(x.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisitId) && x.DeletedDate == null);
+
+
+            if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
+                templates = templates.Where(x => filters.TemplateIds.Contains(x.ProjectDesignTemplateNote.ProjectDesignTemplate.Id) && x.DeletedDate == null);
+
+            //var templates = new List<int>();
+            //if (templateIds != null && templateIds.Length > 0)
+            //    templates = templateIds.OfType<int>().ToList();
+            //else
+            //    templates = _context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return templates.Select(r => new ProjectDesignLanguageReportDto
             {
                 PeriodName = r.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignTemplateNote.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
@@ -483,10 +543,27 @@ namespace GSC.Respository.Project.Design
             }).ToList();
         }
 
-        public IList<ProjectDesignLanguageReportDto> GetVariableLanguageData(int ProjectDesignPeriodId)
+        public IList<ProjectDesignLanguageReportDto> GetVariableLanguageData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)
         {
-            return _context.VariableLanguage.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
-            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            var variables = _context.VariableLanguage.Where(x => x.DeletedDate == null && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
+
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                variables = variables.Where(x => filters.VisitIds.Contains(x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisitId) && x.DeletedDate == null);
+
+
+            if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
+                variables = variables.Where(x => filters.TemplateIds.Contains(x.ProjectDesignVariable.ProjectDesignTemplate.Id) && x.DeletedDate == null);
+
+            if (filters.VariableIds != null && filters.VariableIds.Count() > 0)
+                variables = variables.Where(x => filters.VariableIds.Contains(x.ProjectDesignVariable.Id) && x.DeletedDate == null);
+
+            //var variables = new List<int>();
+            //if (variableIds != null && variableIds.Length > 0)
+            //    variables = variableIds.OfType<int>().ToList();
+            //else
+            //    variables = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return variables.Select(r => new ProjectDesignLanguageReportDto
             {
                 PeriodName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
@@ -497,10 +574,26 @@ namespace GSC.Respository.Project.Design
             }).ToList();
         }
 
-        public IList<ProjectDesignLanguageReportDto> GetVariableNoteLanguageData(int ProjectDesignPeriodId)
+        public IList<ProjectDesignLanguageReportDto> GetVariableNoteLanguageData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)
         {
-            return _context.VariableNoteLanguage.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
-            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            var variables = _context.VariableNoteLanguage.Where(x => x.DeletedDate == null && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
+
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                variables = variables.Where(x => filters.VisitIds.Contains(x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisitId) && x.DeletedDate == null);
+
+
+            if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
+                variables = variables.Where(x => filters.TemplateIds.Contains(x.ProjectDesignVariable.ProjectDesignTemplate.Id) && x.DeletedDate == null);
+
+            if (filters.VariableIds != null && filters.VariableIds.Count() > 0)
+                variables = variables.Where(x => filters.VariableIds.Contains(x.ProjectDesignVariable.Id) && x.DeletedDate == null);
+            //var variables = new List<int>();
+            //if (variableIds != null && variableIds.Length > 0)
+            //    variables = variableIds.OfType<int>().ToList();
+            //else
+            //    variables = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return variables.Select(r => new ProjectDesignLanguageReportDto
             {
                 PeriodName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
@@ -512,10 +605,26 @@ namespace GSC.Respository.Project.Design
             }).ToList();
         }
 
-        public IList<ProjectDesignLanguageReportDto> GetVariableValueLanguageData(int ProjectDesignPeriodId)
+        public IList<ProjectDesignLanguageReportDto> GetVariableValueLanguageData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)
         {
-            return _context.VariableValueLanguage.Where(x => x.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId
-            && x.DeletedDate == null).Select(r => new ProjectDesignLanguageReportDto
+            var variables = _context.VariableValueLanguage.Where(x => x.DeletedDate == null && x.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
+
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                variables = variables.Where(x => filters.VisitIds.Contains(x.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisitId) && x.DeletedDate == null);
+
+
+            if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
+                variables = variables.Where(x => filters.TemplateIds.Contains(x.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.Id) && x.DeletedDate == null);
+
+            if (filters.VariableIds != null && filters.VariableIds.Count() > 0)
+                variables = variables.Where(x => filters.VariableIds.Contains(x.ProjectDesignVariableValue.ProjectDesignVariable.Id) && x.DeletedDate == null);
+            //var variables = new List<int>();
+            //if (variableIds != null && variableIds.Length > 0)
+            //    variables = variableIds.OfType<int>().ToList();
+            //else
+            //    variables = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+            return variables.Select(r => new ProjectDesignLanguageReportDto
             {
                 PeriodName = r.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,

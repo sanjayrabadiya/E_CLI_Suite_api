@@ -91,22 +91,20 @@ namespace GSC.Respository.Audit
         public void SearchProjectDesign(ProjectDatabaseSearchDto search)
         {
 
-            //var designIds = new List<int>();
-            //if (search.RecordId > 0)
-            //    designIds.Add(search.RecordId);
-            //else
-            //    designIds = _context.ProjectDesign.Select(s => s.Id).ToList();
             var Project = _context.Project.Find(search.ParentProjectId);
             var designId = _context.ProjectDesign.Where(x => x.ProjectId == Project.Id).FirstOrDefault().Id;
             var periodIds = _context.ProjectDesignPeriod.Where(t => t.ProjectDesignId == designId)
                 .Select(s => s.Id).ToList();
 
-            var visitIds = _context.ProjectDesignVisit.Where(t => periodIds.Contains(t.ProjectDesignPeriodId))
+            var visitIds = _context.ProjectDesignVisit.Where(t => periodIds.Contains(t.ProjectDesignPeriodId)  && (search.VisitIds==null||search.VisitIds.Contains(t.Id)))
                 .Select(s => s.Id).ToList();
-            var templateIds = _context.ProjectDesignTemplate.Where(t => visitIds.Contains(t.ProjectDesignVisitId))
+
+            var templateIds = _context.ProjectDesignTemplate.Where(t => visitIds.Contains(t.ProjectDesignVisitId) && (search.TemplateIds == null || search.TemplateIds.Contains(t.Id)))
                 .Select(s => s.Id).ToList();
-            var variableIds = _context.ProjectDesignVariable.Where(t => templateIds.Contains(t.ProjectDesignTemplateId))
+
+            var variableIds = _context.ProjectDesignVariable.Where(t => templateIds.Contains(t.ProjectDesignTemplateId) && (search.VariableIds == null || search.VariableIds.Contains(t.Id)))
                 .Select(s => s.Id).ToList();
+
             var variableValueIds = _context.ProjectDesignVariableValue
                 .Where(t => variableIds.Contains(t.ProjectDesignVariableId)).Select(s => s.Id).ToList();
             var variableRemarksIds = _context.ProjectDesignVariableRemarks
@@ -130,45 +128,6 @@ namespace GSC.Respository.Audit
             var variableValueLanguageIds = _context.VariableValueLanguage
               .Where(t => variableValueIds.Contains(t.ProjectDesignVariableValueId)).Select(s => s.Id).ToList();
 
-            //var skipColNames = new List<string>
-            //{
-            //    "ProjectDesignId", "ProjectDesignPeriodId", "ProjectDesignVisitId", "ProjectDesignTemplateId",
-            //    "ProjectDesignVariableId"
-            //};
-
-            //var tableNames = new List<string> { nameof(_context.ProjectDesign), nameof(_context.ProjectDesignPeriod) };
-
-            //var query = All.AsQueryable();
-            //query = query.Where(x => !skipColNames.Contains(x.ColumnName) &&
-            //                         (x.TableName == nameof(_context.ProjectDesign) && x.RecordId == designId
-            //                          || x.TableName == nameof(_context.ProjectDesignPeriod) &&
-            //                          periodIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.ProjectDesignVisit) &&
-            //                          visitIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.ProjectDesignTemplate) &&
-            //                          templateIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.ProjectDesignVariable) &&
-            //                          variableIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.ProjectDesignVariableValue) &&
-            //                          variableValueIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.ProjectDesignVariableRemarks) &&
-            //                          variableRemarksIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.ProjectDesignVisitStatus) &&
-            //                          projectDesignVisitStatusIds.Contains(x.RecordId)
-
-            //                          || x.TableName == nameof(_context.VisitLanguage) &&
-            //                          visitLanguageIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.TemplateLanguage) &&
-            //                          templateLanguageIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.TemplateNoteLanguage) &&
-            //                          templateNoteLanguageIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.VariableLanguage) &&
-            //                          variableLanguageIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.VariableNoteLanguage) &&
-            //                          variableNoteLanguageIds.Contains(x.RecordId)
-            //                          || x.TableName == nameof(_context.VariableValueLanguage) &&
-            //                          variableValueLanguageIds.Contains(x.RecordId)
-            //                         ));
             var displayLists = new List<ProjectDesignAuditReportDto>();
             var Period = GetDesignItems("ProjectDesignPeriod", periodIds, Project.ProjectCode);
             if (Period != null)
@@ -1127,7 +1086,7 @@ namespace GSC.Respository.Audit
             var query = All.AsQueryable();
             query = query.Where(x => x.TableName == TableName && ids.Contains(x.RecordId));
 
-            return query.Where(x => x.TableName == TableName).Select(x => new ProjectDesignAuditReportDto
+            return query.Select(x => new ProjectDesignAuditReportDto
             {
                 Id = x.Id,
                 Key = x.RecordId,
