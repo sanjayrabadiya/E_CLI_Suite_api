@@ -112,8 +112,6 @@ namespace GSC.Api.Controllers.Volunteer
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var volunteer = _mapper.Map<Data.Entities.Volunteer.Volunteer>(volunteerDto);
-
             if (!string.IsNullOrEmpty(volunteerDto.RefNo))
             {
                 var validate = _volunteerRepository.DuplicateOldReference(volunteerDto);
@@ -129,6 +127,8 @@ namespace GSC.Api.Controllers.Volunteer
                 volunteerDto.ProfilePic = new ImageService().ImageSave(volunteerDto.FileModel,
                     _uploadSettingRepository.GetImagePath(), FolderType.Volunteer);
 
+            var volunteer = _mapper.Map<Data.Entities.Volunteer.Volunteer>(volunteerDto);
+
             if (volunteer.Addresses != null)
                 foreach (var address in volunteer.Addresses)
                     address.Location = _locationRepository.SaveLocation(address.Location);
@@ -136,16 +136,10 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerRepository.Add(volunteer);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer failed on save.");
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Inserted, volunteer.Id,
-                null, volunteerDto.Changes);
 
-            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            //{
-            //    KeyId = volunteer.Id,
-            //    SubjectName = volunteer.VolunteerNo,
-            //    SubjectName1 = volunteer.FullName,
-            //    ScreenType = UserRecent.Volunteer
-            //});
+            if (volunteerDto.Changes != null)
+                _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Inserted, volunteer.Id,
+                null, volunteerDto.Changes);
 
             return Ok(volunteer.Id);
         }
@@ -157,9 +151,7 @@ namespace GSC.Api.Controllers.Volunteer
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var volunteer = _mapper.Map<Data.Entities.Volunteer.Volunteer>(volunteerDto);
-
-            if(!string.IsNullOrEmpty(volunteerDto.RefNo))
+            if (!string.IsNullOrEmpty(volunteerDto.RefNo))
             {
                 var validate = _volunteerRepository.DuplicateOldReference(volunteerDto);
                 if (!string.IsNullOrEmpty(validate))
@@ -173,6 +165,8 @@ namespace GSC.Api.Controllers.Volunteer
                 volunteerDto.ProfilePic = new ImageService().ImageSave(volunteerDto.FileModel,
                     _uploadSettingRepository.GetImagePath(), FolderType.Volunteer);
 
+            var volunteer = _mapper.Map<Data.Entities.Volunteer.Volunteer>(volunteerDto);
+
             if (volunteer.Addresses != null)
                 foreach (var address in volunteer.Addresses)
                     address.Location = _locationRepository.SaveLocation(address.Location);
@@ -180,7 +174,8 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerRepository.Update(volunteer);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer failed on save.");
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Updated, volunteer.Id,
+            if (volunteerDto.Changes != null)
+                _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Updated, volunteer.Id,
                 null, volunteerDto.Changes);
 
             return Ok(volunteer.Id);

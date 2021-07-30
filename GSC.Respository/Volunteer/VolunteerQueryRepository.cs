@@ -84,8 +84,16 @@ namespace GSC.Respository.Volunteer
                     {
                         if (commentLatest.QueryStatus == CommentStatus.Open && item.QueryStatus == CommentStatus.Open)
                         {
-                            button.ShowEditButton = true;
-                            button.ShowRespondButton = true;
+                            if(_jwtTokenAccesser.RoleId == commentLatest.UserRole)
+                            {
+                                button.ShowEditButton = true;
+                                button.ShowRespondButton = true;
+                            }
+                            else
+                            {
+                                button.ShowEditButton = true;
+                                button.ShowRespondButton = false;
+                            }
                         }
                         else if (commentLatest.QueryStatus == CommentStatus.Answered || commentLatest.QueryStatus == CommentStatus.Resolved)
                         {

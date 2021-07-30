@@ -54,6 +54,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ReceivedQty { get; set; }
         public int? StorageId { get; set; }
         public bool? IsConditionProduct { get; set; }
+        public int? ClientId { get; set; }
         public int? CompanyId { get; set; }
     }
 }

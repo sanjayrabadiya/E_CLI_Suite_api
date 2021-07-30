@@ -92,16 +92,16 @@ namespace GSC.Respository.Volunteer
                 if (search.FromAge.HasValue)
                     query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year -
                         (DateTime.Today.Month < x.DateOfBirth.Value.Month || (DateTime.Today.Month == x.DateOfBirth.Value.Month && DateTime.Today.Day < x.DateOfBirth.Value.Day)
-                        ? x.DateOfBirth.Value.Year - 1 : x.DateOfBirth.Value.Year)) >= search.FromAge);
+                        ? x.DateOfBirth.Value.Year + 1 : x.DateOfBirth.Value.Year)) >= search.FromAge);
                 if (search.ToAge.HasValue)
                     query = query.Where(x => x.DateOfBirth != null && (DateTime.Today.Year -
                     (DateTime.Today.Month < x.DateOfBirth.Value.Month || (DateTime.Today.Month == x.DateOfBirth.Value.Month && DateTime.Today.Day < x.DateOfBirth.Value.Day)
-                    ? x.DateOfBirth.Value.Year - 1 : x.DateOfBirth.Value.Year)) <= search.ToAge);
+                    ? x.DateOfBirth.Value.Year + 1 : x.DateOfBirth.Value.Year)) <= search.ToAge);
                 if (!string.IsNullOrEmpty(search.VolunteerNo))
                     query = query.Where(x =>
                         x.VolunteerNo != null && x.VolunteerNo.ToLower().Contains(search.VolunteerNo.ToLower()));
                 if (!string.IsNullOrEmpty(search.FullName))
-                    query = query.Where(x => x.FullName.ToLower().Contains(search.FullName.ToLower()));
+                    query = query.Where(x => x.FirstName.ToLower().Contains(search.FullName.ToLower()));
                 if (!string.IsNullOrEmpty(search.TextSearch))
                 {
                     var volunterIds = AutoCompleteSearch(search.TextSearch.Trim());
@@ -310,9 +310,9 @@ namespace GSC.Respository.Volunteer
             bool isSummary = false)
         {
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
-            var roleBlock = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock");
+            var roleBlock = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerdetail");
             var roleScreening = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_screeningEntry");
-            var roleVolunteer = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerlist");
+            var roleVolunteer = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerdetail");
             var result = query.Select(x => new VolunteerGridDto
             {
                 Id = x.Id,
@@ -343,6 +343,7 @@ namespace GSC.Respository.Volunteer
                 IsDeleted = x.DeletedDate != null,
                 Blocked = x.IsBlocked != null ? x.IsBlocked == true ? "Yes" : "No" : "No",
                 IsBlockDisplay = roleBlock.IsView && x.IsBlocked != null,
+                IsBlockAdd = roleBlock.IsAdd,
                 IsScreeningHisotry = roleScreening.IsView,
                 IsDeleteRole = roleVolunteer.IsDelete,
                 IsScreening = x.IsScreening,

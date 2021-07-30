@@ -88,10 +88,12 @@ namespace GSC.Respository.SupplyManagement
             var dtolist = (from productverification in _context.ProductVerification.Where(x => x.DeletedDate == null)
                            join productReceipt in _context.ProductReceipt.Where(t => t.DeletedDate == null) on productverification.ProductReceiptId equals productReceipt.Id
                            join productverificationDetail in _context.ProductVerificationDetail.Where(x => x.DeletedDate == null) on productverification.Id equals productverificationDetail.ProductVerificationId
+                           join project in _context.Project.Where(t => t.DeletedDate == null) on productReceipt.ProjectId equals project.Id
                            where productverification.ProductReceiptId == productReceiptId
                            select new ProductVerificationGridDto
                            {
                                Id = productverification.Id,
+                               ClientId = project.ClientId,
                                ProductReceiptId = productverification.ProductReceiptId,
                                StudyCode = productReceipt.Project.ProjectCode,
                                StorageArea = productReceipt.CentralDepot.StorageArea,

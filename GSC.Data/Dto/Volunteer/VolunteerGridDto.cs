@@ -51,6 +51,7 @@ namespace GSC.Data.Dto.Volunteer
         public DateTime? RegisterDate { get; set; }
         public string StatusName { get; set; }
         public string Blocked { get; set; }
+        public bool IsBlockAdd { get; set; }
         public bool IsBlockDisplay { get; set; }
         public bool IsScreeningHisotry { get; set; }
         public bool IsDeleteRole { get; set; }
