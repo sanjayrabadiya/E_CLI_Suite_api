@@ -155,8 +155,8 @@ namespace GSC.Domain.Context
         public DbSet<Test> Test { get; set; }
         public DbSet<TestGroup> TestGroup { get; set; }
         public DbSet<AuditReason> AuditReason { get; set; }
+        public DbSet<VolunteerAuditTrail> VolunteerAuditTrail { get; set; }
         public DbSet<AuditTrail> AuditTrail { get; set; }
-        public DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
         public DbSet<AppSetting> AppSetting { get; set; }
         public DbSet<ProjectDesign> ProjectDesign { get; set; }
         public DbSet<ProjectDesignPeriod> ProjectDesignPeriod { get; set; }

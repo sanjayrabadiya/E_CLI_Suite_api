@@ -508,7 +508,7 @@ namespace GSC.Respository.Screening
         public List<DashboardQueryStatusDto> GetVisitStatus(int projectId)
         {
             var result = All.Where(x => (x.ScreeningEntry.ProjectId == projectId ||
-           x.ScreeningEntry.Project.ParentProjectId == projectId) && x.DeletedDate == null).GroupBy(
+           x.ScreeningEntry.Project.ParentProjectId == projectId) &&(x.ScreeningEntry.Project.IsTestSite != true) && x.DeletedDate == null).GroupBy(
                t => new { t.Status }).Select(g => new DashboardQueryStatusDto
                {
                    DisplayName = g.Key.Status.GetDescription(),

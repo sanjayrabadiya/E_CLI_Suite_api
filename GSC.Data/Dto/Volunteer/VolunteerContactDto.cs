@@ -23,6 +23,6 @@ namespace GSC.Data.Dto.Volunteer
 
         public string ContactTypeName { get; set; }
 
-        public List<AuditTrail> Changes { get; set; }
+        public List<VolunteerAuditTrail> Changes { get; set; }
     }
 }

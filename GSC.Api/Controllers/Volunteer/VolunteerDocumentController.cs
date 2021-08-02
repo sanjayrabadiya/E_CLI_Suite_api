@@ -20,7 +20,7 @@ namespace GSC.Api.Controllers.Volunteer
     [Route("api/[controller]")]
     public class VolunteerDocumentController : BaseController
     {
-        private readonly IAuditTrailRepository _auditTrailRepository;
+        private readonly IVolunteerAuditTrailRepository _volunteerAuditTrailRepository;
         private readonly IDocumentTypeRepository _documentTypeRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
@@ -31,14 +31,14 @@ namespace GSC.Api.Controllers.Volunteer
             IUnitOfWork uow, IMapper mapper,
             IUploadSettingRepository uploadSettingRepository,
             IDocumentTypeRepository documentTypeRepository,
-            IAuditTrailRepository auditTrailRepository)
+            IVolunteerAuditTrailRepository volunteerAuditTrailRepository)
         {
             _volunteerDocumentRepository = volunteerDocumentRepository;
             _uow = uow;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
             _documentTypeRepository = documentTypeRepository;
-            _auditTrailRepository = auditTrailRepository;
+            _volunteerAuditTrailRepository = volunteerAuditTrailRepository;
         }
 
         [HttpGet("{id}")]
@@ -73,7 +73,7 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerDocumentRepository.Add(volunteerDocument);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer document failed on save.");
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Inserted,
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Inserted,
                 volunteerDocument.Id, volunteerDocument.VolunteerId, volunteerDocumentDto.Changes);
 
             return Ok(volunteerDocument.Id);
@@ -105,7 +105,7 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerDocumentRepository.Update(volunteerDocument);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer document failed on save.");
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Updated,
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Updated,
                 volunteerDocument.Id, volunteerDocument.VolunteerId, volunteerDocumentDto.Changes);
 
             return Ok(volunteerDocument.Id);
@@ -122,7 +122,7 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerDocumentRepository.Delete(record);
             _uow.Save();
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Deleted,
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Deleted,
                 record.Id, record.VolunteerId, null);
 
             return Ok();

@@ -432,7 +432,7 @@ namespace GSC.Respository.Screening
         {
             // Formula % = (OpenVisitTemplate-NotStartedTemplate)/OpenVisitTemplate*100;
             var result = _screeningTemplateRepository.All.Where(x => (x.ScreeningVisit.ScreeningEntry.ProjectId == projectId ||
-          x.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) && x.DeletedDate == null).GroupBy(
+          x.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) && (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) && x.DeletedDate == null).GroupBy(
               t => new { t.ProjectDesignTemplate.ProjectDesignVisit.DisplayName, t.ProjectDesignTemplate.ProjectDesignVisit.Id }).Select(g => new DashboardQueryStatusDto
               {
                   DisplayName = g.Key.DisplayName,

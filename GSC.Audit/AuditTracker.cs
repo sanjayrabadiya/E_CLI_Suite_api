@@ -26,10 +26,10 @@ namespace GSC.Audit
         }
 
 
-        public List<AuditTrailCommon> GetAuditTracker(IList<EntityEntry> entities, DbContext context)
+        public List<AuditTrail> GetAuditTracker(IList<EntityEntry> entities, DbContext context)
         {
             List<TrackerResult> trackers = new List<TrackerResult>();
-            var auditTrailCommons = new List<AuditTrailCommon>();
+            var auditTrailCommons = new List<AuditTrail>();
             try
             {
                 var userId = _jwtTokenAccesser.UserId;
@@ -51,7 +51,7 @@ namespace GSC.Audit
 
                     if ((dbEntry.Entity as BaseEntity).AuditAction == AuditAction.Deleted || (dbEntry.Entity as BaseEntity).AuditAction == AuditAction.Activated)
                     {
-                        var auditTrailCommon = new AuditTrailCommon
+                        var auditTrail = new AuditTrail
                         {
                             TableName = tableName,
                             Action = (dbEntry.Entity as BaseEntity).AuditAction.ToString(),
@@ -65,7 +65,7 @@ namespace GSC.Audit
                             IpAddress = _jwtTokenAccesser.IpAddress,
                             TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
                         };
-                        auditTrailCommons.Add(auditTrailCommon);
+                        auditTrailCommons.Add(auditTrail);
                     }
                     else
                     {
@@ -74,7 +74,7 @@ namespace GSC.Audit
 
                         trackers.ForEach(r =>
                         {
-                            var auditTrailCommon = new AuditTrailCommon
+                            var auditTrail = new AuditTrail
                             {
                                 TableName = tableName,
                                 Action = action,
@@ -92,7 +92,7 @@ namespace GSC.Audit
                                 TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone"),
                                 Entity = (dbEntry.Entity as BaseEntity)
                             };
-                            auditTrailCommons.Add(auditTrailCommon);
+                            auditTrailCommons.Add(auditTrail);
                         });
 
                     }
@@ -163,6 +163,13 @@ namespace GSC.Audit
                     var pkName = string.IsNullOrEmpty(dictionary.PkName)
                         ? dictionary.FieldName
                         : dictionary.PkName;
+
+                    //if (dictionary.SourceColumn == "ProjectCode" && dictionary.TableName == "Project")
+                    //{
+                    //    var projectName = "CASE WHEN ParentProjectId IS NULL THEN 'Study Code' ELSE 'Site Code' END";
+                    //    string strSql = $"{"SELECT "} {projectName} {" AS Value FROM "} {dictionary.TableName} {"WHERE "} {pkName} {"="} {newValue}";
+                    //    dictionary.DisplayName = context.Set<AuditValue>().FromSqlRaw(strSql, "").ToList().Select(r => r.Value).FirstOrDefault();
+                    //}
 
 
                     if (!string.IsNullOrEmpty(newValue))

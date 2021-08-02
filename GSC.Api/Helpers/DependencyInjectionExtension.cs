@@ -136,9 +136,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVariableTemplateRepository, VariableTemplateRepository>();
             services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
             services.AddScoped<IAuditReasonRepository, AuditReasonRepository>();
-            services.AddScoped<IAuditTrailRepository, AuditTrailRepository>();
+            services.AddScoped<IVolunteerAuditTrailRepository, VolunteerAuditTrailRepository>();
             services.AddScoped<IAppSettingRepository, AppSettingRepository>();
-            services.AddScoped<IAuditTrailCommonRepository, AuditTrailCommonRepository>();
+            services.AddScoped<IAuditTrailRepository, AuditTrailRepository>();
             services.AddScoped<IProjectDesignRepository, ProjectDesignRepository>();
             services.AddScoped<IProjectDesignPeriodRepository, ProjectDesignPeriodRepository>();
             services.AddScoped<IProjectDesignVisitRepository, ProjectDesignVisitRepository>();

@@ -551,6 +551,7 @@ namespace GSC.Respository.Screening
         {
             var queries = _screeningTemplateValueRepository.All.Where(r =>
              (r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
+             (!r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) &&
              r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
                   GroupBy(c => new
                   {
@@ -621,7 +622,8 @@ namespace GSC.Respository.Screening
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByRolewise(int projectId)
         {
             var result = All.Where(x => (x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId ||
-           x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) && (x.QueryStatus == QueryStatus.Open || x.QueryStatus == QueryStatus.SelfCorrection
+           x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) && (!x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) 
+           && (x.QueryStatus == QueryStatus.Open || x.QueryStatus == QueryStatus.SelfCorrection
            || x.QueryStatus == QueryStatus.Acknowledge) && x.UserRole != null).GroupBy(
                t => new { t.UserRole, t.QueryStatus }).Select(g => new DashboardQueryStatusDto
                {
@@ -637,7 +639,7 @@ namespace GSC.Respository.Screening
         public List<DashboardQueryStatusDto> GetDashboardQueryStatusByVisitwise(int projectId)
         {
             var queries = _screeningTemplateValueRepository.All.Where(r =>
-          r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
+          r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId && !r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite &&
           r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null && r.QueryStatus != QueryStatus.Closed).
                GroupBy(c => new
                {
@@ -658,6 +660,7 @@ namespace GSC.Respository.Screening
 
             var closeQueries = All.Where(r =>
             r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
+             !r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite &&
             r.ScreeningTemplateValue.ProjectDesignVariable.DeletedDate == null
             && r.ScreeningTemplateValue.DeletedDate == null && r.QueryStatus == QueryStatus.Closed).
                  GroupBy(c => new
@@ -670,7 +673,7 @@ namespace GSC.Respository.Screening
                      TotalQuery = t.Count()
                  }).ToList();
 
-            var visitData = _context.ScreeningVisit.Where(r => r.ScreeningEntry.ProjectId == projectId
+            var visitData = _context.ScreeningVisit.Where(r => r.ScreeningEntry.ProjectId == projectId && !r.ScreeningEntry.Project.IsTestSite
             && r.DeletedDate == null && r.Status > ScreeningVisitStatus.ReSchedule).Select(t => new
             {
                 ProjectDesignVisitId = t.ProjectDesignVisitId,
@@ -699,6 +702,7 @@ namespace GSC.Respository.Screening
         {
             var queries = _screeningTemplateValueRepository.All.Where(r =>
             (r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
+            (r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite != true) &&
             r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null && r.QueryStatus == QueryStatus.Open).
                  GroupBy(c => new
                  {

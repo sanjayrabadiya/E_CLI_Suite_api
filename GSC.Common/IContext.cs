@@ -27,7 +27,7 @@ namespace GSC.Common
         IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class;
         void SetDBConnection(string connectionString);
         void DetachAllEntities();
-        DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
+        DbSet<AuditTrail> AuditTrail { get; set; }
         string GetConnectionString();
     }
 }

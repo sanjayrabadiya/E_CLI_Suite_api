@@ -113,7 +113,7 @@ namespace GSC.Domain.Context
         DbSet<Test> Test { get; set; }
         DbSet<TestGroup> TestGroup { get; set; }
         DbSet<AuditReason> AuditReason { get; set; }
-        DbSet<AuditTrail> AuditTrail { get; set; }
+        DbSet<VolunteerAuditTrail> VolunteerAuditTrail { get; set; }
 
         DbSet<AppSetting> AppSetting { get; set; }
         DbSet<ProjectDesign> ProjectDesign { get; set; }

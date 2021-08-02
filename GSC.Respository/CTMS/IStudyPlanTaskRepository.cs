@@ -22,6 +22,6 @@ namespace GSC.Respository.CTMS
         DateTime GetNextWorkingDate(NextWorkingDateParameterDto parameterDto);
         string ValidateweekEnd(NextWorkingDateParameterDto parameterDto);
         List<StudyPlanTask> Save(StudyPlanTask taskData);
-        List<AuditTrailCommonDto> GetStudyPlanTaskHistory(int id);
+        List<AuditTrailDto> GetStudyPlanTaskHistory(int id);
     }
 }

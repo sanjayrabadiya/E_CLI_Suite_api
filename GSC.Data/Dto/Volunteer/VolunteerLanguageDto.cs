@@ -21,6 +21,6 @@ namespace GSC.Data.Dto.Volunteer
         public string Note { get; set; }
 
         public string LanguageName { get; set; }
-        public List<AuditTrail> Changes { get; set; }
+        public List<VolunteerAuditTrail> Changes { get; set; }
     }
 }

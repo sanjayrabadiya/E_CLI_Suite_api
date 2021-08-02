@@ -144,7 +144,7 @@ namespace GSC.Api.Helpers
             CreateMap<NumberFormat, NumberFormatDto>().ReverseMap();
             CreateMap<RolePermission, RolePermissionDto>().ReverseMap();
             CreateMap<AuditReason, AuditReasonDto>().ReverseMap();
-            CreateMap<AuditTrail, AuditTrailDto>().ReverseMap();
+            CreateMap<VolunteerAuditTrail, VolunteerAuditTrailDto>().ReverseMap();
             CreateMap<ProjectDesign, ProjectDesignDto>().ReverseMap();
             CreateMap<ProjectDesignPeriod, ProjectDesignPeriodDto>().ReverseMap();
             CreateMap<ProjectDesignVisit, ProjectDesignVisitDto>().ReverseMap();

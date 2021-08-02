@@ -170,7 +170,7 @@ namespace GSC.Respository.Etmf
 
             var result = (from review in _context.ProjectArtificateDocumentReview.Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x => x.ProjectArtificateDocumentHistory)
                           .Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy)
-                          join auditReasonTemp in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectArtificateDocumentReview" && x.ColumnName == "SendBack Date")
+                          join auditReasonTemp in _context.AuditTrail.Where(x => x.TableName == "ProjectArtificateDocumentReview" && x.ColumnName == "SendBack Date")
                           on review.Id equals auditReasonTemp.RecordId into auditReasonDto
                           from auditReason in auditReasonDto.DefaultIfEmpty()
                           select new ProjectArtificateDocumentReviewHistory

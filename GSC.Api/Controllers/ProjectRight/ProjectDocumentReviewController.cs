@@ -136,5 +136,12 @@ namespace GSC.Api.Controllers.ProjectRight
             dataObj.ProjectList.ForEach(t => t.DocumentPath = documentUrl + t.DocumentPath);
             return Ok(dataObj);
         }
+
+        [HttpGet]
+        [Route("GetPendingProjectTrainingCount/{id}")]
+        public IActionResult GetPendingProjectTrainingCount(int id)
+        {
+            return Ok(_projectDocumentReviewRepository.GetPendingProjectTrainingCount(id));
+        }
     }
 }

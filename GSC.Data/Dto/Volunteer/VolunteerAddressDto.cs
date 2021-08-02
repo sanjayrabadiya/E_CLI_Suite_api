@@ -15,6 +15,6 @@ namespace GSC.Data.Dto.Volunteer
 
         public Entities.Location.Location Location { get; set; }
 
-        public List<AuditTrail> Changes { get; set; }
+        public List<VolunteerAuditTrail> Changes { get; set; }
     }
 }

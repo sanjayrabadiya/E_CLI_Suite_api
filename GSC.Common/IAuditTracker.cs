@@ -9,6 +9,6 @@ namespace GSC.Common
 {
     public interface IAuditTracker
     {
-        List<AuditTrailCommon> GetAuditTracker(IList<EntityEntry> entities, DbContext context);
+        List<AuditTrail> GetAuditTracker(IList<EntityEntry> entities, DbContext context);
     }
 }

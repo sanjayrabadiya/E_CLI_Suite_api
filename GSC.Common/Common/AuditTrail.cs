@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Common.Common
 {
-    public class AuditTrailCommon
+    public class AuditTrail
     {
         [Key]
         public int Id { get; set; }

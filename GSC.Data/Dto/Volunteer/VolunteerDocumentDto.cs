@@ -28,7 +28,7 @@ namespace GSC.Data.Dto.Volunteer
         public int DocumentTypeId { get; set; }
 
         public string DocumentTypeName { get; set; }
-        public List<AuditTrail> Changes { get; set; }
+        public List<VolunteerAuditTrail> Changes { get; set; }
 
         public int DocumentNameId { get; set; }
 

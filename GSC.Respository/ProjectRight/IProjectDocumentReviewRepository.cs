@@ -19,5 +19,6 @@ namespace GSC.Respository.ProjectRight
         ProjectDashBoardDto GetCompleteTrainingDashboard(int id);
         List<ProjectDropDown> GetChildProjectDropDownProjectRight(int ParentProjectId);
         List<DropDownDto> GetParentProjectDropDownProjectRight();
+        int GetPendingProjectTrainingCount(int id);
     }
 }

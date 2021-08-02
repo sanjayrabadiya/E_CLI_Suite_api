@@ -494,10 +494,10 @@ namespace GSC.Respository.CTMS
         //    _context.Save();
         //}
 
-        public List<AuditTrailCommonDto> GetStudyPlanTaskHistory(int id)
+        public List<AuditTrailDto> GetStudyPlanTaskHistory(int id)
         {
-            var result = _context.AuditTrailCommon.Where(x => x.RecordId == id && x.TableName == "studyplantask" && x.Action == "Modified")
-                .Select(x => new AuditTrailCommonDto
+            var result = _context.AuditTrail.Where(x => x.RecordId == id && x.TableName == "studyplantask" && x.Action == "Modified")
+                .Select(x => new AuditTrailDto
                 {
                     Id = x.Id,
                     TableName = x.TableName,

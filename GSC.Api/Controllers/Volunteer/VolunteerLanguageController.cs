@@ -16,20 +16,20 @@ namespace GSC.Api.Controllers.Volunteer
     [Route("api/[controller]")]
     public class VolunteerLanguageController : BaseController
     {
-        private readonly IAuditTrailRepository _auditTrailRepository;
+        private readonly IVolunteerAuditTrailRepository _volunteerAuditTrailRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IVolunteerLanguageRepository _volunteerLanguageRepository;
 
         public VolunteerLanguageController(IVolunteerLanguageRepository volunteerLanguageRepository,
             IUnitOfWork uow, IMapper mapper,
-            IAuditTrailRepository auditTrailRepository
+            IVolunteerAuditTrailRepository volunteerAuditTrailRepository
         )
         {
             _volunteerLanguageRepository = volunteerLanguageRepository;
             _uow = uow;
             _mapper = mapper;
-            _auditTrailRepository = auditTrailRepository;
+            _volunteerAuditTrailRepository = volunteerAuditTrailRepository;
         }
 
         [HttpGet("{id}/{isDeleted:bool?}")]
@@ -53,7 +53,7 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerLanguageRepository.Add(volunteerLanguage);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer language failed on save.");
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Inserted,
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Inserted,
                 volunteerLanguage.Id, volunteerLanguage.VolunteerId, volunteerLanguageDto.Changes);
 
             return Ok(volunteerLanguage.Id);
@@ -74,7 +74,7 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerLanguageRepository.Update(volunteerLanguage);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer language failed on save.");
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Updated,
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Updated,
                 volunteerLanguageDto.Id, volunteerLanguage.VolunteerId, volunteerLanguageDto.Changes);
 
             return Ok(volunteerLanguage.Id);
@@ -91,7 +91,7 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerLanguageRepository.Delete(record);
             _uow.Save();
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Deleted,
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Deleted,
                 record.Id, record.VolunteerId, null);
 
             return Ok();

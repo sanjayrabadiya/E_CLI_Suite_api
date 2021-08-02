@@ -74,7 +74,7 @@ namespace GSC.Data.Dto.Volunteer
 
         public string StatusName { get; set; }
 
-        public List<AuditTrail> Changes { get; set; }
+        public List<VolunteerAuditTrail> Changes { get; set; }
         public bool? IsBlocked { get; set; }
         public bool IsBlockDisplay { get; set; }
         public bool IsScreening { get; set; }

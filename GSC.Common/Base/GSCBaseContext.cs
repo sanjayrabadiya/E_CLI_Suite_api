@@ -26,7 +26,7 @@ namespace GSC.Common.Base
 
 
         public DbSet<UserAduit> UserAduit { get; set; }
-        public DbSet<AuditTrailCommon> AuditTrailCommon { get; set; }
+        public DbSet<AuditTrail> AuditTrail { get; set; }
         public DbSet<AuditValue> AuditValue { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
@@ -164,7 +164,7 @@ namespace GSC.Common.Base
 
 
 
-        async void AduitSave(List<AuditTrailCommon> audits)
+        async void AduitSave(List<AuditTrail> audits)
         {
             DetachAllEntities();
             if (audits != null && audits.Count() > 0)

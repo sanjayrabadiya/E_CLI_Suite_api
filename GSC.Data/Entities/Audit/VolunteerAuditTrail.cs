@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Audit
 {
-    public class AuditTrail : BaseEntity
+    public class VolunteerAuditTrail : BaseEntity
     {
         public AuditModule ModuleId { get; set; }
         public AuditTable TableId { get; set; }

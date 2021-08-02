@@ -548,7 +548,7 @@ namespace GSC.Respository.Attendance
             {
                 x.PatientStatusName = x.PatientStatusId == null ? "" : x.PatientStatusId.GetDescription();//_patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
                 //x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => x.IsReviewedByPatient == true);
-                x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x =>!String.IsNullOrEmpty(x.Pdfpath));
+                x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => !String.IsNullOrEmpty(x.Pdfpath));
                 //if (projectright.Count > 0)
                 //{
                 //    var EconsentReviewDetails = (from econsentreviewdetails in _context.EconsentReviewDetails.Where(t => t.AttendanceId == x.Id && t.IsReviewedByPatient == true).ToList()
@@ -820,7 +820,7 @@ namespace GSC.Respository.Attendance
                     var filename = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
                     var pdfpath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF");
                     var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), pdfpath);
-                    if (!Directory.Exists(outputFile)) 
+                    if (!Directory.Exists(outputFile))
                         Directory.CreateDirectory(outputFile);
                     var filewritepath = Path.Combine(outputFile, filename);
                     FileStream file = new FileStream(filewritepath, FileMode.Create, FileAccess.Write);
@@ -841,7 +841,7 @@ namespace GSC.Respository.Attendance
                     {
                         if (!String.IsNullOrEmpty(details.User.Email))
                         {
-                            _emailSenderRespository.SendWithDrawEmail(details.User.Email, details.User.FirstName, item.EconsentSetup.DocumentName, details.project.ProjectCode, $"{randomization.ScreeningNumber + " " + randomization.Initial}", filewritepath);                         
+                            _emailSenderRespository.SendWithDrawEmail(details.User.Email, details.User.FirstName, item.EconsentSetup.DocumentName, details.project.ProjectCode, $"{randomization.ScreeningNumber + " " + randomization.Initial}", filewritepath);
                         }
                     }
                 }
@@ -1024,7 +1024,7 @@ namespace GSC.Respository.Attendance
         public List<DashboardQueryStatusDto> GetSubjectStatus(int projectId)
         {
             var result = All.Where(x => (x.ProjectId == projectId ||
-           x.Project.ParentProjectId == projectId) && x.DeletedDate == null).GroupBy(
+           x.Project.ParentProjectId == projectId) && (!x.Project.IsTestSite) && x.DeletedDate == null).GroupBy(
                t => new { t.PatientStatusId }).Select(g => new DashboardQueryStatusDto
                {
                    DisplayName = g.Key.PatientStatusId.GetDescription(),

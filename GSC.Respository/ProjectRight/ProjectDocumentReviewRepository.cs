@@ -453,5 +453,15 @@ namespace GSC.Respository.ProjectRight
             return projectDashBoardDto;
         }
 
+
+        // Get only count for pending review document for project right
+
+        public int GetPendingProjectTrainingCount(int id)
+        {
+           return All.Where(x => x.UserId == _jwtTokenAccesser.UserId && !x.IsReview 
+                                                             && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId && a.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null) 
+                                                             && x.ProjectId == id && x.DeletedDate == null).Count();
+        }
+
     }
 }

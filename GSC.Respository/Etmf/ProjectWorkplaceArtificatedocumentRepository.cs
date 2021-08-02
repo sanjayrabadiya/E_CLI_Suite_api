@@ -42,7 +42,7 @@ namespace GSC.Respository.Etmf
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IEtmfSectionMasterLibraryRepository _etmfSectionMasterLibraryRepository;
-        private readonly IAuditTrailCommonRepository _auditTrailCommonRepository;
+        private readonly IAuditTrailRepository _auditTrailRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
         private readonly IAppSettingRepository _appSettingRepository;
@@ -54,7 +54,7 @@ namespace GSC.Respository.Etmf
            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
            IProjectRepository projectRepository,
            IEtmfSectionMasterLibraryRepository etmfSectionMasterLibraryRepository,
-           IAuditTrailCommonRepository auditTrailCommonRepository,
+           IAuditTrailRepository auditTrailRepository,
            IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
            IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
            IAppSettingRepository appSettingRepository,
@@ -70,7 +70,7 @@ namespace GSC.Respository.Etmf
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
             _projectRepository = projectRepository;
             _etmfSectionMasterLibraryRepository = etmfSectionMasterLibraryRepository;
-            _auditTrailCommonRepository = auditTrailCommonRepository;
+            _auditTrailRepository = auditTrailRepository;
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
             _appSettingRepository = appSettingRepository;
@@ -400,7 +400,7 @@ namespace GSC.Respository.Etmf
 
             var projectWorkplaceArtificatedocumentreviews = _context.ProjectArtificateDocumentReview.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var projectWorkplaceArtificatedocumentapprover = _context.ProjectArtificateDocumentApprover.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
-            var auditrialdata = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null).ToList();
+            var auditrialdata = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceArtificatedocument" && x.Reason != null).ToList();
 
             var Documents = projectWorkplaceArtificatedocuments.Select(r => new EtmfAuditLogReportDto
             {
@@ -468,8 +468,8 @@ namespace GSC.Respository.Etmf
                                     action = "Send Back",
                                     userName = _userRepository.Find(review.UserId).UserName,
                                     actionDate = review.SendBackDate,
-                                    auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
-                                    auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
+                                    auditComment = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
+                                    auditReason = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
                                 }).ToList();
 
             var DeletesSendReview = (from doc in Documents
@@ -489,8 +489,8 @@ namespace GSC.Respository.Etmf
                                          action = "Deleted Review",
                                          userName = _userRepository.Find(review.UserId).UserName,
                                          actionDate = review.DeletedDate,
-                                         auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Deleted" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
-                                         auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Deleted" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
+                                         auditComment = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Deleted" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
+                                         auditReason = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentReview" && x.Action == "Deleted" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
                                      }).ToList();
 
             var sendforApproveData = (from doc in Documents
@@ -528,8 +528,8 @@ namespace GSC.Respository.Etmf
                                     action = approve.IsApproved == true ? "Approved" : "Rejected",
                                     userName = _userRepository.Find((int)approve.UserId).UserName,
                                     actionDate = approve.ModifiedDate,
-                                    auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.ReasonOth,
-                                    auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.Reason,
+                                    auditComment = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.ReasonOth,
+                                    auditReason = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.Reason,
                                 }).ToList();
 
             var DeletedApprovedData = (from doc in Documents
@@ -549,8 +549,8 @@ namespace GSC.Respository.Etmf
                                            action = "Deleted Approve",
                                            userName = _userRepository.Find(approve.UserId).UserName,
                                            actionDate = approve.DeletedDate,
-                                           auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Deleted").FirstOrDefault()?.ReasonOth,
-                                           auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Deleted").FirstOrDefault()?.Reason,
+                                           auditComment = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Deleted").FirstOrDefault()?.ReasonOth,
+                                           auditReason = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Deleted").FirstOrDefault()?.Reason,
                                        }).ToList();
 
 
@@ -610,7 +610,7 @@ namespace GSC.Respository.Etmf
                 }).ToList();
 
             var requiredArtificate = (from artificate in Artificate
-                                      join audit in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectWorkplaceArtificate" && x.ColumnName == "Is NotRequired" && x.Action == "Modified")
+                                      join audit in _context.AuditTrail.Where(x => x.TableName == "ProjectWorkplaceArtificate" && x.ColumnName == "Is NotRequired" && x.Action == "Modified")
                                       on artificate.Id equals audit.RecordId
                                       select new EtmfAuditLogReportDto
                                       {
@@ -662,7 +662,7 @@ namespace GSC.Respository.Etmf
 
             var projectWorkplaceSubSecdocumentreviews = _context.ProjectSubSecArtificateDocumentReview.Where(x => SubSecDocuments.Select(x => x.Id).Contains(x.ProjectWorkplaceSubSecArtificateDocumentId)).ToList();
             var projectWorkplaceSubSecdocumentapprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => SubSecDocuments.Select(x => x.Id).Contains(x.ProjectWorkplaceSubSecArtificateDocumentId)).ToList();
-            var SubSecAuditTrialData = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceSubSecArtificatedocument" && x.Reason != null).ToList();
+            var SubSecAuditTrialData = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectWorkplaceSubSecArtificatedocument" && x.Reason != null).ToList();
 
             var SubSecCretaedData = SubSecDocuments.Select(r =>
             {
@@ -712,8 +712,8 @@ namespace GSC.Respository.Etmf
                                           action = "Send Back",
                                           userName = _userRepository.Find(review.UserId).UserName,
                                           actionDate = review.SendBackDate,
-                                          auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
-                                          auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
+                                          auditComment = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
+                                          auditReason = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Modified" && x.ColumnName == "Is SendBack" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
                                       }).ToList();
 
             var DeletedSubSecreviewer = (from doc in SubSecDocuments
@@ -734,8 +734,8 @@ namespace GSC.Respository.Etmf
                                              action = "Deleted Review",
                                              userName = _userRepository.Find(review.UserId).UserName,
                                              actionDate = review.DeletedDate,
-                                             auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Deleted" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
-                                             auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Deleted" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
+                                             auditComment = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Deleted" && x.RecordId == review.Id).FirstOrDefault()?.ReasonOth,
+                                             auditReason = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentReview" && x.Action == "Deleted" && x.RecordId == review.Id).FirstOrDefault()?.Reason,
                                          }).ToList();
 
             var SubSecSendforApproveData = (from doc in SubSecDocuments
@@ -775,8 +775,8 @@ namespace GSC.Respository.Etmf
                                           action = approve.IsApproved == true ? "Approved" : "Rejected",
                                           userName = _userRepository.Find((int)approve.UserId).UserName,
                                           actionDate = approve.ModifiedDate,
-                                          auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.ReasonOth,
-                                          auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.Reason,
+                                          auditComment = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.ReasonOth,
+                                          auditReason = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Modified" && x.ColumnName == "Is Approved").FirstOrDefault()?.Reason,
                                       }).ToList();
 
             var DeletedSubSecApprovedData = (from doc in SubSecDocuments
@@ -797,8 +797,8 @@ namespace GSC.Respository.Etmf
                                                  action = "Deleted Approve",
                                                  userName = _userRepository.Find((int)approve.UserId).UserName,
                                                  actionDate = approve.DeletedDate,
-                                                 auditComment = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Deleted").FirstOrDefault()?.ReasonOth,
-                                                 auditReason = _auditTrailCommonRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Deleted").FirstOrDefault()?.Reason,
+                                                 auditComment = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Deleted").FirstOrDefault()?.ReasonOth,
+                                                 auditReason = _auditTrailRepository.FindByInclude(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.RecordId == approve.Id && x.Action == "Deleted").FirstOrDefault()?.Reason,
                                              }).ToList();
 
             var SubSecDeletedData = SubSecDocuments.Where(x => x.DeletedDate != null).Select(r =>
@@ -858,8 +858,8 @@ namespace GSC.Respository.Etmf
                 action = "SubSection Added",
                 actionDate = r.CreatedDate,
                 userName = _userRepository.Find((int)r.CreatedBy).UserName,
-                auditReason = _auditTrailCommonRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Added" && x.ColumnName == "SubSection Name").FirstOrDefault().Reason,
-                auditComment = _auditTrailCommonRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Added" && x.ColumnName == "SubSection Name").FirstOrDefault().ReasonOth,
+                auditReason = _auditTrailRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Added" && x.ColumnName == "SubSection Name").FirstOrDefault().Reason,
+                auditComment = _auditTrailRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Added" && x.ColumnName == "SubSection Name").FirstOrDefault().ReasonOth,
             }).ToList();
 
             var subsectionModified = subsection.Where(x => x.ModifiedDate != null).Select(r => new EtmfAuditLogReportDto
@@ -879,8 +879,8 @@ namespace GSC.Respository.Etmf
                 action = "SubSection Modified",
                 actionDate = r.ModifiedDate,
                 userName = _userRepository.Find((int)r.ModifiedBy).UserName,
-                auditReason = _auditTrailCommonRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Modified" && x.ColumnName == "SubSection Name").FirstOrDefault().Reason,
-                auditComment = _auditTrailCommonRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Modified" && x.ColumnName == "SubSection Name").FirstOrDefault().ReasonOth,
+                auditReason = _auditTrailRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Modified" && x.ColumnName == "SubSection Name").FirstOrDefault().Reason,
+                auditComment = _auditTrailRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Modified" && x.ColumnName == "SubSection Name").FirstOrDefault().ReasonOth,
             }).ToList();
 
             var subsectionDeleted = subsection.Where(x => x.DeletedDate != null).Select(r => new EtmfAuditLogReportDto
@@ -900,8 +900,8 @@ namespace GSC.Respository.Etmf
                 action = "SubSection Deleted",
                 actionDate = r.DeletedDate,
                 userName = _userRepository.Find((int)r.DeletedBy).UserName,
-                auditReason = _auditTrailCommonRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Deleted").FirstOrDefault().Reason,
-                auditComment = _auditTrailCommonRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Deleted").FirstOrDefault().ReasonOth,
+                auditReason = _auditTrailRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Deleted").FirstOrDefault().Reason,
+                auditComment = _auditTrailRepository.FindByInclude(x => x.RecordId == r.Id && x.TableName == "ProjectWorkplaceSubSection" && x.Action == "Deleted").FirstOrDefault().ReasonOth,
             }).ToList();
 
             var subsectionArtificate = _context.ProjectWorkplaceSubSectionArtifact
@@ -930,7 +930,7 @@ namespace GSC.Respository.Etmf
                 }).OrderByDescending(x => x.Id).ToList();
 
             var subsectionRequiredArtificate = (from subsecArtificate in subsectionArtificate
-                                                join audit in _context.AuditTrailCommon.Where(x => x.TableName == "ProjectWorkplaceSubSectionArtifact" && x.ColumnName == "Is NotRequired" && x.Action == "Modified")
+                                                join audit in _context.AuditTrail.Where(x => x.TableName == "ProjectWorkplaceSubSectionArtifact" && x.ColumnName == "Is NotRequired" && x.Action == "Modified")
                                                 on subsecArtificate.Id equals audit.RecordId
                                                 select new EtmfAuditLogReportDto
                                                 {

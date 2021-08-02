@@ -17,7 +17,7 @@ namespace GSC.Api.Controllers.Volunteer
     [Route("api/[controller]")]
     public class VolunteerAddressController : BaseController
     {
-        private readonly IAuditTrailRepository _auditTrailRepository;
+        private readonly IVolunteerAuditTrailRepository _volunteerAuditTrailRepository;
         private readonly ILocationRepository _locationRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
@@ -26,13 +26,13 @@ namespace GSC.Api.Controllers.Volunteer
         public VolunteerAddressController(IVolunteerAddressRepository volunteerAddressRepository,
             IUnitOfWork uow, IMapper mapper,
             ILocationRepository locationRepository,
-            IAuditTrailRepository auditTrailRepository)
+            IVolunteerAuditTrailRepository volunteerAuditTrailRepository)
         {
             _volunteerAddressRepository = volunteerAddressRepository;
             _uow = uow;
             _mapper = mapper;
             _locationRepository = locationRepository;
-            _auditTrailRepository = auditTrailRepository;
+            _volunteerAuditTrailRepository = volunteerAuditTrailRepository;
         }
 
         [HttpGet("{id}")]
@@ -56,7 +56,7 @@ namespace GSC.Api.Controllers.Volunteer
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer address failed on save.");
 
             if (volunteerAddressDto.Changes != null)
-                _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Inserted,
+                _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Inserted,
                     volunteerAddress.Id, volunteerAddress.VolunteerId, volunteerAddressDto.Changes);
 
             return Ok(volunteerAddress.Id);
@@ -81,7 +81,7 @@ namespace GSC.Api.Controllers.Volunteer
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer address failed on save.");
 
             if (volunteerAddressDto.Changes != null)
-                _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Updated,
+                _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Updated,
                 volunteerAddress.Id, volunteerAddress.VolunteerId, volunteerAddressDto.Changes);
 
             return Ok(volunteerAddress.Id);
@@ -98,7 +98,7 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerAddressRepository.Delete(record);
             _uow.Save();
 
-            _auditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Deleted,
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Deleted,
                 record.Id, record.VolunteerId, null);
 
 
