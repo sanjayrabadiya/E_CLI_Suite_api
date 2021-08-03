@@ -13,6 +13,8 @@ namespace GSC.Data.Dto.Report
         public int DesignOrder { get; set; }
         public int DesignOrderOfVariable { get; set; }
         public int ScreeningTemplateId { get; set; }
+
+        public int? RepeatSeqNo { get; set; }
         public int ScreeningEntryId { get; set; }
         public int TemplateId { get; set; }
         public string TemplateName { get; set; }
@@ -83,6 +85,7 @@ namespace GSC.Data.Dto.Report
 
     public class ProjectDatabaseVisitDto
     {
+        public int VisitId { get; set; }
         public string Visit { get; set; }
         public int DesignOrder { get; set; }
         public string TemplateName { get; set; }
@@ -92,14 +95,22 @@ namespace GSC.Data.Dto.Report
 
     public class ProjectDatabaseTemplateDto
     {
+        public int VisitId { get; set; }
+        public string Visit { get; set; }
         public int TemplateId { get; set; }
-        public int DesignOrder { get; set; }
+        public decimal DesignOrder { get; set; }
+        public int? RepeatSeqNo { get; set; }
         public string TemplateName { get; set; }
         public List<ProjectDatabaseItemDto> LstProjectDataBaseitems { get; set; }
     }
 
     public class ProjectDatabaseItemDto
     {
+        public int DesignOrder { get; set; }
+        public int TemplateId { get; set; }
+        public string TemplateName { get; set; }
+        public string SubjectNo { get; set; }
+        public string Initial { get; set; }
         public int? ScreeningTemplateParentId { get; set; }
         public string DomainName { get; set; }
         public string VariableName { get; set; }
@@ -108,6 +119,8 @@ namespace GSC.Data.Dto.Report
         public string VariableNameValue { get; set; }
         public int? UnitId { get; set; }
         public string Unit { get; set; }
+        public string Visit { get; set; }
+        public int? RepeatSeqNo { get; set; }
     }
     public class ProjectDatabaseSearchDto : BaseDto
     {
@@ -177,5 +190,13 @@ namespace GSC.Data.Dto.Report
         public List<ProjectDatabaseDomainDto> Dbds { get; set; }
         public List<MeddraDetails> Meddra { get; set; }
     }
-    
+
+    public class RangeOfTemplate
+    {
+        public int TemplateId { get; set; }
+        public string TemplateName { get; set; }
+        public string Visit { get; set; }
+        public int FirstCell { get; set; }
+        public int LastCell { get; set; }
+    }
 }
