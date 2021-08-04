@@ -24,15 +24,18 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
+        private readonly IVariableRepository _variableRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
 
         public DomainController(IDomainRepository domainRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IVariableTemplateRepository variableTemplateRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, IProjectDesignRepository projectDesignRepository)
+            IUnitOfWork uow, IMapper mapper, IGSCContext context,
+            IJwtTokenAccesser jwtTokenAccesser, IProjectDesignRepository projectDesignRepository,
+            IVariableRepository variableRepository)
         {
             _domainRepository = domainRepository;
             _userRepository = userRepository;
@@ -41,7 +44,9 @@ namespace GSC.Api.Controllers.Master
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectDesignRepository = projectDesignRepository;
+            _variableRepository = variableRepository;
             _variableTemplateRepository = variableTemplateRepository;
+            _context = context;
         }
 
 
@@ -103,7 +108,7 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by swati for effective Date on 02-06-2019 */          
+            /* Added by swati for effective Date on 02-06-2019 */
             _domainRepository.AddOrUpdate(domain);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Domain failed on save.");
@@ -121,6 +126,19 @@ namespace GSC.Api.Controllers.Master
                 return NotFound();
 
             _domainRepository.Delete(record);
+
+            var variable = _variableRepository.FindByInclude(x => x.DomainId == id).ToList();
+            variable.ForEach(variable =>
+            {
+                _variableRepository.Delete(variable);
+            });
+
+            var variableTemplate = _variableTemplateRepository.FindByInclude(x => x.DomainId == id).ToList();
+            variableTemplate.ForEach(temp =>
+            {
+                _variableTemplateRepository.Delete(temp);
+            });
+
             _uow.Save();
 
             return Ok();
@@ -138,6 +156,14 @@ namespace GSC.Api.Controllers.Master
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            var domainClass = _context.DomainClass.Where(x => x.Id == record.DomainClassId).FirstOrDefault();
+            if (domainClass?.DeletedDate != null)
+            {
+                var message = "Domain Class Is Deacitvated.";
+                ModelState.AddModelError("Message", message);
                 return BadRequest(ModelState);
             }
 

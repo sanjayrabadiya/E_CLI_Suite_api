@@ -19,27 +19,34 @@ namespace GSC.Api.Controllers.Master
     public class DomainClassController : BaseController
     {
         private readonly IDomainClassRepository _domainClassRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IDomainRepository _domainRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IVariableRepository _variableRepository;
+        private readonly IVariableTemplateRepository _variableTemplateRepository;
 
         public DomainClassController(IDomainClassRepository domainClassRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IDomainRepository domainRepository,
+            IVariableRepository variableRepository,
+            IVariableTemplateRepository variableTemplateRepository)
         {
             _domainClassRepository = domainClassRepository;
             _uow = uow;
-            _userRepository = userRepository;
+            _domainRepository = domainRepository;
+            _variableRepository = variableRepository;
             _companyRepository = companyRepository;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _variableTemplateRepository = variableTemplateRepository;
         }
 
- 
+
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
@@ -112,6 +119,28 @@ namespace GSC.Api.Controllers.Master
                 return NotFound();
 
             _domainClassRepository.Delete(record);
+
+            var domain = _domainRepository.FindByInclude(x => x.DomainClassId == id).ToList();
+            domain.ForEach(z =>
+            {
+                _domainRepository.Delete(z);
+
+                var variable = _variableRepository.FindByInclude(x => x.DomainId == z.Id).ToList();
+
+                variable.ForEach(variable =>
+                {
+                    _variableRepository.Delete(variable);
+                });
+
+                var variableTemplate = _variableTemplateRepository.FindByInclude(x => x.DomainId == z.Id).ToList();
+
+                variableTemplate.ForEach(temp =>
+                {
+                    _variableTemplateRepository.Delete(temp);
+                });
+            });
+
+
             _uow.Save();
 
             return Ok();
