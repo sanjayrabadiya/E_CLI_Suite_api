@@ -72,11 +72,11 @@ namespace GSC.Api.Controllers.CTMS
         }
 
         [HttpGet]
-        [Route("GetWeekEndDay/{studyPlanId}")]
-        public IActionResult GetWeekEndDay(int studyPlanId)
+        [Route("GetWeekEndDay/{projectId}")]
+        public IActionResult GetWeekEndDay(int ProjectId)
         {
-            if (studyPlanId <= 0) return BadRequest();
-            int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
+            if (ProjectId <= 0) return BadRequest();
+            //int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
             var weekendDay = _weekEndMasterRepository.GetweekEndDay(ProjectId);
             return Ok(weekendDay);
         }
