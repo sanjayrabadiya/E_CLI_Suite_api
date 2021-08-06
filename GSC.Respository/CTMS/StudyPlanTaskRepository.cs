@@ -518,6 +518,22 @@ namespace GSC.Respository.CTMS
 
             return result;
         }
+
+        public StudyPlanTaskGridDto GetStudyPlanDependentTaskList(int? StudyPlanTaskId, int ProjectId)
+        {
+            var result = new StudyPlanTaskGridDto();
+
+            var studyplan = _context.StudyPlan.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
+
+            if (studyplan != null)
+            {
+                var tasklist = All.Where(x => x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.Id != StudyPlanTaskId).OrderBy(x => x.TaskOrder).
+               ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                result.StudyPlanTask = tasklist.Where(x => x.DependentTaskId != StudyPlanTaskId).ToList();
+            }
+
+            return result;
+        }
     }
 }
 
