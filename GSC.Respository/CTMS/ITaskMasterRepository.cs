@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Audit;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using System;
@@ -12,5 +13,6 @@ namespace GSC.Respository.CTMS
         List<TaskMasterGridDto> GetTasklist(bool isDeleted, int templateId);
         //void SaveTask(List<TaskMaster> taskmasterDto);
         int UpdateTaskOrder(TaskmasterDto taskmasterDto);
+        List<AuditTrailDto> GetTaskHistory(int id);
     }
 }
