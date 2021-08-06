@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Audit;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
@@ -60,6 +61,31 @@ namespace GSC.Respository.CTMS
                 return ++count;
             }
 
+        }
+
+        public List<AuditTrailDto> GetTaskHistory(int id)
+        {
+            var result = _context.AuditTrail.Where(x => x.RecordId == id && x.TableName == "TaskMaster" && x.Action == "Modified")
+                .Select(x => new AuditTrailDto
+                {
+                    Id = x.Id,
+                    TableName = x.TableName,
+                    RecordId = x.RecordId,
+                    Action = x.Action,
+                    ColumnName = x.ColumnName,
+                    OldValue = x.OldValue,
+                    NewValue = x.NewValue,
+                    ReasonOth = x.ReasonOth,
+                    UserId = x.UserId,
+                    CreatedDate = x.CreatedDate,
+                    ReasonName = x.Reason,
+                    UserName = x.User.UserName,
+                    UserRoleName = x.UserRole,
+                    IpAddress = x.IpAddress,
+                    TimeZone = x.TimeZone
+                }).ToList();
+
+            return result;
         }
     }
 }

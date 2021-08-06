@@ -139,5 +139,13 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(id);
         }
 
+        [HttpGet("GetTaskHistory/{id}")]
+        public IActionResult GetTaskHistory(int id)
+        {
+            if (id <= 0) return BadRequest();
+
+            var result = _taskMasterRepository.GetTaskHistory(id);
+            return Ok(result);
+        }
     }
 }

@@ -23,5 +23,6 @@ namespace GSC.Respository.CTMS
         string ValidateweekEnd(NextWorkingDateParameterDto parameterDto);
         List<StudyPlanTask> Save(StudyPlanTask taskData);
         List<AuditTrailDto> GetStudyPlanTaskHistory(int id);
+        StudyPlanTaskGridDto GetStudyPlanDependentTaskList(int? StudyPlanTaskId, int ProjectId);
     }
 }

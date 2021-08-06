@@ -28,6 +28,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IVariableTemplateNoteRepository _variableTemplateNoteRepository;
+        private readonly IGSCContext _context;
 
         public VariableTemplateController(IVariableTemplateRepository variableTemplateRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -35,7 +36,8 @@ namespace GSC.Api.Controllers.Master
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IVariableTemplateDetailRepository variableTemplateDetailRepository,
-            IVariableTemplateNoteRepository variableTemplateNoteRepository)
+            IVariableTemplateNoteRepository variableTemplateNoteRepository,
+            IGSCContext context)
         {
             _variableTemplateRepository = variableTemplateRepository;
             _uow = uow;
@@ -45,6 +47,7 @@ namespace GSC.Api.Controllers.Master
             _jwtTokenAccesser = jwtTokenAccesser;
             _variableTemplateDetailRepository = variableTemplateDetailRepository;
             _variableTemplateNoteRepository = variableTemplateNoteRepository;
+            _context = context;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -218,7 +221,33 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
+            var domain = _context.Domain.Where(x => x.Id == record.DomainId).FirstOrDefault();
+            if (domain?.DeletedDate != null)
+            {
+                var message = "Domain Is Deacitvated.";
+                ModelState.AddModelError("Message", message);
+                return BadRequest(ModelState);
+            }
+
+            var variableTemplateDetails = _variableTemplateDetailRepository.FindByInclude(x => x.VariableTemplateId == record.Id).ToList();
+
+            foreach (var item in variableTemplateDetails)
+            {
+                var variable = _context.Variable.Where(a => a.Id == item.VariableId).FirstOrDefault();
+                if (variable?.DeletedDate != null)
+                {
+                    var messagevar = "Variable Is Deacitvated.";
+                    ModelState.AddModelError("Message", messagevar);
+                    return BadRequest(ModelState);
+                }
+            }
+
             _variableTemplateRepository.Active(record);
+            variableTemplateDetails.ForEach(z =>
+            {
+                _variableTemplateDetailRepository.Active(z);
+            });
+
             _uow.Save();
 
             return Ok();

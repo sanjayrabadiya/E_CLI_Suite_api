@@ -209,6 +209,11 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(result);
         }
 
-
+        [HttpGet("GetStudyPlanDependentTaskList/{StudyPlanTaskId:int?}/{ProjectId:int}")]
+        public IActionResult GetStudyPlanDependentTaskList(int? StudyPlanTaskId, int ProjectId)
+        {
+            var studyplan = _studyPlanTaskRepository.GetStudyPlanDependentTaskList(StudyPlanTaskId, ProjectId);
+            return Ok(studyplan);
+        }
     }
 }

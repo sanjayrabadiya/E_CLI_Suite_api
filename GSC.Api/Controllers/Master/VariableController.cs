@@ -26,27 +26,32 @@ namespace GSC.Api.Controllers.Master
         private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IVariableValueRepository _variableValueRepository;
-      //  private readonly IVariableRemarksRepository _variableRemarksRepository;
+        //  private readonly IVariableRemarksRepository _variableRemarksRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
+        private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
+        private readonly IGSCContext _context;
 
         public VariableController(IVariableRepository variableRepository,
             IVariableValueRepository variableValueRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
+            IUnitOfWork uow, IMapper mapper, IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-          //  IVariableRemarksRepository variableRemarksRepository,
-            IVariableTemplateRepository variableTemplateRepository)
+            //  IVariableRemarksRepository variableRemarksRepository,
+            IVariableTemplateRepository variableTemplateRepository,
+            IVariableTemplateDetailRepository variableTemplateDetailRepository)
         {
             _variableTemplateRepository = variableTemplateRepository;
             _variableRepository = variableRepository;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _variableValueRepository = variableValueRepository;
-       //     _variableRemarksRepository = variableRemarksRepository;
+            //     _variableRemarksRepository = variableRemarksRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _variableTemplateDetailRepository = variableTemplateDetailRepository;
+            _context = context;
         }
 
         // GET: api/<controller>
@@ -127,7 +132,7 @@ namespace GSC.Api.Controllers.Master
             }
 
             UpdateVariableValues(variable);
-          //  UpdateVariableRemarks(variable);
+            //  UpdateVariableRemarks(variable);
             _variableRepository.Update(variable);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
@@ -186,6 +191,16 @@ namespace GSC.Api.Controllers.Master
             }
 
             _variableRepository.Delete(record);
+
+            var variableTemplateDetails = _variableTemplateDetailRepository.FindByInclude(x => x.VariableId == id).ToList();
+
+            variableTemplateDetails.ForEach(temp =>
+            {
+                //var template = _variableTemplateRepository.Find(temp.VariableTemplateId);
+                //_variableTemplateRepository.Delete(template);
+
+                _variableTemplateDetailRepository.Delete(temp);
+            });
             _uow.Save();
 
             return Ok();
@@ -203,6 +218,14 @@ namespace GSC.Api.Controllers.Master
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            var domain = _context.Domain.Where(x => x.Id == record.DomainId).FirstOrDefault();
+            if (domain?.DeletedDate != null)
+            {
+                var message = "Domain Is Deacitvated.";
+                ModelState.AddModelError("Message", message);
                 return BadRequest(ModelState);
             }
 
