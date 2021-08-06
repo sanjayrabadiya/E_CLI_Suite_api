@@ -412,9 +412,12 @@ namespace GSC.Respository.InformConcent
 
             var outputname = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
             var pdfpath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
-            var outputFile = Path.Combine(upload.DocumentPath, pdfpath);
-            if (!Directory.Exists(outputFile))
-                Directory.CreateDirectory(Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF"));
+            string directorypath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF");
+            string[] paths = { upload.DocumentPath, FolderType.InformConcent.ToString(), "ReviewedPDF" };
+            var fullPath = Path.Combine(paths);
+            var outputFile = Path.Combine(upload.DocumentPath, pdfpath);           
+            if (!Directory.Exists(fullPath))
+                Directory.CreateDirectory(fullPath);
             FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
             outputStream.WriteTo(file);
             file.Dispose();
