@@ -62,10 +62,10 @@ namespace GSC.Api.Controllers.Project.Design
             var projectDesign = _projectDesignRepository.FindByInclude(x => x.Id == id, x => x.Project)
                 .FirstOrDefault();
             var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
-            projectDesignDto.Locked = _studyVersionRepository.IsOnTrialByProjectDesing(id);
+            projectDesignDto.Locked = !_studyVersionRepository.IsOnTrialByProjectDesing(id);
             projectDesignDto.LiveVersion = _studyVersionRepository.All.Where(x => x.ProjectDesignId == id && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
-            if (projectDesignDto.Locked)
-                projectDesignDto.TrialVersion = _studyVersionRepository.All.Where(x => x.ProjectDesignId == id && x.DeletedDate == null && x.VersionStatus == VersionStatus.OnTrial).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
+            projectDesignDto.AnyLive = _studyVersionRepository.All.Any(x => x.ProjectDesignId == id && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive);
+            projectDesignDto.TrialVersion = _studyVersionRepository.All.Where(x => x.ProjectDesignId == id && x.DeletedDate == null && x.VersionStatus == VersionStatus.OnTrial).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
                 KeyId = projectDesign.Id,

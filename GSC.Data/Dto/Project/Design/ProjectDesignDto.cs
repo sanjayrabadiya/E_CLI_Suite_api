@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.Project.Design
         public string ProjectName { get; set; }
         public bool IsStatic { get; set; }
         public bool Locked { get; set; }
+        public bool AnyLive { get; set; }
         public string TrialVersion { get; set; }
         public string LiveVersion { get; set; }
         public ProjectDto Project { get; set; }
