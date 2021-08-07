@@ -181,17 +181,17 @@ namespace GSC.Respository.Screening
 
             var randomization = _randomizationRepository.Find(saveRandomizationDto.RandomizationId);
 
-            var parentProjectId = _projectRepository.All.Where(r => r.Id == randomization.ProjectId).Select(t => t.ParentProjectId).FirstOrDefault();
-            var projectDesign = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId && r.DeletedDate == null).
+            var projectDetail = _projectRepository.All.Where(r => r.Id == randomization.ProjectId).Select(t => new { t.ParentProjectId, t.IsTestSite }).FirstOrDefault();
+
+            var projectDesign = _projectDesignRepository.All.Where(r => r.ProjectId == projectDetail.ParentProjectId && r.DeletedDate == null).
                  Select(t => new
                  {
-                     t.IsUnderTesting,
                      ProjectDesignId = t.Id,
                      ProjectDesignPeriodId = t.ProjectDesignPeriods.Where(x => x.DeletedDate == null).Select(a => a.Id).OrderByDescending(t => t).FirstOrDefault()
                  }).FirstOrDefault();
             randomization.PatientStatusId = ScreeningPatientStatus.OnTrial;
             screeningEntry.ProjectId = randomization.ProjectId;
-            screeningEntry.ScreeningNo = _numberFormatRepository.GenerateNumber(projectDesign.IsUnderTesting ? "TestingScreening" : "Screening");
+            screeningEntry.ScreeningNo = _numberFormatRepository.GenerateNumber(projectDetail.IsTestSite ? "TestingScreening" : "Screening");
             screeningEntry.EntryType = DataEntryType.Randomization;
             screeningEntry.RandomizationId = saveRandomizationDto.RandomizationId;
             screeningEntry.ScreeningDate = saveRandomizationDto.VisitDate;
@@ -201,7 +201,7 @@ namespace GSC.Respository.Screening
 
             _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, saveRandomizationDto.ProjectDesignVisitId, saveRandomizationDto.VisitDate);
 
-            screeningEntry.IsTesting = projectDesign.IsUnderTesting;
+            screeningEntry.IsTesting = projectDetail.IsTestSite;
             screeningEntry.ScreeningHistory = new ScreeningHistory();
             _randomizationRepository.Update(randomization);
             Add(screeningEntry);

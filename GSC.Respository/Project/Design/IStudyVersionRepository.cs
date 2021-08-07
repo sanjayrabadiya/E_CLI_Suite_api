@@ -13,8 +13,9 @@ namespace GSC.Respository.Project.Design
         List<StudyVersionGridDto> GetStudyVersion(int ProjectDesignId);
         string Duplicate(StudyVersion objSave);
         void UpdateVisitStatus(StudyVersion studyVersion);
-        double GetVersionNumber(int ProjectDesignId);
-        void ActiveVersion(int Id, int ProjectDesignId);
+        double GetVersionNumber(int projectId, bool isMonir);
         List<DropDownDto> GetVersionDropDown(int ProjectDesignId);
+        bool IsOnTrialByProjectDesing(int projectDesignId);
+        void SetGoLive(int projectId);
     }
 }

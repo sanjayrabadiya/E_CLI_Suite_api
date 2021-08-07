@@ -52,8 +52,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownWithSeqDto> GetPeriodByProjectIdDropDown(int projectId)
         {
             var periods = All.Where(x => x.DeletedDate == null && x.ProjectDesign.DeletedDate == null
-                                                               && x.ProjectDesign.ProjectId == projectId &&
-                                                               x.ProjectDesign.IsCompleteDesign).OrderBy(t => t.Id)
+                                                               && x.ProjectDesign.ProjectId == projectId).OrderBy(t => t.Id)
                 .Select(t => new DropDownWithSeqDto
                 {
                     Id = t.Id,

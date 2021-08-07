@@ -51,7 +51,7 @@ namespace GSC.Respository.Attendance
             IScreeningTemplateRepository screeningTemplateRepository)
             : base(context)
         {
-           _context = context;
+            _context = context;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _projectRightRepository = projectRightRepository;
@@ -69,8 +69,8 @@ namespace GSC.Respository.Attendance
             attendance.RoleId = _jwtTokenAccesser.RoleId;
             attendance.UserId = _jwtTokenAccesser.UserId;
             attendance.AttendanceDate = _jwtTokenAccesser.GetClientDate();
-            attendance.IsTesting = _context.ProjectDesignPeriod.Any(x =>
-                x.ProjectDesign.IsUnderTesting && x.Id == attendance.ProjectDesignPeriodId);
+            attendance.IsTesting = _context.Project.Any(x =>
+                x.IsTestSite && x.Id == attendance.ProjectId);
             attendance.AttendanceHistory =
                 _attendanceHistoryRepository.SaveHistory("Added attendance", 0, attendance.AuditReasonId);
             Add(attendance);

@@ -251,12 +251,6 @@ namespace GSC.Api.Controllers.Attendance
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            if (_projectDesignRepository.All.Any(x => x.DeletedDate == null && x.ProjectId == randomizationDto.ParentProjectId && !x.IsCompleteDesign))
-            {
-                ModelState.AddModelError("Message", "Design is not complete");
-                return BadRequest(ModelState);
-            }
-
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
 
             var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
@@ -275,7 +269,6 @@ namespace GSC.Api.Controllers.Attendance
 
             _randomizationRepository.SaveScreeningNumber(randomization, randomizationDto);
 
-            //_randomizationRepository.Update(randomization);
             _randomizationRepository.SendEmailOfStartEconsent(randomization);
             if (!_environmentSetting.Value.IsPremise)
                 await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization,2);
@@ -294,12 +287,7 @@ namespace GSC.Api.Controllers.Attendance
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            if (_projectDesignRepository.All.Any(x => x.DeletedDate == null && x.ProjectId == randomizationDto.ParentProjectId && !x.IsCompleteDesign))
-            {
-                ModelState.AddModelError("Message", "Design is not complete");
-                return BadRequest(ModelState);
-            }
-
+      
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
 
             var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);

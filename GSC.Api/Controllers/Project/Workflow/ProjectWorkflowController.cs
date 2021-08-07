@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Entities.Project.Workflow;
-using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.JWTAuth;
@@ -25,13 +22,15 @@ namespace GSC.Api.Controllers.Project.Workflow
         private readonly IUnitOfWork _uow;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IStudyVersionRepository _studyVersionRepository;
 
         public ProjectWorkflowController(IProjectWorkflowRepository projectWorkflowRepository,
             IProjectWorkflowIndependentRepository projectWorkflowIndependentRepository,
             IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignRepository projectDesignRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IStudyVersionRepository studyVersionRepository)
         {
             _projectWorkflowRepository = projectWorkflowRepository;
             _projectWorkflowIndependentRepository = projectWorkflowIndependentRepository;
@@ -40,6 +39,7 @@ namespace GSC.Api.Controllers.Project.Workflow
             _mapper = mapper;
             _projectDesignRepository = projectDesignRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _studyVersionRepository = studyVersionRepository;
         }
 
         [HttpGet("{id}")]
@@ -47,7 +47,7 @@ namespace GSC.Api.Controllers.Project.Workflow
         {
             if (id <= 0) return BadRequest();
             var projectWorkflow = _projectWorkflowRepository.FindByInclude(t => t.Id == id,
-                t => t.Levels, t => t.ProjectDesign, t => t.Independents).FirstOrDefault();
+                t => t.Levels, t => t.Independents).FirstOrDefault();
 
             if (projectWorkflow != null && projectWorkflow.Independents != null)
                 projectWorkflow.Independents = projectWorkflow.Independents.Where(x => x.DeletedDate == null).ToList();
@@ -56,7 +56,8 @@ namespace GSC.Api.Controllers.Project.Workflow
                 projectWorkflow.Levels = projectWorkflow.Levels.Where(x => x.DeletedDate == null).ToList();
 
             var projectWorkflowDto = _mapper.Map<ProjectWorkflowDto>(projectWorkflow);
-            if (projectWorkflow != null) projectWorkflowDto.IsLock = !projectWorkflow.ProjectDesign.IsUnderTesting;
+
+            if (projectWorkflow != null) projectWorkflowDto.IsLock = !_studyVersionRepository.IsOnTrialByProjectDesing(projectWorkflowDto.ProjectDesignId);
 
             return Ok(projectWorkflowDto);
         }
@@ -89,7 +90,7 @@ namespace GSC.Api.Controllers.Project.Workflow
                 .FindBy(t => t.Id == projectDesignId && t.DeletedDate == null).FirstOrDefault();
 
             var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
-            if (projectDesign != null) projectDesignDto.Locked = !projectDesign.IsUnderTesting;
+            if (projectDesign != null) projectDesignDto.Locked = !_studyVersionRepository.IsOnTrialByProjectDesing(projectDesignDto.Id);
 
             return Ok(projectDesignDto);
         }
@@ -191,7 +192,7 @@ namespace GSC.Api.Controllers.Project.Workflow
             if (record == null)
                 return NotFound();
 
-            if (!record.ProjectDesign.IsUnderTesting)
+            if (!_studyVersionRepository.IsOnTrialByProjectDesing(record.ProjectDesign.Id))
             {
                 ModelState.AddModelError("Message", "Can not delete worklow!");
                 return BadRequest(ModelState);

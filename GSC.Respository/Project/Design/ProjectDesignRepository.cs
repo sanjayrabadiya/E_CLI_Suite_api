@@ -89,22 +89,7 @@ namespace GSC.Respository.Project.Design
             return _context.ScreeningEntry.Any(t => t.ProjectDesignId == projectDesignId && t.DeletedDate == null);
         }
 
-        public string CheckCompleteDesign(int id)
-        {
-            var msg = "";
-
-            if (!_context.ProjectWorkflow.Any(x => x.ProjectDesignId == id && x.DeletedDate == null))
-                msg = "Workflow not defined! \n";
-
-            if (!_context.ProjectSchedule.Any(x => x.ProjectDesignId == id && x.DeletedDate == null))
-                msg += "Schedule not defined! \n";
-
-            //if (!_context.EditCheck.Any(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == id && x.DeletedDate == null))
-            //    msg += "Edit check not defined! \n";
-
-            return msg;
-        }
-
+     
         //Not Use in front please check and remove if not use comment  by vipul
         public string Duplicate(ProjectDesign objSave)
         {

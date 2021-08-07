@@ -11,14 +11,13 @@ namespace GSC.Data.Dto.Project.Design
     public class StudyVersionDto : BaseDto
     {
         public int ProjectDesignId { get; set; }
+        public int ProjectId { get; set; }
         public double VersionNumber { get; set; }
         public IList<StudyVerionVisitStatus> StudyVersionVisitStatus { get; set; } = null;
-      //  public bool IsGoLive { get; set; }
-        public bool IsRunning { get; set; }
         public int? GoLiveBy { get; set; }
+        public bool IsMinor { get; set; }
         public DateTime? GoLiveOn { get; set; }
-       // public int? VersionStatusId { get; set; }
-        public VersionStatus? VersionStatus { get; set; }
+        public VersionStatus VersionStatus { get; set; }
     }
 
     public class StudyVersionGridDto : BaseAuditDto

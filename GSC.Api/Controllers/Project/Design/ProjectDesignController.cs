@@ -62,7 +62,10 @@ namespace GSC.Api.Controllers.Project.Design
             var projectDesign = _projectDesignRepository.FindByInclude(x => x.Id == id, x => x.Project)
                 .FirstOrDefault();
             var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
-            projectDesignDto.Locked = !projectDesignDto.IsUnderTesting;
+            projectDesignDto.Locked = _studyVersionRepository.IsOnTrialByProjectDesing(id);
+            projectDesignDto.LiveVersion = _studyVersionRepository.All.Where(x => x.ProjectDesignId == id && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
+            if (projectDesignDto.Locked)
+                projectDesignDto.TrialVersion = _studyVersionRepository.All.Where(x => x.ProjectDesignId == id && x.DeletedDate == null && x.VersionStatus == VersionStatus.OnTrial).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
                 KeyId = projectDesign.Id,
@@ -91,16 +94,14 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Post([FromBody] ProjectDesignDto projectDesignDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            projectDesignDto.IsActiveVersion = true;
-            projectDesignDto.IsUnderTesting = true;
             var projectDesign = _mapper.Map<ProjectDesign>(projectDesignDto);
-            projectDesign.StudyVersion = new StudyVersion();
 
-            var studyVersion = _mapper.Map<StudyVersion>(projectDesign.StudyVersion);
-           // studyVersion.IsGoLive = false;
+            var studyVersion = new StudyVersion();
             studyVersion.VersionNumber = 1.0;
             studyVersion.VersionStatus = VersionStatus.OnTrial;
-            studyVersion.IsRunning = true;
+            studyVersion.ProjectDesign = projectDesign;
+            studyVersion.ProjectId = projectDesign.ProjectId;
+            studyVersion.IsMinor = false;
             _studyVersionRepository.Add(studyVersion);
             _projectDesignRepository.Add(projectDesign);
 
@@ -176,56 +177,12 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_projectDesignRepository.GetProjectByDesignDropDown());
         }
 
-        [HttpGet("CheckCompleteDesign/{id}")]
-        public IActionResult CheckCompleteDesign(int id)
+
+        [HttpPut("SetGoLive/{projectId}")]
+        public IActionResult SetGoLive(int projectId)
         {
-            if (id <= 0) return BadRequest();
-            var validateMessage = _projectDesignRepository.CheckCompleteDesign(id);
-            if (!string.IsNullOrEmpty(validateMessage))
-            {
-                ModelState.AddModelError("Message", validateMessage);
-                return Ok(ModelState);
-            }
-
-            ModelState.AddModelError("Message", "");
-            return Ok(ModelState);
-        }
-
-        [HttpPut("UpdateCompleteDesign/{id}")]
-        public IActionResult UpdateCompleteDesign(int id)
-        {
-            var record = _projectDesignRepository.Find(id);
-
-            if (record == null)
-                return NotFound();
-            record.IsCompleteDesign = true;
-            _projectDesignRepository.Update(record);
+            _studyVersionRepository.SetGoLive(projectId);
             _uow.Save();
-
-            return Ok();
-        }
-
-        [HttpPut("UpdateUnderTesting/{id}/{IsUnderTesting}")]
-        public IActionResult UpdateUnderTesting(int id, bool isUnderTesting)
-        {
-            var record = _projectDesignRepository.Find(id);
-
-            if (record == null)
-                return NotFound();
-            record.IsUnderTesting = isUnderTesting;
-            _projectDesignRepository.Update(record);
-
-            var version = _context.StudyVersion.Where(x=>x.ProjectDesignId == id).FirstOrDefault();
-            if (record == null)
-                return NotFound();
-            version.VersionStatus = VersionStatus.GoLive;
-            //version.IsGoLive = true;
-            version.GoLiveBy = _jwtTokenAccesser.UserId;
-            version.GoLiveOn = _jwtTokenAccesser.GetClientDate();
-            _studyVersionRepository.Update(version);
-
-            _uow.Save();
-
             return Ok();
         }
 

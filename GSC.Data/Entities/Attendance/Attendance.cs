@@ -15,7 +15,7 @@ namespace GSC.Data.Entities.Attendance
     {
         public int ProjectId { get; set; }
         public int? VolunteerId { get; set; }
-
+        public bool IsTesting { get; set; }
         public DateTime AttendanceDate { get; set; }
         public bool IsFingerPrint { get; set; }
         public int RoleId { get; set; }
@@ -30,7 +30,6 @@ namespace GSC.Data.Entities.Attendance
         public User User { get; set; }
         public ProjectDesignPeriod ProjectDesignPeriod { get; set; }
         public AuditReason AuditReason { get; set; }
-        public bool IsTesting { get; set; }
         public int? ScreeningEntryId { get; set; }
         public int? PeriodNo { get; set; }
         public int? ProjectSubjectId { get; set; }

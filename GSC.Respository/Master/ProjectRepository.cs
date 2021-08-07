@@ -481,7 +481,6 @@ namespace GSC.Respository.Master
             designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : _context.ProjectDesignPeriod.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null);
             designDetailsDto.NoofVisit = projectDeisgnId == null ? 0 : GetNoOfVisit(projectDeisgnId);
             designDetailsDto.NoofECrf = projectDeisgnId == null ? 0 : GetNoOfTemplate(projectDeisgnId);
-            designDetailsDto.MarkAsCompleted = projectDeisgn?.IsCompleteDesign;
 
             var projectWorkflowId = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.Id;
             workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : _context.ProjectWorkflowIndependent.Count(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null);

@@ -8,13 +8,9 @@ namespace GSC.Data.Entities.Project.Design
     {
         public int ProjectId { get; set; }
         public int Period { get; set; }
-        public string Version { get; set; }
-        public bool IsActiveVersion { get; set; }
-        public bool IsCompleteDesign { get; set; }
         public int? CompanyId { get; set; }
         public Master.Project Project { get; set; }
         public ICollection<ProjectDesignPeriod> ProjectDesignPeriods { get; set; }
-        public bool IsUnderTesting { get; set; }
-        public StudyVersion StudyVersion { get; set; }
+        public List<StudyVersion> StudyVersions { get; set; }
     }
 }

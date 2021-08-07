@@ -12,7 +12,6 @@ namespace GSC.Respository.Project.Design
         Task<ProjectDetailDto> GetProjectDesignDetail(int projectId);
         IList<DropDownDto> GetProjectByDesignDropDown();
         bool IsScreeningStarted(int projectId);
-        string CheckCompleteDesign(int id);
 
         string Duplicate(ProjectDesign objSave);
         bool IsCompleteExist(int projectDesignId, string moduleName, bool isComplete);

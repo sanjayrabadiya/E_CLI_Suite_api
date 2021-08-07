@@ -35,6 +35,7 @@ namespace GSC.Api.Controllers.Project.Schedule
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
+        private readonly IStudyVersionRepository _studyVersionRepository;
 
         public ProjectScheduleController(IProjectScheduleRepository projectScheduleRepository,
             IProjectScheduleTemplateRepository projectScheduleTemplateRepository,
@@ -46,7 +47,9 @@ namespace GSC.Api.Controllers.Project.Schedule
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectRightRepository projectRightRepository,
             INumberFormatRepository numberFormatRepository,
-            IProjectDesignVisitRepository projectDesignVisitRepository, IGSCContext context)
+            IProjectDesignVisitRepository projectDesignVisitRepository,
+            IStudyVersionRepository studyVersionRepository,
+            IGSCContext context)
         {
             _projectScheduleRepository = projectScheduleRepository;
             _projectScheduleTemplateRepository = projectScheduleTemplateRepository;
@@ -61,6 +64,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             _projectRightRepository = projectRightRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _numberFormatRepository = numberFormatRepository;
+            _studyVersionRepository = studyVersionRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -85,37 +89,34 @@ namespace GSC.Api.Controllers.Project.Schedule
                     VariableName = x.ProjectDesignVariable.VariableName,
                     IsDeleted = x.DeletedDate != null,
                 }).OrderByDescending(x => x.Id).ToList();
-            
+
             return projectSchedules;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if (id <= 0) return BadRequest();
-            var projectSchedule = _projectScheduleRepository.FindByInclude(t => t.Id == id, t => t.Templates,
-                t => t.ProjectDesign, t => t.ProjectDesignPeriod, t => t.ProjectDesignVisit).FirstOrDefault();
+        //[HttpGet("{id}")]
+        //public IActionResult Get(int id)
+        //{
+        //    if (id <= 0) return BadRequest();
+        //    var projectSchedule = _projectScheduleRepository.FindByInclude(t => t.Id == id, t => t.Templates, t => t.ProjectDesignPeriod, t => t.ProjectDesignVisit).FirstOrDefault();
 
 
-            var projectScheduleDto = _mapper.Map<ProjectScheduleDto>(projectSchedule);
+        //    var projectScheduleDto = _mapper.Map<ProjectScheduleDto>(projectSchedule);
 
-            if (projectScheduleDto.Templates != null)
-                projectScheduleDto.Templates.ToList().ForEach(t =>
-                {
-                    var Template = _projectDesignTemplateRepository.Find(t.ProjectDesignTemplateId);
-                    t.TemplateName = Template.TemplateName;
-                    t.TemplateDesignOrder = Template.DesignOrder;
-                    // Change by swati on 01/04/2021
-                    //t.Variables = _projectDesignVariableRepository.GetVariabeDropDown(t.ProjectDesignTemplateId);
-                    t.Variables = _projectDesignVariableRepository.GetVariabeAnnotationDropDown(t.ProjectDesignTemplateId, false);
-                    t.PeriodName = _projectDesignPeriodRepository.Find(t.ProjectDesignPeriodId).DisplayName;
-                    t.VisitName = _projectDesignVisitRepository.Find(t.ProjectDesignVisitId).DisplayName;
-                    t.IsVariablLoaded = true;
-                });
-            projectScheduleDto.Templates = projectScheduleDto.Templates.Where(x => (x.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderBy(x => x.ProjectDesignVisitId).ThenBy(x => x.TemplateDesignOrder).ToList();
-            projectScheduleDto.IsLock = !projectSchedule.ProjectDesign.IsUnderTesting;
-            return Ok(projectScheduleDto);
-        }
+        //    if (projectScheduleDto.Templates != null)
+        //        projectScheduleDto.Templates.ToList().ForEach(t =>
+        //        {
+        //            var Template = _projectDesignTemplateRepository.Find(t.ProjectDesignTemplateId);
+        //            t.TemplateName = Template.TemplateName;
+        //            t.TemplateDesignOrder = Template.DesignOrder;
+        //            t.Variables = _projectDesignVariableRepository.GetVariabeAnnotationDropDown(t.ProjectDesignTemplateId, false);
+        //            t.PeriodName = _projectDesignPeriodRepository.Find(t.ProjectDesignPeriodId).DisplayName;
+        //            t.VisitName = _projectDesignVisitRepository.Find(t.ProjectDesignVisitId).DisplayName;
+        //            t.IsVariablLoaded = true;
+        //        });
+        //    projectScheduleDto.Templates = projectScheduleDto.Templates.Where(x => (x.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderBy(x => x.ProjectDesignVisitId).ThenBy(x => x.TemplateDesignOrder).ToList();
+        //    projectScheduleDto.IsLock = !projectSchedule.ProjectDesign.IsUnderTesting;
+        //    return Ok(projectScheduleDto);
+        //}
 
         [HttpGet("CheckProjectSchedule/{projectDesignVariableId}")]
         public IActionResult CheckProjectSchedule(int projectDesignVariableId)
@@ -138,7 +139,7 @@ namespace GSC.Api.Controllers.Project.Schedule
                 .FindBy(t => t.Id == projectDesignId && t.DeletedDate == null).FirstOrDefault();
 
             var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
-            if (projectDesign != null) projectDesignDto.Locked = !projectDesign.IsUnderTesting;
+            if (projectDesign != null) projectDesignDto.Locked = !_studyVersionRepository.IsOnTrialByProjectDesing(projectDesignDto.Id);
 
             return Ok(projectDesignDto);
         }
@@ -210,7 +211,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             if (record == null && recordTemplate == null)
                 return NotFound();
 
-            if (!record.ProjectDesign.IsUnderTesting)
+            if (!_studyVersionRepository.IsOnTrialByProjectDesing(record.ProjectDesign.Id))
             {
                 ModelState.AddModelError("Message", "Can not delete schedule!");
                 return BadRequest(ModelState);
@@ -244,37 +245,9 @@ namespace GSC.Api.Controllers.Project.Schedule
         }
 
         [HttpGet("GetData/{id}")]
-        public IList<ProjectScheduleDto> GetData(int id)
+        public IActionResult GetData(int id)
         {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return new List<ProjectScheduleDto>();
-
-            var projectSchedules = _projectScheduleRepository.FindByInclude(
-                    x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                         && x.DeletedDate == null
-                         && x.ProjectDesignId == id
-                         && projectList.Any(c => c == x.Project.Id),
-                    x => x.Project, t => t.ProjectDesign, x => x.ProjectDesignPeriod, x => x.ProjectDesignVisit, x => x.ProjectDesignTemplate,
-                    x => x.ProjectDesignVariable)
-                .Select(x => new ProjectScheduleDto
-                {
-                    Id = x.Id,
-                    AutoNumber = x.AutoNumber,
-                    ProjectId = x.ProjectId,
-                    ProjectName = x.Project.ProjectCode,
-                    PeriodName = x.ProjectDesignPeriod.DisplayName,
-                    VisitName = x.ProjectDesignVisit.DisplayName,
-                    TemplateName = x.ProjectDesignTemplate.TemplateName,
-                    VariableName = x.ProjectDesignVariable.VariableName,
-                    IsDeleted = x.DeletedDate != null,
-                    IsLock = !x.ProjectDesign.IsUnderTesting,
-                    CreatedByUser = x.CreatedBy == null ? null : _context.Users.Where(y => y.Id == x.CreatedBy).FirstOrDefault().UserName,
-                    CreatedDate = x.CreatedDate,
-                    ModifiedByUser = x.ModifiedBy == null ? null : _context.Users.Where(y => y.Id == x.ModifiedBy).FirstOrDefault().UserName,
-                    ModifiedDate = x.ModifiedDate
-                }).OrderByDescending(x => x.Id).ToList();
-            
-            return projectSchedules;
+            return Ok(_projectScheduleRepository.GetData(id));
         }
 
         [HttpGet("GetDataByPeriod/{periodId}/{projectId}")]

@@ -23,11 +23,13 @@ namespace GSC.Api.Controllers.Project.EditCheck
         private readonly IUnitOfWork _uow;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
+        private readonly IStudyVersionRepository _studyVersionRepository;
         public EditCheckController(
             IUnitOfWork uow, IMapper mapper, IEditCheckRepository editCheckRepository,
             IEditCheckDetailRepository editCheckDetailRepository,
             IEditCheckRuleRepository editCheckRuleRepository,
-            IProjectDesignRepository projectDesignRepository)
+            IProjectDesignRepository projectDesignRepository,
+            IStudyVersionRepository studyVersionRepository)
         {
             _uow = uow;
             _mapper = mapper;
@@ -35,6 +37,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
             _editCheckDetailRepository = editCheckDetailRepository;
             _projectDesignRepository = projectDesignRepository;
             _editCheckRuleRepository = editCheckRuleRepository;
+            _studyVersionRepository = studyVersionRepository;
         }
 
         [HttpGet("{Id}/{isDeleted:bool?}")]
@@ -108,7 +111,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
                 .FindBy(t => t.Id == projectDesignId && t.DeletedDate == null).FirstOrDefault();
 
             var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
-            if (projectDesign != null) projectDesignDto.Locked = !projectDesign.IsUnderTesting;
+            if (projectDesign != null) projectDesignDto.Locked = !_studyVersionRepository.IsOnTrialByProjectDesing(projectDesignDto.Id);
 
             return Ok(projectDesignDto);
         }

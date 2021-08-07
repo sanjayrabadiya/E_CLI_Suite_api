@@ -151,8 +151,7 @@ namespace GSC.Respository.Attendance
         private string GetSubjectNumer(int projectId, int parentProjectId, SubjectNumberType numberType)
         {
             var project = _projectRepository.Find(projectId);
-            var underTesting = _context.ProjectDesign.Any(x =>
-                x.DeletedDate == null && x.ProjectId == parentProjectId && x.IsUnderTesting);
+            var underTesting = _context.Project.Any(x => x.Id == projectId && x.IsTestSite);
             var keyName = underTesting ? "Testing" : "";
             keyName += numberType == SubjectNumberType.StandBy ? "ExtraSub" : "Sub";
             var number = All.Count(x => x.DeletedDate == null &&

@@ -83,10 +83,12 @@ namespace GSC.Api.Controllers.Project.Design
 
             foreach (var item in studyVersion.StudyVersionVisitStatus)
             {
+                item.StudyVerion = studyVersion;
                 _studyVersionVisitStatusRepository.Add(item);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating version failed on save.");
+            _uow.Save();
+
             return Ok(studyVersion.Id);
         }
 
@@ -142,19 +144,13 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
-        [HttpGet("GetVersionNumber/{id}")]
-        public IActionResult GetVersionNumber(int id)
+        [HttpGet("GetVersionNumber/{projectId}/{isMonir}")]
+        public IActionResult GetVersionNumber(int projectId, bool isMonir)
         {
-            return Ok(_studyVersionRepository.GetVersionNumber(id));
+            return Ok(_studyVersionRepository.GetVersionNumber(projectId, isMonir));
         }
 
-        [HttpPut("ActiveVersion/{Id}/{ProjectDesignId}")]
-        public IActionResult ActiveVersion(int Id, int ProjectDesignId)
-        {
-            _studyVersionRepository.ActiveVersion(Id, ProjectDesignId);
-            return Ok();
-        }
-
+       
         [HttpGet]
         [Route("GetVersionDropDown/{ProjectDesignId}")]
         public IActionResult GetVersionDropDown(int ProjectDesignId)

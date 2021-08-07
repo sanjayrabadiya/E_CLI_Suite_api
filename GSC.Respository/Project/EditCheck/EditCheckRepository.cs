@@ -10,6 +10,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
+using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
@@ -26,6 +27,7 @@ namespace GSC.Respository.Project.EditCheck
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IMapper _mapper;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
+        private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IGSCContext _context;
         public EditCheckRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -33,13 +35,15 @@ namespace GSC.Respository.Project.EditCheck
             IMapper mapper,
             IEditCheckDetailRepository editCheckDetailRepository,
             IEditCheckRuleRepository editCheckRuleRepository,
-            INumberFormatRepository numberFormatRepository) : base(context)
+            INumberFormatRepository numberFormatRepository,
+            IStudyVersionRepository studyVersionRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _numberFormatRepository = numberFormatRepository;
             _editCheckDetailRepository = editCheckDetailRepository;
             _editCheckRuleRepository = editCheckRuleRepository;
+            _studyVersionRepository = studyVersionRepository;
             _mapper = mapper;
             _context = context;
         }
@@ -49,6 +53,8 @@ namespace GSC.Respository.Project.EditCheck
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0)
                 return new List<EditCheckDto>();
+
+            var isOnTrial = _studyVersionRepository.IsOnTrialByProjectDesing(projectDesignId);
 
             var EditCheckData = All.Where(t => (t.CompanyId == null
                                    || t.CompanyId == _jwtTokenAccesser.CompanyId)
@@ -70,7 +76,7 @@ namespace GSC.Respository.Project.EditCheck
                 SourceFormula = r.SourceFormula,
                 StatusName = !string.IsNullOrEmpty(r.TargetFormula) && !string.IsNullOrEmpty(r.SourceFormula) ? "Completed" :
                 r.IsOnlyTarget ? "Only Target" : "In-Complete",
-                IsLock = !r.ProjectDesign.IsUnderTesting,
+                IsLock = !isOnTrial,
                 IsFormula = r.IsFormula,
                 IsReferenceVerify = r.IsReferenceVerify,
                 IsDeleted = r.DeletedDate != null,

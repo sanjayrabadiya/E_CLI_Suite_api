@@ -91,13 +91,7 @@ namespace GSC.Api.Controllers.ProjectRight
                 projectDesign = _projectDesignRepository.FindBy(t => t.ProjectId == parentProject && t.DeletedDate == null).FirstOrDefault();
             else
                 projectDesign = _projectDesignRepository.FindBy(t => t.ProjectId == projectDocumentDto.ProjectId && t.DeletedDate == null).FirstOrDefault();
-            if (projectDesign == null || !projectDesign.IsCompleteDesign)
-            {
-                ModelState.AddModelError("Message", "Design not completed for this project");
-                return BadRequest(ModelState);
-            }
-
-
+         
             projectDocumentDto.Id = 0;
             //set file path and extension
             if (projectDocumentDto.FileModel?.Base64?.Length > 0)

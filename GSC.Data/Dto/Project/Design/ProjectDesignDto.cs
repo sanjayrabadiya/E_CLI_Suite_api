@@ -12,14 +12,12 @@ namespace GSC.Data.Dto.Project.Design
 
         [Required(ErrorMessage = "Period is required.")]
         public int Period { get; set; }
-        public string Version { get; set; }
-        public bool IsActiveVersion { get; set; }
-        public bool IsCompleteDesign { get; set; }
-        public bool IsUnderTesting { get; set; }
         public string ProjectNumber { get; set; }
         public string ProjectName { get; set; }
         public bool IsStatic { get; set; }
         public bool Locked { get; set; }
+        public string TrialVersion { get; set; }
+        public string LiveVersion { get; set; }
         public ProjectDto Project { get; set; }
         public int? CompanyId { get; set; }
     }
