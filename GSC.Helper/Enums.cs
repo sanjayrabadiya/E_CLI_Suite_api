@@ -323,14 +323,20 @@ namespace GSC.Helper
 
     public enum EditCheckRuleBy : short
     {
-        [Description("By Variable")] ByVariable = 1,
+        [Description("By Variable")]
+        ByVariable = 1,
 
         [Description("By Variable Annotation")]
         ByVariableAnnotation = 2,
-        [Description("By Form")] ByTemplate = 3,
+
+        [Description("By Form")] 
+        ByTemplate = 3,
 
         [Description("By Template Annotation")]
-        ByTemplateAnnotation = 4
+        ByTemplateAnnotation = 4,
+
+        [Description("By Variable Rule")]
+        ByVariableRule = 5,
     }
 
     public enum Operator : short

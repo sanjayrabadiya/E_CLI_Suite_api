@@ -95,11 +95,7 @@ namespace GSC.Respository.EditCheckImpact
                         r.ScreeningTemplateId = refTemplate.Id;
                         r.Status = refTemplate.Status;
                         var statusId = (int)refTemplate.Status;
-                        if ((statusId > 2 &&
-                         (r.CheckBy == EditCheckRuleBy.ByTemplate ||
-                         r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)) ||
-                         r.CheckBy == EditCheckRuleBy.ByVariable ||
-                         r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                        if (statusId > 2)
                         {
                             r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
                             r.IsNa = isNa;
@@ -252,11 +248,7 @@ namespace GSC.Respository.EditCheckImpact
                         r.Status = refTemplate.Status;
                         r.ScreeningTemplateId = refTemplate.Id;
                         var statusId = (int)refTemplate.Status;
-                        if ((statusId > 2 &&
-                        (r.CheckBy == EditCheckRuleBy.ByTemplate ||
-                        r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)) ||
-                        r.CheckBy == EditCheckRuleBy.ByVariable ||
-                        r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                        if (statusId > 2)
                         {
                             r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
                             r.IsNa = isNa;
@@ -284,7 +276,10 @@ namespace GSC.Respository.EditCheckImpact
                   });
             _context.Save();
 
-            var variableResult = UpdateVariale(targetResult.Where(r => r.ScreeningTemplateId > 0 && (r.CheckBy == EditCheckRuleBy.ByVariable || r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)).ToList(), screeningEntryId, screeningVisitId, true, isQueryRaise);
+            var variableResult = UpdateVariale(targetResult.Where(r => r.ScreeningTemplateId > 0
+            && (r.CheckBy == EditCheckRuleBy.ByVariable ||
+            r.CheckBy == EditCheckRuleBy.ByVariableRule ||
+            r.CheckBy == EditCheckRuleBy.ByVariableAnnotation)).ToList(), screeningEntryId, screeningVisitId, true, isQueryRaise);
 
             if (variableResult != null)
             {
@@ -335,7 +330,10 @@ namespace GSC.Respository.EditCheckImpact
                     else if (r.IsFormula || r.Operator == Operator.HardFetch)
                     {
                         editCheckTarget.Value = r.ScreeningTemplateValue;
-                        editCheckTarget.IsValueSet = true;
+                        if (r.IsFormula && r.ResultSkip)
+                            editCheckTarget.IsValueSet = false;
+                        else
+                            editCheckTarget.IsValueSet = true;
                         editCheckTarget.Note = note;
                         editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
                         editCheckTarget.OriginalValidationType = ValidationType.None;
@@ -651,7 +649,8 @@ namespace GSC.Respository.EditCheckImpact
                     IsReferenceValue = x.IsReferenceValue,
                     Operator = x.Operator,
                     IsFormula = x.IsFormula,
-                    IsTarget = x.IsTarget
+                    IsTarget = x.IsTarget,
+                    CheckBy = x.CheckBy
                 }).ToList();
 
 
@@ -663,6 +662,7 @@ namespace GSC.Respository.EditCheckImpact
                     t =>
                     {
                         t.ValidateType = validateResult.IsValid ? EditCheckValidateType.ReferenceVerifed : EditCheckValidateType.NotProcessed;
+                        t.ResultSkip = validateResult.ResultSkip;
                         if (validateResult.Target != null)
                         {
                             var singleTarget = validateResult.Target.FirstOrDefault(a => a.Id == t.EditCheckDetailId);

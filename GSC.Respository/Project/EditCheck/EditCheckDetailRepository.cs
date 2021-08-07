@@ -96,8 +96,8 @@ namespace GSC.Respository.Project.EditCheck
 
         public string Validate(EditCheckDetail editCheckDetail)
         {
-            if (!ValidateMathOperator(editCheckDetail))
-                return "Only allow math operators or Non math operators!";
+            //if (!ValidateMathOperator(editCheckDetail))
+            //    return "Only allow math operators or Non math operators!";
 
             if (!CheckLogicalOperator(editCheckDetail))
                 return "Missing Logical Operator!";
@@ -112,7 +112,7 @@ namespace GSC.Respository.Project.EditCheck
             var data = All.AsNoTracking().Where(x => x.DeletedDate == null &&
             x.Id != editCheckDetail.Id &&
             x.IsTarget == editCheckDetail.IsTarget &&
-            !x.EditCheck.IsFormula &&
+            (!x.EditCheck.IsFormula || x.CheckBy == EditCheckRuleBy.ByVariableRule) &&
             x.EditCheckId == editCheckDetail.EditCheckId).
             Select(r => r.Operator).ToList();
 
@@ -169,7 +169,7 @@ namespace GSC.Respository.Project.EditCheck
 
                 x.IsSameTemplate = x.CheckBy == EditCheckRuleBy.ByVariableAnnotation;
 
-                if (x.CheckBy == EditCheckRuleBy.ByVariable)
+                if (x.CheckBy == EditCheckRuleBy.ByVariable || x.CheckBy == EditCheckRuleBy.ByVariableRule)
                 {
                     x.IsSameTemplate = result.Any(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.IsTarget != x.IsTarget);
                 }

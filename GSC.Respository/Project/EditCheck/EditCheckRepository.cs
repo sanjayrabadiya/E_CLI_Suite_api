@@ -261,7 +261,8 @@ namespace GSC.Respository.Project.EditCheck
                     EndParens = r.EndParens,
                     CollectionSource = r.ProjectDesignVariable.CollectionSource,
                     CollectionValue2 = r.CollectionValue2,
-                    CollectionValue = r.CollectionValue
+                    CollectionValue = r.CollectionValue,
+                    CheckBy = r.CheckBy
                 }).ToList();
 
             if (isFormula)

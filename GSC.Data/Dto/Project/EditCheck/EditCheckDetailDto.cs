@@ -70,6 +70,7 @@ namespace GSC.Data.Dto.Project.EditCheck
         public bool IsFormula { get; set; }
         public bool IsSkip { get; set; }
         public bool IsTarget { get; set; }
+        public EditCheckRuleBy CheckBy { get; set; }
     }
 
     public class EditCheckResult
@@ -80,6 +81,7 @@ namespace GSC.Data.Dto.Project.EditCheck
         public string Result { get; set; }
         public string ResultMessage { get; set; }
         public string ErrorMessage { get; set; } = "";
+        public bool ResultSkip { get; set; }
         public List<EditCheckResult> Target { get; set; }
 
     }

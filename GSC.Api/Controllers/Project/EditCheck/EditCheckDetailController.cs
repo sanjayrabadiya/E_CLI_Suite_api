@@ -97,7 +97,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
                     }
 
 
-                    if (editCheckDetail.CheckBy == Helper.EditCheckRuleBy.ByVariable)
+                    if (editCheckDetail.CheckBy == Helper.EditCheckRuleBy.ByVariable || editCheckDetail.CheckBy == Helper.EditCheckRuleBy.ByVariableRule)
                         editCheckDetail.CollectionValue = _impactService.GetProjectDesignVariableId(editCheckDetailDto.ProjectDesignVariableId ?? 0, editCheckDetail.CollectionValue);
 
                     _editCheckDetailRepository.Add(editCheckDetail);

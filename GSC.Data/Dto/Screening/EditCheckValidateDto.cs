@@ -38,6 +38,7 @@ namespace GSC.Data.Dto.Screening
         public int NumberScale { get; set; }
         public bool IsNa { get; set; }
         public EditCheckValidateType ValidateType { get; set; }
+        public bool ResultSkip { get; set; }
         public string SampleResult { get; set; }
         public bool ValueApply { get; set; }
         public ScreeningTemplateStatus Status { get; set; }

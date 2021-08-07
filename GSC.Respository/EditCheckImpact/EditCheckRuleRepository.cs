@@ -25,7 +25,17 @@ namespace GSC.Respository.EditCheckImpact
 
         public EditCheckResult ValidateEditCheck(List<EditCheckValidate> editCheck)
         {
-            if (editCheck.Any(x => x.IsFormula))
+            if (editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
+            {
+                var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), true);
+                result.ResultSkip = true;
+                result.SampleText ="Rule not verifed";
+                if (result.IsValid)
+                    return _editCheckFormulaRepository.ValidateFormula(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
+                else
+                    return result;
+            }
+            else if (editCheck.Any(x => x.IsFormula))
                 return _editCheckFormulaRepository.ValidateFormula(editCheck);
             else
                 return ValidateRule(editCheck, true);
@@ -34,8 +44,17 @@ namespace GSC.Respository.EditCheckImpact
 
         public EditCheckResult ValidateEditCheckReference(List<EditCheckValidate> editCheck)
         {
-            if (editCheck.Any(x => x.IsFormula))
-                return _editCheckFormulaRepository.ValidateFormulaReference(editCheck);
+            if (editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
+            {
+                var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), false);
+                result.ResultSkip = true;
+                if (result.IsValid)
+                    return _editCheckFormulaRepository.ValidateFormula(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
+                else
+                    return result;
+            }
+            else if (editCheck.Any(x => x.IsFormula))
+                return _editCheckFormulaRepository.ValidateFormulaReference(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
             else
                 return ValidateRule(editCheck, false);
         }
