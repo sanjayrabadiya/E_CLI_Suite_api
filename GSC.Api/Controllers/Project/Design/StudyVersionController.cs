@@ -152,10 +152,10 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
-        [Route("GetStudyVersionIdForLive/{projectId}")]
-        public IActionResult GetStudyVersionIdForLive(int projectId)
+        [Route("GetStudyVersionForLive/{projectId}")]
+        public IActionResult GetStudyVersionForLive(int projectId)
         {
-            return Ok(_studyVersionRepository.GetStudyVersionIdForLive(projectId));
+            return Ok(_studyVersionRepository.GetStudyVersionForLive(projectId));
         }
 
     }

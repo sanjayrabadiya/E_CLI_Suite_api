@@ -132,10 +132,10 @@ namespace GSC.Respository.Project.Design
             return result;
         }
 
-        public int GetStudyVersionIdForLive(int projectId)
+        public double GetStudyVersionForLive(int projectId)
         {
             return All.Where(x => x.ProjectId == projectId && x.VersionStatus == Helper.VersionStatus.GoLive && x.DeletedDate == null).
-                Select(t => t.Id).OrderByDescending(c => c).FirstOrDefault();
+                Select(t => t.VersionNumber).OrderByDescending(c => c).FirstOrDefault();
         }
     }
 }

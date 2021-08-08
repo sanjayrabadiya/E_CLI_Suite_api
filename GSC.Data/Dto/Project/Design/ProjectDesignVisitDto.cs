@@ -16,6 +16,8 @@ namespace GSC.Data.Dto.Project.Design
         public bool? IsSchedule { get; set; }
         public bool IsNonCRF { get; set; }
         public int? DesignOrder { get; set; }
+        public bool? InActive { get; set; }
+        public double? StudyVersion { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
     }
 

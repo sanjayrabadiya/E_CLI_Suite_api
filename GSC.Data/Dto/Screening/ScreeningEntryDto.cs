@@ -45,6 +45,7 @@ namespace GSC.Data.Dto.Screening
         public bool IsSystemQueryUpdate { get; set; }
         public List<int> ProjectAttendanceTemplateIds { get; set; }
         public bool IsElectronicSignature { get; set; }
+        public double? StudyVersion { get; set; }
     }
 
     public class ScreeningAuditDto
@@ -75,7 +76,7 @@ namespace GSC.Data.Dto.Screening
     public class SaveRandomizationDto
     {
         public int RandomizationId { get; set; }
-        public int? StudyVersionId { get; set; }
+        public double? StudyVersion { get; set; }
         public int ProjectDesignVisitId { get; set; }
         private DateTime _visitDate;
         public DateTime VisitDate

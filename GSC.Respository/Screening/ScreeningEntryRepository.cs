@@ -197,7 +197,7 @@ namespace GSC.Respository.Screening
             screeningEntry.ScreeningDate = saveRandomizationDto.VisitDate;
             screeningEntry.ProjectDesignId = projectDesign.ProjectDesignId;
             screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
-            screeningEntry.StudyVersionId = saveRandomizationDto.StudyVersionId;
+            screeningEntry.StudyVersion = saveRandomizationDto.StudyVersion;
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
             _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, saveRandomizationDto.ProjectDesignVisitId, saveRandomizationDto.VisitDate);
