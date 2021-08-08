@@ -34,13 +34,6 @@ namespace GSC.Api.Controllers.Project.Design
             _studyVersionVisitStatusRepository = studyVersionVisitStatusRepository;
         }
 
-        // GET: api/<controller>
-        //[HttpGet("{isDeleted:bool?}")]
-        //public IActionResult Get(bool isDeleted)
-        //{
-        //    var manageSite = _studyVersionRepository.GetStudyVersion(isDeleted);
-        //    return Ok(manageSite);
-        //}
 
         //added by vipul for get versions list by projectdesign on 01062021
         [HttpGet]
@@ -152,10 +145,10 @@ namespace GSC.Api.Controllers.Project.Design
 
        
         [HttpGet]
-        [Route("GetVersionDropDown/{ProjectDesignId}")]
-        public IActionResult GetVersionDropDown(int ProjectDesignId)
+        [Route("GetVersionDropDown/{projectId}")]
+        public IActionResult GetVersionDropDown(int projectId)
         {
-            return Ok(_studyVersionRepository.GetVersionDropDown(ProjectDesignId));
+            return Ok(_studyVersionRepository.GetVersionDropDown(projectId));
         }
 
     }

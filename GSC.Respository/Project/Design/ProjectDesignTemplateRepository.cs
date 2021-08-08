@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
@@ -47,8 +48,6 @@ namespace GSC.Respository.Project.Design
                 .ThenInclude(d => d.VariableLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.VariableNoteLanguage.Where(x => x.DeletedBy == null))
-                //  .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
-                //  .ThenInclude(d => d.Remarks.Where(x => x.DeletedBy == null).OrderBy(c => c.SeqNo))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.Roles.Where(x => x.DeletedBy == null))
                 .AsNoTracking().FirstOrDefault();
@@ -56,6 +55,11 @@ namespace GSC.Respository.Project.Design
             return template;
 
 
+        }
+
+        public async Task<bool> IsTemplateExits(int projectDesignId)
+        {
+            return await All.AnyAsync(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId && x.DeletedDate == null);
         }
 
         public DesignScreeningTemplateDto GetTemplate(int id)
@@ -227,20 +231,7 @@ namespace GSC.Respository.Project.Design
             return templates;
         }
 
-        // Not use any where please check and remove if not use any where comment by vipul
-        public IList<DropDownDto> GetTemplateDropDownAnnotation(int projectDesignVisitId)
-        {
-            var templates = All.Where(x => x.DeletedDate == null
-                                           && x.ProjectDesignVisitId == projectDesignVisitId).OrderBy(t => t.DesignOrder).Select(
-                t => new DropDownDto
-                {
-                    Id = t.Id,
-                    Value = t.Domain.DomainName,
-                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
-                }).ToList();
 
-            return templates;
-        }
 
         //added by vipul for get only date time variable template in project design visit on 22092020
         public IList<DropDownDto> GetTemplateDropDownForVisitStatus(int projectDesignVisitId)

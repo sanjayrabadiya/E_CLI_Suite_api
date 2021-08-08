@@ -48,7 +48,7 @@ namespace GSC.Respository.Project.Design
             return "";
         }
 
-        public void SetGoLive(int projectId)
+        public void UpdateGoLive(int projectId)
         {
             var versions = All.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList();
             versions.ForEach(x =>
@@ -112,33 +112,24 @@ namespace GSC.Respository.Project.Design
         public double GetVersionNumber(int projectId, bool isMonir)
         {
             var number = All.Count(x => x.DeletedDate == null && x.ProjectId == projectId && x.IsMinor == isMonir);
+            if (number == 0) return 1;
             var parentNumber = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.IsMinor == isMonir).Select(t => t.ProjectDesignId).Distinct().Count();
             return Convert.ToDouble(parentNumber + "." + number);
         }
 
-        //public void ActiveVersion(int Id, int ProjectDesignId)
-        //{
-        //    var version = All.Where(x => x.ProjectDesignId == ProjectDesignId && x.DeletedDate == null && x.VersionStatus == Helper.VersionStatus.GoLive).FirstOrDefault();
-        //    if (version != null)
-        //    {
-        //        version.IsRunning = false;
-        //        version.VersionStatus = Helper.VersionStatus.Archive;
-        //        Update(version);
-        //    }
 
-        //    var active = All.Where(x => x.Id == Id).FirstOrDefault();
-        //    active.IsRunning = true;
-        //    active.VersionStatus = Helper.VersionStatus.GoLive;
-        //    active.GoLiveOn = _jwtTokenAccesser.GetClientDate();
-        //    active.GoLiveBy = _jwtTokenAccesser.UserId;
-        //    Update(active);
-        //    _context.Save();
-        //}
-
-        public List<DropDownDto> GetVersionDropDown(int ProjectDesignId)
+        public List<DropDownDto> GetVersionDropDown(int projectId)
         {
-            return All.Where(x => x.ProjectDesignId == ProjectDesignId)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.VersionNumber.ToString(), IsDeleted = c.DeletedDate != null, ExtraData = c.VersionStatus }).OrderBy(o => o.Value).ToList();
+            var result = All.Where(x => x.ProjectId == projectId)
+                .Select(c => new DropDownDto
+                {
+                    Id = c.Id,
+                    Value = c.VersionNumber.ToString(),
+                    IsDeleted = c.DeletedDate != null
+                }).OrderBy(o => o.Value).ToList();
+
+
+            return result.Count() == 1 ? null : result;
         }
     }
 }

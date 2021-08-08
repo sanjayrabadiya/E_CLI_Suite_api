@@ -141,6 +141,7 @@ namespace GSC.Respository.Attendance
             Update(randomization);
             if (!randomizationNumberDto.IsTestSite)
             {
+
                 if (randomizationNumberDto.IsManualRandomNo == false)
                 {
                     int projectidforRandomNo = 0;
@@ -151,7 +152,6 @@ namespace GSC.Respository.Attendance
 
                     var projectRandom = _context.RandomizationNumberSettings.Where(x => x.ProjectId == projectidforRandomNo).FirstOrDefault();//_projectRepository.Find(projectidforRandomNo);
                     projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
-                    //_projectRepository.Update(projectRandom);
                     _randomizationNumberSettingsRepository.Update(projectRandom);
                 }
             }
@@ -187,66 +187,12 @@ namespace GSC.Respository.Attendance
 
                     var projectSeries = _context.ScreeningNumberSettings.Where(x => x.ProjectId == projectidforscreeningNo).FirstOrDefault();//_projectRepository.Find(projectidforscreeningNo);
                     projectSeries.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
-                    //_projectRepository.Update(projectSeries);
                     _screeningNumberSettingsRepository.Update(projectSeries);
                 }
             }
         }
 
-        //public void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto)
-        //{
-        //    RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
-        //    randomizationNumberDto = GenerateRandomizationAndScreeningNumber(randomization.Id);
-        //    if (randomizationNumberDto.IsManualScreeningNo == true)
-        //    {
-        //        randomization.ScreeningNumber = randomizationDto.ScreeningNumber;
-        //    }
-        //    else
-        //    {
-        //        randomization.ScreeningNumber = randomizationNumberDto.ScreeningNumber;
-        //    }
-        //    randomization.DateOfScreening = randomizationDto.DateOfScreening;
-        //    if (randomizationNumberDto.IsManualRandomNo == true)
-        //    {
-        //        randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
-        //    }
-        //    else
-        //    {
-        //        randomization.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
-        //    }
-        //    randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
-
-        //    if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening)
-        //        randomization.PatientStatusId = ScreeningPatientStatus.Screening;
-
-        //    Update(randomization);
-        //    int projectidforRandomNo = 0;
-        //    if (randomizationNumberDto.IsSiteDependentRandomNo == true)
-        //        projectidforRandomNo = randomizationNumberDto.ProjectId;
-        //    else
-        //        projectidforRandomNo = randomizationNumberDto.ParentProjectId;
-        //    int projectidforscreeningNo = 0;
-        //    if (randomizationNumberDto.IsSiteDependentScreeningNo == true)
-        //        projectidforscreeningNo = randomizationNumberDto.ProjectId;
-        //    else
-        //        projectidforscreeningNo = randomizationNumberDto.ParentProjectId;
-        //    if (projectidforRandomNo == projectidforscreeningNo)
-        //    {
-        //        var project = _projectRepository.Find(projectidforscreeningNo);
-        //        project.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
-        //        project.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
-        //        _projectRepository.Update(project);
-        //    }
-        //    else
-        //    {
-        //        var projectRandom = _projectRepository.Find(projectidforRandomNo);
-        //        projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
-        //        _projectRepository.Update(projectRandom);
-        //        var projectSeries = _projectRepository.Find(projectidforscreeningNo);
-        //        projectSeries.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
-        //        _projectRepository.Update(projectSeries);
-        //    }
-        //}
+        
 
         public string ValidateScreeningNumber(RandomizationDto randomization)
         {

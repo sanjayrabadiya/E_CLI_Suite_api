@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
@@ -21,8 +22,9 @@ namespace GSC.Respository.Project.Design
 
         DesignScreeningTemplateDto GetTemplate(int id);
 
-        IList<DropDownDto> GetTemplateDropDownAnnotation(int projectDesignVisitId);
 
         IList<DropDownDto> GetTemplateDropDownForVisitStatus(int projectDesignVisitId);
+
+        Task<bool> IsTemplateExits(int projectDesignId);
     }
 }

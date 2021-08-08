@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
@@ -531,13 +532,15 @@ namespace GSC.Api.Controllers.Project.Design
                 variableCategoryType));
         }
 
-        // Not use any where please check and remove if not use any where comment by vipul
+
         [HttpGet]
-        [Route("GetTemplateDropDownAnnotation/{projectDesignVisitId}")]
-        public IActionResult GetTemplateDropDownAnnotation(int projectDesignVisitId)
+        [Route("IsTemplateExits/{projectDesignId}")]
+        public async Task<IActionResult> IsTemplateExits(int projectDesignId)
         {
-            return Ok(_projectDesignTemplateRepository.GetTemplateDropDownAnnotation(projectDesignVisitId));
+            var result = await _projectDesignTemplateRepository.IsTemplateExits(projectDesignId);
+            return Ok(result);
         }
+
 
     }
 }

@@ -9,12 +9,8 @@ namespace GSC.Respository.Project.Design
 {
     public interface IProjectDesignRepository : IGenericRepository<ProjectDesign>
     {
-        Task<ProjectDetailDto> GetProjectDesignDetail(int projectId);
         IList<DropDownDto> GetProjectByDesignDropDown();
-        bool IsScreeningStarted(int projectId);
-
-        string Duplicate(ProjectDesign objSave);
         bool IsCompleteExist(int projectDesignId, string moduleName, bool isComplete);
-        int GetParentProjectDetail(int ProjectDesignId);
+        bool IsWorkFlowOrEditCheck(int projectDesignid);
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -97,7 +95,7 @@ namespace GSC.Api.Controllers.Project.Design
             var projectDesign = _mapper.Map<ProjectDesign>(projectDesignDto);
 
             var studyVersion = new StudyVersion();
-            studyVersion.VersionNumber = 1.0;
+            studyVersion.VersionNumber = 1;
             studyVersion.VersionStatus = VersionStatus.OnTrial;
             studyVersion.ProjectDesign = projectDesign;
             studyVersion.ProjectId = projectDesign.ProjectId;
@@ -138,38 +136,6 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
-        //Not Use in front please check and remove if not use comment  by vipul
-        [HttpPatch("{id}")]
-        public ActionResult Active(int id)
-        {
-            var record = _projectDesignRepository.Find(id);
-
-            if (record == null)
-                return NotFound();
-
-            var validate = _projectDesignRepository.Duplicate(record);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
-
-            _projectDesignRepository.Active(record);
-            _uow.Save();
-
-            return Ok();
-        }
-
-
-        //Not Use in front please check and remove if not use comment  by vipul
-        [HttpGet]
-        [Route("GetProjectDesignDetail/{projectId}")]
-        public async Task<IActionResult> GetProjectDesignDetail(int projectId)
-        {
-            var projectDesignWithPeriod = await _projectDesignRepository.GetProjectDesignDetail(projectId);
-            return Ok(projectDesignWithPeriod);
-        }
-
         [HttpGet]
         [Route("GetProjectByDesignDropDown")]
         public IActionResult GetProjectByDesignDropDown()
@@ -178,10 +144,10 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
 
-        [HttpPut("SetGoLive/{projectId}")]
-        public IActionResult SetGoLive(int projectId)
+        [HttpPut("UpdateGoLive/{projectId}")]
+        public IActionResult updateGoLive(int projectId)
         {
-            _studyVersionRepository.SetGoLive(projectId);
+            _studyVersionRepository.UpdateGoLive(projectId);
             _uow.Save();
             return Ok();
         }
@@ -214,6 +180,13 @@ namespace GSC.Api.Controllers.Project.Design
         {
             var record = _projectDesignRepository.IsCompleteExist(projectDesignId, moduleName, isComplete);
             return Ok();
+        }
+
+        [HttpPut("IsWorkFlowOrEditCheck/{projectDesignId}")]
+        public IActionResult IsWorkFlowOrEditCheck(int projectDesignId)
+        {
+            var result = _projectDesignRepository.IsWorkFlowOrEditCheck(projectDesignId);
+            return Ok(result);
         }
     }
 }

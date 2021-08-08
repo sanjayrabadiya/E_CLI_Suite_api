@@ -13,9 +13,7 @@ namespace GSC.Data.Entities.Attendance
 {
     public class Randomization : BaseEntity, ICommonAduit
     {
-        //private DateTime? _dateOfRandomization;
-        //private DateTime? _dateOfScreening;
-        //private DateTime? _dateOfBirth { get; set; }
+
 
         public ScreeningPatientStatus? PatientStatusId { get; set; }
         public string FirstName { get; set; }
@@ -23,10 +21,7 @@ namespace GSC.Data.Entities.Attendance
         public string LastName { get; set; }
         public string Initial { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        //{
-        //    get => _dateOfBirth.UtcDate();
-        //    set => _dateOfBirth = value.UtcDate();
-        //}
+
         public Gender? Gender { get; set; }
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
@@ -53,18 +48,10 @@ namespace GSC.Data.Entities.Attendance
         public Language Language { get; set; }
         public string ScreeningNumber { get; set; }
         public DateTime? DateOfScreening { get; set; }
-        //{
-        //    get => _dateOfScreening?.UtcDate();
-        //    set => _dateOfScreening = value?.UtcDate();
-        //}
-
         public string RandomizationNumber { get; set; }
 
         public DateTime? DateOfRandomization { get; set; }
-        //{
-        //    get => _dateOfRandomization?.UtcDate();
-        //    set => _dateOfRandomization = value?.UtcDate();
-        //}
+
         public int ProjectId { get; set; }
         public int? CompanyId { get; set; }
         public Data.Entities.Master.Project Project { get; set; }
