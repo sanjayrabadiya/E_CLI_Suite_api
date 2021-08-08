@@ -17,5 +17,6 @@ namespace GSC.Respository.Project.Design
         List<DropDownDto> GetVersionDropDown(int projectId);
         bool IsOnTrialByProjectDesing(int projectDesignId);
         void UpdateGoLive(int projectId);
+        int GetStudyVersionIdForLive(int projectId);
     }
 }

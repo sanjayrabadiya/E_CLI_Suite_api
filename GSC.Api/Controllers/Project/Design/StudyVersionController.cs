@@ -151,5 +151,12 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_studyVersionRepository.GetVersionDropDown(projectId));
         }
 
+        [HttpGet]
+        [Route("GetStudyVersionIdForLive/{projectId}")]
+        public IActionResult GetStudyVersionIdForLive(int projectId)
+        {
+            return Ok(_studyVersionRepository.GetStudyVersionIdForLive(projectId));
+        }
+
     }
 }

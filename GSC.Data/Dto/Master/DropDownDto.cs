@@ -52,6 +52,7 @@ namespace GSC.Data.Dto.Master
     {
         public string Value { get; set; }
         public string Code { get; set; }
+        public bool IsTestSite { get; set; }
         public bool IsStatic { get; set; }
         public int CountryId { get; set; }
         public int ParentProjectId { get; set; }

@@ -123,12 +123,14 @@ namespace GSC.Api.Controllers.Attendance
 
             var randomization = _mapper.Map<Randomization>(randomizationDto);
 
-            //if (_projectRepository.All.Any(x => x.Id == randomization.ProjectId && !x.IsTestSite) &&
-            //    !_studyVersionRepository.All.Any(x => x.ProjectId == randomizationDto.ParentProjectId && x.VersionStatus == VersionStatus.GoLive && x.DeletedDate == null))
-            //{
-            //    ModelState.AddModelError("Message", "Designed still not live for study");
-            //    return BadRequest(ModelState);
-            //}
+            var project = _projectRepository.All.Where(x => x.Id == randomization.ProjectId).Select(t => new { t.IsTestSite, t.ParentProjectId }).FirstOrDefault();
+            randomizationDto.ParentProjectId = project.ParentProjectId ?? 0;
+
+            if (!project.IsTestSite && !_studyVersionRepository.All.Any(x => x.ProjectId == randomizationDto.ParentProjectId && x.VersionStatus == VersionStatus.GoLive && x.DeletedDate == null))
+            {
+                ModelState.AddModelError("Message", "Designed still not live for study");
+                return BadRequest(ModelState);
+            }
 
             randomization.PatientStatusId = ScreeningPatientStatus.PreScreening;
             if (!_environmentSetting.Value.IsPremise)

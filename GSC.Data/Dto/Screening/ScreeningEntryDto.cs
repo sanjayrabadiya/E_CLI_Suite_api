@@ -75,6 +75,7 @@ namespace GSC.Data.Dto.Screening
     public class SaveRandomizationDto
     {
         public int RandomizationId { get; set; }
+        public int? StudyVersionId { get; set; }
         public int ProjectDesignVisitId { get; set; }
         private DateTime _visitDate;
         public DateTime VisitDate

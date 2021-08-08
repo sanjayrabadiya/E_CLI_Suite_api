@@ -31,6 +31,7 @@ namespace GSC.Data.Entities.Screening
         public bool? IsEnrolled { get; set; }
         public string ProjectNo { get; set; }
         public int ProjectDesignId { get; set; }
+        public int? StudyVersionId { get; set; }
         public int ProjectId { get; set; }
         public bool IsTesting { get; set; }
         public string FitnessReason { get; set; }

@@ -346,6 +346,7 @@ namespace GSC.Respository.Master
                     CountryId = c.ManageSite != null && c.ManageSite.City != null && c.ManageSite.City.State != null ? c.ManageSite.City.State.CountryId : 0,
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
+                    IsTestSite=c.IsTestSite,
                     ParentProjectId = c.ParentProjectId ?? 0
                 }).OrderBy(o => o.Value).ToList();
         }
