@@ -95,12 +95,12 @@ namespace GSC.Api.Controllers.Barcode.Generate
                             _projectSubjectRepository.SaveSubjectForProject(barcodeGenerateDto.ProjectId,
                                 SubjectNumberType.Normal);
 
-                        if (barcodeConfigDto.SubjectNo)
-                            barcodeDetail.BarcodeLabelString += barcodeDetail.ProjectSubject.Number;
-                        if (barcodeConfigDto.ProjectNo) barcodeDetail.BarcodeLabelString += subs.ProjectNo;
-                        if (barcodeConfigDto.Period) barcodeDetail.BarcodeLabelString += subs.PeriodNo;
-                        if (barcodeConfigDto.RandomizationNo)
-                            barcodeDetail.BarcodeLabelString += subs.RandomizationNo;
+                        //if (barcodeConfigDto.SubjectNo)
+                        //    barcodeDetail.BarcodeLabelString += barcodeDetail.ProjectSubject.Number;
+                        //if (barcodeConfigDto.ProjectNo) barcodeDetail.BarcodeLabelString += subs.ProjectNo;
+                        //if (barcodeConfigDto.Period) barcodeDetail.BarcodeLabelString += subs.PeriodNo;
+                        //if (barcodeConfigDto.RandomizationNo)
+                        //    barcodeDetail.BarcodeLabelString += subs.RandomizationNo;
                         barcodeDetail.BarcodeLabelString += subs.TemmplateNo;
                         barcodeGenerate.BarcodeSubjects.Add(barcodeDetail);
                     }

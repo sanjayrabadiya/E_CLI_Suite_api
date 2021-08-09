@@ -7,7 +7,8 @@ namespace GSC.Respository.Barcode
 {
     public interface IBarcodeConfigRepository : IGenericRepository<BarcodeConfig>
     {
-        List<BarcodeConfigDto> GetBarcodeConfig(bool isDeleted);
+        List<BarcodeConfigGridDto> GetBarcodeConfig(bool isDeleted);
+        List<BarcodeConfigDto> GetBarcodeConfigById(int id);
         string GenerateBarcodeString(int barcodeTypeId);
         BarcodeConfigDto GenerateBarcodeConfig(int barcodeTypeId);
         BarcodeConfig GetBarcodeConfig(int barcodeTypeId);

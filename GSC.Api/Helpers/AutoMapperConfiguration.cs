@@ -387,6 +387,7 @@ namespace GSC.Api.Helpers
             CreateMap<ProductVerificationDetail,ProductVerificationDetailDto>().ReverseMap();
             CreateMap<LanguageConfiguration, LanguageConfigurationDto>().ReverseMap();
             CreateMap<LanguageConfigurationDetails, LanguageConfigurationDetailsDto>().ReverseMap();
+            CreateMap<BarcodeConfig, BarcodeConfigDto>().ReverseMap();
         }
     }
 }

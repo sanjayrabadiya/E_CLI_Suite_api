@@ -24,15 +24,15 @@ namespace GSC.Respository.Barcode
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.BarcodeTypeName, Code = c.BarcodeTypeCode})
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.BarcodeTypeName})
                 .OrderBy(o => o.Value).ToList();
         }
 
         public string Duplicate(BarcodeType objSave)
         {
-            if (All.Any(
-                x => x.Id != objSave.Id && x.BarcodeTypeCode == objSave.BarcodeTypeCode.Trim() && x.DeletedDate == null))
-                return "Duplicate BarcodeType code : " + objSave.BarcodeTypeCode;
+            //if (All.Any(
+            //    x => x.Id != objSave.Id && x.BarcodeTypeCode == objSave.BarcodeTypeCode.Trim() && x.DeletedDate == null))
+            //    return "Duplicate BarcodeType code : " + objSave.BarcodeTypeCode;
 
             if (All.Any(
                 x => x.Id != objSave.Id && x.BarcodeTypeName == objSave.BarcodeTypeName.Trim() && x.DeletedDate == null))

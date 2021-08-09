@@ -9,6 +9,7 @@ using GSC.Common.Common;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.AdverseEvent;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Audit;
@@ -347,6 +348,9 @@ namespace GSC.Domain.Context
         public DbSet<ProductVerificationDetail> ProductVerificationDetail { get; set; }
         public DbSet<LanguageConfiguration> LanguageConfiguration { get; set; }
         public DbSet<LanguageConfigurationDetails> LanguageConfigurationDetails { get; set; }
+        public DbSet<TableFieldName> TableFieldName { get; set; }
+        public DbSet<BarcodeCombination> BarcodeCombination { get; set; }
+        public DbSet<BarcodeDisplayInfo> BarcodeDisplayInfo { get; set; }
 
     }
 
