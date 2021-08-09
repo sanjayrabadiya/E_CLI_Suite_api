@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 namespace GSC.Api.Controllers.SupplyManagement
 {
     [Route("api/[controller]")]
-    [ApiController]
     public class PharmacyStudyProductTypeController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;

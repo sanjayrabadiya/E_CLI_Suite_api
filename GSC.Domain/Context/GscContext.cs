@@ -347,6 +347,9 @@ namespace GSC.Domain.Context
         public DbSet<ProductVerificationDetail> ProductVerificationDetail { get; set; }
         public DbSet<LanguageConfiguration> LanguageConfiguration { get; set; }
         public DbSet<LanguageConfigurationDetails> LanguageConfigurationDetails { get; set; }
+        public DbSet<VerificationApprovalTemplate> VerificationApprovalTemplate { get; set; }
+        public DbSet<VerificationApprovalTemplateValue> VerificationApprovalTemplateValue { get; set; }
+        public DbSet<VerificationApprovalTemplateValueChild> VerificationApprovalTemplateValueChild { get; set; }
 
     }
 
