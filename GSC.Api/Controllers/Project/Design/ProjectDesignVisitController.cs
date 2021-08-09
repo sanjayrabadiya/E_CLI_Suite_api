@@ -158,117 +158,117 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
-        [Route("CloneVisit/{id}/{projectDesignPeriodId}/{noOfVisits}")]
+        [Route("CloneVisit")]
         [TransactionRequired]
-        public IActionResult CloneVisit(int id, int projectDesignPeriodId, int noOfVisits)
+        public IActionResult CloneVisit([FromQuery] ProjectDesignVisitClone data)
         {
             var saved = _projectDesignVisitRepository
-                .FindBy(t => t.ProjectDesignPeriodId == projectDesignPeriodId && t.DeletedDate == null).Count();
+                .FindBy(t => t.ProjectDesignPeriodId == data.projectDesignPeriodId && t.DeletedDate == null).Count();
 
             ProjectDesignVisit firstSaved = null;
 
             var designOrder = 0;
-            if (_projectDesignVisitRepository.All.Any(t => t.ProjectDesignPeriodId == projectDesignPeriodId && t.DeletedDate == null))
-                designOrder = (int)_projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriodId == projectDesignPeriodId
+            if (_projectDesignVisitRepository.All.Any(t => t.ProjectDesignPeriodId == data.projectDesignPeriodId && t.DeletedDate == null))
+                designOrder = (int)_projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriodId == data.projectDesignPeriodId
                 && t.DeletedDate == null).Max(t => t.DesignOrder);
 
-            for (var i = 1; i <= noOfVisits; i++)
+            for (var i = 1; i <= data.noOfVisits; i++)
             {
-                var visitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == id).ToList();
+                var visitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVisitId == data.Id).ToList();
 
-                var visit = _projectDesignVisitRepository.GetVisit(id);
+                var visit = _projectDesignVisitRepository.GetVisit(data.Id);
                 visit.Id = 0;
-                visit.ProjectDesignPeriodId = projectDesignPeriodId;
+                visit.ProjectDesignPeriodId = data.projectDesignPeriodId;
                 visit.DesignOrder = ++designOrder;
-                visit.Templates.ToList().ForEach(template =>
-                {
-                    template.Id = 0;
-                    template.Variables.ToList().ForEach(variable =>
-                    {
-                        visitStatus.Where(e => e.ProjectDesignVariableId == variable.Id).ToList().ForEach(g =>
-                        {
-                            g.ProjectDesignVariable = variable;
-                            g.ProjectDesignVariableId = 0;
-                        });
+                visit.Templates.Where(z => (data.noOfTemplate.Count() == 0 || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
+                 {
+                     template.Id = 0;
+                     template.Variables.ToList().ForEach(variable =>
+                     {
+                         visitStatus.Where(e => e.ProjectDesignVariableId == variable.Id).ToList().ForEach(g =>
+                         {
+                             g.ProjectDesignVariable = variable;
+                             g.ProjectDesignVariableId = 0;
+                         });
 
-                        variable.Id = 0;
-                        var Seq = 0;
-                        variable.Values.ToList().ForEach(value =>
-                        {
-                            value.Id = 0;
-                            value.SeqNo = ++Seq;
-                            _projectDesignVariableValueRepository.Add(value);
+                         variable.Id = 0;
+                         var Seq = 0;
+                         variable.Values.ToList().ForEach(value =>
+                         {
+                             value.Id = 0;
+                             value.SeqNo = ++Seq;
+                             _projectDesignVariableValueRepository.Add(value);
 
-                            //For variable value clone language
-                            value.VariableValueLanguage.ToList().ForEach(x =>
-                            {
-                                x.Id = 0;
-                                _variableValueLanguageRepository.Add(x);
-                            });
+                             //For variable value clone language
+                             value.VariableValueLanguage.ToList().ForEach(x =>
+                              {
+                                  x.Id = 0;
+                                  _variableValueLanguageRepository.Add(x);
+                              });
 
-                        });
-
-
-                        //variable.Id = 0;
-                        //var RSeq = 0;
-                        //variable.Remarks.ToList().ForEach(value =>
-                        //{
-                        //    value.Id = 0;
-                        //    value.SeqNo = ++RSeq;
-                        //    _projectDesignVariableRemarksRepository.Add(value);
-                        //});
+                         });
 
 
-
-                        _projectDesignVariableRepository.Add(variable);
-
-                        //For variable clone language
-                        variable.VariableLanguage.ToList().ForEach(r =>
-                        {
-                            r.Id = 0;
-                            _variableLanguageRepository.Add(r);
-                        });
-
-                        // For encrypt clone
-                        variable.Roles.ToList().ForEach(r =>
-                        {
-                            r.Id = 0;
-                            _projectDesignVariableEncryptRoleRepository.Add(r);
-                        });
-
-                        //For variable note clone language
-                        variable.VariableNoteLanguage.ToList().ForEach(r =>
-                        {
-                            r.Id = 0;
-                            _variableNoteLanguageRepository.Add(r);
-                        });
-
-                    });
+                         //variable.Id = 0;
+                         //var RSeq = 0;
+                         //variable.Remarks.ToList().ForEach(value =>
+                         //{
+                         //    value.Id = 0;
+                         //    value.SeqNo = ++RSeq;
+                         //    _projectDesignVariableRemarksRepository.Add(value);
+                         //});
 
 
-                    template.ProjectDesignTemplateNote.ToList().ForEach(templateNote =>
-                    {
-                        templateNote.Id = 0;
-                        _projectDesignTemplateNoteRepository.Add(templateNote);
 
-                        //For template note clone language
-                        templateNote.TemplateNoteLanguage.ToList().ForEach(x =>
-                        {
-                            x.Id = 0;
-                            _templateNoteLanguageRepository.Add(x);
-                        });
-                    });
+                         _projectDesignVariableRepository.Add(variable);
 
-                    _projectDesignTemplateRepository.Add(template);
+                         //For variable clone language
+                         variable.VariableLanguage.ToList().ForEach(r =>
+                          {
+                              r.Id = 0;
+                              _variableLanguageRepository.Add(r);
+                          });
 
-                    //For template clone language
-                    template.TemplateLanguage.ToList().ForEach(x =>
-                    {
-                        x.Id = 0;
-                        _templateLanguageRepository.Add(x);
-                    });
+                         // For encrypt clone
+                         variable.Roles.ToList().ForEach(r =>
+                          {
+                              r.Id = 0;
+                              _projectDesignVariableEncryptRoleRepository.Add(r);
+                          });
 
-                });
+                         //For variable note clone language
+                         variable.VariableNoteLanguage.ToList().ForEach(r =>
+                          {
+                              r.Id = 0;
+                              _variableNoteLanguageRepository.Add(r);
+                          });
+
+                     });
+
+
+                     template.ProjectDesignTemplateNote.ToList().ForEach(templateNote =>
+                     {
+                         templateNote.Id = 0;
+                         _projectDesignTemplateNoteRepository.Add(templateNote);
+
+                         //For template note clone language
+                         templateNote.TemplateNoteLanguage.ToList().ForEach(x =>
+                          {
+                              x.Id = 0;
+                              _templateNoteLanguageRepository.Add(x);
+                          });
+                     });
+
+                     _projectDesignTemplateRepository.Add(template);
+
+                     //For template clone language
+                     template.TemplateLanguage.ToList().ForEach(x =>
+                      {
+                          x.Id = 0;
+                          _templateLanguageRepository.Add(x);
+                      });
+
+                 });
 
                 visit.DisplayName = "Visit " + ++saved;
                 visit.IsSchedule = false;
@@ -294,7 +294,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             _uow.Save();
 
-            return Ok(firstSaved != null ? firstSaved.Id : id);
+            return Ok(firstSaved != null ? firstSaved.Id : data.Id);
         }
 
         [HttpGet]

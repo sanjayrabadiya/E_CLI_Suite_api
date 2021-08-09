@@ -30,4 +30,12 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsNonCRF { get; set; }
         public List<int> Templates { get; set; }
     }
+
+    public class ProjectDesignVisitClone
+    {
+        public int Id { get; set; }
+        public int projectDesignPeriodId { get; set; }
+        public int noOfVisits { get; set; }
+        public int[] noOfTemplate { get; set; }
+    }
 }
