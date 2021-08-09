@@ -259,7 +259,8 @@ namespace GSC.Respository.Master
 
         public List<ProjectDropDown> GetParentStaticProjectDropDown()
         {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
+            // var projectList = _projectRightRepository.GetProjectRightIdList();
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
             //var project = new List<int>();

@@ -116,5 +116,6 @@ namespace GSC.Data.Dto.Medra
         public CommentStatus? CommentStatus { get; set; }
         public bool? IsApproved { get; set; }
         public string LltCurrent { get; set; }
+        public int RandomizationId { get; set; }
     }
 }

@@ -145,7 +145,8 @@ namespace GSC.Helper
         [Description("DBDS Report")] DBDSReport = 7,
         [Description("DataEntry Audit")] DataEntryAudit = 11,
         [Description("Study Design Audit")] StudyDesignAudit = 12,
-        [Description("Product Receipt")] ProductReceipt = 13
+        [Description("Product Receipt")] ProductReceipt = 13,
+        [Description("Product Verification")] ProductVerification = 14
     }
 
     public enum AuditModule : short

@@ -8,8 +8,11 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Helper;
 using GSC.Report;
+using GSC.Respository.Configuration;
 using GSC.Respository.SupplyManagement;
+using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -27,6 +30,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IProductVerificationRepository _productVerificationRepository;
         private readonly IProductVerificationDetailRepository _productVerificationDetailRepository;
         private readonly IProductVerificationReport _productVerificationReport;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public ProductVerificationController(
             IMapper mapper
@@ -35,6 +39,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             , IProductVerificationRepository productVerificationRepository
             , IProductVerificationDetailRepository productVerificationDetailRepository
             , IProductVerificationReport productVerificationReport
+            , IUploadSettingRepository uploadSettingRepository
             )
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -43,6 +48,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _productVerificationRepository = productVerificationRepository;
             _productVerificationDetailRepository = productVerificationDetailRepository;
             _productVerificationReport = productVerificationReport;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         [HttpGet("GetProductVerificationList/{productReceiptId}")]
@@ -75,6 +81,14 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             productVerificationDto.Id = 0;
 
+            //set file path and extension
+            if (productVerificationDto.FileModel?.Base64?.Length > 0)
+            {
+                productVerificationDto.PathName = DocumentService.SaveProjectDocument(productVerificationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.ProductVerification);
+                productVerificationDto.MimeType = productVerificationDto.FileModel.Extension;
+                productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
+            }
+
             var productVerification = _mapper.Map<ProductVerification>(productVerificationDto);
 
             _productVerificationRepository.Add(productVerification);
@@ -90,6 +104,21 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (productVerificationDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            //added by vipul for if document send empty if they cant want to change docuemnt
+            var productRec = _productVerificationRepository.Find(productVerificationDto.Id);
+            if (productVerificationDto.FileModel?.Base64?.Length > 0)
+            {
+                productVerificationDto.PathName = DocumentService.SaveDocument(productVerificationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.ProductReceipt, "");
+                productVerificationDto.MimeType = productVerificationDto.FileModel.Extension;
+                productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
+            }
+            else
+            {
+                productVerificationDto.PathName = productRec.PathName;
+                productVerificationDto.MimeType = productRec.MimeType;
+                productVerificationDto.FileName = productRec.FileName;
+            }
 
             var productVerification = _mapper.Map<ProductVerification>(productVerificationDto);
 
