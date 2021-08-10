@@ -4,9 +4,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
-using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Project.Design;
-using GSC.Domain.Context;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +28,6 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeLanguageRepository _variableLanguageRepository;
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
-        private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         public ProjectDesignVisitController(IProjectDesignVisitRepository projectDesignVisitRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -39,7 +36,6 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
-            IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
             IVisitLanguageRepository visitLanguageRepository,
             ITemplateLanguageRepository templateLanguageRepository,
             ITemplateNoteLanguageRepository templateNoteLanguageRepository,
@@ -58,7 +54,6 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _visitLanguageRepository = visitLanguageRepository;
             _templateLanguageRepository = templateLanguageRepository;
-            _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
             _templateNoteLanguageRepository = templateNoteLanguageRepository;
             _variableLanguageRepository = variableLanguageRepository;
             _variableNoteLanguageRepository = variableNoteLanguageRepository;
@@ -100,6 +95,8 @@ namespace GSC.Api.Controllers.Project.Design
                 designOrder = (int)_projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriodId == projectDesignVisit.ProjectDesignPeriodId
                 && t.DeletedDate == null).Max(t => t.DesignOrder);
             projectDesignVisit.DesignOrder = ++designOrder;
+            var checkVersion = _projectDesignVisitRepository.CheckStudyVersion(projectDesignVisit.ProjectDesignPeriodId);
+            projectDesignVisit.StudyVersion = checkVersion.VersionNumber;
             _projectDesignVisitRepository.Add(projectDesignVisit);
             _uow.Save();
 
@@ -133,10 +130,19 @@ namespace GSC.Api.Controllers.Project.Design
         {
             if (id <= 0) return BadRequest();
 
-            var period = _projectDesignVisitRepository.Find(id);
+            var visit = _projectDesignVisitRepository.Find(id);
+            if (visit == null) return NotFound();
 
-            if (period == null) return NotFound();
-            _projectDesignVisitRepository.Delete(period);
+            var checkVersion = _projectDesignVisitRepository.CheckStudyVersion(visit.ProjectDesignPeriodId);
+            if (checkVersion.AnyLive)
+            {
+                visit.StudyVersion = checkVersion.VersionNumber;
+                visit.InActive = true;
+                _projectDesignVisitRepository.Update(visit);
+            }
+            else
+                _projectDesignVisitRepository.Delete(visit);
+
 
             _uow.Save();
 
@@ -167,6 +173,8 @@ namespace GSC.Api.Controllers.Project.Design
 
             ProjectDesignVisit firstSaved = null;
 
+            var checkVersion = _projectDesignVisitRepository.CheckStudyVersion(projectDesignPeriodId);
+
             var designOrder = 0;
             if (_projectDesignVisitRepository.All.Any(t => t.ProjectDesignPeriodId == projectDesignPeriodId && t.DeletedDate == null))
                 designOrder = (int)_projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriodId == projectDesignPeriodId
@@ -180,9 +188,11 @@ namespace GSC.Api.Controllers.Project.Design
                 visit.Id = 0;
                 visit.ProjectDesignPeriodId = projectDesignPeriodId;
                 visit.DesignOrder = ++designOrder;
+                visit.StudyVersion = checkVersion.VersionNumber;
                 visit.Templates.ToList().ForEach(template =>
                 {
                     template.Id = 0;
+                    template.StudyVersion = checkVersion.VersionNumber;
                     template.Variables.ToList().ForEach(variable =>
                     {
                         visitStatus.Where(e => e.ProjectDesignVariableId == variable.Id).ToList().ForEach(g =>
@@ -190,13 +200,14 @@ namespace GSC.Api.Controllers.Project.Design
                             g.ProjectDesignVariable = variable;
                             g.ProjectDesignVariableId = 0;
                         });
-
+                        variable.StudyVersion = checkVersion.VersionNumber;
                         variable.Id = 0;
                         var Seq = 0;
                         variable.Values.ToList().ForEach(value =>
                         {
                             value.Id = 0;
                             value.SeqNo = ++Seq;
+                            value.StudyVersion = checkVersion.VersionNumber;
                             _projectDesignVariableValueRepository.Add(value);
 
                             //For variable value clone language
@@ -207,18 +218,6 @@ namespace GSC.Api.Controllers.Project.Design
                             });
 
                         });
-
-
-                        //variable.Id = 0;
-                        //var RSeq = 0;
-                        //variable.Remarks.ToList().ForEach(value =>
-                        //{
-                        //    value.Id = 0;
-                        //    value.SeqNo = ++RSeq;
-                        //    _projectDesignVariableRemarksRepository.Add(value);
-                        //});
-
-
 
                         _projectDesignVariableRepository.Add(variable);
 

@@ -5,6 +5,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
@@ -136,6 +137,18 @@ namespace GSC.Respository.Project.Design
         {
             return All.Where(x => x.ProjectId == projectId && x.VersionStatus == Helper.VersionStatus.GoLive && x.DeletedDate == null).
                 Select(t => t.VersionNumber).OrderByDescending(c => c).FirstOrDefault();
+        }
+
+        public double GetOnTrialVersionByProjectDesign(int projectDesignId)
+        {
+            return All.Where(x => x.ProjectDesignId == projectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial && x.DeletedDate == null).
+                Select(t => t.VersionNumber).OrderByDescending(c => c).FirstOrDefault();
+        }
+
+
+        public bool AnyLive(int projectDesignId)
+        {
+            return All.Any(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive);
         }
     }
 }

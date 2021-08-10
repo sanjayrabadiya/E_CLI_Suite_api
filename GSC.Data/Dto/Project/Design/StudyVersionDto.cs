@@ -32,4 +32,10 @@ namespace GSC.Data.Dto.Project.Design
         public DateTime? GoLiveOn { get; set; }
         public string VersionStatus { get; set; }
     }
+
+    public class CheckVersionDto 
+    {
+        public double? VersionNumber { get; set; }
+        public bool AnyLive { get; set; }
+    }
 }

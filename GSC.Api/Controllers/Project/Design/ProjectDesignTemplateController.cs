@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -7,16 +6,12 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
-using GSC.Data.Dto.Screening;
-using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Project.Design;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Schedule;
-using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -133,6 +128,8 @@ namespace GSC.Api.Controllers.Project.Design
 
             if (variableTemplate == null) return NotFound();
 
+            var checkVersion = _projectDesignTemplateRepository.CheckStudyVersion(projectDesignVisitId);
+
             var designOrder = 0;
             if (_projectDesignTemplateRepository.All.Any(t => t.ProjectDesignVisitId == projectDesignVisitId && t.DeletedDate == null))
                 designOrder = _projectDesignTemplateRepository.All.Where(t => t.ProjectDesignVisitId == projectDesignVisitId
@@ -143,6 +140,7 @@ namespace GSC.Api.Controllers.Project.Design
                 var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(variableTemplate);
                 projectDesignTemplate.Id = 0;
                 projectDesignTemplate.ProjectDesignVisitId = projectDesignVisitId;
+                projectDesignTemplate.StudyVersion = checkVersion.VersionNumber;
                 projectDesignTemplate.VariableTemplateId = variableTemplateId;
                 projectDesignTemplate.DesignOrder = ++designOrder;
                 projectDesignTemplate.Variables = new List<ProjectDesignVariable>();
@@ -153,6 +151,7 @@ namespace GSC.Api.Controllers.Project.Design
                 {
                     var projectDesignVariable = _mapper.Map<ProjectDesignVariable>(variableDetail.Variable);
                     projectDesignVariable.Id = 0;
+                    projectDesignVariable.StudyVersion = checkVersion.VersionNumber;
                     projectDesignVariable.VariableId = variableDetail.VariableId;
                     projectDesignVariable.DesignOrder = ++variableOrder;
                     projectDesignVariable.Note = variableDetail.Note;
@@ -166,22 +165,12 @@ namespace GSC.Api.Controllers.Project.Design
                     {
                         var projectDesignVariableValue = _mapper.Map<ProjectDesignVariableValue>(variableValue);
                         projectDesignVariableValue.Id = 0;
+                        projectDesignVariableValue.StudyVersion = checkVersion.VersionNumber;
                         projectDesignVariableValue.SeqNo = ++valueOrder;
                         _projectDesignVariableValueRepository.Add(projectDesignVariableValue);
                         projectDesignVariable.Values.Add(projectDesignVariableValue);
                     }
 
-                    //Added for Remarks
-                    //projectDesignVariable.Remarks = new List<ProjectDesignVariableRemarks>();
-                    //var SeqNo = 0;
-                    //foreach (var variableRemark in variableDetail.Variable.Remarks)
-                    //{
-                    //    var projectDesignVariableRemark = _mapper.Map<ProjectDesignVariableRemarks>(variableRemark);
-                    //    projectDesignVariableRemark.Id = 0;
-                    //    projectDesignVariableRemark.SeqNo = ++valueOrder;
-                    //    _projectDesignVariableRemarksRepository.Add(projectDesignVariableRemark);
-                    //    projectDesignVariable.Remarks.Add(projectDesignVariableRemark);
-                    //}
 
                 }
 
@@ -215,6 +204,8 @@ namespace GSC.Api.Controllers.Project.Design
             if (_projectDesignTemplateRepository.All.Any(t => t.ProjectDesignVisitId == projectDesignVisitId))
                 designOrder = _projectDesignTemplateRepository.All.Where(t => t.ProjectDesignVisitId == projectDesignVisitId).Max(t => t.DesignOrder);
 
+            var checkVersion = _projectDesignTemplateRepository.CheckStudyVersion(projectDesignVisitId);
+
             for (var i = 0; i < noOfClones; i++)
             {
                 var temp = _projectDesignTemplateRepository.GetTemplateClone(projectDesignTempateId);
@@ -225,6 +216,7 @@ namespace GSC.Api.Controllers.Project.Design
                 projectDesignTemplate.DesignOrder = ++designOrder;
                 projectDesignTemplate.VariableTemplate = null;
                 projectDesignTemplate.Domain = null;
+                projectDesignTemplate.StudyVersion = checkVersion.VersionNumber;
                 projectDesignTemplate.TemplateName = projectDesignTemplate.TemplateName + "_" + designOrder;
 
                 foreach (var variable in projectDesignTemplate.Variables)
@@ -233,7 +225,7 @@ namespace GSC.Api.Controllers.Project.Design
                     variable.Unit = null;
                     variable.VariableCategory = null;
                     variable.ProjectDesignTemplate = null;
-
+                    variable.StudyVersion = checkVersion.VersionNumber;
                     _projectDesignVariableRepository.Add(variable);
 
                     //For variable clone language
@@ -254,7 +246,7 @@ namespace GSC.Api.Controllers.Project.Design
                     variable.Values.ToList().ForEach(r =>
                       {
                           r.Id = 0;
-                          //    if (r.SeqNo == 0)
+                          r.StudyVersion = checkVersion.VersionNumber;
                           r.SeqNo = ++Seq;
                           _projectDesignVariableValueRepository.Add(r);
                           //For variable value clone language
@@ -424,20 +416,32 @@ namespace GSC.Api.Controllers.Project.Design
             }
             else
             {
-                _projectDesignTemplateRepository.Delete(record);
-                _uow.Save();
-
-                if (_projectDesignTemplateRepository.FindBy(t =>
-                    t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null).Any())
+                var checkVersion = _projectDesignTemplateRepository.CheckStudyVersion(record.ProjectDesignVisitId);
+                if (checkVersion.AnyLive)
                 {
-                    var minOrder = _projectDesignTemplateRepository
-                        .FindBy(t => t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null)
-                        .Min(t => t.DesignOrder);
-                    var firstId = _projectDesignTemplateRepository.FindBy(t =>
-                        t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null &&
-                        t.DesignOrder == minOrder).First().Id;
-                    ChangeTemplateDesignOrder(firstId, 0);
+                    record.StudyVersion = checkVersion.VersionNumber;
+                    record.InActive = true;
+                    _projectDesignTemplateRepository.Update(record);
+                    _uow.Save();
                 }
+                else
+                {
+                    _projectDesignTemplateRepository.Delete(record);
+                    _uow.Save();
+
+                    if (_projectDesignTemplateRepository.FindBy(t =>
+                        t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null).Any())
+                    {
+                        var minOrder = _projectDesignTemplateRepository
+                            .FindBy(t => t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null)
+                            .Min(t => t.DesignOrder);
+                        var firstId = _projectDesignTemplateRepository.FindBy(t =>
+                            t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null &&
+                            t.DesignOrder == minOrder).First().Id;
+                        ChangeTemplateDesignOrder(firstId, 0);
+                    }
+                }
+                
 
                 return Ok();
             }

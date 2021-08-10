@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
-using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Project.Design;
-using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -17,16 +13,13 @@ namespace GSC.Respository.Project.Design
     public class ProjectDesignVisitRepository : GenericRespository<ProjectDesignVisit>,
         IProjectDesignVisitRepository
     {
-        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
+
         private readonly IGSCContext _context;
-        public ProjectDesignVisitRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            IProjectDesignVariableRepository projectDesignVariableRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository) : base(context)
+        private readonly IStudyVersionRepository _studyVersionRepository;
+        public ProjectDesignVisitRepository(IGSCContext context, IStudyVersionRepository studyVersionRepository) : base(context)
         {
-            _projectDesignTemplateRepository = projectDesignTemplateRepository;
-            _projectDesignVariableRepository = projectDesignVariableRepository;
             _context = context;
+            _studyVersionRepository = studyVersionRepository;
         }
 
         public ProjectDesignVisit GetVisit(int id)
@@ -68,14 +61,14 @@ namespace GSC.Respository.Project.Design
             var visits = new List<DropDownDto>();
             periods.ForEach(period =>
             {
-                period.VisitList.Where(x => x.DeletedDate == null).OrderBy(x=>x.DesignOrder).ToList().ForEach(visit =>
-                {
-                    visits.Add(new DropDownDto
-                    {
-                        Id = visit.Id,
-                        Value = visit.DisplayName + " (" + period.DisplayName + ")"
-                    });
-                });
+                period.VisitList.Where(x => x.DeletedDate == null).OrderBy(x => x.DesignOrder).ToList().ForEach(visit =>
+                  {
+                      visits.Add(new DropDownDto
+                      {
+                          Id = visit.Id,
+                          Value = visit.DisplayName + " (" + period.DisplayName + ")"
+                      });
+                  });
             });
 
             return visits;
@@ -115,6 +108,16 @@ namespace GSC.Respository.Project.Design
                 x.ProjectDesignPeriodId == objSave.ProjectDesignPeriodId && x.DeletedDate == null))
                 return "Duplicate Visit Name : " + objSave.DisplayName;
             return "";
+        }
+
+        public CheckVersionDto CheckStudyVersion(int projectDesignPeriodId)
+        {
+            var result = new CheckVersionDto();
+            var projectDesignId = All.Where(x => x.ProjectDesignPeriodId == projectDesignPeriodId).Select(t => t.ProjectDesignPeriod.ProjectDesignId).FirstOrDefault();
+            result.AnyLive = _studyVersionRepository.AnyLive(projectDesignId);
+            if (result.AnyLive)
+                result.VersionNumber = _studyVersionRepository.GetOnTrialVersionByProjectDesign(projectDesignId);
+            return result;
         }
     }
 }

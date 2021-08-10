@@ -26,5 +26,7 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetTemplateDropDownForVisitStatus(int projectDesignVisitId);
 
         Task<bool> IsTemplateExits(int projectDesignId);
+
+        CheckVersionDto CheckStudyVersion(int projectDesignVisitId);
     }
 }

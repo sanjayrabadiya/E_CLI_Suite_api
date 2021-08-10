@@ -281,7 +281,9 @@ namespace GSC.Respository.Project.EditCheck
 
             if (data.Any(x => x.Operator == Operator.Greater || x.Operator == Operator.GreaterEqual ||
                 x.Operator == Operator.Lessthen || x.Operator == Operator.LessthenEqual) && data.Count(x => !x.IsTarget) > 1)
-                data.ToList().ForEach(x => x.InputValue = "");
+                data.ToList().ForEach(x =>
+                x.InputValue = "1"
+                );
 
             return _editCheckRuleRepository.ValidateEditCheckReference(data);
 

@@ -21,16 +21,19 @@ namespace GSC.Respository.Project.Design
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+        private readonly IStudyVersionRepository _studyVersionRepository;
         public ProjectDesignTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
-            IProjectDesignVariableValueRepository projectDesignVariableValueRepository) : base(context)
+            IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+            IStudyVersionRepository studyVersionRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
+            _studyVersionRepository = studyVersionRepository;
         }
 
         public ProjectDesignTemplate GetTemplateClone(int id)
@@ -239,6 +242,17 @@ namespace GSC.Respository.Project.Design
             return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == projectDesignVisitId
             && x.Variables.Where(y => (y.CollectionSource == CollectionSources.Date || y.CollectionSource == CollectionSources.DateTime) && y.DeletedDate == null).Any()).OrderBy(t => t.DesignOrder)
                 .Select(t => new DropDownDto { Id = t.Id, Value = t.TemplateName }).ToList();
+        }
+
+
+        public CheckVersionDto CheckStudyVersion(int projectDesignVisitId)
+        {
+            var result = new CheckVersionDto();
+            var projectDesignId = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId).Select(t => t.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId).FirstOrDefault();
+            result.AnyLive = _studyVersionRepository.AnyLive(projectDesignId);
+            if (result.AnyLive)
+                result.VersionNumber = _studyVersionRepository.GetOnTrialVersionByProjectDesign(projectDesignId);
+            return result;
         }
     }
 }

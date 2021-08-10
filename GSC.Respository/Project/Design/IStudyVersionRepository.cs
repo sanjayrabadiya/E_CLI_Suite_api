@@ -18,5 +18,7 @@ namespace GSC.Respository.Project.Design
         bool IsOnTrialByProjectDesing(int projectDesignId);
         void UpdateGoLive(int projectId);
         double GetStudyVersionForLive(int projectId);
+        bool AnyLive(int projectDesignId);
+        double GetOnTrialVersionByProjectDesign(int projectDesignId);
     }
 }
