@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Barcode;
@@ -16,44 +18,49 @@ namespace GSC.Respository.Barcode
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
+        private readonly IMapper _mapper;
+
         public BarcodeConfigRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-           _context = context;
+            _context = context;
+            _mapper = mapper;
         }
 
-        public List<BarcodeConfigDto> GetBarcodeConfig(bool isDeleted)
+        public List<BarcodeConfigGridDto> GetBarcodeConfig(bool isDeleted)
         {
-            var barcodeconfig = All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).Select(c => new BarcodeConfigDto
-                    {
-                        Id = c.Id,
-                        IsDeleted = c.DeletedDate != null,
-                        BarcodeTypeId = c.BarcodeTypeId,
-                        BarcodeTypeName = c.BarcodeType.BarcodeTypeName,
-                        SubjectNo = c.SubjectNo,
-                        ProjectNo = c.ProjectNo,
-                        Period = c.Period,
-                        VolunteerId = c.VolunteerId,
-                        RandomizationNo = c.RandomizationNo,
-                        BarcodeFor = c.BarcodeFor,
-                        BarcodeForName = c.BarcodeFor == 0 ? "" : ((BarcodeFor)c.BarcodeFor).GetDescription(),
-                        Width = c.Width,
-                        Height = c.Height,
-                        DisplayValue = c.DisplayValue,
-                        FontSize = c.FontSize,
-                        TextMargin = c.TextMargin,
-                        MarginTop = c.MarginTop,
-                        MarginBottom = c.MarginBottom,
-                        MarginLeft = c.MarginLeft,
-                        MarginRight = c.MarginRight
-                    }
-                )
-                .ToList();
-            return barcodeconfig;
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+                  ProjectTo<BarcodeConfigGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        }
+
+        public List<BarcodeConfigDto> GetBarcodeConfigById(int id)
+        {
+            //var result =  All.Where(x => x.Id == id && x.DeletedBy == null)
+            //    .ProjectTo<BarcodeConfigDto>(_mapper.ConfigurationProvider).OrderByDescending(t => t.Id).ToList();
+
+            var result = All.Include(x => x.AppScreen)
+                .Include(x => x.BarcodeDisplayInfo)
+                .ThenInclude(x => x.TableFieldName)
+                .Where(x => x.Id == id && x.DeletedBy == null)
+                .Select(x => new BarcodeConfigDto
+                {
+                    Id = x.Id,
+                    AppScreenId = x.AppScreenId,
+                    ModuleName = x.AppScreen.ScreenName,
+                    PageId = x.PageId,
+                    PageName = "",
+                    BarcodeTypeId = x.BarcodeTypeId,
+                    BarcodeTypeName = x.BarcodeType.BarcodeTypeName,
+                    DisplayValue = x.DisplayValue,
+                    FontSize = x.FontSize,
+                    DisplayInformationLength = x.DisplayInformationLength,
+                    BarcodeCombinationList = x.BarcodeCombination.Where(x => x.DeletedDate == null).Select(s => (int)s.TableFieldNameId).ToList(),
+                    //BarcodeDisplayInfoStr = string.Join(",", x.BarcodeDisplayInfo.Where(x => x.DeletedDate == null).Select(s => s.TableFieldNameId).ToList()),
+                    BarcodeDisplayInfo = x.BarcodeDisplayInfo.Where(t => t.BarcodConfigId == x.Id && t.DeletedBy == null).OrderByDescending(s => s.Id).ToList()
+                }).OrderByDescending(x => x.Id).ToList();
+            return result;
         }
 
         public string GenerateBarcodeString(int barcodeTypeId)
@@ -75,22 +82,8 @@ namespace GSC.Respository.Barcode
                     IsDeleted = c.DeletedDate != null,
                     BarcodeTypeId = c.BarcodeTypeId,
                     BarcodeTypeName = c.BarcodeType.BarcodeTypeName,
-                    SubjectNo = c.SubjectNo,
-                    ProjectNo = c.ProjectNo,
-                    Period = c.Period,
-                    VolunteerId = c.VolunteerId,
-                    RandomizationNo = c.RandomizationNo,
-                    BarcodeFor = c.BarcodeFor,
-                    BarcodeForName = c.BarcodeFor == 0 ? "" : ((BarcodeFor)c.BarcodeFor).GetDescription(),
-                    Width = c.Width,
-                    Height = c.Height,
                     DisplayValue = c.DisplayValue,
                     FontSize = c.FontSize,
-                    TextMargin = c.TextMargin,
-                    MarginTop = c.MarginTop,
-                    MarginBottom = c.MarginBottom,
-                    MarginLeft = c.MarginLeft,
-                    MarginRight = c.MarginRight
                 }).FirstOrDefault();
         }
 

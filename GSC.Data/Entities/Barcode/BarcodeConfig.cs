@@ -1,30 +1,22 @@
 using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.UserMgt;
+using System.Collections.Generic;
 
 namespace GSC.Data.Entities.Barcode
 {
     public class BarcodeConfig : BaseEntity, ICommonAduit
     {
+        public int AppScreenId { get; set; }
+        public int PageId { get; set; }
         public int BarcodeTypeId { get; set; }
-
-        //   public int BarcodeSizeId { get; set; }
-        public bool SubjectNo { get; set; }
-        public bool ProjectNo { get; set; }
-        public bool Period { get; set; }
-        public bool VolunteerId { get; set; }
-        public bool RandomizationNo { get; set; }
-        public int BarcodeFor { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
         public bool DisplayValue { get; set; }
-        public int FontSize { get; set; }
-        public int TextMargin { get; set; }
-        public int MarginTop { get; set; }
-        public int MarginBottom { get; set; }
-        public int MarginLeft { get; set; }
-        public int MarginRight { get; set; }
-        public int? CompanyId { get; set; }
-
+        public int? FontSize { get; set; }
+        public int? DisplayInformationLength { get; set; }
         public BarcodeType BarcodeType { get; set; }
+        public AppScreen AppScreen { get; set; }
+        public IList<BarcodeCombination> BarcodeCombination { get; set; } = null;
+        public IList<BarcodeDisplayInfo> BarcodeDisplayInfo { get; set; } = null;
+        public int? CompanyId { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Helper;
+using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,6 +17,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string LabelClaim { get; set; }
         public string DistributedBy { get; set; }
         public string PackDesc { get; set; }
+        public FileModel FileModel { get; set; }
+        public string FileName { get; set; }
+        public string PathName { get; set; }
+        public string MimeType { get; set; }
         public string MarketAuthorization { get; set; }
         public DateTime? MfgDate { get; set; }
         public ReTestExpiry? RetestExpiryId { get; set; }

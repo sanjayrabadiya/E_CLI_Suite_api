@@ -527,7 +527,16 @@ namespace GSC.Audit
             //language Configartion details
             _dictionaries.Add(new Dictionary { FieldName = "LanguageId", DisplayName = "LanguageId", TableName = "LanguageName", PkName = "Id" });
 
-
+            //Barcode Config
+            _dictionaries.Add(new Dictionary { FieldName = "AppScreenId", DisplayName = "Module Name", SourceColumn = "ScreenName", TableName = "AppScreen", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "BarcodeTypeId", DisplayName = "Barcode Type", SourceColumn = "BarcodeTypeName", TableName = "BarcodeType", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "FontSize", DisplayName = "Font Size" });
+            _dictionaries.Add(new Dictionary { FieldName = "DisplayInformationLength", DisplayName = "Display Info. Length" });
+            _dictionaries.Add(new Dictionary { FieldName = "Combination", DisplayName = "Barcode Combination" });
+            _dictionaries.Add(new Dictionary { FieldName = "DisplayInformation", DisplayName = "Barcode Disp. Info" });
+            _dictionaries.Add(new Dictionary { FieldName = "OrderNumber", DisplayName = "Order Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "OrderNumber", DisplayName = "Order Number" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsSameLine", DisplayName = "Same Line" });            
         }
 
 

@@ -5,9 +5,6 @@ namespace GSC.Data.Dto.Barcode
 {
     public class BarcodeTypeDto : BaseDto
     {
-        [Required(ErrorMessage = "Barcode Type Code is required.")]
-        public string BarcodeTypeCode { get; set; }
-
         [Required(ErrorMessage = "Barcode Type name is required.")]
         public string BarcodeTypeName { get; set; }
 

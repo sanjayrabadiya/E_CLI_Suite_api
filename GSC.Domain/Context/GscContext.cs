@@ -347,6 +347,12 @@ namespace GSC.Domain.Context
         public DbSet<ProductVerificationDetail> ProductVerificationDetail { get; set; }
         public DbSet<LanguageConfiguration> LanguageConfiguration { get; set; }
         public DbSet<LanguageConfigurationDetails> LanguageConfigurationDetails { get; set; }
+        public DbSet<VerificationApprovalTemplate> VerificationApprovalTemplate { get; set; }
+        public DbSet<VerificationApprovalTemplateValue> VerificationApprovalTemplateValue { get; set; }
+        public DbSet<VerificationApprovalTemplateValueChild> VerificationApprovalTemplateValueChild { get; set; }
+        public DbSet<TableFieldName> TableFieldName { get; set; }
+        public DbSet<BarcodeCombination> BarcodeCombination { get; set; }
+        public DbSet<BarcodeDisplayInfo> BarcodeDisplayInfo { get; set; }
 
     }
 

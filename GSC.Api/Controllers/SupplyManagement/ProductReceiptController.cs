@@ -104,7 +104,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            //added by bhargav vipul for if document send empty if they cant want to change docuemnt
+            //added by vipul for if document send empty if they cant want to change docuemnt
             var productRec = _productReceiptRepository.Find(productReceiptDto.Id);
             if (productReceiptDto.FileModel?.Base64?.Length > 0)
             {

@@ -125,6 +125,20 @@ namespace GSC.Api.Controllers.UserMgt
         }
 
         [HttpGet]
+        [Route("GetAppScreenChildParentFromDropDown/{Id}")]
+        public IActionResult GetAppScreenChildParentFromDropDown(int Id)
+        {
+            return Ok(_appScreenRepository.GetAppScreenChildParentFromDropDown(Id));
+        }
+
+        [HttpGet]
+        [Route("GetTableColunms/{Id}")]
+        public IActionResult GetTableColunms(int Id)
+        {
+            return Ok(_appScreenRepository.GetTableColunms(Id));
+        }
+
+        [HttpGet]
         [Route("GetMasterTableName")]
         public IActionResult GetMasterTableName()
         {
