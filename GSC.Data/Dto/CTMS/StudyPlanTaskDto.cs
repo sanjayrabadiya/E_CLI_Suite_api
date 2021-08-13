@@ -45,4 +45,24 @@ namespace GSC.Data.Dto.CTMS
         public int CreatedBy { get; set; }
     }
 
+    public class StudyPlanTaskChartDto
+    {
+        public int All { get; set; }
+        public int Complete { get; set; }
+        public int DueDate { get; set; }
+        public int DeviatedDate { get; set; }
+        public int OnGoingDate { get; set; }
+       
+    }
+
+    public class StudyPlanTaskChartReportDto
+    {
+        public int Id { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string TaskName { get; set; }
+        public int Duration { get; set; }
+        public int NoOfDeviatedDay { get; set; }
+
+    }
 }

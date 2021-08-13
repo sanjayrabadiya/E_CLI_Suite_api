@@ -705,4 +705,12 @@ namespace GSC.Helper
         [Description("Re-Test")] ReTest = 1,
         [Description("Expiry")] Expiry = 2
     }
+
+    public enum CtmsChartType : int
+    {
+        [Description("Completed")] Completed = 1,
+        [Description("DueDate")] DueDate = 2,
+        [Description("DeviatedDate")] DeviatedDate = 3,
+        [Description("OnGoingDate")] OnGoingDate = 4,
+    }
 }

@@ -24,5 +24,7 @@ namespace GSC.Respository.CTMS
         List<StudyPlanTask> Save(StudyPlanTask taskData);
         List<AuditTrailDto> GetStudyPlanTaskHistory(int id);
         StudyPlanTaskGridDto GetStudyPlanDependentTaskList(int? StudyPlanTaskId, int ProjectId);
+        StudyPlanTaskChartDto GetDocChart(int projectId);
+        List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType);
     }
 }

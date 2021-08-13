@@ -13,6 +13,7 @@ using GSC.Helper;
 using GSC.Common;
 using GSC.Common.Common;
 using GSC.Data.Dto.Audit;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.CTMS
 {
@@ -531,6 +532,57 @@ namespace GSC.Respository.CTMS
                ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                 result.StudyPlanTask = tasklist.Where(x => x.DependentTaskId != StudyPlanTaskId).ToList();
             }
+
+            return result;
+        }
+
+        public StudyPlanTaskChartDto GetDocChart(int projectId)
+        {
+            StudyPlanTaskChartDto result = new StudyPlanTaskChartDto();
+
+            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.DeletedDate == null).ToList();
+
+            var TodayDate = DateTime.Now;
+            result.All = StudyPlanTask.Count();
+            result.DueDate = StudyPlanTask.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate == null).Count();
+            result.OnGoingDate = StudyPlanTask.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Count();
+            result.Complete = StudyPlanTask.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Count();
+            result.DeviatedDate = StudyPlanTask.Where(x => x.EndDate < x.ActualEndDate).Count();
+
+            return result;
+        }
+
+        public List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType)
+        {
+            var result = new List<StudyPlanTaskChartReportDto>();
+            var TodayDate = DateTime.Now;
+            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.DeletedDate == null).ToList();
+
+            if (chartType == CtmsChartType.Completed)
+            {
+                StudyPlanTask = StudyPlanTask.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).ToList();
+            }
+            else if (chartType == CtmsChartType.DueDate) {
+                StudyPlanTask = StudyPlanTask.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate == null).ToList();
+            }
+            else if (chartType == CtmsChartType.DeviatedDate)
+            {
+                StudyPlanTask = StudyPlanTask.Where(x => x.EndDate < x.ActualEndDate).ToList();
+            }
+            else if (chartType == CtmsChartType.OnGoingDate)
+            {
+                StudyPlanTask = StudyPlanTask.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).ToList();
+            }
+
+            result = StudyPlanTask.Select(x => new StudyPlanTaskChartReportDto
+            {
+                Id = x.Id,
+                Duration = x.Duration,
+                StartDate = x.StartDate,
+                EndDate = x.EndDate,
+                TaskName = x.TaskName,
+                NoOfDeviatedDay = chartType == CtmsChartType.DeviatedDate ? (x.ActualEndDate - x.EndDate).Value.Days : 0,
+            }).ToList();
 
             return result;
         }

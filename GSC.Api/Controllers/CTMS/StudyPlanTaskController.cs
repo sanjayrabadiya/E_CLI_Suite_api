@@ -215,5 +215,21 @@ namespace GSC.Api.Controllers.CTMS
             var studyplan = _studyPlanTaskRepository.GetStudyPlanDependentTaskList(StudyPlanTaskId, ProjectId);
             return Ok(studyplan);
         }
+
+        [Route("GetDocChart/{projectId}")]
+        [HttpGet]
+        public IActionResult GetDocChart(int projectId)
+        {
+            var result = _studyPlanTaskRepository.GetDocChart(projectId);
+            return Ok(result);
+        }
+
+        [Route("GetChartReport/{projectId}/{chartType:int?}")]
+        [HttpGet]
+        public IActionResult GetChartReport(int projectId, CtmsChartType? chartType)
+        {
+            var report = _studyPlanTaskRepository.GetChartReport(projectId, chartType);
+            return Ok(report);
+        }
     }
 }

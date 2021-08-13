@@ -8,7 +8,7 @@ namespace GSC.Data.Dto.Report
 {
     public class ProjectDatabaseDto : BaseDto
     {
-        public int ScreeningTemplateValueId { get; set; }
+        public int? ScreeningTemplateValueId { get; set; }
         public int? ScreeningTemplateParentId { get; set; }
         public int DesignOrder { get; set; }
         public int DesignOrderOfVariable { get; set; }
@@ -112,6 +112,7 @@ namespace GSC.Data.Dto.Report
         public string SubjectNo { get; set; }
         public string Initial { get; set; }
         public int? ScreeningTemplateParentId { get; set; }
+        public int? ScreeningTemplateValueId { get; set; }
         public string DomainName { get; set; }
         public string VariableName { get; set; }
         public int ScreeningTemplateId { get; set; }

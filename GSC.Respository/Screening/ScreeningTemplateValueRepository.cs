@@ -365,6 +365,7 @@ namespace GSC.Respository.Screening
                                      Initial = screening.RandomizationId != null ? randomization.Initial : screening.Attendance.Volunteer.AliasName,
                                      SubjectNo = screening.RandomizationId != null ? randomization.ScreeningNumber : screening.Attendance.Volunteer.VolunteerNo,
                                      RandomizationNumber = screening.RandomizationId != null ? randomization.RandomizationNumber : "",
+                                     ScreeningTemplateValueId = value == null ? 0 : value.Id,
                                  }).ToList();
 
 
@@ -437,6 +438,7 @@ namespace GSC.Respository.Screening
                                     UnitId = i.UnitId,
                                     Unit = i.Unit,
                                     RepeatSeqNo = i.RepeatSeqNo,
+                                    ScreeningTemplateValueId = i.ScreeningTemplateValueId
                                 }).ToList()
                             }).ToList()
                         }).ToList()
@@ -852,6 +854,7 @@ namespace GSC.Respository.Screening
                     VisitList.GroupBy(x => x.Visit).ToList().ForEach(vst =>
                       {
                           worksheet.Row(2).Cell(visitCell).SetValue(vst.Key);
+                          worksheet.Row(2).Cell(visitCell).Style.Fill.BackgroundColor = XLColor.LightGreen;
                           visitCell++;
 
                           TemplateList.Where(x => x.Visit == vst.Key).GroupBy(x => x.TemplateName).ToList().ForEach(temp =>
@@ -878,46 +881,46 @@ namespace GSC.Respository.Screening
                             });
                       });
 
-                    VariableValueList.ForEach(x =>
-                    {
-                        if (x.VariableNameValue != null)
-                        {
-                            var collectionSource = x.CollectionSource;
+                    VariableValueList.OrderByDescending(x => x.ScreeningTemplateValueId).ToList().ForEach(x =>
+                      {
+                          if (x.VariableNameValue != null)
+                          {
+                              var collectionSource = x.CollectionSource;
 
-                            var cellvalue = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == x.VariableName).ToList();
+                              var cellvalue = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == x.VariableName).ToList();
 
-                            var samevariable = worksheet.CellsUsed(cell => cell.GetString() == x.VariableName).Select(x => x.Address.ColumnNumber).ToList();
-                            var IsExist = RangeList.Where(y => y.TemplateName == x.TemplateName && y.Visit == x.Visit).FirstOrDefault();
+                              var samevariable = worksheet.CellsUsed(cell => cell.GetString() == x.VariableName).Select(x => x.Address.ColumnNumber).ToList();
+                              var IsExist = RangeList.Where(y => y.TemplateName == x.TemplateName && y.Visit == x.Visit).FirstOrDefault();
 
-                            var cellnumber = samevariable.Where(a => a >= IsExist.FirstCell && a <= IsExist.LastCell).FirstOrDefault();
-                            var rownumber = worksheet.CellsUsed(q => q.GetString() == x.Initial).Select(a => a.Address.RowNumber).FirstOrDefault();
+                              var cellnumber = samevariable.Where(a => a >= IsExist.FirstCell && a <= IsExist.LastCell).FirstOrDefault();
+                              var rownumber = worksheet.CellsUsed(q => q.GetString() == x.SubjectNo).Select(a => a.Address.RowNumber).FirstOrDefault();
 
-                            if (collectionSource == (int)CollectionSources.DateTime)
-                            {
-                                DateTime dDate;
-                                var variablevalueformat = x.VariableNameValue;
-                                var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                worksheet.Cell(rownumber, cellnumber).SetValue(dt);
-                            }
-                            else if (collectionSource == (int)CollectionSources.Date)
-                            {
-                                DateTime dDate;
-                                var variablevalueformat = x.VariableNameValue;
-                                string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
-                                worksheet.Cell(rownumber, cellnumber).SetValue(dt);
-                            }
-                            else if (collectionSource == (int)CollectionSources.Time)
-                            {
-                                var variablevalueformat = x.VariableNameValue;
-                                var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
-                                worksheet.Cell(rownumber, cellnumber).SetValue(dt);
-                            }
-                            else
-                            {
-                                worksheet.Cell(rownumber, cellnumber).SetValue(x.VariableNameValue);
-                            }
-                        }
-                    });
+                              if (collectionSource == (int)CollectionSources.DateTime)
+                              {
+                                  DateTime dDate;
+                                  var variablevalueformat = x.VariableNameValue;
+                                  var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                  worksheet.Cell(rownumber, cellnumber).SetValue(dt);
+                              }
+                              else if (collectionSource == (int)CollectionSources.Date)
+                              {
+                                  DateTime dDate;
+                                  var variablevalueformat = x.VariableNameValue;
+                                  string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                                  worksheet.Cell(rownumber, cellnumber).SetValue(dt);
+                              }
+                              else if (collectionSource == (int)CollectionSources.Time)
+                              {
+                                  var variablevalueformat = x.VariableNameValue;
+                                  var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                                  worksheet.Cell(rownumber, cellnumber).SetValue(dt);
+                              }
+                              else
+                              {
+                                  worksheet.Cell(rownumber, cellnumber).SetValue(x.VariableNameValue);
+                              }
+                          }
+                      });
                 }
 
                 if (filters.FilterId == DBDSReportFilter.MedDRA || filters.FilterId == null)
