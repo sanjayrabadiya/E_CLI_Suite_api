@@ -114,15 +114,15 @@ namespace GSC.Respository.Etmf
 
             if (data.FolderType == (int)WorkPlaceFolder.Country)
 
-                path = System.IO.Path.Combine(data.Projectname, WorkPlaceFolder.Country.GetDescription(),
+                path = System.IO.Path.Combine(data.Projectname,FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.Sitename.Trim(), data.Zonename.Trim(), data.Sectionname.Trim(), data.Artificatename);
             else if (data.FolderType == (int)WorkPlaceFolder.Site)
-                path = System.IO.Path.Combine(data.Projectname, WorkPlaceFolder.Site.GetDescription(),
+                path = System.IO.Path.Combine(data.Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                 data.Sitename.Trim(), data.Zonename.Trim(), data.Sectionname.Trim(), data.Artificatename);
             else if (data.FolderType == (int)WorkPlaceFolder.Trial)
-                path = System.IO.Path.Combine(data.Projectname, WorkPlaceFolder.Trial.GetDescription(),
+                path = System.IO.Path.Combine(data.Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    data.Zonename.Trim(), data.Sectionname.Trim(), data.Artificatename);
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path, data.DocumentName);
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path, data.DocumentName);
             System.IO.File.Delete(Path.Combine(filePath));
 
             return id;
@@ -184,8 +184,8 @@ namespace GSC.Respository.Etmf
                 obj.ZoneName = _etmfZoneMasterLibraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.EtmfSectionMasterLibrary.EtmfZoneMasterLibraryId).ZonName;
                 obj.DocumentName = item.DocumentName;
                 obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
-                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath, item.DocumentName);
-                obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), item.DocPath);
+                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(),_jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
+                obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.Reviewer = users;
                 obj.CreatedDate = item.CreatedDate;
@@ -220,8 +220,8 @@ namespace GSC.Respository.Etmf
             obj.ProjectWorkplaceArtificateId = document.ProjectWorkplaceArtificateId;
             obj.DocumentName = document.DocumentName;
             obj.ExtendedName = document.DocumentName.Contains('_') ? document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) : document.DocumentName;
-            obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
-            obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath);
+            obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(),_jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+            obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), document.DocPath);
             obj.CreatedByUser = _userRepository.Find((int)document.CreatedBy).UserName;
             obj.CreatedDate = document.CreatedDate;
             obj.Version = document.Version;
@@ -261,18 +261,32 @@ namespace GSC.Respository.Etmf
             string filePath = string.Empty;
             string path = string.Empty;
 
+            //if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Country)
+
+            //    path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Country.GetDescription(),
+            //      projectWorkplaceArtificatedocumentDto.Countryname.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
+            //else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Site)
+            //    path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Site.GetDescription(),
+            //     projectWorkplaceArtificatedocumentDto.Sitename.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
+            //else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Trial)
+            //    path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Trial.GetDescription(),
+            //       projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
+
+            //filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
+            //string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceArtificatedocumentDto.FileModel, filePath, projectWorkplaceArtificatedocumentDto.FileName);
+
             if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Country)
 
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Country.GetDescription(),
+                path = System.IO.Path.Combine(Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   projectWorkplaceArtificatedocumentDto.Countryname.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
             else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Site)
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Site.GetDescription(),
+                path = System.IO.Path.Combine(Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                  projectWorkplaceArtificatedocumentDto.Sitename.Trim(), projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
             else if (projectWorkplaceArtificatedocumentDto.FolderType == (int)WorkPlaceFolder.Trial)
-                path = System.IO.Path.Combine(Projectname, WorkPlaceFolder.Trial.GetDescription(),
+                path = System.IO.Path.Combine(Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
 
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), path);
             string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceArtificatedocumentDto.FileModel, filePath, projectWorkplaceArtificatedocumentDto.FileName);
 
             projectWorkplaceArtificatedocumentDto.Id = 0;
@@ -1035,7 +1049,7 @@ namespace GSC.Respository.Etmf
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var fileName = projectWorkplaceArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceArtificatedocument.DocumentName.Substring(0, projectWorkplaceArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceArtificatedocument.DocumentName;
             var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
-            filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), projectWorkplaceArtificatedocument.DocPath, docName);
+            filePath = System.IO.Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), projectWorkplaceArtificatedocument.DocPath, docName);
 
             Byte[] byteArray = Convert.FromBase64String(param.documentData);
             Stream stream = new MemoryStream(byteArray);
@@ -1110,7 +1124,7 @@ namespace GSC.Respository.Etmf
         {
             var document = Find(Id);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+            var FullPath = Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
                 return null;
@@ -1128,7 +1142,7 @@ namespace GSC.Respository.Etmf
             {
                 var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
 
-                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
                 FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
                 DocIORenderer render = new DocIORenderer();
@@ -1144,13 +1158,13 @@ namespace GSC.Respository.Etmf
                 pdfDocument.Close();
 
                 outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
-                var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
+                var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, outputname);
                 FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
                 outputStream.WriteTo(file);
             }
             else if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
             {
-                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, document.DocumentName);
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
                 FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
                 PdfDocument pdfDocument = new PdfDocument();
@@ -1162,7 +1176,7 @@ namespace GSC.Respository.Etmf
                 pdfDocument.Close();
 
                 outputname = document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) + "_" + DateTime.Now.Ticks + ".pdf";
-                var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), document.DocPath, outputname);
+                var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, outputname);
                 FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
                 outputStream.WriteTo(file);
 

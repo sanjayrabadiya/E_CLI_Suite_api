@@ -194,11 +194,13 @@ namespace GSC.Api.Controllers.Etmf
         [Route("SaveDocument")]
         public async Task<IActionResult> SaveDocument([FromBody] Dictionary<string, string> jsonObject)
         {
-            var userName = Convert.ToString(jsonObject["userName"]);
-            var result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userName}");
-            int CompanyID = Convert.ToInt32(result.CompanyId);
-            _pdfViewerRepository.SetDbConnection(result.ConnectionString);
-
+            if (!_environmentSetting.Value.IsPremise)
+            {
+                var userName = Convert.ToString(jsonObject["userName"]);
+                var result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userName}");
+                int CompanyID = Convert.ToInt32(result.CompanyId);
+                _pdfViewerRepository.SetDbConnection(result.ConnectionString);
+            }
             //await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
             _pdfViewerRepository.SaveDocument(jsonObject);
             return Ok();

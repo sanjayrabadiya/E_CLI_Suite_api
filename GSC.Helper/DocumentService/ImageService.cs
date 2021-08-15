@@ -12,10 +12,41 @@ namespace GSC.Shared.DocumentService
     public interface IImageService
     {
         string ImageSave(FileModel file, string path, FolderType folderType);
+        string ImageSave(FileModel file, string path, string companyCode, FolderType imageType, string category);
+        void RemoveImage(string basePath, string filePath);
     }
 
     public class ImageService : IImageService
     {
+        public string ImageSave(FileModel file, string path, string companyCode, FolderType imageType,string category)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+
+
+            file.Base64 = file.Base64.Split("base64,")[1];
+
+            var fileBytes = Convert.FromBase64String(file.Base64);
+
+            string[] paths = { path, companyCode, imageType.ToString(), category, "Original" };
+            var fullPath = Path.Combine(paths);
+
+            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+            var strGuid = Guid.NewGuid() + "." + file.Extension;
+            var fileName = Path.Combine(companyCode, imageType.ToString(), category, "Original", strGuid);
+
+            var imagePath = Path.Combine(path, fileName);
+            File.WriteAllBytes(imagePath, fileBytes);
+
+            var thumbFileBytes = CreateThumbByte(fileBytes);
+
+            string[] thumbPaths = { path, companyCode, imageType.ToString(), category, "Thumbnail" };
+            var thumbFullPath = Path.Combine(thumbPaths);
+            if (!Directory.Exists(thumbFullPath)) Directory.CreateDirectory(thumbFullPath);
+            var thumbFileName = Path.Combine(companyCode, imageType.ToString(), category, "Thumbnail", strGuid);
+            var thumbPath = Path.Combine(path, thumbFileName);
+            File.WriteAllBytes(thumbPath, thumbFileBytes);
+            return fileName;
+        }
         public string ImageSave(FileModel file, string path, FolderType imageType)
         {
             if (string.IsNullOrEmpty(path)) return null;
@@ -104,6 +135,24 @@ namespace GSC.Shared.DocumentService
             }
 
             return image;
+        }
+
+        public void RemoveImage(string basePath, string filePath)
+        {
+            if (!String.IsNullOrEmpty(filePath))
+            {
+                string[] paths = { basePath, filePath };
+                var fullPath = Path.Combine(paths);
+                if (File.Exists(fullPath))
+                {
+                    File.Delete(Path.Combine(fullPath));
+                }
+                var thumbPaths = fullPath.Replace("Original", "Thumbnail");
+                if (File.Exists(thumbPaths))
+                {
+                    File.Delete(Path.Combine(thumbPaths));
+                }
+            }
         }
     }
 }

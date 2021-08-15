@@ -46,7 +46,6 @@ namespace GSC.Shared.DocumentService
         //    File.WriteAllBytes(docPath, fileBytes);
         //    return fileName;
         //}
-
         public static string SaveDocument(FileModel file, string path, FolderType folderType, string categoryName)
         {
             string[] paths = { path, folderType.ToString(), categoryName };
@@ -66,9 +65,9 @@ namespace GSC.Shared.DocumentService
             return fileName;
         }
 
-        public static string SaveProjectDocument(FileModel file, string path, FolderType folderType)
+        public static string SaveUploadDocument(FileModel file, string basePath, string companyCode, FolderType folderType, string categoryName)
         {
-            string[] paths = { path, folderType.ToString() };
+            string[] paths = { basePath, companyCode, folderType.ToString(), categoryName };
             var fullPath = Path.Combine(paths);
 
             if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
@@ -76,14 +75,51 @@ namespace GSC.Shared.DocumentService
             file.Base64 = file.Base64.Split("base64,")[1];
 
             var strGuid = Guid.NewGuid() + "." + file.Extension;
-            var fileName = Path.Combine(folderType.ToString(), strGuid);
+            var filepath = Path.Combine(companyCode, folderType.ToString(), categoryName, strGuid);
 
             var imageBytes = Convert.FromBase64String(file.Base64);
-            var documentPath = Path.Combine(path, fileName);
+            var documentPath = Path.Combine(basePath, filepath);
             File.WriteAllBytes(documentPath, imageBytes);
 
-            return fileName;
+            return filepath;
         }
+
+        public static string SaveUploadDocument(FileModel file, string basePath, string companyCode,string studyCode, FolderType folderType, string categoryName)
+        {
+            string[] paths = { basePath, companyCode, studyCode, folderType.ToString(), categoryName };
+            var fullPath = Path.Combine(paths);
+
+            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+
+            file.Base64 = file.Base64.Split("base64,")[1];
+
+            var strGuid = Guid.NewGuid() + "." + file.Extension;
+            var filepath = Path.Combine(companyCode, studyCode,folderType.ToString(), categoryName, strGuid);
+
+            var imageBytes = Convert.FromBase64String(file.Base64);
+            var documentPath = Path.Combine(basePath, filepath);
+            File.WriteAllBytes(documentPath, imageBytes);
+
+            return filepath;
+        }
+        //public static string SaveProjectDocument(FileModel file, string path, FolderType folderType)
+        //{
+        //    string[] paths = { path, folderType.ToString() };
+        //    var fullPath = Path.Combine(paths);
+
+        //    if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+
+        //    file.Base64 = file.Base64.Split("base64,")[1];
+
+        //    var strGuid = Guid.NewGuid() + "." + file.Extension;
+        //    var fileName = Path.Combine(folderType.ToString(), strGuid);
+
+        //    var imageBytes = Convert.FromBase64String(file.Base64);
+        //    var documentPath = Path.Combine(path, fileName);
+        //    File.WriteAllBytes(documentPath, imageBytes);
+
+        //    return fileName;
+        //}
 
         public static string SaveWorkplaceDocument(FileModel file, string path, string Filename)
         {
@@ -123,43 +159,43 @@ namespace GSC.Shared.DocumentService
             return fileName;
         }
 
-        public static string SaveEconsentFile(FileModel file, string path, FolderType folderType, string Rootname)
-        {
-            string[] paths = { path, folderType.ToString(), Rootname };
-            var fullPath = Path.Combine(paths);
+        //public static string SaveEconsentFile(FileModel file, string path, FolderType folderType, string Rootname)
+        //{
+        //    string[] paths = { path, folderType.ToString(), Rootname };
+        //    var fullPath = Path.Combine(paths);
 
-            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+        //    if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
 
-            file.Base64 = file.Base64.Split("base64,")[1];
+        //    file.Base64 = file.Base64.Split("base64,")[1];
 
-            var strGuid = Guid.NewGuid() + "." + file.Extension;
-            var fileName = Path.Combine(folderType.ToString(), Rootname, strGuid);
+        //    var strGuid = Guid.NewGuid() + "." + file.Extension;
+        //    var fileName = Path.Combine(folderType.ToString(), Rootname, strGuid);
 
-            var imageBytes = Convert.FromBase64String(file.Base64);
-            var documentPath = Path.Combine(path, fileName);
-            File.WriteAllBytes(documentPath, imageBytes);
+        //    var imageBytes = Convert.FromBase64String(file.Base64);
+        //    var documentPath = Path.Combine(path, fileName);
+        //    File.WriteAllBytes(documentPath, imageBytes);
             
-            return fileName;
-        }
+        //    return fileName;
+        //}
 
-        public static string SaveEconsentSectionReferenceFile(FileModel file, string path, FolderType folderType, string Rootname)
-        {
-            string[] paths = { path, folderType.ToString(), Rootname };
-            var fullPath = Path.Combine(paths);
+        //public static string SaveEconsentSectionReferenceFile(FileModel file, string path, FolderType folderType, string Rootname)
+        //{
+        //    string[] paths = { path, folderType.ToString(), Rootname };
+        //    var fullPath = Path.Combine(paths);
 
-            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+        //    if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
 
-            file.Base64 = file.Base64.Split("base64,")[1];
+        //    file.Base64 = file.Base64.Split("base64,")[1];
 
-            var strGuid = Guid.NewGuid() + "." + file.Extension;
-            var fileName = Path.Combine(folderType.ToString(), Rootname, strGuid);
+        //    var strGuid = Guid.NewGuid() + "." + file.Extension;
+        //    var fileName = Path.Combine(folderType.ToString(), Rootname, strGuid);
 
-            var imageBytes = Convert.FromBase64String(file.Base64);
-            var documentPath = Path.Combine(path, fileName);
-            File.WriteAllBytes(documentPath, imageBytes);
+        //    var imageBytes = Convert.FromBase64String(file.Base64);
+        //    var documentPath = Path.Combine(path, fileName);
+        //    File.WriteAllBytes(documentPath, imageBytes);
 
-            return fileName;
-        }
+        //    return fileName;
+        //}
 
 
         public static string SaveMedraFile(FileModel file, string path, FolderType folderType, string Language, string Version, string Rootname)
@@ -258,6 +294,18 @@ namespace GSC.Shared.DocumentService
                 }
             }
             return "";
+        }
+        public static void RemoveFile(string basepath, string filepath)
+        {
+            if (!String.IsNullOrEmpty(filepath))
+            {
+                string[] paths = { basepath, filepath };
+                var fullPath = Path.Combine(paths);
+                if (File.Exists(fullPath))
+                {
+                    File.Delete(Path.Combine(fullPath));
+                }
+            }
         }
     }
 }

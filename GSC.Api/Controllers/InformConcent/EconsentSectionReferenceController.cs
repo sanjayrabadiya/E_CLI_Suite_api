@@ -12,6 +12,9 @@ using GSC.Respository.InformConcent;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Data.Entities.InformConcent;
 using System.IO;
+using GSC.Shared.JWTAuth;
+using GSC.Domain.Context;
+using GSC.Respository.Master;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -23,15 +26,22 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
+        private readonly IProjectRepository _projectRepository;
         public EconsentSectionReferenceController(IEconsentSectionReferenceRepository econsentSectionReferenceRepository,
                                                 IUnitOfWork uow,
                                                 IMapper mapper,
-                                                IUploadSettingRepository uploadSettingRepository)
+                                                IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser, IGSCContext context, IProjectRepository projectRepository)
         {
             _econsentSectionReferenceRepository = econsentSectionReferenceRepository;
             _uow = uow;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
+            _projectRepository = projectRepository;
+
         }
 
         //not use
@@ -61,10 +71,19 @@ namespace GSC.Api.Controllers.InformConcent
             if (!ModelState.IsValid)
                 return new UnprocessableEntityObjectResult(ModelState);
             var sectionRef = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
+            int ProjectId = _context.EconsentSetup.Where(x => x.Id == econsentSectionReferenceDto.EconsentSetupId).Select(x => x.ProjectId).FirstOrDefault();
             foreach (var fileModeItem in econsentSectionReferenceDto.FileModel)
             {
                 if (fileModeItem?.Base64?.Length > 0)
-                    sectionRef.FilePath = DocumentService.SaveEconsentSectionReferenceFile(fileModeItem, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
+                {
+                    var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(ProjectId);
+                    if (!string.IsNullOrEmpty(validateuploadlimit))
+                    {
+                        ModelState.AddModelError("Message", validateuploadlimit);
+                        return BadRequest(ModelState);
+                    }
+                    sectionRef.FilePath = DocumentService.SaveUploadDocument(fileModeItem, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent, "EconsentSectionReference");
+                }
                 _econsentSectionReferenceRepository.Add(sectionRef);
                 string root = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent.ToString(), "EconsentSectionReference");
                 if (_uow.Save() <= 0)
@@ -95,10 +114,19 @@ namespace GSC.Api.Controllers.InformConcent
                 ModelState.AddModelError("Message", "Please Update only single file");
                 return BadRequest(ModelState);
             }
+            int ProjectId = _context.EconsentSetup.Where(x => x.Id == econsentSectionReferenceDto.EconsentSetupId).Select(x => x.ProjectId).FirstOrDefault();
             if (econsentSectionReferenceDto.FileModel.Count > 0)
             {
                 if (econsentSectionReferenceDto.FileModel[0]?.Base64?.Length > 0)
-                    sectionRefrence.FilePath = DocumentService.SaveEconsentSectionReferenceFile(econsentSectionReferenceDto.FileModel[0], _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSectionReference");
+                {
+                    var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(ProjectId);
+                    if (!string.IsNullOrEmpty(validateuploadlimit))
+                    {
+                        ModelState.AddModelError("Message", validateuploadlimit);
+                        return BadRequest(ModelState);
+                    }
+                    sectionRefrence.FilePath = DocumentService.SaveUploadDocument(econsentSectionReferenceDto.FileModel[0], _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent, "EconsentSectionReference");
+                }
             }
             else
             {

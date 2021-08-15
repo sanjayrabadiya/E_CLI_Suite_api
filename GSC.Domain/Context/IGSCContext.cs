@@ -22,6 +22,7 @@ using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.Pharmacy;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.EditCheck;
+using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Project.Rights;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Data.Entities.Project.Workflow;
@@ -305,5 +306,6 @@ namespace GSC.Domain.Context
         DbSet<TableFieldName> TableFieldName { get; set; }
         DbSet<BarcodeCombination> BarcodeCombination { get; set; }
         DbSet<BarcodeDisplayInfo> BarcodeDisplayInfo { get; set; }
+        DbSet<UploadLimit> UploadLimit { get; set; }
     }
 }

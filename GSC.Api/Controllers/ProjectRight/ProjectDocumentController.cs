@@ -96,7 +96,13 @@ namespace GSC.Api.Controllers.ProjectRight
             //set file path and extension
             if (projectDocumentDto.FileModel?.Base64?.Length > 0)
             {
-                projectDocumentDto.PathName = DocumentService.SaveProjectDocument(projectDocumentDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.Project);
+                var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(projectDocumentDto.ProjectId);
+                if (!string.IsNullOrEmpty(validateuploadlimit))
+                {
+                    ModelState.AddModelError("Message", validateuploadlimit);
+                    return BadRequest(ModelState);
+                }
+                projectDocumentDto.PathName = DocumentService.SaveUploadDocument(projectDocumentDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(projectDocumentDto.ProjectId), FolderType.TraningDocument, "");
                 projectDocumentDto.MimeType = projectDocumentDto.FileModel.Extension;
             }
 
@@ -133,9 +139,14 @@ namespace GSC.Api.Controllers.ProjectRight
             document.FileName = projectDocumentDto.FileName;
             if (projectDocumentDto.FileModel?.Base64?.Length > 0)
             {
-                var documentCategory = "";
-                document.PathName = DocumentService.SaveDocument(projectDocumentDto.FileModel,
-                    _uploadSettingRepository.GetDocumentPath(), FolderType.Project, documentCategory);
+                var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(projectDocumentDto.ProjectId);
+                if (!string.IsNullOrEmpty(validateuploadlimit))
+                {
+                    ModelState.AddModelError("Message", validateuploadlimit);
+                    return BadRequest(ModelState);
+                }
+                document.PathName = DocumentService.SaveUploadDocument(projectDocumentDto.FileModel,
+                    _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(projectDocumentDto.ProjectId), FolderType.TraningDocument, "");
                 document.MimeType = projectDocumentDto.FileModel.Extension;
                 document.FileName = projectDocumentDto.FileName;
             }

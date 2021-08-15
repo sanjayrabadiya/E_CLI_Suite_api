@@ -573,7 +573,7 @@ namespace GSC.Respository.Etmf
                 projectWorkplace = new ProjectWorkplace();
                 ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
                 projectWorkplace.ProjectId = projectDetail.Id;
-                projectPath = System.IO.Path.Combine(docPath, FolderType.ProjectWorksplace.GetDescription(), projectDetail.ProjectCode.Replace("/", ""));
+                projectPath = System.IO.Path.Combine(docPath, _jwtTokenAccesser.CompanyId.ToString(), projectDetail.ProjectCode.Replace("/", ""),FolderType.Etmf.GetDescription());
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
                 sitePath = Path.Combine(projectPath, WorkPlaceFolder.Site.GetDescription());
@@ -763,7 +763,7 @@ namespace GSC.Respository.Etmf
         public byte[] CreateZipFileOfWorkplace(int Id)
         {
             var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
-            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""));
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""));
             ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
             byte[] compressedBytes;
             var zipfolder = FolderPath + ".zip";
@@ -785,7 +785,7 @@ namespace GSC.Respository.Etmf
                 string sitePath = string.Empty;
                 projectWorkplace = All.Where(x => x.ProjectId == projectDetail.Id).FirstOrDefault();
                 ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
-                projectPath = Path.Combine(docPath, FolderType.ProjectWorksplace.GetDescription(), projectDetail.ProjectCode.Replace("/", ""));
+                projectPath = Path.Combine(docPath, _jwtTokenAccesser.CompanyId.ToString(), projectDetail.ProjectCode.Replace("/", ""));
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
                 sitePath = Path.Combine(projectPath, WorkPlaceFolder.Site.GetDescription());

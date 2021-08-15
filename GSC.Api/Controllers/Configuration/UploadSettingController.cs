@@ -106,5 +106,13 @@ namespace GSC.Api.Controllers.Configuration
 
             return Ok();
         }
+
+        [HttpGet]
+        [Route("IsUnlimitedUploadlimit")]
+        public IActionResult IsUnlimitedUploadlimit()
+        {          
+            var uploadSetting = _uploadSettingRepository.IsUnlimitedUploadlimit();           
+            return Ok(uploadSetting);
+        }
     }
 }

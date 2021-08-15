@@ -11,7 +11,9 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.InformConcent;
+using GSC.Respository.Master;
 using GSC.Shared.DocumentService;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.InformConcent
@@ -25,17 +27,21 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository; 
         private readonly IGSCContext _context;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectRepository _projectRepository;
         public EconsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
             IUnitOfWork uow,
             IMapper mapper, IUploadSettingRepository uploadSettingRepository,             
-            IGSCContext context)
+            IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IProjectRepository projectRepository)
         {
             _econsentSetupRepository = econsentSetupRepository;
             _uow = uow;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;            
             _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _projectRepository = projectRepository;
         }
 
 
@@ -105,8 +111,16 @@ namespace GSC.Api.Controllers.InformConcent
                 return BadRequest(ModelState);
             }
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
-                econsent.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSetup");
-
+            {
+                var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(econsentSetupDto.ProjectId);
+                if (!string.IsNullOrEmpty(validateuploadlimit))
+                {
+                    ModelState.AddModelError("Message", validateuploadlimit);
+                    return BadRequest(ModelState);
+                }
+                econsent.DocumentPath = DocumentService.SaveUploadDocument(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(econsentSetupDto.ProjectId), FolderType.InformConcent, "EconsentSetup");
+                //econsent.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSetup");
+            }
             string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsent.DocumentPath);
             var validatedocument = _econsentSetupRepository.validateDocument(fullpath);
             if (!string.IsNullOrEmpty(validatedocument))
@@ -147,7 +161,14 @@ namespace GSC.Api.Controllers.InformConcent
             }
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
             {
-                econsent.DocumentPath = DocumentService.SaveEconsentFile(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.InformConcent, "EconsentSetup");
+                var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(econsentSetupDto.ProjectId);
+                if (!string.IsNullOrEmpty(validateuploadlimit))
+                {
+                    ModelState.AddModelError("Message", validateuploadlimit);
+                    return BadRequest(ModelState);
+                }
+                DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.DocumentPath);
+                econsent.DocumentPath = DocumentService.SaveUploadDocument(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(),_projectRepository.GetStudyCode(econsentSetupDto.ProjectId),FolderType.InformConcent, "EconsentSetup");
                 string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsent.DocumentPath);
                 var validatedocument = _econsentSetupRepository.validateDocument(fullpath);
                 if (!string.IsNullOrEmpty(validatedocument))

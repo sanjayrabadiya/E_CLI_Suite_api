@@ -69,7 +69,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             //set file path and extension
             if (productReceiptDto.FileModel?.Base64?.Length > 0)
             {
-                productReceiptDto.PathName = DocumentService.SaveProjectDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.ProductReceipt);
+                productReceiptDto.PathName = DocumentService.SaveUploadDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductReceipt,"");
                 productReceiptDto.MimeType = productReceiptDto.FileModel.Extension;
                 productReceiptDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + productReceiptDto.FileModel.Extension;
             }
@@ -108,7 +108,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             var productRec = _productReceiptRepository.Find(productReceiptDto.Id);
             if (productReceiptDto.FileModel?.Base64?.Length > 0)
             {
-                productReceiptDto.PathName = DocumentService.SaveDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.ProductReceipt, "");
+                productReceiptDto.PathName = DocumentService.SaveUploadDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductReceipt, "");
                 productReceiptDto.MimeType = productReceiptDto.FileModel.Extension;
                 productReceiptDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + productReceiptDto.FileModel.Extension;
             }

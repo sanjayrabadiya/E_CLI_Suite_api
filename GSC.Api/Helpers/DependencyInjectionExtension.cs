@@ -43,6 +43,7 @@ using GSC.Respository.LanguageSetup;
 using GSC.Respository.AdverseEvent;
 using GSC.Respository.CTMS;
 using GSC.Respository.SupplyManagement;
+using GSC.Respository.Project.GeneralConfig;
 
 namespace GSC.Api.Helpers
 {
@@ -326,6 +327,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ILanguageConfigurationRepository, LanguageConfigurationRepository>();
             services.AddScoped<IBarcodeCombinationRepository, BarcodeCombinationRepository>();
             services.AddScoped<IBarcodeDisplayInfoRepository, BarcodeDisplayInfoRepository>();
+            services.AddScoped<IUploadlimitRepository, UploadLimitRepository>();
         }
     }
 }

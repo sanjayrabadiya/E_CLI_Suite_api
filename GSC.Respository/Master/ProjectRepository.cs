@@ -718,5 +718,16 @@ namespace GSC.Respository.Master
 
             return projects;
         }
+
+        public string GetStudyCode(int ProjectId)
+        {
+            var projectdDetail = All.Where(x => x.Id == ProjectId).Select(i => new { i.ParentProjectId, i.ProjectCode }).FirstOrDefault();
+            if (projectdDetail.ParentProjectId != null)
+            {
+                var projectCode = All.Where(x => x.Id == projectdDetail.ParentProjectId).Select(x => x.ProjectCode).FirstOrDefault();
+                return projectCode + "\\" + projectdDetail.ProjectCode;
+            }
+            return projectdDetail.ProjectCode;
+        }
     }
 }

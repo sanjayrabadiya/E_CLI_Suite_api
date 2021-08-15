@@ -23,6 +23,7 @@ using GSC.Shared.Configuration;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using GSC.Shared.JWTAuth;
+using GSC.Shared.Extension;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -113,7 +114,7 @@ namespace GSC.Api.Controllers.UserMgt
         {
             if (!_environmentSetting.Value.IsPremise)
             {
-                _centreUserService.GetBlockedUser($"{_environmentSetting.Value.CentralApi}User/GetBlockedUser/{id}");                
+                _centreUserService.GetBlockedUser($"{_environmentSetting.Value.CentralApi}User/GetBlockedUser/{id}");
             }
             if (id <= 0) return BadRequest();
 
@@ -146,7 +147,7 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (userDto.FileModel?.Base64?.Length > 0)
                 userDto.ProfilePic = new ImageService().ImageSave(userDto.FileModel,
-                    _uploadSettingRepository.GetImagePath(), FolderType.Employee);
+                    _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.User, FolderType.Logo.GetDescription());
 
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.IsLocked = false;
@@ -197,9 +198,12 @@ namespace GSC.Api.Controllers.UserMgt
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             if (userDto.FileModel?.Base64?.Length > 0)
+            {
+                var userDetails = _userRepository.Find(userDto.Id);
+                new ImageService().RemoveImage(_uploadSettingRepository.GetImagePath(), userDetails.ProfilePic);
                 userDto.ProfilePic = new ImageService().ImageSave(userDto.FileModel,
-                    _uploadSettingRepository.GetImagePath(), FolderType.Employee);
-
+                    _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.User, FolderType.Logo.GetDescription());
+            }
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.IsFirstTime = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsFirstTime ?? false;
             user.IsLocked = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsLocked ?? false;
@@ -283,7 +287,7 @@ namespace GSC.Api.Controllers.UserMgt
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto loginDto)
         {
 
-           
+
             if (!_environmentSetting.Value.IsPremise)
             {
                 CommonResponceView userdetails = await _centreUserService.ChangePassword(loginDto, _environmentSetting.Value.CentralApi);

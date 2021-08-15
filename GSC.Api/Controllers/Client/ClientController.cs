@@ -13,6 +13,8 @@ using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Shared.JWTAuth;
+using GSC.Shared.Extension;
 
 namespace GSC.Api.Controllers.Client
 {
@@ -27,6 +29,7 @@ namespace GSC.Api.Controllers.Client
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public ClientController(IClientRepository clientRepository,
             IClientTypeRepository clientTypeRepository,
@@ -34,7 +37,8 @@ namespace GSC.Api.Controllers.Client
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IUploadSettingRepository uploadSettingRepository)
+            IUploadSettingRepository uploadSettingRepository,
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _clientTypeRepository = clientTypeRepository;
             _securityRoleRepository = securityRoleRepository;
@@ -44,6 +48,7 @@ namespace GSC.Api.Controllers.Client
             _uow = uow;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -83,7 +88,7 @@ namespace GSC.Api.Controllers.Client
 
             if (clientDto.FileModel?.Base64?.Length > 0)
                 clientDto.Logo = new ImageService().ImageSave(clientDto.FileModel,
-                    _uploadSettingRepository.GetImagePath(), FolderType.Logo);
+                    _uploadSettingRepository.GetImagePath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.Client,FolderType.Logo.GetDescription());
 
 
             var client = _mapper.Map<Data.Entities.Client.Client>(clientDto);
@@ -108,8 +113,12 @@ namespace GSC.Api.Controllers.Client
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             if (clientDto.FileModel?.Base64?.Length > 0)
+            {
+                var clientDetail = _clientRepository.Find(clientDto.Id);
+                new ImageService().RemoveImage(_uploadSettingRepository.GetImagePath(), clientDetail.Logo);
                 clientDto.Logo = new ImageService().ImageSave(clientDto.FileModel,
-                    _uploadSettingRepository.GetImagePath(), FolderType.Logo);
+                    _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Client, FolderType.Logo.GetDescription());
+            }
 
             var client = _mapper.Map<Data.Entities.Client.Client>(clientDto);
 
@@ -138,7 +147,7 @@ namespace GSC.Api.Controllers.Client
 
             _clientRepository.Delete(record);
             _uow.Save();
-
+            
             return Ok();
         }
 

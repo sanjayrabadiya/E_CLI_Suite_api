@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using Syncfusion.EJ2.PdfViewer;
 using Microsoft.Extensions.Caching.Memory;
+using System.Linq;
 
 namespace GSC.Respository.Etmf
 {
@@ -68,7 +69,7 @@ namespace GSC.Respository.Etmf
             }
             else if (version == 5.2)
             {
-                var projectWorkplaceSubSecArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(Convert.ToInt32(jsonObject["artificateDocumentId"]));
+                var projectWorkplaceSubSecArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x=>x.Id==Convert.ToInt32(jsonObject["artificateDocumentId"])).FirstOrDefault();
                 projectWorkplaceSubSecArtificatedocument.DocumentName = docExtendedName;
                 _projectWorkplaceSubSecArtificatedocumentRepository.Update(projectWorkplaceSubSecArtificatedocument);
                 if (_context.Save() <= 0) throw new Exception("Updating Document failed on save.");

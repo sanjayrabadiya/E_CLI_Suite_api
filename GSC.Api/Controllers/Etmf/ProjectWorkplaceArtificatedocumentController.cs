@@ -244,7 +244,7 @@ namespace GSC.Api.Controllers.Etmf
             var history = _projectArtificateDocumentHistoryRepository.Find(id);
             var document = _projectWorkplaceArtificatedocumentRepository.Find(history.ProjectWorkplaceArtificateDocumentId);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = System.IO.Path.Combine(upload.DocumentPath, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, history.DocumentName);
+            var FullPath = System.IO.Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
                 return null;
@@ -297,7 +297,7 @@ namespace GSC.Api.Controllers.Etmf
             var history = _projectArtificateDocumentHistoryRepository.Find(id);
             var document = _projectWorkplaceArtificatedocumentRepository.Find(history.ProjectWorkplaceArtificateDocumentId);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = Path.Combine(upload.DocumentUrl, FolderType.ProjectWorksplace.GetDescription(), document.DocPath, history.DocumentName);
+            var FullPath = Path.Combine(upload.DocumentUrl, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
             obj.FullDocPath = FullPath;
             return Ok(obj);
         }

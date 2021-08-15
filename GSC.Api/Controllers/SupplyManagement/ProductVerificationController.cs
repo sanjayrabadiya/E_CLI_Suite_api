@@ -84,7 +84,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             //set file path and extension
             if (productVerificationDto.FileModel?.Base64?.Length > 0)
             {
-                productVerificationDto.PathName = DocumentService.SaveProjectDocument(productVerificationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.ProductVerification);
+                productVerificationDto.PathName = DocumentService.SaveUploadDocument(productVerificationDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductVerification,"");
                 productVerificationDto.MimeType = productVerificationDto.FileModel.Extension;
                 productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
             }

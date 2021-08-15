@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
+using GSC.Helper;
 
 namespace GSC.Data.Dto.Configuration
 {
@@ -22,5 +23,6 @@ namespace GSC.Data.Dto.Configuration
 
         [Required(ErrorMessage = "Data Recycle Days is required.")]
         public int? DataRecycleDays { get; set; }
+        public UploadLimitType? UploadLimitType { get; set; }
     }
 }

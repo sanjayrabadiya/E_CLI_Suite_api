@@ -140,13 +140,19 @@ namespace GSC.Helper
         [Description("Medra Dictionary")] MedraDictionary = 6,
         [Description("DossierReport")] DossierReport = 7,
         [Description("ExcleTemplate")] ExcleTemplate = 8,
-        [Description("Project Worksplace")] ProjectWorksplace = 9,
+        //[Description("Project Worksplace")] ProjectWorksplace = 9,
+        [Description("ETMF")] Etmf = 9,
         [Description("Inform Consent")] InformConcent = 10,
         [Description("DBDS Report")] DBDSReport = 7,
         [Description("DataEntry Audit")] DataEntryAudit = 11,
         [Description("Study Design Audit")] StudyDesignAudit = 12,
         [Description("Product Receipt")] ProductReceipt = 13,
-        [Description("Product Verification")] ProductVerification = 14
+        [Description("Product Verification")] ProductVerification = 14,
+        [Description("Traning document")] TraningDocument = 15,
+        [Description("DataEntry")] DataEntry = 16,
+        [Description("User")] User = 17,
+        [Description("Company")] Company = 18,
+        [Description("Clent")] Client = 19,
     }
 
     public enum AuditModule : short
@@ -712,5 +718,10 @@ namespace GSC.Helper
         [Description("DueDate")] DueDate = 2,
         [Description("DeviatedDate")] DeviatedDate = 3,
         [Description("OnGoingDate")] OnGoingDate = 4,
+    }
+    public enum UploadLimitType : short
+    {
+        [Description("Unlimited")] Unlimited = 1,
+        [Description("StudyBase")] StudyBase = 2
     }
 }

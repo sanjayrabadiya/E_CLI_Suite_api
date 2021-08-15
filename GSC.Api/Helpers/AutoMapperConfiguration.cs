@@ -19,6 +19,7 @@ using GSC.Data.Dto.Medra;
 using GSC.Data.Dto.Pharmacy;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
+using GSC.Data.Dto.Project.GeneralConfig;
 using GSC.Data.Dto.Project.Schedule;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
@@ -45,6 +46,7 @@ using GSC.Data.Entities.Medra;
 using GSC.Data.Entities.Pharmacy;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.EditCheck;
+using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
@@ -390,6 +392,7 @@ namespace GSC.Api.Helpers
             CreateMap<VerificationApprovalTemplate, VerificationApprovalTemplateDto>().ReverseMap();
             CreateMap<VerificationApprovalTemplateValue, VerificationApprovalTemplateValueDto>().ReverseMap();
             CreateMap<VerificationApprovalTemplateValueChild, VerificationApprovalTemplateValueChildDto>().ReverseMap();
+            CreateMap<UploadLimit, UploadlimitDto>().ReverseMap();
         }
     }
 }

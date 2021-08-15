@@ -12,6 +12,9 @@ using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Shared.JWTAuth;
 using GSC.Respository.EditCheckImpact;
+using GSC.Domain.Context;
+using GSC.Respository.Master;
+using System.Linq;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -28,6 +31,8 @@ namespace GSC.Api.Controllers.Screening
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
         private readonly IImpactService _impactService;
+        private readonly IGSCContext _context;
+        private readonly IProjectRepository _projectRepository;
         public ScreeningTemplateValueController(IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IUploadSettingRepository uploadSettingRepository,
@@ -36,7 +41,9 @@ namespace GSC.Api.Controllers.Screening
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
             IScreeningVisitRepository screeningVisitRepository,
-            IImpactService impactService)
+            IImpactService impactService,
+            IGSCContext context,
+            IProjectRepository projectRepository)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -48,6 +55,8 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
             _impactService = impactService;
+            _context = context;
+            _projectRepository = projectRepository;
         }
 
         [HttpGet("{id}")]
@@ -214,9 +223,20 @@ namespace GSC.Api.Controllers.Screening
 
             if (screeningTemplateValueDto.FileModel?.Base64?.Length > 0)
             {
-                var documentCategory = "Template";
-                screeningTemplateValue.DocPath = DocumentService.SaveDocument(screeningTemplateValueDto.FileModel,
-                    documentPath, FolderType.Screening, documentCategory);
+                //var documentCategory = "Template";
+                //screeningTemplateValue.DocPath = DocumentService.SaveDocument(screeningTemplateValueDto.FileModel,
+                //    documentPath, FolderType.Screening, documentCategory);
+                var screningDetails = _context.ScreeningTemplate.Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).Select(a => new { a.ScreeningVisit.ScreeningEntry.ProjectId, a.ScreeningVisit.ScreeningEntry.Randomization.Initial, a.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber }).FirstOrDefault();
+                var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(screningDetails.ProjectId);
+                if (!string.IsNullOrEmpty(validateuploadlimit))
+                {
+                    ModelState.AddModelError("Message", validateuploadlimit);
+                    return BadRequest(ModelState);
+                }
+                string subject = screningDetails.ScreeningNumber + "-" + screningDetails.Initial;
+                screeningTemplateValue.DocPath = DocumentService.SaveUploadDocument(screeningTemplateValueDto.FileModel,
+                      documentPath,_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(screningDetails.ProjectId), FolderType.DataEntry, subject);
+
                 screeningTemplateValue.MimeType = screeningTemplateValueDto.FileModel.Extension;
             }
 

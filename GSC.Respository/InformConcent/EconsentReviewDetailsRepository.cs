@@ -383,8 +383,9 @@ namespace GSC.Respository.InformConcent
             string filePath = string.Empty;
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var projectId = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetailsDto.EconsentSetupId).Select(x => x.ProjectId).FirstOrDefault();
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
-            filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.InformConcent.ToString(), docName);
+            filePath = System.IO.Path.Combine(upload.DocumentPath,_jwtTokenAccesser.CompanyId.ToString(),_projectRepository.GetStudyCode(projectId), FolderType.InformConcent.ToString(), docName);
 
             Byte[] byteArray = Convert.FromBase64String(econsentReviewDetailsDto.DocumentData);
             Stream stream = new MemoryStream(byteArray);
@@ -410,12 +411,13 @@ namespace GSC.Respository.InformConcent
             pdfDocument.Save(outputStream);
             pdfDocument.Close();
 
+            int ProjectId = _context.EconsentReviewDetails.Where(x => x.Id == econsentReviewDetail.Id).Select(x => x.EconsentSetup.ProjectId).FirstOrDefault();
             var outputname = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
-            var pdfpath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
-            string directorypath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF");
-            string[] paths = { upload.DocumentPath, FolderType.InformConcent.ToString(), "ReviewedPDF" };
-            var fullPath = Path.Combine(paths);
-            var outputFile = Path.Combine(upload.DocumentPath, pdfpath);           
+            var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(),_projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
+            string directorypath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId),FolderType.InformConcent.ToString(), "ReviewedPDF");
+            //string[] paths = { upload.DocumentPath, FolderType.InformConcent.ToString(), "ReviewedPDF" };
+            var fullPath = Path.Combine(upload.DocumentPath,directorypath);
+            var outputFile = Path.Combine(upload.DocumentPath, directorypath, outputname);            
             if (!Directory.Exists(fullPath))
                 Directory.CreateDirectory(fullPath);
             FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
@@ -485,8 +487,9 @@ namespace GSC.Respository.InformConcent
 
                 //}
             }
+            int ProjectId = _context.EconsentReviewDetails.Where(x => x.Id == econsentReviewDetailsDto.Id).Select(x => x.EconsentSetup.ProjectId).FirstOrDefault();
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
-            filePath = System.IO.Path.Combine(upload.DocumentPath, FolderType.InformConcent.ToString(), docName);
+            filePath = System.IO.Path.Combine(upload.DocumentPath,_jwtTokenAccesser.CompanyId.ToString(),_projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), docName);
 
             Byte[] byteArray = Convert.FromBase64String(econsentReviewDetailsDto.DocumentData);
             Stream stream = new MemoryStream(byteArray);
@@ -544,10 +547,12 @@ namespace GSC.Respository.InformConcent
             pdfDocument.Save(outputStream);
             pdfDocument.Close();
 
+            
             var outputname = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
-            var pdfpath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
+            var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(),_projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
             var outputFile = Path.Combine(upload.DocumentPath, pdfpath);
-            if (!Directory.Exists(outputFile)) Directory.CreateDirectory(Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF"));
+            var fullpath = Path.Combine(upload.DocumentPath,_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF");
+            if (!Directory.Exists(fullpath)) Directory.CreateDirectory(fullpath);
             FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
             outputStream.WriteTo(file);
             file.Close();

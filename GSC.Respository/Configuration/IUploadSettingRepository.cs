@@ -10,5 +10,7 @@ namespace GSC.Respository.Configuration
         string GetWebImageUrl();
         string GetWebDocumentUrl();
         object getWebImageUrl();
+        bool IsUnlimitedUploadlimit();
+        string ValidateUploadlimit(int ProjectId);
     }
 }

@@ -764,11 +764,13 @@ namespace GSC.Respository.Attendance
                     pdfDocument.Close();
 
                     var filename = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
-                    var pdfpath = Path.Combine(FolderType.InformConcent.ToString(), "ReviewedPDF");
-                    var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), pdfpath);
-                    if (!Directory.Exists(outputFile))
-                        Directory.CreateDirectory(outputFile);
-                    var filewritepath = Path.Combine(outputFile, filename);
+                    var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(item.EconsentSetup.ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", filename);
+                    var diractorypath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(item.EconsentSetup.ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF");
+                    var filewritepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), pdfpath);
+                    var fulldiractorypath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), diractorypath);
+                    if (!Directory.Exists(fulldiractorypath))
+                        Directory.CreateDirectory(fulldiractorypath);
+                    // var filewritepath = Path.Combine(outputFile, filename);
                     FileStream file = new FileStream(filewritepath, FileMode.Create, FileAccess.Write);
                     outputStream.WriteTo(file);
                     file.Close();

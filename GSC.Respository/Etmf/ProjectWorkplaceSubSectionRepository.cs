@@ -68,15 +68,15 @@ namespace GSC.Respository.Etmf
 
             if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
 
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Country.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), projectWorkplaceSubSectionDto.SubSectionName.Trim());
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Site.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                 data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), projectWorkplaceSubSectionDto.SubSectionName.Trim());
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Trial.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    data.ZonName.Trim(), data.SectionName.Trim(), projectWorkplaceSubSectionDto.SubSectionName.Trim());
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
             bool projectPathExists = Directory.Exists(filePath);
             if (!projectPathExists)
                 System.IO.Directory.CreateDirectory(Path.Combine(filePath));
@@ -119,28 +119,28 @@ namespace GSC.Respository.Etmf
             string Oldpath = string.Empty;
             if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
             {
-                Oldpath = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Country.GetDescription(),
+                Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName);
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Country.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), projectWorkplaceSubSectionDto.SubSectionName.Trim());
             }
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
             {
-                Oldpath = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Site.GetDescription(),
+                Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                 data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName);
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Site.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                  data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), projectWorkplaceSubSectionDto.SubSectionName.Trim());
             }
 
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
             {
-                Oldpath = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Trial.GetDescription(),
+                Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                 data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName);
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Trial.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    data.ZonName.Trim(), data.SectionName.Trim(), projectWorkplaceSubSectionDto.SubSectionName.Trim());
             }
-            OldfilePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), Oldpath);
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
+            OldfilePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), Oldpath);
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
 
             bool projectPathExists = Directory.Exists(OldfilePath);
             if (projectPathExists)
@@ -183,22 +183,22 @@ namespace GSC.Respository.Etmf
             string Oldpath = string.Empty;
             if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
             {
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Country.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim());
             }
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
             {
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Site.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                  data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim());
             }
 
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
             {
-                path = System.IO.Path.Combine(data.ProjectName, WorkPlaceFolder.Trial.GetDescription(),
+                path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim());
             }
              
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
 
             bool projectPathExists = Directory.Exists(filePath);
             if (projectPathExists)

@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Helper;
 
 namespace GSC.Data.Entities.Configuration
 {
@@ -13,5 +14,6 @@ namespace GSC.Data.Entities.Configuration
 
         public int CompanyId { get; set; }
         public int? DataRecycleDays { get; set; }
+        public UploadLimitType? UploadLimitType { get; set; }
     }
 }
