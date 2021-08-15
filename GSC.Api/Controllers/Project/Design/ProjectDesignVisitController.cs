@@ -4,9 +4,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
-using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Project.Design;
-using GSC.Domain.Context;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
@@ -76,8 +74,6 @@ namespace GSC.Api.Controllers.Project.Design
             if (projectDesignVisit == null) return NotFound();
 
             var projectDesignVisitDto = _mapper.Map<ProjectDesignVisitDto>(projectDesignVisit);
-            //var templates = _projectDesignTemplateRepository.FindBy(t => t.ProjectDesignVisitId == projectDesignVisit.Id && t.DeletedDate == null).ToList();
-            //projectDesignVisitDto.Templates = _mapper.Map<List<ProjectDesignTemplateDto>>(templates);
 
             return Ok(projectDesignVisitDto);
         }
@@ -94,12 +90,15 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", validateMessage);
                 return BadRequest(ModelState);
             }
+            var checkVersion = _projectDesignVisitRepository.CheckStudyVersion(projectDesignVisit.ProjectDesignPeriodId);
 
             var designOrder = 0;
             if (_projectDesignVisitRepository.All.Any(t => t.ProjectDesignPeriodId == projectDesignVisit.ProjectDesignPeriodId && t.DeletedDate == null))
                 designOrder = (int)_projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriodId == projectDesignVisit.ProjectDesignPeriodId
                 && t.DeletedDate == null).Max(t => t.DesignOrder);
+
             projectDesignVisit.DesignOrder = ++designOrder;
+            projectDesignVisit.StudyVersion = checkVersion.VersionNumber;
             _projectDesignVisitRepository.Add(projectDesignVisit);
             _uow.Save();
 
@@ -133,10 +132,22 @@ namespace GSC.Api.Controllers.Project.Design
         {
             if (id <= 0) return BadRequest();
 
-            var period = _projectDesignVisitRepository.Find(id);
+            var visit = _projectDesignVisitRepository.Find(id);
 
-            if (period == null) return NotFound();
-            _projectDesignVisitRepository.Delete(period);
+            if (visit == null) return NotFound();
+
+
+            var checkVersion = _projectDesignVisitRepository.CheckStudyVersion(visit.ProjectDesignPeriodId);
+
+
+            if (checkVersion.AnyLive)
+            {
+                visit.StudyVersion = checkVersion.VersionNumber;
+                visit.InActive = true;
+                _projectDesignVisitRepository.Update(visit);
+            }
+            else
+                _projectDesignVisitRepository.Delete(visit);
 
             _uow.Save();
 
@@ -167,6 +178,8 @@ namespace GSC.Api.Controllers.Project.Design
 
             ProjectDesignVisit firstSaved = null;
 
+            var checkVersion = _projectDesignVisitRepository.CheckStudyVersion(data.projectDesignPeriodId);
+
             var designOrder = 0;
             if (_projectDesignVisitRepository.All.Any(t => t.ProjectDesignPeriodId == data.projectDesignPeriodId && t.DeletedDate == null))
                 designOrder = (int)_projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriodId == data.projectDesignPeriodId
@@ -178,11 +191,13 @@ namespace GSC.Api.Controllers.Project.Design
 
                 var visit = _projectDesignVisitRepository.GetVisit(data.Id);
                 visit.Id = 0;
+                visit.StudyVersion = checkVersion.VersionNumber;
                 visit.ProjectDesignPeriodId = data.projectDesignPeriodId;
                 visit.DesignOrder = ++designOrder;
                 visit.Templates.Where(z => (data.noOfTemplate.Count() == 0 || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
                  {
                      template.Id = 0;
+                     template.StudyVersion = checkVersion.VersionNumber;
                      template.Variables.ToList().ForEach(variable =>
                      {
                          visitStatus.Where(e => e.ProjectDesignVariableId == variable.Id).ToList().ForEach(g =>
@@ -190,11 +205,12 @@ namespace GSC.Api.Controllers.Project.Design
                              g.ProjectDesignVariable = variable;
                              g.ProjectDesignVariableId = 0;
                          });
-
+                         variable.StudyVersion = checkVersion.VersionNumber;
                          variable.Id = 0;
                          var Seq = 0;
                          variable.Values.ToList().ForEach(value =>
                          {
+                             value.StudyVersion = checkVersion.VersionNumber;
                              value.Id = 0;
                              value.SeqNo = ++Seq;
                              _projectDesignVariableValueRepository.Add(value);
@@ -207,18 +223,6 @@ namespace GSC.Api.Controllers.Project.Design
                               });
 
                          });
-
-
-                         //variable.Id = 0;
-                         //var RSeq = 0;
-                         //variable.Remarks.ToList().ForEach(value =>
-                         //{
-                         //    value.Id = 0;
-                         //    value.SeqNo = ++RSeq;
-                         //    _projectDesignVariableRemarksRepository.Add(value);
-                         //});
-
-
 
                          _projectDesignVariableRepository.Add(variable);
 

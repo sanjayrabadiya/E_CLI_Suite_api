@@ -257,23 +257,6 @@ namespace GSC.Api.Controllers.Project.Design
                             });
                       });
 
-
-                    //var RemarkSeq = 0;
-                    //variable.Remarks.ToList().ForEach(r =>
-                    //{
-                    //    r.Id = 0;
-                    //    //    if (r.SeqNo == 0)
-                    //    r.SeqNo = ++RemarkSeq;
-                    //    _projectDesignVariableRemarksRepository.Add(r);
-                    //    ////For variable value clone language
-                    //    //r.VariableRemarksLanguage.ToList().ForEach(x =>
-                    //    //{
-                    //    //    x.Id = 0;
-                    //    //    _variableValueLanguageRepository.Add(x);
-                    //    //});
-                    //});
-
-
                     // For encrypt clone
                     variable.Roles.ToList().ForEach(r =>
                     {
@@ -326,71 +309,132 @@ namespace GSC.Api.Controllers.Project.Design
             if (cloneTemplateDto.Id <= 0 || cloneTemplateDto.ClonnedTemplateIds == null ||
                 cloneTemplateDto.ClonnedTemplateIds.Count == 0) return BadRequest();
 
+            var parent = _projectDesignTemplateRepository.GetTemplateClone(cloneTemplateDto.Id);
+
+            var checkVersion = _projectDesignTemplateRepository.CheckStudyVersion(parent.ProjectDesignVisitId);
+
             cloneTemplateDto.ClonnedTemplateIds.ForEach(t =>
             {
-                var parent = _projectDesignTemplateRepository.GetTemplateClone(cloneTemplateDto.Id);
-
-                var clonnedTemplate = _projectDesignVariableRepository.All.Where(a => a.ProjectDesignTemplateId == t).ToList();
-
-                foreach (var variable in clonnedTemplate)
-                {
-                    variable.DeletedDate = _jwtTokenAccesser.GetClientDate();
-                    _projectDesignVariableRepository.Update(variable);
-                }
+                var clonnedTemplate = _projectDesignTemplateRepository.GetTemplateClone(t);
 
                 var variables = parent.Variables.ToList();
                 foreach (var variable in variables)
                 {
                     variable.ProjectDesignTemplateId = t;
+                    var parentVariable = clonnedTemplate.Variables.FirstOrDefault(x => x.VariableCode == variable.VariableCode);
+                    if (parentVariable == null)
+                    {
+                        variable.Id = 0;
+                        variable.StudyVersion = checkVersion.VersionNumber;
+                        _projectDesignVariableRepository.Add(variable);
+
+                    }
+                    else
+                    {
+                        variable.Id = parentVariable.Id;
+                        _projectDesignVariableRepository.Update(variable);
+                    }
 
                     //For variable clone language
                     variable.VariableLanguage.ToList().ForEach(r =>
                     {
                         r.Id = 0;
+                        r.ProjectDesignVariableId = variable.Id;
                         r.ProjectDesignVariable = variable;
-                        _variableLanguageRepository.Add(r);
+
+                        if (parentVariable != null)
+                        {
+                            var clone = parentVariable.VariableLanguage.Where(x => x.Display == r.Display).FirstOrDefault();
+                            r.Id = clone?.Id ?? 0;
+                        }
+
+                        if (r.Id == 0)
+                            _variableLanguageRepository.Add(r);
+                        else
+                            _variableLanguageRepository.Update(r);
+
                     });
 
                     //For variable note clone language
                     variable.VariableNoteLanguage.ToList().ForEach(r =>
                     {
                         r.Id = 0;
+                        r.ProjectDesignVariableId = variable.Id;
                         r.ProjectDesignVariable = variable;
-                        _variableNoteLanguageRepository.Add(r);
+
+                        if (parentVariable != null)
+                        {
+                            var clone = parentVariable.VariableNoteLanguage.Where(x => x.Display == r.Display).FirstOrDefault();
+                            r.Id = clone?.Id ?? 0;
+                        }
+
+                        if (r.Id == 0)
+                            _variableNoteLanguageRepository.Add(r);
+                        else
+                            _variableNoteLanguageRepository.Update(r);
+
                     });
 
                     // For encrypt clone
                     variable.Roles.ToList().ForEach(r =>
                     {
                         r.Id = 0;
-                        _projectDesignVariableEncryptRoleRepository.Add(r);
+                        r.ProjectDesignVariableId = variable.Id;
+                        r.ProjectDesignVariable = variable;
+
+                        if (parentVariable != null)
+                        {
+                            var clone = parentVariable.Roles.Where(x => x.RoleId == r.RoleId).FirstOrDefault();
+                            r.Id = clone?.Id ?? 0;
+                        }
+
+                        if (r.Id == 0)
+                            _projectDesignVariableEncryptRoleRepository.Add(r);
+                        else
+                            _projectDesignVariableEncryptRoleRepository.Update(r);
                     });
 
-                    variable.Id = 0;
-                    foreach (var variableValue in variable.Values)
+
+                    foreach (var r in variable.Values)
                     {
-                        variableValue.Id = 0;
-                        variableValue.ProjectDesignVariable = variable;
-                        _projectDesignVariableValueRepository.Add(variableValue);
+                        r.Id = 0;
+                        r.ProjectDesignVariableId = variable.Id;
+                        r.ProjectDesignVariable = variable;
+                        ProjectDesignVariableValue cloneValue = null;
+                        if (parentVariable != null)
+                        {
+                            cloneValue = parentVariable.Values.Where(x => x.ValueCode == r.ValueCode).FirstOrDefault();
+                            r.Id = cloneValue?.Id ?? 0;
+                        }
+
+                        if (r.Id == 0)
+                        {
+                            r.StudyVersion = checkVersion.VersionNumber;
+                            _projectDesignVariableValueRepository.Add(r);
+                        }
+                            
+                        else
+                            _projectDesignVariableValueRepository.Update(r);
 
                         //For variable value clone language
-                        variableValue.VariableValueLanguage.ToList().ForEach(x =>
+                        r.VariableValueLanguage.ToList().ForEach(x =>
                         {
                             x.Id = 0;
-                            x.ProjectDesignVariableValue = variableValue;
-                            _variableValueLanguageRepository.Add(x);
+                            x.ProjectDesignVariableValue = r;
+                            x.ProjectDesignVariableValueId = r.Id;
+
+                            if (cloneValue != null)
+                            {
+                                var clone = cloneValue.VariableValueLanguage.Where(b => b.Display == x.Display).FirstOrDefault();
+                                x.Id = clone?.Id ?? 0;
+                            }
+
+                            if (r.Id == 0)
+                                _variableValueLanguageRepository.Update(x);
+                            else
+                                _variableValueLanguageRepository.Add(x);
                         });
                     }
-
-                    //variable.Id = 0;
-                    //foreach (var variableRemarks in variable.Remarks)
-                    //{
-                    //    variableRemarks.Id = 0;
-                    //    variableRemarks.ProjectDesignVariable = variable;
-                    //    _projectDesignVariableRemarksRepository.Add(variableRemarks);
-                    //}
-
-                    _projectDesignVariableRepository.Add(variable);
                 }
             });
 
@@ -441,7 +485,7 @@ namespace GSC.Api.Controllers.Project.Design
                         ChangeTemplateDesignOrder(firstId, 0);
                     }
                 }
-                
+
 
                 return Ok();
             }

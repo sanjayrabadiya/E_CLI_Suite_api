@@ -1,12 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Report;
 using GSC.Data.Entities.Project.Design;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
@@ -75,18 +73,14 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+            var checkVersion = _projectDesignVariableRepository.CheckStudyVersion(variable.ProjectDesignTemplateId);
+            variable.StudyVersion = checkVersion.VersionNumber;
             _projectDesignVariableRepository.Add(variable);
             foreach (var item in variable.Values)
             {
+                item.StudyVersion = checkVersion.VersionNumber;
                 _projectDesignVariableValueRepository.Add(item);
             }
-
-            //foreach (var remarks in variable.Remarks)
-            //{
-            //    _projectDesignVariableRemarksRepository.Add(remarks);
-            //}
-
 
             if (variable.IsEncrypt)
             {
@@ -128,7 +122,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             UpdateVariableValues(variable);
-            // UpdateVariableRemarks(variable);
+
             UpdateVariableEncryptRole(variable);
 
             _projectDesignVariableRepository.Update(variable);
@@ -162,7 +156,16 @@ namespace GSC.Api.Controllers.Project.Design
                 return BadRequest(ModelState);
             }
 
-            _projectDesignVariableRepository.Delete(record);
+            var checkVersion = _projectDesignVariableRepository.CheckStudyVersion(record.ProjectDesignTemplateId);
+            if (checkVersion.AnyLive)
+            {
+                record.StudyVersion = checkVersion.VersionNumber;
+                record.InActive = true;
+                _projectDesignVariableRepository.Update(record);
+            }
+            else
+                _projectDesignVariableRepository.Delete(record);
+
             _uow.Save();
 
             if (_projectDesignVariableRepository.FindBy(t =>
@@ -219,20 +222,31 @@ namespace GSC.Api.Controllers.Project.Design
         {
             var data = _projectDesignVariableValueRepository.FindBy(x =>
                 x.ProjectDesignVariableId == variable.Id).ToList(); //&& !variable.Values.Any(c => c.Id == x.Id)).ToList();
+
+            var checkVersion = _projectDesignVariableRepository.CheckStudyVersion(variable.ProjectDesignTemplateId);
+
             var deletevalues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             var addvalues = variable.Values.Where(x => x.Id == 0).ToList();
             var updatevalues = variable.Values.Where(x => x.Id != 0).ToList();
-            //!variable.Values.Any(c => c.Id == x.Id)).ToList();
-            foreach (var value in deletevalues)
-                //value.DeletedDate = DateTime.Now;
-                //_projectDesignVariableValueRepository.Update(value);
 
-                _projectDesignVariableValueRepository.Remove(value);
+            foreach (var value in deletevalues)
+            {
+                if (checkVersion.AnyLive)
+                {
+                    value.StudyVersion = checkVersion.VersionNumber;
+                    value.InActive = true;
+                    _projectDesignVariableValueRepository.Update(value);
+                }
+                else
+                    _projectDesignVariableValueRepository.Remove(value);
+            }
+
 
             var SeqNo = data.Count;
             foreach (var item in addvalues)
             {
                 item.SeqNo = ++SeqNo;
+                item.StudyVersion = checkVersion.VersionNumber;
                 _projectDesignVariableValueRepository.Add(item);
             }
 
@@ -253,7 +267,7 @@ namespace GSC.Api.Controllers.Project.Design
                     _projectDesignVariableEncryptRoleRepository.Add(item);
             }
             var RoleIds = variable.Roles.Select(x => new { x.RoleId }).ToList();
-            //delete role if not select in dropdown and exists in table
+
             var Exists = data.Where(x => !RoleIds.Any(t => t.RoleId == x.RoleId)).ToList();
             if (Exists.Count != 0)
                 foreach (var item in Exists)
@@ -262,35 +276,7 @@ namespace GSC.Api.Controllers.Project.Design
                 }
         }
 
-        //private void UpdateVariableRemarks(ProjectDesignVariable variable)
-        //{
-        //    var data = _projectDesignVariableRemarksRepository.FindBy(x => x.ProjectDesignVariableId == variable.Id).ToList();
-        //    var deletevalues = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-        //    var addvalues = variable.Remarks.Where(x => x.Id == 0).ToList();
-        //    var updatevalues = variable.Remarks.Where(x => x.Id != 0).ToList();
-        //    foreach (var value in deletevalues)
-        //        _projectDesignVariableRemarksRepository.Remove(value);
 
-        //    var SeqNo = data.Count;
-        //    foreach (var item in addvalues)
-        //    {
-        //        item.SeqNo = ++SeqNo;
-        //        _projectDesignVariableRemarksRepository.Add(item);
-        //    }
-
-        //    foreach (var value in updatevalues)
-        //        _projectDesignVariableRemarksRepository.Update(value);
-        //}
-
-        // Merge with GetVariabeAnnotationDropDown/{projectDesignTemplateId}/{isFormula} by vipul
-        //[HttpGet]
-        //[Route("GetVariabeAnnotationDropDown/{projectDesignTemplateId}")]
-        //public IActionResult GetVariabeAnnotationDropDown(int projectDesignTemplateId)
-        //{
-        //    return Ok(_projectDesignVariableRepository.GetVariabeAnnotationDropDown(projectDesignTemplateId, false));
-        //}
-
-        //Added method By Vipul 22092020 for visit status in project design get only date and datetime variable
         [HttpGet]
         [Route("GetVariabeAnnotationDropDownForVisitStatus/{projectDesignTemplateId}")]
         public IActionResult GetVariabeAnnotationDropDownForVisitStatus(int projectDesignTemplateId)

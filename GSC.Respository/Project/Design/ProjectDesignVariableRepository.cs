@@ -19,11 +19,13 @@ namespace GSC.Respository.Project.Design
     {
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly IStudyVersionRepository _studyVersionRepository;
         public ProjectDesignVariableRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IStudyVersionRepository studyVersionRepository) : base(context)
         {
             _mapper = mapper;
             _context = context;
+            _studyVersionRepository = studyVersionRepository;
         }
 
 
@@ -225,6 +227,16 @@ namespace GSC.Respository.Project.Design
                 ProjectDesignVisitId = t.ProjectDesignTemplate.ProjectDesignVisitId
             }).FirstOrDefault();
 
+        }
+
+        public CheckVersionDto CheckStudyVersion(int projectDesignTemplateId)
+        {
+            var result = new CheckVersionDto();
+            var projectDesignId = All.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId).Select(t => t.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId).FirstOrDefault();
+            result.AnyLive = _studyVersionRepository.AnyLive(projectDesignId);
+            if (result.AnyLive)
+                result.VersionNumber = _studyVersionRepository.GetOnTrialVersionByProjectDesign(projectDesignId);
+            return result;
         }
     }
 }
