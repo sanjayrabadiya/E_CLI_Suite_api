@@ -29,7 +29,7 @@ namespace GSC.Respository.EditCheckImpact
             {
                 var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), true);
                 result.ResultSkip = true;
-                result.SampleText ="Rule not verifed";
+                result.SampleText = "Rule not verifed";
                 if (result.IsValid)
                     return _editCheckFormulaRepository.ValidateFormula(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
                 else
@@ -302,6 +302,18 @@ namespace GSC.Respository.EditCheckImpact
 
             return "'";
         }
+
+        bool IsNumeric(CollectionSources? collection, DataType? dataType)
+        {
+            if (collection != null && collection == CollectionSources.TextBox && dataType != null && dataType != DataType.Character)
+                return true;
+
+            if (collection != null && collection == CollectionSources.HorizontalScale)
+                return true;
+
+            return false;
+        }
+
         EditCheckResult ValidateRuleReference(List<EditCheckValidate> editCheck, bool isFromValidate)
         {
             var dt = new DataTable();
@@ -376,8 +388,11 @@ namespace GSC.Respository.EditCheckImpact
                 {
                     decimal value;
                     decimal.TryParse(r.InputValue, out value);
+                    var isnumeri = IsNumeric(r.CollectionSource, r.DataType);
+                    if (isnumeri && value == 0)
+                        col.DefaultValue = 0;
 
-                    if (value != 0 && string.IsNullOrEmpty(singleQuote))
+                    if ((value != 0 || isnumeri) && string.IsNullOrEmpty(singleQuote))
                         col.DataType = Type.GetType("System.Decimal");
                 }
 
