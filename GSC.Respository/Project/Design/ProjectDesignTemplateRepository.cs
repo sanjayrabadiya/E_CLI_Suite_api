@@ -77,7 +77,8 @@ namespace GSC.Respository.Project.Design
                         r.TemplateLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && r.DeletedDate == null && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.TemplateName),
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
-                    Notes = _jwtTokenAccesser.Language != 1 ? r.TemplateLanguage.Where(c => c.DeletedDate == null && r.DeletedDate == null && c.LanguageId == _jwtTokenAccesser.Language).Select(a => a.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
+                    Notes = (_jwtTokenAccesser.Language != 1) ? _context.TemplateNoteLanguage.Where(a => a.DeletedDate == null 
+                    && a.ProjectDesignTemplateNote.ProjectDesignTemplateId == id && a.LanguageId==_jwtTokenAccesser.Language).Select(t => t.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,

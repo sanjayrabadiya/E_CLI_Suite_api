@@ -394,10 +394,11 @@ namespace GSC.Api.Controllers.Project.Design
                             _projectDesignVariableEncryptRoleRepository.Update(r);
                     });
 
-
+                    var Seq = 0;
                     foreach (var r in variable.Values)
                     {
                         r.Id = 0;
+                        r.SeqNo = ++Seq;
                         r.ProjectDesignVariableId = variable.Id;
                         r.ProjectDesignVariable = variable;
                         ProjectDesignVariableValue cloneValue = null;

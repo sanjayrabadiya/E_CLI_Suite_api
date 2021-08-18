@@ -99,8 +99,8 @@ namespace GSC.Respository.Project.EditCheck
             //if (!ValidateMathOperator(editCheckDetail))
             //    return "Only allow math operators or Non math operators!";
 
-            if (!CheckLogicalOperator(editCheckDetail))
-                return "Missing Logical Operator!";
+            //if (!CheckLogicalOperator(editCheckDetail))
+            //    return "Missing Logical Operator!";
 
             return "";
         }
