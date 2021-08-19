@@ -22,5 +22,6 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? ReceivedQty { get; set; }
         public bool? IsConditionProduct { get; set; }
         public int? CompanyId { get; set; }
+        public ProductVerification ProductVerification { get; set; }
     }
 }

@@ -12,8 +12,22 @@ namespace GSC.Data.Dto.SupplyManagement
         public int VerificationApprovalTemplateId { get; set; }
         public int VariableId { get; set; }
         public string Value { get; set; }
+        public string OldValue { get; set; }
         public bool IsNa { get; set; }
+        public ICollection<VerificationApprovalTemplateValueChildDto> Children { get; set; }
         public VerificationApprovalTemplate VerificationApprovalTemplate { get; set; }
         public Variable Variable { get; set; }
+    }
+
+    public class VerificationApprovalTemplateValueBasic
+    {
+        public int VerificationApprovalTemplateId { get; set; }
+        public int VariableId { get; set; }
+        public int Id { get; set; }
+        public string Value { get; set; }
+        public bool IsNa { get; set; }
+        public int? UserRoleId { get; set; }
+        public ICollection<VerificationApprovalTemplateValueChild> Children { get; set; }
+
     }
 }

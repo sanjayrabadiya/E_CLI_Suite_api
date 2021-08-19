@@ -11,5 +11,6 @@ namespace GSC.Data.Entities.Master
         public int SeqNo { get; set; }
         public string Label { get; set; }
         public bool IsDefault { get; set; }
+        public Variable Variable { get; set; }
     }
 }

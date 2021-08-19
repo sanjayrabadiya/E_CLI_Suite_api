@@ -14,5 +14,6 @@ namespace GSC.Data.Entities.SupplyManagement
         public bool IsNa { get; set; }
         public VerificationApprovalTemplate VerificationApprovalTemplate { get; set; }
         public Variable Variable { get; set; }
+        public List<VerificationApprovalTemplateValueChild> Children { get; set; }
     }
 }

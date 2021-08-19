@@ -393,6 +393,9 @@ namespace GSC.Api.Helpers
             CreateMap<VerificationApprovalTemplateValue, VerificationApprovalTemplateValueDto>().ReverseMap();
             CreateMap<VerificationApprovalTemplateValueChild, VerificationApprovalTemplateValueChildDto>().ReverseMap();
             CreateMap<UploadLimit, UploadlimitDto>().ReverseMap();
+            CreateMap<VerificationApprovalTemplateValue, VerificationApprovalTemplateValueBasic>().ReverseMap();
+            CreateMap<VerificationApprovalTemplateHistory, VerificationApprovalTemplateHistoryDto>().ReverseMap();
+            CreateMap<VerificationApprovalTemplateValueAudit, VerificationApprovalTemplateValueAuditDto>().ReverseMap();
         }
     }
 }

@@ -9,6 +9,6 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface IProductVerificationDetailRepository : IGenericRepository<ProductVerificationDetail>
     {
-        List<ProductVerificationDetailDto> GetProductVerificationDetailList(int ProductReceiptId);
+        ProductVerificationDetailDto GetProductVerificationDetailList(int ProductReceiptId);
     }
 }

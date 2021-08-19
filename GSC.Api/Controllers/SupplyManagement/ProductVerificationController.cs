@@ -31,6 +31,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IProductVerificationDetailRepository _productVerificationDetailRepository;
         private readonly IProductVerificationReport _productVerificationReport;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IVerificationApprovalTemplateHistoryRepository _verificationApprovalTemplateHistoryRepository;
 
         public ProductVerificationController(
             IMapper mapper
@@ -40,6 +41,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             , IProductVerificationDetailRepository productVerificationDetailRepository
             , IProductVerificationReport productVerificationReport
             , IUploadSettingRepository uploadSettingRepository
+            , IVerificationApprovalTemplateHistoryRepository verificationApprovalTemplateHistoryRepository
             )
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -49,6 +51,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _productVerificationDetailRepository = productVerificationDetailRepository;
             _productVerificationReport = productVerificationReport;
             _uploadSettingRepository = uploadSettingRepository;
+            _verificationApprovalTemplateHistoryRepository = verificationApprovalTemplateHistoryRepository;
         }
 
         [HttpGet("GetProductVerificationList/{productReceiptId}")]
@@ -59,7 +62,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         }
 
         [HttpGet("GetProductVerificationData/{projectId}/{isDeleted:bool?}")]
-        public IActionResult GetProductReceiptList(int projectId, bool isDeleted)
+        public IActionResult GetProductVerificationData(int projectId, bool isDeleted)
         {
             var productVerification = _productVerificationRepository.GetProductVerification(projectId, isDeleted);
             return Ok(productVerification);

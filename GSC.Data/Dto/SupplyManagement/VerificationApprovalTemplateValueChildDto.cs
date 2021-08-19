@@ -1,16 +1,13 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Project.Design;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using GSC.Data.Entities.Master;
 
 namespace GSC.Data.Dto.SupplyManagement
 {
    public class VerificationApprovalTemplateValueChildDto : BaseDto
     {
-        public int ScreeningTemplateValueId { get; set; }
-        public int ProjectDesignVariableValueId { get; set; }
+        public int VerificationApprovalTemplateValueId { get; set; }
+        public int VariableValueId { get; set; }
         public string Value { get; set; }
-        public ProjectDesignVariableValue ProjectDesignVariableValue { get; set; }
+        public VariableValue VariableValue { get; set; }
     }
 }

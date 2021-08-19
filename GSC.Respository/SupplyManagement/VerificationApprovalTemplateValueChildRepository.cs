@@ -9,7 +9,7 @@ using System.Text;
 
 namespace GSC.Respository.SupplyManagement
 {
-    public class VerificationApprovalTemplateValueChildRepository : GenericRespository<VerificationApprovalTemplateValueChild>
+    public class VerificationApprovalTemplateValueChildRepository : GenericRespository<VerificationApprovalTemplateValueChild>, IVerificationApprovalTemplateValueChildRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
@@ -21,6 +21,19 @@ namespace GSC.Respository.SupplyManagement
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+        }
+        public void Save(VerificationApprovalTemplateValue verificationApprovalTemplateValue)
+        {
+            if (verificationApprovalTemplateValue.Children != null)
+            {
+                verificationApprovalTemplateValue.Children.ForEach(x =>
+                {
+                    if (x.Id == 0)
+                        Add(x);
+                    else
+                        Update(x);
+                });
+            }
         }
     }
 }

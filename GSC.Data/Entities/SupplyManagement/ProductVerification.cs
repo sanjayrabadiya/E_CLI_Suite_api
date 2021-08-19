@@ -25,5 +25,6 @@ namespace GSC.Data.Entities.SupplyManagement
         public string FileName { get; set; }
         public string PathName { get; set; }
         public string MimeType { get; set; }
+        public ProductReceipt ProductReceipt { get; set; }
     }
 }

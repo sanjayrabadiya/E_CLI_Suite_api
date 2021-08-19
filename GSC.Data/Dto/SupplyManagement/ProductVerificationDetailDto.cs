@@ -21,5 +21,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ReceivedQty { get; set; }
         public bool? IsConditionProduct { get; set; }
         public int? CompanyId { get; set; }
+        public bool IsSendBack { get; set; }
+        public bool IsApprove { get; set; }
+        public bool IsSendForApprove { get; set; }
+        public int? VerificationApprovalTemplateId { get; set; }
     }
 }

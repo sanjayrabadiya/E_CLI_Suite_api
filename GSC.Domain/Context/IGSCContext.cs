@@ -307,5 +307,7 @@ namespace GSC.Domain.Context
         DbSet<BarcodeCombination> BarcodeCombination { get; set; }
         DbSet<BarcodeDisplayInfo> BarcodeDisplayInfo { get; set; }
         DbSet<UploadLimit> UploadLimit { get; set; }
+        DbSet<VerificationApprovalTemplateHistory> VerificationApprovalTemplateHistory { get; set; }
+        DbSet<VerificationApprovalTemplateValueAudit> VerificationApprovalTemplateValueAudit { get; set; }
     }
 }

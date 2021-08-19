@@ -9,7 +9,7 @@ using System.Text;
 
 namespace GSC.Respository.SupplyManagement
 {
-    public class VerificationApprovalTemplateValueRepository : GenericRespository<VerificationApprovalTemplateValue>
+    public class VerificationApprovalTemplateValueRepository : GenericRespository<VerificationApprovalTemplateValue>, IVerificationApprovalTemplateValueRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;

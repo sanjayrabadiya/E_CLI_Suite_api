@@ -41,6 +41,8 @@ namespace GSC.Data.Entities.Master
         //public IList<VariableRemarks> Remarks { get; set; } = null;
         public Alignment? Alignment { get; set; }
         public int? LargeStep { get; set; }
-        
+        public VariableTemplateDetail VariableTemplateDetail { get; set; }
+        public VariableCategory VariableCategory { get; set; }
+
     }
 }

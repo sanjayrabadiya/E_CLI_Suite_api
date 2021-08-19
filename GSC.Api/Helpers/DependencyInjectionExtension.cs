@@ -328,6 +328,11 @@ namespace GSC.Api.Helpers
             services.AddScoped<IBarcodeCombinationRepository, BarcodeCombinationRepository>();
             services.AddScoped<IBarcodeDisplayInfoRepository, BarcodeDisplayInfoRepository>();
             services.AddScoped<IUploadlimitRepository, UploadLimitRepository>();
+            services.AddScoped<IVerificationApprovalTemplateRepository, VerificationApprovalTemplateRepository>();
+            services.AddScoped<IVerificationApprovalTemplateValueRepository, VerificationApprovalTemplateValueRepository>();
+            services.AddScoped<IVerificationApprovalTemplateHistoryRepository, VerificationApprovalTemplateHistoryRepository>();
+            services.AddScoped<IVerificationApprovalTemplateValueChildRepository, VerificationApprovalTemplateValueChildRepository>();
+            services.AddScoped<IVerificationApprovalTemplateValueAuditRepository, VerificationApprovalTemplateValueAuditRepository>();
         }
     }
 }

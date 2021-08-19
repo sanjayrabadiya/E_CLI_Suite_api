@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using System;
@@ -61,5 +62,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool? IsConditionProduct { get; set; }
         public int? ClientId { get; set; }
         public int? CompanyId { get; set; }
+        public VerificationApprovalTemplate VerificationApprovalTemplate { get; set; }
+        public VerificationApprovalTemplateHistory VerificationApprovalTemplateHistory { get; set; }
     }
 }

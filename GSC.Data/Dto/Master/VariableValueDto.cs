@@ -15,4 +15,16 @@ namespace GSC.Data.Dto.Master
         public string Label { get; set; }
         public bool IsDefault { get; set; }
     }
+
+    public class VerificationApprovalVariableValueDto
+    {
+        public int Id { get; set; }
+        public int VariableId { get; set; }
+        public string ValueName { get; set; }
+        public string VerificationApprovalValue { get; set; }
+        public int VerificationApprovalTemplateValueChildId { get; set; }
+        public string VerificationApprovalValueOld { get; set; }
+        public string Label { get; set; }
+        public int SeqNo { get; set; }
+    }
 }
