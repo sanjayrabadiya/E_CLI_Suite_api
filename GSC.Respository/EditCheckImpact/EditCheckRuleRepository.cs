@@ -25,7 +25,8 @@ namespace GSC.Respository.EditCheckImpact
 
         public EditCheckResult ValidateEditCheck(List<EditCheckValidate> editCheck)
         {
-            if (editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
+            var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
+            if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
                 var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), true);
                 result.ResultSkip = true;
@@ -35,7 +36,7 @@ namespace GSC.Respository.EditCheckImpact
                 else
                     return result;
             }
-            else if (editCheck.Any(x => x.IsFormula))
+            else if (!dateDiff && editCheck.Any(x => x.IsFormula))
                 return _editCheckFormulaRepository.ValidateFormula(editCheck);
             else
                 return ValidateRule(editCheck, true);
@@ -44,7 +45,8 @@ namespace GSC.Respository.EditCheckImpact
 
         public EditCheckResult ValidateEditCheckReference(List<EditCheckValidate> editCheck)
         {
-            if (editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
+            var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
+            if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
                 var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), false);
                 result.ResultSkip = true;
@@ -53,7 +55,7 @@ namespace GSC.Respository.EditCheckImpact
                 else
                     return result;
             }
-            else if (editCheck.Any(x => x.IsFormula))
+            else if (!dateDiff && editCheck.Any(x => x.IsFormula))
                 return _editCheckFormulaRepository.ValidateFormulaReference(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
             else
                 return ValidateRule(editCheck, false);
@@ -239,7 +241,12 @@ namespace GSC.Respository.EditCheckImpact
             var targetResult = new EditCheckResult();
 
             var targetEditCheck = editCheck.FirstOrDefault(r => r.IsTarget);
-            if (targetEditCheck == null) return null;
+
+            if (editCheck.Any(x => x.IsFormula) && targetEditCheck == null)
+                targetEditCheck = new EditCheckValidate();
+
+            if (targetEditCheck == null) return result;
+
             targetResult.Id = targetEditCheck.Id;
             targetResult.SampleText = $"{from?.FieldName} {"-"} {to?.FieldName}";
 
@@ -255,16 +262,16 @@ namespace GSC.Respository.EditCheckImpact
                 }
 
                 targetResult.ResultMessage = $"{startDate.ToString("dd-MMM-yyyy")} {"-"} {endDate.ToString("dd-MMM-yyyy")}";
-
+                var ruleResult = 0;
                 if (from.CollectionValue.ToUpper().Contains("M"))
                 {
                     var ts = startDate - endDate;
-                    targetResult.Result = Convert.ToString(Math.Abs(Convert.ToInt32(ts.TotalDays / 30)));
+                    ruleResult = Math.Abs(Convert.ToInt32(ts.TotalDays / 30));
                 }
                 else if (from.CollectionValue.ToUpper().Contains("D"))
                 {
                     var ts = startDate - endDate;
-                    targetResult.Result = Convert.ToString(Math.Abs(Convert.ToInt32(ts.TotalDays)));
+                    ruleResult = Math.Abs(Convert.ToInt32(ts.TotalDays));
                 }
                 else
                 {
@@ -272,8 +279,15 @@ namespace GSC.Respository.EditCheckImpact
                     var age = endDate.Year - startDate.Year;
 
                     if (startDate.Date > endDate.AddYears(-age)) age--;
-                    targetResult.Result = Math.Abs(age).ToString();
+                    ruleResult = Math.Abs(age);
                 }
+
+                if (!string.IsNullOrEmpty(to.CollectionValue))
+                {
+                    ruleResult = Convert.ToInt32(new DataTable().Compute($"{ruleResult} {to.CollectionValue}", null));
+                }
+
+                targetResult.Result = ruleResult.ToString();
             }
             else
             {
