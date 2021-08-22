@@ -69,7 +69,7 @@ namespace GSC.Data.Dto.Project.Design
         public Alignment? Alignment { get; set; }
         public IList<ProjectDesignVariableEncryptRoleDto> Roles { get; set; } = null;
         public int? LargeStep { get; set; }
-        public bool? InActive { get; set; }
+        public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
 
     }

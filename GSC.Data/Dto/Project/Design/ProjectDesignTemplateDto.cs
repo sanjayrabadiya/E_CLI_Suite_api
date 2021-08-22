@@ -41,7 +41,7 @@ namespace GSC.Data.Dto.Project.Design
         public DomainDto Domain { get; set; }
         public IList<ProjectDesignVariableDto> Variables { get; set; }
         public int? ProductTypeId { get; set; }
-        public bool? InActive { get; set; }
+        public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
     }
 

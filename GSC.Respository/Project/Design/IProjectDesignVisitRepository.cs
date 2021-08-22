@@ -15,5 +15,6 @@ namespace GSC.Respository.Project.Design
         string Duplicate(ProjectDesignVisit objSave);
         IList<ProjectDesignVisitBasicDto> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId);
         CheckVersionDto CheckStudyVersion(int projectDesignPeriodId);
+        IList<ProjectDesignVisitDto> GetVisitList(int projectDesignPeriodId);
     }
 }

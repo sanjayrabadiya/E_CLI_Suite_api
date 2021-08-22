@@ -464,8 +464,7 @@ namespace GSC.Api.Controllers.Project.Design
                 var checkVersion = _projectDesignTemplateRepository.CheckStudyVersion(record.ProjectDesignVisitId);
                 if (checkVersion.AnyLive)
                 {
-                    record.StudyVersion = checkVersion.VersionNumber;
-                    record.InActive = true;
+                    record.InActiveVersion = checkVersion.VersionNumber;
                     _projectDesignTemplateRepository.Update(record);
                     _uow.Save();
                 }

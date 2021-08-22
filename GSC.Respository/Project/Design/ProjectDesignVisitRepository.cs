@@ -82,7 +82,32 @@ namespace GSC.Respository.Project.Design
                 {
                     Id = t.Id,
                     Value = t.DisplayName,
-                    ExtraData = t.IsNonCRF
+                    Code = t.StudyVersion != null || t.InActiveVersion != null ?
+                    "( V : " + t.StudyVersion + (t.StudyVersion != null && t.InActiveVersion != null ? " - " : "" + t.InActiveVersion) + ")" : "",
+                    ExtraData = t.IsNonCRF,
+                }).ToList();
+
+            return visits;
+        }
+
+
+        public IList<ProjectDesignVisitDto> GetVisitList(int projectDesignPeriodId)
+        {
+            var checkVersion = CheckStudyVersion(projectDesignPeriodId);
+
+            var visits = All.Where(x => x.DeletedDate == null
+                                        && x.ProjectDesignPeriodId == projectDesignPeriodId).OrderBy(t => t.DesignOrder).Select(
+                t => new ProjectDesignVisitDto
+                {
+                    Id = t.Id,
+                    DisplayName = t.DisplayName,
+                    DisplayVersion = t.StudyVersion != null || t.InActiveVersion != null ?
+                    "( V : " + t.StudyVersion + (t.StudyVersion != null && t.InActiveVersion != null ? " - " : "" + t.InActiveVersion) + ")" : "",
+                    IsNonCRF = t.IsNonCRF,
+                    StudyVersion = t.StudyVersion,
+                    InActiveVersion = t.InActiveVersion,
+                    InActive = t.InActiveVersion != null,
+                    AllowActive = checkVersion.VersionNumber == t.InActiveVersion && t.InActiveVersion != null
                 }).ToList();
 
             return visits;

@@ -36,7 +36,7 @@ namespace GSC.Data.Entities.Project.Design
         public PrintType PrintType { get; set; }
         public bool IsDocument { get; set; }
         public bool IsEncrypt { get; set; }
-        public bool? InActive { get; set; }
+        public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
         public IList<ProjectDesignVariableValue> Values { get; set; } = null;
        // public IList<ProjectDesignVariableRemarks> Remarks { get; set; } = null;

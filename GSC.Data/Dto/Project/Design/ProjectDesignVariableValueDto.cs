@@ -15,7 +15,7 @@ namespace GSC.Data.Dto.Project.Design
 
         [Required(ErrorMessage = "Value Name is required.")]
         public string ValueName { get; set; }
-        public bool? InActive { get; set; }
+        public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
         public int SeqNo { get; set; }
         public string Label { get; set; }

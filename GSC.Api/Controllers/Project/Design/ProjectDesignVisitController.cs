@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
@@ -78,6 +79,14 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(projectDesignVisitDto);
         }
 
+
+        [HttpGet]
+        [Route("GetVisitList/{projectDesignPeriodId}")]
+        public IActionResult GetVisitList(int projectDesignPeriodId)
+        {
+            return Ok(_projectDesignVisitRepository.GetVisitList(projectDesignPeriodId));
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] ProjectDesignVisitDto projectDesignVisitDto)
         {
@@ -142,8 +151,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             if (checkVersion.AnyLive)
             {
-                visit.StudyVersion = checkVersion.VersionNumber;
-                visit.InActive = true;
+                visit.InActiveVersion = checkVersion.VersionNumber;
                 _projectDesignVisitRepository.Update(visit);
             }
             else

@@ -22,7 +22,7 @@ namespace GSC.Data.Entities.Project.Design
         public Domain Domain { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public VariableTemplate VariableTemplate { get; set; }
-        public bool? InActive { get; set; }
+        public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
 
         public IList<ProjectDesignTemplateNote> ProjectDesignTemplateNote { get; set; }

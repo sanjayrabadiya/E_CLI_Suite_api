@@ -17,7 +17,7 @@ namespace GSC.Data.Entities.Project.Design
         public int? DesignOrder { get; set; }
         public IList<ProjectDesignTemplate> Templates { get; set; }
         public List<VisitLanguage> VisitLanguage { get; set; }
-        public bool? InActive { get; set; }
+        public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
         public List<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }
     }
