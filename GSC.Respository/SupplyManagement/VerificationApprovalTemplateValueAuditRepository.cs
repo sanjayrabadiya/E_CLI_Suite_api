@@ -42,5 +42,17 @@ namespace GSC.Respository.SupplyManagement
                 Id = r.Id
             }).OrderByDescending(t => t.Id).ToList();
         }
+
+        public void Save(VerificationApprovalTemplateValueAudit audit)
+        {
+            audit.IpAddress = _jwtTokenAccesser.IpAddress;
+            audit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
+            audit.UserName = _jwtTokenAccesser.UserName;
+            audit.UserRole = _jwtTokenAccesser.RoleName;
+
+            audit.CreatedDate = _jwtTokenAccesser.GetClientDate();
+
+            Add(audit);
+        }
     }
 }

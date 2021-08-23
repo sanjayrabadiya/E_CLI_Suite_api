@@ -22,6 +22,7 @@ namespace GSC.Data.Dto.Master
 
         public bool IsRepeated { get; set; }
         public ActivityMode ActivityMode { get; set; }
+        public AuditModule? ModuleId { get; set; }
         public List<VariableTemplateDetailDto> VariableTemplateDetails { get; set; }
         public IList<VariableTemplateNoteDto> Notes { get; set; }
         public int? CompanyId { get; set; }

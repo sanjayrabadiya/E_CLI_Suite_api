@@ -28,12 +28,14 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IProductVerificationDetailRepository _productVerificationDetail;
         private readonly IVerificationApprovalTemplateValueChildRepository _verificationApprovalTemplateValueChildRepository;
         private readonly IVerificationApprovalTemplateValueRepository _verificationApprovalTemplateValueRepository;
+        private readonly IVerificationApprovalTemplateValueAuditRepository _verificationApprovalTemplateValueAuditRepository;
         private readonly IUnitOfWork _uow;
 
         public VerificationApprovalTemplateController(IVerificationApprovalTemplateRepository verificationApprovalTemplateRepository,
             IVerificationApprovalTemplateHistoryRepository verificationApprovalTemplateHistoryRepository,
             IProductVerificationDetailRepository productVerificationDetail,
-            IUnitOfWork uow, IMapper mapper,
+            IVerificationApprovalTemplateValueAuditRepository verificationApprovalTemplateValueAuditRepository,
+        IUnitOfWork uow, IMapper mapper,
             IVariableTemplateRepository variableTemplateRepository,
             IVerificationApprovalTemplateValueChildRepository verificationApprovalTemplateValueChildRepository,
         IVerificationApprovalTemplateValueRepository verificationApprovalTemplateValueRepository,
@@ -41,6 +43,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             _verificationApprovalTemplateRepository = verificationApprovalTemplateRepository;
             _verificationApprovalTemplateHistoryRepository = verificationApprovalTemplateHistoryRepository;
+            _verificationApprovalTemplateValueAuditRepository = verificationApprovalTemplateValueAuditRepository;
             _productVerificationDetail = productVerificationDetail;
             _verificationApprovalTemplateValueChildRepository = verificationApprovalTemplateValueChildRepository;
             _verificationApprovalTemplateValueRepository = verificationApprovalTemplateValueRepository;
@@ -163,16 +166,45 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 foreach (var item in verificationApprovalTemplateDto.VerificationApprovalTemplateValueList)
                 {
+                    var value = _verificationApprovalTemplateValueRepository.GetValueForAudit(item);
                     var verificationApproveTemplateValue = _mapper.Map<VerificationApprovalTemplateValue>(item);
-                    verificationApproveTemplateValue.Id = 0;
-                    verificationApproveTemplateValue.VerificationApprovalTemplateId = verificationApprovalTemplateDto.Id;
-                    _verificationApprovalTemplateValueRepository.Add(verificationApproveTemplateValue);
 
-                    _verificationApprovalTemplateValueChildRepository.Save(verificationApproveTemplateValue);
+                    verificationApproveTemplateValue.VerificationApprovalTemplateId = verificationApprovalTemplateDto.Id;
+                    var Exists = _verificationApprovalTemplateValueRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id && x.VariableId == item.VariableId).FirstOrDefault();
+
+                    VerificationApprovalTemplateValueAudit audit = new VerificationApprovalTemplateValueAudit();
+
+                    if (Exists == null)
+                    {
+                        verificationApproveTemplateValue.Id = 0;
+                        _verificationApprovalTemplateValueRepository.Add(verificationApproveTemplateValue);
+
+                        var aduit = new VerificationApprovalTemplateValueAudit
+                        {
+                            VerificationApprovalTemplateValue = verificationApproveTemplateValue,
+                            Value = item.IsNa ? "N/A" : value,
+                            OldValue = item.OldValue,
+                        };
+                        _verificationApprovalTemplateValueAuditRepository.Save(aduit);
+                        _verificationApprovalTemplateValueChildRepository.Save(verificationApproveTemplateValue);
+                    }
+                    else
+                    {
+                        var aduit = new VerificationApprovalTemplateValueAudit
+                        {
+                            VerificationApprovalTemplateValueId = Exists.Id,
+                            Value = item.IsNa ? "N/A" : value,
+                            OldValue = item.OldValue,
+                        };
+                        _verificationApprovalTemplateValueAuditRepository.Save(aduit);
+                        if (item.IsDeleted)
+                            _verificationApprovalTemplateValueRepository.DeleteChild(Exists.Id);
+
+                        _verificationApprovalTemplateValueChildRepository.Save(verificationApproveTemplateValue);
+                        _verificationApprovalTemplateValueRepository.Update(verificationApproveTemplateValue);
+                    }
                 }
             }
-
-
             if (_uow.Save() <= 0) throw new Exception("Updating Verification Approval Template failed on save.");
             return Ok(verificationApprovalTemplate.Id);
         }

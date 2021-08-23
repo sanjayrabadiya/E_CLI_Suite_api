@@ -16,5 +16,6 @@ namespace GSC.Respository.Master
         void AddRequieredTemplate(Variable variable);
         List<DropDownDto> GetVariableTemplateNonCRFDropDown();
         DesignVerificationApprovalTemplateDto GetVerificationApprovalTemplate(int id);
+        List<DropDownDto> GetVariableTemplateByModuleId(int moduleId);
     }
 }

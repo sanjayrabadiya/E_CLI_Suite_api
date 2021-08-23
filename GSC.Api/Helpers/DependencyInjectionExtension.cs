@@ -333,6 +333,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVerificationApprovalTemplateHistoryRepository, VerificationApprovalTemplateHistoryRepository>();
             services.AddScoped<IVerificationApprovalTemplateValueChildRepository, VerificationApprovalTemplateValueChildRepository>();
             services.AddScoped<IVerificationApprovalTemplateValueAuditRepository, VerificationApprovalTemplateValueAuditRepository>();
+            services.AddScoped<ISupplyManagementConfigurationRepository, SupplyManagementConfigurationRepository>();
         }
     }
 }

@@ -345,6 +345,11 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.BarcodeCombination, x => x.MapFrom(a => string.Join(",", a.BarcodeCombination.Where(x => x.DeletedDate == null).Select(s => s.TableFieldName.LabelName).ToList())))
                 .ForMember(x => x.BarcodeDisplayInfo, x => x.MapFrom(a => string.Join(",", a.BarcodeDisplayInfo.Where(x => x.DeletedDate == null).Select(s => s.TableFieldName.LabelName).ToList())))
                 .ReverseMap();
+
+            CreateMap<SupplyManagementConfiguration, SupplyManagementConfigurationGridDto>()
+                .ForMember(x => x.PageName, x => x.MapFrom(a => a.AppScreen.ScreenName))
+                .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.VariableTemplate.TemplateName))
+                .ReverseMap();
         }
     }
 }

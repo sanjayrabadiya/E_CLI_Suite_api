@@ -17,5 +17,6 @@ namespace GSC.Data.Entities.Master
         public Domain Domain { get; set; }
         public ActivityMode ActivityMode { get; set; }
         public IList<VariableTemplateNote> Notes { get; set; }
+        public AuditModule? ModuleId { get; set; }
     }
 }

@@ -357,6 +357,7 @@ namespace GSC.Domain.Context
         public DbSet<UploadLimit> UploadLimit { get; set; }
         public DbSet<VerificationApprovalTemplateHistory> VerificationApprovalTemplateHistory { get; set; }
         public DbSet<VerificationApprovalTemplateValueAudit> VerificationApprovalTemplateValueAudit { get; set; }
+        public DbSet<SupplyManagementConfiguration> SupplyManagementConfiguration { get; set; }
     }
 
 

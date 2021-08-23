@@ -8,5 +8,6 @@ namespace GSC.Respository.SupplyManagement
     public interface IVerificationApprovalTemplateValueAuditRepository : IGenericRepository<VerificationApprovalTemplateValueAudit>
     {
         IList<VerificationApprovalAuditDto> GetAudits(int VerificationApprovalTemplateValueId);
+        void Save(VerificationApprovalTemplateValueAudit audit);
     }
 }

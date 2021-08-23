@@ -216,5 +216,14 @@ namespace GSC.Respository.Master
 
             return result;
         }
+
+        public List<DropDownDto> GetVariableTemplateByModuleId(int moduleId)
+        {
+            return All.Where(x =>
+                (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null &&
+                 (int)x.ModuleId == moduleId)
+            .Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode })
+            .OrderBy(o => o.Value).ToList();
+        }
     }
 }
