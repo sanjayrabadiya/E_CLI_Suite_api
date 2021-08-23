@@ -43,6 +43,22 @@ namespace GSC.Respository.Audit
                     }
                 };
             }
+            else if (action == AuditAction.Activated)
+            {
+                int.TryParse(_jwtTokenAccesser.GetHeader("audit-reason-id"), out var reasonId);
+                var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+                changes = new List<VolunteerAuditTrail>
+                {
+                    new VolunteerAuditTrail
+                    {
+                        IsRecordDeleted = false,
+                        ReasonId = reasonId > 0 ? reasonId : (int?) null,
+                        ReasonOth = reasonOth,
+                        IpAddress = _jwtTokenAccesser.IpAddress,
+                        TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
+                    }
+                };
+            }
 
             if (!changes.Any()) return;
             changes.ForEach(t =>

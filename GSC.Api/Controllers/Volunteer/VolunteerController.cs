@@ -205,8 +205,12 @@ namespace GSC.Api.Controllers.Volunteer
 
             if (record == null)
                 return NotFound();
-            _volunteerRepository.Active(record);
+            _volunteerRepository.Active(record);            
+            
             _uow.Save();
+
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Activated, record.Id,
+                null, null);
 
             return Ok();
         }

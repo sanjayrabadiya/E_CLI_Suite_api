@@ -40,5 +40,12 @@ namespace GSC.Respository.Volunteer
                     LanguageName = t.Language.LanguageName
                 }).OrderByDescending(x => x.Id).ToList();
         }
+
+        public string DuplicateRecord(VolunteerLanguageDto objSave)
+        {
+            if (All.Any(x => x.Id != objSave.Id && x.LanguageId == objSave.LanguageId && x.DeletedDate == null && x.VolunteerId == objSave.VolunteerId))
+                return "Language Already Exists";
+            return "";
+        }
     }
 }

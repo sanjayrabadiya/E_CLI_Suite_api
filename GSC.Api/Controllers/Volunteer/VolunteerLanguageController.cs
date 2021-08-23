@@ -45,8 +45,15 @@ namespace GSC.Api.Controllers.Volunteer
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            _volunteerLanguageRepository.RemoveExisting(0, volunteerLanguageDto.VolunteerId,
-                volunteerLanguageDto.LanguageId);
+            //_volunteerLanguageRepository.RemoveExisting(0, volunteerLanguageDto.VolunteerId,
+            //    volunteerLanguageDto.LanguageId);
+
+            var validate = _volunteerLanguageRepository.DuplicateRecord(volunteerLanguageDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             volunteerLanguageDto.Id = 0;
             var volunteerLanguage = _mapper.Map<VolunteerLanguage>(volunteerLanguageDto);
@@ -66,11 +73,17 @@ namespace GSC.Api.Controllers.Volunteer
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            _volunteerLanguageRepository.RemoveExisting(volunteerLanguageDto.Id, volunteerLanguageDto.VolunteerId,
-                volunteerLanguageDto.LanguageId);
+            var validate = _volunteerLanguageRepository.DuplicateRecord(volunteerLanguageDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            //_volunteerLanguageRepository.RemoveExisting(volunteerLanguageDto.Id, volunteerLanguageDto.VolunteerId,
+            //    volunteerLanguageDto.LanguageId);
 
             var volunteerLanguage = _mapper.Map<VolunteerLanguage>(volunteerLanguageDto);
-            //volunteerLanguage.Id = id;
             _volunteerLanguageRepository.Update(volunteerLanguage);
             if (_uow.Save() <= 0) throw new Exception("Updating volunteer language failed on save.");
 
