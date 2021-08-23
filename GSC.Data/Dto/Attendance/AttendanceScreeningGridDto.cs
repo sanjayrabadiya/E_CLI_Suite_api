@@ -54,5 +54,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsReplaced { get; set; }
         public string IsStandby { get; set; }
         public bool IsLocked { get; set; }
+        public bool IsBarcodeGenerated { get; set; }
+        public int? AttendanceBarcodeGenerateId { get; set; }
     }
 }

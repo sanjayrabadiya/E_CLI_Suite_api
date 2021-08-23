@@ -310,5 +310,7 @@ namespace GSC.Domain.Context
         DbSet<VerificationApprovalTemplateHistory> VerificationApprovalTemplateHistory { get; set; }
         DbSet<VerificationApprovalTemplateValueAudit> VerificationApprovalTemplateValueAudit { get; set; }
         DbSet<SupplyManagementConfiguration> SupplyManagementConfiguration { get; set; }
+        DbSet<AttendanceBarcodeGenerate> AttendanceBarcodeGenerate { get; set; }
+        DbSet<BarcodeAudit> BarcodeAudit { get; set; }
     }
 }

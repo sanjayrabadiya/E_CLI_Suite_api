@@ -397,6 +397,8 @@ namespace GSC.Api.Helpers
             CreateMap<VerificationApprovalTemplateHistory, VerificationApprovalTemplateHistoryDto>().ReverseMap();
             CreateMap<VerificationApprovalTemplateValueAudit, VerificationApprovalTemplateValueAuditDto>().ReverseMap();
             CreateMap<SupplyManagementConfiguration, SupplyManagementConfigurationDto>().ReverseMap();
+            CreateMap<AttendanceBarcodeGenerate, AttendanceBarcodeGenerateDto>().ReverseMap();
+            CreateMap<BarcodeAudit, BarcodeAuditDto>().ReverseMap();
         }
     }
 }

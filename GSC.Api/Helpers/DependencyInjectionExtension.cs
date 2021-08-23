@@ -334,6 +334,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVerificationApprovalTemplateValueChildRepository, VerificationApprovalTemplateValueChildRepository>();
             services.AddScoped<IVerificationApprovalTemplateValueAuditRepository, VerificationApprovalTemplateValueAuditRepository>();
             services.AddScoped<ISupplyManagementConfigurationRepository, SupplyManagementConfigurationRepository>();
+            services.AddScoped<IAttendanceBarcodeGenerateRepository, AttendanceBarcodeGenerateRepository>();
+            services.AddScoped<IBarcodeAuditRepository, BarcodeAuditRepository>();
         }
     }
 }

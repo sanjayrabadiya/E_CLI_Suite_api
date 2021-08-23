@@ -8,6 +8,7 @@ using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Barcode;
 using GSC.Respository.Configuration;
 using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
@@ -37,6 +38,7 @@ namespace GSC.Respository.Attendance
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        private readonly IAttendanceBarcodeGenerateRepository _attendanceBarcodeGenerateRepository;
 
         public AttendanceRepository(IGSCContext context,
             IUserRepository userRepository,
@@ -48,7 +50,8 @@ namespace GSC.Respository.Attendance
             IRolePermissionRepository rolePermissionRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
-            IScreeningTemplateRepository screeningTemplateRepository)
+            IScreeningTemplateRepository screeningTemplateRepository,
+            IAttendanceBarcodeGenerateRepository attendanceBarcodeGenerateRepository)
             : base(context)
         {
             _context = context;
@@ -62,6 +65,7 @@ namespace GSC.Respository.Attendance
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
+            _attendanceBarcodeGenerateRepository = attendanceBarcodeGenerateRepository;
         }
 
         public void SaveAttendance(Data.Entities.Attendance.Attendance attendance)
@@ -160,8 +164,9 @@ namespace GSC.Respository.Attendance
                 CreatedDate = x.CreatedDate,
                 ModifiedDate = x.ModifiedDate,
                 DeletedDate = x.DeletedDate,
-                IsLocked = !_screeningTemplateRepository.All.Any(t => t.ScreeningVisit.ScreeningEntryId == x.ScreeningEntry.Id && !t.IsLocked)
-
+                IsLocked = !_screeningTemplateRepository.All.Any(t => t.ScreeningVisit.ScreeningEntryId == x.ScreeningEntry.Id && !t.IsLocked),
+                IsBarcodeGenerated = _attendanceBarcodeGenerateRepository.All.Any(t => t.AttendanceId == x.Id && t.DeletedBy == null),//x.AttendanceBarcodeGenerate != null ? true : false,
+                AttendanceBarcodeGenerateId = _attendanceBarcodeGenerateRepository.All.Where(t => t.AttendanceId == x.Id && t.DeletedBy == null).FirstOrDefault().Id//x.AttendanceBarcodeGenerate.Id
             }).ToList().OrderBy(x => x.Id).ToList();
 
             return items;

@@ -15,7 +15,8 @@ namespace GSC.Shared.Generic
         [Description("Inserted")] Inserted = 1,
         [Description("Updated")] Updated = 2,
         [Description("Deleted")] Deleted = 3,
-        [Description("Activated")] Activated = 4
+        [Description("Activated")] Activated = 4,
+        [Description("RePrint")] RePrint = 5
     }
 
     public enum PrefLanguage : short
