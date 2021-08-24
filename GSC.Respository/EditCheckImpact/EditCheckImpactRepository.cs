@@ -316,11 +316,13 @@ namespace GSC.Respository.EditCheckImpact
                         editCheckTarget.OriginalValidationType = editCheckTarget.EditCheckDisable ? ValidationType.None : ValidationType.Required;
                         if (editCheckTarget.EditCheckDisable)
                         {
-                            editCheckTarget.Value = "";
+                            editCheckTarget.Value = r.CollectionSource == CollectionSources.HorizontalScale ? "0" : "";
                             if (!string.IsNullOrEmpty(r.ScreeningTemplateValue)) editCheckTarget.IsValueSet = true;
                             editCheckTarget.Note = note;
                         }
-                        if (string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.ValidateType == EditCheckValidateType.Passed)
+
+                        if ((string.IsNullOrEmpty(r.ScreeningTemplateValue) || 
+                        (r.CollectionSource == CollectionSources.HorizontalScale && r.ScreeningTemplateValue == "0")) && r.ValidateType == EditCheckValidateType.Passed)
                         {
                             if (isQueryRaise) editCheckTarget.HasQueries = true;
                             r.ValidateType = EditCheckValidateType.Failed;

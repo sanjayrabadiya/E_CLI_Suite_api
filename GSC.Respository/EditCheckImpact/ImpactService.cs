@@ -287,7 +287,8 @@ namespace GSC.Respository.EditCheckImpact
               collectionSource == CollectionSources.DateTime ||
               collectionSource == CollectionSources.PartialDate ||
               collectionSource == CollectionSources.TextBox ||
-              collectionSource == CollectionSources.Time;
+              collectionSource == CollectionSources.Time ||
+              collectionSource == CollectionSources.HorizontalScale;
         }
 
         List<int> ProjectDesignVariableIds(string collectionValue)
