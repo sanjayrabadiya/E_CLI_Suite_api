@@ -95,7 +95,7 @@ namespace GSC.Respository.EditCheckImpact
                         r.ScreeningTemplateId = refTemplate.Id;
                         r.Status = refTemplate.Status;
                         var statusId = (int)refTemplate.Status;
-                        if (statusId > 2)
+                        if (statusId > 1)
                         {
                             r.ScreeningTemplateValue = _impactService.GetVariableValue(r, out bool isNa);
                             r.IsNa = isNa;
