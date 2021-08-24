@@ -41,6 +41,8 @@ namespace GSC.Data.Dto.Report
         public int? ParentProjectId { get; set; }
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
+        public int? VisitDesignOrder { get; set; }
+        public int PeriodId { get; set; }
         public List<ProjectDatabaseDto> LstVariable { get; set; }
         public List<ProjectDatabaseDto> LstProjectDataBase { get; set; }
         public List<ProjectDatabaseDto> LstProjectDataBaseVisit { get; set; }
@@ -88,6 +90,8 @@ namespace GSC.Data.Dto.Report
         public int VisitId { get; set; }
         public string Visit { get; set; }
         public int DesignOrder { get; set; }
+        public int? VisitDesignOrder { get; set; }
+        public int PeriodId { get; set; }
         public string TemplateName { get; set; }
         public List<ProjectDatabaseTemplateDto> LstProjectDataBaseTemplate { get; set; }
         //public List<ProjectDatabaseItemDto> LstProjectDataBaseitems { get; set; }
