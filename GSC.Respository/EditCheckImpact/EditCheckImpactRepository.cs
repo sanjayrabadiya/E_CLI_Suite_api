@@ -321,7 +321,7 @@ namespace GSC.Respository.EditCheckImpact
                             editCheckTarget.Note = note;
                         }
 
-                        if ((string.IsNullOrEmpty(r.ScreeningTemplateValue) || 
+                        if ((string.IsNullOrEmpty(r.ScreeningTemplateValue) ||
                         (r.CollectionSource == CollectionSources.HorizontalScale && r.ScreeningTemplateValue == "0")) && r.ValidateType == EditCheckValidateType.Passed)
                         {
                             if (isQueryRaise) editCheckTarget.HasQueries = true;
@@ -481,6 +481,8 @@ namespace GSC.Respository.EditCheckImpact
                 Update(r);
             });
             _context.Save();
+
+
         }
 
         private void UpdateEnableTemplate(int projectDesignTemplateId, int domainId, int screeningVisitId, EditCheckValidateDto editCheckValidateDto, List<EditCheckTargetValidationList> editCheckTarget, bool isQueryRaise)
@@ -494,7 +496,7 @@ namespace GSC.Respository.EditCheckImpact
                 bool isReviewed = _screeningTemplateReviewRepository.All.AsNoTracking().Any(x => x.ScreeningTemplateId == r.Id && x.Status == ScreeningTemplateStatus.Reviewed);
                 bool isFound = false;
                 var isTemplateQuery = false;
-
+                bool isSubmitted = false;
                 if (isReviewed && isQueryRaise)
                 {
                     if (r.Status > ScreeningTemplateStatus.Submitted)
@@ -515,12 +517,28 @@ namespace GSC.Respository.EditCheckImpact
                 }
                 else if (r.Status == ScreeningTemplateStatus.InProcess || r.Status == ScreeningTemplateStatus.Submitted)
                 {
+
+                    if (r.Status == ScreeningTemplateStatus.Submitted) isSubmitted = true;
+
                     r.ReviewLevel = null;
                     r.Progress = 0;
                     r.Status = ScreeningTemplateStatus.Pending;
                     TemplateValueAduit(r.Id, editCheckValidateDto);
                     isFound = true;
+
                 }
+
+                if (isSubmitted)
+                {
+                    var screeningTemplateReview = _screeningTemplateReviewRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateId == r.Id).ToList();
+
+                    screeningTemplateReview.ForEach(c =>
+                    {
+                        c.IsRepeat = true;
+                        _screeningTemplateReviewRepository.Update(c);
+                    });
+                }
+              
 
                 if (isFound)
                 {
