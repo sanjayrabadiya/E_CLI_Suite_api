@@ -250,11 +250,10 @@ namespace GSC.Respository.InformConcent
         {
             var document = Find(EconcentReviewId);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = Path.Combine(upload.DocumentPath, document.PdfPath);
-            string path = FullPath;
-            if (!System.IO.File.Exists(path))
-                return null;
-            var stream = new FileStream(path, FileMode.Open);
+            var FullPath = Path.Combine(upload.DocumentPath, document.PdfPath);          
+            if (!System.IO.File.Exists(FullPath))
+                return null;           
+            FileStream stream = new FileStream(FullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);        
             return new FileStreamResult(stream, "application/pdf");          
         }
         public List<DashboardDto> GetEconsentMyTaskList(int ProjectId)
