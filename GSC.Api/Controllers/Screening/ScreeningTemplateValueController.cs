@@ -233,6 +233,7 @@ namespace GSC.Api.Controllers.Screening
                     ModelState.AddModelError("Message", validateuploadlimit);
                     return BadRequest(ModelState);
                 }
+                DocumentService.RemoveFile(documentPath, screeningTemplateValue.DocPath);
                 string subject = screningDetails.ScreeningNumber + "-" + screningDetails.Initial;
                 screeningTemplateValue.DocPath = DocumentService.SaveUploadDocument(screeningTemplateValueDto.FileModel,
                       documentPath,_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(screningDetails.ProjectId), FolderType.DataEntry, subject);

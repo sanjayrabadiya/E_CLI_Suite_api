@@ -145,6 +145,7 @@ namespace GSC.Api.Controllers.ProjectRight
                     ModelState.AddModelError("Message", validateuploadlimit);
                     return BadRequest(ModelState);
                 }
+                DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.PathName);
                 document.PathName = DocumentService.SaveUploadDocument(projectDocumentDto.FileModel,
                     _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(projectDocumentDto.ProjectId), FolderType.TraningDocument, "");
                 document.MimeType = projectDocumentDto.FileModel.Extension;
@@ -173,7 +174,7 @@ namespace GSC.Api.Controllers.ProjectRight
 
             if (record == null)
                 return NotFound();
-
+            DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), record.PathName);
             _projectDocumentRepository.Delete(record);
             _documentReviewRepository.DeleteByDocumentId(id, record.ProjectId);
 

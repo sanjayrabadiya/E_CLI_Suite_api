@@ -288,7 +288,7 @@ namespace GSC.Api.Helpers
             CreateMap<Data.Entities.UserMgt.User, EConsentUserChatDto>()
                 .ForMember(x => x.UserName, y => y.MapFrom(a => a.FirstName +" "+ a.LastName ))
                 .ReverseMap();
-            CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
+            //CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
             CreateMap<Site, SiteDto>().ReverseMap();
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
             CreateMap<VisitLanguage, VisitLanguageDto>().ReverseMap();

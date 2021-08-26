@@ -72,7 +72,9 @@ namespace GSC.Api.Controllers.Configuration
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var languagedetails = _languageConfigurationRepository.Find(languageconfiDto.Id);
             var languageConfi = _mapper.Map<LanguageConfiguration>(languageconfiDto);
+            languageConfi.KeyCode = languagedetails.KeyCode;
             //languageConfi.Id = departmentDto.Id;
             var validate = _languageConfigurationRepository.Duplicate(languageConfi);
             if (!string.IsNullOrEmpty(validate))

@@ -13,8 +13,8 @@ namespace GSC.Data.Dto.InformConcent
     {
         public EconsentSetupDto()
         {
-            PatientStatus = new List<EconsentSetupPatientStatus>();
-            Roles = new List<EconsentSetupRoles>();
+            //PatientStatus = new List<EconsentSetupPatientStatus>();
+            //Roles = new List<EconsentSetupRoles>();
         }
         public int ProjectId { get; set; }
         //public int DocumentTypeId { get; set; }
@@ -28,8 +28,8 @@ namespace GSC.Data.Dto.InformConcent
         public string ProjectName { get; set; }
         //temp open remove this
         public FileModel FileModel { get; set; }
-        public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
-        public List<EconsentSetupRoles> Roles { get; set; }
+       // public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
+        //public List<EconsentSetupRoles> Roles { get; set; }
         public string OriginalFileName { get; set; }
     }
 
@@ -55,7 +55,7 @@ namespace GSC.Data.Dto.InformConcent
         public string LanguageName { get; set; }
         public string DocumentTypeName { get; set; }
         public string ProjectName { get; set; }
-        public string PatientStatusData { get; set; }
+        //public string PatientStatusData { get; set; }
         public string ApproveBy { get; set; }
 
     }

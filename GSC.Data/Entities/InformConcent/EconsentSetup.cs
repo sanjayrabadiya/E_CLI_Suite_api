@@ -19,7 +19,7 @@ namespace GSC.Data.Entities.InformConcent
         public Language Language { get; set; }
         //public DocumentType DocumentType { get; set; }
         public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
-        public List<EconsentSetupRoles> Roles { get; set; }
+        //public List<EconsentSetupRoles> Roles { get; set; }
         public string OriginalFileName { get; set; }
     }
 }

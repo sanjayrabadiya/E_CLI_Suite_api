@@ -6,7 +6,7 @@ using System.Text;
 
 namespace GSC.Respository.InformConcent
 {
-    public interface IEconsentSetupRolesRepository : IGenericRepository<EconsentSetupRoles>
-    {
-    }
+    //public interface IEconsentSetupRolesRepository : IGenericRepository<EconsentSetupRoles>
+    //{
+    //}
 }

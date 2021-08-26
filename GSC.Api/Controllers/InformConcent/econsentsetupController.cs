@@ -60,7 +60,8 @@ namespace GSC.Api.Controllers.InformConcent
         {
             //calls when edit particular document         
             if (id <= 0) return BadRequest();
-            var ecincentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id, x => x.Roles, x => x.PatientStatus).FirstOrDefault();
+            //var ecincentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id, x => x.Roles, x => x.PatientStatus).FirstOrDefault();
+            var ecincentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id, x => x.PatientStatus).FirstOrDefault();
             var econcentsetupDto = _mapper.Map<EconsentSetupDto>(ecincentSetup);
             return Ok(econcentsetupDto);
         }
@@ -133,8 +134,8 @@ namespace GSC.Api.Controllers.InformConcent
                 return BadRequest(ModelState);
             }
             _econsentSetupRepository.Add(econsent);
-            _context.EconsentSetupPatientStatus.AddRange(econsent.PatientStatus);
-            _context.EconsentSetupRoles.AddRange(econsent.Roles);
+           // _context.EconsentSetupPatientStatus.AddRange(econsent.PatientStatus);
+           // _context.EconsentSetupRoles.AddRange(econsent.Roles);
             if (_uow.Save() <= 0) throw new Exception($"Creating EConsent File failed on save.");
             _econsentSetupRepository.SendDocumentEmailPatient(econsent);
 
@@ -186,13 +187,13 @@ namespace GSC.Api.Controllers.InformConcent
                 econsent.DocumentPath = document.DocumentPath;
             }            
             _econsentSetupRepository.Update(econsent);
-            var removepatientstatus = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id).ToList();
-            _context.EconsentSetupPatientStatus.RemoveRange(removepatientstatus);
-            var role = _context.EconsentSetupRoles.Where(x => x.EconsentDocumentId == econsent.Id).ToList();
-            _context.EconsentSetupRoles.RemoveRange(role);
+           // var removepatientstatus = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id).ToList();
+           // _context.EconsentSetupPatientStatus.RemoveRange(removepatientstatus);
+            //var role = _context.EconsentSetupRoles.Where(x => x.EconsentDocumentId == econsent.Id).ToList();
+            //_context.EconsentSetupRoles.RemoveRange(role);
             if (_uow.Save() <= 0) throw new Exception($"Updating EConsent File failed on save.");
-            _context.EconsentSetupRoles.AddRange(econsent.Roles);
-            _context.EconsentSetupPatientStatus.AddRange(econsent.PatientStatus);
+            //_context.EconsentSetupRoles.AddRange(econsent.Roles);
+            //_context.EconsentSetupPatientStatus.AddRange(econsent.PatientStatus);
             _uow.Save();
             return Ok(econsent.Id);            
         }

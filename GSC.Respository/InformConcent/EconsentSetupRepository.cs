@@ -30,32 +30,32 @@ namespace GSC.Respository.InformConcent
     public class EconsentSetupRepository : GenericRespository<EconsentSetup>, IEconsentSetupRepository
     {
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;       
-        private readonly IProjectRepository _projectRepository;        
+        private readonly IGSCContext _context;
+        private readonly IProjectRepository _projectRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IRandomizationRepository _randomizationRepository;
-        private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;        
+        private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IUnitOfWork _uow;
-        public EconsentSetupRepository(IGSCContext context,             
+        public EconsentSetupRepository(IGSCContext context,
             IProjectRepository projectRepository,
-            IMapper mapper,            
-            IEmailSenderRespository emailSenderRespository,            
+            IMapper mapper,
+            IEmailSenderRespository emailSenderRespository,
             IRandomizationRepository randomizationRepository,
-            IEconsentReviewDetailsRepository econsentReviewDetailsRepository,            
+            IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IUnitOfWork uow) : base(context)
-        {           
+        {
             _projectRepository = projectRepository;
             _mapper = mapper;
-            _context = context;           
+            _context = context;
             _emailSenderRespository = emailSenderRespository;
             _randomizationRepository = randomizationRepository;
-            _econsentReviewDetailsRepository = econsentReviewDetailsRepository;           
+            _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _uow = uow;
         }
 
         public string Duplicate(EconsentSetup objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.Version == objSave.Version && x.ProjectId == objSave.ProjectId && x.LanguageId == objSave.LanguageId && x.DeletedDate == null && x.DocumentName==objSave.DocumentName))
+            if (All.Any(x => x.Id != objSave.Id && x.Version == objSave.Version && x.ProjectId == objSave.ProjectId && x.LanguageId == objSave.LanguageId && x.DeletedDate == null && x.DocumentName == objSave.DocumentName))
             {
                 return "Duplicate Document";
             }
@@ -73,25 +73,25 @@ namespace GSC.Respository.InformConcent
         public List<EconsentSetupGridDto> GetEconsentSetupList(int projectid, bool isDeleted)
         {
             var econsentSetups = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectid). //intList.Contains(x.ProjectId
-                   ProjectTo<EconsentSetupGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();          
+                   ProjectTo<EconsentSetupGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return econsentSetups;
         }
 
         public List<DropDownDto> GetPatientStatusDropDown()
         {
-           var result = Enum.GetValues(typeof(ScreeningPatientStatus))
-                 .Cast<ScreeningPatientStatus>().Where(x => 
-                                                                    //x == ScreeningPatientStatus.PreScreening ||
-                                                                    x == ScreeningPatientStatus.Screening ||
-                                                                    x == ScreeningPatientStatus.ConsentCompleted ||
-                                                                    x == ScreeningPatientStatus.OnTrial).Select(e => new DropDownDto
-                {
-                    Id = Convert.ToInt16(e),
-                    Value = e.GetDescription()
-                }).OrderBy(o => o.Value).ToList();
+            var result = Enum.GetValues(typeof(ScreeningPatientStatus))
+                  .Cast<ScreeningPatientStatus>().Where(x =>
+                                                                     //x == ScreeningPatientStatus.PreScreening ||
+                                                                     x == ScreeningPatientStatus.Screening ||
+                                                                     x == ScreeningPatientStatus.ConsentCompleted ||
+                                                                     x == ScreeningPatientStatus.OnTrial).Select(e => new DropDownDto
+                                                                     {
+                                                                         Id = Convert.ToInt16(e),
+                                                                         Value = e.GetDescription()
+                                                                     }).OrderBy(o => o.Value).ToList();
             return result;
         }
-        
+
         public string validateDocument(string path)
         {
             bool isheaderpresent = false;
@@ -142,25 +142,26 @@ namespace GSC.Respository.InformConcent
 
         public void SendDocumentEmailPatient(EconsentSetup econsent)
         {
-            var patientstatus = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id).Select(x => x.PatientStatusId).ToList();
-            var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId && (patientstatus.Contains((int)x.PatientStatusId) || x.PatientStatusId== ScreeningPatientStatus.ConsentInProcess ||x.PatientStatusId== ScreeningPatientStatus.ReConsentInProcess)).Include(x => x.Project).ToList();
-
+            //var patientstatus = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id).Select(x => x.PatientStatusId).ToList();
+            //var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId && (patientstatus.Contains((int)x.PatientStatusId) || x.PatientStatusId== ScreeningPatientStatus.ConsentInProcess ||x.PatientStatusId== ScreeningPatientStatus.ReConsentInProcess)).Include(x => x.Project).ToList();
+            var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.DeletedDate==null && x.LanguageId == econsent.LanguageId && x.PatientStatusId != ScreeningPatientStatus.Completed && x.PatientStatusId != ScreeningPatientStatus.Withdrawal).Include(x => x.Project).ToList();
             string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
             //for (var i = 0; i <= result.Count - 1; i++)
-            foreach(var item in result)
+            foreach (var item in result)
             {
-                if (item.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || item.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess || item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
+                //if (item.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || item.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess || item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
+                // {
+                EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
+                econsentReviewDetails.RandomizationId = item.Id;
+                econsentReviewDetails.EconsentSetupId = econsent.Id;
+                econsentReviewDetails.IsReviewedByPatient = false;
+                _econsentReviewDetailsRepository.Add(econsentReviewDetails);
+                // if (item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || item.PatientStatusId == ScreeningPatientStatus.OnTrial)
+                if (item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || item.PatientStatusId == ScreeningPatientStatus.OnTrial)
                 {
-                    EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
-                    econsentReviewDetails.RandomizationId = item.Id;
-                    econsentReviewDetails.EconsentSetupId = econsent.Id;
-                    econsentReviewDetails.IsReviewedByPatient = false;
-                    _econsentReviewDetailsRepository.Add(econsentReviewDetails);
-                    if (item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
-                    {
-                        _randomizationRepository.ChangeStatustoReConsentInProgress(item.Id);
-                    }
+                    _randomizationRepository.ChangeStatustoReConsentInProgress(item.Id);
                 }
+                // }
                 if (item.Email != "")
                 {
                     string patientName = "";

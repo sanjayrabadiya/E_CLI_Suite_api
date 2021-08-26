@@ -236,13 +236,13 @@ namespace GSC.Domain.Context
         DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
 
         DbSet<ProjectArtificateDocumentHistory> ProjectArtificateDocumentHistory { get; set; }
-        DbSet<EconsentSetupPatientStatus> EconsentSetupPatientStatus { get; set; }
+       // DbSet<EconsentSetupPatientStatus> EconsentSetupPatientStatus { get; set; }
         DbSet<EconsentSetup> EconsentSetup { get; set; }
         DbSet<EconsentReviewDetails> EconsentReviewDetails { get; set; }
         DbSet<EconsentSectionReference> EconsentSectionReference { get; set; }
         DbSet<EconsentReviewDetailsSections> EconsentReviewDetailsSections { get; set; }
         DbSet<EconsentChat> EconsentChat { get; set; }
-        DbSet<EconsentSetupRoles> EconsentSetupRoles { get; set; }
+        //DbSet<EconsentSetupRoles> EconsentSetupRoles { get; set; }
         DbSet<RegulatoryType> RegulatoryType { get; set; }
         DbSet<ProjectArtificateDocumentApprover> ProjectArtificateDocumentApprover { get; set; }
         DbSet<Site> Site { get; set; }

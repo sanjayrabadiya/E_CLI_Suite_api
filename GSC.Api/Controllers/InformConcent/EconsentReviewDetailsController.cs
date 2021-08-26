@@ -20,6 +20,7 @@ using GSC.Shared.JWTAuth;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Drawing;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -48,7 +49,7 @@ namespace GSC.Api.Controllers.InformConcent
             _emailSenderRespository = emailSenderRespository;
             _projectRepository = projectRepository;
             _randomizationRepository = randomizationRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;   
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -66,7 +67,7 @@ namespace GSC.Api.Controllers.InformConcent
             var sectionsHeaders = _econsentReviewDetailsRepository.GetEconsentSectionHeaders(id);
             return Ok(sectionsHeaders);
         }
-        
+
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -99,12 +100,51 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(_econsentReviewDetailsRepository.UpdateDocument(econsentReviewDetailsDto));
         }
 
-        [HttpPost]
-        [Route("GetEconsentDocument")]
-        public IActionResult GetEconsentDocument([FromBody] EconsentDocumetViwerDto econsentreviewdetails)
+        //[HttpPost]
+        //[Route("GetEconsentDocument")]
+        //public IActionResult GetEconsentDocument([FromBody] EconsentDocumetViwerDto econsentreviewdetails)
+        //{
+        //    var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
+        //    return Ok(json);
+        //}
+
+        [HttpGet]
+        [Route("GetEconsentDocument/{id}")]
+        public IActionResult GetEconsentDocument(int id)
         {
-            var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
-            return Ok(json);
+            var document = _econsentReviewDetailsRepository.GetEconsentDocument(id);
+            return document;
+            //return Ok(json);
+        }
+
+        [HttpPut]
+        [Route("ApprovePatient")]
+        public IActionResult ApprovePatient([FromBody] EconsentDocumetViwerDto econsentreviewdetails)
+        {
+            //var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
+            //return Ok(json);
+            int revieId = _econsentReviewDetailsRepository.ApproveWithDrawPatient(econsentreviewdetails,false);
+            return Ok(revieId);
+        }
+
+        [HttpPut]
+        [Route("WithDrawPatient")]
+        [TransactionRequired]
+        public IActionResult WithDrawPatient([FromBody] EconsentDocumetViwerDto econsentreviewdetails)
+        {
+            //var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
+            //return Ok(json);
+            var randomization = _randomizationRepository.FindBy(x=>x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            var reviewDetails = _context.EconsentReviewDetails.Where(x => x.RandomizationId == randomization.Id && x.DeletedDate == null).ToList();
+            foreach (var item in reviewDetails)
+            {
+                EconsentDocumetViwerDto econcentDetails = new EconsentDocumetViwerDto();
+                econcentDetails.EconcentReviewDetailsId = item.Id;
+                econcentDetails.PatientdigitalSignBase64 = econsentreviewdetails.PatientdigitalSignBase64;
+                _econsentReviewDetailsRepository.ApproveWithDrawPatient(econcentDetails,true);
+            }
+            _randomizationRepository.ChangeStatustoWithdrawal();
+            return Ok();
         }
 
         [HttpGet]
@@ -113,7 +153,7 @@ namespace GSC.Api.Controllers.InformConcent
         {
             return Ok(_econsentReviewDetailsRepository.GetEconsentReviewDetailsForSubjectManagement(patientid));
         }
-        
+
         [HttpGet]
         [Route("GetEconsentReviewDetailsForPatientDashboard")]
         public IActionResult GetEconsentReviewDetailsForPatientDashboard()
@@ -131,7 +171,7 @@ namespace GSC.Api.Controllers.InformConcent
 
         [HttpPost]
         [Route("downloadpdf/{id}")]
-        public  IActionResult downloadpdf(int id)
+        public IActionResult downloadpdf(int id)
         {
             return Ok(_econsentReviewDetailsRepository.downloadpdf(id));
         }

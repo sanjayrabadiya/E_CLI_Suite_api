@@ -8,16 +8,16 @@ using System.Text;
 
 namespace GSC.Data.Entities.InformConcent
 {
-    public class EconsentSetupRoles : BaseEntity, ICommonAduit
-    {
-        public int EconsentDocumentId { get; set; }
+    //public class EconsentSetupRoles : BaseEntity, ICommonAduit
+    //{
+    //    public int EconsentDocumentId { get; set; }
 
-        [ForeignKey("EconsentDocumentId")]
-        public EconsentSetup EconsentSetup { get; set; }
+    //    [ForeignKey("EconsentDocumentId")]
+    //    public EconsentSetup EconsentSetup { get; set; }
 
-        public int RoleId { get; set; }
+    //    public int RoleId { get; set; }
 
-        [ForeignKey("RoleId")]
-        public SecurityRole SecurityRole { get; set; }
-    }
+    //    [ForeignKey("RoleId")]
+    //    public SecurityRole SecurityRole { get; set; }
+    //}
 }

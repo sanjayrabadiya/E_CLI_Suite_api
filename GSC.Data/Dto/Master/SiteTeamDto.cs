@@ -15,7 +15,8 @@ namespace GSC.Data.Dto.Master
         public string UserName { get; set; }
         public string Role { get; set; }
         public string UserPicUrl { get; set; }
-        
+        public bool? IsIcfApproval { get; set; }
+
     }
     public class SiteTeamGridDto : BaseAuditDto
     {
@@ -26,5 +27,6 @@ namespace GSC.Data.Dto.Master
         public string Role { get; set; }
         public string ContactEmail { get; set; }
         public string ContactMobile { get; set; }
+        public bool? IsIcfApproval { get; set; }
     }
 }

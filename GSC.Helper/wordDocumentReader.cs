@@ -8,15 +8,15 @@ namespace GSC.Helper
 
     public class SectionsHeader
     {
-        public int documentId { get; set; }
-        public int documentReviewId { get; set; }
-        public int seqNo { get; set; }
-        public string documentName { get; set; }
-        public int sectionNo { get; set; }
-        public string sectionName { get; set; }
-        public string header { get; set; }
-        public bool isReadCompelete { get; set; }
-        public bool isReviewed { get; set; }
+        public int DocumentId { get; set; }
+        public int DocumentReviewId { get; set; }
+        public int SeqNo { get; set; }
+        public string DocumentName { get; set; }
+        public int SectionNo { get; set; }
+        public string SectionName { get; set; }
+        public string Header { get; set; }
+        public bool IsReadCompelete { get; set; }
+        public bool IsReviewed { get; set; }
         public int ReviewTime { get; set; }
     }
 

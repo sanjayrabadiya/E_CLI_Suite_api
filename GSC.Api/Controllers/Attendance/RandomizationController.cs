@@ -158,7 +158,7 @@ namespace GSC.Api.Controllers.Attendance
                 _userRoleRepository.Add(userRole);
             }
 
-            _randomizationRepository.SendEmailOfStartEconsent(randomization);
+            //_randomizationRepository.SendEmailOfStartEconsent(randomization);
             _randomizationRepository.Add(randomization);
 
             if (_uow.Save() <= 0) throw new Exception("Creating randomization failed on save.");
@@ -329,14 +329,14 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(randomization.Id);
         }
 
-        [HttpPut]
-        [Route("ChangeStatustoConsentInProgress")]
-        public IActionResult ChangeStatustoConsentInProgress()
-        {
-            _randomizationRepository.ChangeStatustoConsentInProgress();
-            _uow.Save();
-            return Ok();
-        }
+        //[HttpPut]
+        //[Route("ChangeStatustoConsentInProgress")]
+        //public IActionResult ChangeStatustoConsentInProgress()
+        //{
+        //    _randomizationRepository.ChangeStatustoConsentInProgress();
+        //    _uow.Save();
+        //    return Ok();
+        //}
 
         [HttpPut]
         [Route("ConsentStart")]
@@ -346,19 +346,19 @@ namespace GSC.Api.Controllers.Attendance
             subjectDetail.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
             _randomizationRepository.Update(subjectDetail);
             _uow.Save();
-            return Ok();
+            return Ok(subjectDetail.PatientStatusId);
         }
 
-        [HttpPut]
-        [Route("ChangeStatustoWithdrawal")]
-        public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
-        //public IActionResult ChangeStatustoWithdrawal()
-        {
-            //public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
-            _randomizationRepository.ChangeStatustoWithdrawal(fileModel);
-            _uow.Save();
-            return Ok();
-        }
+        //[HttpPut]
+        //[Route("ChangeStatustoWithdrawal")]
+        //public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
+        ////public IActionResult ChangeStatustoWithdrawal()
+        //{
+        //    //public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
+        //    _randomizationRepository.ChangeStatustoWithdrawal(fileModel);
+        //    _uow.Save();
+        //    return Ok();
+        //}
 
         [HttpGet("GetPatientVisits")]
         public IActionResult GetPatientVisits()

@@ -263,11 +263,11 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEconsentSetupRepository, EconsentSetupRepository>();
             services.AddScoped<IRegulatoryTypeRepository, RegulatoryTypeRepository>();
             services.AddScoped<IProjectArtificateDocumentApproverRepository, ProjectArtificateDocumentApproverRepository>();
-            services.AddScoped<IEconsentSetupPatientStatusRepository, EconsentSetupPatientStatusRepository>();
+            //services.AddScoped<IEconsentSetupPatientStatusRepository, EconsentSetupPatientStatusRepository>();
             services.AddScoped<IEconsentSectionReferenceRepository, EconsentSectionReferenceRepository>();
             services.AddScoped<IEconsentReviewDetailsSectionsRepository, EconsentReviewDetailsSectionsRepository>();
             services.AddScoped<IEconsentChatRepository, EconsentChatRepository>();
-            services.AddScoped<IEconsentSetupRolesRepository, EconsentSetupRolesRepository>();
+            //services.AddScoped<IEconsentSetupRolesRepository, EconsentSetupRolesRepository>();
             services.AddScoped<ISiteRepository, SiteRepository>();
             services.AddScoped<IProjectSubSecArtificateDocumentHistoryRepository, ProjectSubSecArtificateDocumentHistoryRepository>();
             services.AddScoped<IProjectSubSecArtificateDocumentReviewRepository, ProjectSubSecArtificateDocumentReviewRepository>();

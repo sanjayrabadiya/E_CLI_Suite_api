@@ -6,7 +6,7 @@ using System.Text;
 
 namespace GSC.Respository.InformConcent
 {
-    public interface IEconsentSetupPatientStatusRepository : IGenericRepository<EconsentSetupPatientStatus>
-    {
-    }
+    //public interface IEconsentSetupPatientStatusRepository : IGenericRepository<EconsentSetupPatientStatus>
+    //{
+    //}
 }

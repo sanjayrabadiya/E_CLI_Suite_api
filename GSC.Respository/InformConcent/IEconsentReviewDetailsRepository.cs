@@ -4,6 +4,7 @@ using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.InformConcent;
 using GSC.Helper;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,13 +17,13 @@ namespace GSC.Respository.InformConcent
         List<SectionsHeader> GetEconsentSectionHeaders(int id);
         List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId);
         string ImportSectionData(int id, int sectionno);
-        //string GetEconsentDocument(EconsentReviewDetailsDto econsentreviewdetails);
-        string GetEconsentDocument(EconsentDocumetViwerDto econsentreviewdetails);
+        FileStreamResult GetEconsentDocument(int EconcentReviewId);
         List<DashboardDto> GetEconsentMyTaskList(int ProjectId);
         CustomParameter downloadpdf(int id);
         List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForSubjectManagement(int patientid);
         List<EconsentDocumentDetailsDto> GetEconsentReviewDetailsForPatientDashboard();
         int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
         int ApproveRejectEconsentDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
+        int ApproveWithDrawPatient(EconsentDocumetViwerDto econsentReviewDetailsDto, bool isWithdraw);
     }
 }

@@ -125,6 +125,7 @@ namespace GSC.Api.Controllers.InformConcent
                         ModelState.AddModelError("Message", validateuploadlimit);
                         return BadRequest(ModelState);
                     }
+                    DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.FilePath);
                     sectionRefrence.FilePath = DocumentService.SaveUploadDocument(econsentSectionReferenceDto.FileModel[0], _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent, "EconsentSectionReference");
                 }
             }

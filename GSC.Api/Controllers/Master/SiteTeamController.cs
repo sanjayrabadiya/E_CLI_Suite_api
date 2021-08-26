@@ -52,7 +52,7 @@ namespace GSC.Api.Controllers.Master
                 item.ContactEmail = _userRepository.Find(item.UserId).Email;
                 item.ContactMobile = _userRepository.Find(item.UserId).Phone;
                 item.IsDeleted = isDeleted;
-                item.Role = _roleRepository.Find(item.RoleId).RoleName;
+                item.Role = _roleRepository.Find(item.RoleId).RoleName;                
             }
             return Ok(siteteams);
         }

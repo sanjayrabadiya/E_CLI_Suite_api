@@ -231,7 +231,8 @@ namespace GSC.Api.Controllers.Master
         [Route("GetLanguageDropDown")]
         public IActionResult GetLanguageDropDown()
         {
-            return Ok(_languageRepository.GetLanguageDropDown());
+            var language = _languageRepository.GetLanguageDropDown();
+            return Ok(language);
         }
     }
 }

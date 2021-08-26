@@ -9,12 +9,12 @@ using System.Text;
 
 namespace GSC.Respository.InformConcent
 {
-    public class EconsentSetupPatientStatusRepository : GenericRespository<EconsentSetupPatientStatus>, IEconsentSetupPatientStatusRepository
-    {
-        //private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public EconsentSetupPatientStatusRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
-        {
-            //_jwtTokenAccesser = jwtTokenAccesser;
-        }
-    }
+    //public class EconsentSetupPatientStatusRepository : GenericRespository<EconsentSetupPatientStatus>, IEconsentSetupPatientStatusRepository
+    //{
+    //    //private readonly IJwtTokenAccesser _jwtTokenAccesser;
+    //    public EconsentSetupPatientStatusRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
+    //    {
+    //        //_jwtTokenAccesser = jwtTokenAccesser;
+    //    }
+    //}
 }
