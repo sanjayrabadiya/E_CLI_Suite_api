@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Domain.Context;
@@ -55,6 +56,7 @@ namespace GSC.Api.Controllers.Master
             return Ok(randomizationNumberSettingsDto);
         }
 
+        [TransactionRequired]
         [HttpPut("UpdateRandomizationNumberFormat")]
         public IActionResult UpdateRandomizationNumberFormat([FromBody] RandomizationNumberSettingsDto randomizationNumberSettingsDto)
         {
@@ -71,7 +73,7 @@ namespace GSC.Api.Controllers.Master
                     randomizationNumberSettings.IsManualRandomNo != randomizationNumberSettingsDto.IsManualRandomNo ||
                     randomizationNumberSettings.IsSiteDependentRandomNo != randomizationNumberSettingsDto.IsSiteDependentRandomNo)
                 {
-                    if (randomizationNumberSettingsDto.IsSiteDependentRandomNo == false && 
+                    if (randomizationNumberSettingsDto.IsSiteDependentRandomNo == false &&
                         randomizationNumberSettings.RandomNoStartsWith != randomizationNumberSettingsDto.RandomNoStartsWith)
                     {
                         ModelState.AddModelError("Message", "You can't change format, Randomization entry is started in subject management");
@@ -80,7 +82,7 @@ namespace GSC.Api.Controllers.Master
                 }
             }
 
-            if (randomizationNumberSettingsDto.IsManualRandomNo == false)
+            if (randomizationNumberSettingsDto.IsManualRandomNo == false && randomizationNumberSettingsDto.IsSiteDependentRandomNo == false)
             {
                 if (randomizationNumberSettingsDto.RandomNoStartsWith == null)
                 {
@@ -95,7 +97,7 @@ namespace GSC.Api.Controllers.Master
             randomizationNumberSettings.IsAlphaNumRandomNo = randomizationNumberSettingsDto.IsAlphaNumRandomNo;
             randomizationNumberSettings.RandomNoStartsWith = randomizationNumberSettingsDto.RandomNoStartsWith;
             randomizationNumberSettings.IsSiteDependentRandomNo = randomizationNumberSettingsDto.IsSiteDependentRandomNo;
-            
+
             if (randomizationNumberSettings.IsManualRandomNo == false)
             {
                 if (randomizationNumberSettings.IsSiteDependentRandomNo == true)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Domain.Context;
@@ -53,6 +54,7 @@ namespace GSC.Api.Controllers.Master
             return Ok(screeningNumberSettingsDto);
         }
 
+        [TransactionRequired]
         [HttpPut("UpdateScreeningNumberFormat")]
         public IActionResult UpdateScreeningNumberFormat([FromBody] ScreeningNumberSettingsDto screeningNumberSettingsDto)
         {
@@ -76,7 +78,7 @@ namespace GSC.Api.Controllers.Master
                 }  
             }
 
-            if (screeningNumberSettingsDto.IsManualScreeningNo == false)
+            if (screeningNumberSettingsDto.IsManualScreeningNo == false && screeningNumberSettingsDto.IsSiteDependentScreeningNo == false)
             {
                 if (screeningNumberSettingsDto.ScreeningNoStartsWith == null)
                 {
