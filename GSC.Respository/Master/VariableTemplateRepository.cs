@@ -90,9 +90,9 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Template code : " + objSave.TemplateCode;
 
-            if (!string.IsNullOrEmpty(objSave.ActivityName))
-                if (All.Any(x => x.Id != objSave.Id && x.DeletedDate == null && !string.IsNullOrEmpty(x.ActivityName) && x.ActivityName == objSave.ActivityName.Trim()))
-                    return "Duplicate Activity name : " + objSave.ActivityName;
+            //if (!string.IsNullOrEmpty(objSave.Activity.ActivityName))
+            //    if (All.Any(x => x.Id != objSave.Id && x.DeletedDate == null && !string.IsNullOrEmpty(x.Activity.ActivityName) && x.Activity.ActivityName == objSave.Activity.ActivityName.Trim()))
+            //        return "Duplicate Activity name : " + objSave.Activity.ActivityName;
 
             if (All.Any(x => x.Id != objSave.Id && x.TemplateName == objSave.TemplateName.Trim() && x.DeletedDate == null))
                 return "Duplicate Template name : " + objSave.TemplateName;
@@ -159,7 +159,7 @@ namespace GSC.Respository.Master
                     Id = r.Id,
                     VariableTemplateId = r.Id,
                     VariableTemplateName = r.TemplateName,
-                    ActivityName = r.ActivityName,
+                    ActivityName = r.Activity.ActivityName,
                     Notes = r.Notes.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     VariableTemplateDetails = r.VariableTemplateDetails
                 }

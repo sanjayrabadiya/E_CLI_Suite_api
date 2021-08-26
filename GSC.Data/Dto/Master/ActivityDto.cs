@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
+using GSC.Helper;
 
 namespace GSC.Data.Dto.Master
 {
@@ -11,6 +12,8 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Activity Name is required.")]
         public string ActivityName { get; set; }
 
+        [Required(ErrorMessage = "Module Name is required.")]
+        public AuditModule ModuleId { get; set; }
         public int? CompanyId { get; set; }
     }
 
@@ -18,6 +21,7 @@ namespace GSC.Data.Dto.Master
     {
         public string ActivityCode { get; set; }
         public string ActivityName { get; set; }
+        public string ModuleName { get; set; }
 
     }
 }

@@ -170,6 +170,8 @@ namespace GSC.Api.Helpers
             CreateMap<VariableTemplate, VariableTemplateGridDto>()
                .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
                .ForMember(x => x.ActivityMode, x => x.MapFrom(a => a.ActivityMode.GetDescription()))
+               .ForMember(x => x.ActivityName, x => x.MapFrom(a => a.Activity.ActivityName))
+               .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.ModuleId.GetDescription()))
                .ReverseMap();
 
             CreateMap<InvestigatorContact, InvestigatorContactGridDto>()
@@ -264,7 +266,9 @@ namespace GSC.Api.Helpers
                    .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                    .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
                   .ReverseMap();
-            CreateMap<Activity, ActivityGridDto>().ReverseMap();
+            CreateMap<Activity, ActivityGridDto>()
+                 .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.ModuleId.GetDescription()))
+                .ReverseMap();
             CreateMap<ManageMonitoring, ManageMonitoringGridDto>()
                    .ForMember(x => x.Activity, x => x.MapFrom(a => a.Activity.ActivityName))
                    .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))

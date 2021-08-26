@@ -8,7 +8,7 @@ namespace GSC.Data.Entities.Master
     public class VariableTemplate : BaseEntity, ICommonAduit
     {
         public string TemplateCode { get; set; }
-        public string ActivityName { get; set; }
+        public int ActivityId { get; set; }
         public string TemplateName { get; set; }
         public int DomainId { get; set; }
         public bool IsRepeated { get; set; }
@@ -18,5 +18,7 @@ namespace GSC.Data.Entities.Master
         public ActivityMode ActivityMode { get; set; }
         public IList<VariableTemplateNote> Notes { get; set; }
         public AuditModule? ModuleId { get; set; }
+        public Activity Activity { get; set; }
+
     }
 }

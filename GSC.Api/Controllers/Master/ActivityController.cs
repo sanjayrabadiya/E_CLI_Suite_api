@@ -110,5 +110,12 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_activityRepository.GetActivityDropDown());
         }
+
+        [HttpGet]
+        [Route("GetActivityDropDownByModuleId/{moduleId}")]
+        public IActionResult GetActivityDropDownByModuleId(int moduleId)
+        {
+            return Ok(_activityRepository.GetActivityDropDownByModuleId(moduleId));
+        }
     }
 }

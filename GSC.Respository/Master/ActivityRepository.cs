@@ -7,6 +7,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Master
@@ -28,13 +29,21 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.ActivityName}).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.ActivityName }).OrderBy(o => o.Value).ToList();
         }
 
         public List<ActivityGridDto> GetActivityList(bool isDeleted)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<ActivityGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        }
+
+        public List<DropDownDto> GetActivityDropDownByModuleId(int moduleId)
+        {
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null
+                    && x.ModuleId == ((AuditModule)moduleId))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.ActivityName }).OrderBy(o => o.Value).ToList();
         }
     }
 }
