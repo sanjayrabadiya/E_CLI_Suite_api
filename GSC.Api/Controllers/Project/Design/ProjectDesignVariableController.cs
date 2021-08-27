@@ -46,7 +46,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.OrderBy(x => x.SeqNo), t => t.Roles.Where(x => x.DeletedDate == null))
+            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.Where(x => x.DeletedDate == null).OrderBy(x => x.SeqNo), t => t.Roles.Where(x => x.DeletedDate == null))
                 .FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             return Ok(variableDto);
@@ -121,7 +121,7 @@ namespace GSC.Api.Controllers.Project.Design
                 }
             }
 
-            UpdateVariableValues(variable);
+            UpdateVariableValues(variable, variableDto.CollectionValueDisable);
 
             UpdateVariableEncryptRole(variable);
 
@@ -217,39 +217,51 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
-        private void UpdateVariableValues(ProjectDesignVariable variable)
+        private void UpdateVariableValues(ProjectDesignVariable variable, bool CollectionValueDisable)
         {
-            var data = _projectDesignVariableValueRepository.FindBy(x =>
-                x.ProjectDesignVariableId == variable.Id).ToList(); //&& !variable.Values.Any(c => c.Id == x.Id)).ToList();
-
-            var checkVersion = _projectDesignVariableRepository.CheckStudyVersion(variable.ProjectDesignTemplateId);
-
-            var deletevalues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-            var addvalues = variable.Values.Where(x => x.Id == 0).ToList();
-            var updatevalues = variable.Values.Where(x => x.Id != 0).ToList();
-
-            foreach (var value in deletevalues)
+            if (CollectionValueDisable == true)
             {
-                if (checkVersion.AnyLive)
+                var deletedisableValues = variable.Values.ToList();
+
+                foreach (var item in deletedisableValues)
                 {
-                    value.InActiveVersion = checkVersion.VersionNumber;
-                    _projectDesignVariableValueRepository.Update(value);
+                    _projectDesignVariableValueRepository.Delete(item);
                 }
-                else
-                    _projectDesignVariableValueRepository.Remove(value);
             }
-
-
-            var SeqNo = data.Count;
-            foreach (var item in addvalues)
+            else
             {
-                item.SeqNo = ++SeqNo;
-                item.StudyVersion = checkVersion.VersionNumber;
-                _projectDesignVariableValueRepository.Add(item);
-            }
+                var data = _projectDesignVariableValueRepository.FindBy(x =>
+                    x.ProjectDesignVariableId == variable.Id).ToList(); //&& !variable.Values.Any(c => c.Id == x.Id)).ToList();
 
-            foreach (var value in updatevalues)
-                _projectDesignVariableValueRepository.Update(value);
+                var checkVersion = _projectDesignVariableRepository.CheckStudyVersion(variable.ProjectDesignTemplateId);
+
+                var deletevalues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+                var addvalues = variable.Values.Where(x => x.Id == 0).ToList();
+                var updatevalues = variable.Values.Where(x => x.Id != 0).ToList();
+
+                foreach (var value in deletevalues)
+                {
+                    if (checkVersion.AnyLive)
+                    {
+                        value.InActiveVersion = checkVersion.VersionNumber;
+                        _projectDesignVariableValueRepository.Update(value);
+                    }
+                    else
+                        _projectDesignVariableValueRepository.Remove(value);
+                }
+
+
+                var SeqNo = data.Count;
+                foreach (var item in addvalues)
+                {
+                    item.SeqNo = ++SeqNo;
+                    item.StudyVersion = checkVersion.VersionNumber;
+                    _projectDesignVariableValueRepository.Add(item);
+                }
+
+                foreach (var value in updatevalues)
+                    _projectDesignVariableValueRepository.Update(value);
+            }
         }
 
         private void UpdateVariableEncryptRole(ProjectDesignVariable variable)
