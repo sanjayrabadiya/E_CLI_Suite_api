@@ -10,6 +10,7 @@ using GSC.Respository.EmailSender;
 using GSC.Respository.InformConcent;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
+using GSC.Shared.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -70,11 +71,13 @@ namespace GSC.Api.Controllers.InformConcent
         [HttpPost]
         public IActionResult Post([FromBody] EconsentChat econsentChat)
         {
-            // insert message details in econsentchat table
+            // insert message details in econsentchat table          
+            econsentChat.Salt= Cryptography.CreateSaltKey();
+            econsentChat.Message = EncryptionDecryption.EncryptString(econsentChat.Salt, econsentChat.Message);         
             _econsentChatRepository.Add(econsentChat);
-            _uow.Save();
-
-            var senderdetails = _userRepository.Find(econsentChat.ReceiverId);
+            _uow.Save();           
+            econsentChat.Message = EncryptionDecryption.DecryptString(econsentChat.Salt, econsentChat.Message);
+            // var senderdetails = _userRepository.Find(econsentChat.ReceiverId);
             //var connection = ConnectedUser.Ids.Where(x => x.userId == econsentChat.ReceiverId).Any();
             //if (!senderdetails.IsLogin)
             //{

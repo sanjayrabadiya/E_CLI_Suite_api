@@ -8,6 +8,7 @@ using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
+using GSC.Shared.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,7 +82,7 @@ namespace GSC.Respository.InformConcent
                 // {
                 IList<int> intList = new List<int>() { ch.Id, _jwtTokenAccesser.UserId };
                 var chatobj = chatdata.Where(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();//FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();
-                ch.LastMessage = chatobj == null ? "" : chatobj.Message;
+                ch.LastMessage = chatobj == null ? "" :  EncryptionDecryption.DecryptString(chatobj.Salt,chatobj.Message);
                 ch.SendDateTime = chatobj?.SendDateTime;
                 ch.UnReadMsgCount = chatdata.Where(x => x.SenderId == ch.Id && x.IsRead == false).ToList().Count;
                 if (chatobj != null)
@@ -106,6 +107,7 @@ namespace GSC.Respository.InformConcent
         {
             IList<int> intList = new List<int>() { userId, _jwtTokenAccesser.UserId };
             var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).ToList();
+            data.ForEach(x => x.Message = EncryptionDecryption.DecryptString(x.Salt, x.Message));
             return data;
         }
 

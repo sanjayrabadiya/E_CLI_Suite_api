@@ -250,27 +250,28 @@ namespace GSC.Respository.InformConcent
         {
             var document = Find(EconcentReviewId);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = Path.Combine(upload.DocumentPath, document.PdfPath);          
-            if (!System.IO.File.Exists(FullPath))
-                return null;           
-            FileStream stream = new FileStream(FullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);        
-            return new FileStreamResult(stream, "application/pdf");          
+            var FullPath = Path.Combine(upload.DocumentPath, document.PdfPath);
+            //if (!File.Exists(FullPath))
+            //    return null;
+            GC.Collect();
+            FileStream stream = new FileStream(FullPath, FileMode.Open, FileAccess.ReadWrite);                  
+            return new FileStreamResult(stream, "application/pdf");
         }
         public List<DashboardDto> GetEconsentMyTaskList(int ProjectId)
-        {           
+        {
             var projectIdlist = _context.Project.Where(x => x.ParentProjectId == ProjectId).Select(x => x.Id).ToList();
             var rolelist = _context.SiteTeam.Where(x => projectIdlist.Contains(x.ProjectId) && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
             if (_context.ProjectRight.Any(x => rolelist.Contains(x.RoleId) && x.DeletedDate == null && x.RoleId == _jwtTokenAccesser.RoleId && x.UserId == _jwtTokenAccesser.UserId))
             {
-                var result = _context.EconsentReviewDetails.Where(x => x.EconsentSetup.ProjectId == ProjectId && x.DeletedDate == null && x.Randomization.DeletedDate==null 
-                    && x.IsReviewedByPatient==true && x.IsReviewDoneByInvestigator==false
+                var result = _context.EconsentReviewDetails.Where(x => x.EconsentSetup.ProjectId == ProjectId && x.DeletedDate == null && x.Randomization.DeletedDate == null
+                    && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == false
                     && (x.Randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || x.Randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)).Select(x => new DashboardDto
-                {
-                    Id = x.Id,
-                    TaskInformation = x.EconsentSetup.DocumentName + " for " + x.Randomization.Initial + " " + x.Randomization.ScreeningNumber + " is Pending approve from your side",
-                    ExtraData = x.Id,
-                    Module = MyTaskModule.InformConsent.GetDescription(),
-                }).ToList();
+                    {
+                        Id = x.Id,
+                        TaskInformation = x.EconsentSetup.DocumentName + " for " + x.Randomization.Initial + " " + x.Randomization.ScreeningNumber + " is Pending approve from your side",
+                        ExtraData = x.Id,
+                        Module = MyTaskModule.InformConsent.GetDescription(),
+                    }).ToList();
                 return result;
             }
             return new List<DashboardDto>();
@@ -547,7 +548,7 @@ namespace GSC.Respository.InformConcent
 
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             int ProjectId = _context.EconsentReviewDetails.Where(x => x.Id == econsentReviewDetailsDto.Id).Select(x => x.EconsentSetup.ProjectId).FirstOrDefault();
-            
+
             PdfDocument pdfDocument = new PdfDocument();
             string filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsentReviewDetails.PdfPath);
             FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
@@ -555,7 +556,7 @@ namespace GSC.Respository.InformConcent
             pdfDocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
             //PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
 
-     
+
 
             int pagecount = pdfDocument.Pages.Count;
             PdfGraphics graphics = pdfDocument.Pages[pagecount - 1].Graphics;
@@ -606,6 +607,8 @@ namespace GSC.Respository.InformConcent
             file.Dispose();
             outputStream.Close();
             outputStream.Dispose();
+            docStream.Close();
+            docStream.Dispose();
 
             econsentReviewDetails.PdfPath = pdfpath;
 
@@ -655,6 +658,8 @@ namespace GSC.Respository.InformConcent
                 pdfDocument = render.ConvertToPDF(wordDocument);
                 render.Dispose();
                 wordDocument.Dispose();
+                docStream.Close();
+                docStream.Dispose();               
             }
             else
             {
@@ -662,6 +667,8 @@ namespace GSC.Respository.InformConcent
                 FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
                 pdfDocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
+                docStream.Close();
+                docStream.Dispose();
             }
 
             //add signature
@@ -670,8 +677,10 @@ namespace GSC.Respository.InformConcent
             PdfPage page = pdfDocument.Pages.Add();
             PdfGraphics graphics = page.Graphics;
             //Load the image from the disk
-            FileStream logoinputstream = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{reviewdetails.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);
+            FileStream logoinputstream = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{reviewdetails.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);           
             PdfImage image = new PdfBitmap(logoinputstream);
+            logoinputstream.Close();
+            logoinputstream.Dispose();
             //Draw the image   
 
             PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
@@ -681,17 +690,15 @@ namespace GSC.Respository.InformConcent
             format.LineAlignment = PdfVerticalAlignment.Top;
 
 
-            if (!isWithdraw == true)
-            {
-                graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
-                graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
 
-                graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
-                graphics.DrawImage(image, new PointF(70, 70), new SizeF(650, 150));
-                graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 190), format);
-                graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 190), format);
-            }
-            else
+            graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
+            graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
+
+            graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
+            graphics.DrawImage(image, new PointF(70, 70), new SizeF(650, 150));
+            graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 190), format);
+            graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 190), format);
+            if (!isWithdraw == true)
             {
                 var reason = _jwtTokenAccesser.GetHeader("audit-reason-name");
                 var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
@@ -714,6 +721,7 @@ namespace GSC.Respository.InformConcent
             MemoryStream outputStream = new MemoryStream();
             pdfDocument.Save(outputStream);
             pdfDocument.Close();
+            pdfDocument.Dispose();
 
             var filename = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
             var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(reviewdetails.EconsentSetup.ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", filename);
