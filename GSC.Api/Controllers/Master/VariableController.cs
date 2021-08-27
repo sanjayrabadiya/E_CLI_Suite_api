@@ -13,6 +13,7 @@ using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -67,7 +68,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values).FirstOrDefault();
+            var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values.Where(x => x.DeletedDate == null)).FirstOrDefault();
             // var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values, t => t.Remarks).FirstOrDefault();
 
             //if (variable.Values != null)
@@ -131,7 +132,7 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            UpdateVariableValues(variable);
+            UpdateVariableValues(variable, variableDto.CollectionValueDisable);
             //  UpdateVariableRemarks(variable);
             _variableRepository.Update(variable);
 
@@ -139,25 +140,36 @@ namespace GSC.Api.Controllers.Master
             return Ok(variable.Id);
         }
 
-        private void UpdateVariableValues(Variable variable)
+        private void UpdateVariableValues(Variable variable, bool CollectionValueDisable)
         {
-            var data = _variableValueRepository.FindBy(x => x.VariableId == variable.Id).ToList();
-            var deleteValues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-            var addvariables = variable.Values.Where(x => x.Id == 0).ToList();
-            var updatevariables = variable.Values.Where(x => x.Id > 0).ToList();
-            //var deleteValues = _variableValueRepository.FindBy(x => x.VariableId == variable.Id
-            //                                                        && !variable.Values.Any(c => c.Id == x.Id))
-            //.ToList();
-            foreach (var value in deleteValues)
-                _variableValueRepository.Remove(value);
-
-            foreach (var value in updatevariables)
-                _variableValueRepository.Update(value);
-            foreach (var item in addvariables)
+            if (CollectionValueDisable == true)
             {
-                _variableValueRepository.Add(item);
-            }
+                var deletedisableValues = variable.Values.ToList();
 
+                foreach (var item in deletedisableValues)
+                {
+                    _variableValueRepository.Delete(item);
+                }
+            }
+            else
+            {
+                var data = _variableValueRepository.FindBy(x => x.VariableId == variable.Id).ToList();
+                var deleteValues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
+                var addvariables = variable.Values.Where(x => x.Id == 0).ToList();
+                var updatevariables = variable.Values.Where(x => x.Id > 0).ToList();
+                //var deleteValues = _variableValueRepository.FindBy(x => x.VariableId == variable.Id
+                //                                                        && !variable.Values.Any(c => c.Id == x.Id))
+                //.ToList();
+                foreach (var value in deleteValues)
+                    _variableValueRepository.Remove(value);
+
+                foreach (var value in updatevariables)
+                    _variableValueRepository.Update(value);
+                foreach (var item in addvariables)
+                {
+                    _variableValueRepository.Add(item);
+                }
+            }
         }
 
         //private void UpdateVariableRemarks(Variable variable)

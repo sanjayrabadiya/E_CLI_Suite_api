@@ -60,6 +60,7 @@ namespace GSC.Data.Dto.Master
         public int? LargeStep { get; set; }
         //   public IList<VariableRemarks> Remarks { get; set; } = null;
         public Alignment? Alignment { get; set; }
+        public bool CollectionValueDisable { get; set; }
     }
 
     public class VariableGridDto : BaseAuditDto
@@ -111,7 +112,7 @@ namespace GSC.Data.Dto.Master
         public string UnitName { get; set; }
         public int? DesignOrder { get; set; }
         public string VerificationApprovalValue { get; set; }
-        public int VerificationApprovalTemplateValueId { get; set; }       
+        public int VerificationApprovalTemplateValueId { get; set; }
         public string VerificationApprovalValueOld { get; set; }
         public string VariableCategoryName { get; set; }
         public VariableCategoryType? SystemType { get; set; }
