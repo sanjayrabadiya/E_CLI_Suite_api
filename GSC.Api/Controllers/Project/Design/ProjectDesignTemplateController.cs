@@ -87,19 +87,8 @@ namespace GSC.Api.Controllers.Project.Design
         {
             if (projectDesignVisitId <= 0) return BadRequest();
 
-            var templates = _projectDesignTemplateRepository.FindByInclude(t =>
-                t.ProjectDesignVisitId == projectDesignVisitId
-                && t.DeletedDate == null, t => t.Domain).OrderBy(t => t.DesignOrder).ToList();
-
-            var templatesDto = _mapper.Map<IEnumerable<ProjectDesignTemplateDto>>(templates).ToList();
-            templatesDto.ForEach(t =>
-            {
-                t.DomainId = t.DomainId;
-                t.DomainName = _domainRepository.Find(t.DomainId)?.DomainName;
-
-            });
-
-            return Ok(templatesDto);
+            var templates = _projectDesignTemplateRepository.GetTemplateByVisitId(projectDesignVisitId);
+            return Ok(templates);
         }
 
         [HttpPut]

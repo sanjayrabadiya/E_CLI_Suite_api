@@ -22,7 +22,7 @@ namespace GSC.Respository.Project.Design
 
         DesignScreeningTemplateDto GetTemplate(int id);
 
-
+        List<ProjectDesignTemplateDto> GetTemplateByVisitId(int projectDesignVisitId);
         IList<DropDownDto> GetTemplateDropDownForVisitStatus(int projectDesignVisitId);
 
         Task<bool> IsTemplateExits(int projectDesignId);

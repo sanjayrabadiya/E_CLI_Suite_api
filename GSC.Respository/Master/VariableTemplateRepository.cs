@@ -85,6 +85,8 @@ namespace GSC.Respository.Master
             return template;
         }
 
+       
+
         public string Duplicate(VariableTemplate objSave)
         {
             if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode.Trim() && x.DeletedDate == null))

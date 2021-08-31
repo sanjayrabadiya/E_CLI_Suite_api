@@ -162,6 +162,25 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
+
+        [HttpPut]
+        [Route("SetActiveFromInActive/{id}")]
+        public IActionResult SetActiveFromInActive(int id)
+        {
+            if (id <= 0) return BadRequest();
+
+            var visit = _projectDesignVisitRepository.Find(id);
+
+            if (visit == null) return NotFound();
+
+            visit.InActiveVersion = null;
+            _projectDesignVisitRepository.Update(visit);
+
+            _uow.Save();
+
+            return Ok();
+        }
+
         [HttpGet]
         [Route("GetVisitDropDown/{projectDesignPeriodId}")]
         public IActionResult GetVisitDropDown(int projectDesignPeriodId)

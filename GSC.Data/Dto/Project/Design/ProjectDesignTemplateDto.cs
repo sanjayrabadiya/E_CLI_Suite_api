@@ -33,7 +33,7 @@ namespace GSC.Data.Dto.Project.Design
             get => _refTimeInterval.UtcDate();
             set => _refTimeInterval = value.UtcDate();
         }
-
+        public bool AllowActive { get; set; }
         public int DomainId { get; set; }
         public bool IsRepeated { get; set; }
         public bool IsParticipantView { get; set; }

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
@@ -77,8 +78,8 @@ namespace GSC.Respository.Project.Design
                         r.TemplateLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && r.DeletedDate == null && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.TemplateName),
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
-                    Notes = (_jwtTokenAccesser.Language != 1) ? _context.TemplateNoteLanguage.Where(a => a.DeletedDate == null 
-                    && a.ProjectDesignTemplateNote.ProjectDesignTemplateId == id && a.LanguageId==_jwtTokenAccesser.Language).Select(t => t.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
+                    Notes = (_jwtTokenAccesser.Language != 1) ? _context.TemplateNoteLanguage.Where(a => a.DeletedDate == null
+                    && a.ProjectDesignTemplateNote.ProjectDesignTemplateId == id && a.LanguageId == _jwtTokenAccesser.Language).Select(t => t.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,
@@ -255,5 +256,18 @@ namespace GSC.Respository.Project.Design
                 result.VersionNumber = _studyVersionRepository.GetOnTrialVersionByProjectDesign(projectDesignId);
             return result;
         }
+
+
+        public List<ProjectDesignTemplateDto> GetTemplateByVisitId(int projectDesignVisitId)
+        {
+            var checkVersion = CheckStudyVersion(projectDesignVisitId);
+            var result = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId).ProjectTo<ProjectDesignTemplateDto>(_mapper.ConfigurationProvider).ToList();
+            result.ForEach(x =>
+            {
+                x.AllowActive = checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
+            });
+            return result;
+        }
+
     }
 }
