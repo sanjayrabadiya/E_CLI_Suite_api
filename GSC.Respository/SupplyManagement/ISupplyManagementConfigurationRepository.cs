@@ -9,5 +9,6 @@ namespace GSC.Respository.SupplyManagement
     {
         List<SupplyManagementConfigurationGridDto> GetSupplyManagementTemplateList(bool isDeleted);
         string Duplicate(SupplyManagementConfiguration objSave);
+        SupplyManagementConfiguration GetTemplateByScreenCode(string screenCode);
     }
 }

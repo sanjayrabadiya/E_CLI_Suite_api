@@ -38,5 +38,10 @@ namespace GSC.Respository.SupplyManagement
                 return "Duplicate form name : " + objSave.VariableTemplate.TemplateName;
             return "";
         }
+
+        public SupplyManagementConfiguration GetTemplateByScreenCode(string screenCode)
+        {
+            return All.Where(x => x.AppScreen.ScreenCode == screenCode && x.DeletedDate == null).FirstOrDefault();
+        }
     }
 }

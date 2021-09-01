@@ -85,7 +85,7 @@ namespace GSC.Respository.Master
             return template;
         }
 
-       
+
 
         public string Duplicate(VariableTemplate objSave)
         {
@@ -155,15 +155,15 @@ namespace GSC.Respository.Master
         public DesignVerificationApprovalTemplateDto GetVerificationApprovalTemplate(int id)
         {
             var result = All.Where(t => t.Id == id)
-                .Include(d => d.VariableTemplateDetails).
-                Select(r => new DesignVerificationApprovalTemplateDto
+                .Include(d => d.VariableTemplateDetails)
+                .Select(r => new DesignVerificationApprovalTemplateDto
                 {
                     Id = r.Id,
                     VariableTemplateId = r.Id,
                     VariableTemplateName = r.TemplateName,
                     ActivityName = r.Activity.ActivityName,
                     Notes = r.Notes.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
-                    VariableTemplateDetails = r.VariableTemplateDetails
+                    VariableTemplateDetails = r.VariableTemplateDetails.Where(c => c.Variable.DeletedDate == null).ToList()
                 }
             ).FirstOrDefault();
 
@@ -202,7 +202,7 @@ namespace GSC.Respository.Master
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : ""
                     }).FirstOrDefault();
 
-                    variables.Values = _context.VariableValue.Where(c => c.VariableId == detail.VariableId).Select(c => new VerificationApprovalVariableValueDto
+                    variables.Values = _context.VariableValue.Where(c => c.VariableId == detail.VariableId && c.Variable.DeletedDate == null).Select(c => new VerificationApprovalVariableValueDto
                     {
                         Id = c.Id,
                         VariableId = c.VariableId,

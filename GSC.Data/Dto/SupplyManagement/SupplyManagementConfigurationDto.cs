@@ -8,7 +8,7 @@ namespace GSC.Data.Dto.SupplyManagement
     {
         public int AppScreenId { get; set; }
         public int VariableTemplateId { get; set; }
-        public AppScreen MyProperty { get; set; }
+        public AppScreen AppScreen { get; set; }
         public VariableTemplate VariableTemplate { get; set; }
     }
 

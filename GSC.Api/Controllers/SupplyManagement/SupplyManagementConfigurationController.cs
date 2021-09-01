@@ -38,8 +38,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var drug = _supplyManagementConfigurationRepository.GetSupplyManagementTemplateList(isDeleted);
-            return Ok(drug);
+            return Ok(_supplyManagementConfigurationRepository.GetSupplyManagementTemplateList(isDeleted));
         }
 
 

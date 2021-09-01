@@ -29,6 +29,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IVerificationApprovalTemplateValueChildRepository _verificationApprovalTemplateValueChildRepository;
         private readonly IVerificationApprovalTemplateValueRepository _verificationApprovalTemplateValueRepository;
         private readonly IVerificationApprovalTemplateValueAuditRepository _verificationApprovalTemplateValueAuditRepository;
+        private readonly ISupplyManagementConfigurationRepository _supplyManagementConfigurationRepository;
         private readonly IUnitOfWork _uow;
 
         public VerificationApprovalTemplateController(IVerificationApprovalTemplateRepository verificationApprovalTemplateRepository,
@@ -39,6 +40,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             IVariableTemplateRepository variableTemplateRepository,
             IVerificationApprovalTemplateValueChildRepository verificationApprovalTemplateValueChildRepository,
         IVerificationApprovalTemplateValueRepository verificationApprovalTemplateValueRepository,
+        ISupplyManagementConfigurationRepository supplyManagementConfigurationRepository,
         IJwtTokenAccesser jwtTokenAccesser)
         {
             _verificationApprovalTemplateRepository = verificationApprovalTemplateRepository;
@@ -47,6 +49,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _productVerificationDetail = productVerificationDetail;
             _verificationApprovalTemplateValueChildRepository = verificationApprovalTemplateValueChildRepository;
             _verificationApprovalTemplateValueRepository = verificationApprovalTemplateValueRepository;
+            _supplyManagementConfigurationRepository = supplyManagementConfigurationRepository;
             _uow = uow;
             _mapper = mapper;
             _variableTemplateRepository = variableTemplateRepository;
@@ -57,8 +60,8 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("GetTemplate/{id}")]
         public IActionResult GetTemplate([FromRoute] int id)
         {
-            //var verificationApprovalTemplateId = _productVerificationDetail.Find(id).Id;
-            var designTemplate = _variableTemplateRepository.GetVerificationApprovalTemplate(100);
+            var TemplateId = _verificationApprovalTemplateRepository.All.Where(x=>x.ProductVerificationDetailId == id).FirstOrDefault().VariableTemplateId;
+            var designTemplate = _variableTemplateRepository.GetVerificationApprovalTemplate(TemplateId);
             return Ok(_verificationApprovalTemplateRepository.GetVerificationApprovalTemplate(designTemplate, id));
         }
 
@@ -67,9 +70,16 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var ConfigDetial = _supplyManagementConfigurationRepository.GetTemplateByScreenCode("mnu_productverification");
+            if (ConfigDetial == null)
+            {
+                ModelState.AddModelError("Message", "Please set first verification template from configuration");
+                return BadRequest(ModelState);
+            }
+
             verificationApprovalTemplateDto.Id = 0;
             var verificationApprovalTemplate = _mapper.Map<VerificationApprovalTemplate>(verificationApprovalTemplateDto);
-            verificationApprovalTemplate.VariableTemplateId = 100;
+            verificationApprovalTemplate.VariableTemplateId = ConfigDetial.VariableTemplateId;
             _verificationApprovalTemplateRepository.Add(verificationApprovalTemplate);
 
             verificationApprovalTemplate.VerificationApprovalTemplateHistory = new VerificationApprovalTemplateHistory();
