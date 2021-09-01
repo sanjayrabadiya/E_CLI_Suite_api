@@ -12,5 +12,7 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetProjectByDesignDropDown();
         bool IsCompleteExist(int projectDesignId, string moduleName, bool isComplete);
         bool IsWorkFlowOrEditCheck(int projectDesignid);
+
+        bool CheckPeriodWithProjectPeriod(int projectDesignid, int projectId);
     }
 }

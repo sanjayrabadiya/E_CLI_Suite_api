@@ -182,10 +182,18 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
-        [HttpPut("IsWorkFlowOrEditCheck/{projectDesignId}")]
+        [HttpGet("IsWorkFlowOrEditCheck/{projectDesignId}")]
         public IActionResult IsWorkFlowOrEditCheck(int projectDesignId)
         {
             var result = _projectDesignRepository.IsWorkFlowOrEditCheck(projectDesignId);
+            return Ok(result);
+        }
+
+
+        [HttpGet("CheckPeriodWithProjectPeriod/{projectDesignId}/{projectId}")]
+        public IActionResult CheckPeriodWithProjectPeriod(int projectDesignId, int projectId)
+        {
+            var result = _projectDesignRepository.CheckPeriodWithProjectPeriod(projectDesignId, projectId);
             return Ok(result);
         }
     }

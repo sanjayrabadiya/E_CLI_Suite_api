@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Project.Design;
@@ -43,6 +42,12 @@ namespace GSC.Respository.Project.Design
                  && _context.EditCheck.Any(x => x.ProjectDesignId == projectDesignid && x.DeletedDate == null);
 
 
+        }
+
+        public bool CheckPeriodWithProjectPeriod(int projectDesignid, int projectId)
+        {
+            var period = _context.Project.Where(x => x.Id == projectId).Select(t => t.Period).FirstOrDefault();
+            return period == _context.ProjectDesignPeriod.Count(x => x.ProjectDesignId == projectDesignid && x.DeletedDate == null);
         }
 
 
