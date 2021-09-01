@@ -3,7 +3,6 @@ using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
-using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Attendance;
@@ -13,7 +12,6 @@ using GSC.Helper;
 using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
-using GSC.Respository.InformConcent;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
@@ -26,7 +24,6 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using GSC.Respository.Project.Workflow;
 using GSC.Shared.Configuration;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
@@ -35,19 +32,6 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Shared.Security;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Medra;
-using GSC.Data.Dto.Configuration;
-using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
-using System.IO;
-using Newtonsoft.Json.Linq;
-using Syncfusion.Pdf.Parsing;
-using Syncfusion.Pdf.Security;
-using Syncfusion.DocIORenderer;
-using Syncfusion.Pdf;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using Newtonsoft.Json;
-using Syncfusion.Pdf.Graphics;
-using Syncfusion.Drawing;
 
 namespace GSC.Respository.Attendance
 {
@@ -55,12 +39,7 @@ namespace GSC.Respository.Attendance
     {
 
         private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
-        private readonly IStateRepository _stateRepository;
-        private readonly ICountryRepository _countryRepository;
-        private readonly ICityRepository _cityRepository;
         private readonly IMapper _mapper;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IProjectRepository _projectRepository;
@@ -74,9 +53,6 @@ namespace GSC.Respository.Attendance
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
-        private readonly IUnitOfWork _uow;
-        private readonly IAppSettingRepository _appSettingRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -100,12 +76,7 @@ namespace GSC.Respository.Attendance
             : base(context)
         {
             _userRepository = userRepository;
-            _companyRepository = companyRepository;
-            _projectDesignRepository = projectDesignRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
-            _stateRepository = stateRepository;
-            _countryRepository = countryRepository;
-            _cityRepository = cityRepository;
             _mapper = mapper;
             _emailSenderRespository = emailSenderRespository;
             _projectRepository = projectRepository;
@@ -119,9 +90,6 @@ namespace GSC.Respository.Attendance
             _environmentSetting = environmentSetting;
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
-            _uow = uow;
-            _appSettingRepository = appSettingRepository;
-            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -129,13 +97,10 @@ namespace GSC.Respository.Attendance
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
             randomizationNumberDto = GenerateRandomizationNumber(randomization.Id);
             if (randomizationNumberDto.IsManualRandomNo == true)
-            {
                 randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
-            }
             else
-            {
                 randomization.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
-            }
+
             randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
 
             Update(randomization);
@@ -162,15 +127,11 @@ namespace GSC.Respository.Attendance
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
             randomizationNumberDto = GenerateScreeningNumber(randomization.Id);
             if (randomizationNumberDto.IsManualScreeningNo == true)
-            {
                 randomization.ScreeningNumber = randomizationDto.ScreeningNumber;
-            }
             else
-            {
                 randomization.ScreeningNumber = randomizationNumberDto.ScreeningNumber;
-            }
+        
             randomization.DateOfScreening = randomizationDto.DateOfScreening;
-
             if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening)
                 randomization.PatientStatusId = ScreeningPatientStatus.Screening;
 
@@ -192,8 +153,6 @@ namespace GSC.Respository.Attendance
             }
         }
 
-
-
         public string ValidateScreeningNumber(RandomizationDto randomization)
         {
             if (!_projectRepository.Find(randomization.ProjectId).IsTestSite)
@@ -204,9 +163,7 @@ namespace GSC.Respository.Attendance
                 if (randomizationNumberDto.IsManualScreeningNo == true)
                 {
                     if (randomizationNumberDto.ScreeningNumber.Length != randomizationNumberDto.ScreeningLength)
-                    {
                         return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
-                    }
                 }
                 return "";
             }
@@ -223,79 +180,12 @@ namespace GSC.Respository.Attendance
                 if (randomizationNumberDto.IsManualRandomNo == true)
                 {
                     if (randomizationNumberDto.RandomizationNumber.Length != randomizationNumberDto.RandomNoLength)
-                    {
                         return "Please add " + randomizationNumberDto.RandomNoLength.ToString() + " characters in Randomization Number";
-                    }
-                    //if (randomizationNumberDto.IsAlphaNumRandomNo == true)
-                    //{
-                    //    if (randomizationNumberDto.RandomizationNumber.All(char.IsDigit))
-                    //    {
-                    //        return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    if (randomizationNumberDto.RandomizationNumber.Contains(randomizationNumberDto.PrefixRandomNo) == false)
-                    //    {
-                    //        return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
-                    //    }
-                    //}
                 }
                 return "";
             }
             return "";
         }
-
-        //public string ValidateRandomizationAndScreeningNumber(RandomizationDto randomization)
-        //{
-        //    RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
-        //    randomizationNumberDto = GenerateRandomizationAndScreeningNumber(randomization.Id);
-        //    randomizationNumberDto.ScreeningNumber = randomization.ScreeningNumber;
-        //    randomizationNumberDto.RandomizationNumber = randomization.RandomizationNumber;
-        //    if (randomizationNumberDto.IsManualRandomNo == true)
-        //    {
-        //        if (randomizationNumberDto.RandomizationNumber.Length != randomizationNumberDto.RandomNoLength)
-        //        {
-        //            return "Please add " + randomizationNumberDto.RandomNoLength.ToString() + " characters in Randomization Number";
-        //        }
-        //        if (randomizationNumberDto.IsAlphaNumRandomNo == true)
-        //        {
-        //            if (randomizationNumberDto.RandomizationNumber.All(char.IsDigit))
-        //            {
-        //                return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (randomizationNumberDto.RandomizationNumber.Contains(randomizationNumberDto.PrefixRandomNo) == false)
-        //            {
-        //                return "Please add Prefix " + randomizationNumberDto.PrefixRandomNo + " in Randomization Number";
-        //            }
-        //        }
-        //    }
-        //    if (randomizationNumberDto.IsManualScreeningNo == true)
-        //    {
-        //        if (randomizationNumberDto.ScreeningNumber.Length != randomizationNumberDto.ScreeningLength)
-        //        {
-        //            return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
-        //        }
-        //        if (randomizationNumberDto.IsAlphaNumScreeningNo == true)
-        //        {
-        //            if (randomizationNumberDto.ScreeningNumber.All(char.IsDigit))
-        //            {
-        //                return "Please add Prefix " + randomizationNumberDto.PrefixScreeningNo + " in Screening Number";
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (randomizationNumberDto.ScreeningNumber.Contains(randomizationNumberDto.PrefixScreeningNo) == false)
-        //            {
-        //                return "Please add Prefix " + randomizationNumberDto.PrefixScreeningNo + " in Screening Number";
-        //            }
-        //        }
-        //    }
-        //    return "";
-        //}
 
         public RandomizationNumberDto GenerateRandomizationNumber(int id)
         {
@@ -325,7 +215,7 @@ namespace GSC.Respository.Attendance
                     if (string.IsNullOrEmpty(sitedata.PrefixRandomNo))
                         randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
                     else
-                        randomizationNumberDto.RandomizationNumber = sitedata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength - 1, '0');
+                        randomizationNumberDto.RandomizationNumber = sitedata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
                 }
                 else
                 {
@@ -393,7 +283,7 @@ namespace GSC.Respository.Attendance
                     if (string.IsNullOrEmpty(sitedata.PrefixScreeningNo))
                         randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
                     else
-                        randomizationNumberDto.ScreeningNumber = sitedata.PrefixScreeningNo + latestno.ToString().PadLeft((int)studydata.ScreeningLength - 1, '0');
+                        randomizationNumberDto.ScreeningNumber = sitedata.PrefixScreeningNo + latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
                 }
                 else
                 {
@@ -413,78 +303,6 @@ namespace GSC.Respository.Attendance
             return randomizationNumberDto;
         }
 
-
-        //public RandomizationNumberDto GenerateRandomizationAndScreeningNumber(int id)
-        //{
-        //    var randomization = Find(id);
-        //    var sitedata = _projectRepository.Find(randomization.ProjectId);
-        //    var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
-        //    RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
-        //    randomizationNumberDto.ProjectId = randomization.ProjectId;
-        //    randomizationNumberDto.ParentProjectId = studydata.Id;
-        //    randomizationNumberDto.IsManualRandomNo = studydata.IsManualRandomNo;
-        //    randomizationNumberDto.IsManualScreeningNo = studydata.IsManualScreeningNo;
-        //    randomizationNumberDto.IsSiteDependentRandomNo = studydata.IsSiteDependentRandomNo;
-        //    randomizationNumberDto.IsSiteDependentScreeningNo = studydata.IsSiteDependentScreeningNo;
-        //    randomizationNumberDto.RandomNoLength = studydata.RandomNoLength;
-        //    randomizationNumberDto.ScreeningLength = studydata.ScreeningLength;
-        //    randomizationNumberDto.PrefixRandomNo = studydata.PrefixRandomNo;
-        //    randomizationNumberDto.PrefixScreeningNo = studydata.PrefixScreeningNo;
-        //    if (studydata.IsManualRandomNo == true)
-        //    {
-        //        randomizationNumberDto.RandomizationNumber = "";
-        //    }
-        //    else
-        //    {
-        //        int latestno;
-        //        if (studydata.IsSiteDependentRandomNo == true)
-        //        {
-        //            latestno = sitedata.RandomizationNoseries;
-        //            randomizationNumberDto.RandomizationNoseries = sitedata.RandomizationNoseries;
-        //        }
-        //        else
-        //        {
-        //            latestno = studydata.RandomizationNoseries;
-        //            randomizationNumberDto.RandomizationNoseries = studydata.RandomizationNoseries;
-        //        }
-        //        if (studydata.IsAlphaNumRandomNo == true)
-        //        {
-        //            randomizationNumberDto.RandomizationNumber = studydata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength - 1, '0');
-        //        }
-        //        else
-        //        {
-        //            randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
-        //        }
-        //    }
-        //    if (studydata.IsManualScreeningNo == true)
-        //    {
-        //        randomizationNumberDto.ScreeningNumber = "";
-        //    }
-        //    else
-        //    {
-        //        int latestno;
-        //        if (studydata.IsSiteDependentScreeningNo == true)
-        //        {
-        //            latestno = sitedata.ScreeningNoseries;
-        //            randomizationNumberDto.ScreeningNoseries = sitedata.ScreeningNoseries;
-        //        }
-        //        else
-        //        {
-        //            latestno = studydata.ScreeningNoseries;
-        //            randomizationNumberDto.ScreeningNoseries = studydata.ScreeningNoseries;
-        //        }
-        //        if (studydata.IsAlphaNumScreeningNo == true)
-        //        {
-        //            randomizationNumberDto.ScreeningNumber = studydata.PrefixScreeningNo + latestno.ToString().PadLeft((int)studydata.ScreeningLength - 1, '0');
-        //        }
-        //        else
-        //        {
-        //            randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
-        //        }
-        //    }
-        //    return randomizationNumberDto;
-        //}
-
         public List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted)
         {
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
@@ -494,7 +312,7 @@ namespace GSC.Respository.Attendance
             {
                 x.PatientStatusName = x.PatientStatusId == null ? "" : x.PatientStatusId.GetDescription();//_patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
                 //x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => x.IsReviewedByPatient == true);
-                x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => !String.IsNullOrEmpty(x.PdfPath));                
+                x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => !String.IsNullOrEmpty(x.PdfPath));
             });
 
             var projectCode = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId).ProjectCode;
@@ -559,7 +377,7 @@ namespace GSC.Respository.Attendance
                     EconsentSetupId = x.Id,
                     IsReviewedByPatient = false,
                 }).ToList();
-                _context.EconsentReviewDetails.AddRange(reviewrecord);               
+                _context.EconsentReviewDetails.AddRange(reviewrecord);
                 string documentname = string.Join(",", documentDetails.Select(x => x.DocumentName).ToArray());
                 _emailSenderRespository.SendEmailOfStartEconsent(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, documentname, study.ProjectCode);
             }
@@ -618,11 +436,11 @@ namespace GSC.Respository.Attendance
 
         }
         public void ChangeStatustoWithdrawal()
-        {          
-            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();         
+        {
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
             randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
             Update(randomization);
-            _context.Save();          
+            _context.Save();
         }
         public DashboardPatientDto GetDashboardPatientDetail()
         {

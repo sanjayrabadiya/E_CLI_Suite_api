@@ -15,7 +15,7 @@ namespace GSC.Data.Dto.Master
         public bool? IsAlphaNumRandomNo { get; set; }
         public int RandomizationNoseries { get; set; }
         public int? RandomNoStartsWith { get; set; }
-        public string? PrefixRandomNo { get; set; }
+        public string PrefixRandomNo { get; set; }
         public bool DisableRow { get; set; }
         public List<RandomizationNumberSettingsDto> RandomizationNumberSettingsSites { get; set; }
     }
