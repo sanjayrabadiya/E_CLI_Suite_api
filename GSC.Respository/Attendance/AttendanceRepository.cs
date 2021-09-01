@@ -82,7 +82,7 @@ namespace GSC.Respository.Attendance
 
         public List<AttendanceScreeningGridDto> GetAttendaceList(ScreeningSearhParamDto attendanceSearch)
         {
-            if (attendanceSearch.ProjectId == 0) return new List<AttendanceScreeningGridDto>();
+            //if (attendanceSearch.ProjectId == 0) return new List<AttendanceScreeningGridDto>();
 
             var projectList = _projectRightRepository.GetProjectRightIdList();
 
@@ -99,7 +99,8 @@ namespace GSC.Respository.Attendance
 
             if (attendanceSearch.Id > 0)
             {
-                result = result.Where(x => x.VolunteerId == attendanceSearch.Id);
+                //result = result.Where(x => x.VolunteerId == attendanceSearch.Id);
+                result = result.Where(x => x.Id == attendanceSearch.Id);
             }
             else
             {

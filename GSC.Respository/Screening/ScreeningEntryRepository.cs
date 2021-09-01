@@ -11,6 +11,7 @@ using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
+using GSC.Respository.Barcode;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
@@ -41,6 +42,7 @@ namespace GSC.Respository.Screening
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectScheduleRepository _projectScheduleRepository;
+        private readonly IAttendanceBarcodeGenerateRepository _attendanceBarcodeGenerateRepository;
         public ScreeningEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
@@ -53,7 +55,8 @@ namespace GSC.Respository.Screening
             IScreeningTemplateRepository screeningTemplateRepository,
             INumberFormatRepository numberFormatRepository,
             IRolePermissionRepository rolePermissionRepository,
-             IProjectScheduleRepository projectScheduleRepository)
+             IProjectScheduleRepository projectScheduleRepository,
+             IAttendanceBarcodeGenerateRepository attendanceBarcodeGenerateRepository)
             : base(context)
         {
             _volunteerRepository = volunteerRepository;
@@ -70,6 +73,7 @@ namespace GSC.Respository.Screening
             _projectRepository = projectRepository;
             _context = context;
             _projectScheduleRepository = projectScheduleRepository;
+            _attendanceBarcodeGenerateRepository = attendanceBarcodeGenerateRepository;
         }
 
         public ScreeningEntryDto GetDetails(int id)
@@ -251,15 +255,17 @@ namespace GSC.Respository.Screening
 
             if (searchParam.Id > 0)
             {
-                screeningEntries = screeningEntries.Where(x => x.Attendance.VolunteerId == searchParam.Id);
+                attendanceResult = attendanceResult.Where(x => x.Id == searchParam.Id).ToList();
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(searchParam.TextSearch))
                 {
-                    var volunterIds = _volunteerRepository.AutoCompleteSearch(searchParam.TextSearch.Trim());
-                    screeningEntries =
-                        screeningEntries.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
+                    //var volunterIds = _volunteerRepository.AutoCompleteSearch(searchParam.TextSearch.Trim());
+                    //screeningEntries =
+                    //    screeningEntries.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
+                    var volunterIds = BarcodeSearch(searchParam.TextSearch.Trim());
+                    screeningEntries = screeningEntries.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
                 }
 
                 if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
@@ -326,6 +332,20 @@ namespace GSC.Respository.Screening
                 }).ToList();
 
             return query;
+        }
+
+        public IList<DropDownDto> BarcodeSearch(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText)) return new List<DropDownDto>();
+            searchText = searchText.Trim();
+            var attendanceIds = _attendanceBarcodeGenerateRepository.FindByInclude(x => x.BarcodeString == searchText && x.DeletedBy == null).Select(t => new DropDownDto
+            {
+                Id = t.AttendanceId,
+                Value = t.BarcodeString
+            }).ToList();
+            if (attendanceIds == null || attendanceIds.Count == 0) return new List<DropDownDto>();
+           
+            return attendanceIds;
         }
 
 

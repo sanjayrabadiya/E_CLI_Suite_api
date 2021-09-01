@@ -18,5 +18,6 @@ namespace GSC.Respository.Screening
         IList<DropDownDto> GetSubjectByProjecId(int projectId);
         IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock);
         IList<DropDownDto> GetPeriodByProjectIdIsLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
+        IList<DropDownDto> BarcodeSearch(string searchText);
     }
 }

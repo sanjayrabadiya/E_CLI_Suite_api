@@ -150,6 +150,14 @@ namespace GSC.Api.Controllers.Screening
             return Ok(result);
         }
 
+
+        [HttpGet("BarcodeSearch")]
+        public IActionResult BarcodeSearch(string searchText)
+        {
+            var result = _screeningEntryRepository.BarcodeSearch(searchText);
+            return Ok(result);
+        }
+
         [HttpPost]
         [Route("GetScreeningList")]
         public IActionResult GetScreeningList([FromBody] ScreeningSearhParamDto searchParam)
