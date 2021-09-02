@@ -60,5 +60,6 @@ namespace GSC.Data.Entities.Project.Design
 
         public IList<ProjectDesignVariableEncryptRole> Roles { get; set; } = null;
         public int? LargeStep { get; set; }
+        public AnnotationType AnnotationType { get; set; }
     }
 }
