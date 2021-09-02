@@ -43,6 +43,7 @@ namespace GSC.Data.Dto.CTMS
         public bool IsManual { get; set; }
         public RefrenceType RefrenceType { get; set; }
         public int CreatedBy { get; set; }
+        public string Status { get; set; }
     }
 
     public class StudyPlanTaskChartDto
@@ -51,6 +52,7 @@ namespace GSC.Data.Dto.CTMS
         public int Complete { get; set; }
         public int DueDate { get; set; }
         public int DeviatedDate { get; set; }
+        public int NotStartedDate { get; set; }
         public int OnGoingDate { get; set; }
        
     }

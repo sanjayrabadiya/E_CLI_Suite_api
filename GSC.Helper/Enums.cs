@@ -720,6 +720,7 @@ namespace GSC.Helper
         [Description("DueDate")] DueDate = 2,
         [Description("DeviatedDate")] DeviatedDate = 3,
         [Description("OnGoingDate")] OnGoingDate = 4,
+        [Description("NotStarted")] NotStarted = 5,
     }
     public enum UploadLimitType : short
     {
