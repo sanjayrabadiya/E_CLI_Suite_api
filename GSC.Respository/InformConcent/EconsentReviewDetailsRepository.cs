@@ -83,7 +83,7 @@ namespace GSC.Respository.InformConcent
                 ReviewId = x.Id,
                 IsReviewed = x.IsReviewedByPatient,
                 TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds)
-            }).ToList();
+            }).OrderByDescending(x=>x.DocumentId).ToList();
 
             result.ForEach(t => t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath));
 
@@ -648,27 +648,28 @@ namespace GSC.Respository.InformConcent
             reviewdetails.EconsentReviewDetailsSections = _mapper.Map<List<EconsentReviewDetailsSections>>(econsentReviewDetailsDto.EconsentReviewDetailsSections);
             string filepath = "";
             PdfDocument pdfDocument = new PdfDocument();
+            FileStream docStream;
             if (String.IsNullOrEmpty(reviewdetails.PdfPath) && reviewdetails.IsReviewedByPatient == false)
             {
                 filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), reviewdetails.EconsentSetup.DocumentPath);
-                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
                 DocIORenderer render = new DocIORenderer();
                 render.Settings.PreserveFormFields = true;
                 pdfDocument = render.ConvertToPDF(wordDocument);
                 render.Dispose();
                 wordDocument.Dispose();
-                docStream.Close();
-                docStream.Dispose();               
+                //docStream.Close();
+                //docStream.Dispose();               
             }
             else
             {
                 filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), reviewdetails.PdfPath);
-                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
                 pdfDocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
-                docStream.Close();
-                docStream.Dispose();
+                //docStream.Close();
+                //docStream.Dispose();
             }
 
             //add signature
@@ -695,33 +696,32 @@ namespace GSC.Respository.InformConcent
             graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
 
             graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
-            graphics.DrawImage(image, new PointF(70, 70), new SizeF(650, 150));
-            graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 190), format);
-            graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 190), format);
-            if (!isWithdraw == true)
+            graphics.DrawImage(image, new PointF(70, 70), new SizeF(400f, 100f));
+            graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);
+            graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 230), format);
+            if (isWithdraw == true)
             {
                 var reason = _jwtTokenAccesser.GetHeader("audit-reason-name");
                 var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
-                graphics.DrawString("Withdraw By:", fontbold, PdfBrushes.Black, new PointF(70, 210), format);
-                graphics.DrawString($"{_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")"}", regular, PdfBrushes.Black, new PointF(150, 210), format);
+                graphics.DrawString("Withdraw By:", fontbold, PdfBrushes.Black, new PointF(70, 250), format);
+                graphics.DrawString($"{_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")"}", regular, PdfBrushes.Black, new PointF(150, 250), format);
 
-                graphics.DrawString("Withdraw Reason:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);
-                graphics.DrawString($"{reason}", regular, PdfBrushes.Black, new PointF(180, 230), format);
+                graphics.DrawString("Withdraw Reason:", fontbold, PdfBrushes.Black, new PointF(70, 280), format);
+                graphics.DrawString($"{reason}", regular, PdfBrushes.Black, new PointF(180, 280), format);
 
-                graphics.DrawString("Comment:", fontbold, PdfBrushes.Black, new PointF(70, 250), format);
-                graphics.DrawString($"{reasonOth}", regular, PdfBrushes.Black, new PointF(70, 270), format);
+                graphics.DrawString("Comment:", fontbold, PdfBrushes.Black, new PointF(70, 300), format);
+                graphics.DrawString($"{reasonOth}", regular, PdfBrushes.Black, new PointF(70, 320), format);
 
                 reviewdetails.IsWithDraw = true;
                 reviewdetails.WithdrawReason = reason;
                 reviewdetails.WithdrawComment = reasonOth;
             }
-
-
-
             MemoryStream outputStream = new MemoryStream();
             pdfDocument.Save(outputStream);
             pdfDocument.Close();
             pdfDocument.Dispose();
+            docStream.Close();
+            docStream.Dispose();
 
             var filename = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
             var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(reviewdetails.EconsentSetup.ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", filename);
