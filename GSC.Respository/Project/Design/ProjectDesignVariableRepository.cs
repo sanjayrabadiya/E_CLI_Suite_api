@@ -229,14 +229,6 @@ namespace GSC.Respository.Project.Design
 
         }
 
-        public CheckVersionDto CheckStudyVersion(int projectDesignTemplateId)
-        {
-            var result = new CheckVersionDto();
-            var projectDesignId = All.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId).Select(t => t.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId).FirstOrDefault();
-            result.AnyLive = _studyVersionRepository.AnyLive(projectDesignId);
-            if (result.AnyLive)
-                result.VersionNumber = _studyVersionRepository.GetOnTrialVersionByProjectDesign(projectDesignId);
-            return result;
-        }
+       
     }
 }

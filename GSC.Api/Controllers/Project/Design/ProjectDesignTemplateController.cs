@@ -579,5 +579,24 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
 
+        [HttpPut]
+        [Route("SetActiveFromInActive/{id}")]
+        public IActionResult SetActiveFromInActive(int id)
+        {
+            if (id <= 0) return BadRequest();
+
+            var template = _projectDesignTemplateRepository.Find(id);
+
+            if (template == null) return NotFound();
+
+            template.InActiveVersion = null;
+            _projectDesignTemplateRepository.Update(template);
+
+            _uow.Save();
+
+            return Ok();
+        }
+
+
     }
 }

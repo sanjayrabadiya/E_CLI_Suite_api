@@ -22,6 +22,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
+        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
 
         public ProjectDesignVariableController(IProjectDesignVariableRepository projectDesignVariableRepository,
@@ -30,7 +31,8 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             IUnitOfWork uow, IMapper mapper,
-            IVariableRepository variableRepository)
+            IVariableRepository variableRepository,
+            IProjectDesignTemplateRepository projectDesignTemplateRepository)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
@@ -40,6 +42,7 @@ namespace GSC.Api.Controllers.Project.Design
             _uow = uow;
             _mapper = mapper;
             _variableRepository = variableRepository;
+            _projectDesignTemplateRepository = projectDesignTemplateRepository;
         }
 
         [HttpGet("{id}")]
@@ -73,7 +76,7 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            var checkVersion = _projectDesignVariableRepository.CheckStudyVersion(variable.ProjectDesignTemplateId);
+            var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(variable.ProjectDesignTemplateId);
             variable.StudyVersion = checkVersion.VersionNumber;
             _projectDesignVariableRepository.Add(variable);
             foreach (var item in variable.Values)
@@ -156,7 +159,7 @@ namespace GSC.Api.Controllers.Project.Design
                 return BadRequest(ModelState);
             }
 
-            var checkVersion = _projectDesignVariableRepository.CheckStudyVersion(record.ProjectDesignTemplateId);
+            var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(record.ProjectDesignTemplateId);
             if (checkVersion.AnyLive)
             {
                 record.InActiveVersion = checkVersion.VersionNumber;
@@ -233,7 +236,7 @@ namespace GSC.Api.Controllers.Project.Design
                 var data = _projectDesignVariableValueRepository.FindBy(x =>
                     x.ProjectDesignVariableId == variable.Id).ToList(); //&& !variable.Values.Any(c => c.Id == x.Id)).ToList();
 
-                var checkVersion = _projectDesignVariableRepository.CheckStudyVersion(variable.ProjectDesignTemplateId);
+                var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(variable.ProjectDesignTemplateId);
 
                 var deletevalues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
                 var addvalues = variable.Values.Where(x => x.Id == 0).ToList();

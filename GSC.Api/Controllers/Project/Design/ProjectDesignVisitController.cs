@@ -333,26 +333,30 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult ChangeVisitDesignOrder(int id, int index)
         {
             var template = _projectDesignVisitRepository.Find(id);
-            var PeriodId = template.ProjectDesignPeriodId;
-
-            var orderedList = _projectDesignVisitRepository
-                .FindBy(t => t.ProjectDesignPeriodId == PeriodId && t.DeletedDate == null).OrderBy(t => t.DesignOrder)
-                .ToList();
-            orderedList.Remove(orderedList.First(t => t.Id == id));
-
-            if (index != 0)
-                index--;
-
-            orderedList.Insert(index, template);
-
-            var i = 0;
-            foreach (var item in orderedList)
+            if (template != null)
             {
-                item.DesignOrder = ++i;
-                _projectDesignVisitRepository.Update(item);
-            }
 
-            _uow.Save();
+                var PeriodId = template.ProjectDesignPeriodId;
+
+                var orderedList = _projectDesignVisitRepository
+                    .FindBy(t => t.ProjectDesignPeriodId == PeriodId && t.DeletedDate == null).OrderBy(t => t.DesignOrder)
+                    .ToList();
+                orderedList.Remove(orderedList.First(t => t.Id == id));
+
+                if (index != 0)
+                    index--;
+
+                orderedList.Insert(index, template);
+
+                var i = 0;
+                foreach (var item in orderedList)
+                {
+                    item.DesignOrder = ++i;
+                    _projectDesignVisitRepository.Update(item);
+                }
+
+                _uow.Save();
+            }
 
             return Ok();
         }

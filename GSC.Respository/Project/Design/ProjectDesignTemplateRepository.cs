@@ -23,11 +23,13 @@ namespace GSC.Respository.Project.Design
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
+        private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         public ProjectDesignTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
-            IStudyVersionRepository studyVersionRepository) : base(context)
+            IStudyVersionRepository studyVersionRepository,
+            IProjectDesignVisitRepository projectDesignVisitRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
@@ -35,6 +37,7 @@ namespace GSC.Respository.Project.Design
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _studyVersionRepository = studyVersionRepository;
+            _projectDesignVisitRepository = projectDesignVisitRepository;
         }
 
         public ProjectDesignTemplate GetTemplateClone(int id)
@@ -250,7 +253,7 @@ namespace GSC.Respository.Project.Design
         public CheckVersionDto CheckStudyVersion(int projectDesignVisitId)
         {
             var result = new CheckVersionDto();
-            var projectDesignId = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId).Select(t => t.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId).FirstOrDefault();
+            var projectDesignId = _projectDesignVisitRepository.All.Where(x => x.Id == projectDesignVisitId).Select(t => t.ProjectDesignPeriod.ProjectDesignId).FirstOrDefault();
             result.AnyLive = _studyVersionRepository.AnyLive(projectDesignId);
             if (result.AnyLive)
                 result.VersionNumber = _studyVersionRepository.GetOnTrialVersionByProjectDesign(projectDesignId);
@@ -266,6 +269,16 @@ namespace GSC.Respository.Project.Design
             {
                 x.AllowActive = checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
             });
+            return result;
+        }
+
+        public CheckVersionDto CheckStudyVersionForTemplate(int projectDesignTemplateId)
+        {
+            var result = new CheckVersionDto();
+            var projectDesignId = All.Where(x => x.Id == projectDesignTemplateId).Select(t => t.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId).FirstOrDefault();
+            result.AnyLive = _studyVersionRepository.AnyLive(projectDesignId);
+            if (result.AnyLive)
+                result.VersionNumber = _studyVersionRepository.GetOnTrialVersionByProjectDesign(projectDesignId);
             return result;
         }
 

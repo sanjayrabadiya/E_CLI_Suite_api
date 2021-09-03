@@ -28,5 +28,7 @@ namespace GSC.Respository.Project.Design
         Task<bool> IsTemplateExits(int projectDesignId);
 
         CheckVersionDto CheckStudyVersion(int projectDesignVisitId);
+
+        CheckVersionDto CheckStudyVersionForTemplate(int projectDesignTemplateId);
     }
 }

@@ -110,12 +110,12 @@ namespace GSC.Respository.Project.Design
             //});
         }
 
-        public double GetVersionNumber(int projectId, bool isMonir)
+        public decimal GetVersionNumber(int projectId, bool isMonir)
         {
             var number = All.Count(x => x.DeletedDate == null && x.ProjectId == projectId && x.IsMinor == isMonir);
             if (number == 0) return 1;
             var parentNumber = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.IsMinor == isMonir).Select(t => t.ProjectDesignId).Distinct().Count();
-            return Convert.ToDouble(parentNumber + "." + number);
+            return Convert.ToDecimal(parentNumber + "." + number);
         }
 
 

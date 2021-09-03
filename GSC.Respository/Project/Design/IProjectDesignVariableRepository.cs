@@ -24,7 +24,6 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetVariableByMultipleTemplateDropDown(int?[] templateIds);
 
         ProjectDesignVariableRelationDto GetProjectDesignVariableRelation(int id);
-        CheckVersionDto CheckStudyVersion(int projectDesignTemplateId);
 
     }
 }
