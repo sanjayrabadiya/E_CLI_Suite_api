@@ -264,10 +264,12 @@ namespace GSC.Respository.Project.Design
         public List<ProjectDesignTemplateDto> GetTemplateByVisitId(int projectDesignVisitId)
         {
             var checkVersion = CheckStudyVersion(projectDesignVisitId);
+            var vistInActiveVersion = _projectDesignVisitRepository.All.Where(x => x.Id == projectDesignVisitId).Select(t => t.InActiveVersion).FirstOrDefault();
+
             var result = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId).ProjectTo<ProjectDesignTemplateDto>(_mapper.ConfigurationProvider).ToList();
             result.ForEach(x =>
             {
-                x.AllowActive = checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
+                x.AllowActive = vistInActiveVersion != x.InActiveVersion && checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
             });
             return result;
         }
