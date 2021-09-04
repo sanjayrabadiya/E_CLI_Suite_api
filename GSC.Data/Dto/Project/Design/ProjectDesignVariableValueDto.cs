@@ -22,6 +22,8 @@ namespace GSC.Data.Dto.Project.Design
         public string ScreeningValue { get; set; }
         public int ScreeningTemplateValueChildId { get; set; }
         public string ScreeningValueOld { get; set; }
+        public bool AllowActive { get; set; }
+        public string DisplayVersion { get; set; }
     }
 
     public class ScreeningVariableValueDto

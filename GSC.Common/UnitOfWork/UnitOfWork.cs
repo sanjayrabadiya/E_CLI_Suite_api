@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using GSC.Shared;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using System.Threading.Tasks;
 
 namespace GSC.Common.UnitOfWork
 {

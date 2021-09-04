@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
-using GSC.Data.Entities.LanguageSetup;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using DataType = GSC.Helper.DataType;
@@ -43,7 +42,7 @@ namespace GSC.Data.Dto.Project.Design
         public string UnitAnnotation { get; set; }
         public PrintType? PrintType { get; set; }
         public IList<ProjectDesignVariableValueDto> Values { get; set; } = null;
-        // public IList<ProjectDesignVariableRemarksDto> Remarks { get; set; } = null;
+       
         public UnitDto Unit { get; set; }
         public int DesignOrder { get; set; }
         public bool? IsDocument { get; set; }

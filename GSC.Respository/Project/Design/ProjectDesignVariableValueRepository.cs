@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AutoMapper;
 using ClosedXML.Excel;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
@@ -9,7 +10,6 @@ using GSC.Data.Dto.Report;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Respository.Project.Design
@@ -18,10 +18,12 @@ namespace GSC.Respository.Project.Design
         IProjectDesignVariableValueRepository
     {
         private readonly IGSCContext _context;
-        public ProjectDesignVariableValueRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) :
+        private readonly IMapper _mapper;
+        public ProjectDesignVariableValueRepository(IGSCContext context, IMapper mapper) :
             base(context)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public IList<DropDownDto> GetProjectDesignVariableValueDropDown(int projectDesignVariableId)
@@ -84,7 +86,7 @@ namespace GSC.Respository.Project.Design
                 DataType = r.DataType.GetDescription(),
                 IsNa = r.IsNa,
                 DateValidate = r.DateValidate.GetDescription(),
-                AnnotationType=r.AnnotationType.AnnotationeName,
+                AnnotationType = r.AnnotationType.AnnotationeName,
                 UnitName = r.Unit.UnitName,
                 UnitAnnotation = r.UnitAnnotation,
                 CollectionAnnotation = r.CollectionAnnotation,
@@ -209,9 +211,9 @@ namespace GSC.Respository.Project.Design
                 #endregion
 
                 #region Add Visit status sheet
-               // IXLWorksheet worksheetVisit = workbook.Worksheets.Add("Visit Status");
+                // IXLWorksheet worksheetVisit = workbook.Worksheets.Add("Visit Status");
                 IXLWorksheet worksheetVisit = Temp.CopyTo("Visit Status");
-               // worksheetVisit.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                // worksheetVisit.Rows(1, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
                 //worksheetVisit.Cell(1, 1).Value = "Period";
                 //worksheetVisit.Cell(1, 2).Value = "Visit";
                 //worksheetVisit.Cell(1, 3).Value = "Template";
@@ -231,8 +233,8 @@ namespace GSC.Respository.Project.Design
                 #endregion Add Visit status sheet
 
                 #region Add template note sheet
-                IXLWorksheet WorkSheetTNote =  Temp.CopyTo("Template Note");
-                  // IXLWorksheet WorkSheetTNote = workbook.Worksheets.Add("Template Note");
+                IXLWorksheet WorkSheetTNote = Temp.CopyTo("Template Note");
+                // IXLWorksheet WorkSheetTNote = workbook.Worksheets.Add("Template Note");
                 // worksheetVisit.Copy(type workbook.Worksheets[1]);
 
 
@@ -425,7 +427,7 @@ namespace GSC.Respository.Project.Design
             var templates = _context.ProjectDesignTemplateNote.Where(x => x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
 
             if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
-                templates = templates.Where(x => filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId) && x.DeletedDate ==null);
+                templates = templates.Where(x => filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId) && x.DeletedDate == null);
 
 
             if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
@@ -446,7 +448,7 @@ namespace GSC.Respository.Project.Design
             var visits = _context.VisitLanguage.Where(x => x.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriodId == ProjectDesignPeriodId);
 
             if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
-                visits = visits.Where(x => filters.VisitIds.Contains(x.ProjectDesignVisitId) && x.DeletedDate==null);
+                visits = visits.Where(x => filters.VisitIds.Contains(x.ProjectDesignVisitId) && x.DeletedDate == null);
 
 
             //if (templateIds != null && templateIds.Count() > 0)
@@ -485,7 +487,7 @@ namespace GSC.Respository.Project.Design
             {
                 PeriodName = r.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                 VisitName = r.ProjectDesignVisit.DisplayName,
-                TemplateName =r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
+                TemplateName = r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
                 VariableName = r.ProjectDesignVariable.VariableName,
                 Status = r.VisitStatusId.GetDescription()
             }).ToList();
@@ -606,6 +608,50 @@ namespace GSC.Respository.Project.Design
                 Language = r.Language.LanguageName,
                 Value = r.Display
             }).ToList();
+        }
+
+        public void UpdateVariableValues(ProjectDesignVariableDto variableDto, bool CollectionValueDisable, CheckVersionDto checkVersion)
+        {
+
+            if (CollectionValueDisable == true)
+            {
+                var deletedisableValues = All.Where(x => x.ProjectDesignVariableId == variableDto.Id).ToList();
+                foreach (var item in deletedisableValues)
+                {
+                   Delete(item);
+                }
+            }
+            else
+            {
+                if (variableDto.Values == null || variableDto.Values.Count() == 0) return;
+                int seqNo = 0;
+                variableDto.Values.ToList().ForEach(x =>
+                {
+                    var variableValue = _mapper.Map<ProjectDesignVariableValue>(x);
+                    if (x.Id > 0 && x.IsDeleted && checkVersion.AnyLive)
+                    {
+                        variableValue.InActiveVersion = checkVersion.VersionNumber;
+                        Update(variableValue);
+                    }
+                    else if (x.Id > 0 && x.IsDeleted)
+                        Remove(variableValue);
+                    else if (x.Id > 0)
+                    {
+                        seqNo += 1;
+                        variableValue.SeqNo = seqNo;
+                        Update(variableValue);
+                    }
+                       
+                    else if (x.Id == 0 && !x.IsDeleted)
+                    {
+                        seqNo += 1;
+                        variableValue.ProjectDesignVariableId = variableDto.Id;
+                        variableValue.SeqNo = seqNo;
+                        variableValue.StudyVersion = checkVersion.VersionNumber;
+                        Add(variableValue);
+                    }
+                });
+            }
         }
 
         public IList<ProjectDesignLanguageReportDto> GetVariableValueLanguageData(int ProjectDesignPeriodId, ProjectDatabaseSearchDto filters)

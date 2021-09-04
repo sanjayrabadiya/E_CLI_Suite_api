@@ -49,9 +49,21 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var variable = _projectDesignVariableRepository.FindByInclude(t => t.Id == id, t => t.Values.Where(x => x.DeletedDate == null).OrderBy(x => x.SeqNo), t => t.Roles.Where(x => x.DeletedDate == null))
-                .FirstOrDefault();
+            var variable = _projectDesignVariableRepository.
+                FindByInclude(t => t.Id == id, t => t.Values.Where(x => x.DeletedDate == null).OrderBy(x => x.SeqNo), t => t.Roles.Where(x => x.DeletedDate == null)).FirstOrDefault();
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
+            var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(variableDto.ProjectDesignTemplateId);
+
+            if (variableDto.Values != null)
+            {
+                variableDto.Values.ToList().ForEach(x =>
+                {
+                    x.AllowActive = checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
+                    x.DisplayVersion = x.StudyVersion != null || x.InActiveVersion != null ?
+                    "( V : " + x.StudyVersion + (x.StudyVersion != null && x.InActiveVersion != null ? " - " : "") + x.InActiveVersion + ")" : "";
+                });
+            }
+
             return Ok(variableDto);
         }
 
@@ -61,13 +73,15 @@ namespace GSC.Api.Controllers.Project.Design
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             variableDto.Id = 0;
+
+            if (variableDto.Values != null)
+                variableDto.Values = variableDto.Values.Where(x => !x.IsDeleted).ToList();
+
             var variable = _mapper.Map<ProjectDesignVariable>(variableDto);
             variable.DesignOrder = 1;
 
-            if (_projectDesignVariableRepository.FindBy(t =>
-                    t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId && t.DeletedDate == null).Count() > 0)
-                variable.DesignOrder = _projectDesignVariableRepository.FindBy(t =>
-                                           t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId &&
+            if (_projectDesignVariableRepository.All.Any(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId && t.DeletedDate == null))
+                variable.DesignOrder = _projectDesignVariableRepository.FindBy(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId &&
                                            t.DeletedDate == null).Max(t => t.DesignOrder) + 1;
 
             var validate = _projectDesignVariableRepository.Duplicate(variable);
@@ -76,9 +90,11 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+
             var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(variable.ProjectDesignTemplateId);
             variable.StudyVersion = checkVersion.VersionNumber;
             _projectDesignVariableRepository.Add(variable);
+
             foreach (var item in variable.Values)
             {
                 item.StudyVersion = checkVersion.VersionNumber;
@@ -124,12 +140,16 @@ namespace GSC.Api.Controllers.Project.Design
                 }
             }
 
-            UpdateVariableValues(variable, variableDto.CollectionValueDisable);
-
             UpdateVariableEncryptRole(variable);
 
             _projectDesignVariableRepository.Update(variable);
+
+            var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(variableDto.ProjectDesignTemplateId);
+
+            _projectDesignVariableValueRepository.UpdateVariableValues(variableDto, variableDto.CollectionValueDisable, checkVersion);
+
             _uow.Save();
+
             return Ok(variable.Id);
         }
 
@@ -229,53 +249,9 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
-        private void UpdateVariableValues(ProjectDesignVariable variable, bool CollectionValueDisable)
-        {
-            if (CollectionValueDisable == true)
-            {
-                var deletedisableValues = variable.Values.ToList();
+       
 
-                foreach (var item in deletedisableValues)
-                {
-                    _projectDesignVariableValueRepository.Delete(item);
-                }
-            }
-            else
-            {
-                var data = _projectDesignVariableValueRepository.FindBy(x =>
-                    x.ProjectDesignVariableId == variable.Id).ToList(); //&& !variable.Values.Any(c => c.Id == x.Id)).ToList();
-
-                var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(variable.ProjectDesignTemplateId);
-
-                var deletevalues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-                var addvalues = variable.Values.Where(x => x.Id == 0).ToList();
-                var updatevalues = variable.Values.Where(x => x.Id != 0).ToList();
-
-                foreach (var value in deletevalues)
-                {
-                    if (checkVersion.AnyLive)
-                    {
-                        value.InActiveVersion = checkVersion.VersionNumber;
-                        _projectDesignVariableValueRepository.Update(value);
-                    }
-                    else
-                        _projectDesignVariableValueRepository.Remove(value);
-                }
-
-
-                var SeqNo = data.Count;
-                foreach (var item in addvalues)
-                {
-                    item.SeqNo = ++SeqNo;
-                    item.StudyVersion = checkVersion.VersionNumber;
-                    _projectDesignVariableValueRepository.Add(item);
-                }
-
-                foreach (var value in updatevalues)
-                    _projectDesignVariableValueRepository.Update(value);
-            }
-        }
-
+        
         private void UpdateVariableEncryptRole(ProjectDesignVariable variable)
         {
             // get role by projectdesign variable id
