@@ -402,7 +402,7 @@ namespace GSC.Api.Controllers.Project.Design
                             r.StudyVersion = checkVersion.VersionNumber;
                             _projectDesignVariableValueRepository.Add(r);
                         }
-                            
+
                         else
                             _projectDesignVariableValueRepository.Update(r);
 
@@ -455,6 +455,15 @@ namespace GSC.Api.Controllers.Project.Design
                 {
                     record.InActiveVersion = checkVersion.VersionNumber;
                     _projectDesignTemplateRepository.Update(record);
+
+                    var variables = _projectDesignVariableRepository.All.Where(x => x.DeletedDate == null
+                    && x.ProjectDesignTemplateId == id && x.InActiveVersion == null).ToList();
+                    variables.ForEach(x =>
+                    {
+                        x.InActiveVersion = checkVersion.VersionNumber;
+                        _projectDesignVariableRepository.Update(x);
+                    });
+
                     _uow.Save();
                 }
                 else
@@ -588,6 +597,14 @@ namespace GSC.Api.Controllers.Project.Design
             var template = _projectDesignTemplateRepository.Find(id);
 
             if (template == null) return NotFound();
+
+            var variables = _projectDesignVariableRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == id && x.InActiveVersion == template.InActiveVersion).
+                ToList();
+            variables.ForEach(x =>
+            {
+                x.InActiveVersion = null;
+                _projectDesignVariableRepository.Update(x);
+            });
 
             template.InActiveVersion = null;
             _projectDesignTemplateRepository.Update(template);

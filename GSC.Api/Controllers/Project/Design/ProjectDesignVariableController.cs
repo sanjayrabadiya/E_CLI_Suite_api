@@ -164,6 +164,15 @@ namespace GSC.Api.Controllers.Project.Design
             {
                 record.InActiveVersion = checkVersion.VersionNumber;
                 _projectDesignVariableRepository.Update(record);
+
+                var variables = _projectDesignVariableValueRepository.All.Where(x => x.DeletedDate == null
+                   && x.ProjectDesignVariableId == id && x.InActiveVersion == null).ToList();
+                variables.ForEach(x =>
+                {
+                    x.InActiveVersion = checkVersion.VersionNumber;
+                    _projectDesignVariableValueRepository.Update(x);
+                });
+
             }
             else
                 _projectDesignVariableRepository.Delete(record);
@@ -366,6 +375,40 @@ namespace GSC.Api.Controllers.Project.Design
         {
             var result = _projectDesignVariableRepository.GetProjectDesignVariableRelation(id);
             return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("GetVariabeBasic/{projectDesignTemplateId}")]
+        public IActionResult GetVariabeBasic(int projectDesignTemplateId)
+        {
+            var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(projectDesignTemplateId);
+            return Ok(_projectDesignVariableRepository.GetVariabeBasic(projectDesignTemplateId, checkVersion));
+        }
+
+        [HttpPut]
+        [Route("SetActiveFromInActive/{id}")]
+        public IActionResult SetActiveFromInActive(int id)
+        {
+            if (id <= 0) return BadRequest();
+
+            var variable = _projectDesignVariableRepository.Find(id);
+
+            if (variable == null) return NotFound();
+
+            var variables = _projectDesignVariableValueRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignVariableId == id && x.InActiveVersion == variable.InActiveVersion).
+                ToList();
+            variables.ForEach(x =>
+            {
+                x.InActiveVersion = null;
+                _projectDesignVariableValueRepository.Update(x);
+            });
+
+            variable.InActiveVersion = null;
+            _projectDesignVariableRepository.Update(variable);
+
+            _uow.Save();
+
+            return Ok();
         }
     }
 }

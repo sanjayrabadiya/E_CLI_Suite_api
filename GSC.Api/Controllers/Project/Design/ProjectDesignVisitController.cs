@@ -153,6 +153,22 @@ namespace GSC.Api.Controllers.Project.Design
             {
                 visit.InActiveVersion = checkVersion.VersionNumber;
                 _projectDesignVisitRepository.Update(visit);
+
+                var templates = _projectDesignTemplateRepository.All.Where(x => x.DeletedDate == null
+                  && x.ProjectDesignVisitId == id && x.InActiveVersion == null).ToList();
+                templates.ForEach(x =>
+                {
+                    x.InActiveVersion = checkVersion.VersionNumber;
+                    _projectDesignTemplateRepository.Update(x);
+                });
+
+                var variables = _projectDesignVariableRepository.All.Where(x => x.DeletedDate == null
+                   && x.ProjectDesignTemplate.ProjectDesignVisitId == id && x.InActiveVersion == null).ToList();
+                variables.ForEach(x =>
+                {
+                    x.InActiveVersion = checkVersion.VersionNumber;
+                    _projectDesignVariableRepository.Update(x);
+                });
             }
             else
                 _projectDesignVisitRepository.Delete(visit);
@@ -172,6 +188,22 @@ namespace GSC.Api.Controllers.Project.Design
             var visit = _projectDesignVisitRepository.Find(id);
 
             if (visit == null) return NotFound();
+
+            var templates = _projectDesignTemplateRepository.All.Where(x => x.DeletedDate == null
+                 && x.ProjectDesignVisitId == id && x.InActiveVersion == visit.InActiveVersion).ToList();
+            templates.ForEach(x =>
+            {
+                x.InActiveVersion = null;
+                _projectDesignTemplateRepository.Update(x);
+            });
+
+            var variables = _projectDesignVariableRepository.All.Where(x => x.DeletedDate == null
+               && x.ProjectDesignTemplate.ProjectDesignVisitId == id && x.InActiveVersion == visit.InActiveVersion).ToList();
+            variables.ForEach(x =>
+            {
+                x.InActiveVersion = null;
+                _projectDesignVariableRepository.Update(x);
+            });
 
             visit.InActiveVersion = null;
             _projectDesignVisitRepository.Update(visit);

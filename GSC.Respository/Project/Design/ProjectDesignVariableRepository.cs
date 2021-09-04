@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
@@ -95,6 +94,23 @@ namespace GSC.Respository.Project.Design
                     Code = c.CoreVariableType.ToString(),
                     ExtraData = c.DesignOrder
                 }).OrderBy(o => o.ExtraData).ToList();
+        }
+
+
+        public IList<ProjectDesignVariableBasicDto> GetVariabeBasic(int projectDesignTemplateId, CheckVersionDto checkVersion)
+        {
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId)
+                .Select(c => new ProjectDesignVariableBasicDto
+                {
+                    Id = c.Id,
+                    Value = c.VariableName,
+                    InActiveVersion = c.InActiveVersion,
+                    StudyVersion = c.StudyVersion,
+                    DesignOrder = c.DesignOrder,
+                    DisplayVersion = c.StudyVersion != null || c.InActiveVersion != null ?
+                    "( V : " + c.StudyVersion + (c.StudyVersion != null && c.InActiveVersion != null ? " - " : "") + c.InActiveVersion + ")" : "",
+                    AllowActive = checkVersion.VersionNumber == c.InActiveVersion && c.InActiveVersion != null
+                }).OrderBy(o => o.DesignOrder).ToList();
         }
 
 
@@ -229,6 +245,6 @@ namespace GSC.Respository.Project.Design
 
         }
 
-       
+
     }
 }
