@@ -93,30 +93,29 @@ namespace GSC.Api.Controllers.Project.Schedule
             return projectSchedules;
         }
 
-        //[HttpGet("{id}")]
-        //public IActionResult Get(int id)
-        //{
-        //    if (id <= 0) return BadRequest();
-        //    var projectSchedule = _projectScheduleRepository.FindByInclude(t => t.Id == id, t => t.Templates, t => t.ProjectDesignPeriod, t => t.ProjectDesignVisit).FirstOrDefault();
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var projectSchedule = _projectScheduleRepository.FindByInclude(t => t.Id == id, t => t.Templates, t => t.ProjectDesignPeriod, t => t.ProjectDesignVisit).FirstOrDefault();
 
 
-        //    var projectScheduleDto = _mapper.Map<ProjectScheduleDto>(projectSchedule);
+            var projectScheduleDto = _mapper.Map<ProjectScheduleDto>(projectSchedule);
 
-        //    if (projectScheduleDto.Templates != null)
-        //        projectScheduleDto.Templates.ToList().ForEach(t =>
-        //        {
-        //            var Template = _projectDesignTemplateRepository.Find(t.ProjectDesignTemplateId);
-        //            t.TemplateName = Template.TemplateName;
-        //            t.TemplateDesignOrder = Template.DesignOrder;
-        //            t.Variables = _projectDesignVariableRepository.GetVariabeAnnotationDropDown(t.ProjectDesignTemplateId, false);
-        //            t.PeriodName = _projectDesignPeriodRepository.Find(t.ProjectDesignPeriodId).DisplayName;
-        //            t.VisitName = _projectDesignVisitRepository.Find(t.ProjectDesignVisitId).DisplayName;
-        //            t.IsVariablLoaded = true;
-        //        });
-        //    projectScheduleDto.Templates = projectScheduleDto.Templates.Where(x => (x.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderBy(x => x.ProjectDesignVisitId).ThenBy(x => x.TemplateDesignOrder).ToList();
-        //    projectScheduleDto.IsLock = !projectSchedule.ProjectDesign.IsUnderTesting;
-        //    return Ok(projectScheduleDto);
-        //}
+            if (projectScheduleDto.Templates != null)
+                projectScheduleDto.Templates.ToList().ForEach(t =>
+                {
+                    var Template = _projectDesignTemplateRepository.Find(t.ProjectDesignTemplateId);
+                    t.TemplateName = Template.TemplateName;
+                    t.TemplateDesignOrder = Template.DesignOrder;
+                    t.Variables = _projectDesignVariableRepository.GetVariabeAnnotationDropDown(t.ProjectDesignTemplateId, false);
+                    t.PeriodName = _projectDesignPeriodRepository.Find(t.ProjectDesignPeriodId).DisplayName;
+                    t.VisitName = _projectDesignVisitRepository.Find(t.ProjectDesignVisitId).DisplayName;
+                    t.IsVariablLoaded = true;
+                });
+            projectScheduleDto.Templates = projectScheduleDto.Templates.Where(x => (x.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null)).OrderBy(x => x.ProjectDesignVisitId).ThenBy(x => x.TemplateDesignOrder).ToList();
+            return Ok(projectScheduleDto);
+        }
 
         [HttpGet("CheckProjectSchedule/{projectDesignVariableId}")]
         public IActionResult CheckProjectSchedule(int projectDesignVariableId)
