@@ -32,7 +32,9 @@ namespace GSC.Respository.Project.Design
                 ).Select(c => new DropDownDto
                 {
                     Id = c.Id,
-                    Value = c.Project.ProjectCode
+                    Value = c.Project.ProjectCode,
+                    ExtraData = c.StudyVersions.Any(t => t.VersionStatus == Helper.VersionStatus.OnTrial && t.DeletedDate == null)
+
                 }).OrderBy(o => o.Value).ToList();
         }
 

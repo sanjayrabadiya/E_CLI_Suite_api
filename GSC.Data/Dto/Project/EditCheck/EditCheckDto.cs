@@ -12,7 +12,6 @@ namespace GSC.Data.Dto.Project.EditCheck
         public string SourceFormula { get; set; }
         public string StatusName { get; set; }
         public int? CompanyId { get; set; }
-        public bool IsLock { get; set; }
         public List<EditCheckDetailDto> EditCheckDetails { get; set; }
         public bool IsFormula { get; set; }
         public bool IsReferenceVerify { get; set; }

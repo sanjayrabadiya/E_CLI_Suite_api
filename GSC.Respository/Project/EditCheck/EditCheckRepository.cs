@@ -27,7 +27,6 @@ namespace GSC.Respository.Project.EditCheck
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IMapper _mapper;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
-        private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IGSCContext _context;
         public EditCheckRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -35,15 +34,13 @@ namespace GSC.Respository.Project.EditCheck
             IMapper mapper,
             IEditCheckDetailRepository editCheckDetailRepository,
             IEditCheckRuleRepository editCheckRuleRepository,
-            INumberFormatRepository numberFormatRepository,
-            IStudyVersionRepository studyVersionRepository) : base(context)
+            INumberFormatRepository numberFormatRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _numberFormatRepository = numberFormatRepository;
             _editCheckDetailRepository = editCheckDetailRepository;
             _editCheckRuleRepository = editCheckRuleRepository;
-            _studyVersionRepository = studyVersionRepository;
             _mapper = mapper;
             _context = context;
         }
@@ -54,7 +51,6 @@ namespace GSC.Respository.Project.EditCheck
             if (projectList == null || projectList.Count == 0)
                 return new List<EditCheckDto>();
 
-            var isOnTrial = _studyVersionRepository.IsOnTrialByProjectDesing(projectDesignId);
 
             var EditCheckData = All.Where(t => (t.CompanyId == null
                                    || t.CompanyId == _jwtTokenAccesser.CompanyId)
@@ -76,7 +72,6 @@ namespace GSC.Respository.Project.EditCheck
                 SourceFormula = r.SourceFormula,
                 StatusName = !string.IsNullOrEmpty(r.TargetFormula) && !string.IsNullOrEmpty(r.SourceFormula) ? "Completed" :
                 r.IsOnlyTarget ? "Only Target" : "In-Complete",
-                IsLock = !isOnTrial,
                 IsFormula = r.IsFormula,
                 IsReferenceVerify = r.IsReferenceVerify,
                 IsDeleted = r.DeletedDate != null,
@@ -86,8 +81,7 @@ namespace GSC.Respository.Project.EditCheck
                 ModifiedByUser = _context.Users.Where(x => x.Id == r.ModifiedBy).FirstOrDefault().UserName,
                 DeletedDate = r.DeletedDate,
                 DeletedByUser = _context.Users.Where(x => x.Id == r.DeletedBy).FirstOrDefault().UserName,
-            })
-            .OrderByDescending(x => x.Id).ToList();
+            }).OrderByDescending(x => x.Id).ToList();
         }
 
         public void SaveEditCheck(Data.Entities.Project.EditCheck.EditCheck editCheck)
