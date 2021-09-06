@@ -5,12 +5,9 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.Project.Design
 {
@@ -35,7 +32,6 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
 
-        //added by vipul for get versions list by projectdesign on 01062021
         [HttpGet]
         [Route("GetDetails/{projectDesignId}")]
         public IActionResult GetDetails(int projectDesignId)
@@ -44,11 +40,12 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(manageSite);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet]
+        [Route("GetOnTrialDetail/{projectDesignId}")]
+        public IActionResult GetOnTrialDetail(int projectDesignId)
         {
             var studyVersion = _studyVersionRepository
-                    .FindByInclude(x => x.Id == id, x => x.StudyVersionVisitStatus).SingleOrDefault();
+                    .FindByInclude(x => x.ProjectDesignId == projectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial, x => x.StudyVersionVisitStatus).FirstOrDefault();
             if (studyVersion == null)
                 return BadRequest();
 
