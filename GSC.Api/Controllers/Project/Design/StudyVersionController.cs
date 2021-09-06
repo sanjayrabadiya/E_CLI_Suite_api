@@ -6,6 +6,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
@@ -52,7 +53,8 @@ namespace GSC.Api.Controllers.Project.Design
             if (studyVersion != null && studyVersion.StudyVersionVisitStatus != null)
                 studyVersion.StudyVersionVisitStatus = studyVersion.StudyVersionVisitStatus.Where(x => x.DeletedDate == null).ToList();
 
-            var studyVersionDto = _mapper.Map<StudyVersion>(studyVersion);
+            var studyVersionDto = _mapper.Map<StudyVersionDto>(studyVersion);
+            studyVersionDto.IsTestSiteVerified = studyVersionDto.IsTestSiteVerified ?? false;
             return Ok(studyVersionDto);
         }
 
@@ -82,30 +84,7 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(studyVersion.Id);
         }
 
-        // PUT api/<controller>/5
-        [HttpPut]
-        public IActionResult Put([FromBody] StudyVersionDto studyVersionDto)
-        {
-            if (studyVersionDto.Id <= 0) return BadRequest();
 
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            var studyVersion = _mapper.Map<StudyVersion>(studyVersionDto);
-
-            var validate = _studyVersionRepository.Duplicate(studyVersion);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
-
-            _studyVersionRepository.UpdateVisitStatus(studyVersion);
-            /* Added by Darshil for effective Date on 24-07-2020 */
-            _studyVersionRepository.Update(studyVersion);
-
-            if (_uow.Save() <= 0) throw new Exception("Updating study version failed on save.");
-            return Ok(studyVersion.Id);
-        }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -140,7 +119,7 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(_studyVersionRepository.GetVersionNumber(projectId, isMonir));
         }
 
-       
+
         [HttpGet]
         [Route("GetVersionDropDown/{projectId}")]
         public IActionResult GetVersionDropDown(int projectId)
@@ -153,6 +132,22 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult GetStudyVersionForLive(int projectId)
         {
             return Ok(_studyVersionRepository.GetStudyVersionForLive(projectId));
+        }
+
+        [HttpPut("GoLive")]
+        public IActionResult GoLive([FromBody] StudyGoLiveDto studyGoLiveDto)
+        {
+            var studyVersion = _studyVersionRepository.All.AsNoTracking().Where(x => x.DeletedDate == null && x.ProjectDesignId == studyGoLiveDto.ProjectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial).FirstOrDefault();
+
+            if (_studyVersionRepository.AnyLive(studyGoLiveDto.ProjectDesignId) && studyGoLiveDto.IsOnTrial == false && (studyVersion.IsTestSiteVerified == null || studyVersion.IsTestSiteVerified == false))
+            {
+                ModelState.AddModelError("Message", "First verify on Test site");
+                return BadRequest(ModelState);
+            }
+
+             _studyVersionRepository.UpdateGoLive(studyGoLiveDto, studyVersion);
+            _uow.Save();
+            return Ok();
         }
 
     }

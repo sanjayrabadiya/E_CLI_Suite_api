@@ -9,11 +9,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Common;
-using GSC.Respository.Configuration;
 using GSC.Respository.Project.Design;
-using GSC.Respository.ProjectRight;
-using GSC.Respository.UserMgt;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Design
@@ -21,36 +17,26 @@ namespace GSC.Api.Controllers.Project.Design
     [Route("api/[controller]")]
     public class ProjectDesignController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
+
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
-        private readonly IProjectRightRepository _projectRightRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IGSCContext _context;
 
         public ProjectDesignController(IProjectDesignRepository projectDesignRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser,
             IGSCContext context,
             IStudyVersionRepository studyVersionRepository,
-            IUserRecentItemRepository userRecentItemRepository, IProjectRightRepository projectRightRepository)
+            IUserRecentItemRepository userRecentItemRepository)
         {
             _projectDesignRepository = projectDesignRepository;
-            _companyRepository = companyRepository;
-            _userRepository = userRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _studyVersionRepository = studyVersionRepository;
             _userRecentItemRepository = userRecentItemRepository;
-            _projectRightRepository = projectRightRepository;
         }
 
         [HttpGet("{id}")]
@@ -144,13 +130,7 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
 
-        [HttpPut("UpdateGoLive/{projectId}")]
-        public IActionResult updateGoLive(int projectId)
-        {
-            _studyVersionRepository.UpdateGoLive(projectId);
-            _uow.Save();
-            return Ok();
-        }
+     
 
         [HttpGet("GetIsCompleteDesign/{projectId}")]
         public IActionResult GetIsCompleteDesign(int projectId)

@@ -7,6 +7,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +19,14 @@ namespace GSC.Respository.Project.Design
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
-        public StudyVersionRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        private readonly IStudyVersionVisitStatusRepository _studyVersionVisitStatusRepository;
+        public StudyVersionRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
+            IStudyVersionVisitStatusRepository studyVersionVisitStatusRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _mapper = mapper;
+            _studyVersionVisitStatusRepository = studyVersionVisitStatusRepository;
         }
 
         public List<StudyVersionGridDto> GetStudyVersion(int ProjectDesignId)
@@ -39,8 +43,6 @@ namespace GSC.Respository.Project.Design
 
         }
 
-
-
         public string Duplicate(StudyVersion objSave)
         {
             if (All.Any(x => x.Id != objSave.Id && x.VersionNumber == objSave.VersionNumber && x.ProjectDesignId == objSave.ProjectDesignId && x.DeletedDate == null))
@@ -49,9 +51,9 @@ namespace GSC.Respository.Project.Design
             return "";
         }
 
-        public void UpdateGoLive(int projectId)
+        private void SetGoLive(int projectDesignId, string note)
         {
-            var versions = All.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList();
+            var versions = All.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).ToList();
             versions.ForEach(x =>
             {
                 if (x.VersionStatus == Helper.VersionStatus.OnTrial)
@@ -59,6 +61,7 @@ namespace GSC.Respository.Project.Design
                     x.VersionStatus = Helper.VersionStatus.GoLive;
                     x.GoLiveBy = _jwtTokenAccesser.UserId;
                     x.GoLiveOn = _jwtTokenAccesser.GetClientDate();
+                    x.GoLiveNote = note;
                     Update(x);
                 }
                 else if (x.VersionStatus == Helper.VersionStatus.GoLive)
@@ -79,35 +82,40 @@ namespace GSC.Respository.Project.Design
             }).OrderBy(o => o.Value).ToList();
         }
 
-        public void UpdateVisitStatus(StudyVersion studyVersion)
+        public void UpdateGoLive(StudyGoLiveDto studyGoLiveDto, StudyVersion studyVersion)
         {
-            //var studyVerionVisitStatus = _context.StudyVerionVisitStatus.Where(x => x.StudyVerionId == studyVersion.Id
-            //                                                   && studyVersion.StudyVersionVisitStatus.Select(x => x.VisitStatusId).Contains(x.VisitStatusId)
-            //                                                   && x.DeletedDate == null).ToList();
 
-            //studyVersion.StudyVersionVisitStatus.ForEach(z =>
-            //{
-            //    var status = studyVerionVisitStatus.Where(x => x.StudyVerionId == z.StudyVerionId && x.VisitStatusId == z.VisitStatusId).FirstOrDefault();
-            //    if (status == null)
-            //    {
-            //        _context.StudyVerionVisitStatus.Add(z);
-            //    }
-            //});
+            if (studyVersion == null) return;
 
-            //var studyVerionVisit = _context.StudyVerionVisitStatus.Where(x => x.StudyVerionId == studyVersion.Id && x.DeletedDate == null)
-            //    .ToList();
+            if (studyGoLiveDto.IsOnTrial)
+            {
+                studyVersion.TestNote = studyGoLiveDto.GoLiveNote;
+                studyVersion.IsTestSiteVerified = true;
+                Update(studyVersion);
+            }
+            else
+            {
 
-            //studyVerionVisit.ForEach(t =>
-            //{
-            //    var visit = studyVerionVisitStatus.Where(x => x.StudyVerionId == t.StudyVerionId && x.VisitStatusId == t.VisitStatusId).FirstOrDefault();
-            //    if (visit == null)
-            //    {
-            //        //delete
-            //        t.DeletedBy = _jwtTokenAccesser.UserId;
-            //        t.DeletedDate = _jwtTokenAccesser.GetClientDate();
-            //        _context.StudyVerionVisitStatus.Update(t);
-            //    }
-            //});
+
+                SetGoLive(studyGoLiveDto.ProjectDesignId, studyGoLiveDto.GoLiveNote);
+            }
+
+            var studyVerionVisit = _studyVersionVisitStatusRepository.All.Where(x => x.StudyVerionId == studyVersion.Id && x.DeletedDate == null).ToList();
+            studyVerionVisit.ForEach(x =>
+            {
+                _studyVersionVisitStatusRepository.Remove(x);
+            });
+
+            if (studyGoLiveDto.VisitStatusId != null)
+            {
+                studyGoLiveDto.VisitStatusId.ToList().ForEach(x =>
+                {
+                    var studyVersionVisitStatus = new StudyVerionVisitStatus();
+                    studyVersionVisitStatus.VisitStatusId = x;
+                    studyVersionVisitStatus.StudyVerionId = studyVersion.Id;
+                    _studyVersionVisitStatusRepository.Add(studyVersionVisitStatus);
+                });
+            }
         }
 
         public decimal GetVersionNumber(int projectId, bool isMonir)

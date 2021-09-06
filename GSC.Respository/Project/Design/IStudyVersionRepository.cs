@@ -12,11 +12,10 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetProjectVersionDropDown();
         List<StudyVersionGridDto> GetStudyVersion(int ProjectDesignId);
         string Duplicate(StudyVersion objSave);
-        void UpdateVisitStatus(StudyVersion studyVersion);
         decimal GetVersionNumber(int projectId, bool isMonir);
         List<DropDownDto> GetVersionDropDown(int projectId);
         bool IsOnTrialByProjectDesing(int projectDesignId);
-        void UpdateGoLive(int projectId);
+        void UpdateGoLive(StudyGoLiveDto studyGoLiveDto, StudyVersion studyVersion);
         double GetStudyVersionForLive(int projectId);
         bool AnyLive(int projectDesignId);
         double GetOnTrialVersionByProjectDesign(int projectDesignId);

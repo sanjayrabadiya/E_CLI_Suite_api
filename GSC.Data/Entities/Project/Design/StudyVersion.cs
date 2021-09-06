@@ -1,12 +1,9 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
-using GSC.Data.Entities.Master;
-using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace GSC.Data.Entities.Project.Design
 {
@@ -18,10 +15,12 @@ namespace GSC.Data.Entities.Project.Design
         public string Note { get; set; }
         public IList<StudyVerionVisitStatus> StudyVersionVisitStatus { get; set; } = null;
         public ProjectDesign ProjectDesign { get; set; }
-
+        public string GoLiveNote { get; set; }
+        public string TestNote { get; set; }
         public int? GoLiveBy { get; set; }
         public DateTime? GoLiveOn { get; set; }
         public bool IsMinor { get; set; }
+        public bool? IsTestSiteVerified { get; set; }
         public VersionStatus? VersionStatus { get; set; }
         [ForeignKey("GoLiveBy")]
         public UserAduit GoLiveByUser { get; set; }
