@@ -102,7 +102,7 @@ namespace GSC.Data.Dto.Attendance
         public string ProjectName { get; set; }
         public bool IsLocked { get; set; }
         public string PatientStatusName { get; set; }
-        public ScreeningPatientStatus? PatientStatusId { get; set; }
+        public ScreeningPatientStatus PatientStatusId { get; set; }
         public bool IsShowEconsentIcon { get; set; }
         public bool IsEconsentReviewPending { get; set; }
         public List<EconsentReviewDetails> EconsentReviewDetails { get; set; }

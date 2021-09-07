@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GSC.Data.Dto.Project.Workflow;
+using GSC.Data.Entities.Attendance;
 using GSC.Helper;
 using GSC.Shared.Extension;
 
@@ -124,5 +125,20 @@ namespace GSC.Data.Dto.ProjectRight
         public int? Review4 { get; set; }
         public int? Review5 { get; set; }
         public WorkFlowLevelDto WorkflowDetail { get; set; }
+    }
+
+    public class DashboardPatientStatusDisplayDto
+    {
+        public string ProjectName { get; set; }
+        public string DisplayName { get; set; }
+        public int Id { get; set; }
+        public double Avg { get; set; }
+    }
+
+    public class DashboardPatientStatusDto
+    {
+        public string ProjectName { get; set; }
+        public int ProjectId { get; set; }
+        public List<DashboardPatientStatusDisplayDto> StatusList { get; set; }
     }
 }

@@ -43,5 +43,6 @@ namespace GSC.Respository.Attendance
         // Dashboard chart for Subject Status
         public List<DashboardQueryStatusDto> GetSubjectStatus(int projectId);
         List<DropDownDto> GetAttendanceForMeddraCodingDropDown(MeddraCodingSearchDto filters);
+        List<DashboardPatientStatusDto> GetDashboardPatientStatus(int projectId);
     }
 }

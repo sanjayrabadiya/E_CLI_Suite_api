@@ -442,5 +442,11 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(_randomizationRepository.GetAttendanceForMeddraCodingDropDown(filters));
         }
 
+        [HttpGet]
+        [Route("GetDashboardPatientStatus/{projectId}")]
+        public IActionResult GetDashboardPatientStatus(int projectId)
+        {
+            return Ok(_randomizationRepository.GetDashboardPatientStatus(projectId));
+        }
     }
 }

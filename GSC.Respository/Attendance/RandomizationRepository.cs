@@ -130,7 +130,7 @@ namespace GSC.Respository.Attendance
                 randomization.ScreeningNumber = randomizationDto.ScreeningNumber;
             else
                 randomization.ScreeningNumber = randomizationNumberDto.ScreeningNumber;
-        
+
             randomization.DateOfScreening = randomizationDto.DateOfScreening;
             if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening)
                 randomization.PatientStatusId = ScreeningPatientStatus.Screening;
@@ -677,5 +677,63 @@ namespace GSC.Respository.Attendance
             return _context.Project.Where(c => c.DeletedDate == null && (c.Id == ProjectId || c.ParentProjectId == ProjectId) && projectList.Any(t => t == c.Id)).Select(x => x.Id).ToList();
         }
 
+        // Dashboard chart for target status
+        public List<DashboardPatientStatusDto> GetDashboardPatientStatus(int projectId)
+        {
+            var pro = _context.Project.Where(x => x.Id == projectId).FirstOrDefault();
+            var project = new List<Data.Entities.Master.Project>();
+            if (pro.ParentProjectId == null)
+            {
+                var projectList = _projectRightRepository.GetProjectRightIdList();
+                project = _context.Project.Where(x => x.ParentProjectId == projectId && _context.ProjectRight.Any(a => a.ProjectId == x.Id
+                                                  && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId
+                                                  && a.DeletedDate == null && a.RollbackReason == null) && x.DeletedDate == null).ToList();
+            }
+            else
+            {
+                project = _context.Project.Where(x => x.Id == projectId).ToList();
+            }
+
+            var result = new List<DashboardPatientStatusDto>();
+            project.ForEach(t =>
+            {
+                var data = new DashboardPatientStatusDto();
+                data.ProjectId = t.Id;
+                data.ProjectName = t.ProjectCode;
+                data.StatusList = new List<DashboardPatientStatusDisplayDto>();
+                result.Add(data);
+            });
+
+            result.ForEach(x =>
+            {
+                var ScreeningPatientStatus = Enum.GetValues(typeof(ScreeningPatientStatus))
+                                           .Cast<ScreeningPatientStatus>().Select(e => new DashboardPatientStatusDisplayDto
+                                           {
+                                               Id = Convert.ToInt16(e),
+                                               DisplayName = e.GetDescription()
+                                           }).ToList();
+
+                x.StatusList.AddRange(ScreeningPatientStatus);
+
+                x.StatusList.ForEach(status =>
+                {
+                    var randomization = All.Include(q => q.Project)
+                    .Where(q => q.ProjectId == x.ProjectId && q.DeletedDate == null && (int)q.PatientStatusId == status.Id)
+                    .GroupBy(y => y.PatientStatusId)
+                    .Select(g => new DashboardPatientStatusDisplayDto
+                    {
+                        Id = (int)g.Key,
+                        ProjectName = x.ProjectName,
+                        DisplayName = g.Key.GetDescription(),
+                        Avg = g.Count()
+                    }).FirstOrDefault();
+
+                    status.ProjectName = x.ProjectName;
+                    status.Avg = randomization != null ? randomization.Avg : 0;
+                });
+            });
+
+            return result;
+        }
     }
 }
