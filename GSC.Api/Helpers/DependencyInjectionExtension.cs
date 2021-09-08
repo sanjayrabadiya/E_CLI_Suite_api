@@ -336,6 +336,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementConfigurationRepository, SupplyManagementConfigurationRepository>();
             services.AddScoped<IAttendanceBarcodeGenerateRepository, AttendanceBarcodeGenerateRepository>();
             services.AddScoped<IBarcodeAuditRepository, BarcodeAuditRepository>();
+            services.AddScoped<IVersionEffectRepository, VersionEffectRepository>();
         }
     }
 }
