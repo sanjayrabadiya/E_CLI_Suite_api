@@ -138,6 +138,9 @@ namespace GSC.Data.Dto.ProjectRight
     public class DashboardPatientStatusDto
     {
         public string ProjectName { get; set; }
+        public int? Target { get; set; }
+        public bool IsParentProject { get; set; }
+        public int? ParentProjectTarget { get; set; }
         public int ProjectId { get; set; }
         public List<DashboardPatientStatusDisplayDto> StatusList { get; set; }
     }

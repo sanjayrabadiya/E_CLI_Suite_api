@@ -700,6 +700,9 @@ namespace GSC.Respository.Attendance
                 var data = new DashboardPatientStatusDto();
                 data.ProjectId = t.Id;
                 data.ProjectName = t.ProjectCode;
+                data.Target = t.AttendanceLimit;
+                data.IsParentProject = pro.ParentProjectId == null ? true : false;
+                data.ParentProjectTarget = pro.AttendanceLimit;
                 data.StatusList = new List<DashboardPatientStatusDisplayDto>();
                 result.Add(data);
             });

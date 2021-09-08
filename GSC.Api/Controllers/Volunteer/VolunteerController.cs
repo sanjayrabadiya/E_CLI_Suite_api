@@ -247,5 +247,14 @@ namespace GSC.Api.Controllers.Volunteer
             return response;
         }
 
+        [HttpPost]
+        [Route("GetVolunteersSearchData")]
+        [AllowAnonymous]
+        public IActionResult GetVolunteersSearchData([FromBody] VolunteerSearchDto search)
+        {
+            var volunteers = _volunteerRepository.Search(search);
+            var response = _volunteerSummaryReport.GetVolunteerSearchDesign(volunteers);
+            return response;
+        }
     }
 }
