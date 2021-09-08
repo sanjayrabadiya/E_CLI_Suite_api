@@ -111,7 +111,7 @@ namespace GSC.Report
             PdfSection SectionTOC = document.Sections.Add();
             PdfPage pageTOC = SectionTOC.Pages.Add();
 
-            document.Template.Top = AddHeader(document, true, true, 1);
+            document.Template.Top = AddHeader(document, true, true, 1, volunteer[0].ProfilePic);
             document.Template.Bottom = AddFooter(document);
 
             PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
@@ -127,20 +127,6 @@ namespace GSC.Report
 
             PdfSolidBrush brush = new PdfSolidBrush(new PdfColor(0, 0, 0));
             PdfPen pens = new PdfPen(Color.Black);
-
-            //Add a Volunteer Profile Image
-
-            SizeF imageSize = new SizeF(65f, 65f);
-            var imagePath = _uploadSettingRepository.GetWebImageUrl();
-            if (File.Exists($"{imagePath}/{volunteer[0].ProfilePic}"))
-            {
-                FileStream VoluntreerProfileinputstream = new FileStream($"{imagePath}/{volunteer[0].ProfilePic}", FileMode.Open, FileAccess.Read);
-                PdfImage img = new PdfBitmap(VoluntreerProfileinputstream);
-                var VoluntreerProfile = new PointF(pageTOC.GetClientSize().Width - 75, 0);
-                pageTOC.Graphics.DrawImage(img, VoluntreerProfile, imageSize);
-                pageTOC.Graphics.DrawRectangle(pens, new RectangleF(pageTOC.GetClientSize().Width - 75, 0, 65f, 65f));
-
-            }
 
             PdfStringFormat tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
             PdfTextElement indexheader = new PdfTextElement();
@@ -506,7 +492,7 @@ namespace GSC.Report
             tocresult = pdfGrid.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), pdfLayoutFormat);
         }
 
-        private PdfPageTemplateElement AddHeader(PdfDocument doc, bool isClientLogo, bool isCompanyLogo, int ClientId)
+        private PdfPageTemplateElement AddHeader(PdfDocument doc, bool isClientLogo, bool isCompanyLogo, int ClientId,string ProfilePic)
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
@@ -535,6 +521,19 @@ namespace GSC.Report
                     PdfImage img = new PdfBitmap(logoinputstream);
                     var imageLocation = new PointF(doc.Pages[0].GetClientSize().Width - imageSize.Width - 20, 0);
                     header.Graphics.DrawImage(img, imageLocation, imageSize);
+                }
+            }
+            if(ProfilePic != "")
+            {
+                imageSize = new SizeF(65f, 65f);
+                if (File.Exists($"{imagePath}/{ProfilePic}"))
+                {
+                    FileStream VoluntreerProfileinputstream = new FileStream($"{imagePath}/{ProfilePic}", FileMode.Open, FileAccess.Read);
+                    PdfImage img = new PdfBitmap(VoluntreerProfileinputstream);
+                    var VoluntreerProfile = new PointF(doc.Pages[0].GetClientSize().Width - 75, 0);
+                    header.Graphics.DrawImage(img, VoluntreerProfile, imageSize);
+                    header.Graphics.DrawRectangle(new PdfPen(Color.Black), new RectangleF(doc.Pages[0].GetClientSize().Width - 75, 0, 65f, 65f));
+
                 }
             }
 
@@ -624,6 +623,166 @@ namespace GSC.Report
                 }
             }
 
+        }
+
+        public FileStreamResult GetVolunteerSearchDesign(IList<VolunteerGridDto> volunteerGridDto)
+        {
+            var MainData = volunteerGridDto.ToList();
+            using (PdfDocument doc = new PdfDocument())
+            {
+                //Set the orientation
+                doc.PageSettings.Orientation = PdfPageOrientation.Landscape;
+
+                //Add a page
+                PdfPage page = doc.Pages.Add();
+
+                //Add header 
+                doc.Template.Top = AddSearchDesignHeader(doc, "Volunteer Details");
+
+                //Add footer 
+                doc.Template.Bottom = AddSearchDesignFooter(doc);
+
+                //Create a PdfGrid
+                PdfGrid pdfGrid = new PdfGrid();
+
+                //Create a DataTable
+                DataTable dataTable = new DataTable();
+
+                //Add columns to the DataTable
+                dataTable.Columns.Add("CODE");
+                dataTable.Columns.Add("REF");
+                dataTable.Columns.Add("DATE OF BIRTH");
+                dataTable.Columns.Add("NAME");
+                dataTable.Columns.Add("INITIAL");
+                dataTable.Columns.Add("REGISTER DATE");
+                dataTable.Columns.Add("RELIGION");
+                dataTable.Columns.Add("OCCUPATION");
+                dataTable.Columns.Add("EDUCATION");
+                dataTable.Columns.Add("RACE");
+                dataTable.Columns.Add("MARITAL STATUS");
+                dataTable.Columns.Add("POPULATION");
+                dataTable.Columns.Add("GENDER");
+                dataTable.Columns.Add("ANNUAL INCOME");
+                dataTable.Columns.Add("STATUS");
+                dataTable.Columns.Add("BLOCKED");
+                dataTable.Columns.Add("CREATED BY");
+                dataTable.Columns.Add("CREATED DATE");
+
+                //Add rows to the DataTable
+                MainData.ForEach(d =>
+                {
+                    dataTable.Rows.Add(new object[] { d.VolunteerNo, d.RefNo, Convert.ToDateTime(d.DateOfBirth).ToString("dd/MMM/yyyy"), d.FullName, d.AliasName,
+                        Convert.ToDateTime(d.RegisterDate).ToString("dd/MMM/yyyy"),d.Religion, d.Occupation, d.Education, d.Race,
+                    d.MaritalStatus,d.PopulationType,d.Gender,d.AnnualIncome,d.StatusName,d.Blocked,d.CreatedByUser,
+                        Convert.ToDateTime(d.CreatedDate).ToString("dd/MMM/yyyy HH:mm")});
+                });
+
+                //Assign data source
+                pdfGrid.DataSource = dataTable;
+                pdfGrid.RepeatHeader = true;
+
+                //Create and customize string format  
+                PdfStringFormat format = new PdfStringFormat();
+                format.Alignment = PdfTextAlignment.Center;
+
+                //Specify the style for PdfGrid cell header
+                PdfGridCellStyle headerstyle = new PdfGridCellStyle();
+                headerstyle.Font = new PdfStandardFont(PdfFontFamily.TimesRoman, 6, PdfFontStyle.Bold);
+                headerstyle.StringFormat = format;
+                pdfGrid.Headers.ApplyStyle(headerstyle);
+
+                //Specify the style for PdfGrid cell content
+                PdfGridCellStyle cellstyle = new PdfGridCellStyle();
+                cellstyle.CellPadding = new PdfPaddings(2, 0, 1, 0);
+                pdfGrid.Rows.ApplyStyle(cellstyle);
+
+                //Draw the String.
+                pdfGrid.Style.Font = smallfont;
+
+                //Draw grid to the page of PDF document
+                pdfGrid.Draw(page, new PointF(10, 10));
+
+                //Save and the document
+                MemoryStream memoryStream = new MemoryStream();
+                doc.Save(memoryStream);
+                memoryStream.Position = 0;
+                FileStreamResult fileStreamResult = new FileStreamResult(memoryStream, "application/pdf");
+                fileStreamResult.FileDownloadName = "blankreport.pdf";
+                return fileStreamResult;
+            }
+        }
+
+        public PdfPageTemplateElement AddSearchDesignHeader(PdfDocument doc, string title)
+        {
+            RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 50);
+
+            //Create a page template
+            PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
+            PdfFont font = new PdfStandardFont(PdfFontFamily.Helvetica, 24);
+            float doubleHeight = font.Height * 2;
+            Color activeColor = Color.FromArgb(44, 71, 120);
+            SizeF imageSize = new SizeF(110f, 35f);
+
+            //Locating the logo on the right corner of the Drawing Surface
+            PointF imageLocation = new PointF(doc.Pages[0].GetClientSize().Width - imageSize.Width - 20, 5);
+
+            PdfSolidBrush brush = new PdfSolidBrush(activeColor);
+
+            PdfPen pen = new PdfPen(Color.DarkBlue, 3f);
+            font = new PdfStandardFont(PdfFontFamily.Helvetica, 16, PdfFontStyle.Bold);
+
+            //Set formattings for the text
+            PdfStringFormat format = new PdfStringFormat();
+            format.Alignment = PdfTextAlignment.Center;
+            format.LineAlignment = PdfVerticalAlignment.Middle;
+
+            //Draw title
+            header.Graphics.DrawString(title, font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
+            brush = new PdfSolidBrush(Color.Gray);
+            font = new PdfStandardFont(PdfFontFamily.Helvetica, 6, PdfFontStyle.Bold);
+
+            format = new PdfStringFormat();
+            format.Alignment = PdfTextAlignment.Left;
+            format.LineAlignment = PdfVerticalAlignment.Bottom;
+
+            //Draw some lines in the header
+            pen = new PdfPen(Color.DarkBlue, 0.7f);
+            header.Graphics.DrawLine(pen, 0, 0, header.Width, 0);
+            pen = new PdfPen(Color.DarkBlue, 2f);
+            header.Graphics.DrawLine(pen, 0, 03, header.Width + 3, 03);
+            pen = new PdfPen(Color.DarkBlue, 2f);
+            header.Graphics.DrawLine(pen, 0, header.Height - 3, header.Width, header.Height - 3);
+            header.Graphics.DrawLine(pen, 0, header.Height, header.Width, header.Height);
+
+            return header;
+        }
+
+        public PdfPageTemplateElement AddSearchDesignFooter(PdfDocument doc)
+        {
+            RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 10);
+            PdfPageTemplateElement footer = new PdfPageTemplateElement(rect);
+            PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 8, PdfFontStyle.Bold);
+            PdfSolidBrush brush = new PdfSolidBrush(Color.Black);
+
+            PdfPageNumberField pageNumber = new PdfPageNumberField(font, brush);
+            PdfPageCountField count = new PdfPageCountField(font, brush);
+
+            PdfCompositeField compositeField = new PdfCompositeField(font, brush, "Page {0} of {1}", pageNumber, count);
+            compositeField.Bounds = footer.Bounds;
+            compositeField.Draw(footer.Graphics, new PointF(footer.Width - 60, footer.Height - 10));
+
+            PdfCompositeField createdBy = new PdfCompositeField(font, brush, "Created By : " + _jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")");
+            createdBy.Bounds = footer.Bounds;
+            createdBy.Draw(footer.Graphics, new PointF(1, footer.Height - 10));
+
+            PdfCompositeField createdDate = new PdfCompositeField(font, brush, "Created On : " + DateTime.Now.ToString());
+            createdDate.Bounds = footer.Bounds;
+            createdDate.Draw(footer.Graphics, new PointF((footer.Width / 2) - 20, footer.Height - 10));
+
+            PdfPen pen = new PdfPen(Color.Black, 1.0f);
+            footer.Graphics.DrawLine(pen, 0, 0, footer.Width, 0);
+
+            return footer;
         }
 
     }
