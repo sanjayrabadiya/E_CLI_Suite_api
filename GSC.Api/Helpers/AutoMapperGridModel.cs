@@ -35,6 +35,8 @@ using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
 using GSC.Data.Entities.Barcode;
 using GSC.Data.Dto.Barcode;
+using System.Configuration;
+using GSC.Data.Dto.LabManagement;
 
 namespace GSC.Api.Helpers
 {
@@ -353,6 +355,12 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementConfiguration, SupplyManagementConfigurationGridDto>()
                 .ForMember(x => x.PageName, x => x.MapFrom(a => a.AppScreen.ScreenName))
                 .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.VariableTemplate.TemplateName))
+                .ReverseMap();
+
+            CreateMap<Data.Entities.LabManagement.LabManagementConfiguration, LabManagementConfigurationGridDto>()
+                .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ForMember(x => x.ProjectDesignVisitName, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
+                .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
                 .ReverseMap();
         }
     }

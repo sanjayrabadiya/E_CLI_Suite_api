@@ -153,6 +153,7 @@ namespace GSC.Helper
         [Description("User")] User = 17,
         [Description("Company")] Company = 18,
         [Description("Clent")] Client = 19,
+        [Description("Lab Management")] LabManagement = 20
     }
 
     public enum AuditModule : short

@@ -44,6 +44,7 @@ using GSC.Respository.AdverseEvent;
 using GSC.Respository.CTMS;
 using GSC.Respository.SupplyManagement;
 using GSC.Respository.Project.GeneralConfig;
+using GSC.Respository.LabManagement;
 
 namespace GSC.Api.Helpers
 {
@@ -280,7 +281,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVariabeLanguageRepository, VariabeLanguageRepository>();
             services.AddScoped<IVariabeNoteLanguageRepository, VariabeNoteLanguageRepository>();
             services.AddScoped<ITemplateNoteLanguageRepository, TemplateNoteLanguageRepository>();
-            services.AddScoped<IVariabeValueLanguageRepository, VariabeValueLanguageRepository>();            
+            services.AddScoped<IVariabeValueLanguageRepository, VariabeValueLanguageRepository>();
             services.AddHttpClient<ICentreUserService, CentreUserService>();
             services.AddHttpClient<IEmailSenderRespository, EmailSenderRespository>();
             services.AddMemoryCache();
@@ -294,7 +295,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IAEReportingRepository, AEReportingRepository>();
             services.AddScoped<IAdverseEventSettingsRepository, AdverseEventSettingsRepository>();
             services.AddScoped<IAEReportingValueRepository, AEReportingValueRepository>();
-            services.AddScoped<IAdverseEventSettingsLanguageRepository, AdverseEventSettingsLanguageRepository>();           
+            services.AddScoped<IAdverseEventSettingsLanguageRepository, AdverseEventSettingsLanguageRepository>();
             services.AddScoped<IPhaseManagementRepository, PhaseManagementRepository>();
             services.AddScoped<IResourceTypeRepository, ResourceTypeRepository>();
             services.AddScoped<IEtmfUserPermissionRepository, EtmfUserPermissionRepository>();
@@ -337,6 +338,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IAttendanceBarcodeGenerateRepository, AttendanceBarcodeGenerateRepository>();
             services.AddScoped<IBarcodeAuditRepository, BarcodeAuditRepository>();
             services.AddScoped<IVersionEffectRepository, VersionEffectRepository>();
+            services.AddScoped<ILabManagementConfigurationRepository, LabManagementConfigurationRepository>();
+            services.AddScoped<ILabManagementVariableMappingRepository, LabManagementVariableMappingRepository>();
         }
     }
 }

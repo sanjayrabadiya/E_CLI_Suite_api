@@ -14,6 +14,7 @@ using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.InformConcent;
+using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
@@ -312,5 +313,7 @@ namespace GSC.Domain.Context
         DbSet<SupplyManagementConfiguration> SupplyManagementConfiguration { get; set; }
         DbSet<AttendanceBarcodeGenerate> AttendanceBarcodeGenerate { get; set; }
         DbSet<BarcodeAudit> BarcodeAudit { get; set; }
+        DbSet<LabManagementConfiguration> LabManagementConfiguration { get; set; }
+        DbSet<LabManagementVariableMapping> LabManagementVariableMapping { get; set; }
     }
 }
