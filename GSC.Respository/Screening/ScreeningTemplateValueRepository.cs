@@ -403,7 +403,7 @@ namespace GSC.Respository.Screening
                               TemplateId = x.ProjectDesignTemplateId
                           }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList(),
 
-                    LstProjectDataBase = y.Where(v => v.VariableName != null).GroupBy(x => new { x.Initial, x.SubjectNo }).Select(s => new ProjectDatabaseInitialDto
+                    LstProjectDataBase = y.Where(v => v.VariableName != null  && v.SubjectNo != null).GroupBy(x => new { x.Initial, x.SubjectNo }).Select(s => new ProjectDatabaseInitialDto
                     {
                         Initial = s.Key.Initial,
                         DomainName = s.FirstOrDefault().DomainName,
@@ -899,7 +899,7 @@ namespace GSC.Respository.Screening
                             var IsExist = RangeList.Where(y => y.TemplateName == x.TemplateName && y.Visit == x.Visit).FirstOrDefault();
 
                             var cellnumber = samevariable.Where(a => a >= IsExist.FirstCell && a <= IsExist.LastCell).FirstOrDefault();
-                            var rownumber = worksheet.CellsUsed(q => q.GetString() == x.SubjectNo).Select(a => a.Address.RowNumber).FirstOrDefault();
+                            var rownumber = worksheet.Column(3).CellsUsed(q => q.GetString() == x.SubjectNo).Select(a => a.Address.RowNumber).FirstOrDefault();
 
                             if (collectionSource == (int)CollectionSources.DateTime)
                             {
