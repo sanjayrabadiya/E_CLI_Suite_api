@@ -20,10 +20,10 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
-        private readonly IStudyVersionVisitStatusRepository _studyVersionVisitStatusRepository;
+        private readonly IStudyVersionStatusRepository _studyVersionVisitStatusRepository;
 
         public StudyVersionController(IStudyVersionRepository studyVersionRepository,
-            IUnitOfWork uow, IMapper mapper, IGSCContext context, IStudyVersionVisitStatusRepository studyVersionVisitStatusRepository)
+            IUnitOfWork uow, IMapper mapper, IGSCContext context, IStudyVersionStatusRepository studyVersionVisitStatusRepository)
         {
             _studyVersionRepository = studyVersionRepository;
             _uow = uow;
@@ -46,12 +46,12 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult GetOnTrialDetail(int projectDesignId)
         {
             var studyVersion = _studyVersionRepository
-                    .FindByInclude(x => x.ProjectDesignId == projectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial, x => x.StudyVersionVisitStatus).FirstOrDefault();
+                    .FindByInclude(x => x.ProjectDesignId == projectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial, x => x.StudyVerionStatus).FirstOrDefault();
             if (studyVersion == null)
                 return BadRequest();
 
-            if (studyVersion != null && studyVersion.StudyVersionVisitStatus != null)
-                studyVersion.StudyVersionVisitStatus = studyVersion.StudyVersionVisitStatus.Where(x => x.DeletedDate == null).ToList();
+            if (studyVersion != null && studyVersion.StudyVerionStatus != null)
+                studyVersion.StudyVerionStatus = studyVersion.StudyVerionStatus.Where(x => x.DeletedDate == null).ToList();
 
             var studyVersionDto = _mapper.Map<StudyVersionDto>(studyVersion);
             studyVersionDto.IsTestSiteVerified = studyVersionDto.IsTestSiteVerified ?? false;
@@ -73,7 +73,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
             _studyVersionRepository.Add(studyVersion);
 
-            foreach (var item in studyVersion.StudyVersionVisitStatus)
+            foreach (var item in studyVersion.StudyVerionStatus)
             {
                 item.StudyVerion = studyVersion;
                 _studyVersionVisitStatusRepository.Add(item);

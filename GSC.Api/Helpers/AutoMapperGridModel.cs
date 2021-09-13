@@ -312,7 +312,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.StudyName, x => x.MapFrom(a => a.ProjectDesign.Project.ProjectCode))
                 .ForMember(x => x.VersionStatus, x => x.MapFrom(a => a.VersionStatus.GetDescription()))
                 .ForMember(x => x.GoLiveBy, x => x.MapFrom(a => a.GoLiveByUser.UserName))
-                .ForMember(x => x.VisitStatus, x => x.MapFrom(a => string.Join(", ", a.StudyVersionVisitStatus.ToList().Select(x => x.VisitStatus.DisplayName))))
+                .ForMember(x => x.PatientStatus, x => x.MapFrom(a => string.Join(", ", a.StudyVerionStatus.ToList().Select(x => x.PatientStatusId.GetDescription()))))
                 .ReverseMap();
 
             CreateMap<WeekEndMaster, WeekEndGridDto>()

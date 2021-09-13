@@ -588,5 +588,20 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(uploadlimit);
         }
+
+
+        [HttpGet]
+        [Route("GetPatientStatus")]
+        public IActionResult GetPatientStatus()
+        {
+            var uploadlimit = Enum.GetValues(typeof(ScreeningPatientStatus))
+                .Cast<UploadLimitType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(uploadlimit);
+        }
     }
 }

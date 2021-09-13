@@ -334,7 +334,7 @@ namespace GSC.Domain.Context
         public DbSet<CentralDepot> CentralDepot { get; set; }
         public DbSet<StudyPlanTaskResource> StudyPlanTaskResource { get; set; }
         public DbSet<StudyVersion> StudyVersion { get; set; }
-        public DbSet<StudyVerionVisitStatus> StudyVerionVisitStatus { get; set; }
+        public DbSet<StudyVerionStatus> StudyVerionStatus { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.DefalutMappingValue();

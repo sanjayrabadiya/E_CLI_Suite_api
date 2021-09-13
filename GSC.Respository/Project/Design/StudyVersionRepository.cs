@@ -19,9 +19,9 @@ namespace GSC.Respository.Project.Design
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
-        private readonly IStudyVersionVisitStatusRepository _studyVersionVisitStatusRepository;
+        private readonly IStudyVersionStatusRepository _studyVersionVisitStatusRepository;
         public StudyVersionRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
-            IStudyVersionVisitStatusRepository studyVersionVisitStatusRepository) : base(context)
+            IStudyVersionStatusRepository studyVersionVisitStatusRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
@@ -106,12 +106,12 @@ namespace GSC.Respository.Project.Design
                 _studyVersionVisitStatusRepository.Remove(x);
             });
 
-            if (studyGoLiveDto.VisitStatusId != null)
+            if (studyGoLiveDto.PatientStatusId != null)
             {
-                studyGoLiveDto.VisitStatusId.ToList().ForEach(x =>
+                studyGoLiveDto.PatientStatusId.ToList().ForEach(x =>
                 {
-                    var studyVersionVisitStatus = new StudyVerionVisitStatus();
-                    studyVersionVisitStatus.VisitStatusId = x;
+                    var studyVersionVisitStatus = new StudyVerionStatus();
+                    studyVersionVisitStatus.PatientStatusId = x;
                     studyVersionVisitStatus.StudyVerionId = studyVersion.Id;
                     _studyVersionVisitStatusRepository.Add(studyVersionVisitStatus);
                 });

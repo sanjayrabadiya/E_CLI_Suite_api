@@ -1,10 +1,8 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Dto.Project.Design
 {
@@ -14,7 +12,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectId { get; set; }
         public double VersionNumber { get; set; }
         public string Note { get; set; }
-        public IList<StudyVerionVisitStatus> StudyVersionVisitStatus { get; set; } = null;
+        public IList<StudyVerionStatus> StudyVersionStatus { get; set; } = null;
         public int? GoLiveBy { get; set; }
         public bool IsMinor { get; set; }
         public DateTime? GoLiveOn { get; set; }
@@ -29,7 +27,7 @@ namespace GSC.Data.Dto.Project.Design
         public string VersionNumber { get; set; }
         public string Note { get; set; }
         public string GoLiveNote { get; set; }
-        public string VisitStatus { get; set; }
+        public string PatientStatus { get; set; }
         public bool IsRunning { get; set; }
         public string GoLiveBy { get; set; }
         public DateTime? GoLiveOn { get; set; }
@@ -46,7 +44,7 @@ namespace GSC.Data.Dto.Project.Design
     public class StudyGoLiveDto 
     {
         public int ProjectDesignId { get; set; }
-        public IList<int> VisitStatusId { get; set; }
+        public IList<ScreeningPatientStatus> PatientStatusId { get; set; }
         public string GoLiveNote { get; set; }
         public bool IsOnTrial { get; set; }
 
