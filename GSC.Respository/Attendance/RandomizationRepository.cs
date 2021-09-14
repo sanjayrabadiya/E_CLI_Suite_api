@@ -32,6 +32,7 @@ using GSC.Data.Dto.UserMgt;
 using GSC.Shared.Security;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Medra;
+using System.Globalization;
 
 namespace GSC.Respository.Attendance
 {
@@ -737,6 +738,57 @@ namespace GSC.Respository.Attendance
             });
 
             return result;
+        }
+
+        public List<DashboardRecruitmentStatusDisplayDto> GetDashboardRecruitmentStatus(int projectId)
+        {
+            var pro = _context.Project.Where(x => x.Id == projectId).FirstOrDefault();
+
+            var project = new List<Data.Entities.Master.Project>();
+            if (pro.ParentProjectId == null)
+            {
+                var projectList = _projectRightRepository.GetProjectRightIdList();
+                project = _context.Project.Where(x => x.ParentProjectId == projectId && _context.ProjectRight.Any(a => a.ProjectId == x.Id
+                                                  && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId
+                                                  && a.DeletedDate == null && a.RollbackReason == null) && x.DeletedDate == null).ToList();
+            }
+            else
+            {
+                project = _context.Project.Where(x => x.Id == projectId).ToList();
+            }
+
+            var randomization = All.Include(q => q.Project)
+                .Where(q => project.Select(x => x.Id).Contains(q.ProjectId) && q.DeletedDate == null)
+                .Select(g => new DashboardRecruitmentStatusDisplayDto
+                {
+                    ProjectName = g.Project.ProjectName,
+                    ScreeningDate = g.DateOfScreening,
+                    RandomizationDate = g.DateOfRandomization,
+                    ScreeningMonth = g.DateOfScreening.Value.ToString("MMM yyyy"),
+                    RandomizationMonth = g.DateOfRandomization.Value.ToString("MMM yyyy"),
+                }).ToList();
+
+            var screening = randomization.Where(y => y.ScreeningDate != null).GroupBy(x => x.ScreeningMonth)
+                .Select(g => new DashboardRecruitmentStatusDisplayDto
+                {
+                    ScreeningMonth = g.Key,
+                    ScreeningMonthNo = DateTime.ParseExact(g.Key, "MMM yyyy", CultureInfo.CurrentCulture).Month,
+                    ScreeningDataCount = g.Count(),
+                    DisplayName = "Screening"
+                }).OrderBy(x => x.ScreeningMonthNo).ToList();
+
+            var randomizationCount = randomization.Where(y => y.RandomizationDate != null).GroupBy(x => x.RandomizationMonth)
+               .Select(g => new DashboardRecruitmentStatusDisplayDto
+               {
+                   ScreeningMonth = g.Key,
+                   ScreeningMonthNo = DateTime.ParseExact(g.Key, "MMM yyyy", CultureInfo.CurrentCulture).Month,
+                   ScreeningDataCount = g.Count(),
+                   DisplayName = "Randomization"
+               }).OrderBy(x => x.ScreeningMonthNo).ToList();
+
+            screening.AddRange(randomizationCount);
+
+            return screening;
         }
     }
 }

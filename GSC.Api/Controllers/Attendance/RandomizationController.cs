@@ -448,5 +448,12 @@ namespace GSC.Api.Controllers.Attendance
         {
             return Ok(_randomizationRepository.GetDashboardPatientStatus(projectId));
         }
+
+        [HttpGet]
+        [Route("GetDashboardRecruitmentStatus/{projectId}")]
+        public IActionResult GetDashboardRecruitmentStatus(int projectId)
+        {
+            return Ok(_randomizationRepository.GetDashboardRecruitmentStatus(projectId));
+        }
     }
 }

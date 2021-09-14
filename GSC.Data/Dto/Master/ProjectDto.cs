@@ -70,6 +70,7 @@ namespace GSC.Data.Dto.Master
         public bool IsTestSite { get; set; }
         public bool IsSendSMS { get; set; }
         public bool IsSendEmail { get; set; }
+        public int? Recruitment { get; set; }
     }
 
     //public class RandomizationAndScreeningNumberFormatDto : BaseDto

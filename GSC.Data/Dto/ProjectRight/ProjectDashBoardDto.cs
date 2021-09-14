@@ -144,4 +144,20 @@ namespace GSC.Data.Dto.ProjectRight
         public int ProjectId { get; set; }
         public List<DashboardPatientStatusDisplayDto> StatusList { get; set; }
     }
+
+    public class DashboardRecruitmentStatusDisplayDto
+    {
+        public int Id { get; set; }
+        public string ProjectName { get; set; }
+        public string DisplayName { get; set; }
+        public string ScreeningMonth { get; set; }
+        public int ScreeningMonthNo { get; set; }
+        public string RandomizationMonth { get; set; }
+        public int RandomizationMonthNo { get; set; }
+        public int ScreeningDataCount { get; set; }
+        public int RandomizationDataCount { get; set; }
+        public DateTime? ScreeningDate { get; set; }
+        public DateTime? RandomizationDate { get; set; }
+        public double Avg { get; set; }
+    }
 }
