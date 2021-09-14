@@ -167,5 +167,32 @@ namespace GSC.Api.Controllers.SupplyManagement
             return response;
         }
 
+        [HttpPatch("{id}")]
+        public ActionResult Active(int id)
+        {
+            var record = _productVerificationRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+
+            //var validate = _productVerificationRepository.Duplicate(record);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
+
+            _productVerificationRepository.Active(record);
+
+            var verifyRecord = _productVerificationDetailRepository.FindByInclude(x => x.ProductVerificationId == id).ToList();
+
+            if (verifyRecord != null)
+                _productVerificationDetailRepository.Active(verifyRecord[0]);
+
+            _uow.Save();
+
+            return Ok();
+        }
+
     }
 }
