@@ -39,8 +39,8 @@ namespace GSC.Respository.SupplyManagement
         {
             var dtolist = (from productverification in _context.ProductVerification.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
                            join productReceipt in _context.ProductReceipt.Where(t => t.DeletedDate == null && t.ProjectId == ProjectId) on productverification.ProductReceiptId equals productReceipt.Id
-                           join productverificationDetail in _context.ProductVerificationDetail.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null) on productverification.Id equals productverificationDetail.ProductVerificationId
-                           join verificationApprovalTemplate in _context.VerificationApprovalTemplate.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null)on productverificationDetail.Id equals verificationApprovalTemplate.ProductVerificationDetailId
+                           join productverificationDetail in _context.ProductVerificationDetail on productverification.Id equals productverificationDetail.ProductVerificationId
+                           join verificationApprovalTemplate in _context.VerificationApprovalTemplate on productverificationDetail.Id equals verificationApprovalTemplate.ProductVerificationDetailId
                            select new ProductVerificationGridDto
                            {
                                Id = productverification.Id,

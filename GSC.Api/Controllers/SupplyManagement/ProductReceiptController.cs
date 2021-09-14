@@ -54,7 +54,9 @@ namespace GSC.Api.Controllers.SupplyManagement
         [HttpGet("GetProductReceiptList/{projectId}/{isDeleted:bool?}")]
         public IActionResult GetProductReceiptList(int projectId, bool isDeleted)
         {
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var productReciept = _productReceiptRepository.GetProductReceiptList(projectId, isDeleted);
+            productReciept.ForEach(t => t.PathName = documentUrl + t.PathName);
             return Ok(productReciept);
 
             //return Ok();

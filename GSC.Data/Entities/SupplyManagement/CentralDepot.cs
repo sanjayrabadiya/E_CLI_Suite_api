@@ -10,7 +10,7 @@ namespace GSC.Data.Entities.SupplyManagement
 {
     public class CentralDepot : BaseEntity, ICommonAduit
     {
-        public bool IsCompanyLevel { get; set; }
+        // public bool IsCompanyLevel { get; set; }
         public DepotType DepotType { get; set; }
         public int? SupplyLocationId { get; set; }
         public int? CountryId { get; set; }

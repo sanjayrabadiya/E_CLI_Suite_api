@@ -8,7 +8,7 @@ namespace GSC.Data.Dto.SupplyManagement
 {
     public class CentralDepotDto : BaseDto
     {
-        public bool IsCompanyLevel { get; set; }
+      //  public bool IsCompanyLevel { get; set; }
         public DepotType DepotType { get; set; }
         public int? SupplyLocationId { get; set; }
         public int? CountryId { get; set; }
@@ -23,7 +23,7 @@ namespace GSC.Data.Dto.SupplyManagement
 
     public class CentralDepotGridDto : BaseAuditDto
     {
-        public bool IsCompanyLevel { get; set; }
+       // public bool IsCompanyLevel { get; set; }
         public string DepotType { get; set; }
         public string SupplyLocation { get; set; }
         public string Country { get; set; }
