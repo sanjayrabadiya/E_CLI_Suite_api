@@ -347,7 +347,7 @@ namespace GSC.Respository.Master
                     CountryId = c.ManageSite != null && c.ManageSite.City != null && c.ManageSite.City.State != null ? c.ManageSite.City.State.CountryId : 0,
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
-                    IsTestSite=c.IsTestSite,
+                    IsTestSite = c.IsTestSite,
                     ParentProjectId = c.ParentProjectId ?? 0
                 }).OrderBy(o => o.Value).ToList();
         }
@@ -475,14 +475,58 @@ namespace GSC.Respository.Master
             siteDetailsDto.NoofSite = GetNoOfSite(projectId);
             //siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.CountryId).Select(t => t.Key).Count();
             siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.ManageSite.City.State.Country.Id).Select(t => t.Key).Count();
+            projectDetailsDto.Sites = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).Select(t => new BasicSiteDto
+            {
+                SiteCode = t.ProjectCode,
+                SiteName = t.ProjectName,
+                SiteCountry = t.Country.CountryName
+            }).ToList();
+
+
+
+
             siteDetailsDto.MarkAsCompleted = All.Any(x => x.ParentProjectId == projectId && x.DeletedDate == null);
 
-            var projectDeisgn = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
-            var projectDeisgnId = projectDeisgn?.Id;
 
-            designDetailsDto.NoofPeriod = projectDeisgnId == null ? 0 : _context.ProjectDesignPeriod.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null);
-            designDetailsDto.NoofVisit = projectDeisgnId == null ? 0 : GetNoOfVisit(projectDeisgnId);
-            designDetailsDto.NoofECrf = projectDeisgnId == null ? 0 : GetNoOfTemplate(projectDeisgnId);
+            var projectDesing = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).Select(t => new
+            {
+                projectDeisgnId = t.Id,
+                ActiveVersion = t.StudyVersions.Where(r => r.DeletedDate == null && r.VersionStatus == VersionStatus.GoLive).Select(t => t.VersionNumber).FirstOrDefault(),
+                TrialVersion = t.StudyVersions.Where(r => r.DeletedDate == null && r.VersionStatus == VersionStatus.OnTrial).Select(t => t.VersionNumber).FirstOrDefault(),
+                TotalPeriod = t.ProjectDesignPeriods.Where(c => c.DeletedDate == null).Count(),
+                TotalVisit = t.ProjectDesignPeriods.Where(c => c.DeletedDate == null).SelectMany(r => r.VisitList.Where(b => b.DeletedDate == null).Select(y => y.Id)).Count(),
+                TotalVisitNoCRF = t.ProjectDesignPeriods.Where(c => c.DeletedDate == null).SelectMany(r => r.VisitList.Where(b => b.DeletedDate == null && b.IsNonCRF).Select(y => y.Id)).Count(),
+                TotalTemplate = t.ProjectDesignPeriods.Where(c => c.DeletedDate == null).SelectMany(r => r.VisitList.Where(b => b.DeletedDate == null).
+                SelectMany(r => r.Templates.Where(n => n.DeletedDate == null).Select(k => k.Id))).Count()
+            }).FirstOrDefault();
+
+            var projectDeisgnId = projectDesing?.projectDeisgnId;
+
+            if (projectDesing != null)
+            {
+                designDetailsDto.NoofPeriod = projectDesing.TotalPeriod;
+                designDetailsDto.NoofVisit = projectDesing.TotalVisit;
+                designDetailsDto.NoofTemplate = projectDesing.TotalTemplate;
+                designDetailsDto.GoLiveVersion = projectDesing.ActiveVersion;
+                designDetailsDto.TrialVersion = projectDesing.TrialVersion;
+                designDetailsDto.NoofECrf = projectDesing.TotalVisitNoCRF;
+            }
+
+            projectDetailsDto.WorkFlowDetail = _context.ProjectWorkflowIndependent.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDeisgnId
+            && x.ProjectWorkflow.DeletedDate == null && x.DeletedDate == null).Select(t => new BasicWorkFlowDetailsDto
+            {
+                RoleName = t.SecurityRole.RoleName,
+                LevelNo = 0
+            }).ToList();
+
+            var workFlowDetail = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDeisgnId
+            && x.ProjectWorkflow.DeletedDate == null && x.DeletedDate == null).Select(t => new BasicWorkFlowDetailsDto
+            {
+                RoleName = t.SecurityRole.RoleName,
+                LevelNo = t.LevelNo
+            }).ToList();
+
+            projectDetailsDto.WorkFlowDetail.AddRange(workFlowDetail);
 
             var projectWorkflowId = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null).FirstOrDefault()?.Id;
             workflowDetailsDto.Independent = projectWorkflowId == null ? 0 : _context.ProjectWorkflowIndependent.Count(x => x.ProjectWorkflowId == projectWorkflowId && x.DeletedDate == null);

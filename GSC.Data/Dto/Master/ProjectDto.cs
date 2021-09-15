@@ -2,6 +2,7 @@
 using GSC.Data.Entities.Master;
 using GSC.Helper;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.Master
@@ -126,6 +127,8 @@ namespace GSC.Data.Dto.Master
         public WorkflowDetailsDto workflowDetails { get; set; }
         public UserRightDetailsDto userRightDetails { get; set; }
         public SchedulesDetailsDto schedulesDetails { get; set; }
+        public List<BasicSiteDto> Sites { get; set; }
+        public List<BasicWorkFlowDetailsDto> WorkFlowDetail { get; set; }
         public EditCheckDetailsDto editCheckDetails { get; set; }
     }
 
@@ -136,11 +139,28 @@ namespace GSC.Data.Dto.Master
         public bool MarkAsCompleted { get; set; }
     }
 
+
+    public class BasicWorkFlowDetailsDto
+    {
+        public string RoleName { get; set; }
+        public int LevelNo { get; set; }
+    }
+
+    public class BasicSiteDto
+    {
+        public string SiteName { get; set; }
+        public string SiteCode { get; set; }
+        public string SiteCountry { get; set; }
+    }
+
     public class DesignDetailsDto
     {
+        public double GoLiveVersion { get; set; }
+        public double TrialVersion { get; set; }
         public int? NoofPeriod { get; set; }
         public int? NoofVisit { get; set; }
         public int? NoofECrf { get; set; }
+        public int NoofTemplate { get; set; }
         public bool? MarkAsCompleted { get; set; }
     }
 
