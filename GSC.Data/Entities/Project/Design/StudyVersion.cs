@@ -13,7 +13,7 @@ namespace GSC.Data.Entities.Project.Design
         public int ProjectId { get; set; }
         public int ProjectDesignId { get; set; }
         public string Note { get; set; }
-        public IList<StudyVerionStatus> StudyVerionStatus { get; set; } = null;
+        public IList<StudyVersionStatus> StudyVersionStatus { get; set; } = null;
         public ProjectDesign ProjectDesign { get; set; }
         public string GoLiveNote { get; set; }
         public string TestNote { get; set; }

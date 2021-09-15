@@ -291,7 +291,7 @@ namespace GSC.Domain.Context
         DbSet<SupplyLocation> SupplyLocation { get; set; }
         DbSet<CentralDepot> CentralDepot { get; set; }
         DbSet<StudyVersion> StudyVersion { get; set; }
-        DbSet<StudyVerionStatus> StudyVerionStatus { get; set; }
+        DbSet<StudyVersionStatus> StudyVersionStatus { get; set; }
         DbSet<ProjectDesignTemplateNote> ProjectDesignTemplateNote { get; set; }
         DbSet<VolunteerQuery> VolunteerQuery { get; set; }
         DbSet<PharmacyStudyProductType> PharmacyStudyProductType { get; set; }

@@ -3,7 +3,7 @@ using GSC.Data.Entities.Project.Design;
 
 namespace GSC.Respository.Project.Design
 {
-    public interface IStudyVersionStatusRepository : IGenericRepository<StudyVerionStatus>
+    public interface IStudyVersionStatusRepository : IGenericRepository<StudyVersionStatus>
     {
     }
 }

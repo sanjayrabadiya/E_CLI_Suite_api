@@ -595,7 +595,7 @@ namespace GSC.Api.Controllers.Common
         public IActionResult GetPatientStatus()
         {
             var uploadlimit = Enum.GetValues(typeof(ScreeningPatientStatus))
-                .Cast<UploadLimitType>().Select(e => new DropDownEnum
+                .Cast<ScreeningPatientStatus>().Select(e => new DropDownEnum
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()

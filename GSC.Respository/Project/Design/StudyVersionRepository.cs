@@ -110,7 +110,7 @@ namespace GSC.Respository.Project.Design
             {
                 studyGoLiveDto.PatientStatusId.ToList().ForEach(x =>
                 {
-                    var studyVersionVisitStatus = new StudyVerionStatus();
+                    var studyVersionVisitStatus = new StudyVersionStatus();
                     studyVersionVisitStatus.PatientStatusId = x;
                     studyVersionVisitStatus.StudyVerionId = studyVersion.Id;
                     _studyVersionVisitStatusRepository.Add(studyVersionVisitStatus);

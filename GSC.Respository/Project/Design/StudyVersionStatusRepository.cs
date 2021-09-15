@@ -5,7 +5,7 @@ using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Project.Design
 {
-    public class StudyVersionStatusRepository : GenericRespository<StudyVerionStatus>, IStudyVersionStatusRepository
+    public class StudyVersionStatusRepository : GenericRespository<StudyVersionStatus>, IStudyVersionStatusRepository
     {
         public StudyVersionStatusRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) :
            base(context)

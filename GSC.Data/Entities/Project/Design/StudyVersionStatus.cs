@@ -9,7 +9,7 @@ using System.Text;
 
 namespace GSC.Data.Entities.Project.Design
 {
-    public class StudyVerionStatus : BaseEntity, ICommonAduit
+    public class StudyVersionStatus : BaseEntity, ICommonAduit
     {
         public ScreeningPatientStatus PatientStatusId { get; set; }
         public int StudyVerionId { get; set; }

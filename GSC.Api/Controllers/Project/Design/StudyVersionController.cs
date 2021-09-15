@@ -46,12 +46,12 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult GetOnTrialDetail(int projectDesignId)
         {
             var studyVersion = _studyVersionRepository
-                    .FindByInclude(x => x.ProjectDesignId == projectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial, x => x.StudyVerionStatus).FirstOrDefault();
+                    .FindByInclude(x => x.ProjectDesignId == projectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial, x => x.StudyVersionStatus).FirstOrDefault();
             if (studyVersion == null)
                 return BadRequest();
 
-            if (studyVersion != null && studyVersion.StudyVerionStatus != null)
-                studyVersion.StudyVerionStatus = studyVersion.StudyVerionStatus.Where(x => x.DeletedDate == null).ToList();
+            if (studyVersion != null && studyVersion.StudyVersionStatus != null)
+                studyVersion.StudyVersionStatus = studyVersion.StudyVersionStatus.Where(x => x.DeletedDate == null).ToList();
 
             var studyVersionDto = _mapper.Map<StudyVersionDto>(studyVersion);
             studyVersionDto.IsTestSiteVerified = studyVersionDto.IsTestSiteVerified ?? false;
@@ -73,7 +73,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
             _studyVersionRepository.Add(studyVersion);
 
-            foreach (var item in studyVersion.StudyVerionStatus)
+            foreach (var item in studyVersion.StudyVersionStatus)
             {
                 item.StudyVerion = studyVersion;
                 _studyVersionVisitStatusRepository.Add(item);

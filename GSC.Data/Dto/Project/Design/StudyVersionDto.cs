@@ -12,7 +12,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectId { get; set; }
         public double VersionNumber { get; set; }
         public string Note { get; set; }
-        public IList<StudyVerionStatus> StudyVersionStatus { get; set; } = null;
+        public IList<StudyVersionStatus> StudyVersionStatus { get; set; } = null;
         public int? GoLiveBy { get; set; }
         public bool IsMinor { get; set; }
         public DateTime? GoLiveOn { get; set; }
