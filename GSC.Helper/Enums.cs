@@ -177,7 +177,8 @@ namespace GSC.Helper
         [Description("Inform Consent")] InformConsent = 19,
         [Description("AdverseEvent")] AdverseEvent = 20,
         [Description("CTMS")] CTMS = 22,
-        [Description("Supply Management")] SupplyManagement = 23
+        [Description("Supply Management")] SupplyManagement = 23,
+        [Description("Lab Management")] LabManagement = 24
     }
 
 

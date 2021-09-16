@@ -9,6 +9,7 @@ using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 
 namespace GSC.Api.Controllers.LabManagement
 {
@@ -50,7 +51,7 @@ namespace GSC.Api.Controllers.LabManagement
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var configuration = _configurationRepository.Find(id);
+            var configuration = _configurationRepository.FindByInclude(x => x.Id == id, x => x.ProjectDesignTemplate.ProjectDesignVisit).FirstOrDefault();
             var configurationDto = _mapper.Map<LabManagementConfigurationDto>(configuration);
             return Ok(configurationDto);
         }
