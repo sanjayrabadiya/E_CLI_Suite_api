@@ -160,4 +160,16 @@ namespace GSC.Data.Dto.ProjectRight
         public DateTime? RandomizationDate { get; set; }
         public double Avg { get; set; }
     }
+
+    public class DashboardRecruitmentRateDto
+    {
+        public int? ScreeningDataCount { get; set; }
+        public int? ScreeningAvgValue { get; set; }
+        public int? ScreeningMonth { get; set; }
+        public int? RandomizationDataCount { get; set; }
+        public int? RandomizationAvgValue { get; set; }
+        public int? RandomizationMonth { get; set; }
+        public bool IsScreeningAchive { get; set; }
+        public bool IsRandomizationAchive { get; set; }
+    }
 }

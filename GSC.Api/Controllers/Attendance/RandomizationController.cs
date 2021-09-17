@@ -455,5 +455,12 @@ namespace GSC.Api.Controllers.Attendance
         {
             return Ok(_randomizationRepository.GetDashboardRecruitmentStatus(projectId));
         }
+
+        [HttpGet]
+        [Route("GetDashboardRecruitmentRate/{projectId}")]
+        public IActionResult GetDashboardRecruitmentRate(int projectId)
+        {
+            return Ok(_randomizationRepository.GetDashboardRecruitmentRate(projectId));
+        }
     }
 }
