@@ -15,6 +15,7 @@ using GSC.Respository.EditCheckImpact;
 using GSC.Domain.Context;
 using GSC.Respository.Master;
 using System.Linq;
+using GSC.Respository.Project.Design;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -25,6 +26,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IMapper _mapper;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
+        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IUnitOfWork _uow;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
@@ -43,7 +45,8 @@ namespace GSC.Api.Controllers.Screening
             IScreeningVisitRepository screeningVisitRepository,
             IImpactService impactService,
             IGSCContext context,
-            IProjectRepository projectRepository)
+            IProjectRepository projectRepository,
+            IProjectDesignVariableRepository projectDesignVariableRepository)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -56,6 +59,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
             _impactService = impactService;
             _context = context;
+            _projectDesignVariableRepository = projectDesignVariableRepository;
             _projectRepository = projectRepository;
         }
 
@@ -75,6 +79,14 @@ namespace GSC.Api.Controllers.Screening
         public IActionResult Post([FromBody] ScreeningTemplateValueDto screeningTemplateValueDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var projectDesignTemplateId=_projectDesignVariableRepository.All.Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).Select(t => t.ProjectDesignTemplateId).FirstOrDefault();
+
+            if (projectDesignTemplateId != screeningTemplateValueDto.ProjectDesignTemplateId)
+            {
+                ModelState.AddModelError("Message", "Please select proper template!");
+                return BadRequest(ModelState);
+            }
 
             var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
 
@@ -164,6 +176,15 @@ namespace GSC.Api.Controllers.Screening
         public IActionResult Put([FromBody] ScreeningTemplateValueDto screeningTemplateValueDto)
         {
             if (screeningTemplateValueDto.Id <= 0) return BadRequest();
+
+
+            var projectDesignTemplateId = _projectDesignVariableRepository.All.Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).Select(t => t.ProjectDesignTemplateId).FirstOrDefault();
+
+            if (projectDesignTemplateId != screeningTemplateValueDto.ProjectDesignTemplateId)
+            {
+                ModelState.AddModelError("Message", "Please select proper template!");
+                return BadRequest(ModelState);
+            }
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
