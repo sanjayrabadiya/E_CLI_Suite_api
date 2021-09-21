@@ -86,15 +86,17 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(econsentChat);
         }
 
-        [HttpPut]
-        [Route("DeliverFlagUpdate")]
-        public IActionResult DeliverFlagUpdate([FromBody] EconsentChat econsentChat)
+        [HttpGet]
+        [Route("DeliverFlagUpdate/{messageId}")]
+        public IActionResult DeliverFlagUpdate(int messageId)
         {
             // delivered flag update when message delivered
+            var econsentChat = _econsentChatRepository.Find(messageId);
             econsentChat.IsDelivered = true;
             econsentChat.DeliveredDateTime = _jwtTokenAccesser.GetClientDate();
             _econsentChatRepository.Update(econsentChat);
             _uow.Save();
+            econsentChat.Message = EncryptionDecryption.DecryptString(econsentChat.Salt, econsentChat.Message);
             return Ok(econsentChat);
         }
 

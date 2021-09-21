@@ -33,7 +33,7 @@ namespace GSC.Respository.UserMgt
 
         public async Task<string> InsertOtp(string username)
         {
-            var user = _userRepository.FindBy(x => x.UserName == username && x.DeletedDate == null).FirstOrDefault();
+            var user = _userRepository.FindByInclude(x => x.UserName == username && x.DeletedDate == null,x=>x.Company).FirstOrDefault();
             if (user == null) return "Invalid user name!";
 
             var userOtp = new UserOtp();
@@ -43,7 +43,7 @@ namespace GSC.Respository.UserMgt
             userOtp.CreatedDate = DateTime.Now;
             Add(userOtp);
 
-            await _emailSenderRespository.SendForgotPasswordEMail(user.Email,user.Phone, opt, user.UserName);
+            await _emailSenderRespository.SendForgotPasswordEMail(user.Email,user.Phone, opt, user.UserName,user.Company.CompanyName);
             return "";
         }
 

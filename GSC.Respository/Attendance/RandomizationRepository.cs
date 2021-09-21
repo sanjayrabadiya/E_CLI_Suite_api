@@ -308,20 +308,22 @@ namespace GSC.Respository.Attendance
         {
             var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                   ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).ToList();
+            var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
+            var rolelist = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
             result.ForEach(x =>
             {
                 x.PatientStatusName = x.PatientStatusId == null ? "" : x.PatientStatusId.GetDescription();//_patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
                 //x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => x.IsReviewedByPatient == true);
-                x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => !String.IsNullOrEmpty(x.PdfPath));
+                //x.EconsentReviewDetails.Any(x => !String.IsNullOrEmpty(x.PdfPath))
+                x.IsShowEconsentIcon = (rolelist.Contains(_jwtTokenAccesser.RoleId) && projectright != null);
             });
 
             var projectCode = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId).ProjectCode;
             result.ForEach(x =>
             {
                 x.ParentProjectCode = projectCode;
-                var screeningTemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
-                x.IsLocked = screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false) ? false : true;
+                //var screeningTemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
+                //x.IsLocked = screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false) ? false : true;
             });
 
             return result;

@@ -105,6 +105,7 @@ namespace GSC.Api.Controllers.InformConcent
                 return new UnprocessableEntityObjectResult(ModelState);
             
             var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
+            econsent.DocumentStatusId = DocumentStatus.Pending;
             var validate = _econsentSetupRepository.Duplicate(econsent);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -137,8 +138,6 @@ namespace GSC.Api.Controllers.InformConcent
            // _context.EconsentSetupPatientStatus.AddRange(econsent.PatientStatus);
            // _context.EconsentSetupRoles.AddRange(econsent.Roles);
             if (_uow.Save() <= 0) throw new Exception($"Creating EConsent File failed on save.");
-            _econsentSetupRepository.SendDocumentEmailPatient(econsent);
-
             return Ok(econsent.Id);            
         }
 
@@ -213,6 +212,18 @@ namespace GSC.Api.Controllers.InformConcent
         {
             // patient status dropdown use in econsent setup add/edit popup
             return Ok(_econsentSetupRepository.GetPatientStatusDropDown());
+        }
+
+        [HttpGet]
+        [Route("UpdateDocumentStatus/{econcentSetupId}")]
+        public IActionResult UpdateDocumentStatus(int econcentSetupId)
+        {
+            var econsent = _econsentSetupRepository.Find(econcentSetupId);
+            econsent.DocumentStatusId = DocumentStatus.Final;
+            _econsentSetupRepository.SendDocumentEmailPatient(econsent);
+            _econsentSetupRepository.Update(econsent);
+            if (_uow.Save() <= 0) throw new Exception($"Updating EConsent File failed on save.");
+            return Ok(econsent.Id);
         }
     }
 }

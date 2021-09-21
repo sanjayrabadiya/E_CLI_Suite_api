@@ -1,6 +1,7 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Master;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,5 +22,6 @@ namespace GSC.Data.Entities.InformConcent
         public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
         //public List<EconsentSetupRoles> Roles { get; set; }
         public string OriginalFileName { get; set; }
+        public DocumentStatus? DocumentStatusId { get; set; }
     }
 }

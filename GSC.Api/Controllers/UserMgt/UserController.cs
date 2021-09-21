@@ -185,7 +185,8 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 var password = RandomPassword.CreateRandomPassword(6);
                 _userPasswordRepository.CreatePassword(password, user.Id);
-                _emailSenderRespository.SendRegisterEMail(user.Email, password, user.UserName);
+                var company=_context.Company.Where(x => x.Id == user.CompanyId).Select(x => x.CompanyName).FirstOrDefault();
+                _emailSenderRespository.SendRegisterEMail(user.Email, password, user.UserName, company);
             }
             return Ok(user.Id);
         }
@@ -304,7 +305,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
             else
             {
-                var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null)
+                var user = _userRepository.FindByInclude(x => x.UserName == loginDto.UserName && x.DeletedDate == null,x=>x.Company)
                     .FirstOrDefault();
 
                 if (user == null)
@@ -319,7 +320,7 @@ namespace GSC.Api.Controllers.UserMgt
                 _userRepository.Update(user);
                 _uow.Save();
                 _userPasswordRepository.CreatePassword(loginDto.NewPassword, user.Id);
-                _emailSenderRespository.SendRegisterEMail(user.Email, loginDto.NewPassword, user.UserName);
+                _emailSenderRespository.SendRegisterEMail(user.Email, loginDto.NewPassword, user.UserName,user.Company.CompanyName);
                 return Ok();
             }
         }

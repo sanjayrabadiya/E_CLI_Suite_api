@@ -83,7 +83,7 @@ namespace GSC.Respository.InformConcent
                 ReviewId = x.Id,
                 IsReviewed = x.IsReviewedByPatient,
                 TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds)
-            }).OrderByDescending(x=>x.DocumentId).ToList();
+            }).OrderByDescending(x => x.DocumentId).ToList();
 
             result.ForEach(t => t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath));
 
@@ -254,7 +254,7 @@ namespace GSC.Respository.InformConcent
             //if (!File.Exists(FullPath))
             //    return null;
             GC.Collect();
-            FileStream stream = new FileStream(FullPath, FileMode.Open, FileAccess.ReadWrite);                  
+            FileStream stream = new FileStream(FullPath, FileMode.Open, FileAccess.ReadWrite);
             return new FileStreamResult(stream, "application/pdf");
         }
         public List<DashboardDto> GetEconsentMyTaskList(int ProjectId)
@@ -291,9 +291,10 @@ namespace GSC.Respository.InformConcent
 
         public List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForSubjectManagement(int patientid)
         {
-            var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid).
-               ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.IsReviewedByPatient == true).
+                                        ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return EconsentReviewDetails;
+
         }
 
         public List<EconsentDocumentDetailsDto> GetEconsentReviewDetailsForPatientDashboard()
@@ -678,7 +679,7 @@ namespace GSC.Respository.InformConcent
             PdfPage page = pdfDocument.Pages.Add();
             PdfGraphics graphics = page.Graphics;
             //Load the image from the disk
-            FileStream logoinputstream = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{reviewdetails.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);           
+            FileStream logoinputstream = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{reviewdetails.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);
             PdfImage image = new PdfBitmap(logoinputstream);
             logoinputstream.Close();
             logoinputstream.Dispose();

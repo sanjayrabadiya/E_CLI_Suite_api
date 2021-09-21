@@ -729,4 +729,9 @@ namespace GSC.Helper
         [Description("Unlimited")] Unlimited = 1,
         [Description("StudyBase")] StudyBase = 2
     }
+    public enum DocumentStatus : short
+    {
+        [Description("Pending")] Pending = 1,
+        [Description("Final")] Final = 2
+    }
 }

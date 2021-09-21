@@ -65,7 +65,7 @@ namespace GSC.Respository.InformConcent
         public List<DropDownDto> GetEconsentDocumentDropDown(int projectId)
         {
             return All.Where(x =>
-                   x.ProjectId == projectId && x.DeletedDate == null)
+                   x.ProjectId == projectId && x.DeletedDate == null && x.DocumentStatusId==DocumentStatus.Final)
                .Select(c => new DropDownDto { Id = c.Id, Value = c.DocumentName, IsDeleted = false }).OrderBy(o => o.Value)
                .ToList();
         }

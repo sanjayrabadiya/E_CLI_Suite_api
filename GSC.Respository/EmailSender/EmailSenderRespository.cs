@@ -38,29 +38,29 @@ namespace GSC.Respository.EmailSender
             _iSMSSettingRepository = iSMSSettingRepository;
         }
 
-        public void SendRegisterEMail(string toMail, string password, string userName)
+        public void SendRegisterEMail(string toMail, string password, string userName,string companyName)
         {
             var emailMessage = ConfigureEmail("empreg", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password);
+            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password,companyName);
             _emailService.SendMail(emailMessage);
         }
 
 
-        public void SendChangePasswordEMail(string toMail, string password, string userName)
+        public void SendChangePasswordEMail(string toMail, string password, string userName,string companyName)
         {
             var emailMessage = ConfigureEmail("resetpass", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password);
+            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password,companyName);
             _emailService.SendMail(emailMessage);
         }
 
-        public async Task SendForgotPasswordEMail(string toMail, string mobile, string password, string userName)
+        public async Task SendForgotPasswordEMail(string toMail, string mobile, string password, string userName,string companyName)
             //void SendForgotPasswordEMail(string toMail, string password, string userName)
         {
             var emailMessage = ConfigureEmail("forgotpass", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password);
+            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password,companyName);
             if (toMail != null && toMail != "")
             {
                 _emailService.SendMail(emailMessage);
@@ -305,13 +305,15 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-        private string ReplaceBody(string body, string userName, string password)
+        private string ReplaceBody(string body, string userName, string password,string companyName)
         {
             body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
                 RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##password##", password, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>password</strong>##", "<strong>" + password + "</strong>",
+                RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>company</strong>##", "<strong>" + companyName + "</strong>",
                 RegexOptions.IgnoreCase);
             return body;
         }

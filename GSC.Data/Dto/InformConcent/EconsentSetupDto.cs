@@ -56,8 +56,11 @@ namespace GSC.Data.Dto.InformConcent
         public string DocumentTypeName { get; set; }
         public string ProjectName { get; set; }
         //public string PatientStatusData { get; set; }
-        public string ApproveBy { get; set; }
+        //public string ApproveBy { get; set; }
+        public DocumentStatus DocumentStatusId { get; set; }
+        public string DocumentStatus { get; set; }
 
     }
+
 
 }
