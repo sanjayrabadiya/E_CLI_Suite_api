@@ -81,7 +81,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "Location", DisplayName = "Location" });
             _dictionaries.Add(new Dictionary { FieldName = "Temprature", DisplayName = "Temprature" });
             _dictionaries.Add(new Dictionary { FieldName = "Capacity", DisplayName = "Capacity" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
+            _dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
             _dictionaries.Add(new Dictionary { FieldName = "LanguageName", DisplayName = "Language" });
             _dictionaries.Add(new Dictionary { FieldName = "ShortName", DisplayName = "Short Name" });
             _dictionaries.Add(new Dictionary { FieldName = "MaritalStatusName", DisplayName = "Marital Status" });
@@ -441,8 +441,11 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsRead", DisplayName = "Read" });
             _dictionaries.Add(new Dictionary { FieldName = "IsWrite", DisplayName = "Write" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSpeak", DisplayName = "Speak" });
-            _dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
+          //  _dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
             _dictionaries.Add(new Dictionary { FieldName = "DocumentNameId", DisplayName = "Document Name", SourceColumn = "Name", TableName = "DocumentName", PkName = "Id" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "AttendanceTemplateId", DisplayName = "Fitness", SourceColumn = "TemplateName", TableName = "ProjectDesignTemplate", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "DiscontinuedTemplateId", DisplayName = "Discontinued", SourceColumn = "TemplateName", TableName = "ProjectDesignTemplate", PkName = "Id" });
 
             // Variable add column
             //  _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignTemplateId", DisplayName = "Project Design Template", SourceColumn = "TemplateName", TableName = "ProjectDesignTemplate", PkName = "Id" });
@@ -467,8 +470,8 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "Alignment", DisplayName = "Alignment" });
 
             _dictionaries.Add(new Dictionary { FieldName = "Display", DisplayName = "Conversion" });
-
-
+            _dictionaries.Add(new Dictionary { FieldName = "IsParticipantView", DisplayName = "Is ParticipantView" });
+            
             // Project design template note
             _dictionaries.Add(new Dictionary { FieldName = "IsPreview", DisplayName = "Is Printable?" });
 
