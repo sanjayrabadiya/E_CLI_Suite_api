@@ -119,8 +119,7 @@ namespace GSC.Respository.InformConcent
             }
             else if (extension == ".pdf")
             {
-                //var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
-                var pdfupload = "http://localhost:52633/Documents/";
+                var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();              
                 var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
                 type = "pdf";
                 econsentSectionReferenceDocument.type = type;
