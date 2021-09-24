@@ -11,7 +11,6 @@ namespace GSC.Respository.CTMS
     public interface IStudyPlanTaskResourceRepository : IGenericRepository<StudyPlanTaskResource>
     {
         List<StudyPlanTaskResourceGridDto> GetStudyPlanTaskResourceList(bool isDeleted, int studyPlanTaskId);
-
         string Duplicate(StudyPlanTaskResource objSave);
     }
 }

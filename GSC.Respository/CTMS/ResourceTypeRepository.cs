@@ -48,9 +48,5 @@ namespace GSC.Respository.CTMS
                    ProjectTo<ResourceTypeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
         }
-
-       
     }
-
-   
 }

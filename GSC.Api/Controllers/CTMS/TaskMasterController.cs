@@ -58,12 +58,7 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             taskmasterDto.Id = 0;
             var tastMaster = _mapper.Map<TaskMaster>(taskmasterDto);
-            //var validate = _update.Duplicate(ResourceType);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}       
+                
             if (tastMaster.IsMileStone || tastMaster.Duration == 0)
             {
                 tastMaster.Duration = 0;

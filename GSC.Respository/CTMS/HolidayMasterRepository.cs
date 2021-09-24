@@ -56,7 +56,6 @@ namespace GSC.Respository.CTMS
 
         public List<HolidayMasterListDto> GetProjectWiseHolidayList(int ProjectId)
         {
-            //int ProjectId = _context.StudyPlan.Where(x => x.Id == StudyPlanId).FirstOrDefault().ProjectId;
             var result = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).
                    ProjectTo<HolidayMasterListDto>(_mapper.ConfigurationProvider).ToList();
             return result;

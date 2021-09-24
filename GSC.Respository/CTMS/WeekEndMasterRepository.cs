@@ -47,23 +47,7 @@ namespace GSC.Respository.CTMS
         {
             var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).ToList();
             var weekendlis = new List<WeekendData>();
-            //if (weekend != null)
-            //{
-            //    if (weekend.Sunday == true)
-            //        weekendlis.Add("Sunday");
-            //    if (weekend.Monday == true)
-            //        weekendlis.Add("Monday");
-            //    if (weekend.Tuesday == true)
-            //        weekendlis.Add("Tuesday");
-            //    if (weekend.Wednesday == true)
-            //        weekendlis.Add("Wednesday");
-            //    if (weekend.Thursday == true)
-            //        weekendlis.Add("Thursday");
-            //    if (weekend.Friday == true)
-            //        weekendlis.Add("Friday");
-            //    if (weekend.Saturday == true)
-            //        weekendlis.Add("Saturday");
-            //}
+           
             foreach (var item in weekend)
             {
                 WeekendData obj = new WeekendData();
@@ -80,24 +64,7 @@ namespace GSC.Respository.CTMS
             var weekendlis = new List<string>();
 
             var days = new List<string> { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-            //if (weekend != null)
-            //{
-            //    if (weekend.Sunday == false)
-            //        weekendlis.Add("Sunday");
-            //    if (weekend.Monday == false)
-            //        weekendlis.Add("Monday");
-            //    if (weekend.Tuesday == false)
-            //        weekendlis.Add("Tuesday");
-            //    if (weekend.Wednesday == false)
-            //        weekendlis.Add("Wednesday");
-            //    if (weekend.Thursday == false)
-            //        weekendlis.Add("Thursday");
-            //    if (weekend.Friday == false)
-            //        weekendlis.Add("Friday");
-            //    if (weekend.Saturday == false)
-            //        weekendlis.Add("Saturday");
-            //}
-
+            
             weekendlis = days.Where(x => !weekend.Select(y => y.AllWeekOff.ToString()).Contains(x)).ToList();
             return weekendlis;
         }

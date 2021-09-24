@@ -48,7 +48,6 @@ namespace GSC.Respository.CTMS
 
             var holidaylist = _holidayMasterRepository.GetHolidayList(studyplan.ProjectId);
             var weekendlist = _weekEndMasterRepository.GetworkingDayList(studyplan.ProjectId);
-            //var weekendlist = new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
             var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
@@ -92,15 +91,7 @@ namespace GSC.Respository.CTMS
                 }
             });
 
-            //foreach (var item in tasklist)
-            //{
-            //    var validate = ValidateTask(item, tasklist, studyplan);
-            //    if (!string.IsNullOrEmpty(validate))
-            //        return validate;
-            //}
-
             _context.StudyPlanTask.AddRange(tasklist);
-
             _context.Save();
 
             return "";
@@ -159,7 +150,6 @@ namespace GSC.Respository.CTMS
 
         public string ValidateTask(StudyPlanTask taskmasterDto, List<StudyPlanTask> tasklist, StudyPlan studyplan)
         {
-            //var studyplan = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault();
             if (taskmasterDto.StartDate >= studyplan.StartDate && taskmasterDto.StartDate <= studyplan.EndDate
                 && taskmasterDto.EndDate <= studyplan.EndDate && taskmasterDto.EndDate >= studyplan.StartDate)
             {

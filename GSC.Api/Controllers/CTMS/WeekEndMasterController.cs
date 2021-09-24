@@ -76,7 +76,6 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult GetWeekEndDay(int ProjectId)
         {
             if (ProjectId <= 0) return BadRequest();
-            //int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
             var weekendDay = _weekEndMasterRepository.GetweekEndDay(ProjectId);
             return Ok(weekendDay);
         }

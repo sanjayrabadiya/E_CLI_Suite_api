@@ -11,7 +11,6 @@ namespace GSC.Respository.CTMS
     public interface ITaskMasterRepository : IGenericRepository<TaskMaster>
     {
         List<TaskMasterGridDto> GetTasklist(bool isDeleted, int templateId);
-        //void SaveTask(List<TaskMaster> taskmasterDto);
         int UpdateTaskOrder(TaskmasterDto taskmasterDto);
         List<AuditTrailDto> GetTaskHistory(int id);
     }

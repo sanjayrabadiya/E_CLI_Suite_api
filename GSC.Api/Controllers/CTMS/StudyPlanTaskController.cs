@@ -28,7 +28,6 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
         private readonly IStudyPlanRepository _studyPlanRepository;
 
-
         public StudyPlanTaskController(IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, IGSCContext context, IStudyPlanTaskRepository studyPlanTaskRepository,
             ITaskMasterRepository taskMasterRepository)
@@ -70,23 +69,10 @@ namespace GSC.Api.Controllers.CTMS
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
             }
-            //var validate = _studyPlanTaskRepository.ValidateTask(tastMaster);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+            
             _studyPlanTaskRepository.Add(tastMaster);
             _uow.Save();
-            //  var tasklist= _studyPlanTaskRepository.Save(tastMaster);
-            //string mvalidate = _studyPlanTaskRepository.UpdateDependentTask(taskmasterDto.StudyPlanId);
-            //if (!string.IsNullOrEmpty(mvalidate))
-            //{
-            //    ModelState.AddModelError("Message", mvalidate);
-            //    _studyPlanTaskRepository.Remove(tastMaster);
-            //    _uow.Save();
-            //    return BadRequest(ModelState);
-            //}            
+                    
             _studyPlanTaskRepository.UpdateTaskOrderSequence(taskmasterDto.Id);
 
             var ProjectId = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault().ProjectId;
@@ -109,14 +95,10 @@ namespace GSC.Api.Controllers.CTMS
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
             }
-            //var validate = _studyPlanTaskRepository.ValidateTask(tastMaster);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+           
             var revertdata = _studyPlanTaskRepository.Find(taskmasterDto.Id);
             _studyPlanTaskRepository.Update(tastMaster);
+
             if (_uow.Save() <= 0) throw new Exception("Updating Task failed on save.");
             string mvalidate = _studyPlanTaskRepository.UpdateDependentTask(taskmasterDto.Id);
             if (!string.IsNullOrEmpty(mvalidate))
