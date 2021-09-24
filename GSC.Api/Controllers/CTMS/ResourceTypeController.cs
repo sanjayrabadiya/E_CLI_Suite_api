@@ -25,7 +25,6 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-       // private object resourcetypeDto;
 
         public ResourceTypeController(IResourceTypeRepository resourcetypeRepository,
             IUserRepository userRepository,
@@ -48,7 +47,6 @@ namespace GSC.Api.Controllers.CTMS
 
             var resourcetype = _resourcetypeRepository.GetResourceTypeList(isDeleted);
             return Ok(resourcetype);
-            //var  resourcetype  = _resourcetypeRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
         }
 
 

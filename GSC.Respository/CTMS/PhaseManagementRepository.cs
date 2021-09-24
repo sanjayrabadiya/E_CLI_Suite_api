@@ -54,20 +54,5 @@ namespace GSC.Respository.CTMS
                    ProjectTo<PhaseManagementGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
         }
-
-        //public List<PhaseManagementDto> GetPhaseManagementList(bool isDeleted)
-        //{
-        //    return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-        //           ProjectTo<PhaseManagementDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-        //}
-
-        //List<PhaseManagementGridDto> IPhaseManagementRepository.GetPhaseManagementList(bool isDeleted)
-        //{
-        //    return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-        //           ProjectTo<PhaseManagementGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-        //}
     }
-
-
-
 }

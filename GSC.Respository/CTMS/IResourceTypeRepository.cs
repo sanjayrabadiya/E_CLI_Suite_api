@@ -6,11 +6,10 @@ using System.Collections.Generic;
 
 namespace GSC.Respository.CTMS
 {
-   public interface IResourceTypeRepository: IGenericRepository<ResourceType>
+    public interface IResourceTypeRepository : IGenericRepository<ResourceType>
     {
         List<DropDownDto> GetResourceTypeDropDown();
         string Duplicate(ResourceType objSave);
-
         List<ResourceTypeGridDto> GetResourceTypeList(bool isDeleted);
     }
 }

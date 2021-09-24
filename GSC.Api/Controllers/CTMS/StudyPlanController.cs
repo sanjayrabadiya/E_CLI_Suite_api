@@ -90,8 +90,6 @@ namespace GSC.Api.Controllers.CTMS
                 if (!string.IsNullOrEmpty(validate))
                 {
                     ModelState.AddModelError("Message", validate);
-                    //_studyPlanRepository.Remove(studyplan);
-                    //_uow.Save();
                     return BadRequest(ModelState);
                 }
                 //_uow.Save();
@@ -115,17 +113,6 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
 
-            //var TaskList = _context.StudyPlanTask.Where(x => x.DeletedDate == null && x.StudyPlanId == studyplanDto.Id).ToList();
-            //foreach (var item in TaskList)
-            //{
-            //    var ValidateTask = _studyPlanRepository.ValidateTask(item, TaskList, studyplan);
-            //    if (!string.IsNullOrEmpty(ValidateTask))
-            //    {
-            //        ModelState.AddModelError("Message", ValidateTask);
-            //        return BadRequest(ModelState);
-            //    }
-            //}
-
             _studyPlanRepository.Update(studyplan);
             if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
             return Ok(studyplan.Id);
@@ -140,8 +127,6 @@ namespace GSC.Api.Controllers.CTMS
             foreach (var item in AllProject)
             {
                 var data = _studyPlanRepository.FindByInclude(x => x.DeletedDate == null && x.ProjectId == item.Id).FirstOrDefault();
-                //if (data == null)
-                //    //return NotFound();
                 if (data != null)
                     _studyPlanRepository.Delete(data.Id);
             }
