@@ -175,6 +175,5 @@ namespace GSC.Api.Controllers.InformConcent
         {
             return Ok(_econsentReviewDetailsRepository.downloadpdf(id));
         }
-
     }
 }

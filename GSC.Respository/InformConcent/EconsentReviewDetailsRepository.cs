@@ -590,6 +590,10 @@ namespace GSC.Respository.InformConcent
 
                 graphics.DrawString(econsentReviewDetailsDto.ApproveRejectReasonOth, fontnormal, PdfBrushes.Black, new PointF(70, 400));
             }
+            PdfStringFormat stringFormat = new PdfStringFormat();
+            stringFormat.MeasureTrailingSpaces = true;
+            stringFormat.WordWrap = PdfWordWrapType.WordOnly;
+            graphics.DrawString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature", fontnormal, PdfBrushes.Black, new PointF(70, 500), stringFormat);
             //render.Dispose();
             //wordDocument.Dispose();
             MemoryStream outputStream = new MemoryStream();
@@ -688,10 +692,10 @@ namespace GSC.Respository.InformConcent
             PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
             PdfFont regular = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Regular);
             PdfStringFormat format = new PdfStringFormat();
-            format.Alignment = PdfTextAlignment.Left;
-            format.LineAlignment = PdfVerticalAlignment.Top;
-
-
+            //format.Alignment = PdfTextAlignment.Left;
+            //format.LineAlignment = PdfVerticalAlignment.Top;
+            format.MeasureTrailingSpaces = true;
+            format.WordWrap = PdfWordWrapType.Word;
 
             graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
             graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
@@ -717,6 +721,7 @@ namespace GSC.Respository.InformConcent
                 reviewdetails.WithdrawReason = reason;
                 reviewdetails.WithdrawComment = reasonOth;
             }
+            graphics.DrawString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature", regular, PdfBrushes.Black, new PointF(70, isWithdraw ? 500 : 400), format);
             MemoryStream outputStream = new MemoryStream();
             pdfDocument.Save(outputStream);
             pdfDocument.Close();
@@ -765,7 +770,6 @@ namespace GSC.Respository.InformConcent
             });
             return reviewdetails.Id;
         }
-
 
     }
 }
