@@ -9,9 +9,6 @@ using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.CTMS
 {

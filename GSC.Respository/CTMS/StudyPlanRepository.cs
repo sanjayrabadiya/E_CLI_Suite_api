@@ -10,7 +10,6 @@ using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Respository.CTMS
 {
@@ -47,7 +46,7 @@ namespace GSC.Respository.CTMS
         {
 
             var holidaylist = _holidayMasterRepository.GetHolidayList(studyplan.ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetworkingDayList(studyplan.ProjectId);
+            var weekendlist = _weekEndMasterRepository.GetWorkingDayList(studyplan.ProjectId);
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
             var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
@@ -99,9 +98,9 @@ namespace GSC.Respository.CTMS
 
         public void PlanUpdate(int ProjectId)
         {
-            var Projects = _context.Project.Where(x => x.Id == ProjectId || x.ParentProjectId == ProjectId).ToList();
+            var projectIds = _context.Project.Where(x => x.Id == ProjectId || x.ParentProjectId == ProjectId).Select(t => t.Id).ToList();
 
-            var studyPlanList = _context.StudyPlan.Where(x => Projects.Select(x => x.Id).Contains(x.ProjectId) && x.DeletedDate == null).ToList();
+            var studyPlanList = _context.StudyPlan.Where(x => projectIds.Contains(x.ProjectId) && x.DeletedDate == null).ToList();
 
             var studyPlanTaskList = _context.StudyPlanTask.Where(x => x.DeletedDate == null && studyPlanList.Select(x => x.Id).Contains(x.StudyPlanId)).ToList();
 

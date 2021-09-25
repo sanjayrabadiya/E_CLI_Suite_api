@@ -43,28 +43,22 @@ namespace GSC.Respository.CTMS
             return data;
         }
 
-        public List<WeekendData> GetworkingDayList(int ProjectId)
+        public List<WeekendData> GetWorkingDayList(int ProjectId)
         {
-            var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).ToList();
-            var weekendlis = new List<WeekendData>();
-           
-            foreach (var item in weekend)
+            return All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(t => new WeekendData
             {
-                WeekendData obj = new WeekendData();
-                obj.Weekend = item.AllWeekOff.ToString();
-                obj.Frequency = ((FrequencyType)item.Frequency).GetDescription();
-                weekendlis.Add(obj);
-            }
-            return weekendlis;
+                Weekend = t.AllWeekOff.GetDescription(),
+                Frequency = t.Frequency.GetDescription()
+            }).ToList();
         }
 
-        public List<string> GetweekEndDay(int ProjectId)
+        public List<string> GetWeekEndDay(int ProjectId)
         {
             var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).ToList();
             var weekendlis = new List<string>();
 
             var days = new List<string> { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-            
+
             weekendlis = days.Where(x => !weekend.Select(y => y.AllWeekOff.ToString()).Contains(x)).ToList();
             return weekendlis;
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -9,8 +8,6 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Respository.CTMS;
-using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -67,7 +64,7 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (studyPlanId <= 0) return BadRequest();
             int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
-            var workingDay = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            var workingDay = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
             return Ok(workingDay);
         }
 
@@ -76,7 +73,7 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult GetWeekEndDay(int ProjectId)
         {
             if (ProjectId <= 0) return BadRequest();
-            var weekendDay = _weekEndMasterRepository.GetweekEndDay(ProjectId);
+            var weekendDay = _weekEndMasterRepository.GetWeekEndDay(ProjectId);
             return Ok(weekendDay);
         }
 

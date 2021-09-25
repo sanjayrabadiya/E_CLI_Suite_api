@@ -11,7 +11,7 @@ namespace GSC.Respository.CTMS
     public interface IWeekEndMasterRepository : IGenericRepository<WeekEndMaster>
     {
         List<WeekEndGridDto> GetWeekendList(bool isDeleted);
-        List<WeekendData> GetworkingDayList(int ProjectId);
-        List<string> GetweekEndDay(int ProjectId);
+        List<WeekendData> GetWorkingDayList(int ProjectId);
+        List<string> GetWeekEndDay(int ProjectId);
     }
 }

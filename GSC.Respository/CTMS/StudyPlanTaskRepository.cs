@@ -295,7 +295,7 @@ namespace GSC.Respository.CTMS
         {
             int ProjectId = _context.StudyPlan.Where(x => x.Id == maintask.StudyPlanId).FirstOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            var weekendlist = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
             //var weekendlist = new List<string>();
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
@@ -335,7 +335,7 @@ namespace GSC.Respository.CTMS
             int studyPlanId = reftasklist.FirstOrDefault().StudyPlanId;
             int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            var weekendlist = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
             
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
             //var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).SingleOrDefault();
@@ -379,7 +379,7 @@ namespace GSC.Respository.CTMS
         {
             int ProjectId = _context.StudyPlan.Where(x => x.Id == parameterDto.StudyPlanId).FirstOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetworkingDayList(ProjectId);
+            var weekendlist = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
             var nextworkingdate = WorkingDayHelper.AddBusinessDays(parameterDto.StartDate, parameterDto.Duration > 0 ? parameterDto.Duration - 1 : 0);
             return nextworkingdate;
