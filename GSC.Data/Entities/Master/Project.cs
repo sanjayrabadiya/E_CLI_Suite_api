@@ -78,7 +78,7 @@ namespace GSC.Data.Entities.Master
         //public int? RandomNoLength { get; set; }
         //public bool? IsAlphaNumRandomNo { get; set; }
         ////public string? PrefixRandomNo { get; set; }
-        //public bool? IsManualScreeningNo { get; set; }
+        public bool? IsManualScreeningNo { get; set; }
         //public bool? IsSiteDependentScreeningNo { get; set; }
         //public int? ScreeningLength { get; set; }
         //public bool? IsAlphaNumScreeningNo { get; set; }

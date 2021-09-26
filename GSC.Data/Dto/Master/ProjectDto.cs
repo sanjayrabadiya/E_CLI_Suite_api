@@ -122,6 +122,9 @@ namespace GSC.Data.Dto.Master
 
     public class ProjectDetailsDto
     {
+        public string SendSMS { get; set; }
+        public string SendEmail { get; set; }
+        public string RandomizationAutomatic { get; set; }
         public SiteDetailsDto siteDetails { get; set; }
         public DesignDetailsDto designDetails { get; set; }
         public WorkflowDetailsDto workflowDetails { get; set; }
@@ -129,7 +132,7 @@ namespace GSC.Data.Dto.Master
         public SchedulesDetailsDto schedulesDetails { get; set; }
         public List<BasicSiteDto> Sites { get; set; }
         public List<BasicWorkFlowDetailsDto> WorkFlowDetail { get; set; }
-        public EditCheckDetailsDto editCheckDetails { get; set; }
+        public EditCheckDetailsDto EditCheckDetails { get; set; }
     }
 
     public class SiteDetailsDto
@@ -172,21 +175,26 @@ namespace GSC.Data.Dto.Master
     }
     public class UserRightDetailsDto
     {
-        public int? NoofUser { get; set; }
+        public int NoofUser { get; set; }
+        public int NoOfDocument { get; set; }
+        public int DocumentNotReview { get; set; }
         public bool? MarkAsCompleted { get; set; }
     }
 
     public class SchedulesDetailsDto
     {
-        public int? NoofVisit { get; set; }
+        public int NoofVisit { get; set; }
+        public int NoOfReferenceTemplate { get; set; }
+        public int NoOfTargetTemplate { get; set; }
         public bool? MarkAsCompleted { get; set; }
     }
 
     public class EditCheckDetailsDto
     {
-        public int? NoofRules { get; set; }
-        public int? NoofFormulas { get; set; }
-        public bool? MarkAsCompleted { get; set; }
+        public int NoofRules { get; set; }
+        public int NoofFormulas { get; set; }
+        public int NotVerified { get; set; }
+        public bool IsAnyRecord { get; set; }
     }
 
 

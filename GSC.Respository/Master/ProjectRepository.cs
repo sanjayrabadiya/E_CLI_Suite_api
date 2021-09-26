@@ -473,7 +473,6 @@ namespace GSC.Respository.Master
             var editCheckDetailsDto = new EditCheckDetailsDto();
 
             siteDetailsDto.NoofSite = GetNoOfSite(projectId);
-            //siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.CountryId).Select(t => t.Key).Count();
             siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.ManageSite.City.State.Country.Id).Select(t => t.Key).Count();
             projectDetailsDto.Sites = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).Select(t => new BasicSiteDto
             {
@@ -482,8 +481,10 @@ namespace GSC.Respository.Master
                 SiteCountry = t.Country.CountryName
             }).ToList();
 
-
-
+            var project = Find(projectId);
+            projectDetailsDto.SendSMS = project.IsSendSMS ? "Yes" : "No";
+            projectDetailsDto.SendEmail = project.IsSendEmail ? "Yes" : "No";
+            projectDetailsDto.RandomizationAutomatic = project.IsManualScreeningNo == true ? "No" : "Yes";
 
             siteDetailsDto.MarkAsCompleted = All.Any(x => x.ParentProjectId == projectId && x.DeletedDate == null);
 
@@ -534,21 +535,27 @@ namespace GSC.Respository.Master
             workflowDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteWorkflow == true);
 
             userRightDetailsDto.NoofUser = _context.ProjectRight.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.UserId).Select(t => t.Key).Count();
+            userRightDetailsDto.NoOfDocument = _context.ProjectDocument.Count(x => x.ProjectId == projectId && x.DeletedDate == null);
+            userRightDetailsDto.DocumentNotReview = _context.ProjectDocumentReview.Where(x => x.ProjectId == projectId && x.DeletedDate == null && !x.IsReview).GroupBy(y => y.UserId).Select(t => t.Key).Count();
+
             userRightDetailsDto.MarkAsCompleted = _context.ProjectRight.Any(x => x.ProjectId == projectId && x.DeletedDate == null);
 
             schedulesDetailsDto.NoofVisit = _context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignVisitId).Select(t => t.Key).Count();
+            schedulesDetailsDto.NoOfReferenceTemplate = _context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignTemplateId).Select(t => t.Key).Count();
+            schedulesDetailsDto.NoOfTargetTemplate = _context.ProjectScheduleTemplate.Where(x => x.ProjectSchedule.DeletedDate == null && x.ProjectSchedule.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignTemplateId).Select(t => t.Key).Count();
             schedulesDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteSchedule == true);
 
-            editCheckDetailsDto.NoofFormulas = projectDeisgnId == null ? 0 : _context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsFormula == true).ToList().Count();
-            editCheckDetailsDto.NoofRules = projectDeisgnId == null ? 0 : _context.EditCheck.Where(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsFormula == false).ToList().Count();
-            editCheckDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteEditCheck == true);
+            editCheckDetailsDto.NoofFormulas = _context.EditCheck.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsFormula == true);
+            editCheckDetailsDto.NoofRules = _context.EditCheck.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsFormula == false);
+            editCheckDetailsDto.NotVerified = _context.EditCheck.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && !x.IsReferenceVerify);
+            editCheckDetailsDto.IsAnyRecord = editCheckDetailsDto.NoofFormulas > 0 || editCheckDetailsDto.NoofRules > 0 || editCheckDetailsDto.NotVerified > 0;
 
             projectDetailsDto.siteDetails = siteDetailsDto;
             projectDetailsDto.designDetails = designDetailsDto;
             projectDetailsDto.workflowDetails = workflowDetailsDto;
             projectDetailsDto.userRightDetails = userRightDetailsDto;
             projectDetailsDto.schedulesDetails = schedulesDetailsDto;
-            projectDetailsDto.editCheckDetails = editCheckDetailsDto;
+            projectDetailsDto.EditCheckDetails = editCheckDetailsDto;
             return projectDetailsDto;
         }
 
