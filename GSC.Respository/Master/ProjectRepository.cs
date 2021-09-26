@@ -538,54 +538,21 @@ namespace GSC.Respository.Master
             userRightDetailsDto.NoOfDocument = _context.ProjectDocument.Count(x => x.ProjectId == projectId && x.DeletedDate == null);
             userRightDetailsDto.DocumentNotReview = _context.ProjectDocumentReview.Where(x => x.ProjectId == projectId && x.DeletedDate == null && !x.IsReview).GroupBy(y => y.UserId).Select(t => t.Key).Count();
 
-            userRightDetailsDto.MarkAsCompleted = _context.ProjectRight.Any(x => x.ProjectId == projectId && x.DeletedDate == null);
 
             schedulesDetailsDto.NoofVisit = _context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignVisitId).Select(t => t.Key).Count();
             schedulesDetailsDto.NoOfReferenceTemplate = _context.ProjectSchedule.Where(x => x.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignTemplateId).Select(t => t.Key).Count();
             schedulesDetailsDto.NoOfTargetTemplate = _context.ProjectScheduleTemplate.Where(x => x.ProjectSchedule.DeletedDate == null && x.ProjectSchedule.ProjectId == projectId && x.DeletedDate == null).GroupBy(y => y.ProjectDesignTemplateId).Select(t => t.Key).Count();
-            schedulesDetailsDto.MarkAsCompleted = _context.ElectronicSignature.Any(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsCompleteSchedule == true);
 
             editCheckDetailsDto.NoofFormulas = _context.EditCheck.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsFormula == true);
             editCheckDetailsDto.NoofRules = _context.EditCheck.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && x.IsFormula == false);
             editCheckDetailsDto.NotVerified = _context.EditCheck.Count(x => x.ProjectDesignId == projectDeisgnId && x.DeletedDate == null && !x.IsReferenceVerify);
             editCheckDetailsDto.IsAnyRecord = editCheckDetailsDto.NoofFormulas > 0 || editCheckDetailsDto.NoofRules > 0 || editCheckDetailsDto.NotVerified > 0;
 
-            projectDetailsDto.siteDetails = siteDetailsDto;
-            projectDetailsDto.designDetails = designDetailsDto;
-            projectDetailsDto.workflowDetails = workflowDetailsDto;
-            projectDetailsDto.userRightDetails = userRightDetailsDto;
-            projectDetailsDto.schedulesDetails = schedulesDetailsDto;
+            projectDetailsDto.DesignDetails = designDetailsDto;
+            projectDetailsDto.UserRightDetails = userRightDetailsDto;
+            projectDetailsDto.SchedulesDetails = schedulesDetailsDto;
             projectDetailsDto.EditCheckDetails = editCheckDetailsDto;
             return projectDetailsDto;
-        }
-
-        public int GetNoOfVisit(int? projectDesignId)
-        {
-            return _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Id == projectDesignId
-           && x.DeletedDate == null && x.ProjectDesignPeriod.DeletedDate == null).Count();
-
-        }
-
-        public int GetNoOfTemplate(int? projectDesignId)
-        {
-
-            return _context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Id == projectDesignId
-                && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null).Count();
-
-        }
-
-        public int GetNoOfFormulas(int? projectDesignId)
-        {
-            var rules = _context.EditCheck.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).ToList();
-            var formulasCount = 0;
-
-            rules.ForEach(b =>
-            {
-                var formula = _context.EditCheckDetail.Where(x => x.EditCheckId == b.Id && x.DeletedDate == null).ToList().Count;
-                formulasCount += formula;
-            });
-
-            return formulasCount;
         }
 
         public IList<ProjectGridDto> GetSitesList(int projectId, bool isDeleted)

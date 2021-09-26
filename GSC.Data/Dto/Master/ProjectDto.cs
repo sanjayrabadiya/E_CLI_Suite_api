@@ -125,11 +125,9 @@ namespace GSC.Data.Dto.Master
         public string SendSMS { get; set; }
         public string SendEmail { get; set; }
         public string RandomizationAutomatic { get; set; }
-        public SiteDetailsDto siteDetails { get; set; }
-        public DesignDetailsDto designDetails { get; set; }
-        public WorkflowDetailsDto workflowDetails { get; set; }
-        public UserRightDetailsDto userRightDetails { get; set; }
-        public SchedulesDetailsDto schedulesDetails { get; set; }
+        public DesignDetailsDto DesignDetails { get; set; }
+        public UserRightDetailsDto UserRightDetails { get; set; }
+        public SchedulesDetailsDto SchedulesDetails { get; set; }
         public List<BasicSiteDto> Sites { get; set; }
         public List<BasicWorkFlowDetailsDto> WorkFlowDetail { get; set; }
         public EditCheckDetailsDto EditCheckDetails { get; set; }
@@ -164,7 +162,6 @@ namespace GSC.Data.Dto.Master
         public int? NoofVisit { get; set; }
         public int? NoofECrf { get; set; }
         public int NoofTemplate { get; set; }
-        public bool? MarkAsCompleted { get; set; }
     }
 
     public class WorkflowDetailsDto
@@ -178,7 +175,6 @@ namespace GSC.Data.Dto.Master
         public int NoofUser { get; set; }
         public int NoOfDocument { get; set; }
         public int DocumentNotReview { get; set; }
-        public bool? MarkAsCompleted { get; set; }
     }
 
     public class SchedulesDetailsDto
@@ -186,7 +182,6 @@ namespace GSC.Data.Dto.Master
         public int NoofVisit { get; set; }
         public int NoOfReferenceTemplate { get; set; }
         public int NoOfTargetTemplate { get; set; }
-        public bool? MarkAsCompleted { get; set; }
     }
 
     public class EditCheckDetailsDto
