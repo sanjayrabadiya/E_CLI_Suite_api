@@ -96,13 +96,13 @@ namespace GSC.Respository.Audit
             var periodIds = _context.ProjectDesignPeriod.Where(t => t.ProjectDesignId == designId)
                 .Select(s => s.Id).ToList();
 
-            var visitIds = _context.ProjectDesignVisit.Where(t => periodIds.Contains(t.ProjectDesignPeriodId)  && (search.VisitIds==null||search.VisitIds.Contains(t.Id)))
+            var visitIds = _context.ProjectDesignVisit.Where(t => periodIds.Contains(t.ProjectDesignPeriodId)  && (search.VisitIds==null || search.VisitIds.Length == 0  || search.VisitIds.Contains(t.Id)))
                 .Select(s => s.Id).ToList();
 
-            var templateIds = _context.ProjectDesignTemplate.Where(t => visitIds.Contains(t.ProjectDesignVisitId) && (search.TemplateIds == null || search.TemplateIds.Contains(t.Id)))
+            var templateIds = _context.ProjectDesignTemplate.Where(t => visitIds.Contains(t.ProjectDesignVisitId) && (search.TemplateIds == null || search.TemplateIds.Length == 0 || search.TemplateIds.Contains(t.Id)))
                 .Select(s => s.Id).ToList();
 
-            var variableIds = _context.ProjectDesignVariable.Where(t => templateIds.Contains(t.ProjectDesignTemplateId) && (search.VariableIds == null || search.VariableIds.Contains(t.Id)))
+            var variableIds = _context.ProjectDesignVariable.Where(t => templateIds.Contains(t.ProjectDesignTemplateId) && (search.VariableIds == null || search.VariableIds.Length == 0 || search.VariableIds.Contains(t.Id)))
                 .Select(s => s.Id).ToList();
 
             var variableValueIds = _context.ProjectDesignVariableValue
