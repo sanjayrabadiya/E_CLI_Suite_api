@@ -1,7 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Project.Design;
-using System.Collections.Generic;
 
 namespace GSC.Data.Entities.LabManagement
 {
@@ -14,6 +13,5 @@ namespace GSC.Data.Entities.LabManagement
         public string MimeType { get; set; }
         public Entities.Master.Project Project { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
-        public IList<LabManagementVariableMapping> LabManagementVariableMapping { get; set; }
     }
 }

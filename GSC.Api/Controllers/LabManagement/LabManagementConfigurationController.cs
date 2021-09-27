@@ -81,11 +81,6 @@ namespace GSC.Api.Controllers.LabManagement
 
             _configurationRepository.Add(configuration);
 
-            foreach (var item in configuration.LabManagementVariableMapping)
-            {
-                _labManagementVariableMappingRepository.Add(item);
-            }
-
             if (_uow.Save() <= 0) throw new Exception("Creating Configuration failed on save.");
             return Ok(configuration.Id);
         }
@@ -161,6 +156,13 @@ namespace GSC.Api.Controllers.LabManagement
             _uow.Save();
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetMappingData/{LabManagementConfigurationId}")]
+        public IActionResult GetMappingData(int LabManagementConfigurationId)
+        {
+            return Ok(_configurationRepository.GetMappingData(LabManagementConfigurationId));
         }
     }
 }

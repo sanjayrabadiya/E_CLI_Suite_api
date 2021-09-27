@@ -8,5 +8,6 @@ namespace GSC.Respository.LabManagement
     {
         string Duplicate(Data.Entities.LabManagement.LabManagementConfiguration objSave);
         List<LabManagementConfigurationGridDto> GetConfigurationList(bool isDeleted);
+        object[] GetMappingData(int LabManagementConfigurationId);
     }
 }
