@@ -365,7 +365,7 @@ namespace GSC.Respository.Attendance
             var documentDetails = _context.EconsentSetup.Where(x => x.DeletedDate == null
             && x.ProjectId == study.Id
             && x.LanguageId == randomization.LanguageId
-            && x.DeletedDate == null && x.DocumentStatusId==DocumentStatus.Final
+            && x.DeletedDate == null && x.DocumentStatusId == DocumentStatus.Final
             ).Select(x => new
             {
                 x.Id,

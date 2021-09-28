@@ -132,6 +132,16 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendEmailOfRejectedDocumenttoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath)
+        {
+            var emailMessage = ConfigureEmail("RejectedSignedDocumentToPatient", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientReviewedPDFtoPatient(emailMessage.MessageBody, userName, documentName, ProjectName);
+            emailMessage.Subject = ReplaceSubjectForPatientReviewedPDFtoPatient(emailMessage.Subject, documentName);
+            emailMessage.Attachments.Add(new Attachment(filepath));
+            _emailService.SendMail(emailMessage);
+        }
+
         public void SendEmailOfInvestigatorApprovedPDFtoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath)
         {
             var emailMessage = ConfigureEmail("InvestigatorSignedDocumentToPatient", userName);

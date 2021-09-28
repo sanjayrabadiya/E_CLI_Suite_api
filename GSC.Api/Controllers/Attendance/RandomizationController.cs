@@ -342,10 +342,13 @@ namespace GSC.Api.Controllers.Attendance
         [Route("ConsentStart")]
         public IActionResult ConsentStart()
         {
-            var subjectDetail = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).SingleOrDefault();
-            subjectDetail.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
-            _randomizationRepository.Update(subjectDetail);
-            _uow.Save();
+            var subjectDetail = _randomizationRepository.FindByInclude(x => x.UserId == _jwtTokenAccesser.UserId,x=>x.EconsentReviewDetails).SingleOrDefault();
+            if (subjectDetail.EconsentReviewDetails.Count() > 0)
+            {
+                subjectDetail.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
+                _randomizationRepository.Update(subjectDetail);
+                _uow.Save();
+            }
             return Ok(subjectDetail.PatientStatusId);
         }
 

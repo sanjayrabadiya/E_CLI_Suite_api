@@ -144,7 +144,7 @@ namespace GSC.Respository.InformConcent
         {
             //var patientstatus = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id).Select(x => x.PatientStatusId).ToList();
             //var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId && (patientstatus.Contains((int)x.PatientStatusId) || x.PatientStatusId== ScreeningPatientStatus.ConsentInProcess ||x.PatientStatusId== ScreeningPatientStatus.ReConsentInProcess)).Include(x => x.Project).ToList();
-            var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.DeletedDate==null && x.LanguageId == econsent.LanguageId && x.PatientStatusId != ScreeningPatientStatus.Completed && x.PatientStatusId != ScreeningPatientStatus.Withdrawal).Include(x => x.Project).ToList();
+            var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.DeletedDate==null && x.LanguageId == econsent.LanguageId && x.PatientStatusId != ScreeningPatientStatus.Completed && x.PatientStatusId != ScreeningPatientStatus.Withdrawal && x.PatientStatusId!=ScreeningPatientStatus.PreScreening).Include(x => x.Project).ToList();
             string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
             //for (var i = 0; i <= result.Count - 1; i++)
             foreach (var item in result)
