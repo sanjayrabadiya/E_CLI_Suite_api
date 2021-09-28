@@ -340,6 +340,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVersionEffectRepository, VersionEffectRepository>();
             services.AddScoped<ILabManagementConfigurationRepository, LabManagementConfigurationRepository>();
             services.AddScoped<ILabManagementVariableMappingRepository, LabManagementVariableMappingRepository>();
+            services.AddScoped<IManageMonitoringVisitRepository, ManageMonitoringVisitRepository>();
         }
     }
 }

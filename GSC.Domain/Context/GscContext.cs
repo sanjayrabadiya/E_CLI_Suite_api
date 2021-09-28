@@ -363,6 +363,7 @@ namespace GSC.Domain.Context
         public DbSet<BarcodeAudit> BarcodeAudit { get; set; }
         public DbSet<LabManagementConfiguration> LabManagementConfiguration { get; set; }
         public DbSet<LabManagementVariableMapping> LabManagementVariableMapping { get; set; }
+        public DbSet<ManageMonitoringVisit> ManageMonitoringVisit { get; set; }
     }
 
 

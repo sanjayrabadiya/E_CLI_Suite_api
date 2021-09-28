@@ -403,6 +403,7 @@ namespace GSC.Api.Helpers
             CreateMap<AttendanceBarcodeGenerate, AttendanceBarcodeGenerateDto>().ReverseMap();
             CreateMap<BarcodeAudit, BarcodeAuditDto>().ReverseMap();
             CreateMap<LabManagementConfiguration, LabManagementConfigurationDto>().ReverseMap();
+            CreateMap<ManageMonitoringVisit, ManageMonitoringVisitDto>().ReverseMap();
         }
     }
 }

@@ -315,5 +315,6 @@ namespace GSC.Domain.Context
         DbSet<BarcodeAudit> BarcodeAudit { get; set; }
         DbSet<LabManagementConfiguration> LabManagementConfiguration { get; set; }
         DbSet<LabManagementVariableMapping> LabManagementVariableMapping { get; set; }
+        DbSet<ManageMonitoringVisit> ManageMonitoringVisit { get; set; }
     }
 }
