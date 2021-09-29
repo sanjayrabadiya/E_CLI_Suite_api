@@ -19,20 +19,17 @@ namespace GSC.Api.Controllers.LabManagement
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILabManagementConfigurationRepository _configurationRepository;
-        private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public LabManagementConfigurationController(
             ILabManagementConfigurationRepository configurationRepository,
-            ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
         IUploadSettingRepository uploadSettingRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _configurationRepository = configurationRepository;
-            _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _uow = uow;
             _mapper = mapper;

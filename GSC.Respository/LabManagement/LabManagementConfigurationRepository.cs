@@ -4,6 +4,7 @@ using ExcelDataReader;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.LabManagement;
 using GSC.Domain.Context;
+using GSC.Respository.Configuration;
 using GSC.Shared.JWTAuth;
 using System.Collections.Generic;
 using System.Data;
@@ -17,12 +18,18 @@ namespace GSC.Respository.LabManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
+        //private readonly ILabManagementConfigurationRepository _configurationRepository;
 
         public LabManagementConfigurationRepository(IGSCContext context,
+             IUploadSettingRepository uploadSettingRepository,
+             //ILabManagementConfigurationRepository configurationRepository,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _uploadSettingRepository = uploadSettingRepository;
+            //_configurationRepository = configurationRepository;
             _mapper = mapper;
             _context = context;
         }
@@ -42,7 +49,10 @@ namespace GSC.Respository.LabManagement
 
         public object[] GetMappingData(int LabManagementConfigurationId)
         {
-            string pathname = @"C:\Users\User\Desktop\MappingSheet.xlsx";
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            var projectDocuments = All.Where(x=>x.Id == LabManagementConfigurationId).FirstOrDefault().PathName;
+
+            string pathname = documentUrl + projectDocuments;
             FileStream streamer = new FileStream(pathname, FileMode.Open);
             IExcelDataReader reader = null;
             if (Path.GetExtension(pathname) == ".xls")
