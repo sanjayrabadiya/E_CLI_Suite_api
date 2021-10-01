@@ -43,7 +43,6 @@ namespace GSC.Api.Controllers.LabManagement
             return Ok(_configurationRepository.GetConfigurationList(isDeleted));
         }
 
-
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -52,7 +51,6 @@ namespace GSC.Api.Controllers.LabManagement
             var configurationDto = _mapper.Map<LabManagementConfigurationDto>(configuration);
             return Ok(configurationDto);
         }
-
 
         [HttpPost]
         public IActionResult Post([FromBody] LabManagementConfigurationDto configurationDto)
@@ -119,7 +117,6 @@ namespace GSC.Api.Controllers.LabManagement
             return Ok(configuration.Id);
         }
 
-
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
@@ -159,7 +156,8 @@ namespace GSC.Api.Controllers.LabManagement
         [Route("GetMappingData/{LabManagementConfigurationId}")]
         public IActionResult GetMappingData(int LabManagementConfigurationId)
         {
-            return Ok(_configurationRepository.GetMappingData(LabManagementConfigurationId));
+
+            return Ok(_configurationRepository.GetMappingData<object>(LabManagementConfigurationId));
         }
     }
 }

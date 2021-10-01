@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.LabManagement;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace GSC.Respository.LabManagement
@@ -22,6 +24,20 @@ namespace GSC.Respository.LabManagement
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
+        }
+
+        public void DeleteMapping(LabManagementVariableMappingDto mappingDto)
+        {
+            var Result = All.Where(x => x.LabManagementConfigurationId == mappingDto.LabManagementConfigurationId && x.DeletedDate == null).ToList();
+            foreach (var item in Result)
+            {
+                item.DeletedBy = _jwtTokenAccesser.UserId;
+                item.DeletedDate = _jwtTokenAccesser.GetClientDate();
+                item.Reason = mappingDto.Reason;
+                item.Comment = mappingDto.Comment;
+                Update(item);
+            }
+            _context.Save();
         }
 
     }

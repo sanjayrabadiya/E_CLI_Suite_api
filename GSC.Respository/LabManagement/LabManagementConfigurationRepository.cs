@@ -6,6 +6,7 @@ using GSC.Data.Dto.LabManagement;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Shared.JWTAuth;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -23,7 +24,7 @@ namespace GSC.Respository.LabManagement
 
         public LabManagementConfigurationRepository(IGSCContext context,
              IUploadSettingRepository uploadSettingRepository,
-             //ILabManagementConfigurationRepository configurationRepository,
+            //ILabManagementConfigurationRepository configurationRepository,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
             : base(context)
         {
@@ -47,24 +48,33 @@ namespace GSC.Respository.LabManagement
             return "";
         }
 
-        public object[] GetMappingData(int LabManagementConfigurationId)
+        public T[] GetMappingData<T>(int LabManagementConfigurationId)
         {
-            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-            var projectDocuments = All.Where(x=>x.Id == LabManagementConfigurationId).FirstOrDefault().PathName;
+            var Exists = _context.LabManagementVariableMapping.Where(x => x.LabManagementConfigurationId == LabManagementConfigurationId && x.DeletedDate == null).Count();
+            if (Exists == 0)
+            {
+                var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+                var projectDocuments = All.Where(x => x.Id == LabManagementConfigurationId).FirstOrDefault().PathName;
 
-            string pathname = documentUrl + projectDocuments;
-            FileStream streamer = new FileStream(pathname, FileMode.Open);
-            IExcelDataReader reader = null;
-            if (Path.GetExtension(pathname) == ".xls")
-                reader = ExcelReaderFactory.CreateBinaryReader(streamer);
+                string pathname = documentUrl + projectDocuments;
+                FileStream streamer = new FileStream(@"E:\Project Document\Lab management\Lab Sheet_Mapping.xlsx", FileMode.Open);
+                IExcelDataReader reader = null;
+                if (Path.GetExtension(pathname) == ".xls")
+                    reader = ExcelReaderFactory.CreateBinaryReader(streamer);
+                else
+                    reader = ExcelReaderFactory.CreateOpenXmlReader(streamer);
+                DataSet results = reader.AsDataSet();
+                var data = results.Tables[0].AsEnumerable().Select(r => r.Field<string>("Column8").Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+                streamer.Dispose();
+                return (T[])(object)data.ToArray();
+            }
             else
-                reader = ExcelReaderFactory.CreateOpenXmlReader(streamer);
-            DataSet results = reader.AsDataSet();
-            results.Tables[0].Rows[0].ToString();
-            results.AcceptChanges();
-            var MappingData = results.Tables[0].Rows[0].Table.Rows[0].ItemArray;
-            streamer.Dispose();
-            return MappingData;
+            {
+                var result = _context.LabManagementVariableMapping.Where(x => x.LabManagementConfigurationId == LabManagementConfigurationId && x.DeletedDate == null).
+                    Select(x => new { ProjectDesignVariable = x.ProjectDesignVariable.VariableName, TargetVariable = x.TargetVariable }).ToList();
+                return (T[])(object)result.ToArray();
+            }
         }
+
     }
 }

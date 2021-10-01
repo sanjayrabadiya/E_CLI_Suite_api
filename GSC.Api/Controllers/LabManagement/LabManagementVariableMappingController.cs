@@ -66,9 +66,17 @@ namespace GSC.Api.Controllers.LabManagement
                 _labManagementVariableMappingRepository.Add(mapping);
                 if (_uow.Save() <= 0) throw new Exception("Creating Mapping failed on save.");
             }
-            
+
             return Ok();
         }
 
+        [HttpPut]
+        [TransactionRequired]
+        public IActionResult Put([FromBody] LabManagementVariableMappingDto mappingDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            _labManagementVariableMappingRepository.DeleteMapping(mappingDto);
+            return Ok();
+        }
     }
 }

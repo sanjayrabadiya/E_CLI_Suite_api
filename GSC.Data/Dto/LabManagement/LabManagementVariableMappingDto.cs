@@ -11,6 +11,8 @@ namespace GSC.Data.Dto.LabManagement
         public IList<LabManagementVariableMappingDetail> LabManagementVariableMappingDetail { get; set; }
         public LabManagementConfiguration LabManagementConfiguration { get; set; }
         public ProjectDesignVariable ProjectDesignVariable { get; set; }
+        public string Reason { get; set; }
+        public string Comment { get; set; }
     }
 
     public class LabManagementVariableMappingDetail
