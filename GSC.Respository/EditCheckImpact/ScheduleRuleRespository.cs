@@ -77,6 +77,7 @@ namespace GSC.Respository.EditCheckImpact
 
         void CheckValidationProcess(List<ScheduleCheckValidateDto> targetList, List<ScheduleCheckValidateDto> referenceList, bool isQuery, string targetSchDate, int screeningEntryId)
         {
+            targetList = targetList.Where(x => x.ScreeningTemplate != null).ToList();
             targetList.ForEach(x =>
             {
                 var reference = referenceList.FirstOrDefault(t => t.ProjectScheduleId == x.ProjectScheduleId);

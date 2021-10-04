@@ -334,7 +334,7 @@ namespace GSC.Respository.EditCheckImpact
         public List<ScheduleCheckValidateDto> GetReferenceSchedule(List<int> projectScheduleId)
         {
             return _projectScheduleRepository.All.AsNoTracking().Where(r =>
-                projectScheduleId.Contains(r.Id)
+                projectScheduleId.Contains(r.Id) && r.ProjectDesignVisit.DeletedDate == null && r.ProjectDesignTemplate.DeletedDate == null
                 && r.DeletedDate == null).Select(t => new ScheduleCheckValidateDto
                 {
                     ProjectScheduleId = t.Id,
@@ -373,7 +373,8 @@ namespace GSC.Respository.EditCheckImpact
         public List<ScheduleCheckValidateDto> GetTargetScheduleByVariableId(int ProjectDesignVariableId)
         {
             var result = _projectScheduleTemplateRepository.All.AsNoTracking().
-                Where(x => x.DeletedDate == null && x.ProjectSchedule.DeletedDate == null &&
+                Where(x => x.DeletedDate == null && x.ProjectSchedule.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null
+                && x.ProjectDesignTemplate.DeletedDate == null &&
                 (x.ProjectDesignVariableId == ProjectDesignVariableId || x.ProjectSchedule.ProjectDesignVariableId == ProjectDesignVariableId)).Select(t => new ScheduleCheckValidateDto
                 {
                     ProjectScheduleId = t.ProjectScheduleId,

@@ -19,20 +19,17 @@ namespace GSC.Api.Controllers.LabManagement
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILabManagementConfigurationRepository _configurationRepository;
-        private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public LabManagementConfigurationController(
             ILabManagementConfigurationRepository configurationRepository,
-            ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
         IUploadSettingRepository uploadSettingRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _configurationRepository = configurationRepository;
-            _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _uow = uow;
             _mapper = mapper;
@@ -46,7 +43,6 @@ namespace GSC.Api.Controllers.LabManagement
             return Ok(_configurationRepository.GetConfigurationList(isDeleted));
         }
 
-
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -55,7 +51,6 @@ namespace GSC.Api.Controllers.LabManagement
             var configurationDto = _mapper.Map<LabManagementConfigurationDto>(configuration);
             return Ok(configurationDto);
         }
-
 
         [HttpPost]
         public IActionResult Post([FromBody] LabManagementConfigurationDto configurationDto)
@@ -122,7 +117,6 @@ namespace GSC.Api.Controllers.LabManagement
             return Ok(configuration.Id);
         }
 
-
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
@@ -162,7 +156,8 @@ namespace GSC.Api.Controllers.LabManagement
         [Route("GetMappingData/{LabManagementConfigurationId}")]
         public IActionResult GetMappingData(int LabManagementConfigurationId)
         {
-            return Ok(_configurationRepository.GetMappingData(LabManagementConfigurationId));
+
+            return Ok(_configurationRepository.GetMappingData<object>(LabManagementConfigurationId));
         }
     }
 }
