@@ -181,7 +181,8 @@ namespace GSC.Api.Controllers.InformConcent
             else
             {
                 econsent.DocumentPath = document.DocumentPath;
-            }            
+            }
+            econsent.DocumentStatusId = document.DocumentStatusId;
             _econsentSetupRepository.Update(econsent);           
             if (_uow.Save() <= 0) throw new Exception($"Updating Econsent File failed on save.");            
             _uow.Save();

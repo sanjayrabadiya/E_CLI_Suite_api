@@ -30,7 +30,7 @@ namespace GSC.Data.Dto.InformConcent
         public FileModel FileModel { get; set; }
        // public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
         //public List<EconsentSetupRoles> Roles { get; set; }
-        public string OriginalFileName { get; set; }
+        public string OriginalFileName { get; set; }       
     }
 
     public class SaveFileDto
