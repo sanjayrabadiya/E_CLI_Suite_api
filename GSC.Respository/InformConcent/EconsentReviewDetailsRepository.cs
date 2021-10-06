@@ -617,14 +617,17 @@ namespace GSC.Respository.InformConcent
 
             econsentReviewDetails.PdfPath = pdfpath;
 
-            Update(econsentReviewDetails);
+            var details = _mapper.Map<EconsentReviewDetails>(econsentReviewDetails);            
+            Update(details);
             //System.IO.File.Delete(filePath);
-
             _uow.Save();
             var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetails.EconsentSetupId).ToList().FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
             var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetails.RandomizationId).ToList().FirstOrDefault();
-            _emailSenderRespository.SendEmailOfInvestigatorApprovedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
+            if (econsentReviewDetailsDto.IsApproved == true)
+                _emailSenderRespository.SendEmailOfInvestigatorApprovedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
+            else
+                _emailSenderRespository.SendEmailOfRejectedDocumenttoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
             if (econsentReviewDetailsDto.IsApproved == true)
                 _randomizationRepository.ChangeStatustoConsentCompleted(econsentReviewDetails.RandomizationId);
             else
@@ -640,7 +643,8 @@ namespace GSC.Respository.InformConcent
         {
             var generalSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             generalSettings.TimeFormat = generalSettings.TimeFormat.Replace("a", "tt");
-            var reviewdetails = All.Where(x => x.Id == econsentReviewDetailsDto.EconcentReviewDetailsId).Include(x => x.EconsentSetup).FirstOrDefault();
+            var reviewdetails = All.Where(x => x.Id == econsentReviewDetailsDto.EconcentReviewDetailsId).FirstOrDefault();
+            var econsentSetupDetails = _context.EconsentSetup.Where(x => x.Id == reviewdetails.EconsentSetupId).FirstOrDefault();
             var randomization = _context.Randomization.Where(x => x.Id == reviewdetails.RandomizationId).FirstOrDefault();
             if (econsentReviewDetailsDto.PatientdigitalSignBase64?.Length > 0)
             {
@@ -656,7 +660,7 @@ namespace GSC.Respository.InformConcent
             FileStream docStream;
             if (String.IsNullOrEmpty(reviewdetails.PdfPath) && reviewdetails.IsReviewedByPatient == false)
             {
-                filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), reviewdetails.EconsentSetup.DocumentPath);
+                filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsentSetupDetails.DocumentPath);
                 docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
                 DocIORenderer render = new DocIORenderer();
@@ -730,8 +734,8 @@ namespace GSC.Respository.InformConcent
             docStream.Dispose();
 
             var filename = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
-            var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(reviewdetails.EconsentSetup.ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", filename);
-            var diractorypath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(reviewdetails.EconsentSetup.ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF");
+            var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(econsentSetupDetails.ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", filename);
+            var diractorypath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(econsentSetupDetails.ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF");
             var filewritepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), pdfpath);
             var fulldiractorypath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), diractorypath);
             if (!Directory.Exists(fulldiractorypath))
@@ -749,12 +753,13 @@ namespace GSC.Respository.InformConcent
             reviewdetails.IsReviewedByPatient = true;
             reviewdetails.PatientdigitalSignImagepath = "";
             reviewdetails.PatientApprovedDatetime = DateTime.Now;
-            _context.EconsentReviewDetails.Update(reviewdetails);
+            var details = _mapper.Map<EconsentReviewDetails>(reviewdetails);            
+            _context.EconsentReviewDetails.Update(details);
             _context.Save();
 
-            var project = _projectRepository.Find(reviewdetails.EconsentSetup.ProjectId);
+            var project = _projectRepository.Find(econsentSetupDetails.ProjectId);
             if (!isWithdraw)
-                _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, reviewdetails.EconsentSetup.DocumentName, project.ProjectCode, filewritepath);
+                _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, econsentSetupDetails.DocumentName, project.ProjectCode, filewritepath);
 
             var siteteam = _context.SiteTeam.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
             var users = _context.ProjectRight.Where(x => x.ProjectId == randomization.ProjectId && siteteam.Contains(x.RoleId) && x.IsReviewDone == true).Select(x => x.UserId).Distinct();
@@ -763,9 +768,9 @@ namespace GSC.Respository.InformConcent
             {
                 if (!String.IsNullOrEmpty(x.Email))
                     if (!isWithdraw)
-                        _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(x.Email, x.UserName, reviewdetails.EconsentSetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, filewritepath);
+                        _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(x.Email, x.UserName, econsentSetupDetails.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, filewritepath);
                     else
-                        _emailSenderRespository.SendWithDrawEmail(x.Email, x.FirstName, reviewdetails.EconsentSetup.DocumentName, project.ProjectCode, $"{randomization.ScreeningNumber + " " + randomization.Initial}", filewritepath);
+                        _emailSenderRespository.SendWithDrawEmail(x.Email, x.FirstName, econsentSetupDetails.DocumentName, project.ProjectCode, $"{randomization.ScreeningNumber + " " + randomization.Initial}", filewritepath);
 
             });
             return reviewdetails.Id;

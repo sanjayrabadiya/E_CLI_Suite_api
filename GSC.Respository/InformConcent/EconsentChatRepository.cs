@@ -103,12 +103,13 @@ namespace GSC.Respository.InformConcent
             return userschat.OrderByDescending(x => x.SendDateTime).ToList();
         }
 
-        public List<EconsentChat> GetEconsentChat(int userId)
+        public List<EconsentChatDto> GetEconsentChat(int userId)
         {
             IList<int> intList = new List<int>() { userId, _jwtTokenAccesser.UserId };
             var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).ToList();
             data.ForEach(x => x.Message = EncryptionDecryption.DecryptString(x.Salt, x.Message));
-            return data;
+            var result = _mapper.Map<List<EconsentChatDto>>(data);
+            return result;
         }
 
         public int GetUnReadMessagecount()

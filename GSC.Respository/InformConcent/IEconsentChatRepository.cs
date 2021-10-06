@@ -12,8 +12,7 @@ namespace GSC.Respository.InformConcent
     public interface IEconsentChatRepository : IGenericRepository<EconsentChat>
     {
         List<EConsentUserChatDto> GetChatUsersList();
-
-        List<EconsentChat> GetEconsentChat(int userId);
+        List<EconsentChatDto> GetEconsentChat(int userId);
         int GetUnReadMessagecount();
         void AllMessageRead(int senderId);
     }
