@@ -85,7 +85,5 @@ namespace GSC.Data.Entities.UserMgt
         //public string SignaturePath { get; set; }
         public UserMasterUserType? UserType { get; set; }
         public Company Company { get; set; }
-        public string? SignatureBase64String { get; set; }
-        
     }
 }

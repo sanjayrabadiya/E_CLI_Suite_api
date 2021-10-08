@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.InformConcent;
 using GSC.Respository.EmailSender;
 using GSC.Respository.InformConcent;
@@ -27,11 +29,13 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IHubContext<MessageHub> _hubcontext;
         private readonly IUserRepository _userRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly IMapper _mapper;
 
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
                                         IHubContext<MessageHub> hubcontext,
-                                        IEconsentChatRepository econsentChatRepository,IUserRepository userRepository,IEmailSenderRespository emailSenderRespository)
+                                        IEconsentChatRepository econsentChatRepository,IUserRepository userRepository,IEmailSenderRespository emailSenderRespository,
+                                        IMapper mapper)
         {
             _econsentChatRepository = econsentChatRepository;
             _uow = uow;
@@ -39,6 +43,7 @@ namespace GSC.Api.Controllers.InformConcent
             _hubcontext = hubcontext;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -83,7 +88,8 @@ namespace GSC.Api.Controllers.InformConcent
             //{
             //    _emailSenderRespository.SendOfflineChatNotification(senderdetails.Email, senderdetails.FirstName);
             //}
-            return Ok(econsentChat);
+            var result = _mapper.Map<EconsentChatDto>(econsentChat);
+            return Ok(result);
         }
 
         [HttpGet]
@@ -96,8 +102,9 @@ namespace GSC.Api.Controllers.InformConcent
             econsentChat.DeliveredDateTime = _jwtTokenAccesser.GetClientDate();
             _econsentChatRepository.Update(econsentChat);
             _uow.Save();
+            var result = _mapper.Map<EconsentChatDto>(econsentChat);
             econsentChat.Message = EncryptionDecryption.DecryptString(econsentChat.Salt, econsentChat.Message);
-            return Ok(econsentChat);
+            return Ok(result);
         }
 
         [HttpPut]

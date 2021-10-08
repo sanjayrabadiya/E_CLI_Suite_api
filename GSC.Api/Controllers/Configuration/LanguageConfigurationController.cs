@@ -53,6 +53,7 @@ namespace GSC.Api.Controllers.Configuration
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             languageconfiDto.Id = 0;
             var languageConfi = _mapper.Map<LanguageConfiguration>(languageconfiDto);
+            languageConfi.IsReadOnlyDefaultMessage = false;
             var validate = _languageConfigurationRepository.Duplicate(languageConfi);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -75,6 +76,9 @@ namespace GSC.Api.Controllers.Configuration
             var languagedetails = _languageConfigurationRepository.Find(languageconfiDto.Id);
             var languageConfi = _mapper.Map<LanguageConfiguration>(languageconfiDto);
             languageConfi.KeyCode = languagedetails.KeyCode;
+            languageConfi.IsReadOnlyDefaultMessage = languagedetails.IsReadOnlyDefaultMessage;
+            if(languageConfi.IsReadOnlyDefaultMessage)
+                languageConfi.DefaultMessage = languagedetails.DefaultMessage;
             //languageConfi.Id = departmentDto.Id;
             var validate = _languageConfigurationRepository.Duplicate(languageConfi);
             if (!string.IsNullOrEmpty(validate))

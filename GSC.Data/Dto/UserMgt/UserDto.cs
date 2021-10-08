@@ -89,7 +89,6 @@ namespace GSC.Data.Dto.UserMgt
         public string CompanyName { get; set; }
 
         public UserMasterUserType? UserType { get; set; }
-        public string? SignatureBase64String { get; set; }
     }
 
     public class UserGridDto : BaseAuditDto

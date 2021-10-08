@@ -11,6 +11,7 @@ namespace GSC.Data.Entities.Configuration
         public string KeyCode { get; set; }
         public string KeyName { get; set; }
         public string DefaultMessage { get; set; }
+        public bool IsReadOnlyDefaultMessage { get; set; }
         public IList<LanguageConfigurationDetails> LanguageConfigurationDetailslist { get; set; }
     }
 

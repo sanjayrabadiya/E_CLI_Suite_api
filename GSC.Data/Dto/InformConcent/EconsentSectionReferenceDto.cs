@@ -6,7 +6,7 @@ using System.Text;
 
 namespace GSC.Data.Dto.InformConcent
 {
-    public class EconsentSectionReferenceDto : BaseDto
+    public class EconsentSectionReferenceDto : BaseAuditDto
     {
         public int EconsentSetupId { get; set; }
         public int SectionNo { get; set; }
