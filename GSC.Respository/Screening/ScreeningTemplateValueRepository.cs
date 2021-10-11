@@ -18,6 +18,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
+using GSC.Respository.ProjectRight;
 using GSC.Respository.Reports;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
@@ -45,13 +46,15 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IMapper _mapper;
+        private readonly IProjectRightRepository _projectRightRepository;
         public ScreeningTemplateValueRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IProjectDesignVariableRepository projectDesignVariableRepository, IAppSettingRepository appSettingRepository,
             IJobMonitoringRepository jobMonitoringRepository,
             IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
-            IProjectWorkflowRepository projectWorkflowRepository, IMapper mapper)
+            IProjectWorkflowRepository projectWorkflowRepository, IMapper mapper,
+            IProjectRightRepository projectRightRepository)
             : base(context)
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
@@ -269,7 +272,15 @@ namespace GSC.Respository.Screening
             }
             else
             {
-                sites = _context.Project.Where(x => x.ParentProjectId == filters.ParentProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
+                // Change done by swati on 11 oct 2021 for sites bug
+                //sites = _context.Project.Where(x => x.ParentProjectId == filters.ParentProjectId && x.IsTestSite == false && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
+
+                var projectList = _projectRightRepository.GetProjectRightIdList();
+                if (projectList == null || projectList.Count == 0) sites = null;
+
+                sites = _context.Project.Where(x =>
+                    x.DeletedDate == null && x.ParentProjectId == filters.ParentProjectId
+                    && projectList.Any(c => c == x.Id)).Select(y => y.Id).ToList();
             }
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
