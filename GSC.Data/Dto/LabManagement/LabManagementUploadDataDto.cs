@@ -1,6 +1,7 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.LabManagement;
 using GSC.Shared.DocumentService;
+using System.Collections.Generic;
 
 namespace GSC.Data.Dto.LabManagement
 {
@@ -16,6 +17,7 @@ namespace GSC.Data.Dto.LabManagement
         public string PathName { get; set; }
         public string MimeType { get; set; }
         public LabManagementConfiguration LabManagementConfiguration { get; set; }
+        public IList<LabManagementUploadExcelData> LabManagementUploadExcelDatas { get; set; } = null;
         public Entities.Master.Project Project { get; set; }
     }
 

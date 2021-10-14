@@ -8,5 +8,6 @@ namespace GSC.Respository.LabManagement
     public interface ILabManagementUploadDataRepository : IGenericRepository<LabManagementUploadData>
     {
         List<LabManagementUploadDataGridDto> GetUploadDataList(bool isDeleted);
+        List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto);
     }
 }

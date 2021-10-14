@@ -27,13 +27,15 @@ namespace GSC.Api.Controllers.LabManagement
         private readonly ILabManagementUploadDataRepository _labManagementUploadDataRepository;
         private readonly ILabManagementConfigurationRepository _configurationRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly ILabManagementUploadExcelDataRepository _labManagementUploadExcelDataRepository;
 
         public LabManagementUploadDataController(
             IUnitOfWork uow, IMapper mapper,
              ILabManagementUploadDataRepository labManagementUploadDataRepository,
              ILabManagementConfigurationRepository configurationRepository,
         IUploadSettingRepository uploadSettingRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+        ILabManagementUploadExcelDataRepository labManagementUploadExcelDataRepository,
+        IJwtTokenAccesser jwtTokenAccesser)
         {
             _uow = uow;
             _mapper = mapper;
@@ -41,6 +43,7 @@ namespace GSC.Api.Controllers.LabManagement
             _configurationRepository = configurationRepository;
             _labManagementUploadDataRepository = labManagementUploadDataRepository;
             _uploadSettingRepository = uploadSettingRepository;
+            _labManagementUploadExcelDataRepository = labManagementUploadExcelDataRepository;
         }
 
         // GET: api/<controller>
@@ -67,14 +70,17 @@ namespace GSC.Api.Controllers.LabManagement
             }
 
             var labManagementUploadData = _mapper.Map<LabManagementUploadData>(labManagementUploadDataDto);
-            //var validate = _labManagementUploadDataRepository.Duplicate(labManagementUploadData);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+
+            //Upload Excel data into database table
+            var ExcelData =_labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadDataDto);
+            labManagementUploadData.LabManagementUploadExcelDatas = ExcelData;
 
             _labManagementUploadDataRepository.Add(labManagementUploadData);
+
+            foreach (var item in labManagementUploadData.LabManagementUploadExcelDatas)
+            {
+                _labManagementUploadExcelDataRepository.Add(item);
+            }
 
             if (_uow.Save() <= 0) throw new Exception("Creating updaload data failed on save.");
             return Ok(labManagementUploadData.Id);

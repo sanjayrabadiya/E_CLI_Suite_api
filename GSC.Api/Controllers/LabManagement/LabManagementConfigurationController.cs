@@ -103,7 +103,7 @@ namespace GSC.Api.Controllers.LabManagement
                 configurationDto.FileName = productRec.FileName;
             }
 
-            var configuration = _mapper.Map<Data.Entities.LabManagement.LabManagementConfiguration>(configurationDto);
+            var configuration = _mapper.Map<LabManagementConfiguration>(configurationDto);
             var validate = _configurationRepository.Duplicate(configuration);
             if (!string.IsNullOrEmpty(validate))
             {

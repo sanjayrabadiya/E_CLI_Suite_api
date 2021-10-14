@@ -342,6 +342,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ILabManagementVariableMappingRepository, LabManagementVariableMappingRepository>();
             services.AddScoped<IManageMonitoringVisitRepository, ManageMonitoringVisitRepository>();
             services.AddScoped<ILabManagementUploadDataRepository, LabManagementUploadDataRepository>();
+            services.AddScoped<ILabManagementUploadExcelDataRepository, LabManagementUploadExcelDataRepository>();
         }
     }
 }

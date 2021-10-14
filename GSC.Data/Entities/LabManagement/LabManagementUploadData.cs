@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using System.Collections.Generic;
 
 namespace GSC.Data.Entities.LabManagement
 {
@@ -12,5 +13,6 @@ namespace GSC.Data.Entities.LabManagement
         public string MimeType { get; set; }
         public LabManagementConfiguration LabManagementConfiguration { get; set; }
         public Master.Project Project { get; set; }
+        public IList<LabManagementUploadExcelData> LabManagementUploadExcelDatas { get; set; } = null;
     }
 }
