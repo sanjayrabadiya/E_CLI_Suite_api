@@ -316,5 +316,6 @@ namespace GSC.Domain.Context
         DbSet<LabManagementConfiguration> LabManagementConfiguration { get; set; }
         DbSet<LabManagementVariableMapping> LabManagementVariableMapping { get; set; }
         DbSet<ManageMonitoringVisit> ManageMonitoringVisit { get; set; }
+        DbSet<LabManagementUploadData> LabManagementUploadData { get; set; }
     }
 }

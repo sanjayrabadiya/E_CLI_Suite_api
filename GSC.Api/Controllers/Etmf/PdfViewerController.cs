@@ -41,7 +41,7 @@ namespace GSC.Api.Controllers.Etmf
 
 
         [AllowAnonymous]
-        [HttpPost("Load")]
+        [HttpPost]
         [Route("Load")]
         public IActionResult Load([FromBody] Dictionary<string, string> jsonData)
         {

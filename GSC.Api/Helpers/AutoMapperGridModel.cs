@@ -37,6 +37,7 @@ using GSC.Data.Entities.Barcode;
 using GSC.Data.Dto.Barcode;
 using System.Configuration;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Entities.LabManagement;
 
 namespace GSC.Api.Helpers
 {
@@ -359,11 +360,18 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
 
             CreateMap<Data.Entities.LabManagement.LabManagementConfiguration, LabManagementConfigurationGridDto>()
-                .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
                 .ForMember(x => x.ProjectDesignVisitName, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
                 .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
                 .ReverseMap();
-          
+
+            CreateMap<LabManagementUploadData, LabManagementUploadDataGridDto>()
+                .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
+                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ForMember(x => x.ProjectDesignVisitName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
+                .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.TemplateName))
+                .ReverseMap();
+
         }
     }
 }

@@ -49,6 +49,7 @@ namespace GSC.Api.Controllers.Centeral
             return Ok(1);
         }
 
+        [HttpPut]
         public IActionResult Put([FromBody] StydyDetails details)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);

@@ -1,0 +1,33 @@
+﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.LabManagement;
+using GSC.Shared.DocumentService;
+
+namespace GSC.Data.Dto.LabManagement
+{
+    public class LabManagementUploadDataDto : BaseDto
+    {
+        public int LabManagementConfigurationId { get; set; }
+        public int ParentProjectId { get; set; }
+        public int ProjectId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public FileModel FileModel { get; set; }
+        public string FileName { get; set; }
+        public string PathName { get; set; }
+        public string MimeType { get; set; }
+        public LabManagementConfiguration LabManagementConfiguration { get; set; }
+        public Entities.Master.Project Project { get; set; }
+    }
+
+    public class LabManagementUploadDataGridDto : BaseAuditDto
+    {
+        public string StudyCode { get; set; }
+        public string SiteCode { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public string ProjectDesignVisitName { get; set; }
+        public string ProjectDesignTemplateName { get; set; }
+        public string MimeType { get; set; }
+        public string PathName { get; set; }
+        public string FullPath { get; set; }
+    }
+}

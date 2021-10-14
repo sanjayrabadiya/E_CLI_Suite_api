@@ -2,6 +2,7 @@
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Entities.LabManagement;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.LabManagement;
@@ -63,10 +64,10 @@ namespace GSC.Api.Controllers.LabManagement
             {
                 configurationDto.PathName = DocumentService.SaveUploadDocument(configurationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.LabManagement, "");
                 configurationDto.MimeType = configurationDto.FileModel.Extension;
-                configurationDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + configurationDto.FileModel.Extension;
+                configurationDto.FileName = "LabManagement_" + DateTime.Now.Ticks + "." + configurationDto.FileModel.Extension;
             }
 
-            var configuration = _mapper.Map<Data.Entities.LabManagement.LabManagementConfiguration>(configurationDto);
+            var configuration = _mapper.Map<LabManagementConfiguration>(configurationDto);
             var validate = _configurationRepository.Duplicate(configuration);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -158,6 +159,30 @@ namespace GSC.Api.Controllers.LabManagement
         {
 
             return Ok(_configurationRepository.GetMappingData<object>(LabManagementConfigurationId));
+        }
+
+        // Add by vipul for only bind that project which map in lab management configuration
+        [HttpGet]
+        [Route("GetParentProjectDropDownForUploadLabData")]
+        public IActionResult GetParentProjectDropDownForUploadLabData()
+        {
+            return Ok(_configurationRepository.GetParentProjectDropDownForUploadLabData());
+        }
+
+        // Add by vipul for only bind that visit which map in lab management configuration
+        [HttpGet]
+        [Route("GetVisitDropDownForUploadLabData/{projectDesignPeriodId}")]
+        public IActionResult GetVisitDropDownForUploadLabData(int projectDesignPeriodId)
+        {
+            return Ok(_configurationRepository.GetVisitDropDownForUploadLabData(projectDesignPeriodId));
+        }
+
+        // Add by vipul for only bind that template which map in lab management configuration
+        [HttpGet]
+        [Route("GetTemplateDropDownForUploadLabData/{projectDesignVisitId}")]
+        public IActionResult GetTemplateDropDownForUploadLabData(int projectDesignVisitId)
+        {
+            return Ok(_configurationRepository.GetTemplateDropDownForUploadLabData(projectDesignVisitId));
         }
     }
 }

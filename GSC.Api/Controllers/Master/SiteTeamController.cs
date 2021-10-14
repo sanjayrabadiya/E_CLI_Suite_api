@@ -41,7 +41,6 @@ namespace GSC.Api.Controllers.Master
 
         }
 
-        [HttpGet]
         [HttpGet("{projectid}/{isDeleted:bool?}")]
         public IActionResult Get(int projectid, bool isDeleted)
         {
@@ -156,7 +155,6 @@ namespace GSC.Api.Controllers.Master
             return Ok(siteTeam.Id);
         }
 
-        [HttpGet]
         [HttpGet("GetRoleDropdownForSiteTeam/{projectid}")]
         public IActionResult GetRoleDropdownForSiteTeam(int projectid)
         {
@@ -164,7 +162,6 @@ namespace GSC.Api.Controllers.Master
             return Ok(data);
         }
 
-        [HttpGet]
         [HttpGet("GetUserDropdownForSiteTeam/{projectid}/{roleId}")]
         public IActionResult GetUserDropdownForSiteTeam(int projectid, int roleId)
         {
