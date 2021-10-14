@@ -45,8 +45,9 @@ namespace GSC.Respository.LabManagement
         //Upload data insert into database
         public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto) 
         {
-            string pathname = labManagementUploadDataDto.PathName + labManagementUploadDataDto.FileName;
-            FileStream streamer = new FileStream(@"E:\Project Document\Lab management\Lab Sheet_Compiled_FINAL_050419.xlsx", FileMode.Open);
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            string pathname = documentUrl + labManagementUploadDataDto.FileName;
+            FileStream streamer = new FileStream(pathname, FileMode.Open);
             IExcelDataReader reader = null;
             if (Path.GetExtension(pathname) == ".xls")
                 reader = ExcelReaderFactory.CreateBinaryReader(streamer);

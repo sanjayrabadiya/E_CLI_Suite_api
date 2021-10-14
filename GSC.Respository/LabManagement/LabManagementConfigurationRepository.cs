@@ -60,7 +60,7 @@ namespace GSC.Respository.LabManagement
                 var projectDocuments = All.Where(x => x.Id == LabManagementConfigurationId).FirstOrDefault().PathName;
 
                 string pathname = documentUrl + projectDocuments;
-                FileStream streamer = new FileStream(@"E:\Project Document\Lab management\Lab Sheet_Mapping.xlsx", FileMode.Open);
+                FileStream streamer = new FileStream(pathname, FileMode.Open);
                 IExcelDataReader reader = null;
                 if (Path.GetExtension(pathname) == ".xls")
                     reader = ExcelReaderFactory.CreateBinaryReader(streamer);
