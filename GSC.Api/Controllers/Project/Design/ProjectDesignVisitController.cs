@@ -251,12 +251,14 @@ namespace GSC.Api.Controllers.Project.Design
                 var visit = _projectDesignVisitRepository.GetVisit(data.Id);
                 visit.Id = 0;
                 visit.StudyVersion = checkVersion.VersionNumber;
+                visit.InActiveVersion = null;
                 visit.ProjectDesignPeriodId = data.projectDesignPeriodId;
                 visit.DesignOrder = ++designOrder;
                 visit.Templates.Where(z => (data.noOfTemplate.Count() == 0 || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
                  {
                      template.Id = 0;
                      template.StudyVersion = checkVersion.VersionNumber;
+                     template.InActiveVersion = null;
                      template.Variables.ToList().ForEach(variable =>
                      {
                          visitStatus.Where(e => e.ProjectDesignVariableId == variable.Id).ToList().ForEach(g =>
@@ -265,11 +267,13 @@ namespace GSC.Api.Controllers.Project.Design
                              g.ProjectDesignVariableId = 0;
                          });
                          variable.StudyVersion = checkVersion.VersionNumber;
+                         variable.InActiveVersion = null;
                          variable.Id = 0;
                          var Seq = 0;
                          variable.Values.ToList().ForEach(value =>
                          {
                              value.StudyVersion = checkVersion.VersionNumber;
+                             value.InActiveVersion = null;
                              value.Id = 0;
                              value.SeqNo = ++Seq;
                              _projectDesignVariableValueRepository.Add(value);

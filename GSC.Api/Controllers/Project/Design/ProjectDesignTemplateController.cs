@@ -206,6 +206,7 @@ namespace GSC.Api.Controllers.Project.Design
                 projectDesignTemplate.VariableTemplate = null;
                 projectDesignTemplate.Domain = null;
                 projectDesignTemplate.StudyVersion = checkVersion.VersionNumber;
+                projectDesignTemplate.InActiveVersion = null;
                 projectDesignTemplate.TemplateName = projectDesignTemplate.TemplateName + "_" + designOrder;
 
                 foreach (var variable in projectDesignTemplate.Variables)
@@ -215,6 +216,7 @@ namespace GSC.Api.Controllers.Project.Design
                     variable.VariableCategory = null;
                     variable.ProjectDesignTemplate = null;
                     variable.StudyVersion = checkVersion.VersionNumber;
+                    variable.InActiveVersion = null;
                     _projectDesignVariableRepository.Add(variable);
 
                     //For variable clone language
@@ -236,6 +238,7 @@ namespace GSC.Api.Controllers.Project.Design
                       {
                           r.Id = 0;
                           r.StudyVersion = checkVersion.VersionNumber;
+                          r.InActiveVersion = null;
                           r.SeqNo = ++Seq;
                           _projectDesignVariableValueRepository.Add(r);
                           //For variable value clone language

@@ -98,6 +98,7 @@ namespace GSC.Api.Controllers.Project.Design
             foreach (var item in variable.Values)
             {
                 item.StudyVersion = checkVersion.VersionNumber;
+                item.InActiveVersion = null;
                 _projectDesignVariableValueRepository.Add(item);
             }
 
