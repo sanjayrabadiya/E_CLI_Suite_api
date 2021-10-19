@@ -318,5 +318,9 @@ namespace GSC.Domain.Context
         DbSet<ManageMonitoringVisit> ManageMonitoringVisit { get; set; }
         DbSet<LabManagementUploadData> LabManagementUploadData { get; set; }
         DbSet<LabManagementUploadExcelData> LabManagementUploadExcelData { get; set; }
+        DbSet<ManageMonitoringReport> ManageMonitoringReport { get; set; }
+        DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
+        DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
+        DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
     }
 }

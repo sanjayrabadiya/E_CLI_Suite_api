@@ -366,6 +366,10 @@ namespace GSC.Domain.Context
         public DbSet<ManageMonitoringVisit> ManageMonitoringVisit { get; set; }
         public DbSet<LabManagementUploadData> LabManagementUploadData { get; set; }
         public DbSet<LabManagementUploadExcelData> LabManagementUploadExcelData { get; set; }
+        public DbSet<ManageMonitoringReport> ManageMonitoringReport { get; set; }
+        public DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
+        public DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
+        public DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
     }
 
 

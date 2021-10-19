@@ -343,6 +343,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<IManageMonitoringVisitRepository, ManageMonitoringVisitRepository>();
             services.AddScoped<ILabManagementUploadDataRepository, LabManagementUploadDataRepository>();
             services.AddScoped<ILabManagementUploadExcelDataRepository, LabManagementUploadExcelDataRepository>();
+            services.AddScoped<IManageMonitoringReportRepository, ManageMonitoringReportRepository>();
+            services.AddScoped<IManageMonitoringReportVariableRepository, ManageMonitoringReportVariableRepository>();
+            services.AddScoped<IManageMonitoringReportVariableChildRepository, ManageMonitoringReportVariableChildRepository>();
+            services.AddScoped<IManageMonitoringReportVariableAuditRepository, ManageMonitoringReportVariableAuditRepository>();
         }
     }
 }

@@ -734,4 +734,10 @@ namespace GSC.Helper
         [Description("Pending")] Pending = 1,
         [Description("Final")] Final = 2
     }
+
+    public enum MonitoringReportStatus : short
+    {
+        [Description("Not Initiated")] NotInitiated = 1,
+        [Description("Initiated")] Initiated = 2,
+    }
 }

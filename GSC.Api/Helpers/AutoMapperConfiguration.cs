@@ -405,6 +405,11 @@ namespace GSC.Api.Helpers
             CreateMap<LabManagementConfiguration, LabManagementConfigurationDto>().ReverseMap();
             CreateMap<ManageMonitoringVisit, ManageMonitoringVisitDto>().ReverseMap();
             CreateMap<LabManagementUploadData, LabManagementUploadDataDto>().ReverseMap();
+            CreateMap<ManageMonitoringReport, ManageMonitoringReportDto>().ReverseMap();
+            CreateMap<ManageMonitoringReportVariable, ManageMonitoringReportVariableDto>().ReverseMap();
+            CreateMap<ManageMonitoringReportVariable, ManageMonitoringValueBasic>().ReverseMap();
+            CreateMap<ManageMonitoringReportVariableChild, ManageMonitoringReportVariableChildDto>().ReverseMap();
+            CreateMap<ManageMonitoringReportVariableAudit, ManageMonitoringReportVariableAuditDto>().ReverseMap();
         }
     }
 }

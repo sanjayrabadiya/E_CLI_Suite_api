@@ -40,6 +40,12 @@ namespace GSC.Respository.CTMS
                     ScheduleEndDate = x.ScheduleEndDate,
                     ActualStartDate = x.ActualStartDate,
                     ActualEndDate = x.ActualEndDate,
+                    CreatedDate = x.CreatedDate,
+                    ModifiedDate = x.ModifiedDate,
+                    DeletedDate = x.DeletedDate,
+                    CreatedByUser = x.CreatedByUser.UserName,
+                    ModifiedByUser = x.ModifiedByUser.UserName,
+                    DeletedByUser = x.DeletedByUser.UserName
                 }).ToList();
 
             var data = Activity.Select(x => new ManageMonitoringVisitDto
@@ -51,6 +57,12 @@ namespace GSC.Respository.CTMS
                 ScheduleEndDate = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.ScheduleEndDate,
                 ActualStartDate = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.ActualStartDate,
                 ActualEndDate = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.ActualEndDate,
+                CreatedDate = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.CreatedDate,
+                ModifiedDate = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.ModifiedDate,
+                DeletedDate = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.DeletedDate,
+                CreatedByUser = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.CreatedByUser,
+                ModifiedByUser = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.ModifiedByUser,
+                DeletedByUser = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.DeletedByUser,
             }).ToList();
 
             return data;

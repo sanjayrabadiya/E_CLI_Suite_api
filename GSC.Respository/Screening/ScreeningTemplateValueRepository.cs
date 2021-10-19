@@ -278,8 +278,8 @@ namespace GSC.Respository.Screening
                 var projectList = _projectRightRepository.GetProjectRightIdList();
                 if (projectList == null || projectList.Count == 0) sites = null;
 
-                sites = _context.Project.Where(x =>
-                    x.DeletedDate == null && x.ParentProjectId == filters.ParentProjectId
+                sites = _context.Project.Where(x => 
+                    x.DeletedDate == null && x.ParentProjectId == filters.ParentProjectId && x.IsTestSite == false
                     && projectList.Any(c => c == x.Id)).Select(y => y.Id).ToList();
             }
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
