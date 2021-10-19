@@ -152,7 +152,7 @@ namespace GSC.Respository.InformConcent
 
         public IList<EconcentSectionRefrenceDetailListDto> GetSetionRefefrenceDetailList(int documentId, int sectionNo)
         {
-            var sectionRefrence = All.Where(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo).
+            var sectionRefrence = All.Where(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo && x.DeletedDate==null).
                ProjectTo<EconcentSectionRefrenceDetailListDto>(_mapper.ConfigurationProvider).ToList();
             return sectionRefrence;
         }

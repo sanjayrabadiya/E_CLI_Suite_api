@@ -25,6 +25,7 @@ namespace GSC.Data.Entities.UserMgt
         public bool IsDelete { get; set; }
 
         public bool IsExport { get; set; }
+        public bool IsSync { get; set; }
 
         public string UrlName { get; set; }
 

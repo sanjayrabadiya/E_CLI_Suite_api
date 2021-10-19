@@ -29,16 +29,16 @@ namespace GSC.Respository.UserMgt
             if (existing.Any())
             {
                 _context.RolePermission.RemoveRange(existing);
-                 _context.Save();
+                _context.Save();
             }
 
-            rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
+            rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport || t.IsSync)
                 .ToList();
 
             _context.RolePermission.AddRange(rolePermissions);
-             _context.Save();
+            _context.Save();
         }
-       
+
         public void updatePermission(List<RolePermission> rolePermissions)
         {
             var userRoleId = rolePermissions.First().UserRoleId;
@@ -47,13 +47,13 @@ namespace GSC.Respository.UserMgt
             if (existing.Any())
             {
                 _context.RolePermission.RemoveRange(existing);
-                 _context.Save();
+                _context.Save();
             }
 
-            rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
+            rolePermissions = rolePermissions.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport || t.IsSync)
                 .ToList();
             _context.RolePermission.UpdateRange(rolePermissions);
-             _context.Save();
+            _context.Save();
         }
 
         public List<RolePermissionDto> GetByRoleId(int roleId)
@@ -67,6 +67,7 @@ namespace GSC.Respository.UserMgt
                     CanEdit = t.IsEdit,
                     CanExport = t.IsExport,
                     CanView = t.IsView,
+                    CanSync = t.IsSync,
                     AppScreenId = t.Id,
                     ScreenCode = t.ScreenCode,
                     ScreenName = t.ScreenName,
@@ -85,8 +86,9 @@ namespace GSC.Respository.UserMgt
                 t.IsDelete = p.IsDelete;
                 t.IsEdit = p.IsEdit;
                 t.IsExport = p.IsExport;
+                t.IsSync = p.IsSync;
                 t.IsView = p.IsView;
-                t.IsAll = p.IsAdd && p.IsDelete && p.IsEdit && p.IsExport && p.IsView;
+                t.IsAll = p.IsAdd && p.IsDelete && p.IsEdit && p.IsExport && p.IsView && p.IsSync;
             });
 
             return permissions;
@@ -115,9 +117,10 @@ namespace GSC.Respository.UserMgt
                 t.IsExport = isPowerAdmin || p.Any(s => s.IsExport);
                 t.IsView = isPowerAdmin || p.Any(s => s.IsView);
                 t.IsView = isPowerAdmin || p.Any(s => s.IsView);
+                t.IsSync = isPowerAdmin || p.Any(s => s.IsSync);
                 t.IsFavorited = favorites.Any(f => f.AppScreenId == t.Id);
             });
-            screens = screens.Where(t => !t.IsPermission || t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
+            screens = screens.Where(t => !t.IsPermission || t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport ||t.IsSync)
                 .ToList();
             return screens;
         }
@@ -136,7 +139,8 @@ namespace GSC.Respository.UserMgt
 
                 var accessRights = _context.AppScreenPatientRights.Where(x => x.ProjectId == studyId).ToList().Select(x => x.AppScreenPatientId);
                 screens = screens.Where(x => accessRights.Contains(x.Id)).ToList();
-            } else new List<AppScreenPatient>();
+            }
+            else new List<AppScreenPatient>();
 
             return screens;
         }
@@ -146,7 +150,7 @@ namespace GSC.Respository.UserMgt
             var isPowerAdmin = _context.Users.Find(_jwtTokenAccesser.UserId).IsPowerAdmin;
             if (isPowerAdmin)
                 return new RolePermission
-                    {IsAdd = true, IsView = true, IsDelete = true, IsEdit = true, IsExport = true};
+                { IsAdd = true, IsView = true, IsDelete = true, IsEdit = true, IsExport = true, IsSync = true };
             var rolePermission = FindBy(x =>
                     x.ScreenCode == screenCode && x.UserRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null)
                 .FirstOrDefault();

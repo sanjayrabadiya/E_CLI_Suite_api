@@ -74,7 +74,7 @@ namespace GSC.Respository.InformConcent
             }
             var userschat = _mapper.Map<List<EConsentUserChatDto>>(users);
             var userintlist = users.Select(x => x.Id).ToList();
-            var chatdata = FindBy(x => (x.SenderId == _jwtTokenAccesser.UserId || x.ReceiverId == _jwtTokenAccesser.UserId)); 
+            var chatdata = FindBy(x => (x.SenderId == _jwtTokenAccesser.UserId || x.ReceiverId == _jwtTokenAccesser.UserId));
             userschat.ForEach(ch =>
             {
 
@@ -82,7 +82,7 @@ namespace GSC.Respository.InformConcent
                 // {
                 IList<int> intList = new List<int>() { ch.Id, _jwtTokenAccesser.UserId };
                 var chatobj = chatdata.Where(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();//FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();
-                ch.LastMessage = chatobj == null ? "" :  EncryptionDecryption.DecryptString(chatobj.Salt,chatobj.Message);
+                ch.LastMessage = chatobj == null ? "" : EncryptionDecryption.DecryptString(chatobj.Salt, chatobj.Message);
                 ch.SendDateTime = chatobj?.SendDateTime;
                 ch.UnReadMsgCount = chatdata.Where(x => x.SenderId == ch.Id && x.IsRead == false).ToList().Count;
                 if (chatobj != null)
@@ -102,7 +102,6 @@ namespace GSC.Respository.InformConcent
             });
             return userschat.OrderByDescending(x => x.SendDateTime).ToList();
         }
-
         public List<EconsentChatDto> GetEconsentChat(int userId)
         {
             IList<int> intList = new List<int>() { userId, _jwtTokenAccesser.UserId };
@@ -111,6 +110,16 @@ namespace GSC.Respository.InformConcent
             var result = _mapper.Map<List<EconsentChatDto>>(data);
             return result;
         }
+
+        //public List<EconsentChatDto> GetEconsentChat(EconcentChatParameterDto details)
+        //{
+        //    IList<int> intList = new List<int>() { details.UserId, _jwtTokenAccesser.UserId };
+        //    //var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && details.LastDate!=null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now && x.Message.Contains(details.SearchString)).Take(details.PageSize).OrderBy(x=>x.SendDateTime).ToList();
+        //    var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && (details.LastDate != null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now)).Take(details.PageSize).OrderBy(x => x.SendDateTime).ToList();
+        //    data.ForEach(x => x.Message = EncryptionDecryption.DecryptString(x.Salt, x.Message));
+        //    var result = _mapper.Map<List<EconsentChatDto>>(data);
+        //    return result;
+        //}
 
         public int GetUnReadMessagecount()
         {

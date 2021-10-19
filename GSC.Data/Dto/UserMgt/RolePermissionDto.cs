@@ -22,6 +22,7 @@ namespace GSC.Data.Dto.UserMgt
         public bool IsDelete { get; set; }
 
         public bool IsExport { get; set; }
+        public bool IsSync { get; set; }
 
         public bool IsAll { get; set; }
 
@@ -34,6 +35,7 @@ namespace GSC.Data.Dto.UserMgt
         public bool CanDelete { get; set; }
 
         public bool CanExport { get; set; }
+        public bool CanSync { get; set; }
 
         public bool CanAll { get; set; }
         public bool hasChild { get; set; }

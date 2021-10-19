@@ -13,6 +13,7 @@ using GSC.Respository.InformConcent;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -63,6 +64,15 @@ namespace GSC.Api.Controllers.InformConcent
             var data = _econsentChatRepository.GetEconsentChat(userid);
             return Ok(data);
         }
+
+        //[HttpPost]
+        //[Route("GetEconsentChat")]
+        //public IActionResult GetEconsentChat([FromBody] EconcentChatParameterDto details)
+        //{
+        //    // display messages of selected user
+        //    var data = _econsentChatRepository.GetEconsentChat(details);
+        //    return Ok(data);
+        //}
 
         [HttpGet]
         [Route("GetUnReadMessagecount")]
