@@ -740,4 +740,12 @@ namespace GSC.Helper
         [Description("Not Initiated")] NotInitiated = 1,
         [Description("Initiated")] Initiated = 2,
     }
+
+
+    public enum LabManagementUploadStatus : short
+    {
+        [Description("Pending")] Pending = 1,
+        [Description("Reject")] Reject = 2,
+        [Description("Approve")] Approve = 3
+    }
 }

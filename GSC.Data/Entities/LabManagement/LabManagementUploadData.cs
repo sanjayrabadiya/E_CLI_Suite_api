@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Helper;
 using System.Collections.Generic;
 
 namespace GSC.Data.Entities.LabManagement
@@ -14,5 +15,6 @@ namespace GSC.Data.Entities.LabManagement
         public LabManagementConfiguration LabManagementConfiguration { get; set; }
         public Master.Project Project { get; set; }
         public IList<LabManagementUploadExcelData> LabManagementUploadExcelDatas { get; set; } = null;
+        public LabManagementUploadStatus LabManagementUploadStatus { get; set; }
     }
 }

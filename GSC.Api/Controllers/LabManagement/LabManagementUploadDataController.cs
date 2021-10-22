@@ -69,6 +69,7 @@ namespace GSC.Api.Controllers.LabManagement
                 labManagementUploadDataDto.FileName = "LabManagementData_" + DateTime.Now.Ticks + "." + labManagementUploadDataDto.FileModel.Extension;
             }
 
+            labManagementUploadDataDto.LabManagementUploadStatus = LabManagementUploadStatus.Pending;
             var labManagementUploadData = _mapper.Map<LabManagementUploadData>(labManagementUploadDataDto);
 
             //Upload Excel data into database table

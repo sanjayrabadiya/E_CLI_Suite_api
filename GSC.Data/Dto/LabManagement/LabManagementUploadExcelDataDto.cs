@@ -1,12 +1,10 @@
-﻿using GSC.Common.Base;
-using GSC.Common.Common;
+﻿using GSC.Data.Entities.Common;
 using System;
 
-namespace GSC.Data.Entities.LabManagement
+namespace GSC.Data.Dto.LabManagement
 {
-    public class LabManagementUploadExcelData : BaseEntity, ICommonAduit
+    public class LabManagementUploadExcelDataDto : BaseDto
     {
-        public int LabManagementUploadDataId { get; set; }
         public string ScreeningNo { get; set; }
         public string RandomizationNo { get; set; }
         public string Visit { get; set; }
@@ -22,7 +20,5 @@ namespace GSC.Data.Entities.LabManagement
         public string ReferenceRangeLow { get; set; }
         public string ReferenceRangeHigh { get; set; }
         public string ClinicallySignificant { get; set; }
-        public LabManagementUploadData LabManagementUploadData { get; set; }
-
     }
 }

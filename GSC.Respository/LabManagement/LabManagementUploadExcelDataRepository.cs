@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.LabManagement;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Shared.JWTAuth;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace GSC.Respository.LabManagement
 {
@@ -25,6 +26,13 @@ namespace GSC.Respository.LabManagement
             _mapper = mapper;
             _context = context;
             _uploadSettingRepository = uploadSettingRepository;
+        }
+
+        public List<LabManagementUploadExcelDataDto> GetExcelDataList(int labManagementUploadDataId)
+        {
+            var result = All.Where(x => x.DeletedDate == null && x.LabManagementUploadDataId == labManagementUploadDataId).
+                   ProjectTo<LabManagementUploadExcelDataDto>(_mapper.ConfigurationProvider).OrderBy(x => x.Id).ToList();
+            return result;
         }
     }
 }
