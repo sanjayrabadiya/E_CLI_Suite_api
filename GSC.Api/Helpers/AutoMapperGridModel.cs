@@ -122,6 +122,7 @@ namespace GSC.Api.Helpers
             CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
             CreateMap<User, UserGridDto>()
                 .ForMember(x => x.Role, x => x.MapFrom(a => string.Join(", ", a.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())))
+                .ForMember(x => x.ScreeningNumber, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
                 .ForMember(x => x.CompanyName, x => x.MapFrom(a => a.Company.CompanyName))
                 .ReverseMap();
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Configuration;
 using GSC.Helper;
 using GSC.Shared.Extension;
@@ -85,5 +86,6 @@ namespace GSC.Data.Entities.UserMgt
         //public string SignaturePath { get; set; }
         public UserMasterUserType? UserType { get; set; }
         public Company Company { get; set; }
+        public Randomization Randomization { get; set; }
     }
 }

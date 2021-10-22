@@ -114,6 +114,7 @@ namespace GSC.Respository.UserMgt
 
         public List<UserGridDto> GetPatients(PatientDto userDto)
         {
+
             var UserID = _context.Randomization.Where(x => x.ProjectId == userDto.ProjectId).Select(x => x.UserId).ToList();
             return All.Where(x => (userDto.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (UserID.Contains(x.Id))).
                    ProjectTo<UserGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
