@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.LabManagement;
+using GSC.Data.Entities.Master;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using System.Collections.Generic;
@@ -21,12 +22,16 @@ namespace GSC.Data.Dto.LabManagement
         public LabManagementConfiguration LabManagementConfiguration { get; set; }
         public IList<LabManagementUploadExcelData> LabManagementUploadExcelDatas { get; set; } = null;
         public Entities.Master.Project Project { get; set; }
+        public int? AuditReasonId { get; set; }
+        public AuditReason AuditReason { get; set; }
+        public string ReasonOth { get; set; }
     }
 
     public class LabManagementUploadDataGridDto : BaseAuditDto
     {
         public string StudyCode { get; set; }
         public string SiteCode { get; set; }
+        public string Status { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public string ProjectDesignVisitName { get; set; }
         public string ProjectDesignTemplateName { get; set; }

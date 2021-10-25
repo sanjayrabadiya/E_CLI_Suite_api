@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Master;
 using GSC.Helper;
 using System.Collections.Generic;
 
@@ -16,5 +17,8 @@ namespace GSC.Data.Entities.LabManagement
         public Master.Project Project { get; set; }
         public IList<LabManagementUploadExcelData> LabManagementUploadExcelDatas { get; set; } = null;
         public LabManagementUploadStatus LabManagementUploadStatus { get; set; }
+        public int? AuditReasonId { get; set; }
+        public AuditReason AuditReason { get; set; }
+        public string ReasonOth { get; set; }
     }
 }

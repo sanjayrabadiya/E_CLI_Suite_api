@@ -87,5 +87,22 @@ namespace GSC.Api.Controllers.LabManagement
             return Ok(labManagementUploadData.Id);
         }
 
+        [HttpPut]
+        public IActionResult Put([FromBody] LabManagementUploadDataDto labManagementUploadDataDto)
+        {
+            if (labManagementUploadDataDto.Id <= 0) return BadRequest();
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            
+            var labManagementUpload = _labManagementUploadDataRepository.Find(labManagementUploadDataDto.Id);
+            labManagementUpload.LabManagementUploadStatus = labManagementUploadDataDto.LabManagementUploadStatus;
+            labManagementUpload.AuditReasonId = labManagementUploadDataDto.AuditReasonId;
+            labManagementUpload.ReasonOth = labManagementUploadDataDto.ReasonOth;
+
+            _labManagementUploadDataRepository.Update(labManagementUpload);
+            
+            if (_uow.Save() <= 0) throw new Exception("Updating lab management data failed on action.");
+            return Ok(labManagementUpload.Id);
+        }
+
     }
 }

@@ -369,6 +369,7 @@ namespace GSC.Api.Helpers
             CreateMap<LabManagementUploadData, LabManagementUploadDataGridDto>()
                 .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
                 .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ForMember(x => x.Status, x => x.MapFrom(a => a.LabManagementUploadStatus.GetDescription()))
                 .ForMember(x => x.ProjectDesignVisitName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
                 .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.TemplateName))
                 .ReverseMap();
