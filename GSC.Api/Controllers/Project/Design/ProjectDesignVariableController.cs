@@ -387,5 +387,12 @@ namespace GSC.Api.Controllers.Project.Design
 
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetVariabeDropDownForLabManagementMapping/{projectDesignTemplateId}")]
+        public IActionResult GetVariabeDropDownForLabManagementMapping(int projectDesignTemplateId)
+        {
+            return Ok(_projectDesignVariableRepository.GetVariabeDropDownForLabManagementMapping(projectDesignTemplateId));
+        }
     }
 }
