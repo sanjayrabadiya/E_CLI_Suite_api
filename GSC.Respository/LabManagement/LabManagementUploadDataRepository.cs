@@ -37,7 +37,7 @@ namespace GSC.Respository.LabManagement
         {
             var result= All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<LabManagementUploadDataGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            var documentUrl = _uploadSettingRepository.GetDocumentPath();
             result.ForEach(t => t.FullPath = documentUrl + t.PathName);
             return result;
         }
@@ -45,7 +45,7 @@ namespace GSC.Respository.LabManagement
         //Upload data insert into database
         public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto) 
         {
-            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            var documentUrl = _uploadSettingRepository.GetDocumentPath();
             string pathname = documentUrl + labManagementUploadDataDto.FileName;
             FileStream streamer = new FileStream(pathname, FileMode.Open);
             IExcelDataReader reader = null;

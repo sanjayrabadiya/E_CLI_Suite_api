@@ -56,7 +56,7 @@ namespace GSC.Respository.LabManagement
             var Exists = _context.LabManagementVariableMapping.Where(x => x.LabManagementConfigurationId == LabManagementConfigurationId && x.DeletedDate == null).Count();
             if (Exists == 0)
             {
-                var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+                var documentUrl = _uploadSettingRepository.GetDocumentPath();
                 var projectDocuments = All.Where(x => x.Id == LabManagementConfigurationId).FirstOrDefault().PathName;
 
                 string pathname = documentUrl + projectDocuments;
