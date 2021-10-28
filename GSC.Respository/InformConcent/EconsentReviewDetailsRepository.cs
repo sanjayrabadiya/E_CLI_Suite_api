@@ -46,6 +46,7 @@ namespace GSC.Respository.InformConcent
         private readonly IUnitOfWork _uow;
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IAppSettingRepository _appSettingRepository;
+        private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
 
         public EconsentReviewDetailsRepository(IGSCContext context,
                                                 IJwtTokenAccesser jwtTokenAccesser,
@@ -55,7 +56,8 @@ namespace GSC.Respository.InformConcent
                                                 IUploadSettingRepository uploadSettingRepository,
                                                 IEmailSenderRespository emailSenderRespository,
                                                 IUnitOfWork uow,
-                                                IRandomizationRepository randomizationRepository, IAppSettingRepository appSettingRepository) : base(context)
+                                                IRandomizationRepository randomizationRepository, IAppSettingRepository appSettingRepository,
+                                                IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository) : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -67,6 +69,7 @@ namespace GSC.Respository.InformConcent
             _uow = uow;
             _randomizationRepository = randomizationRepository;
             _appSettingRepository = appSettingRepository;
+            _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
         }
 
         public List<EConsentDocumentHeader> GetEconsentDocumentHeaders()
@@ -617,8 +620,8 @@ namespace GSC.Respository.InformConcent
 
             econsentReviewDetails.PdfPath = pdfpath;
 
-            var details = _mapper.Map<EconsentReviewDetails>(econsentReviewDetails);            
-            Update(details);
+            var details = _mapper.Map<EconsentReviewDetails>(econsentReviewDetails);
+            Update(details);         
             //System.IO.File.Delete(filePath);
             _uow.Save();
             var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetails.EconsentSetupId).ToList().FirstOrDefault();
@@ -636,6 +639,13 @@ namespace GSC.Respository.InformConcent
                 randomizationdata.PatientStatusId = ScreeningPatientStatus.Withdrawal;
                 _randomizationRepository.Update(randomizationdata);
             }
+
+            //reviewdetail audit
+            EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
+            audit.EconsentReviewDetailsId = details.Id;
+            audit.Activity = econsentReviewDetailsDto.IsApproved == true ? ICFAction.Approve : ICFAction.Withdraw;
+            audit.PateientStatus = randomization.PatientStatusId;
+            _econsentReviewDetailsAuditRepository.Add(audit);
             _uow.Save();
             return econsentReviewDetails.Id;
         }
@@ -753,8 +763,14 @@ namespace GSC.Respository.InformConcent
             reviewdetails.IsReviewedByPatient = true;
             reviewdetails.PatientdigitalSignImagepath = "";
             reviewdetails.PatientApprovedDatetime = DateTime.Now;
-            var details = _mapper.Map<EconsentReviewDetails>(reviewdetails);            
+            var details = _mapper.Map<EconsentReviewDetails>(reviewdetails);
             _context.EconsentReviewDetails.Update(details);
+            //auditlog
+            EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
+            audit.EconsentReviewDetailsId = details.Id;
+            audit.Activity = isWithdraw ? ICFAction.Approve : ICFAction.Withdraw;
+            audit.PateientStatus = randomization.PatientStatusId;
+            _econsentReviewDetailsAuditRepository.Add(audit);
             _context.Save();
 
             var project = _projectRepository.Find(econsentSetupDetails.ProjectId);

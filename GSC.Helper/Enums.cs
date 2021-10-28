@@ -153,7 +153,8 @@ namespace GSC.Helper
         [Description("User")] User = 17,
         [Description("Company")] Company = 18,
         [Description("Clent")] Client = 19,
-        [Description("Lab Management")] LabManagement = 20
+        [Description("Lab Management")] LabManagement = 20,
+        [Description("ICF Detail Report")] ICFDetailReport = 21
     }
 
     public enum AuditModule : short
@@ -481,7 +482,8 @@ namespace GSC.Helper
         [Description("Medra")] Medra = 2,
         [Description("DBDS Report")] DBDSReport = 3,
         [Description("DataEntry Audit")] DataEntryAudit = 4,
-        [Description("Project Design Audit")] ProjectDesignAudit = 5
+        [Description("Project Design Audit")] ProjectDesignAudit = 5,
+        [Description("ICF Detail Report")] ICFDetailReport = 6,
     }
 
     public enum JobTypeEnum : short
@@ -747,5 +749,13 @@ namespace GSC.Helper
         [Description("Pending")] Pending = 1,
         [Description("Reject")] Reject = 2,
         [Description("Approve")] Approve = 3
+    }
+
+    public enum ICFAction : short
+    {
+        [Description("Screened")] Screened = 1,
+        [Description("Approve")] Approve = 2,
+        //[Description("Reject")] Reject = 3,
+        [Description("Withdraw")] Withdraw = 3,
     }
 }

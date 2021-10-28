@@ -21,6 +21,7 @@ using Syncfusion.Pdf.Graphics;
 using Syncfusion.Drawing;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
+using GSC.Data.Entities.InformConcent;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -35,13 +36,15 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IProjectRepository _projectRepository;
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
 
         public EconsentReviewDetailsController(IUnitOfWork uow,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IEmailSenderRespository emailSenderRespository,
             IProjectRepository projectRepository,
             IRandomizationRepository randomizationRepository,
-            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context)
+            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context,
+            IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository)
         {
             _uow = uow;
             _context = context;
@@ -50,6 +53,7 @@ namespace GSC.Api.Controllers.InformConcent
             _projectRepository = projectRepository;
             _randomizationRepository = randomizationRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
         }
 
         [HttpGet]
@@ -123,7 +127,7 @@ namespace GSC.Api.Controllers.InformConcent
         {
             //var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
             //return Ok(json);
-            int revieId = _econsentReviewDetailsRepository.ApproveWithDrawPatient(econsentreviewdetails,false);
+            int revieId = _econsentReviewDetailsRepository.ApproveWithDrawPatient(econsentreviewdetails, false);
             return Ok(revieId);
         }
 
@@ -134,16 +138,23 @@ namespace GSC.Api.Controllers.InformConcent
         {
             //var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
             //return Ok(json);
-            var randomization = _randomizationRepository.FindBy(x=>x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
             var reviewDetails = _context.EconsentReviewDetails.Where(x => x.RandomizationId == randomization.Id && x.DeletedDate == null).ToList();
             foreach (var item in reviewDetails)
             {
                 EconsentDocumetViwerDto econcentDetails = new EconsentDocumetViwerDto();
                 econcentDetails.EconcentReviewDetailsId = item.Id;
                 econcentDetails.PatientdigitalSignBase64 = econsentreviewdetails.PatientdigitalSignBase64;
-                _econsentReviewDetailsRepository.ApproveWithDrawPatient(econcentDetails,true);
+                _econsentReviewDetailsRepository.ApproveWithDrawPatient(econcentDetails, true);
             }
             _randomizationRepository.ChangeStatustoWithdrawal();
+            //detail audit log
+            EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
+            audit.EconsentReviewDetailsId = econsentreviewdetails.EconcentReviewDetailsId;
+            audit.Activity = ICFAction.Withdraw;
+            audit.PateientStatus = randomization.PatientStatusId;
+            _econsentReviewDetailsAuditRepository.Add(audit);
+            _uow.Save();
             return Ok();
         }
 

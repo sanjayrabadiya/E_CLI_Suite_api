@@ -33,6 +33,7 @@ using GSC.Shared.Security;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Medra;
 using System.Globalization;
+using GSC.Respository.InformConcent;
 
 namespace GSC.Respository.Attendance
 {
@@ -54,6 +55,8 @@ namespace GSC.Respository.Attendance
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
+        private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
+
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -73,7 +76,8 @@ namespace GSC.Respository.Attendance
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
             IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
             IUnitOfWork uow,
-            IAppSettingRepository appSettingRepository, IUploadSettingRepository uploadSettingRepository)
+            IAppSettingRepository appSettingRepository, IUploadSettingRepository uploadSettingRepository, IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository
+            )
             : base(context)
         {
             _userRepository = userRepository;
@@ -91,6 +95,7 @@ namespace GSC.Respository.Attendance
             _environmentSetting = environmentSetting;
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
+            _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -381,6 +386,16 @@ namespace GSC.Respository.Attendance
                     IsReviewedByPatient = false,
                 }).ToList();
                 _context.EconsentReviewDetails.AddRange(reviewrecord);
+                _context.Save();
+                //add audit report  
+                foreach (var data in reviewrecord)
+                {
+                    EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
+                    audit.EconsentReviewDetailsId = data.Id;
+                    audit.Activity = ICFAction.Screened;
+                    audit.PateientStatus = data.Randomization.PatientStatusId;
+                    _econsentReviewDetailsAuditRepository.Add(audit);
+                } 
                 string documentname = string.Join(",", documentDetails.Select(x => x.DocumentName).ToArray());
                 _emailSenderRespository.SendEmailOfStartEconsent(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, documentname, study.ProjectCode);
             }

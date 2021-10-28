@@ -13,6 +13,6 @@ namespace GSC.Data.Dto.InformConcent
         public int UnReadMsgCount { get; set; }
         public bool IsLogin { get; set; }
         public string LastMessageStatus { get; set; }
-        public DateTime? SendDateTime { get; set; }
+        public string SendDateTime { get; set; }
     }
 }

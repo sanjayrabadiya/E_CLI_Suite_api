@@ -36,13 +36,15 @@ namespace GSC.Respository.InformConcent
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
         public EconsentSetupRepository(IGSCContext context,
             IProjectRepository projectRepository,
             IMapper mapper,
             IEmailSenderRespository emailSenderRespository,
             IRandomizationRepository randomizationRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
-            IUnitOfWork uow) : base(context)
+            IUnitOfWork uow,
+            IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository) : base(context)
         {
             _projectRepository = projectRepository;
             _mapper = mapper;
@@ -51,6 +53,7 @@ namespace GSC.Respository.InformConcent
             _randomizationRepository = randomizationRepository;
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _uow = uow;
+            _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
         }
 
         public string Duplicate(EconsentSetup objSave)
@@ -144,7 +147,7 @@ namespace GSC.Respository.InformConcent
         {
             //var patientstatus = _context.EconsentSetupPatientStatus.Where(x => x.EconsentDocumentId == econsent.Id).Select(x => x.PatientStatusId).ToList();
             //var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.LanguageId == econsent.LanguageId && (patientstatus.Contains((int)x.PatientStatusId) || x.PatientStatusId== ScreeningPatientStatus.ConsentInProcess ||x.PatientStatusId== ScreeningPatientStatus.ReConsentInProcess)).Include(x => x.Project).ToList();
-            var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.DeletedDate==null && x.LanguageId == econsent.LanguageId && x.PatientStatusId != ScreeningPatientStatus.Completed && x.PatientStatusId != ScreeningPatientStatus.Withdrawal && x.PatientStatusId!=ScreeningPatientStatus.PreScreening).Include(x => x.Project).ToList();
+            var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.DeletedDate==null && x.LanguageId == econsent.LanguageId && (x.PatientStatusId != ScreeningPatientStatus.Completed) && (x.PatientStatusId != ScreeningPatientStatus.Withdrawal) && (x.PatientStatusId!=ScreeningPatientStatus.PreScreening)).Include(x => x.Project).ToList();
             string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
             //for (var i = 0; i <= result.Count - 1; i++)
             foreach (var item in result)
@@ -161,6 +164,11 @@ namespace GSC.Respository.InformConcent
                 {
                     _randomizationRepository.ChangeStatustoReConsentInProgress(item.Id);
                 }
+                EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
+                audit.EconsentReviewDetailsId = econsentReviewDetails.Id;
+                audit.Activity = ICFAction.Screened;
+                audit.PateientStatus = item.PatientStatusId;
+                _econsentReviewDetailsAuditRepository.Add(audit);
                 // }
                 if (item.Email != "")
                 {

@@ -83,7 +83,7 @@ namespace GSC.Respository.InformConcent
                 IList<int> intList = new List<int>() { ch.Id, _jwtTokenAccesser.UserId };
                 var chatobj = chatdata.Where(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();//FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).OrderBy(t => t.SendDateTime).LastOrDefault();
                 ch.LastMessage = chatobj == null ? "" : EncryptionDecryption.DecryptString(chatobj.Salt, chatobj.Message);
-                ch.SendDateTime = chatobj?.SendDateTime;
+                ch.SendDateTime = chatobj?.SendDateTime==null?"": Convert.ToDateTime(chatobj?.SendDateTime).ToString("yyyy-MM-ddTHH:mm:ss");
                 ch.UnReadMsgCount = chatdata.Where(x => x.SenderId == ch.Id && x.IsRead == false).ToList().Count;
                 if (chatobj != null)
                 {

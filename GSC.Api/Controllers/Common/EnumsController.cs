@@ -603,5 +603,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(uploadlimit);
         }
+
+        [HttpGet]
+        [Route("GetICFAction")]
+        public IActionResult GetICFAction()
+        {
+            var result = Enum.GetValues(typeof(ICFAction))
+                .Cast<ICFAction>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(result);
+        }
     }
 }

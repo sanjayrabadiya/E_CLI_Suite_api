@@ -347,6 +347,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IManageMonitoringReportVariableRepository, ManageMonitoringReportVariableRepository>();
             services.AddScoped<IManageMonitoringReportVariableChildRepository, ManageMonitoringReportVariableChildRepository>();
             services.AddScoped<IManageMonitoringReportVariableAuditRepository, ManageMonitoringReportVariableAuditRepository>();
+            services.AddScoped<ISyncConfigurationRepository, SyncConfigurationRepository>();
+            services.AddScoped<IEconsentReviewDetailsAuditRepository, EconsentReviewDetailsAuditRepository>();
         }
     }
 }

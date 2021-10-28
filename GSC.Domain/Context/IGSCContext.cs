@@ -322,5 +322,7 @@ namespace GSC.Domain.Context
         DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
         DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
         DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
+        DbSet<SyncConfiguration> SyncConfiguration { get; set; }
+        DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
     }
 }

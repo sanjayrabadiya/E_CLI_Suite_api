@@ -370,6 +370,9 @@ namespace GSC.Domain.Context
         public DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
         public DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
         public DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
+        public DbSet<SyncConfiguration> SyncConfiguration { get; set; }
+        public DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
+
     }
 
 

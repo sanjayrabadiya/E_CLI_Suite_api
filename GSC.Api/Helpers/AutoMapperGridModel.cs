@@ -374,7 +374,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.TemplateName))
                 .ReverseMap();
             CreateMap<ManageMonitoringReportVariable, ManageMonitoringReportVariableDto>().ReverseMap();
-
+            CreateMap<SyncConfiguration, SyncConfigurationGridDto>().ReverseMap();
         }
     }
 }
