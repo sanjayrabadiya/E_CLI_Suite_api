@@ -10,6 +10,7 @@ using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
 using GSC.Respository.LabManagement;
+using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Shared.DocumentService;
@@ -43,6 +44,7 @@ namespace GSC.Api.Controllers.LabManagement
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IAppSettingRepository _appSettingRepository;
+        private readonly IProjectRepository _projectRepository;
 
         public LabManagementUploadDataController(
             IUnitOfWork uow, IMapper mapper,
@@ -58,6 +60,7 @@ namespace GSC.Api.Controllers.LabManagement
         IScreeningTemplateRepository screeningTemplateRepository,
         IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
         IAppSettingRepository appSettingRepository,
+        IProjectRepository projectRepository,
         IJwtTokenAccesser jwtTokenAccesser)
         {
             _uow = uow;
@@ -75,6 +78,7 @@ namespace GSC.Api.Controllers.LabManagement
             _randomizationRepository = randomizationRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _appSettingRepository = appSettingRepository;
+            _projectRepository = projectRepository;
         }
 
         // GET: api/<controller>
@@ -95,7 +99,7 @@ namespace GSC.Api.Controllers.LabManagement
             //set file path and extension
             if (labManagementUploadDataDto.FileModel?.Base64?.Length > 0)
             {
-                labManagementUploadDataDto.PathName = DocumentService.SaveUploadDocument(labManagementUploadDataDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.LabManagement, "");
+                labManagementUploadDataDto.PathName = DocumentService.SaveUploadDocument(labManagementUploadDataDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(labManagementUploadDataDto.ProjectId), FolderType.LabManagement, "");
                 labManagementUploadDataDto.MimeType = labManagementUploadDataDto.FileModel.Extension;
                 labManagementUploadDataDto.FileName = "LabManagementData_" + DateTime.Now.Ticks + "." + labManagementUploadDataDto.FileModel.Extension;
             }

@@ -6,6 +6,7 @@ using GSC.Data.Entities.LabManagement;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.LabManagement;
+using GSC.Respository.Master;
 using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
@@ -23,15 +24,19 @@ namespace GSC.Api.Controllers.LabManagement
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IProjectRepository _projectRepository;
 
         public LabManagementConfigurationController(
             ILabManagementConfigurationRepository configurationRepository,
         IUploadSettingRepository uploadSettingRepository,
+        IProjectRepository projectRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _configurationRepository = configurationRepository;
             _uploadSettingRepository = uploadSettingRepository;
+            _projectRepository = projectRepository;
+
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -92,7 +97,7 @@ namespace GSC.Api.Controllers.LabManagement
             var productRec = _configurationRepository.Find(configurationDto.Id);
             if (configurationDto.FileModel?.Base64?.Length > 0)
             {
-                configurationDto.PathName = DocumentService.SaveUploadDocument(configurationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.LabManagement, "");
+                configurationDto.PathName = DocumentService.SaveUploadDocument(configurationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(configurationDto.ProjectId), FolderType.LabManagement, "");
                 configurationDto.MimeType = configurationDto.FileModel.Extension;
                 configurationDto.FileName = "LabManagement_" + DateTime.Now.Ticks + "." + configurationDto.FileModel.Extension;
             }
