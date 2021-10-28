@@ -159,7 +159,7 @@ namespace GSC.Api.Controllers.LabManagement
                             {
                                 foreach (var r in result)
                                 {
-                                    var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == r.ScreeningNo
+                                    var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == r.ScreeningNo                              
                                                     && x.ProjectDesignTemplateId == item.LabManagementConfiguration.ProjectDesignTemplateId).FirstOrDefault();
 
                                     if (screeningTemplate != null)
@@ -188,11 +188,11 @@ namespace GSC.Api.Controllers.LabManagement
                                         };
                                         _screeningTemplateValueAuditRepository.Save(aduit);
 
-                                        // var screeningTemplateData = _screeningTemplateRepository.Find(screeningTemplate.Id);
-                                        //if (screeningTemplate.Status != Helper.ScreeningTemplateStatus.Submitted)
+                                        //if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
                                         //{
-                                        //    screeningTemplate.Status = Helper.ScreeningTemplateStatus.Submitted;
-                                        //    _screeningTemplateRepository.All.AsNoTracking().Update(screeningTemplate);
+                                        //    screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                                        //    screeningTemplate.IsDisable = false;
+                                        //    _screeningTemplateRepository.Update(screeningTemplate);
                                         //}
                                     }
                                 }
