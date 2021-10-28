@@ -678,7 +678,7 @@ namespace GSC.Respository.Screening
                     y.DataEntryStatus = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = y.ReviewLevel, Status = y.ScreeningTemplateStatus }, false, workflowlevel);
                 });
             });
-            return grpresult.Where(x => x.lstTemplate.Count > 0).ToList();
+            return grpresult.OrderBy(x => x.SubjectNo).Where(x => x.lstTemplate.Count > 0).ToList();
         }
 
 
@@ -736,12 +736,12 @@ namespace GSC.Respository.Screening
 
             Templates = Templates.Where(a => a.IsLocked == !lockUnlockDDDto.IsLock).ToList();
 
-            return Templates.Select(x => new DropDownDto
+            return Templates.GroupBy(w => w.ProjectDesignTemplateId).Select(x => new DropDownDto
             {
-                Id = x.ProjectDesignTemplateId,
-                Value = x.ProjectDesignTemplate.TemplateName,
-                ExtraData = x.ProjectDesignTemplate.DesignOrder
-            }).Distinct().OrderBy(x => x.ExtraData).ToList();
+                Id = x.FirstOrDefault().ProjectDesignTemplateId,
+                Value = x.FirstOrDefault().ProjectDesignTemplate.TemplateName,
+                ExtraData = x.FirstOrDefault().ProjectDesignTemplate.DesignOrder
+            }).OrderBy(x => x.ExtraData).ToList();
         }
 
         public IList<VisitDeviationReport> GetVisitDeviationReport(VisitDeviationReportSearchDto filters)

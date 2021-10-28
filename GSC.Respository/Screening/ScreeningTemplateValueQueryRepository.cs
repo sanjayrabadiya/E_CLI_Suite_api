@@ -405,7 +405,7 @@ namespace GSC.Respository.Screening
                 && (filters.QueryGenerateBy == null || filters.QueryGenerateBy.Contains(q.CreatedByName))
                 && (filters.DataEntryBy == null || filters.DataEntryBy.Contains(q.DataEntryByName))).ToList();
 
-            return groupbytemp;
+            return groupbytemp.OrderBy(x => x.SubjectNo).ToList();
         }
 
         public IList<QueryManagementDto> GetGenerateQueryBy(int projectId)

@@ -85,14 +85,16 @@ namespace GSC.Api.Controllers.Screening
                 var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.Id == item.ScreeningTemplateId && x.DeletedDate == null).FirstOrDefault();
 
                 if (item.IsLocked)
+                {
                     CheckEditCheck(item.ScreeningTemplateId);
 
-                string validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(item.ScreeningTemplateId);
+                    string validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(item.ScreeningTemplateId);
 
-                if (!string.IsNullOrEmpty(validateMsg))
-                {
-                    ModelState.AddModelError("Message", validateMsg);
-                    return BadRequest(ModelState);
+                    if (!string.IsNullOrEmpty(validateMsg))
+                    {
+                        ModelState.AddModelError("Message", validateMsg);
+                        return BadRequest(ModelState);
+                    }
                 }
 
                 var screeningTemplateLockUnlock = _mapper.Map<ScreeningTemplateLockUnlockAudit>(item);
