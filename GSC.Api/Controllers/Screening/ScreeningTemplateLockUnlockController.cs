@@ -80,9 +80,11 @@ namespace GSC.Api.Controllers.Screening
         [TransactionRequired]
         public IActionResult LockUnlockTemplateList([FromBody] List<ScreeningTemplateLockUnlockAuditDto> AuditList)
         {
-            foreach (var item in AuditList)
+            var screeningTemplateIds = AuditList.Select(t => t.ScreeningTemplateId).Distinct().ToList();
+
+            foreach (var x in screeningTemplateIds)
             {
-                var screeningTemplate = _screeningTemplateRepository.FindByInclude(x => x.Id == item.ScreeningTemplateId && x.DeletedDate == null).FirstOrDefault();
+                var item = AuditList.FirstOrDefault(t => t.ScreeningTemplateId == x);
 
                 if (item.IsLocked)
                 {
@@ -92,23 +94,28 @@ namespace GSC.Api.Controllers.Screening
 
                     if (!string.IsNullOrEmpty(validateMsg))
                     {
+                        _uow.Commit();
+                        _uow.Begin();
                         ModelState.AddModelError("Message", validateMsg);
                         return BadRequest(ModelState);
                     }
                 }
-
+                var screeningTemplate = _screeningTemplateRepository.Find(x);
                 var screeningTemplateLockUnlock = _mapper.Map<ScreeningTemplateLockUnlockAudit>(item);
                 _screeningTemplateLockUnlockRepository.Insert(screeningTemplateLockUnlock);
                 screeningTemplate.IsLocked = item.IsLocked;
                 _screeningTemplateRepository.Update(screeningTemplate);
-                if (_uow.Save() <= 0)
-                {
-                    throw new Exception($"Failed Lock Unlock Template");
-                }
+
+                _uow.Save();
 
                 if (!item.IsLocked)
                     CheckEditCheck(item.ScreeningTemplateId);
             }
+           
+            //foreach (var item in AuditList)
+            //{
+                
+            //}
             return Ok();
         }
 
