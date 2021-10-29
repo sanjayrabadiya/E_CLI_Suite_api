@@ -99,7 +99,7 @@ namespace GSC.Respository.Project.Design
                 Note = r.Note,
                 IsEncrypt = r.IsEncrypt,
                 EncryptRole = string.Join(", ", r.Roles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList()),
-                CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList()),
+                CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueCode + (s.ValueCode == null ? "" : "-") + s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList()),
                 DisplayValue = r.LargeStep
             }).ToList().OrderBy(x => x.VisitOrderId).ToList();
 

@@ -67,6 +67,8 @@ namespace GSC.Respository.LabManagement
                 else
                     reader = ExcelReaderFactory.CreateOpenXmlReader(streamer);
                 DataSet results = reader.AsDataSet();
+                results.Tables[0].Rows[0].Delete();
+                results.Tables[0].AcceptChanges();
                 var data = results.Tables[0].AsEnumerable().Select(r => r.Field<string>("Column8").Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
                 streamer.Dispose();
                 return (T[])(object)data.ToArray();

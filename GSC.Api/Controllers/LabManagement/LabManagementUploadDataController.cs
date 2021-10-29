@@ -36,14 +36,14 @@ namespace GSC.Api.Controllers.LabManagement
         private readonly ILabManagementConfigurationRepository _configurationRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly ILabManagementUploadExcelDataRepository _labManagementUploadExcelDataRepository;
-        private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
-        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
-        private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IScreeningTemplateRepository _screeningTemplateRepository;
-        private readonly IScreeningVisitRepository _screeningVisitRepository;
-        private readonly IRandomizationRepository _randomizationRepository;
-        private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
-        private readonly IAppSettingRepository _appSettingRepository;
+        //private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
+        //private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
+        //private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
+        //private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        //private readonly IScreeningVisitRepository _screeningVisitRepository;
+        //private readonly IRandomizationRepository _randomizationRepository;
+        //private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
+        //private readonly IAppSettingRepository _appSettingRepository;
         private readonly IProjectRepository _projectRepository;
 
         public LabManagementUploadDataController(
@@ -52,14 +52,14 @@ namespace GSC.Api.Controllers.LabManagement
              ILabManagementConfigurationRepository configurationRepository,
         IUploadSettingRepository uploadSettingRepository,
         ILabManagementUploadExcelDataRepository labManagementUploadExcelDataRepository,
-         ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
-         IProjectDesignVariableRepository projectDesignVariableRepository,
-         IScreeningTemplateValueRepository screeningTemplateValueRepository,
-         IScreeningVisitRepository screeningVisitRepository,
-        IRandomizationRepository randomizationRepository,
-        IScreeningTemplateRepository screeningTemplateRepository,
-        IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
-        IAppSettingRepository appSettingRepository,
+        // ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
+        // IProjectDesignVariableRepository projectDesignVariableRepository,
+        // IScreeningTemplateValueRepository screeningTemplateValueRepository,
+        // IScreeningVisitRepository screeningVisitRepository,
+        //IRandomizationRepository randomizationRepository,
+        //IScreeningTemplateRepository screeningTemplateRepository,
+        //IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
+        //IAppSettingRepository appSettingRepository,
         IProjectRepository projectRepository,
         IJwtTokenAccesser jwtTokenAccesser)
         {
@@ -70,14 +70,14 @@ namespace GSC.Api.Controllers.LabManagement
             _labManagementUploadDataRepository = labManagementUploadDataRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _labManagementUploadExcelDataRepository = labManagementUploadExcelDataRepository;
-            _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
-            _projectDesignVariableRepository = projectDesignVariableRepository;
-            _screeningTemplateValueRepository = screeningTemplateValueRepository;
-            _screeningTemplateRepository = screeningTemplateRepository;
-            _screeningVisitRepository = screeningVisitRepository;
-            _randomizationRepository = randomizationRepository;
-            _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
-            _appSettingRepository = appSettingRepository;
+            //_labManagementVariableMappingRepository = labManagementVariableMappingRepository;
+            //_projectDesignVariableRepository = projectDesignVariableRepository;
+            //_screeningTemplateValueRepository = screeningTemplateValueRepository;
+            //_screeningTemplateRepository = screeningTemplateRepository;
+            //_screeningVisitRepository = screeningVisitRepository;
+            //_randomizationRepository = randomizationRepository;
+            //_screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
+            //_appSettingRepository = appSettingRepository;
             _projectRepository = projectRepository;
         }
 
@@ -136,74 +136,79 @@ namespace GSC.Api.Controllers.LabManagement
 
             if (labManagementUploadDataDto.LabManagementUploadStatus == LabManagementUploadStatus.Approve)
             {
-                var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
-                GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
+                _labManagementUploadDataRepository.InsertDataIntoDataEntry(labManagementUpload);
 
-                // variable mapping data
-                var MappingData = _labManagementVariableMappingRepository.All.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId
-                 && x.DeletedDate == null)
-                    .Include(x => x.LabManagementConfiguration)
-                    .ThenInclude(x => x.ProjectDesignTemplate)
-                    .ToList();
+                #region Comment
+                //var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+                //GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
 
-                if (MappingData != null)
-                {
-                    // Upload Excel sheet data
-                    var ExcelData = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id).ToList();
+                //// variable mapping data
+                //var MappingData = _labManagementVariableMappingRepository.All.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId
+                // && x.DeletedDate == null)
+                //    .Include(x => x.LabManagementConfiguration)
+                //    .ThenInclude(x => x.ProjectDesignTemplate)
+                //    .ToList();
 
-                    if (ExcelData != null)
-                    {
-                        foreach (var item in MappingData)
-                        {
-                            // filter Excel data
-                            var result = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id && x.TestName == item.TargetVariable).ToList();
-                            var dataType = _projectDesignVariableRepository.Find(item.ProjectDesignVariableId).CollectionSource;
+                //if (MappingData != null)
+                //{
+                //    // Upload Excel sheet data
+                //    var ExcelData = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id).ToList();
 
-                            if (result != null)
-                            {
-                                foreach (var r in result)
-                                {
-                                    var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == r.ScreeningNo                              
-                                                    && x.ProjectDesignTemplateId == item.LabManagementConfiguration.ProjectDesignTemplateId).FirstOrDefault();
+                //    if (ExcelData != null)
+                //    {
+                //        foreach (var item in MappingData)
+                //        {
+                //            // filter Excel data
+                //            var result = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id && x.TestName == item.TargetVariable).ToList();
+                //            var dataType = _projectDesignVariableRepository.Find(item.ProjectDesignVariableId).CollectionSource;
 
-                                    if (screeningTemplate != null)
-                                    {
-                                        ScreeningTemplateValue obj = new ScreeningTemplateValue();
-                                        obj.ScreeningTemplateId = screeningTemplate.Id;
-                                        obj.ProjectDesignVariableId = item.ProjectDesignVariableId;
-                                        if (dataType == CollectionSources.Date || dataType == CollectionSources.DateTime || dataType == CollectionSources.Time)
-                                        {
-                                            DateTime dDate;
-                                            string variablevalueformat = r.Result;
-                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                            obj.Value = dt;
-                                        }
-                                        else
-                                            obj.Value = r.Result;
-                                        obj.ReviewLevel = 0;
-                                        obj.IsNa = false;
-                                        obj.IsSystem = false;
-                                        _screeningTemplateValueRepository.Add(obj);
+                //            if (result != null)
+                //            {
+                //                foreach (var r in result)
+                //                {
+                //                    var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == r.ScreeningNo                              
+                //                                    && x.ProjectDesignTemplateId == item.LabManagementConfiguration.ProjectDesignTemplateId).FirstOrDefault();
 
-                                        var aduit = new ScreeningTemplateValueAudit
-                                        {
-                                            ScreeningTemplateValue = obj,
-                                            Value = r.Result
-                                        };
-                                        _screeningTemplateValueAuditRepository.Save(aduit);
+                //                    if (screeningTemplate != null)
+                //                    {
+                //                        ScreeningTemplateValue obj = new ScreeningTemplateValue();
+                //                        obj.ScreeningTemplateId = screeningTemplate.Id;
+                //                        obj.ProjectDesignVariableId = item.ProjectDesignVariableId;
+                //                        if (dataType == CollectionSources.Date || dataType == CollectionSources.DateTime || dataType == CollectionSources.Time)
+                //                        {
+                //                            DateTime dDate;
+                //                            string variablevalueformat = r.Result;
+                //                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                //                            obj.Value = dt;
+                //                        }
+                //                        else
+                //                            obj.Value = r.Result;
+                //                        obj.ReviewLevel = 0;
+                //                        obj.IsNa = false;
+                //                        obj.IsSystem = false;
+                //                        obj.LabManagementUploadExcelDataId = r.Id;
+                //                        _screeningTemplateValueRepository.Add(obj);
 
-                                        //if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
-                                        //{
-                                        //    screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
-                                        //    screeningTemplate.IsDisable = false;
-                                        //    _screeningTemplateRepository.Update(screeningTemplate);
-                                        //}
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                //                        var aduit = new ScreeningTemplateValueAudit
+                //                        {
+                //                            ScreeningTemplateValue = obj,
+                //                            Value = r.Result
+                //                        };
+                //                        _screeningTemplateValueAuditRepository.Save(aduit);
+
+                //                        //if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
+                //                        //{
+                //                        //    screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                //                        //    screeningTemplate.IsDisable = false;
+                //                        //    _screeningTemplateRepository.Update(screeningTemplate);
+                //                        //}
+                //                    }
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
+                #endregion Comment
             }
             _labManagementUploadDataRepository.Update(labManagementUpload);
 

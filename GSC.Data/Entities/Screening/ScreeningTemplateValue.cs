@@ -37,6 +37,7 @@ namespace GSC.Data.Entities.Screening
         [ForeignKey("UserRoleId")] 
         public SecurityRole SecurityRole { get; set; }
         public bool IsSystem { get; set; }
+        public int? LabManagementUploadExcelDataId { get; set; }
     }
 
 

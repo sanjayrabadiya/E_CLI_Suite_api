@@ -2,11 +2,17 @@
 using AutoMapper.QueryableExtensions;
 using ExcelDataReader;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.LabManagement;
+using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.Project.Design;
+using GSC.Respository.Screening;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -22,31 +28,52 @@ namespace GSC.Respository.LabManagement
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IAppSettingRepository _appSettingRepository;
+        private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
+        private readonly ILabManagementUploadExcelDataRepository _labManagementUploadExcelDataRepository;
+        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
+        private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
+        private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
 
         public LabManagementUploadDataRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository,
+            ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
+            ILabManagementUploadExcelDataRepository labManagementUploadExcelDataRepository,
+            IProjectDesignVariableRepository projectDesignVariableRepository,
+         IScreeningTemplateValueRepository screeningTemplateValueRepository,
+        IScreeningTemplateRepository screeningTemplateRepository,
+        IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
+            IAppSettingRepository appSettingRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
             _uploadSettingRepository = uploadSettingRepository;
+            _appSettingRepository = appSettingRepository;
+            _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
+            _labManagementUploadExcelDataRepository = labManagementUploadExcelDataRepository;
+            _projectDesignVariableRepository = projectDesignVariableRepository;
+            _screeningTemplateValueRepository = screeningTemplateValueRepository;
+            _screeningTemplateRepository = screeningTemplateRepository;
+            _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
         }
 
         public List<LabManagementUploadDataGridDto> GetUploadDataList(bool isDeleted)
         {
-            var result= All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<LabManagementUploadDataGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            var documentUrl = _uploadSettingRepository.GetDocumentPath();
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             result.ForEach(t => t.FullPath = documentUrl + t.PathName);
             return result;
         }
 
-        //Upload data insert into database
-        public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto) 
+        // Upload excel data insert into database
+        public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto)
         {
             var documentUrl = _uploadSettingRepository.GetDocumentPath();
-            string pathname = documentUrl + labManagementUploadDataDto.FileName;
+            string pathname = documentUrl + labManagementUploadDataDto.PathName;
             FileStream streamer = new FileStream(pathname, FileMode.Open);
             IExcelDataReader reader = null;
             if (Path.GetExtension(pathname) == ".xls")
@@ -81,9 +108,93 @@ namespace GSC.Respository.LabManagement
                 obj.CreatedDate = _jwtTokenAccesser.GetClientDate();
                 objLst.Add(obj);
             }
-           // _context.LabManagementUploadExcelData.AddRange(objLst);
+            // _context.LabManagementUploadExcelData.AddRange(objLst);
             streamer.Dispose();
             return objLst;
+        }
+
+        // Insert data into data entry screening template, screening template value and screening template audit
+        public void InsertDataIntoDataEntry(LabManagementUploadData labManagementUpload)
+        {
+            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+            GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
+
+            // variable mapping data
+            var MappingData = _labManagementVariableMappingRepository.All
+                    .Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId && x.DeletedDate == null)
+                    .Include(x => x.LabManagementConfiguration)
+                    .ThenInclude(x => x.ProjectDesignTemplate)
+                    .ToList();
+
+            if (MappingData != null)
+            {
+                // Upload Excel sheet data
+                var ExcelData = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id).ToList();
+
+                if (ExcelData != null)
+                {
+                    foreach (var item in MappingData)
+                    {
+                        // filter Excel data
+                        var result = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id && x.TestName == item.TargetVariable).ToList();
+                        var dataType = _projectDesignVariableRepository.Find(item.ProjectDesignVariableId).CollectionSource;
+
+                        if (result != null)
+                        {
+                            foreach (var r in result)
+                            {
+                                // get scrreening template Id by screening number and project design template id
+                                var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == r.ScreeningNo
+                                                && x.ProjectDesignTemplateId == item.LabManagementConfiguration.ProjectDesignTemplateId).FirstOrDefault();
+
+                                if (screeningTemplate != null)
+                                {
+                                    // insert screening template value
+                                    ScreeningTemplateValue obj = new ScreeningTemplateValue();
+                                    obj.ScreeningTemplateId = screeningTemplate.Id;
+                                    obj.ProjectDesignVariableId = item.ProjectDesignVariableId;
+                                    // set date time format
+                                    if (dataType == CollectionSources.Date || dataType == CollectionSources.DateTime || dataType == CollectionSources.Time)
+                                    {
+                                        DateTime dDate;
+                                        string variablevalueformat = r.Result;
+                                        var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                                                                    .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                        obj.Value = dt;
+                                    }
+                                    else
+                                        obj.Value = r.Result;
+                                    obj.ReviewLevel = 0;
+                                    obj.IsNa = false;
+                                    obj.IsSystem = false;
+                                    obj.LabManagementUploadExcelDataId = r.Id;
+                                    _screeningTemplateValueRepository.Add(obj);
+
+                                    // insert screening template value audit
+                                    var aduit = new ScreeningTemplateValueAudit
+                                    {
+                                        ScreeningTemplateValue = obj,
+                                        Value = r.Result
+                                    };
+                                    _screeningTemplateValueAuditRepository.Save(aduit);
+
+                                    // update screening template status
+                                    //if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
+                                    //{
+                                    //    screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                                    //    screeningTemplate.IsDisable = false;
+                                    //    _screeningTemplateRepository.Update(screeningTemplate);
+                                    //}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                
+            }
         }
     }
 }

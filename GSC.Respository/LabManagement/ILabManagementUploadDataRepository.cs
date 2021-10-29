@@ -9,5 +9,7 @@ namespace GSC.Respository.LabManagement
     {
         List<LabManagementUploadDataGridDto> GetUploadDataList(bool isDeleted);
         List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto);
+        // Insert data into data entry screening template, screening template value and screening template audit
+        void InsertDataIntoDataEntry(LabManagementUploadData labManagementUpload);
     }
 }

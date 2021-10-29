@@ -33,8 +33,8 @@ namespace GSC.Respository.LabManagement
             {
                 item.DeletedBy = _jwtTokenAccesser.UserId;
                 item.DeletedDate = _jwtTokenAccesser.GetClientDate();
-                item.Reason = mappingDto.Reason;
-                item.Comment = mappingDto.Comment;
+                item.AuditReasonId = mappingDto.AuditReasonId;
+                item.ReasonOth = mappingDto.ReasonOth;
                 Update(item);
             }
             _context.Save();
