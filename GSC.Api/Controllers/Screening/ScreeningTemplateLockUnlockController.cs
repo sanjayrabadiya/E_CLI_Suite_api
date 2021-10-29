@@ -4,17 +4,12 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
-using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
-using GSC.Respository.Project.EditCheck;
-using GSC.Respository.Project.Schedule;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.Screening;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -88,9 +83,9 @@ namespace GSC.Api.Controllers.Screening
 
                 if (item.IsLocked)
                 {
-                    CheckEditCheck(item.ScreeningTemplateId);
+                    CheckEditCheck(x);
 
-                    string validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(item.ScreeningTemplateId);
+                    string validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(x);
 
                     if (!string.IsNullOrEmpty(validateMsg))
                     {
@@ -111,17 +106,13 @@ namespace GSC.Api.Controllers.Screening
                 if (!item.IsLocked)
                     CheckEditCheck(item.ScreeningTemplateId);
             }
-           
-            //foreach (var item in AuditList)
-            //{
-                
-            //}
+         
             return Ok();
         }
 
         void CheckEditCheck(int id)
         {
-            _screeningTemplateRepository.SubmitReviewTemplate(id, true);
+            _screeningTemplateRepository.SubmitReviewTemplate(id, false);
             _uow.Save();
         }
 
