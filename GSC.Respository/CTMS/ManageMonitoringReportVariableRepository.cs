@@ -37,6 +37,7 @@ namespace GSC.Respository.CTMS
 
             designTemplateDto.VariableTemplateId = reportTemplateId;
             designTemplateDto.ManageMonitoringReportId = ManageMonitoringReportId;
+            designTemplateDto.ProjectId = ManageMonitoringTemplateBasic.ProjectId;
 
             var values = GetVariableValues(ManageMonitoringTemplateBasic.Id);
 
@@ -75,6 +76,7 @@ namespace GSC.Respository.CTMS
                {
                    Id = c.Id,
                    ManageMonitoringVisitId = c.ManageMonitoringVisitId,
+                   ProjectId = c.ManageMonitoringVisit.ProjectId,
                    VariableTemplateId = c.VariableTemplateId,
                }).FirstOrDefault();
         }

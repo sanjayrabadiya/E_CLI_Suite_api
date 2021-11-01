@@ -48,14 +48,15 @@ namespace GSC.Respository.CTMS
             var result = visit.Select(x => new ManageMonitoringReportGridDto
             {
                 Id = ManageMonitoringReport.Any(t => t.ManageMonitoringVisitId == x.Id) ? ManageMonitoringReport.Where(t => t.ManageMonitoringVisitId == x.Id).LastOrDefault().Id : 0,
+                ProjectId = x.ProjectId,
                 ManageMonitoringVisitId = x.Id,
                 Status = MonitoringReportStatus.NotInitiated.GetDescription(),
                 StatusId = MonitoringReportStatus.NotInitiated,
                 ActualStartDate = x.ActualStartDate,
                 ActualEndDate = x.ActualEndDate,
                 ActivityName = x.Activity.ActivityName,
-                VariableTemplate = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).FirstOrDefault().TemplateName,
-                VariableTemplateId = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).FirstOrDefault().Id
+                VariableTemplate = _variableTemplateRepository.All.Any(t => t.ActivityId == x.ActivityId) ? _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).FirstOrDefault().TemplateName : "",
+                VariableTemplateId = _variableTemplateRepository.All.Any(t => t.ActivityId == x.ActivityId) ? _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).FirstOrDefault().Id : 0
             }).ToList();
 
             return result;

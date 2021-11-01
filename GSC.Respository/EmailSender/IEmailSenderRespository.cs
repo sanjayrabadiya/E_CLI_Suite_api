@@ -26,5 +26,7 @@ namespace GSC.Respository.EmailSender
         void SendOfflineChatNotification(string toMail, string userName);
         void SendWithDrawEmail(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
         public void SendEmailOfRejectedDocumenttoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath);
+        void SendEmailOfTemplateReview(string toMail, string userName, string activity, string template, string project);
+        void SendEmailOfTemplateSendBack(string toMail, string userName, string activity, string template, string ProjectName);
     }
 }

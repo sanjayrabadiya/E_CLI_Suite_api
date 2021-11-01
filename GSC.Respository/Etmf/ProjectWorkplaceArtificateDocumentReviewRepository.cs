@@ -27,7 +27,6 @@ namespace GSC.Respository.Etmf
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        //private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
@@ -36,7 +35,6 @@ namespace GSC.Respository.Etmf
 
         public ProjectWorkplaceArtificateDocumentReviewRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
-           //IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
            IEmailSenderRespository emailSenderRespository,
            IUserRepository userRepository,
@@ -47,7 +45,6 @@ namespace GSC.Respository.Etmf
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
-            //_projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;

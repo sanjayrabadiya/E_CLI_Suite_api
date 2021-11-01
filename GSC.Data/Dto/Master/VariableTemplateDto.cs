@@ -64,6 +64,7 @@ namespace GSC.Data.Dto.Master
         public int DesignOrder { get; set; }
         public IList<ManageMonitoringVariableDto> Variables { get; set; }
         public int ManageMonitoringReportId { get; set; }
+        public int ProjectId { get; set; }
         public List<string> Notes { get; set; }
         public List<VariableTemplateDetail> VariableTemplateDetails { get; set; }
     }

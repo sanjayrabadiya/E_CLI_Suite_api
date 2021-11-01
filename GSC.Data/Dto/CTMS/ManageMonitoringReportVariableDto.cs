@@ -15,6 +15,7 @@ namespace GSC.Data.Dto.CTMS
         public bool IsNa { get; set; }
         public string ValueName { get; set; }
         public string OldValue { get; set; }
+        public int ManageMonitoringReportVariableId { get; set; }
         public ManageMonitoringReport ManageMonitoringReport { get; set; }
         public ICollection<ManageMonitoringReportVariableChildDto> Children { get; set; }
     }

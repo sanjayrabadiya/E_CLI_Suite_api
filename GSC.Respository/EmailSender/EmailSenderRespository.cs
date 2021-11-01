@@ -96,11 +96,27 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendEmailOfTemplateReview(string toMail, string userName, string activity, string template, string project)
+        {
+            var emailMessage = ConfigureEmail("TemplateReview", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForTemplate(emailMessage.MessageBody, userName, activity, template, project);
+            _emailService.SendMail(emailMessage);
+        }
+
         public void SendEmailOfSendBack(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
         {
             var emailMessage = ConfigureEmail("ArtificateSendBack", userName);
             emailMessage.SendTo = toMail;
             emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName);
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void SendEmailOfTemplateSendBack(string toMail, string userName, string activity, string template, string ProjectName)
+        {
+            var emailMessage = ConfigureEmail("TemplateSendBack", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, activity, template, ProjectName);
             _emailService.SendMail(emailMessage);
         }
 
@@ -340,6 +356,26 @@ namespace GSC.Respository.EmailSender
 
             body = Regex.Replace(body, "##artificateName##", artificateName, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>artificateName</strong>##", "<strong>" + artificateName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##projectName##", projectName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>projectName</strong>##", "<strong>" + projectName + "</strong>",
+                RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceBodyForTemplate(string body, string userName, string activityName, string formName, string projectName)
+        {
+            body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##activityName##", activityName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>activityName</strong>##", "<strong>" + activityName + "</strong>",
+                RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##formName##", formName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>formName</strong>##", "<strong>" + formName + "</strong>",
                 RegexOptions.IgnoreCase);
 
             body = Regex.Replace(body, "##projectName##", projectName, RegexOptions.IgnoreCase);

@@ -375,6 +375,7 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
             CreateMap<ManageMonitoringReportVariable, ManageMonitoringReportVariableDto>().ReverseMap();
             CreateMap<SyncConfiguration, SyncConfigurationGridDto>().ReverseMap();
+            CreateMap<ManageMonitoringReportReview, ManageMonitoringReportReviewDto>().ReverseMap();
         }
     }
 }

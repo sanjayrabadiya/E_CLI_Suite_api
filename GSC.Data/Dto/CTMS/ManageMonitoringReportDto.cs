@@ -24,11 +24,13 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? ActualStartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
         public int ManageMonitoringVisitId { get; set; }
+        public int ProjectId { get; set; }
     }
 
     public class ManageMonitoringTemplateBasic
     {
         public int Id { get; set; }
+        public int ProjectId { get; set; }
         public int ManageMonitoringVisitId { get; set; }
         public int VariableTemplateId { get; set; }
     }
