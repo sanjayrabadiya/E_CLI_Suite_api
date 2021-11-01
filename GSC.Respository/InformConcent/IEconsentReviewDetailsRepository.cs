@@ -24,6 +24,6 @@ namespace GSC.Respository.InformConcent
         List<EconsentDocumentDetailsDto> GetEconsentReviewDetailsForPatientDashboard();
         int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
         int ApproveRejectEconsentDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
-        int ApproveWithDrawPatient(EconsentDocumetViwerDto econsentReviewDetailsDto, bool isWithdraw);
+        int ApproveWithDrawPatient(EconsentDocumetViwerDto econsentReviewDetailsDto, bool isWithdraw);        
     }
 }
