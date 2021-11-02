@@ -89,12 +89,15 @@ namespace GSC.Api.Controllers.LabManagement
         }
 
         [HttpPost]
+        [TransactionRequired]
         public IActionResult Post([FromBody] LabManagementUploadDataDto labManagementUploadDataDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             labManagementUploadDataDto.Id = 0;
-
-            labManagementUploadDataDto.LabManagementConfigurationId = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId).FirstOrDefault().Id;
+             
+            var LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId).FirstOrDefault();
+            
+            labManagementUploadDataDto.LabManagementConfigurationId = LabManagementConfiguration.Id;
 
             //set file path and extension
             if (labManagementUploadDataDto.FileModel?.Base64?.Length > 0)
@@ -108,15 +111,21 @@ namespace GSC.Api.Controllers.LabManagement
             var labManagementUploadData = _mapper.Map<LabManagementUploadData>(labManagementUploadDataDto);
 
             //Upload Excel data into database table
-            var ExcelData = _labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadDataDto);
-            labManagementUploadData.LabManagementUploadExcelDatas = ExcelData;
+            var validate = _labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadData);
 
-            _labManagementUploadDataRepository.Add(labManagementUploadData);
-
-            foreach (var item in labManagementUploadData.LabManagementUploadExcelDatas)
+            if (!string.IsNullOrEmpty(validate))
             {
-                _labManagementUploadExcelDataRepository.Add(item);
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
             }
+            //labManagementUploadData.LabManagementUploadExcelDatas = ExcelData;
+
+            //_labManagementUploadDataRepository.Add(labManagementUploadData);
+
+            //foreach (var item in labManagementUploadData.LabManagementUploadExcelDatas)
+            //{
+            //    _labManagementUploadExcelDataRepository.Add(item);
+            //}
 
             if (_uow.Save() <= 0) throw new Exception("Creating updaload data failed on save.");
             return Ok(labManagementUploadData.Id);

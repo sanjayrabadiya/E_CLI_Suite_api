@@ -8,7 +8,7 @@ namespace GSC.Respository.LabManagement
     public interface ILabManagementUploadDataRepository : IGenericRepository<LabManagementUploadData>
     {
         List<LabManagementUploadDataGridDto> GetUploadDataList(bool isDeleted);
-        List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto);
+        string InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData);
         // Insert data into data entry screening template, screening template value and screening template audit
         void InsertDataIntoDataEntry(LabManagementUploadData labManagementUpload);
         string CheckDataIsUploadForDeleteConfiguration(int Id);

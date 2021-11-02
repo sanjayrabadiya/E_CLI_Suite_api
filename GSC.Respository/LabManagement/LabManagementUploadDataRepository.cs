@@ -70,10 +70,17 @@ namespace GSC.Respository.LabManagement
         }
 
         // Upload excel data insert into database
-        public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto)
+        //public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData)
+        public string InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData)
         {
+            if (!_labManagementVariableMappingRepository.All.Any(x => x.LabManagementConfigurationId == labManagementUploadData.LabManagementConfigurationId && x.DeletedDate == null))
+                return "You can not upload excel data before mapping variable in configuration.";
+
+            // Add Lab Management Upload Data and status
+            Add(labManagementUploadData);
+
             var documentUrl = _uploadSettingRepository.GetDocumentPath();
-            string pathname = documentUrl + labManagementUploadDataDto.PathName;
+            string pathname = documentUrl + labManagementUploadData.PathName;
             FileStream streamer = new FileStream(pathname, FileMode.Open);
             IExcelDataReader reader = null;
             if (Path.GetExtension(pathname) == ".xls")
@@ -110,7 +117,15 @@ namespace GSC.Respository.LabManagement
             }
             // _context.LabManagementUploadExcelData.AddRange(objLst);
             streamer.Dispose();
-            return objLst;
+            labManagementUploadData.LabManagementUploadExcelDatas = objLst;
+
+            // Add Lab Management Upload excel Data into db table
+            foreach (var item in labManagementUploadData.LabManagementUploadExcelDatas)
+            {
+                _labManagementUploadExcelDataRepository.Add(item);
+            }
+            return "";
+           // return objLst;
         }
 
         // Insert data into data entry screening template, screening template value and screening template audit
@@ -179,12 +194,12 @@ namespace GSC.Respository.LabManagement
                                     _screeningTemplateValueAuditRepository.Save(aduit);
 
                                     // update screening template status
-                                    //if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
-                                    //{
-                                    //    screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
-                                    //    screeningTemplate.IsDisable = false;
-                                    //    _screeningTemplateRepository.Update(screeningTemplate);
-                                    //}
+                                    if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
+                                    {
+                                        screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                                        screeningTemplate.IsDisable = false;
+                                        _screeningTemplateRepository.Update(screeningTemplate);
+                                    }
                                 }
                             }
                         }
