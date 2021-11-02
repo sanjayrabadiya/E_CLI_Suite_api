@@ -47,7 +47,7 @@ namespace GSC.Respository.LabManagement
         public string Duplicate(LabManagementConfiguration objSave)
         {
             if (All.Any(x => x.Id != objSave.Id && x.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId && x.MimeType == objSave.MimeType && x.DeletedDate == null))
-                return "Duplicate File format for: " + objSave.ProjectDesignTemplate.TemplateCode;
+                return "You already configure this template, Please configure unique template mapping.";
             return "";
         }
 
