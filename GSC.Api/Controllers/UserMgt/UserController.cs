@@ -301,6 +301,11 @@ namespace GSC.Api.Controllers.UserMgt
                         return BadRequest(ModelState);
                     }
                 }
+                var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null).FirstOrDefault();
+                user.IsFirstTime = false;
+                user.IsLogin = false;
+                _userRepository.Update(user);
+                _uow.Save();
                 return Ok();
             }
             else
