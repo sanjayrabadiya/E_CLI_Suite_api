@@ -127,17 +127,19 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
 
             CreateMap<Randomization, RandomizationGridDto>()
-                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
-                .ForMember(x => x.CountryId, x => x.MapFrom(a => a.City.State.Country.Id))
-                .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
-                .ForMember(x => x.StateId, x => x.MapFrom(a => a.City.State.Id))
-                .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
-                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
-                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
-                 .ForMember(x => x.Language, x => x.MapFrom(a => a.Language.LanguageName))
-                 .ForMember(x => x.Gen, x => x.MapFrom(a => a.Gender.GetDescription()))
-                 .ForMember(x => x.LegalRelationship, x => x.MapFrom(a => a.LegalRelationship.GetDescription()))
-                 .ForMember(x => x.PatientStatusName, x => x.MapFrom(a => a.PatientStatusId.GetDescription())).ReverseMap();
+               .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
+               .ForMember(x => x.CountryId, x => x.MapFrom(a => a.City.State.Country.Id))
+               .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
+               .ForMember(x => x.StateId, x => x.MapFrom(a => a.City.State.Id))
+               .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
+                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
+                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ForMember(x => x.Language, x => x.MapFrom(a => a.Language.LanguageName))
+                .ForMember(x => x.Gen, x => x.MapFrom(a => a.Gender.GetDescription()))
+                .ForMember(x => x.LegalRelationship, x => x.MapFrom(a => a.LegalRelationship.GetDescription()))
+                .ForMember(x => x.PatientStatusName, x => x.MapFrom(a => a.PatientStatusId.GetDescription()))
+                .ForMember(x => x.IsFirstTime, x => x.MapFrom(a => a.User == null ? false : a.User.IsFirstTime))
+                .ReverseMap();
 
             CreateMap<ProjectWorkplace, ETMFWorkplaceGridDto>()
                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))

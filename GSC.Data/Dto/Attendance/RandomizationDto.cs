@@ -110,6 +110,7 @@ namespace GSC.Data.Dto.Attendance
         public int? ZipCode { get; set; }
         public int? UserId { get; set; }
         public string Gen { get; set; }
+        public bool IsFirstTime { get; set; }
 
     }
 

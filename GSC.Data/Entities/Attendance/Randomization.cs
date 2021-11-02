@@ -8,6 +8,7 @@ using GSC.Common.Common;
 using GSC.Shared.Extension;
 using System.Collections.Generic;
 using GSC.Data.Entities.InformConcent;
+using GSC.Data.Entities.UserMgt;
 
 namespace GSC.Data.Entities.Attendance
 {
@@ -59,5 +60,6 @@ namespace GSC.Data.Entities.Attendance
         public string WithdrawSignaturePath { get; set; }
         public int? UserId { get; set; }
         public List<EconsentReviewDetails> EconsentReviewDetails { get; set; }
+        public User User { get; set; }
     }
 }
