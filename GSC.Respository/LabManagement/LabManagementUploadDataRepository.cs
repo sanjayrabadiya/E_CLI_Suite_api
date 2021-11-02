@@ -189,17 +189,18 @@ namespace GSC.Respository.LabManagement
                                     var aduit = new ScreeningTemplateValueAudit
                                     {
                                         ScreeningTemplateValue = obj,
-                                        Value = r.Result
+                                        Value = r.Result,
+                                        Note = "Added by Lab management"
                                     };
                                     _screeningTemplateValueAuditRepository.Save(aduit);
-
+                                  //  _context.DetachAllEntities();
                                     // update screening template status
-                                    if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
-                                    {
-                                        screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
-                                        screeningTemplate.IsDisable = false;
-                                        _screeningTemplateRepository.Update(screeningTemplate);
-                                    }
+                                    //if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
+                                    //{
+                                    //    screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                                    //    screeningTemplate.IsDisable = false;
+                                    //    _screeningTemplateRepository.Update(screeningTemplate);
+                                    //}
                                 }
                             }
                         }
