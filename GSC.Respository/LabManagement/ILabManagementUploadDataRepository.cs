@@ -11,5 +11,7 @@ namespace GSC.Respository.LabManagement
         List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadDataDto labManagementUploadDataDto);
         // Insert data into data entry screening template, screening template value and screening template audit
         void InsertDataIntoDataEntry(LabManagementUploadData labManagementUpload);
+        string CheckDataIsUploadForDeleteConfiguration(int Id);
+        string CheckDataIsUploadForRemapping(int Id);
     }
 }

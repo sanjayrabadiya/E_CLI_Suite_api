@@ -17,15 +17,18 @@ namespace GSC.Api.Controllers.LabManagement
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
+        private readonly ILabManagementUploadDataRepository _labManagementUploadDataRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public LabManagementVariableMappingController(
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
+            ILabManagementUploadDataRepository labManagementUploadDataRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
+            _labManagementUploadDataRepository = labManagementUploadDataRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -75,6 +78,14 @@ namespace GSC.Api.Controllers.LabManagement
         public IActionResult Put([FromBody] LabManagementVariableMappingDto mappingDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var Exists = _labManagementUploadDataRepository.CheckDataIsUploadForRemapping(mappingDto.LabManagementConfigurationId);
+            if (!string.IsNullOrEmpty(Exists))
+            {
+                ModelState.AddModelError("Message", Exists);
+                return BadRequest(ModelState);
+            }
+
             _labManagementVariableMappingRepository.DeleteMapping(mappingDto);
             return Ok();
         }

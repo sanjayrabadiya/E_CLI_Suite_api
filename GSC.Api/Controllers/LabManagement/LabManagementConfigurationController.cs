@@ -21,6 +21,7 @@ namespace GSC.Api.Controllers.LabManagement
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILabManagementConfigurationRepository _configurationRepository;
+        private readonly ILabManagementUploadDataRepository _labManagementUploadDataRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
@@ -28,6 +29,7 @@ namespace GSC.Api.Controllers.LabManagement
 
         public LabManagementConfigurationController(
             ILabManagementConfigurationRepository configurationRepository,
+            ILabManagementUploadDataRepository labManagementUploadDataRepository,
         IUploadSettingRepository uploadSettingRepository,
         IProjectRepository projectRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -36,6 +38,7 @@ namespace GSC.Api.Controllers.LabManagement
             _configurationRepository = configurationRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _projectRepository = projectRepository;
+            _labManagementUploadDataRepository = labManagementUploadDataRepository;
 
             _uow = uow;
             _mapper = mapper;
@@ -130,6 +133,14 @@ namespace GSC.Api.Controllers.LabManagement
 
             if (record == null)
                 return NotFound();
+
+            var Exists = _labManagementUploadDataRepository.CheckDataIsUploadForDeleteConfiguration(id);
+            if (!string.IsNullOrEmpty(Exists))
+            {
+                ModelState.AddModelError("Message", Exists);
+                return BadRequest(ModelState);
+            }
+
 
             _configurationRepository.Delete(record);
             _uow.Save();

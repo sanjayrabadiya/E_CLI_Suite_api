@@ -196,5 +196,21 @@ namespace GSC.Respository.LabManagement
                 
             }
         }
+
+        // Add by vipul for check configuration already use in upload data or not
+        public string CheckDataIsUploadForDeleteConfiguration(int Id)
+        {
+            if (All.Any(x => x.LabManagementConfigurationId == Id && x.DeletedDate == null))
+                return "You can not delete configuration due to already upload excel data.";
+            return "";
+        }
+
+        // Add by vipul for check configuration already use in upload data and status
+        public string CheckDataIsUploadForRemapping(int Id)
+        {
+            if (All.Any(x => x.LabManagementConfigurationId == Id && x.DeletedDate == null && x.LabManagementUploadStatus == LabManagementUploadStatus.Approve))
+                return "You can not re-map variable due to upload excel data already approve.";
+            return "";
+        }
     }
 }
