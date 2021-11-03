@@ -165,17 +165,18 @@ namespace GSC.Respository.CTMS
                         .ThenInclude(t => t.ManageMonitoringVisit)
                         .ThenInclude(t => t.Project)
                         .Where(t => t.DeletedDate == null && t.ManageMonitoringReport.ManageMonitoringVisit.ProjectId == ProjectId
-                        && t.CreatedBy == _jwtTokenAccesser.UserId && t.IsSendBack == false && t.ManageMonitoringReport.DeletedDate == null)
+                        && t.UserId == _jwtTokenAccesser.UserId && t.IsSendBack == false && t.ManageMonitoringReport.DeletedDate == null)
                         .Select(s => new DashboardDto
                         {
                             Id = s.Id,
-                            TaskInformation = s.ManageMonitoringReport.VariableTemplate.TemplateName,
+                            TaskInformation = s.ManageMonitoringReport.ManageMonitoringVisit.Project.ProjectCode + " - " + s.ManageMonitoringReport.VariableTemplate.TemplateName,
                             ExtraData = s.ManageMonitoringReportId,
                             CreatedDate = s.CreatedDate,
-                            CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                            CreatedByUser = s.CreatedByUser.UserName,
                             Module = MyTaskModule.CTMS.GetDescription(),
                             DataType = MyTaskMethodModule.Reviewed.GetDescription(),
-                            Level = 6
+                            Level = 6,
+                            VariableTemplateId = s.ManageMonitoringReport.VariableTemplateId,
                         }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
@@ -187,17 +188,18 @@ namespace GSC.Respository.CTMS
                         .ThenInclude(t => t.ManageMonitoringVisit)
                         .ThenInclude(t => t.Project)
                         .Where(t => t.DeletedDate == null && t.ManageMonitoringReport.ManageMonitoringVisit.ProjectId == ProjectId
-                        && t.CreatedBy == _jwtTokenAccesser.UserId && t.IsSendBack == false && t.ManageMonitoringReport.DeletedDate == null)
+                        && t.CreatedBy == _jwtTokenAccesser.UserId && t.IsSendBack == true && t.ManageMonitoringReport.DeletedDate == null)
                         .Select(s => new DashboardDto
                         {
                             Id = s.Id,
-                            TaskInformation = s.ManageMonitoringReport.VariableTemplate.TemplateName,
+                            TaskInformation = s.ManageMonitoringReport.ManageMonitoringVisit.Project.ProjectCode + " - " + s.ManageMonitoringReport.VariableTemplate.TemplateName,
                             ExtraData = s.ManageMonitoringReportId,
                             CreatedDate = s.CreatedDate,
-                            CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                            CreatedByUser = s.CreatedByUser.UserName,
                             Module = MyTaskModule.CTMS.GetDescription(),
-                            DataType = MyTaskMethodModule.Reviewed.GetDescription(),
-                            Level = 6
+                            DataType = MyTaskMethodModule.SendBack.GetDescription(),
+                            Level = 6,
+                            VariableTemplateId = s.ManageMonitoringReport.VariableTemplateId,
                         }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;

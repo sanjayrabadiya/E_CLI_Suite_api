@@ -17,5 +17,6 @@ namespace GSC.Data.Entities.CTMS
         public ManageMonitoringReport ManageMonitoringReport { get; set; }
         public Variable Variable { get; set; }
         public List<ManageMonitoringReportVariableChild> Children { get; set; }
+        public ICollection<ManageMonitoringReportVariableComment> Comments { get; set; }
     }
 }

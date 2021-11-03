@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.Master
         public string DataType { get; set; }
         public double Level { get; set; }
         public int DocumentId { get; set; }
+        public int VariableTemplateId { get; set; }
     }
 
     public class DashboardDetailsDto : BaseDto
@@ -28,5 +29,7 @@ namespace GSC.Data.Dto.Master
         public List<DashboardDto> eTMFSendBackData { get; set; }
         public List<DashboardDto> eTMFSubSecSendBackData { get; set; }
         public List<DashboardDto> eConsentData { get; set; }
+        public List<DashboardDto> manageMonitoringReportSendData { get; set; }
+        public List<DashboardDto> manageMonitoringReportSendBackData { get; set; }
     }
 }

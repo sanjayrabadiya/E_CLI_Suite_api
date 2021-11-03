@@ -160,5 +160,6 @@ namespace GSC.Data.Dto.Master
         public string ValidationMessage { get; set; }
         public Alignment? Alignment { get; set; }
         public int? LargeStep { get; set; }
+        public bool HasComments { get; set; }
     }
 }

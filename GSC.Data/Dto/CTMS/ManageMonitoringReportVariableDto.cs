@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.CTMS
         public string ValueName { get; set; }
         public string OldValue { get; set; }
         public int ManageMonitoringReportVariableId { get; set; }
+        public bool IsComment { get; set; }
         public ManageMonitoringReport ManageMonitoringReport { get; set; }
         public ICollection<ManageMonitoringReportVariableChildDto> Children { get; set; }
     }
@@ -34,8 +35,8 @@ namespace GSC.Data.Dto.CTMS
         public string Value { get; set; }
         public bool IsNa { get; set; }
         public int? UserRoleId { get; set; }
+        public bool IsComment { get; set; }
         public ICollection<ManageMonitoringReportVariableChild> Children { get; set; }
-
     }
 
     public class ManageMonitoringReportVariableValueDto

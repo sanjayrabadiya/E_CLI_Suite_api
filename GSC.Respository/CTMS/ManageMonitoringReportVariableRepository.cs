@@ -49,7 +49,7 @@ namespace GSC.Respository.CTMS
                     variable.VariableValue = t.Value;
                     variable.VariableValueOld = t.IsNa ? "N/A" : t.Value;
                     variable.ManageMonitoringReportVariableId = t.Id;
-
+                    variable.HasComments = t.IsComment;
                     variable.IsNaValue = t.IsNa;
 
                     if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))

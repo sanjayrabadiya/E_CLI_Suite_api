@@ -350,6 +350,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISyncConfigurationRepository, SyncConfigurationRepository>();
             services.AddScoped<IEconsentReviewDetailsAuditRepository, EconsentReviewDetailsAuditRepository>();
             services.AddScoped<IManageMonitoringReportReviewRepository, ManageMonitoringReportReviewRepository>();
+            services.AddScoped<IManageMonitoringReportVariableCommentRepository, ManageMonitoringReportVariableCommentRepository>();
         }
     }
 }

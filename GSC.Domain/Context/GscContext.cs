@@ -373,6 +373,7 @@ namespace GSC.Domain.Context
         public DbSet<SyncConfiguration> SyncConfiguration { get; set; }
         public DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
         public DbSet<ManageMonitoringReportReview> ManageMonitoringReportReview { get; set; }
+        public DbSet<ManageMonitoringReportVariableComment> ManageMonitoringReportVariableComment { get; set; }
     }
 
 

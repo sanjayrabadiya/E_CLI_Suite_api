@@ -8,6 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
+using GSC.Respository.CTMS;
 using GSC.Respository.Etmf;
 using GSC.Respository.InformConcent;
 using GSC.Respository.Master;
@@ -25,13 +26,15 @@ namespace GSC.Api.Controllers.Master
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
+        private readonly IManageMonitoringReportReviewRepository _manageMonitoringReportReviewRepository;
 
         public DashboardController(
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
-            IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository
+            IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
+            IManageMonitoringReportReviewRepository manageMonitoringReportReviewRepository
             )
         {
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
@@ -39,11 +42,12 @@ namespace GSC.Api.Controllers.Master
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
+            _manageMonitoringReportReviewRepository = manageMonitoringReportReviewRepository;
         }
 
         [HttpGet]
-        [Route("GetMyTaskList/{ProjectId}")]
-        public IActionResult GetMyTaskList(int ProjectId)
+        [Route("GetMyTaskList/{ProjectId}/{SiteId:int?}")]
+        public IActionResult GetMyTaskList(int ProjectId, int? SiteId)
         {
             DashboardDetailsDto objdashboard = new DashboardDetailsDto();
             objdashboard.eTMFApproveData = _projectArtificateDocumentApproverRepository.GetEtmfMyTaskList(ProjectId);
@@ -53,6 +57,8 @@ namespace GSC.Api.Controllers.Master
             objdashboard.eTMFSendBackData = _projectWorkplaceArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId);
             objdashboard.eTMFSubSecSendBackData = _projectSubSecArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId);
             objdashboard.eConsentData = _econsentReviewDetailsRepository.GetEconsentMyTaskList(ProjectId);
+            objdashboard.manageMonitoringReportSendData = _manageMonitoringReportReviewRepository.GetSendTemplateList((int)(SiteId != null ? SiteId : ProjectId));
+            objdashboard.manageMonitoringReportSendBackData = _manageMonitoringReportReviewRepository.GetSendBackTemplateList((int)(SiteId != null ? SiteId : ProjectId));
             return Ok(objdashboard);
         }
     }
