@@ -154,7 +154,8 @@ namespace GSC.Helper
         [Description("Company")] Company = 18,
         [Description("Clent")] Client = 19,
         [Description("Lab Management")] LabManagement = 20,
-        [Description("ICF Detail Report")] ICFDetailReport = 21
+        [Description("ICF Detail Report")] ICFDetailReport = 21,
+        [Description("RoleIcon")] RoleIcon = 22
     }
 
     public enum AuditModule : short

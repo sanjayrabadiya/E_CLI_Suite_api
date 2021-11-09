@@ -11,5 +11,6 @@ namespace GSC.Data.Entities.UserMgt
 
         public bool IsSystemRole { get; set; }
         public int? CompanyId { get; set; }
+        public string RoleIcon { get; set; }
     }
 }

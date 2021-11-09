@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
-using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.UserMgt;
+using GSC.Shared.DocumentService;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,13 +28,15 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IRoleRepository _securityRoleRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public SecurityRoleController(IRoleRepository securityRoleRepository,
             IRolePermissionRepository rolePermissionRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser,
-            IUserRoleRepository userRoleRepository)
+            IUserRoleRepository userRoleRepository,
+            IUploadSettingRepository uploadSettingRepository)
         {
             _securityRoleRepository = securityRoleRepository;
             _rolePermissionRepository = rolePermissionRepository;
@@ -41,6 +46,7 @@ namespace GSC.Api.Controllers.UserMgt
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _userRoleRepository = userRoleRepository;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         // GET: api/<controller>
@@ -58,6 +64,8 @@ namespace GSC.Api.Controllers.UserMgt
             if (id <= 0) return BadRequest();
             var securityRole = _securityRoleRepository.Find(id);
             var securityRoleDto = _mapper.Map<SecurityRoleDto>(securityRole);
+            var fullPath = Path.Combine(_uploadSettingRepository.GetImagePath(),securityRoleDto.RoleIcon);
+            securityRoleDto.RoleIcon = DocumentService.ConvertBase64Image(fullPath);
             return Ok(securityRoleDto);
         }
 
@@ -75,6 +83,9 @@ namespace GSC.Api.Controllers.UserMgt
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            if (securityRoleDto.FileModel?.Base64?.Length > 0)
+                securityrole.RoleIcon = new ImageService().ImageSave(securityRoleDto.FileModel,
+                    _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.RoleIcon, FolderType.RoleIcon.GetDescription());
 
             _securityRoleRepository.Add(securityrole);
             if (_uow.Save() <= 0) throw new Exception("Creating Occupation failed on save.");

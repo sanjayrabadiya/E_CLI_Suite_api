@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
+using GSC.Shared.DocumentService;
 
 namespace GSC.Data.Dto.UserMgt
 {
@@ -14,6 +15,8 @@ namespace GSC.Data.Dto.UserMgt
 
         public bool IsSystemRole { get; set; }
         public int? CompanyId { get; set; }
+        public FileModel FileModel { get; set; }
+        public string RoleIcon { get; set; }
     }
 
     public class SecurityRoleGridDto : BaseAuditDto
