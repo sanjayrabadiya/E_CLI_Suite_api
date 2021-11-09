@@ -395,7 +395,7 @@ namespace GSC.Respository.Attendance
                     audit.Activity = ICFAction.Screened;
                     audit.PateientStatus = data.Randomization.PatientStatusId;
                     _econsentReviewDetailsAuditRepository.Add(audit);
-                } 
+                }
                 string documentname = string.Join(",", documentDetails.Select(x => x.DocumentName).ToArray());
                 _emailSenderRespository.SendEmailOfStartEconsent(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, documentname, study.ProjectCode);
             }
@@ -484,9 +484,9 @@ namespace GSC.Respository.Attendance
                     x.ContactMobile = _userRepository.Find(x.UserId).Phone;
                     x.UserName = _userRepository.Find(x.UserId).FirstName + " " + _userRepository.Find(x.UserId).LastName;
                     x.Role = _roleRepository.Find(x.RoleId).RoleName;
-                    x.UserPicUrl = _context.UploadSetting.FirstOrDefault().ImageUrl + (_userRepository.Find(x.UserId).ProfilePic ?? DocumentService.DefulatProfilePic);
-                }
-                    );
+                    //x.UserPicUrl = _context.UploadSetting.FirstOrDefault().ImageUrl + (_userRepository.Find(x.UserId).ProfilePic ?? DocumentService.DefulatProfilePic);
+                    x.UserPicUrl = _context.UploadSetting.FirstOrDefault().ImageUrl + (_roleRepository.Find(x.RoleId).RoleIcon ?? _userRepository.Find(x.UserId).ProfilePic ?? DocumentService.DefulatProfilePic);
+                });
                 dashboardPatientDto.siteTeams = siteteamdtos;
                 if (project.ManageSiteId != null)
                 {
