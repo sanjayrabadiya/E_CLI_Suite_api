@@ -64,8 +64,11 @@ namespace GSC.Api.Controllers.UserMgt
             if (id <= 0) return BadRequest();
             var securityRole = _securityRoleRepository.Find(id);
             var securityRoleDto = _mapper.Map<SecurityRoleDto>(securityRole);
-            var fullPath = Path.Combine(_uploadSettingRepository.GetImagePath(),securityRoleDto.RoleIcon);
-            securityRoleDto.RoleIcon = DocumentService.ConvertBase64Image(fullPath);
+            if (securityRoleDto.RoleIcon != null)
+            {
+                var fullPath = Path.Combine(_uploadSettingRepository.GetImagePath(), securityRoleDto.RoleIcon);
+                securityRoleDto.RoleIcon = DocumentService.ConvertBase64Image(fullPath);
+            }
             return Ok(securityRoleDto);
         }
 
