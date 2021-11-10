@@ -200,10 +200,14 @@ namespace GSC.Api.Controllers.Screening
                 }
             }
 
-
             var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
 
             var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
+
+            // get lab management data id
+            var LabManagementUploadExcelDataId = _screeningTemplateValueRepository.Find(screeningTemplateValueDto.Id).LabManagementUploadExcelDataId;
+            screeningTemplateValue.LabManagementUploadExcelDataId = LabManagementUploadExcelDataId;
+
 
             var aduit = new ScreeningTemplateValueAudit
             {
