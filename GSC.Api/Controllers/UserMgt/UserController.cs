@@ -24,6 +24,7 @@ using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Extension;
+using GSC.Respository.LogReport;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -43,6 +44,7 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly ICentreUserService _centreUserService;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IUserLoginReportRespository _userLoginReportRepository;
         public UserController(IUserRepository userRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -53,7 +55,8 @@ namespace GSC.Api.Controllers.UserMgt
             IProjectRepository projectRepository,
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService,
-            IGSCContext context, IJwtTokenAccesser jwtTokenAccesser
+            IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
+            IUserLoginReportRespository userLoginReportRepository
             )
         {
             _userRepository = userRepository;
@@ -69,6 +72,7 @@ namespace GSC.Api.Controllers.UserMgt
             _centreUserService = centreUserService;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _userLoginReportRepository = userLoginReportRepository;
         }
 
 
@@ -301,6 +305,8 @@ namespace GSC.Api.Controllers.UserMgt
                         return BadRequest(ModelState);
                     }
                 }
+               var usersdetails = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{loginDto.UserName}");
+                _userLoginReportRepository.SetDbConnection(usersdetails.ConnectionString);
                 var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null).FirstOrDefault();
                 user.IsFirstTime = false;
                 user.IsLogin = false;
