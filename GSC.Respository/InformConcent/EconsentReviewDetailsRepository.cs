@@ -46,7 +46,7 @@ namespace GSC.Respository.InformConcent
         private readonly IUnitOfWork _uow;
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IAppSettingRepository _appSettingRepository;
-        private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;       
+        private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
 
         public EconsentReviewDetailsRepository(IGSCContext context,
                                                 IJwtTokenAccesser jwtTokenAccesser,
@@ -283,12 +283,13 @@ namespace GSC.Respository.InformConcent
         public CustomParameter downloadpdf(int id)
         {
             // after reviewed document patient can download pdf from dashboard
-            var econsentreviewdetails = Find(id);
+            var econsentreviewdetails = FindByInclude(x => x.Id == id, x => x.EconsentSetup, x => x.Randomization).FirstOrDefault();
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var docName = Path.Combine(upload.DocumentUrl, econsentreviewdetails.PdfPath);
             CustomParameter param = new CustomParameter();
             param.documentData = docName;
-            param.fileName = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
+            //param.fileName = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
+            param.fileName = econsentreviewdetails.EconsentSetup.DocumentName + "_" + econsentreviewdetails.Randomization.ScreeningNumber;
             return param;
         }
 
@@ -572,41 +573,41 @@ namespace GSC.Respository.InformConcent
             RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
             PdfLayoutResult result = new PdfLayoutResult(page, bounds);
 
-            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();            
+            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
             layoutFormat.Layout = PdfLayoutType.Paginate;
             layoutFormat.Break = PdfLayoutBreakType.FitElement;
-            
-            
+
+
 
             if (econsentReviewDetailsDto.IsApproved == true)
-             result= AddString("Approved By: ", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
+                result = AddString("Approved By: ", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
             else
                 result = AddString("Reject By: ", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
 
-            result = AddString(_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);           
-            result = AddString(Convert.ToDateTime(econsentReviewDetails.InvestigatorReviewedDatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);            
+            result = AddString(_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
+            result = AddString(Convert.ToDateTime(econsentReviewDetails.InvestigatorReviewedDatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
 
             if (econsentReviewDetailsDto.IsApproved == true)
                 result = AddString("Approved Reason: ", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
             else
                 result = AddString("Reject Reason: ", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
-            
 
-            string reasonName = _context.AuditReason.Where(x => x.Id == econsentReviewDetailsDto.ApproveRejectReasonId).FirstOrDefault().ReasonName;            
+
+            string reasonName = _context.AuditReason.Where(x => x.Id == econsentReviewDetailsDto.ApproveRejectReasonId).FirstOrDefault().ReasonName;
             result = AddString(reasonName, result.Page, new Syncfusion.Drawing.RectangleF(175, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
             if (econsentReviewDetailsDto.ApproveRejectReasonOth != null && econsentReviewDetailsDto.ApproveRejectReasonOth != "")
             {
-                if (econsentReviewDetailsDto.IsApproved == true)                    
+                if (econsentReviewDetailsDto.IsApproved == true)
                     result = AddString("Approved Comment: ", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
-                else                    
+                else
                     result = AddString("Reject Comment: ", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
 
-                result = AddString(econsentReviewDetailsDto.ApproveRejectReasonOth, result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);                
+                result = AddString(econsentReviewDetailsDto.ApproveRejectReasonOth, result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
             }
             PdfStringFormat stringFormat = new PdfStringFormat();
             stringFormat.MeasureTrailingSpaces = true;
-            stringFormat.WordWrap = PdfWordWrapType.WordOnly;            
-            string message = "I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature";           
+            stringFormat.WordWrap = PdfWordWrapType.WordOnly;
+            string message = "I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature";
             result = AddString(message, result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
             //render.Dispose();
             //wordDocument.Dispose();
@@ -710,7 +711,7 @@ namespace GSC.Respository.InformConcent
             RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
             PdfLayoutResult result = new PdfLayoutResult(page, bounds);
 
-            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();           
+            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
             layoutFormat.Layout = PdfLayoutType.Paginate;
             layoutFormat.Break = PdfLayoutBreakType.FitElement;
             PdfGraphics graphics = page.Graphics;
@@ -769,7 +770,7 @@ namespace GSC.Respository.InformConcent
                 reviewdetails.WithdrawComment = reasonOth;
             }
             //graphics.DrawString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature", regular, PdfBrushes.Black, new PointF(70, isWithdraw ? 500 : 400), format);
-            string message = "I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature";        
+            string message = "I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature";
             result = AddString(message, result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
             MemoryStream outputStream = new MemoryStream();
             pdfDocument.Save(outputStream);
