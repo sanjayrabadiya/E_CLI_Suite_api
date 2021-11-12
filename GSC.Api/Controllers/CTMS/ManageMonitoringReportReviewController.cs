@@ -75,8 +75,6 @@ namespace GSC.Api.Controllers.CTMS
             if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
             _manageMonitoringReportReviewRepository.SendMailToSendBack(manageMonitoringReportReview);
 
-            //var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(projectArtificateDocumentReviewDto.ProjectWorkplaceArtificatedDocumentId);
-            //_projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, projectArtificateDocumentReviewDto.Id, null);
             return Ok();
         }
 

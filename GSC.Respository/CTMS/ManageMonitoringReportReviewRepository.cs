@@ -195,7 +195,7 @@ namespace GSC.Respository.CTMS
                             TaskInformation = s.ManageMonitoringReport.ManageMonitoringVisit.Project.ProjectCode + " - " + s.ManageMonitoringReport.VariableTemplate.TemplateName,
                             ExtraData = s.ManageMonitoringReportId,
                             CreatedDate = s.CreatedDate,
-                            CreatedByUser = s.CreatedByUser.UserName,
+                            CreatedByUser = s.User.UserName,
                             Module = MyTaskModule.CTMS.GetDescription(),
                             DataType = MyTaskMethodModule.SendBack.GetDescription(),
                             Level = 6,

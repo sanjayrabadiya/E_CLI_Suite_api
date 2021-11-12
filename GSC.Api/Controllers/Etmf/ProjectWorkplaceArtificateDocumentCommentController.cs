@@ -10,8 +10,6 @@ using GSC.Domain.Context;
 using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
-using GSC.Respository.Master;
-using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Shared.JWTAuth;
 
@@ -25,39 +23,15 @@ namespace GSC.Api.Controllers.Etmf
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IProjectRepository _projectRepository;
-        private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
-        private readonly IProjectArtificateDocumentCommentRepository _projectArtificateDocumentCommentRepository;
-        private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
-        private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IProjectArtificateDocumentCommentRepository _projectArtificateDocumentCommentRepository;        
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public ProjectWorkplaceArtificateDocumentCommentController(IProjectRepository projectRepository,
-            IUnitOfWork uow,
+        public ProjectWorkplaceArtificateDocumentCommentController(IUnitOfWork uow,
             IMapper mapper,
-            IETMFWorkplaceRepository eTMFWorkplaceRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
-            IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
-            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
-            IUploadSettingRepository uploadSettingRepository,
             IProjectArtificateDocumentCommentRepository projectArtificateDocumentCommentRepository,
             IJwtTokenAccesser jwtTokenAccesser)
         {
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
-            _projectRepository = projectRepository;
             _uow = uow;
             _mapper = mapper;
-            _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
-            _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
-            _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
-            _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
-            _uploadSettingRepository = uploadSettingRepository;
             _projectArtificateDocumentCommentRepository = projectArtificateDocumentCommentRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
         }

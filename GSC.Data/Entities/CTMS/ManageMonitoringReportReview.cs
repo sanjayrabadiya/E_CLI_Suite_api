@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using GSC.Common.Common;
+using GSC.Data.Entities.UserMgt;
 
 namespace GSC.Data.Entities.CTMS
 {
@@ -15,5 +16,6 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? SendBackDate { get; set; }
         public string Message { get; set; }
         public ManageMonitoringReport ManageMonitoringReport { get; set; }
+        public User User { get; set; }
     }
 }

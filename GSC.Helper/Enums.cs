@@ -759,4 +759,12 @@ namespace GSC.Helper
         //[Description("Reject")] Reject = 3,
         [Description("Withdraw")] Withdraw = 3,
     }
+
+    public enum CtmsCommentStatus : short
+    {
+        [Description("Open")] Open = 1,
+        [Description("Answered")] Answered = 2,
+        [Description("Resolved")] Resolved = 3,
+        [Description("Closed")] Closed = 4,
+    }
 }
