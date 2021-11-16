@@ -65,6 +65,7 @@ namespace GSC.Respository.CTMS
             manageMonitoringReportVariableComment.OldValue = manageMonitoringReportVariableCommentDto.OldValue;
 
             //manageMonitoringReportVariable.QueryStatus = updateCommentStatus;
+
             manageMonitoringReportVariable.Value = manageMonitoringReportVariableCommentDto.Value;
 
             //var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
@@ -82,8 +83,8 @@ namespace GSC.Respository.CTMS
             manageMonitoringReportVariableComment.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             //manageMonitoringReportVariableComment.UserName = _jwtTokenAccesser.UserName;
             manageMonitoringReportVariableComment.RoleId = _jwtTokenAccesser.RoleId;
-            manageMonitoringReportVariableComment.CreatedDate = _jwtTokenAccesser.GetClientDate();
-            Add(manageMonitoringReportVariableComment);
+            //manageMonitoringReportVariableComment.CreatedDate = _jwtTokenAccesser.GetClientDate();
+            Update(manageMonitoringReportVariableComment);
         }
     }
 }

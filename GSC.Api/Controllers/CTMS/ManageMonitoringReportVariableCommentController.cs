@@ -81,6 +81,10 @@ namespace GSC.Api.Controllers.Screening
             //    return BadRequest(ModelState);
             //}
 
+            var comment = _manageMonitoringReportVariableCommentRepository.All.Where(x => x.ManageMonitoringReportVariableId == manageMonitoringReportVariableCommentDto.ManageMonitoringReportVariableId).OrderByDescending(x=>x.Id).FirstOrDefault();
+
+            manageMonitoringReportVariableCommentDto.Id = comment.Id;
+            manageMonitoringReportVariableCommentDto.Comment = comment.Comment;
             var manageMonitoringReportVariableComment = _mapper.Map<ManageMonitoringReportVariableComment>(manageMonitoringReportVariableCommentDto);
 
             _manageMonitoringReportVariableCommentRepository.UpdateQuery(manageMonitoringReportVariableCommentDto, manageMonitoringReportVariableComment, manageMonitoringReportVariable);
