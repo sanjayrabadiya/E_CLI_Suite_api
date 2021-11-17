@@ -5,10 +5,12 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.Report;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.ProjectRight;
+using GSC.Respository.Reports;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
@@ -31,12 +33,14 @@ namespace GSC.Respository.Etmf
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IJobMonitoringRepository _jobMonitoringRepository;
         public string Workplace = "AAAAAA";
         
         public ETMFWorkplaceRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IMapper mapper, IUploadSettingRepository uploadSettingRepository,
-           IProjectRightRepository projectRightRepository)
+           IProjectRightRepository projectRightRepository,
+           IJobMonitoringRepository jobMonitoringRepository)
            : base(context)
         {
             _context = context;
@@ -44,6 +48,7 @@ namespace GSC.Respository.Etmf
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
+            _jobMonitoringRepository = jobMonitoringRepository;
         }
 
         public string Duplicate(int id)
@@ -763,7 +768,7 @@ namespace GSC.Respository.Etmf
         public byte[] CreateZipFileOfWorkplace(int Id)
         {
             var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
-            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""));
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""), JobNameType.EtmfDetail.GetDescription());
             ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
             byte[] compressedBytes;
             var zipfolder = FolderPath + ".zip";
@@ -773,6 +778,26 @@ namespace GSC.Respository.Etmf
             compressedBytes = dataStream.ToArray();
             File.Delete(zipfolder);
             return compressedBytes.ToArray();
+        }
+
+        public void CreateZipFileOfWorkplaceJobMonitoring(int Id)
+        {
+            var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""), JobNameType.EtmfDetail.GetDescription());
+            ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
+            var zipfolder = FolderPath + ".zip";
+
+            JobMonitoring jobMonitoring = new JobMonitoring();
+            jobMonitoring.JobName = JobNameType.EtmfDetail;
+            jobMonitoring.JobDescription = ProjectWorkplace.Project.Id;
+            jobMonitoring.JobType = JobTypeEnum.Zip;
+            jobMonitoring.JobStatus = JobStatusType.Completed;
+            jobMonitoring.FolderPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""), JobNameType.EtmfDetail.GetDescription());
+            jobMonitoring.FolderName = ProjectWorkplace.Project.ProjectCode.Replace("/", "") + ".zip";
+            jobMonitoring.SubmittedBy = _jwtTokenAccesser.UserId;
+            jobMonitoring.SubmittedTime = _jwtTokenAccesser.GetClientDate();
+            _jobMonitoringRepository.Add(jobMonitoring);
+            _context.Save();
         }
 
         public ProjectWorkplace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath)

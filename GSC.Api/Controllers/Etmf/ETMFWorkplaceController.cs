@@ -161,6 +161,14 @@ namespace GSC.Api.Controllers.Etmf
             return File(filebytes, "application/zip");
         }
 
+        [HttpGet]
+        [Route("DownloadFolderFromJobMonitoring/{Id}")]
+        public IActionResult DownloadFolderFromJobMonitoring(int Id)
+        {
+            _eTMFWorkplaceRepository.CreateZipFileOfWorkplaceJobMonitoring(Id);
+            return Ok();
+        }
+
         [HttpPost]
         [Route("SaveSiteData")]
         public IActionResult SaveSiteData([FromBody] List<int> ProjectIds)

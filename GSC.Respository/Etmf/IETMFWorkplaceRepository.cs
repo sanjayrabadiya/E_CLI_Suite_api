@@ -19,5 +19,6 @@ namespace GSC.Respository.Etmf
         ProjectWorkplace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath);
         byte[] CreateZipFileOfWorkplace(int Id);
         List<ChartReport> GetChartReport(int id, EtmfChartType? chartType);
+        void CreateZipFileOfWorkplaceJobMonitoring(int Id);
     }
 }
