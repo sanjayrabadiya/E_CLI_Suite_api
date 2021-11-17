@@ -485,7 +485,7 @@ namespace GSC.Helper
         [Description("DataEntry Audit")] DataEntryAudit = 4,
         [Description("Project Design Audit")] ProjectDesignAudit = 5,
         [Description("ICF Detail Report")] ICFDetailReport = 6,
-        [Description("Etmf Details")] EtmfDetail = 7,
+        [Description("ETMF")] ETMF = 7,
     }
 
     public enum JobTypeEnum : short
