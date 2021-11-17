@@ -782,9 +782,10 @@ namespace GSC.Respository.Etmf
 
         public void CreateZipFileOfWorkplaceJobMonitoring(int Id)
         {
+            var etmfname = DateTime.Now.Ticks;
             var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
             var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
-            ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
+            ZipFile.CreateFromDirectory(FolderPath, FolderPath + etmfname + ".zip", CompressionLevel.Fastest, true);
             var zipfolder = FolderPath + ".zip";
 
             JobMonitoring jobMonitoring = new JobMonitoring();
@@ -792,8 +793,8 @@ namespace GSC.Respository.Etmf
             jobMonitoring.JobDescription = ProjectWorkplace.Project.Id;
             jobMonitoring.JobType = JobTypeEnum.Zip;
             jobMonitoring.JobStatus = JobStatusType.Completed;
-            jobMonitoring.FolderPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
-            jobMonitoring.FolderName = ProjectWorkplace.Project.ProjectCode.Replace("/", "") + ".zip";
+            jobMonitoring.FolderPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""));
+            jobMonitoring.FolderName = JobNameType.ETMF.GetDescription() + etmfname + ".zip";
             jobMonitoring.SubmittedBy = _jwtTokenAccesser.UserId;
             jobMonitoring.SubmittedTime = _jwtTokenAccesser.GetClientDate();
             _jobMonitoringRepository.Add(jobMonitoring);
