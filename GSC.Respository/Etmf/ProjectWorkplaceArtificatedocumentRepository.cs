@@ -114,7 +114,7 @@ namespace GSC.Respository.Etmf
 
             if (data.FolderType == (int)WorkPlaceFolder.Country)
 
-                path = System.IO.Path.Combine(data.Projectname,FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
+                path = System.IO.Path.Combine(data.Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.Sitename.Trim(), data.Zonename.Trim(), data.Sectionname.Trim(), data.Artificatename);
             else if (data.FolderType == (int)WorkPlaceFolder.Site)
                 path = System.IO.Path.Combine(data.Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
@@ -139,6 +139,13 @@ namespace GSC.Respository.Etmf
         public List<CommonArtifactDocumentDto> GetDocumentList(int id)
         {
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
+
+            var artificate = _context.ProjectWorkplaceArtificate.Where(x => x.Id == id).Include(x => x.ProjectWorkplaceSection)
+                .ThenInclude(x => x.ProjectWorkPlaceZone).FirstOrDefault();
+
+            var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == artificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetailId
+                         && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
+                         .OrderByDescending(x => x.Id).FirstOrDefault();
 
             var documentList = All.Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.EtmfArtificateMasterLbrary)
                 .ThenInclude(x => x.EtmfSectionMasterLibrary).ThenInclude(x => x.EtmfZoneMasterLibrary)
@@ -184,8 +191,8 @@ namespace GSC.Respository.Etmf
                 obj.ZoneName = _etmfZoneMasterLibraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.EtmfSectionMasterLibrary.EtmfZoneMasterLibraryId).ZonName;
                 obj.DocumentName = item.DocumentName;
                 obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
-                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(),_jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
-                obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
+                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
+                obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.Reviewer = users;
                 obj.CreatedDate = item.CreatedDate;
@@ -194,7 +201,7 @@ namespace GSC.Respository.Etmf
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;
                 obj.Level = 6;
-                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
+                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId || rights.IsAdd);
                 obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
                 obj.IsReview = Review.Count() == 0 ? false : Review.All(z => z.IsSendBack) ? true : false;
                 obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
@@ -220,8 +227,8 @@ namespace GSC.Respository.Etmf
             obj.ProjectWorkplaceArtificateId = document.ProjectWorkplaceArtificateId;
             obj.DocumentName = document.DocumentName;
             obj.ExtendedName = document.DocumentName.Contains('_') ? document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) : document.DocumentName;
-            obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(),_jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
-            obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), document.DocPath);
+            obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+            obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath);
             obj.CreatedByUser = _userRepository.Find((int)document.CreatedBy).UserName;
             obj.CreatedDate = document.CreatedDate;
             obj.Version = document.Version;
@@ -286,7 +293,7 @@ namespace GSC.Respository.Etmf
                 path = System.IO.Path.Combine(Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    projectWorkplaceArtificatedocumentDto.Zonename.Trim(), projectWorkplaceArtificatedocumentDto.Sectionname.Trim(), projectWorkplaceArtificatedocumentDto.Artificatename.Trim());
 
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), path);
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
             string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceArtificatedocumentDto.FileModel, filePath, projectWorkplaceArtificatedocumentDto.FileName);
 
             projectWorkplaceArtificatedocumentDto.Id = 0;
