@@ -94,7 +94,7 @@ namespace GSC.Api.Controllers.LabManagement
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             labManagementUploadDataDto.Id = 0;
-             
+            string StudyCode = ""; 
             var LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId).FirstOrDefault();
             
             labManagementUploadDataDto.LabManagementConfigurationId = LabManagementConfiguration.Id;
@@ -102,7 +102,8 @@ namespace GSC.Api.Controllers.LabManagement
             //set file path and extension
             if (labManagementUploadDataDto.FileModel?.Base64?.Length > 0)
             {
-                labManagementUploadDataDto.PathName = DocumentService.SaveUploadDocument(labManagementUploadDataDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(labManagementUploadDataDto.ProjectId), FolderType.LabManagement, "");
+                StudyCode = _projectRepository.GetStudyCode(labManagementUploadDataDto.ProjectId);
+                labManagementUploadDataDto.PathName = DocumentService.SaveUploadDocument(labManagementUploadDataDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), StudyCode, FolderType.LabManagement, "");
                 labManagementUploadDataDto.MimeType = labManagementUploadDataDto.FileModel.Extension;
                 labManagementUploadDataDto.FileName = "LabManagementData_" + DateTime.Now.Ticks + "." + labManagementUploadDataDto.FileModel.Extension;
             }
@@ -111,7 +112,7 @@ namespace GSC.Api.Controllers.LabManagement
             var labManagementUploadData = _mapper.Map<LabManagementUploadData>(labManagementUploadDataDto);
 
             //Upload Excel data into database table
-            var validate = _labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadData);
+            var validate = _labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadData, StudyCode);
 
             if (!string.IsNullOrEmpty(validate))
             {

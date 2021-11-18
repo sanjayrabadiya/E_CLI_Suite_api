@@ -71,7 +71,7 @@ namespace GSC.Respository.LabManagement
 
         // Upload excel data insert into database
         //public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData)
-        public string InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData)
+        public string InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData,string StudyCode)
         {
             if (!_labManagementVariableMappingRepository.All.Any(x => x.LabManagementConfigurationId == labManagementUploadData.LabManagementConfigurationId && x.DeletedDate == null))
                 return "You can not upload excel data before mapping variable in configuration.";
@@ -95,6 +95,9 @@ namespace GSC.Respository.LabManagement
 
             foreach (var item in results.Tables[0].Rows)
             {
+                if(((DataRow)item).ItemArray[0].ToString().Trim() != StudyCode.Trim())
+                    return "Can not upload excel data due to study code not match.";
+
                 LabManagementUploadExcelData obj = new LabManagementUploadExcelData();
                 obj.ScreeningNo = ((DataRow)item).ItemArray[0].ToString();
                 obj.RandomizationNo = ((DataRow)item).ItemArray[1].ToString();
@@ -115,7 +118,6 @@ namespace GSC.Respository.LabManagement
                 obj.CreatedDate = _jwtTokenAccesser.GetClientDate();
                 objLst.Add(obj);
             }
-            // _context.LabManagementUploadExcelData.AddRange(objLst);
             streamer.Dispose();
             labManagementUploadData.LabManagementUploadExcelDatas = objLst;
 
@@ -158,8 +160,9 @@ namespace GSC.Respository.LabManagement
                         {
                             foreach (var r in result)
                             {
-                                // get scrreening template Id by screening number and project design template id
+                                // get scrreening template Id by screening number and visit name and project design template id
                                 var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == r.ScreeningNo
+                                                && x.ScreeningVisit.ProjectDesignVisit.DisplayName == r.Visit
                                                 && x.ProjectDesignTemplateId == item.LabManagementConfiguration.ProjectDesignTemplateId).FirstOrDefault();
 
                                 if (screeningTemplate != null)
