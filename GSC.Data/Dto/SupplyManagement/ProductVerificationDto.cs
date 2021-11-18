@@ -27,6 +27,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public ReTestExpiry? RetestExpiryId { get; set; }
         public DateTime? RetestExpiryDate { get; set; }
         public int? CompanyId { get; set; }
+        public bool IsSendForApprove { get; set; }
     }
 
     public class ProductVerificationGridDto : BaseAuditDto

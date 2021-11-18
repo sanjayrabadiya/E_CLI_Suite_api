@@ -9,7 +9,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface IProductVerificationRepository : IGenericRepository<ProductVerification>
     {
-        List<ProductVerificationDto> GetProductVerificationList(int productReceiptId);
+        ProductVerificationDto GetProductVerificationList(int productReceiptId);
         List<ProductVerificationGridDto> GetProductVerification(int ProjectId, bool isDeleted);
         List<ProductVerificationGridDto> GetProductVerificationSummary(int productReceiptId);
     }

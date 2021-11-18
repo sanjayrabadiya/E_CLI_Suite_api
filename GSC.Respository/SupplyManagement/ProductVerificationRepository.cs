@@ -6,6 +6,7 @@ using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,10 +30,33 @@ namespace GSC.Respository.SupplyManagement
             _mapper = mapper;
         }
 
-        public List<ProductVerificationDto> GetProductVerificationList(int productReceiptId)
+        public ProductVerificationDto GetProductVerificationList(int productReceiptId)
         {
-            return All.Where(x => (x.DeletedDate == null) && x.ProductReceiptId == productReceiptId).
-                   ProjectTo<ProductVerificationDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var result = All.Where(x => (x.DeletedDate == null) && x.ProductReceiptId == productReceiptId).
+                   ProjectTo<ProductVerificationDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
+            if (result != null)
+            {
+                var detail = _context.ProductVerificationDetail.Where(x => (x.DeletedDate == null) && x.ProductReceiptId == productReceiptId && x.ProductVerificationId == result.Id).
+                       ProjectTo<ProductVerificationDetailDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
+                if (detail != null)
+                {
+                    var VerificationData = _context.VerificationApprovalTemplateHistory
+                        .Include(x => x.VerificationApprovalTemplate).Where(x => x.VerificationApprovalTemplate.ProductVerificationDetailId == result.Id)
+                        .OrderBy(x => x.Id)
+                        .LastOrDefault();
+                    if (VerificationData != null)
+                    {
+                        result.IsSendForApprove = false;
+                        if (VerificationData.IsSendBack && !detail.IsApprove)
+                            result.IsSendForApprove = true;
+                    }
+                    else
+                        result.IsSendForApprove = true;
+                }
+                else
+                    result.IsSendForApprove = false;
+            }
+            return result;
         }
 
         public List<ProductVerificationGridDto> GetProductVerification(int ProjectId, bool isDeleted)
@@ -79,7 +103,7 @@ namespace GSC.Respository.SupplyManagement
                                ReceivedQty = productverificationDetail.ReceivedQty,
                                IsConditionProduct = productverificationDetail.IsConditionProduct,
                                VerificationApprovalTemplate = verificationApprovalTemplate,
-                               VerificationApprovalTemplateHistory = _context.VerificationApprovalTemplateHistory.Where(x=>x.VerificationApprovalTemplateId== verificationApprovalTemplate.Id).OrderBy(x=>x.Id).LastOrDefault()
+                               VerificationApprovalTemplateHistory = _context.VerificationApprovalTemplateHistory.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplate.Id).OrderBy(x => x.Id).LastOrDefault()
 
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 

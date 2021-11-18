@@ -25,5 +25,6 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool IsApprove { get; set; }
         public bool IsSendForApprove { get; set; }
         public int? VerificationApprovalTemplateId { get; set; }
+        public string Comment { get; set; }
     }
 }
