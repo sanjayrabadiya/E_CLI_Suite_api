@@ -154,6 +154,13 @@ namespace GSC.Respository.Etmf
 
         public List<CommonArtifactDocumentDto> GetSubSecDocumentList(int Id)
         {
+            var artificate = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.Id == Id).Include(x => x.ProjectWorkplaceSubSection).ThenInclude(x=>x.ProjectWorkplaceSection)
+                .ThenInclude(x => x.ProjectWorkPlaceZone).FirstOrDefault();
+
+            var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == artificate.ProjectWorkplaceSubSection.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetailId
+                        && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
+                        .OrderByDescending(x => x.Id).FirstOrDefault();
+
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
             var reviewdocument = _context.ProjectSubSecArtificateDocumentReview.Where(c => c.DeletedDate == null
             && c.UserId == _jwtTokenAccesser.UserId).Select(x => x.ProjectWorkplaceSubSecArtificateDocumentId).ToList();
@@ -206,7 +213,8 @@ namespace GSC.Respository.Etmf
                 obj.Version = item.Version;
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;
-                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
+                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId || rights.IsAdd);
+                obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 obj.IsAccepted = item.IsAccepted;
                 //obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceSubSectionArtifact.EtmfArtificateMasterLbraryId;
                 obj.Reviewer = users;

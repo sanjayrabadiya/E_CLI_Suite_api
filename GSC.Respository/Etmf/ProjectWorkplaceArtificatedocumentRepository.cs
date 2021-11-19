@@ -202,6 +202,7 @@ namespace GSC.Respository.Etmf
                 obj.Status = (int)item.Status;
                 obj.Level = 6;
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId || rights.IsAdd);
+                obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 obj.ReviewStatus = Review.Count() == 0 ? "" : Review.All(z => z.IsSendBack) ? "Send Back" : "Send";
                 obj.IsReview = Review.Count() == 0 ? false : Review.All(z => z.IsSendBack) ? true : false;
                 obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
