@@ -36,7 +36,7 @@ namespace GSC.Data.Dto.Screening
         public string StudyCode { get; set; }
         public int RandomizationId { get; set; }
         public string Unit { get; set; }
-        public Int32 Deviation { get; set; }
+        public Int32? Deviation { get; set; }
         public string RefValueExcel { get; set; }
         public string TargetValueExcel { get; set; }
         public string RandomizationNumber { get; set; }
