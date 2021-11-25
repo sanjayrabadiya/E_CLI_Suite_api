@@ -1,5 +1,6 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using System;
 using System.Collections.Generic;
@@ -12,5 +13,6 @@ namespace GSC.Respository.Etmf
         List<EtmfZoneMasterLibrary> ExcelDataConvertToEntityformat(List<MasterLibraryDto> data);
 
         string Duplicate(EtmfZoneMasterLibrary objSave);
+        List<DropDownDto> GetZoneMasterLibraryDropDown();
     }
 }

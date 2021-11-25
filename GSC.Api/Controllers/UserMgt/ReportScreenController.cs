@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GSC.Api.Controllers.Common;
+﻿using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Respository.UserMgt;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.UserMgt
@@ -25,12 +19,10 @@ namespace GSC.Api.Controllers.UserMgt
             _uow = uow;
         }
 
-        [HttpGet]
-        [AllowAnonymous]
+        [HttpGet]       
         public IActionResult Get()
         {
             var Screens = _reportScreenRepository.GetReportScreen();
-
             return Ok(Screens);
         }
     }

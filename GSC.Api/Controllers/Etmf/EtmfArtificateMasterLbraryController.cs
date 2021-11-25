@@ -66,5 +66,13 @@ namespace GSC.Api.Controllers.Etmf
             /* Added by swati for effective Date on 02-06-2019 */
             return Ok(EtmfArtificateMasterLbrary);
         }
+
+        [HttpGet]
+        [Route("GetArtificateDropDown/{EtmfSectionMasterLibraryId}")]
+        public IActionResult GetArtificateDropDown(int EtmfSectionMasterLibraryId)
+        {
+            return Ok(_etmfArtificateMasterLbraryRepository.GetArtificateDropDown(EtmfSectionMasterLibraryId));
+        }
+
     }
 }

@@ -175,5 +175,12 @@ namespace GSC.Api.Controllers.Etmf
             var result = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.Version == version, x => x.EtmfSectionMasterLibrary);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("GetZoneMasterLibraryDropDown")]
+        public IActionResult GetZoneMasterLibraryDropDown()
+        {
+            return Ok(_etmfZoneMasterLibraryRepository.GetZoneMasterLibraryDropDown());
+        }
     }
 }

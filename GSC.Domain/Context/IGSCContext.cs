@@ -321,10 +321,12 @@ namespace GSC.Domain.Context
         DbSet<ManageMonitoringReport> ManageMonitoringReport { get; set; }
         DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
         DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
-        DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
-        DbSet<SyncConfiguration> SyncConfiguration { get; set; }
+        DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }     
         DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
         DbSet<ManageMonitoringReportReview> ManageMonitoringReportReview { get; set; }
         DbSet<ManageMonitoringReportVariableComment> ManageMonitoringReportVariableComment { get; set; }
+        DbSet<SyncConfigurationMaster> SyncConfigurationMaster { get; set; }
+        DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
+        DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }
     }
 }
