@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
@@ -79,6 +80,12 @@ namespace GSC.Respository.Etmf
             if (All.Any(x => x.Id != objSave.Id && x.ZonName == objSave.ZonName.Trim() && x.DeletedDate == null))
                 return "Duplicate Zone name : " + objSave.ZonName;
             return "";
+        }
+        public List<DropDownDto> GetZoneMasterLibraryDropDown()
+        {
+            return All.Where(x => x.DeletedDate==null)
+                    //(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.ZonName }).OrderBy(o => o.Value).ToList();
         }
     }
 }

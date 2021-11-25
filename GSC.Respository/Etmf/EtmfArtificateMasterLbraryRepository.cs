@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
@@ -86,6 +87,12 @@ namespace GSC.Respository.Etmf
 
             return dtolist;
 
+        }
+
+        public List<DropDownDto> GetArtificateDropDown(int EtmfSectionMasterLibraryId)
+        {
+            return All.Where(x =>x.DeletedDate==null && x.EtmfSectionMasterLibraryId== EtmfSectionMasterLibraryId)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.ArtificateName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }
 }

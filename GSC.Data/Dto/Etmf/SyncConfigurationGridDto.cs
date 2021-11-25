@@ -11,4 +11,10 @@ namespace GSC.Data.Dto.Etmf
         public string ProjectName { get; set; }
         public string ModuleName { get; set; }
     }
+
+    public class SyncConfigurationMasterGridDto : BaseAuditDto
+    {
+        public string ReportName { get; set; }
+        public string Version { get; set; }
+    }
 }

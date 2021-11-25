@@ -1,5 +1,6 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,6 @@ namespace GSC.Respository.Etmf
     {
         List<MasterLibraryJoinDto> GetArtifcateWithAllList();
         List<MasterLibraryJoinDto> GetArtifcateWithAllListByVersion(int ParentProjectId);
+        List<DropDownDto> GetArtificateDropDown(int EtmfSectionMasterLibraryId);
     }
 }

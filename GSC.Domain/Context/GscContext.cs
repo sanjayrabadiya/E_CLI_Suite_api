@@ -369,11 +369,13 @@ namespace GSC.Domain.Context
         public DbSet<ManageMonitoringReport> ManageMonitoringReport { get; set; }
         public DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
         public DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
-        public DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
-        public DbSet<SyncConfiguration> SyncConfiguration { get; set; }
+        public DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }       
         public DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
         public DbSet<ManageMonitoringReportReview> ManageMonitoringReportReview { get; set; }
         public DbSet<ManageMonitoringReportVariableComment> ManageMonitoringReportVariableComment { get; set; }
+        public DbSet<SyncConfigurationMaster> SyncConfigurationMaster { get; set; }
+        public DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
+        public DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }
     }
 
 

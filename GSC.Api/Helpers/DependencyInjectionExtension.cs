@@ -346,11 +346,14 @@ namespace GSC.Api.Helpers
             services.AddScoped<IManageMonitoringReportRepository, ManageMonitoringReportRepository>();
             services.AddScoped<IManageMonitoringReportVariableRepository, ManageMonitoringReportVariableRepository>();
             services.AddScoped<IManageMonitoringReportVariableChildRepository, ManageMonitoringReportVariableChildRepository>();
-            services.AddScoped<IManageMonitoringReportVariableAuditRepository, ManageMonitoringReportVariableAuditRepository>();
-            services.AddScoped<ISyncConfigurationRepository, SyncConfigurationRepository>();
+            services.AddScoped<IManageMonitoringReportVariableAuditRepository, ManageMonitoringReportVariableAuditRepository>();          
             services.AddScoped<IEconsentReviewDetailsAuditRepository, EconsentReviewDetailsAuditRepository>();
             services.AddScoped<IManageMonitoringReportReviewRepository, ManageMonitoringReportReviewRepository>();
             services.AddScoped<IManageMonitoringReportVariableCommentRepository, ManageMonitoringReportVariableCommentRepository>();
+            services.AddScoped<ISyncConfigurationMasterRepository, SyncConfigurationMasterRepository>();
+            services.AddScoped<ISyncConfigurationMasterDetailsRepository, SyncConfigurationMasterDetailsRepository>();
+            services.AddScoped<ISyncConfigurationMasterDetailsRepositoryAudit, SyncConfigurationMasterDetailsRepositoryAudit>();
+            
         }
     }
 }

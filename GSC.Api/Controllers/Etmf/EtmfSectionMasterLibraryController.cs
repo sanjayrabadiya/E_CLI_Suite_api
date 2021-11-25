@@ -60,5 +60,13 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Updating Drug failed on save.");
             return Ok(data.Id);
         }
+
+
+        [HttpGet]
+        [Route("GetSectionMasterLibraryDropDown/{EtmfZoneMasterLibraryId}")]
+        public IActionResult GetSectionMasterLibraryDropDown(int EtmfZoneMasterLibraryId)
+        {
+            return Ok(_etmfSectionMasterLibraryRepository.GetSectionMasterLibraryDropDown(EtmfZoneMasterLibraryId));
+        }
     }
 }

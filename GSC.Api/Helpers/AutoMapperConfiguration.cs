@@ -57,6 +57,7 @@ using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Entities.Volunteer;
+using GSC.Shared.Extension;
 using System.Linq;
 
 
@@ -411,10 +412,16 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Comments.Any()));
             CreateMap<ManageMonitoringReportVariableChild, ManageMonitoringReportVariableChildDto>().ReverseMap();
             CreateMap<ManageMonitoringReportVariableAudit, ManageMonitoringReportVariableAuditDto>().ReverseMap();
-            CreateMap<LabManagementUploadExcelData, LabManagementUploadExcelDataDto>().ReverseMap();
-            CreateMap<SyncConfiguration, SyncConfigurationDto>().ReverseMap();
+            CreateMap<LabManagementUploadExcelData, LabManagementUploadExcelDataDto>().ReverseMap();          
             CreateMap<ManageMonitoringReportReview, ManageMonitoringReportReviewDto>().ReverseMap();
             CreateMap<ManageMonitoringReportVariableComment, ManageMonitoringReportVariableCommentDto>().ReverseMap();
+            CreateMap<SyncConfigurationMaster, SyncConfigurationMasterDto>().ReverseMap();
+            CreateMap<SyncConfigurationMasterDetails, ConfigurationData>()
+                .ForMember(x => x.WorkPlaceFolderName, x => x.MapFrom(a => a.WorkPlaceFolder.GetDescription()))
+                .ReverseMap();
+            CreateMap<SyncConfigurationMasterDetailsAudit, SyncConfigurationMasterDetails>()
+                .ForMember(x => x.Id, x => x.MapFrom(a => a.SyncConfigrationDetailId))
+                .ReverseMap();
         }
     }
 }
