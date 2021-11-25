@@ -24,5 +24,6 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? CompanyId { get; set; }
         public string Comment { get; set; }
         public ProductVerification ProductVerification { get; set; }
+        public int? RetentionSampleQty { get; set; }
     }
 }
