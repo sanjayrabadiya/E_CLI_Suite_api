@@ -36,7 +36,8 @@ namespace GSC.Respository.Project.Design
 
             if (isFormula)
                 result = result.Where(x => (x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character
-                || x.CollectionSource == CollectionSources.NumericScale || x.CollectionSource == CollectionSources.HorizontalScale));
+                || x.CollectionSource == CollectionSources.Time || x.CollectionSource == CollectionSources.NumericScale
+                || x.CollectionSource == CollectionSources.HorizontalScale));
 
             return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownVaribleDto
             {

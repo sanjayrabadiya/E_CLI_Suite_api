@@ -71,6 +71,13 @@ namespace GSC.Respository.EditCheckImpact
                     if (string.IsNullOrEmpty(r.InputValue))
                         r.InputValue = "0";
 
+                    if (r.CollectionSource == CollectionSources.Time && !string.IsNullOrEmpty(r.InputValue))
+                    {
+                        DateTime dt = DateTime.ParseExact(r.InputValue, "MM/dd/yyyy HH:mm:ss", null);
+                        var hrs = dt.Hour + Math.Ceiling(dt.Minute / 15.0) / 4.0;
+                        r.InputValue = hrs.ToString();
+                    }
+
                     if (!string.IsNullOrEmpty(r.CollectionValue) && r.CollectionValue == "0")
                         r.CollectionValue = "";
 
