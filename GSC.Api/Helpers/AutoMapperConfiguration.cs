@@ -290,7 +290,7 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentReviewDetailsSections, EconsentReviewDetailsSectionsDto>().ReverseMap();
             CreateMap<EconsentChat, EconsentChatDto>().ReverseMap();
             CreateMap<Data.Entities.UserMgt.User, EConsentUserChatDto>()
-                .ForMember(x => x.UserName, y => y.MapFrom(a => a.FirstName +" "+ a.LastName ))
+                .ForMember(x => x.UserName, y => y.MapFrom(a => a.FirstName + " " + a.LastName))
                 .ReverseMap();
             //CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
             CreateMap<Site, SiteDto>().ReverseMap();
@@ -334,7 +334,7 @@ namespace GSC.Api.Helpers
             CreateMap<TaskTemplate, TaskTemplateDto>().ReverseMap();
             CreateMap<TaskMaster, TaskmasterDto>().ReverseMap();
             CreateMap<StudyPlan, StudyPlanDto>().ReverseMap();
-            CreateMap<StudyPlanTask,TaskMaster>()
+            CreateMap<StudyPlanTask, TaskMaster>()
                 .ForMember(x => x.Id, y => y.MapFrom(a => a.TaskId))
                .ReverseMap();
             CreateMap<ScreeningNumberSettings, ScreeningNumberSettingsDto>()
@@ -359,7 +359,7 @@ namespace GSC.Api.Helpers
               .ReverseMap();
             CreateMap<WeekEndMasterDto, WeekEndMaster>().ReverseMap();
             CreateMap<ReportSettingNew, ProjectDesignReportSetting>()
-               .ForMember(x => x.ProjectDesignId, y => y.MapFrom(a => a.ProjectId))            
+               .ForMember(x => x.ProjectDesignId, y => y.MapFrom(a => a.ProjectId))
                .ReverseMap();
             CreateMap<SupplyLocation, SupplyLocationDto>().ReverseMap();
             CreateMap<CentralDepot, CentralDepotDto>().ReverseMap();
@@ -389,8 +389,8 @@ namespace GSC.Api.Helpers
             CreateMap<PharmacyStudyProductType, PharmacyStudyProductTypeDto>().ReverseMap();
             CreateMap<ProductReceipt, ProductReceiptDto>().ReverseMap();
             CreateMap<StudyPlanTaskResourceDto, StudyPlanTaskResource>().ReverseMap();
-            CreateMap<ProductVerification,ProductVerificationDto>().ReverseMap();
-            CreateMap<ProductVerificationDetail,ProductVerificationDetailDto>().ReverseMap();
+            CreateMap<ProductVerification, ProductVerificationDto>().ReverseMap();
+            CreateMap<ProductVerificationDetail, ProductVerificationDetailDto>().ReverseMap();
             CreateMap<LanguageConfiguration, LanguageConfigurationDto>().ReverseMap();
             CreateMap<LanguageConfigurationDetails, LanguageConfigurationDetailsDto>().ReverseMap();
             CreateMap<VerificationApprovalTemplate, VerificationApprovalTemplateDto>().ReverseMap();
@@ -412,7 +412,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Comments.Any()));
             CreateMap<ManageMonitoringReportVariableChild, ManageMonitoringReportVariableChildDto>().ReverseMap();
             CreateMap<ManageMonitoringReportVariableAudit, ManageMonitoringReportVariableAuditDto>().ReverseMap();
-            CreateMap<LabManagementUploadExcelData, LabManagementUploadExcelDataDto>().ReverseMap();          
+            CreateMap<LabManagementUploadExcelData, LabManagementUploadExcelDataDto>().ReverseMap();
             CreateMap<ManageMonitoringReportReview, ManageMonitoringReportReviewDto>().ReverseMap();
             CreateMap<ManageMonitoringReportVariableComment, ManageMonitoringReportVariableCommentDto>().ReverseMap();
             CreateMap<SyncConfigurationMaster, SyncConfigurationMasterDto>().ReverseMap();
@@ -422,6 +422,8 @@ namespace GSC.Api.Helpers
             CreateMap<SyncConfigurationMasterDetailsAudit, SyncConfigurationMasterDetails>()
                 .ForMember(x => x.Id, x => x.MapFrom(a => a.SyncConfigrationDetailId))
                 .ReverseMap();
+
+            CreateMap<FileSizeConfiguration, FileSizeConfigurationDto>().ReverseMap();
         }
     }
 }

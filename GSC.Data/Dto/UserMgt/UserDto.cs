@@ -106,5 +106,8 @@ namespace GSC.Data.Dto.UserMgt
         public DateTime? ValidTo { get; set; }
         public string ProfilePicPath { get; set; }
         public string ScreeningNumber { get; set; }
+        public DateTime? DateOfScreening { get; set; }
+        public string RandomizationNumber { get; set; }
+        public DateTime? DateOfRandomization { get; set; }
     }
 }

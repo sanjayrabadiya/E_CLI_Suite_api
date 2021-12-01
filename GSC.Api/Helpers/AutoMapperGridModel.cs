@@ -124,6 +124,9 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.Role, x => x.MapFrom(a => string.Join(", ", a.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())))
                 .ForMember(x => x.ScreeningNumber, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
                 .ForMember(x => x.CompanyName, x => x.MapFrom(a => a.Company.CompanyName))
+                .ForMember(x => x.RandomizationNumber, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+                .ForMember(x => x.DateOfScreening, x => x.MapFrom(a => a.Randomization.DateOfScreening))
+                .ForMember(x => x.DateOfRandomization, x => x.MapFrom(a => a.Randomization.DateOfRandomization))
                 .ReverseMap();
 
             CreateMap<Randomization, RandomizationGridDto>()
@@ -375,12 +378,15 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.ProjectDesignVisitName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
                 .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.TemplateName))
                 .ReverseMap();
-            CreateMap<ManageMonitoringReportVariable, ManageMonitoringReportVariableDto>().ReverseMap();           
+            CreateMap<ManageMonitoringReportVariable, ManageMonitoringReportVariableDto>().ReverseMap();
             CreateMap<ManageMonitoringReportReview, ManageMonitoringReportReviewDto>().ReverseMap();
             CreateMap<SyncConfigurationMaster, SyncConfigurationMasterGridDto>()
                 .ForMember(x => x.ReportName, x => x.MapFrom(a => a.ReportScreen.ReportName))
                 .ReverseMap();
 
+            CreateMap<FileSizeConfiguration, FileSizeConfigurationGridDto>()
+                .ForMember(x => x.ScreenName, x => x.MapFrom(a => a.AppScreens.ScreenName))
+                .ForMember(x => x.ScreenCode, x => x.MapFrom(a => a.AppScreens.ScreenCode)).ReverseMap();
         }
     }
 }
