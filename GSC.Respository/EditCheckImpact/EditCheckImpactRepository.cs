@@ -312,7 +312,8 @@ namespace GSC.Respository.EditCheckImpact
 
                     if (r.Operator == Operator.Enable)
                     {
-                        if (r.ValidateType == EditCheckValidateType.Passed && editCheckTarget.EditCheckDisable)
+
+                        if (editCheckTarget.IsEnable)
                         {
                             editCheckTarget.InfoType = EditCheckInfoType.Info;
                             editCheckTarget.EditCheckDisable = false;
@@ -321,6 +322,7 @@ namespace GSC.Respository.EditCheckImpact
                         {
                             editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
                             editCheckTarget.EditCheckDisable = r.ValidateType != EditCheckValidateType.Passed;
+                            editCheckTarget.IsEnable = r.ValidateType == EditCheckValidateType.Passed;
                         }
 
                         editCheckTarget.OriginalValidationType = editCheckTarget.EditCheckDisable ? ValidationType.None : ValidationType.Required;
