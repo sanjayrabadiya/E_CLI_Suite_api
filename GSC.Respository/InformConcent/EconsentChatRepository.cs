@@ -111,15 +111,15 @@ namespace GSC.Respository.InformConcent
             return result;
         }
 
-        //public List<EconsentChatDto> GetEconsentChat(EconcentChatParameterDto details)
-        //{
-        //    IList<int> intList = new List<int>() { details.UserId, _jwtTokenAccesser.UserId };
-        //    //var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && details.LastDate!=null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now && x.Message.Contains(details.SearchString)).Take(details.PageSize).OrderBy(x=>x.SendDateTime).ToList();
-        //    var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && (details.LastDate != null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now)).Take(details.PageSize).OrderBy(x => x.SendDateTime).ToList();
-        //    data.ForEach(x => x.Message = EncryptionDecryption.DecryptString(x.Salt, x.Message));
-        //    var result = _mapper.Map<List<EconsentChatDto>>(data);
-        //    return result;
-        //}
+        public List<EconsentChatDto> GetEconsentChat(EconcentChatParameterDto details)
+        {
+            IList<int> intList = new List<int>() { details.UserId, _jwtTokenAccesser.UserId };
+            //var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && details.LastDate!=null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now && x.Message.Contains(details.SearchString)).Take(details.PageSize).OrderBy(x=>x.SendDateTime).ToList();
+            var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && (details.LastDate != null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now)).Take(details.PageSize).OrderBy(x => x.SendDateTime).ToList();
+            data.ForEach(x => x.Message = EncryptionDecryption.DecryptString(x.Salt, x.Message));
+            var result = _mapper.Map<List<EconsentChatDto>>(data);
+            return result;
+        }
 
         public int GetUnReadMessagecount()
         {

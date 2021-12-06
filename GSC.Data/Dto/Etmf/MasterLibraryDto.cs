@@ -46,5 +46,6 @@ namespace GSC.Data.Dto.Etmf
         public bool TrailLevelDoc { get; set; }
         public bool CountryLevelDoc { get; set; }
         public bool SiteLevelDoc { get; set; }
+        public string Version { get; set; }
     }
 }

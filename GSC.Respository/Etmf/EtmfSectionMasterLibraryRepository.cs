@@ -27,7 +27,7 @@ namespace GSC.Respository.Etmf
 
         public List<DropDownDto> GetSectionMasterLibraryDropDown(int EtmfZoneMasterLibraryId)
         {
-            return All.Where(x => x.DeletedDate==null && x.EtmfZoneMasterLibraryId== EtmfZoneMasterLibraryId)
+            return All.Where(x => x.EtmfZoneMasterLibraryId== EtmfZoneMasterLibraryId)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.SectionName }).OrderBy(o => o.Value).ToList();
         }
     }

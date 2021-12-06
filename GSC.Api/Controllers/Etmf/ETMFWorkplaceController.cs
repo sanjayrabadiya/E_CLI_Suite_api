@@ -113,7 +113,7 @@ namespace GSC.Api.Controllers.Etmf
             var imageUrl = _uploadSettingRepository.GetDocumentPath();
 
             var SaveFolderStructure = _eTMFWorkplaceRepository.SaveFolderStructure(projectDetail, childProjectList, countryList, artificiteList, imageUrl);
-
+            SaveFolderStructure.Version = artificiteList.FirstOrDefault().Version;
             _eTMFWorkplaceRepository.Add(SaveFolderStructure);
             foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetail)
             {

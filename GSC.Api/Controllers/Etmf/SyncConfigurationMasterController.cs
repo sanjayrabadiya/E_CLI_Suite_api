@@ -169,19 +169,31 @@ namespace GSC.Api.Controllers.Etmf
                 _configurationMasterDetailsRepositoryAudit.Add(syncConfigrationMasterDetails);
             }
             _syncConfigurationMasterRepository.Active(record);
-            _uow.Save();          
+            _uow.Save();
             return Ok();
         }
 
 
         [HttpGet]
-        [Route("GetAudit")]       
+        [Route("GetAudit")]
         public IActionResult GetAudit()
         {
             var audit = _syncConfigurationMasterRepository.GetAudit();
             return Ok(audit);
         }
 
-
+        [HttpPost]       
+        [Route("GetSyncConfigrationPath")]
+        public IActionResult GetSyncConfigrationPath([FromBody] SyncConfigurationParameterDto details)
+        {
+            string validate = _syncConfigurationMasterRepository.ValidateMasterConfiguration(details);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+            var path = _syncConfigurationMasterRepository.GetsyncConfigurationPath(details);    
+            return  Ok(new { PathDetail = path });
+        }
     }
 }

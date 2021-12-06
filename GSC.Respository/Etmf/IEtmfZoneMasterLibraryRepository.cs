@@ -13,6 +13,6 @@ namespace GSC.Respository.Etmf
         List<EtmfZoneMasterLibrary> ExcelDataConvertToEntityformat(List<MasterLibraryDto> data);
 
         string Duplicate(EtmfZoneMasterLibrary objSave);
-        List<DropDownDto> GetZoneMasterLibraryDropDown();
+        List<DropDownDto> GetZoneMasterLibraryDropDown(string version);
     }
 }

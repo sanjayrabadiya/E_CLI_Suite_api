@@ -35,7 +35,7 @@ namespace GSC.Api.Controllers.InformConcent
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
                                         IHubContext<MessageHub> hubcontext,
-                                        IEconsentChatRepository econsentChatRepository,IUserRepository userRepository,IEmailSenderRespository emailSenderRespository,
+                                        IEconsentChatRepository econsentChatRepository, IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
                                         IMapper mapper)
         {
             _econsentChatRepository = econsentChatRepository;
@@ -65,14 +65,14 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(data);
         }
 
-        //[HttpPost]
-        //[Route("GetEconsentChat")]
-        //public IActionResult GetEconsentChat([FromBody] EconcentChatParameterDto details)
-        //{
-        //    // display messages of selected user
-        //    var data = _econsentChatRepository.GetEconsentChat(details);
-        //    return Ok(data);
-        //}
+        [HttpPost]
+        [Route("GetEconsentChat")]
+        public IActionResult GetEconsentChat([FromBody] EconcentChatParameterDto details)
+        {
+            // display messages of selected user
+            var data = _econsentChatRepository.GetEconsentChat(details);
+            return Ok(data);
+        }
 
         [HttpGet]
         [Route("GetUnReadMessagecount")]
@@ -87,10 +87,10 @@ namespace GSC.Api.Controllers.InformConcent
         public IActionResult Post([FromBody] EconsentChat econsentChat)
         {
             // insert message details in econsentchat table          
-            econsentChat.Salt= Cryptography.CreateSaltKey();
-            econsentChat.Message = EncryptionDecryption.EncryptString(econsentChat.Salt, econsentChat.Message);         
+            econsentChat.Salt = Cryptography.CreateSaltKey();
+            econsentChat.Message = EncryptionDecryption.EncryptString(econsentChat.Salt, econsentChat.Message);
             _econsentChatRepository.Add(econsentChat);
-            _uow.Save();           
+            _uow.Save();
             econsentChat.Message = EncryptionDecryption.DecryptString(econsentChat.Salt, econsentChat.Message);
             // var senderdetails = _userRepository.Find(econsentChat.ReceiverId);
             //var connection = ConnectedUser.Ids.Where(x => x.userId == econsentChat.ReceiverId).Any();
@@ -132,14 +132,17 @@ namespace GSC.Api.Controllers.InformConcent
             _uow.Save();
             List<int> senderids = new List<int>();
             senderids = messages.Select(x => x.SenderId).Distinct().ToList();
-            var userlist = ConnectedUser.Ids.Where(x => senderids.Contains(x.userId)).ToList();
-            List<string> listData = new List<string>();
-            for (int i = 0; i < userlist.Count; i++)
+            if (ConnectedUser.Ids != null)
             {
-                listData.Add(userlist[i].connectionId);
+                var userlist = ConnectedUser.Ids.Where(x => senderids.Contains(x.userId)).ToList();
+                List<string> listData = new List<string>();
+                for (int i = 0; i < userlist.Count; i++)
+                {
+                    listData.Add(userlist[i].connectionId);
+                }
+                IReadOnlyList<string> readOnlyData = listData.AsReadOnly();
+                await _hubcontext.Clients.Clients(readOnlyData).SendAsync("AllMessageDelivered", receiverId);
             }
-            IReadOnlyList<string> readOnlyData = listData.AsReadOnly();
-            await _hubcontext.Clients.Clients(readOnlyData).SendAsync("AllMessageDelivered", receiverId);
             return Ok();
         }
 

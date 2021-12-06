@@ -12,5 +12,7 @@ namespace GSC.Respository.Etmf
         List<SyncConfigurationMasterGridDto> GetSyncConfigurationMastersList(bool isDeleted);
         string Duplicate(SyncConfigurationMaster objSave);
         List<SyncConfigurationAuditDto> GetAudit();
+        string ValidateMasterConfiguration(SyncConfigurationParameterDto details);
+        string GetsyncConfigurationPath(SyncConfigurationParameterDto details);
     }
 }

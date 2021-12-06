@@ -168,6 +168,24 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(dtolist.OrderByDescending(x => x.Id));
         }
 
+        [Route("GetVersion")]
+        [HttpGet]
+        public ActionResult GetVersion()
+        {
+            var result = _etmfZoneMasterLibraryRepository.All.Select(x => x.Version).Distinct();
+            int cnt = 1;
+            List<DropDownDto> dtolist = new List<DropDownDto>();
+            foreach (var val in result)
+            {
+                DropDownDto obj = new DropDownDto();
+                obj.Id = cnt;
+                obj.Value = val.ToString();
+                cnt++;
+                dtolist.Add(obj);
+            }
+            return Ok(dtolist.OrderByDescending(x => x.Id));
+        }
+
         [Route("GetInActiveVersionData/{version}")]
         [HttpGet]
         public ActionResult GetInActiveVersionData(string version)
@@ -177,10 +195,10 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpGet]
-        [Route("GetZoneMasterLibraryDropDown")]
-        public IActionResult GetZoneMasterLibraryDropDown()
+        [Route("GetZoneMasterLibraryDropDown/{version}")]
+        public IActionResult GetZoneMasterLibraryDropDown(string version)
         {
-            return Ok(_etmfZoneMasterLibraryRepository.GetZoneMasterLibraryDropDown());
+            return Ok(_etmfZoneMasterLibraryRepository.GetZoneMasterLibraryDropDown(version));
         }
     }
 }

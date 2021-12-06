@@ -9,6 +9,7 @@ namespace GSC.Data.Entities.Etmf
     public class ProjectWorkplace : BaseEntity, ICommonAduit
     {
         public int ProjectId { get; set; }
+        public string Version { get; set; }
 
         public Data.Entities.Master.Project Project { get; set; }
         public List<ProjectWorkplaceDetail> ProjectWorkplaceDetail { get; set; }

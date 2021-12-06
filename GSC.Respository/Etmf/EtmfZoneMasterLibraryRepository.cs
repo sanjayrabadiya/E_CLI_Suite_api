@@ -81,9 +81,9 @@ namespace GSC.Respository.Etmf
                 return "Duplicate Zone name : " + objSave.ZonName;
             return "";
         }
-        public List<DropDownDto> GetZoneMasterLibraryDropDown()
+        public List<DropDownDto> GetZoneMasterLibraryDropDown(string version)
         {
-            return All.Where(x => x.DeletedDate==null)
+            return All.Where(x => x.Version== version)
                     //(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.ZonName }).OrderBy(o => o.Value).ToList();
         }
