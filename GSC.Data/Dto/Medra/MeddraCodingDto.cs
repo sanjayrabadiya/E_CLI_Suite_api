@@ -117,5 +117,8 @@ namespace GSC.Data.Dto.Medra
         public bool? IsApproved { get; set; }
         public string LltCurrent { get; set; }
         public int RandomizationId { get; set; }
+
+        public string ApprovedBy { get; set; }
+        public DateTime? ApprovedOn { get; set; }
     }
 }

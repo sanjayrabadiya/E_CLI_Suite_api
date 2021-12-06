@@ -312,7 +312,19 @@ namespace GSC.Respository.EditCheckImpact
 
                     if (r.Operator == Operator.Enable)
                     {
-                        editCheckTarget.EditCheckDisable = r.ValidateType != EditCheckValidateType.Passed;
+
+                        if (editCheckTarget.IsEnable)
+                        {
+                            editCheckTarget.InfoType = EditCheckInfoType.Info;
+                            editCheckTarget.EditCheckDisable = false;
+                        }
+                        else
+                        {
+                            editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
+                            editCheckTarget.EditCheckDisable = r.ValidateType != EditCheckValidateType.Passed;
+                            editCheckTarget.IsEnable = r.ValidateType == EditCheckValidateType.Passed;
+                        }
+
                         editCheckTarget.OriginalValidationType = editCheckTarget.EditCheckDisable ? ValidationType.None : ValidationType.Required;
                         if (editCheckTarget.EditCheckDisable)
                         {
@@ -327,7 +339,7 @@ namespace GSC.Respository.EditCheckImpact
                             if (isQueryRaise) editCheckTarget.HasQueries = true;
                             r.ValidateType = EditCheckValidateType.Failed;
                         }
-                        editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
+
                     }
                     else if (r.IsFormula || r.Operator == Operator.HardFetch)
                     {
@@ -538,7 +550,7 @@ namespace GSC.Respository.EditCheckImpact
                         _screeningTemplateReviewRepository.Update(c);
                     });
                 }
-              
+
 
                 if (isFound)
                 {

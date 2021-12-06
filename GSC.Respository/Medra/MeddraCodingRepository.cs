@@ -219,8 +219,15 @@ namespace GSC.Respository.Medra
 
             var result = (from se in _context.ScreeningEntry
                           join project in _context.Project.Where(x => projectList.Contains(x.Id)) on se.ProjectId equals project.Id
-                          join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null && ((filters.TemplateStatus != null && filters.ExtraData == false) ? t.Status == ScreeningTemplateStatus.Completed
-                          : true) && ((filters.TemplateStatus != null && filters.ExtraData == true) ? t.ReviewLevel == filters.TemplateStatus : true) && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on se.Id equals st.ScreeningVisit.ScreeningEntryId
+                          join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null && (
+                          
+                          (filters.TemplateStatus != null && filters.ExtraData == false) ? t.Status == ScreeningTemplateStatus.Completed : true) && 
+                          ((filters.TemplateStatus != null && filters.ExtraData == true) ? t.ReviewLevel == filters.TemplateStatus : true) && 
+                          t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) 
+                          
+                          on se.Id equals st.ScreeningVisit.ScreeningEntryId
+                          
+                          
                           join pt in _context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
                           join visit in _context.ProjectDesignVisit on pt.ProjectDesignVisitId equals visit.Id
                           join pdv in _context.ProjectDesignVariable.Where(val => val.DeletedDate == null && val.Id == filters.ProjectDesignVariableId)
@@ -244,6 +251,8 @@ namespace GSC.Respository.Medra
                           from user in userDto.DefaultIfEmpty()
                           join roles in _context.SecurityRole on meddraCoding.CreatedRole equals roles.Id into roleDto
                           from role in roleDto.DefaultIfEmpty()
+                          join users in _context.Users on meddraCoding.ApprovedBy equals users.Id into usersDto
+                          from approvedBy in usersDto.DefaultIfEmpty()
                           where meddraLLT.pt_code == meddraMD.pt_code && pdv.Id == filters.ProjectDesignVariableId
                           // && ((filters.SubjectIds != null && filters.SubjectIds.Length > 0) ? filters.SubjectIds.Contains(randomization.Id) : true)
                           && ((filters.ProjectId != 0 ? se.ProjectId == filters.ProjectId : true))
@@ -297,7 +306,9 @@ namespace GSC.Respository.Medra
                               SocCode = meddraMD.pt_code.ToString(),
                               IsApproved = meddraCoding.IsApproved,
                               PrimarySoc = meddraMD.primary_soc_fg,
-                              RandomizationId = randomization.Id
+                              RandomizationId = randomization.Id,
+                              ApprovedBy =approvedBy.UserName,
+                              ApprovedOn=meddraCoding.ApproveDate
                           }).ToList();
 
             if (filters.CommentStatus != null)
@@ -314,6 +325,11 @@ namespace GSC.Respository.Medra
             {
                 result = result.Where(x=> filters.SubjectIds.Contains(x.RandomizationId)).ToList();
             }
+
+            //if (filters.TemplateStatus != null && filters.ExtraData == false)
+            //{
+            //    result = result.Where(x => filters.TemplateStatus == 5).ToList();
+            //}
 
             return result.ToList();
         }

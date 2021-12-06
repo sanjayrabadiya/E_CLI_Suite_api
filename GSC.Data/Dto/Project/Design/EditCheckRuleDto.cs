@@ -18,6 +18,7 @@ namespace GSC.Data.Dto.Project.Design
         }
         public ValidationType? OriginalValidationType { get; set; }
         public bool EditCheckDisable { get; set; }
+        public bool IsEnable { get; set; }
         public List<EditCheckMessage> EditCheckMsg { get; set; }
         public EditCheckInfoType InfoType { get; set; }
         public bool HasQueries { get; set; }

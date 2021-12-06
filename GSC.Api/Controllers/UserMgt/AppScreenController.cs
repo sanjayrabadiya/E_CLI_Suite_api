@@ -39,10 +39,10 @@ namespace GSC.Api.Controllers.UserMgt
         public IActionResult Get(bool isDeleted)
         {
             var appScreens = _appScreenRepository.All.Where(x =>
-                isDeleted ? x.DeletedDate != null : x.DeletedDate == null 
+                isDeleted ? x.DeletedDate != null : x.DeletedDate == null
             ).OrderByDescending(x => x.Id).ToList();
             var appScreensDto = _mapper.Map<IEnumerable<AppScreenDto>>(appScreens);
-            
+
             foreach (var item in appScreensDto)
             {
                 var name = _appScreenRepository.All.Where(x => x.Id == item.ParentAppScreenId).Select(c => c.ScreenName)
@@ -143,6 +143,15 @@ namespace GSC.Api.Controllers.UserMgt
         public IActionResult GetMasterTableName()
         {
             return Ok(_appScreenRepository.GetMasterTableName());
+        }
+
+        [HttpGet("GetSubMenus")]
+        public IActionResult GetSubMenus()
+        {
+            var appScreens = _appScreenRepository.All.Where(x => x.DeletedDate == null && x.ParentAppScreenId != null
+            ).OrderByDescending(x => x.Id).ToList();
+            var appScreensDto = _mapper.Map<IEnumerable<AppScreenDto>>(appScreens);
+            return Ok(appScreensDto);
         }
     }
 }
