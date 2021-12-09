@@ -48,5 +48,8 @@ namespace GSC.Data.Dto.Configuration
         public string ClientDateTime { get; set; }
         public bool? NonCRF { get; set; }
         public bool IsSectionDisplay { get; set; }
+        public int ReportScreenId { get; set; }
+        public int SitesId { get; set; }
+        public bool IsSync { get; set; }
     }
 }

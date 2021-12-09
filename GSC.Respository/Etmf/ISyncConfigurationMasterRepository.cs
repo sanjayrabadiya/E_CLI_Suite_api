@@ -13,6 +13,7 @@ namespace GSC.Respository.Etmf
         string Duplicate(SyncConfigurationMaster objSave);
         List<SyncConfigurationAuditDto> GetAudit();
         string ValidateMasterConfiguration(SyncConfigurationParameterDto details);
-        string GetsyncConfigurationPath(SyncConfigurationParameterDto details);
+        string GetsyncConfigurationPath(SyncConfigurationParameterDto details, out int ProjectWorkplaceArtificateId);
+        string SaveArtifactDocument(string DocumentName, SyncConfigurationParameterDto details);
     }
 }

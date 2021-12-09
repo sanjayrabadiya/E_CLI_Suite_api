@@ -186,13 +186,14 @@ namespace GSC.Api.Controllers.Etmf
         [Route("GetSyncConfigrationPath")]
         public IActionResult GetSyncConfigrationPath([FromBody] SyncConfigurationParameterDto details)
         {
+            int ProjectWorkplaceArtificateId;
             string validate = _syncConfigurationMasterRepository.ValidateMasterConfiguration(details);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            var path = _syncConfigurationMasterRepository.GetsyncConfigurationPath(details);    
+            var path = _syncConfigurationMasterRepository.GetsyncConfigurationPath(details,out ProjectWorkplaceArtificateId);    
             return  Ok(new { PathDetail = path });
         }
     }

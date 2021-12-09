@@ -2,6 +2,7 @@
 using BoldReports.Writer;
 using GSC.Data.Dto.Common;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Report.Pdf;
@@ -14,6 +15,7 @@ using GSC.Report.Common;
 using GSC.Respository.Client;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
+using GSC.Respository.Etmf;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
@@ -62,6 +64,7 @@ namespace GSC.Report
         private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
         private readonly PdfFont regularfont;
         private readonly Stream fontStream;
+        private readonly ISyncConfigurationMasterRepository _syncConfigurationMasterRepository;
 
         private PdfDocument document = null;
         private PdfLayoutResult tocresult = null;
@@ -71,7 +74,7 @@ namespace GSC.Report
         public ReportSyncfusion(IHostingEnvironment hostingEnvironment,
         IUploadSettingRepository uploadSettingRepository, IReportBaseRepository reportBaseRepository, ICompanyRepository companyRepository,
         IClientRepository clientRepository, IGSCContext context, IAppSettingRepository appSettingRepository, IJwtTokenAccesser jwtTokenAccesser,
-        IUserRepository userRepository, IEmailSenderRespository emailSenderRespository
+        IUserRepository userRepository, IEmailSenderRespository emailSenderRespository, ISyncConfigurationMasterRepository syncConfigurationMasterRepository
         )
         {
             _hostingEnvironment = hostingEnvironment;
@@ -86,6 +89,7 @@ namespace GSC.Report
             _emailSenderRespository = emailSenderRespository;
             fontStream = FilePathConvert();
             regularfont = new PdfTrueTypeFont(fontStream, 12);
+            _syncConfigurationMasterRepository = syncConfigurationMasterRepository;
         }
 
         private Stream FilePathConvert()
@@ -414,6 +418,9 @@ namespace GSC.Report
             var parent = _context.Project.Where(x => x.Id == reportSetting.ProjectId).FirstOrDefault().ProjectCode;
             fileInfo.ParentFolderName = parent + "_" + DateTime.Now.Ticks;
 
+            string ParentProctCode = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode;
+            string ParentProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+
             foreach (var item in projectDetails)
             {
                 document = new PdfDocument();
@@ -455,59 +462,70 @@ namespace GSC.Report
                 MemoryStream memoryStream = new MemoryStream();
                 document.Save(memoryStream);
 
-
-
                 fileInfo.Base_URL = base_URL;
                 fileInfo.ModuleName = Enum.GetName(typeof(JobNameType), jobMonitoring.JobName);
                 fileInfo.FolderType = Enum.GetName(typeof(DossierPdfStatus), jobMonitoring.JobDetails);
-                //fileInfo.ParentFolderName = projectdetails.Project.ProjectCode + "-" + projectdetails.Project.ProjectName + "_" + DateTime.Now.Ticks;                
-                //harshil     
-                string filePath = "";
-                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+
+                //projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "-" + projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+                if (reportSetting.IsSync)
                 {
-                    fileInfo.ParentFolderName = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "_" + DateTime.Now.Ticks;
-                    fileInfo.FileName = fileInfo.ParentFolderName.Replace("/", "") + ".pdf";
-                    filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.FileName);
+                    string filenName = reportSetting.PdfStatus == DossierPdfStatus.Blank ? fileInfo.ParentFolderName.Replace("/", "") + ".pdf" : item.Initial.Replace("/", "") + ".pdf";
+                    SyncFile(filenName, reportSetting, memoryStream);
                 }
                 else
                 {
-                    fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
-                    fileInfo.FileName = item.Initial.Replace("/", "") + ".pdf";
-                    string fileName = fileInfo.FileName + ".pdf";
-                    fileInfo.ChildFolderName = item.ProjectDetails.ProjectCode;
-                    filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
+                    SaveFile(reportSetting, fileInfo, memoryStream, item, ParentProctCode);
                 }
-                bool exists = Directory.Exists(filePath);
-                if (!exists)
-                    if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                        Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
-                    else
-                        Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName));
+                //fileInfo.ParentFolderName = projectdetails.Project.ProjectCode + "-" + projectdetails.Project.ProjectName + "_" + DateTime.Now.Ticks;                
+                //harshil     
+                //string filePath = "";
+                //if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                //{
+                //    fileInfo.ParentFolderName = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "_" + DateTime.Now.Ticks;
+                //    fileInfo.FileName = fileInfo.ParentFolderName.Replace("/", "") + ".pdf";
+                //    filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.FileName);
+                //}
+                //else
+                //{
+                //    fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
+                //    fileInfo.FileName = item.Initial.Replace("/", "") + ".pdf";
+                //    string fileName = fileInfo.FileName + ".pdf";
+                //    fileInfo.ChildFolderName = item.ProjectDetails.ProjectCode;
+                //    filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
+                //}
+                //bool exists = Directory.Exists(filePath);
+                //if (!exists)
+                //    if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                //        Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
+                //    else
+                //        Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName));
 
-                using (System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
-                {
-                    memoryStream.WriteTo(fs);
-                }
+                //using (System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
+                //{
+                //    memoryStream.WriteTo(fs);
+                //}
                 //// add job Monitor
 
             }
             //if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
             //{
-            jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
-            jobMonitoring.JobStatus = JobStatusType.Completed;
-            jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
-            jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
-            var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);
+            //jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
+            //jobMonitoring.JobStatus = JobStatusType.Completed;
+            //jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
+            //jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
+            //var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);
 
-            string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
-            ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
-            Directory.Delete(Zipfilename, true);
+            //string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
+            //ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
+            //Directory.Delete(Zipfilename, true);
 
-            var user = _userRepository.Find(_jwtTokenAccesser.UserId);
-            var ProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "-" + projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
-            string asa = Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType, jobMonitoring.FolderName);
-            var linkOfPdf = "<a href='" + asa + "'>Click Here</a>";
-            _emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
+            //var user = _userRepository.Find(_jwtTokenAccesser.UserId);
+            //var ProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "-" + projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+            //string asa = Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType, jobMonitoring.FolderName);
+            //var linkOfPdf = "<a href='" + asa + "'>Click Here</a>";
+            //_emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
+            if (!reportSetting.IsSync)
+                UpdateJobStatus(jobMonitoring, fileInfo, ParentProctCode, ParentProjectName, documentUrl);
 
             return "";
         }
@@ -977,6 +995,72 @@ namespace GSC.Report
         }
 
 
+        private void SaveFile(ReportSettingNew reportSetting, FileSaveInfo fileInfo, MemoryStream memoryStream, DossierReportDto item, string ParentProjectCode)
+        {
+            string filePath = "";
+            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+            {
+                //fileInfo.ParentFolderName = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "_" + DateTime.Now.Ticks;
+                fileInfo.ParentFolderName = ParentProjectCode + "_" + DateTime.Now.Ticks;
+                fileInfo.FileName = fileInfo.ParentFolderName.Replace("/", "") + ".pdf";
+                filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.FileName);
+            }
+            else
+            {
+                fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
+                fileInfo.FileName = item.Initial.Replace("/", "") + ".pdf";
+                string fileName = fileInfo.FileName + ".pdf";
+                fileInfo.ChildFolderName = item.ProjectDetails.ProjectCode;
+                filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
+            }
+            bool exists = Directory.Exists(filePath);
+            if (!exists)
+                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                    Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
+                else
+                    Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName));
+
+            using (System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
+            {
+                memoryStream.WriteTo(fs);
+            }
+        }
+
+        private void UpdateJobStatus(JobMonitoring jobMonitoring, FileSaveInfo fileInfo, string ParentProjectCode, string ParentProjectName, string documentUrl)
+        {
+            jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
+            jobMonitoring.JobStatus = JobStatusType.Completed;
+            jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
+            jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
+            var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);
+
+            string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
+            ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
+            Directory.Delete(Zipfilename, true);
+
+            var user = _userRepository.Find(_jwtTokenAccesser.UserId);
+            //var ProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "-" + projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+            var ProjectName = ParentProjectCode + "-" + ParentProjectName;
+            string asa = Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType, jobMonitoring.FolderName);
+            var linkOfPdf = "<a href='" + asa + "'>Click Here</a>";
+            _emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
+        }
+
+        private void SyncFile(string DocumentName, ReportSettingNew reportSetting, MemoryStream memoryStream)
+        {
+            SyncConfigurationParameterDto parameterDto = new SyncConfigurationParameterDto();
+            parameterDto.CountryId = Convert.ToInt32(reportSetting.CountryId);
+            parameterDto.ProjectId = reportSetting.ProjectId;
+            parameterDto.SiteId = reportSetting.SitesId;
+            parameterDto.ReportScreenId = reportSetting.ReportScreenId;
+            string DocumentPath = _syncConfigurationMasterRepository.SaveArtifactDocument(DocumentName, parameterDto);
+            string fullPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), DocumentPath,DocumentName);
+            Directory.CreateDirectory(Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), DocumentPath));
+            using (System.IO.FileStream fs = new System.IO.FileStream(fullPath, System.IO.FileMode.Create))
+            {
+                memoryStream.WriteTo(fs);
+            }
+        }
     }
 
 }

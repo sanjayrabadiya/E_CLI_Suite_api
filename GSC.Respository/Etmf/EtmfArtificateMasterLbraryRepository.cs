@@ -92,7 +92,7 @@ namespace GSC.Respository.Etmf
 
         public List<DropDownDto> GetArtificateDropDown(int EtmfSectionMasterLibraryId)
         {
-            return All.Where(x => x.EtmfSectionMasterLibraryId== EtmfSectionMasterLibraryId)
+            return All.Where(x => x.EtmfSectionMasterLibraryId == EtmfSectionMasterLibraryId)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.ArtificateName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }

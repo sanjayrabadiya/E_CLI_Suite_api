@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Entities.Project.Design;
@@ -58,9 +59,9 @@ namespace GSC.Api.Controllers.Report
             reportSetting.ProjectId = projectDesignId;
             reportSetting.PdfStatus = DossierPdfStatus.Blank;
             reportSetting.AnnotationType = true;
-            reportSetting.LeftMargin =Convert.ToDecimal(0.5);
-            reportSetting.RightMargin =Convert.ToDecimal(0.5);
-            reportSetting.BottomMargin =Convert.ToDecimal(0.5);
+            reportSetting.LeftMargin = Convert.ToDecimal(0.5);
+            reportSetting.RightMargin = Convert.ToDecimal(0.5);
+            reportSetting.BottomMargin = Convert.ToDecimal(0.5);
             reportSetting.TopMargin = Convert.ToDecimal(0.5);
             reportSetting.IsClientLogo = true;
             reportSetting.IsCompanyLogo = true;
@@ -79,6 +80,7 @@ namespace GSC.Api.Controllers.Report
         //    return abc;
         //}
 
+        [TransactionRequired]
         [HttpPost]
         [Route("GetProjectDesignWithFliter")]
         public async Task<IActionResult> GetProjectDesignWithFliter([FromBody] ReportSettingNew reportSetting)
@@ -87,12 +89,12 @@ namespace GSC.Api.Controllers.Report
             var reportSettingForm = _projectDesignReportSettingRepository.All.Where(x => x.ProjectDesignId == reportSetting.ProjectId && x.CompanyId == reportSetting.CompanyId && x.DeletedBy == null).FirstOrDefault();
             var objNew = _mapper.Map<ProjectDesignReportSetting>(reportSetting);
             if (reportSettingForm == null)
-            {                           
+            {
                 _projectDesignReportSettingRepository.Add(objNew);
             }
             else
-            {              
-                 objNew.Id = reportSettingForm.Id;
+            {
+                objNew.Id = reportSettingForm.Id;
                 _projectDesignReportSettingRepository.Update(objNew);
             }
             #endregion
@@ -105,7 +107,8 @@ namespace GSC.Api.Controllers.Report
             jobMonitoringDto.SubmittedTime = _jwtTokenAccesser.GetClientDate();
             jobMonitoringDto.JobDetails = (DossierPdfStatus)reportSetting.PdfStatus;
             var jobMonitoring = _mapper.Map<JobMonitoring>(jobMonitoringDto);
-            _jobMonitoringRepository.Add(jobMonitoring);
+            if (!reportSetting.IsSync)
+                _jobMonitoringRepository.Add(jobMonitoring);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Job Monitoring failed on save.");
             string message = _reportSuncfusion.DossierPdfReportGenerate(reportSetting, jobMonitoring);

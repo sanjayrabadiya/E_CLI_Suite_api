@@ -14,7 +14,7 @@ namespace GSC.Data.Dto.Etmf
     }
     public class SyncConfigrationPathDetails
     {
-        
+        public int ProjectWorkplaceArtificateId { get; set; }
         public string ProjectCode { get; set; }
         public string WorkPlaceFolder { get; set; }
         public string ItemName { get; set; }
