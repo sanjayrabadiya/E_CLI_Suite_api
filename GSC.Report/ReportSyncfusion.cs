@@ -1052,7 +1052,7 @@ namespace GSC.Report
             parameterDto.CountryId = Convert.ToInt32(reportSetting.CountryId);
             parameterDto.ProjectId = reportSetting.ProjectId;
             parameterDto.SiteId = reportSetting.SitesId;
-            parameterDto.ReportScreenId = reportSetting.ReportScreenId;
+            parameterDto.ReportCode = reportSetting.ReportCode;
             string DocumentPath = _syncConfigurationMasterRepository.SaveArtifactDocument(DocumentName, parameterDto);
             string fullPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), DocumentPath,DocumentName);
             Directory.CreateDirectory(Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), DocumentPath));

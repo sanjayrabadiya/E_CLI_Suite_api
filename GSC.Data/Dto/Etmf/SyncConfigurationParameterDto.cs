@@ -7,7 +7,8 @@ namespace GSC.Data.Dto.Etmf
 {
     public class SyncConfigurationParameterDto
     {
-        public int ReportScreenId { get; set; }
+       // public int ReportScreenId { get; set; }
+        public string ReportCode { get; set; }
         public int ProjectId { get; set; }
         public int SiteId { get; set; }
         public int CountryId { get; set; }

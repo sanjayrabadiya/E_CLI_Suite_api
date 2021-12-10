@@ -75,13 +75,13 @@ namespace GSC.Respository.Etmf
 
         public string ValidateMasterConfiguration(SyncConfigurationParameterDto details)
         {
-            var validateMaster = ValidateSyncConfigurationMasterDetails(details.ProjectId, details.ReportScreenId);
+            var validateMaster = ValidateSyncConfigurationMasterDetails(details.ProjectId, details.ReportCode);
             if (!String.IsNullOrEmpty(validateMaster))
                 return validateMaster;
 
             if (details.ProjectId > 0 && details.CountryId > 0 && details.SiteId > 0)
             {
-                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportScreenId, WorkPlaceFolder.Site);
+                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Site);
                 if (!String.IsNullOrEmpty(validateDeails))
                     return validateDeails;
                 //save on country folder
@@ -89,7 +89,7 @@ namespace GSC.Respository.Etmf
             }
             else if (details.ProjectId > 0 && details.SiteId > 0)
             {
-                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportScreenId, WorkPlaceFolder.Site);
+                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Site);
                 if (!String.IsNullOrEmpty(validateDeails))
                     return validateDeails;
                 // save on site
@@ -97,7 +97,7 @@ namespace GSC.Respository.Etmf
             }
             else if (details.ProjectId > 0 && details.CountryId > 0)
             {
-                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportScreenId, WorkPlaceFolder.Country);
+                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Country);
                 if (!String.IsNullOrEmpty(validateDeails))
                     return validateDeails;
                 // save on site
@@ -106,7 +106,7 @@ namespace GSC.Respository.Etmf
             else
             {
                 // save on trial
-                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportScreenId, WorkPlaceFolder.Trial);
+                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Trial);
                 if (!String.IsNullOrEmpty(validateDeails))
                     return validateDeails;
                 return "";
@@ -114,9 +114,10 @@ namespace GSC.Respository.Etmf
             //return "";
         }
 
-        public string ValidateSyncConfigurationMasterDetails(int ProjectId, int ReportScreenId)
+        public string ValidateSyncConfigurationMasterDetails(int ProjectId, string ReportCode)
         {
             //if (All.Any(x => x.Id != objSave.Id && x.CountryCode == objSave.CountryCode.Trim() && x.DeletedDate == null))
+            int ReportScreenId = _context.ReportScreen.Where(x => x.ReportCode == ReportCode && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault();
             string Version = _context.ProjectWorkplace.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
             if (All.Any(x => x.ReportScreenId == ReportScreenId && x.DeletedDate == null && x.Version == Version))
                 return "";
@@ -124,8 +125,9 @@ namespace GSC.Respository.Etmf
                 return "Version is Not Configuration in Sync Master";
         }
 
-        public string ValidateFolderConfiguration(int ProjectId, int ReportScreenId, WorkPlaceFolder folder)
+        public string ValidateFolderConfiguration(int ProjectId, string ReportCode, WorkPlaceFolder folder)
         {
+            int ReportScreenId = _context.ReportScreen.Where(x => x.ReportCode == ReportCode && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault();
             string Version = _context.ProjectWorkplace.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
             List<SyncConfigurationMasterDetails> details = All.Where(x => x.ReportScreenId == ReportScreenId && x.DeletedDate == null && x.Version == Version)
                 .Select(x => x.SyncConfigurationMasterDetails).FirstOrDefault();
@@ -135,34 +137,35 @@ namespace GSC.Respository.Etmf
                 return "please configuration Master details";
         }
 
-        public string GetsyncConfigurationPath(SyncConfigurationParameterDto details,out int ProjectWorkplaceArtificateId)
+        public string GetsyncConfigurationPath(SyncConfigurationParameterDto details, out int ProjectWorkplaceArtificateId)
         {
             if (details.ProjectId > 0 && details.CountryId > 0 && details.SiteId > 0)
             {
-                string path = GetConfigurationPath(details, WorkPlaceFolder.Site,out ProjectWorkplaceArtificateId);
+                string path = GetConfigurationPath(details, WorkPlaceFolder.Site, out ProjectWorkplaceArtificateId);
                 return path;
             }
             else if (details.ProjectId > 0 && details.SiteId > 0)
             {
-                string path = GetConfigurationPath(details, WorkPlaceFolder.Site,out ProjectWorkplaceArtificateId);
+                string path = GetConfigurationPath(details, WorkPlaceFolder.Site, out ProjectWorkplaceArtificateId);
                 return path;
             }
             else if (details.ProjectId > 0 && details.CountryId > 0)
             {
-                string path = GetConfigurationPath(details, WorkPlaceFolder.Country,out ProjectWorkplaceArtificateId);
+                string path = GetConfigurationPath(details, WorkPlaceFolder.Country, out ProjectWorkplaceArtificateId);
                 return path;
             }
             else
             {
-                string path = GetConfigurationPath(details, WorkPlaceFolder.Trial,out ProjectWorkplaceArtificateId);
+                string path = GetConfigurationPath(details, WorkPlaceFolder.Trial, out ProjectWorkplaceArtificateId);
                 return path;
             }
         }
 
         private string GetConfigurationPath(SyncConfigurationParameterDto details, WorkPlaceFolder workplaceFolder, out int ProjectWorkplaceArtificateId)
         {
+            int ReportScreenId = _context.ReportScreen.Where(x => x.ReportCode == details.ReportCode && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault();
             string Version = _context.ProjectWorkplace.Where(x => x.ProjectId == details.ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
-            var syncConfigDetails = _context.SyncConfigurationMasterDetails.Where(x => x.SyncConfigurationMaster.ReportScreenId == details.ReportScreenId && x.SyncConfigurationMaster.Version == Version && x.WorkPlaceFolder == workplaceFolder && x.DeletedDate == null && x.SyncConfigurationMaster.DeletedDate == null).FirstOrDefault();
+            var syncConfigDetails = _context.SyncConfigurationMasterDetails.Where(x => x.SyncConfigurationMaster.ReportScreenId == ReportScreenId && x.SyncConfigurationMaster.Version == Version && x.WorkPlaceFolder == workplaceFolder && x.DeletedDate == null && x.SyncConfigurationMaster.DeletedDate == null).FirstOrDefault();
 
             var projectDetails = _context.ProjectWorkplaceArtificate.Where(x =>
          x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == details.ProjectId
@@ -170,11 +173,11 @@ namespace GSC.Respository.Etmf
          && x.ProjectWorkplaceSection.EtmfSectionMasterLibraryId == syncConfigDetails.SectionMasterLibraryId
          && x.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibraryId == syncConfigDetails.ZoneMasterLibraryId
          && x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.DeletedDate == null
-        // && syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Site ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.SiteId :(syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.CountryId : x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == 0))
-         && (workplaceFolder == WorkPlaceFolder.Site? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId==details.SiteId : (syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.CountryId : x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == 0)))         
+         // && syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Site ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.SiteId :(syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.CountryId : x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == 0))
+         && (workplaceFolder == WorkPlaceFolder.Site ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.SiteId : (syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.CountryId : x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == 0)))
            .Select(x => new SyncConfigrationPathDetails
            {
-               ProjectWorkplaceArtificateId=x.Id,
+               ProjectWorkplaceArtificateId = x.Id,
                ProjectCode = x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
                WorkPlaceFolder = ((WorkPlaceFolder)x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
                ItemName = x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName,
@@ -183,15 +186,15 @@ namespace GSC.Respository.Etmf
                ArtificateName = x.EtmfArtificateMasterLbrary.ArtificateName,
            }).FirstOrDefault();
             ProjectWorkplaceArtificateId = projectDetails.ProjectWorkplaceArtificateId;
-          string[] paths = { projectDetails.ProjectCode, FolderType.Etmf.GetDescription(), projectDetails.WorkPlaceFolder, projectDetails.ItemName != null ? projectDetails.ItemName : "", projectDetails.ZonName, projectDetails.SectionName, projectDetails.ArtificateName };
-          var fullPath = Path.Combine(paths);
-          return fullPath;
+            string[] paths = { projectDetails.ProjectCode, FolderType.Etmf.GetDescription(), projectDetails.WorkPlaceFolder, projectDetails.ItemName != null ? projectDetails.ItemName : "", projectDetails.ZonName, projectDetails.SectionName, projectDetails.ArtificateName };
+            var fullPath = Path.Combine(paths);
+            return fullPath;
         }
 
         public string SaveArtifactDocument(string DocumentName, SyncConfigurationParameterDto details)
         {
             int ProjectWorkplaceArtificateId;
-            string DocumentPath = GetsyncConfigurationPath(details,out ProjectWorkplaceArtificateId);
+            string DocumentPath = GetsyncConfigurationPath(details, out ProjectWorkplaceArtificateId);
             ProjectWorkplaceArtificatedocument projectWorkplaceArtificatedocument = new ProjectWorkplaceArtificatedocument();
             projectWorkplaceArtificatedocument.DocumentName = DocumentName;
             projectWorkplaceArtificatedocument.DocPath = DocumentPath;
