@@ -20,15 +20,18 @@ namespace GSC.Api.Controllers.LabManagement
         private readonly ILabManagementUploadDataRepository _labManagementUploadDataRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly ILabManagementConfigurationRepository _labManagementConfigurationRepository;
 
         public LabManagementVariableMappingController(
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
             ILabManagementUploadDataRepository labManagementUploadDataRepository,
+            ILabManagementConfigurationRepository labManagementConfigurationRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
             _labManagementUploadDataRepository = labManagementUploadDataRepository;
+            _labManagementConfigurationRepository = labManagementConfigurationRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -61,9 +64,18 @@ namespace GSC.Api.Controllers.LabManagement
             foreach (var item in mappingDto.LabManagementVariableMappingDetail)
             {
                 LabManagementVariableMapping mapping = new LabManagementVariableMapping();
-
                 mapping.LabManagementConfigurationId = mappingDto.LabManagementConfigurationId;
                 mapping.ProjectDesignVariableId = item.ProjectDesignVariableId;
+                if (item.ProjectDesignVariableId == 0)
+                {
+                    // Get Project design variable id by lab management configuration Id
+                    mapping.ProjectDesignVariableId = _labManagementConfigurationRepository.getProjectDesignVariableId(mappingDto.LabManagementConfigurationId, item.TargetVariable);
+                    if (mapping.ProjectDesignVariableId == 0)
+                    {
+                        ModelState.AddModelError("Message", item.TargetVariable + " Variable not found in template, please add first");
+                        return BadRequest(ModelState);
+                    }
+                }
                 mapping.TargetVariable = item.TargetVariable;
 
                 _labManagementVariableMappingRepository.Add(mapping);

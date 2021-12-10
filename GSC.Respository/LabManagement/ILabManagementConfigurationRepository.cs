@@ -14,5 +14,7 @@ namespace GSC.Respository.LabManagement
         List<ProjectDropDown> GetParentProjectDropDownForUploadLabData();
         IList<DropDownDto> GetVisitDropDownForUploadLabData(int projectDesignPeriodId);
         IList<DropDownDto> GetTemplateDropDownForUploadLabData(int projectDesignVisitId);
+        // Get Project design variable id by lab management configuration Id
+        int getProjectDesignVariableId(int LabManagementConfigurationId, string VariableName);
     }
 }

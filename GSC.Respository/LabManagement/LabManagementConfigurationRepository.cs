@@ -9,6 +9,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -69,7 +70,7 @@ namespace GSC.Respository.LabManagement
                 DataSet results = reader.AsDataSet();
                 results.Tables[0].Rows[0].Delete();
                 results.Tables[0].AcceptChanges();
-                var data = results.Tables[0].AsEnumerable().Select(r => r.Field<string>("Column8").Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+                var data = results.Tables[0].AsEnumerable().Select(r => r.Field<string>("Column10").Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
                 streamer.Dispose();
                 return (T[])(object)data.ToArray();
             }
@@ -129,6 +130,19 @@ namespace GSC.Respository.LabManagement
                 }).ToList();
 
             return templates;
+        }
+
+        // Get Project design variable id by lab management configuration Id
+        public int getProjectDesignVariableId(int LabManagementConfigurationId, string VariableName)
+        {
+            var ProjectDesignTemplateId = All.Where(x => x.Id == LabManagementConfigurationId && x.DeletedDate == null).FirstOrDefault().ProjectDesignTemplateId;
+            var ProjectDesignVariable = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == ProjectDesignTemplateId 
+            && x.VariableName.Trim().ToLower() == VariableName.Trim().ToLower() && x.DeletedDate == null).ToList();
+
+            if (ProjectDesignVariable.Count() == 0)
+                return 0;
+            else
+                return ProjectDesignVariable.FirstOrDefault().Id;
         }
 
     }

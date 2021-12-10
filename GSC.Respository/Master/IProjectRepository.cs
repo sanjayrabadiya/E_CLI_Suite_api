@@ -43,5 +43,6 @@ namespace GSC.Respository.Master
         List<ProjectDropDown> GetParentProjectDropDownStudyReport();
         IList<ProjectDropDown> GetProjectForAttendance(bool isStatic);
         string GetStudyCode(int ProjectId);
+        string GetParentProjectCode(int ProjectId);
     }
 }
