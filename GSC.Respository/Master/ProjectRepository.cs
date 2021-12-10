@@ -747,5 +747,10 @@ namespace GSC.Respository.Master
             }
             return projectdDetail.ProjectCode;
         }
+
+        public string GetParentProjectCode(int ProjectId)
+        {
+            return All.Where(x => x.Id == ProjectId).Select(x=>x.ProjectCode).FirstOrDefault();
+        }
     }
 }

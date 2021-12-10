@@ -94,9 +94,9 @@ namespace GSC.Api.Controllers.LabManagement
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             labManagementUploadDataDto.Id = 0;
-            string StudyCode = ""; 
-            var LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId).FirstOrDefault();
-            
+            string StudyCode = "";
+            var LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+
             labManagementUploadDataDto.LabManagementConfigurationId = LabManagementConfiguration.Id;
 
             //set file path and extension
@@ -112,7 +112,7 @@ namespace GSC.Api.Controllers.LabManagement
             var labManagementUploadData = _mapper.Map<LabManagementUploadData>(labManagementUploadDataDto);
 
             //Upload Excel data into database table
-            var validate = _labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadData, StudyCode);
+            var validate = _labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadData, _projectRepository.GetParentProjectCode(labManagementUploadDataDto.ParentProjectId));
 
             if (!string.IsNullOrEmpty(validate))
             {
