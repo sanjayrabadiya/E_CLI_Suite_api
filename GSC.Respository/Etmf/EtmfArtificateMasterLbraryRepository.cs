@@ -35,7 +35,7 @@ namespace GSC.Respository.Etmf
                                ZoneId = zone.Id,
                                ZoneName = zone.ZonName,
                                Zoneno = zone.ZoneNo,
-                               
+
                                SectionId = section.Id,
                                SectionName = section.SectionName,
                                SectionNo = section.Sectionno,
@@ -90,9 +90,9 @@ namespace GSC.Respository.Etmf
 
         }
 
-        public List<DropDownDto> GetArtificateDropDown(int EtmfSectionMasterLibraryId)
+        public List<DropDownDto> GetArtificateDropDown(int EtmfSectionMasterLibraryId, int foldertype)
         {
-            return All.Where(x => x.EtmfSectionMasterLibraryId == EtmfSectionMasterLibraryId)
+            return All.Where(x => x.EtmfSectionMasterLibraryId == EtmfSectionMasterLibraryId && (foldertype == 1 ? x.CountryLevelDoc == true : (foldertype == 2 ? x.SiteLevelDoc == true : x.TrailLevelDoc == true)))
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.ArtificateName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }

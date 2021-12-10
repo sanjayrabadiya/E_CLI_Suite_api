@@ -12,6 +12,6 @@ namespace GSC.Respository.Etmf
     {
         List<MasterLibraryJoinDto> GetArtifcateWithAllList();
         List<MasterLibraryJoinDto> GetArtifcateWithAllListByVersion(int ParentProjectId);
-        List<DropDownDto> GetArtificateDropDown(int EtmfSectionMasterLibraryId);
+        List<DropDownDto> GetArtificateDropDown(int EtmfSectionMasterLibraryId,int foldertype);
     }
 }

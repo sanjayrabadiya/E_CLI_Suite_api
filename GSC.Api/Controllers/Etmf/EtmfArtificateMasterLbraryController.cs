@@ -68,10 +68,10 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpGet]
-        [Route("GetArtificateDropDown/{EtmfSectionMasterLibraryId}")]
-        public IActionResult GetArtificateDropDown(int EtmfSectionMasterLibraryId)
+        [Route("GetArtificateDropDown/{EtmfSectionMasterLibraryId}/{foldertype}")]
+        public IActionResult GetArtificateDropDown(int EtmfSectionMasterLibraryId,short foldertype)
         {
-            return Ok(_etmfArtificateMasterLbraryRepository.GetArtificateDropDown(EtmfSectionMasterLibraryId));
+            return Ok(_etmfArtificateMasterLbraryRepository.GetArtificateDropDown(EtmfSectionMasterLibraryId, foldertype));
         }
 
     }
