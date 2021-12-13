@@ -219,9 +219,9 @@ namespace GSC.Respository.Medra
 
             var result = (from se in _context.ScreeningEntry
                           join project in _context.Project.Where(x => projectList.Contains(x.Id)) on se.ProjectId equals project.Id
-                          join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null && (
+                          join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null && 
                           
-                          (filters.TemplateStatus != null && filters.ExtraData == false) ? t.Status == ScreeningTemplateStatus.Completed : true) && 
+                          ((filters.TemplateStatus != null && filters.ExtraData == false) ? t.Status == ScreeningTemplateStatus.Reviewed : true) &&
                           ((filters.TemplateStatus != null && filters.ExtraData == true) ? t.ReviewLevel == filters.TemplateStatus : true) && 
                           t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) 
                           
