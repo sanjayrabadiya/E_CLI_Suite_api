@@ -256,6 +256,7 @@ namespace GSC.Respository.Project.EditCheck
                     CollectionSource = r.ProjectDesignVariable.CollectionSource,
                     CollectionValue2 = r.CollectionValue2,
                     CollectionValue = r.CollectionValue,
+                    DataType = r.ProjectDesignVariable.DataType,
                     CheckBy = r.CheckBy
                 }).ToList();
 
