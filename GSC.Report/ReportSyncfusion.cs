@@ -791,7 +791,7 @@ namespace GSC.Report
                                 PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
                                 checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
                                 checkField.Style = PdfCheckBoxStyle.Check;
-                                checkField.ReadOnly = true;
+                                //checkField.ReadOnly = true;
                                 document.Form.Fields.Add(checkField);
                             }
                         }

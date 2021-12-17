@@ -67,7 +67,8 @@ namespace GSC.Api.Controllers.InformConcent
             {
                 var connectionId = ConnectedUser.Ids.Where(x => x.userId == ReceiverUserId).FirstOrDefault().connectionId;
                 await _hubContext.Clients.Client(connectionId).SendAsync("SendVideoCallRequesttoReceiver", data);
-            } else
+            }
+            else
             {
                 var connectionId = ConnectedUser.Ids.Where(x => x.userId == data.SenderUserId).FirstOrDefault().connectionId;
                 await _hubContext.Clients.Client(connectionId).SendAsync("ReceiverNotConnectedforCall", data);
@@ -151,7 +152,7 @@ namespace GSC.Api.Controllers.InformConcent
 
         [HttpPut]
         [Route("CallAcceptedUpdate/{id}")]
-        public  IActionResult CallAcceptedUpdate(int id)
+        public IActionResult CallAcceptedUpdate(int id)
         {
             // when user1 calls to user2 then user2 call accept then this method is called
             var eConsentVideo = _EConsentVideoRepository.Find(id);
@@ -179,7 +180,8 @@ namespace GSC.Api.Controllers.InformConcent
                     var connectionId = ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.ReceiverUserId).ToList().FirstOrDefault().connectionId;
                     await _hubContext.Clients.Client(connectionId).SendAsync("CallEndsuccessfullyafterconnecting", id);
                 }
-            } else
+            }
+            else
             {
                 if (ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.SenderUserId).ToList().FirstOrDefault() != null)
                 {

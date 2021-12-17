@@ -115,8 +115,7 @@ namespace GSC.Respository.Etmf
         }
 
         public string ValidateSyncConfigurationMasterDetails(int ProjectId, string ReportCode)
-        {
-            //if (All.Any(x => x.Id != objSave.Id && x.CountryCode == objSave.CountryCode.Trim() && x.DeletedDate == null))
+        {            
             int ReportScreenId = _context.ReportScreen.Where(x => x.ReportCode == ReportCode && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault();
             string Version = _context.ProjectWorkplace.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
             if (All.Any(x => x.ReportScreenId == ReportScreenId && x.DeletedDate == null && x.Version == Version))
