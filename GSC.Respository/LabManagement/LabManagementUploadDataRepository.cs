@@ -138,117 +138,127 @@ namespace GSC.Respository.LabManagement
 
             // get variable mapping data by Lab Management configuration id
             var MappingData = _labManagementVariableMappingRepository.All
-                    .Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId && x.DeletedDate == null)
-                    .Include(x => x.LabManagementConfiguration)
-                    .ThenInclude(x => x.ProjectDesignTemplate)
-                    .ToList();
+                   .Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId && x.DeletedDate == null)
+                  .Select(t => new
+                  {
+                      t.TargetVariable,
+                      t.ProjectDesignVariableId,
+                      t.ProjectDesignVariable.CollectionSource,
+                      t.LabManagementConfiguration.ProjectDesignTemplateId
+                  }).ToList();
 
-            //if (MappingData != null)
-            //{
-            // Get Upload Excel sheet data
-            // var ExcelDataResult = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id).ToList();
-
-            // if (ExcelData != null)
-            // {
-            foreach (var item in MappingData)
+            if (MappingData != null)
             {
-                // get upload Excel data by lab management upload id and variale name
-                var result = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id && x.TestName == item.TargetVariable).ToList();
-                var dataType = _projectDesignVariableRepository.Find(item.ProjectDesignVariableId).CollectionSource;
+                // Get Upload Excel sheet data
+                var ExcelDataResult = _labManagementUploadExcelDataRepository.All.Where(x => x.LabManagementUploadDataId == labManagementUpload.Id).ToList();
 
-                if (result != null)
+                if (ExcelDataResult != null)
                 {
-                    foreach (var r in result)
+                    var ScreningNumberList = ExcelDataResult.Select(x => x.ScreeningNo).ToList().Distinct();
+
+                    foreach (var ScreningNumber in ScreningNumberList)
                     {
-                        // get scrreening template Id by screening number and visit name and project design template id
-                        var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == r.ScreeningNo
-                                            && x.ScreeningVisit.ProjectDesignVisit.DisplayName == r.Visit
-                                            && x.ProjectDesignTemplateId == item.LabManagementConfiguration.ProjectDesignTemplateId).FirstOrDefault();
+                        var GetExcelDataByScreeningNumber = ExcelDataResult.Where(x => x.ScreeningNo == ScreningNumber).ToList();
+
+                        var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == ScreningNumber
+                                                   && x.ProjectDesignTemplateId == MappingData.FirstOrDefault().ProjectDesignTemplateId).FirstOrDefault();
+
+                        var isRepatTemplated = GetExcelDataByScreeningNumber.Any(t => t.RepeatSampleCollection == "Yes");
+
+                        if (isRepatTemplated && screeningTemplate!= null)
+                        {
+                            screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplate.Id);
+                            screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                        }
+                        else if (screeningTemplate != null)
+                        {
+                            // update screening template status
+                            if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
+                            {
+                                screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                                screeningTemplate.IsDisable = false;
+                                _screeningTemplateRepository.Update(screeningTemplate);
+                            }
+                        }
 
                         if (screeningTemplate != null)
                         {
-                            // insert screening template value
-                            ScreeningTemplateValue obj = new ScreeningTemplateValue();
-
-                            // Repeate Template if repeate sample collection is yes
-                            if (r.RepeatSampleCollection.ToLower() == "yes")
+                            foreach (var item in MappingData)
                             {
-                                var repeatscreeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplate.Id);
-                                obj.ScreeningTemplateId = repeatscreeningTemplate.Id;
-                            }
-                            else
-                                obj.ScreeningTemplateId = screeningTemplate.Id;
-
-                            obj.ProjectDesignVariableId = item.ProjectDesignVariableId;
-
-                            if (item.TargetVariable.Trim().ToLower() == "date of sample collection")
-                            {
-                                DateTime dDate;
-                                string variablevalueformat = r.DateOfSampleCollection.ToString();
-                                var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                                                            .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                obj.Value = dt;
-                            }
-                            else if (item.TargetVariable.Trim().ToLower() == "date of report")
-                            {
-
-                                DateTime dDate;
-                                string variablevalueformat = r.DateOfReport.ToString();
-                                var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                                                            .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                obj.Value = dt;
-                            }
-                            else if (item.TargetVariable.Trim().ToLower() == "laboratory Name")
-                                obj.Value = r.LaboratryName;
-                            else if (item.TargetVariable.Trim().ToLower() == "clinically significant")
-                                obj.Value = r.ClinicallySignificant;
-                            else
-                            {
-                                // set date time format if data type is date datetime or time
-                                if (dataType == CollectionSources.Date || dataType == CollectionSources.DateTime || dataType == CollectionSources.Time)
+                                // get upload Excel data by lab management upload id and variale name
+                                var result = GetExcelDataByScreeningNumber.Where(x => x.TestName == item.TargetVariable).ToList();
+                                var dataType = item.CollectionSource;
+                                foreach (var r in result)
                                 {
-                                    DateTime dDate;
-                                    string variablevalueformat = r.Result;
-                                    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                                                                .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                    obj.Value = dt;
+                                    // insert screening template value
+                                    var obj = _screeningTemplateValueRepository.All.Where(x => x.ProjectDesignVariableId == item.ProjectDesignVariableId
+                                      && x.ScreeningTemplateId == screeningTemplate.Id).FirstOrDefault() ?? new ScreeningTemplateValue();
+
+                                    obj.ScreeningTemplateId = screeningTemplate.Id;
+                                    obj.ScreeningTemplate = screeningTemplate;
+
+                                    obj.ProjectDesignVariableId = item.ProjectDesignVariableId;
+
+                                    if (item.TargetVariable.Trim().ToLower() == "date of sample collection")
+                                    {
+                                        DateTime dDate;
+                                        string variablevalueformat = r.DateOfSampleCollection.ToString();
+                                        var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                                                                    .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                        obj.Value = dt;
+                                    }
+                                    else if (item.TargetVariable.Trim().ToLower() == "date of report")
+                                    {
+
+                                        DateTime dDate;
+                                        string variablevalueformat = r.DateOfReport.ToString();
+                                        var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                                                                    .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                        obj.Value = dt;
+                                    }
+                                    else if (item.TargetVariable.Trim().ToLower() == "laboratory Name")
+                                        obj.Value = r.LaboratryName;
+                                    else if (item.TargetVariable.Trim().ToLower() == "clinically significant")
+                                        obj.Value = r.ClinicallySignificant;
+                                    else
+                                    {
+                                        // set date time format if data type is date datetime or time
+                                        if (dataType == CollectionSources.Date || dataType == CollectionSources.DateTime || dataType == CollectionSources.Time)
+                                        {
+                                            DateTime dDate;
+                                            string variablevalueformat = r.Result;
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                                                                        .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                            obj.Value = dt;
+                                        }
+                                        else
+                                            obj.Value = r.Result;
+                                    }
+
+                                    obj.ReviewLevel = 0;
+                                    obj.IsNa = false;
+                                    obj.IsSystem = false;
+                                    obj.LabManagementUploadExcelDataId = r.Id;
+
+                                    if (obj.Id > 0)
+                                        _screeningTemplateValueRepository.Update(obj);
+                                    else
+                                        _screeningTemplateValueRepository.Add(obj);
+
+                                    // insert screening template value audit
+                                    var aduit = new ScreeningTemplateValueAudit
+                                    {
+                                        ScreeningTemplateValue = obj,
+                                        Value = r.Result,
+                                        Note = "Added by Lab management"
+                                    };
+                                    _screeningTemplateValueAuditRepository.Save(aduit);
                                 }
-                                else
-                                    obj.Value = r.Result;
                             }
-
-                            obj.ReviewLevel = 0;
-                            obj.IsNa = false;
-                            obj.IsSystem = false;
-                            obj.LabManagementUploadExcelDataId = r.Id;
-                            _screeningTemplateValueRepository.Add(obj);
-
-                            // insert screening template value audit
-                            var aduit = new ScreeningTemplateValueAudit
-                            {
-                                ScreeningTemplateValue = obj,
-                                Value = r.Result,
-                                Note = "Added by Lab management"
-                            };
-                            _screeningTemplateValueAuditRepository.Save(aduit);
-
-                            // update screening template status
-                            //if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
-                            //{
-                            //    screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
-                            //    screeningTemplate.IsDisable = false;
-                            //    _screeningTemplateRepository.Update(screeningTemplate);
-                            //}
                         }
                     }
                 }
             }
-            // }
-            //}
-            //else
-            //{
-
-            //}
         }
 
         // Add by vipul for check configuration already use in upload data or not
