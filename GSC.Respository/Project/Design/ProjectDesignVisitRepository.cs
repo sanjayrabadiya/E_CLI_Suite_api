@@ -114,7 +114,7 @@ namespace GSC.Respository.Project.Design
         }
 
 
-        public IList<ProjectDesignVisitBasicDto> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId)
+        public List<ProjectDesignVisitBasicDto> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId)
         {
             return All.Where(x => x.DeletedDate == null && x.DeletedDate == null && x.ProjectDesignPeriodId == projectDesignPeriodId)
                 .Select(t => new ProjectDesignVisitBasicDto
@@ -122,8 +122,10 @@ namespace GSC.Respository.Project.Design
                     Id = t.Id,
                     IsRepeated = t.IsRepeated,
                     IsSchedule = t.IsSchedule,
-                    Templates = t.Templates.Where(a => a.DeletedDate == null).Select(b => b.Id).ToList()
+                    StudyVersion = t.StudyVersion,
+                    Templates = t.Templates.Where(a => a.DeletedDate == null).Select(b => new InsertScreeningTemplate { ProjectDesignTemplateId = b.Id, StudyVersion = b.StudyVersion }).ToList()
                 }).ToList();
+
         }
 
         public string Duplicate(ProjectDesignVisit objSave)

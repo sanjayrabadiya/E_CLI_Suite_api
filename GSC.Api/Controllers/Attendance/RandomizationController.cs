@@ -128,7 +128,7 @@ namespace GSC.Api.Controllers.Attendance
 
             if (!project.IsTestSite && !_studyVersionRepository.All.Any(x => x.ProjectId == randomizationDto.ParentProjectId && x.VersionStatus == VersionStatus.GoLive && x.DeletedDate == null))
             {
-                ModelState.AddModelError("Message", "Designed still not live for study");
+                ModelState.AddModelError("Message", "Designed still not live for this site");
                 return BadRequest(ModelState);
             }
 

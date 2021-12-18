@@ -312,17 +312,18 @@ namespace GSC.Respository.EditCheckImpact
 
                     if (r.Operator == Operator.Enable)
                     {
-
-                        if (editCheckTarget.IsEnable)
+                        var enableVariable = editCheckValidateDto.FirstOrDefault(b => b.ProjectDesignVariableId == t && b.ValidateType == EditCheckValidateType.Passed);
+                        if (enableVariable != null)
                         {
                             editCheckTarget.InfoType = EditCheckInfoType.Info;
                             editCheckTarget.EditCheckDisable = false;
+                            editCheckTarget.IsValueSet = false;
+                            editCheckTarget.Value = enableVariable.ScreeningTemplateValue;
                         }
                         else
                         {
                             editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
                             editCheckTarget.EditCheckDisable = r.ValidateType != EditCheckValidateType.Passed;
-                            editCheckTarget.IsEnable = r.ValidateType == EditCheckValidateType.Passed;
                         }
 
                         editCheckTarget.OriginalValidationType = editCheckTarget.EditCheckDisable ? ValidationType.None : ValidationType.Required;
@@ -333,8 +334,9 @@ namespace GSC.Respository.EditCheckImpact
                             editCheckTarget.Note = note;
                         }
 
-                        if ((string.IsNullOrEmpty(r.ScreeningTemplateValue) ||
-                        (r.CollectionSource == CollectionSources.HorizontalScale && r.ScreeningTemplateValue == "0")) && r.ValidateType == EditCheckValidateType.Passed)
+                        if (enableVariable == null &&
+                        (string.IsNullOrEmpty(r.ScreeningTemplateValue) || (r.CollectionSource == CollectionSources.HorizontalScale &&
+                        r.ScreeningTemplateValue == "0")) && r.ValidateType == EditCheckValidateType.Passed)
                         {
                             if (isQueryRaise) editCheckTarget.HasQueries = true;
                             r.ValidateType = EditCheckValidateType.Failed;

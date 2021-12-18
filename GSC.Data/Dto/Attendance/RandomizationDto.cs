@@ -47,6 +47,7 @@ namespace GSC.Data.Dto.Attendance
         public int? CompanyId { get; set; }
         public bool IsLocked { get; set; }
         public int? UserId { get; set; }
+        public double? StudyVersion { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto
@@ -111,6 +112,7 @@ namespace GSC.Data.Dto.Attendance
         public int? UserId { get; set; }
         public string Gen { get; set; }
         public bool IsFirstTime { get; set; }
+        public double? StudyVersion { get; set; }
 
     }
 

@@ -129,7 +129,7 @@ namespace GSC.Respository.Project.Design
 
         public List<DropDownDto> GetVersionDropDown(int projectId)
         {
-            var result = All.Where(x => x.ProjectId == projectId)
+            var result = All.Where(x => x.ProjectId == projectId && x.DeletedDate == null)
                 .Select(c => new DropDownDto
                 {
                     Id = c.Id,

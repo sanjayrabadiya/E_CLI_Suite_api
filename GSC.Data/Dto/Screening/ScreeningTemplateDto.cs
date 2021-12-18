@@ -56,6 +56,7 @@ namespace GSC.Data.Dto.Screening
         public bool IsNoCRF { get; set; }
         public bool IsDisable { get; set; }
         public int ProjectDesignVisitId { get; set; }
+        public double? StudyVersion { get; set; }
 
     }
 

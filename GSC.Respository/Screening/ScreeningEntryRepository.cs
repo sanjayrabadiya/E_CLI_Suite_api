@@ -157,7 +157,7 @@ namespace GSC.Respository.Screening
             screeningEntry.EntryType = attendace.AttendanceType;
             screeningEntry.ProjectDesignPeriodId = attendace.ProjectDesignPeriodId;
 
-            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId, 0, _jwtTokenAccesser.GetClientDate());
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId, 0, _jwtTokenAccesser.GetClientDate(), null);
 
             attendace.IsProcessed = true;
             _attendanceRepository.Update(attendace);
@@ -201,10 +201,10 @@ namespace GSC.Respository.Screening
             screeningEntry.ScreeningDate = saveRandomizationDto.VisitDate;
             screeningEntry.ProjectDesignId = projectDesign.ProjectDesignId;
             screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
-            screeningEntry.StudyVersion = saveRandomizationDto.StudyVersion;
+            screeningEntry.StudyVersion = randomization.StudyVersion;
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
-            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, saveRandomizationDto.ProjectDesignVisitId, saveRandomizationDto.VisitDate);
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, saveRandomizationDto.ProjectDesignVisitId, saveRandomizationDto.VisitDate, randomization.StudyVersion);
 
             screeningEntry.IsTesting = projectDetail.IsTestSite;
             screeningEntry.ScreeningHistory = new ScreeningHistory();
@@ -344,7 +344,7 @@ namespace GSC.Respository.Screening
                 Value = t.BarcodeString
             }).ToList();
             if (attendanceIds == null || attendanceIds.Count == 0) return new List<DropDownDto>();
-           
+
             return attendanceIds;
         }
 

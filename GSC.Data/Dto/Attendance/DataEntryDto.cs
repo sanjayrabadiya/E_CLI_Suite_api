@@ -34,6 +34,7 @@ namespace GSC.Data.Dto.Attendance
         public ScreeningPatientStatus? PatientStatusId { get; set; }
         public ScreeningPatientStatus? ScreeningPatientStatus { get; set; }
         public string RandomizationNumber { get; set; }
+        public double? StudyVersion { get; set; }
         public List<DataEntryVisitTemplateDto> Visit { get; set; }
     }
 
@@ -68,6 +69,7 @@ namespace GSC.Data.Dto.Attendance
         public int VisitStatusId { get; set; }
         public int? DesignOrder { get; set; }
         public bool IsLocked { get; set; }
+        public double? StudyVersion { get; set; }
 
         private DateTime? _scheduleDate { get; set; }
         public DateTime? ScheduleDate

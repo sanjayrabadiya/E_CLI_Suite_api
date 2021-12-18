@@ -30,8 +30,15 @@ namespace GSC.Data.Dto.Project.Design
         public int Id { get; set; }
         public bool IsRepeated { get; set; }
         public bool? IsSchedule { get; set; }
+        public double? StudyVersion { get; set; }
         public bool IsNonCRF { get; set; }
-        public List<int> Templates { get; set; }
+        public List<InsertScreeningTemplate> Templates { get; set; }
+    }
+
+    public class InsertScreeningTemplate
+    {
+        public int ProjectDesignTemplateId { get; set; }
+        public double? StudyVersion { get; set; }
     }
 
     public class ProjectDesignVisitClone

@@ -61,5 +61,6 @@ namespace GSC.Data.Entities.Attendance
         public int? UserId { get; set; }
         public List<EconsentReviewDetails> EconsentReviewDetails { get; set; }
         public User User { get; set; }
+        public double? StudyVersion { get; set; }
     }
 }

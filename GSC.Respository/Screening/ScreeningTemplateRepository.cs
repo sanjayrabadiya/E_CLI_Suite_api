@@ -66,6 +66,7 @@ namespace GSC.Respository.Screening
                    ScreeningEntryId = c.ScreeningVisit.ScreeningEntryId,
                    ProjectDesignId = c.ScreeningVisit.ScreeningEntry.ProjectDesignId,
                    ProjectDesignTemplateId = c.ProjectDesignTemplateId,
+                   StudyVersion = c.ScreeningVisit.ScreeningEntry.StudyVersion,
                    Status = c.Status,
                    DomainId = c.ProjectDesignTemplate.DomainId,
                    ReviewLevel = c.ReviewLevel,
@@ -117,8 +118,15 @@ namespace GSC.Respository.Screening
             designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
             designTemplateDto.IsLocked = screeningTemplateBasic.IsLocked;
             designTemplateDto.Status = screeningTemplateBasic.Status;
-            designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic,
-                workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
+            designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic, workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
+
+            designTemplateDto.Variables = designTemplateDto.Variables.Where(t => t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion).ToList();
+
+            designTemplateDto.Variables.ToList().ForEach(r =>
+            {
+                if (r.Values != null)
+                    r.Values = r.Values.Where(t => t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion).ToList();
+            });
 
             var values = GetScreeningValues(screeningTemplateBasic.Id);
 

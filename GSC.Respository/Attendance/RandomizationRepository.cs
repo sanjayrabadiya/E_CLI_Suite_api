@@ -108,6 +108,7 @@ namespace GSC.Respository.Attendance
                 randomization.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
 
             randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
+            randomization.StudyVersion = randomizationDto.StudyVersion;
 
             Update(randomization);
             if (!randomizationNumberDto.IsTestSite)
@@ -141,6 +142,7 @@ namespace GSC.Respository.Attendance
             if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening)
                 randomization.PatientStatusId = ScreeningPatientStatus.Screening;
 
+            randomization.StudyVersion = randomizationDto.StudyVersion;
             Update(randomization);
             if (!randomizationNumberDto.IsTestSite)
             {

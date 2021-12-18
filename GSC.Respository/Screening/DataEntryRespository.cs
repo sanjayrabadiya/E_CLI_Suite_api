@@ -4,9 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
-using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
-using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -78,7 +76,8 @@ namespace GSC.Respository.Screening
                 ProjectDesignVisitId = t.Id,
                 VisitName = t.DisplayName,
                 VisitStatus = ScreeningVisitStatus.NotStarted.GetDescription(),
-                VisitStatusId = (int)ScreeningVisitStatus.NotStarted
+                VisitStatusId = (int)ScreeningVisitStatus.NotStarted,
+                StudyVersion = t.StudyVersion
             }).ToListAsync();
 
             var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
@@ -91,6 +90,7 @@ namespace GSC.Respository.Screening
                  PatientStatusId = t.PatientStatusId,
                  PatientStatusName = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
+                 StudyVersion = t.StudyVersion,
                  TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                  {
                      LevelNo = x.LevelNo
@@ -189,7 +189,7 @@ namespace GSC.Respository.Screening
             //var queries = await queryTask;
             //var screeningData = await screeningDataTask;
 
-            randomizationData.ForEach(r => r.Visit = projectDesignVisit);
+            randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => t.StudyVersion == null || t.StudyVersion <= r.StudyVersion).ToList());
 
             screeningData.ForEach(r =>
             {
@@ -400,7 +400,7 @@ namespace GSC.Respository.Screening
                     {
                         Id = t.Id,
                         ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
-                        SubjectNo=t.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
+                        SubjectNo = t.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                         RandomizationNumber = t.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
                         ScreeningVisitId = t.ScreeningVisitId,
                         ProjectDesignTemplateId = t.ProjectDesignTemplateId,
@@ -415,7 +415,7 @@ namespace GSC.Respository.Screening
                         ParentId = t.ParentId,
                         ScheduleDate = t.ScheduleDate,
                         TemplateName = t.ProjectDesignTemplate.TemplateName,
-                        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(t.ScreeningVisit.RepeatedVisitNumber == null ?"" : "-" + t.ScreeningVisit.RepeatedVisitNumber),
+                        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(t.ScreeningVisit.RepeatedVisitNumber == null ? "" : "-" + t.ScreeningVisit.RepeatedVisitNumber),
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName

@@ -93,11 +93,15 @@ namespace GSC.Respository.Screening
             return result;
         }
 
-        public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId, DateTime visitDate)
+        public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId, DateTime visitDate, double? studyVersion)
         {
             var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(projectDesignPeriodId);
+
+            designVisits = designVisits.Where(x => x.StudyVersion == null || x.StudyVersion <= studyVersion).ToList();
+             
+
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
-            designVisits.ToList().ForEach(r =>
+            designVisits.ForEach(r =>
             {
                 var screeningVisit = new ScreeningVisit
                 {
@@ -113,11 +117,11 @@ namespace GSC.Respository.Screening
                     _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.Open, visitDate);
                 }
 
-                r.Templates.ForEach(t =>
+                r.Templates.Where(b => b.StudyVersion == null || b.StudyVersion <= studyVersion).ToList().ForEach(t =>
                 {
                     var screeningTemplate = new ScreeningTemplate
                     {
-                        ProjectDesignTemplateId = t,
+                        ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                         Status = ScreeningTemplateStatus.Pending
                     };
                     _screeningTemplateRepository.Add(screeningTemplate);
@@ -508,7 +512,7 @@ namespace GSC.Respository.Screening
         public List<DashboardQueryStatusDto> GetVisitStatus(int projectId)
         {
             var result = All.Where(x => (x.ScreeningEntry.ProjectId == projectId ||
-           x.ScreeningEntry.Project.ParentProjectId == projectId) &&(x.ScreeningEntry.Project.IsTestSite != true) && x.DeletedDate == null).GroupBy(
+           x.ScreeningEntry.Project.ParentProjectId == projectId) && (x.ScreeningEntry.Project.IsTestSite != true) && x.DeletedDate == null).GroupBy(
                t => new { t.Status }).Select(g => new DashboardQueryStatusDto
                {
                    DisplayName = g.Key.Status.GetDescription(),
