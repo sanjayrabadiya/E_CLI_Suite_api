@@ -432,7 +432,7 @@ namespace GSC.Respository.Screening
         public ScreeningTemplate TemplateRepeat(int id)
         {
             var screeningTemplate = new ScreeningTemplate();
-            var originalTemplate = Find(id);
+            var originalTemplate = All.AsNoTracking().Where(x => x.Id == id).FirstOrDefault();
             screeningTemplate.ParentId = originalTemplate.Id;
             screeningTemplate.Id = 0;
             screeningTemplate.RepeatSeqNo = All.Count(x => x.ParentId == originalTemplate.Id) + 1;
