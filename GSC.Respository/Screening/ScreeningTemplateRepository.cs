@@ -120,12 +120,14 @@ namespace GSC.Respository.Screening
             designTemplateDto.Status = screeningTemplateBasic.Status;
             designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic, workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
 
-            designTemplateDto.Variables = designTemplateDto.Variables.Where(t => t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion).ToList();
+            designTemplateDto.Variables = designTemplateDto.Variables.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
+            && (t.InActiveVersion == null || t.InActiveVersion >= screeningTemplateBasic.StudyVersion)).ToList();
 
             designTemplateDto.Variables.ToList().ForEach(r =>
             {
                 if (r.Values != null)
-                    r.Values = r.Values.Where(t => t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion).ToList();
+                    r.Values = r.Values.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
+                    && (t.InActiveVersion == null || t.InActiveVersion >= screeningTemplateBasic.StudyVersion)).ToList();
             });
 
             var values = GetScreeningValues(screeningTemplateBasic.Id);

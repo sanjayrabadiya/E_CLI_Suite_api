@@ -127,6 +127,7 @@ namespace GSC.Data.Dto.Project.Design
         public int? RelationProjectDesignVariableId { get; set; }
         public int? LargeStep { get; set; }
         public double? StudyVersion { get; set; }
+        public double? InActiveVersion { get; set; }
 
     }
 

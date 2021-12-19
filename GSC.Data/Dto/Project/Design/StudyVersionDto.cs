@@ -14,7 +14,7 @@ namespace GSC.Data.Dto.Project.Design
         public string Note { get; set; }
         public IList<StudyVersionStatus> StudyVersionStatus { get; set; } = null;
         public int? GoLiveBy { get; set; }
-        public bool? IsMinor { get; set; }
+        public bool IsMinor { get; set; }
         public DateTime? GoLiveOn { get; set; }
         public bool? IsTestSiteVerified { get; set; }
         public string TestNote { get; set; }

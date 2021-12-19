@@ -19,7 +19,7 @@ namespace GSC.Data.Entities.Project.Design
         public string TestNote { get; set; }
         public int? GoLiveBy { get; set; }
         public DateTime? GoLiveOn { get; set; }
-        public bool? IsMinor { get; set; }
+        public bool IsMinor { get; set; }
         public bool? IsTestSiteVerified { get; set; }
         public VersionStatus? VersionStatus { get; set; }
         [ForeignKey("GoLiveBy")]

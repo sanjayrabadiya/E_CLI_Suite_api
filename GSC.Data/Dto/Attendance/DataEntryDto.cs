@@ -70,7 +70,7 @@ namespace GSC.Data.Dto.Attendance
         public int? DesignOrder { get; set; }
         public bool IsLocked { get; set; }
         public double? StudyVersion { get; set; }
-
+        public double? InActiveVersion { get; set; }
         private DateTime? _scheduleDate { get; set; }
         public DateTime? ScheduleDate
         {

@@ -77,7 +77,8 @@ namespace GSC.Respository.Screening
                 VisitName = t.DisplayName,
                 VisitStatus = ScreeningVisitStatus.NotStarted.GetDescription(),
                 VisitStatusId = (int)ScreeningVisitStatus.NotStarted,
-                StudyVersion = t.StudyVersion
+                StudyVersion = t.StudyVersion,
+                InActiveVersion = t.InActiveVersion
             }).ToListAsync();
 
             var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
@@ -189,7 +190,8 @@ namespace GSC.Respository.Screening
             //var queries = await queryTask;
             //var screeningData = await screeningDataTask;
 
-            randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => t.StudyVersion == null || t.StudyVersion <= r.StudyVersion).ToList());
+            randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && 
+            (t.InActiveVersion == null || t.InActiveVersion >= r.StudyVersion)).ToList());
 
             screeningData.ForEach(r =>
             {
