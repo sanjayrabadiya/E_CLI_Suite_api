@@ -98,7 +98,7 @@ namespace GSC.Respository.Screening
             var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(projectDesignPeriodId);
 
             designVisits = designVisits.Where(x => (x.StudyVersion == null || x.StudyVersion <= studyVersion) &&
-            (x.InActiveVersion == null || x.InActiveVersion >= studyVersion)).ToList();
+            (x.InActiveVersion == null || x.InActiveVersion > studyVersion)).ToList();
 
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
             designVisits.ForEach(r =>

@@ -191,7 +191,7 @@ namespace GSC.Respository.Screening
             //var screeningData = await screeningDataTask;
 
             randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && 
-            (t.InActiveVersion == null || t.InActiveVersion >= r.StudyVersion)).ToList());
+            (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
 
             screeningData.ForEach(r =>
             {
