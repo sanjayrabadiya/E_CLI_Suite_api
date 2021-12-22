@@ -22,4 +22,12 @@ namespace GSC.Data.Dto.LabManagement
         public int ProjectDesignVariableId { get; set; }
         public string TargetVariable { get; set; }
     }
+
+    public class LabManagementVariableMappingGridDto : BaseAuditDto
+    {
+        public string ProjectDesignVariable { get; set; }
+        public string TargetVariable { get; set; }
+        public string AuditReason { get; set; }
+        public string ReasonOth { get; set; }
+    }
 }

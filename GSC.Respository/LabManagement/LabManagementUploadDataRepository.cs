@@ -76,6 +76,14 @@ namespace GSC.Respository.LabManagement
             if (!_labManagementVariableMappingRepository.All.Any(x => x.LabManagementConfigurationId == labManagementUploadData.LabManagementConfigurationId && x.DeletedDate == null))
                 return "You can not upload excel data before mapping variable in configuration.";
 
+            var details = _labManagementVariableMappingRepository.All
+                  .Where(x => x.LabManagementConfigurationId == labManagementUploadData.LabManagementConfigurationId && x.DeletedDate == null)
+                 .Select(t => new
+                 {
+                     t.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
+                     t.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                 }).ToList();
+            
             // Add Lab Management Upload Data and status
             Add(labManagementUploadData);
 
@@ -97,6 +105,12 @@ namespace GSC.Respository.LabManagement
             {
                 if (((DataRow)item).ItemArray[0].ToString().Trim() != StudyCode.Trim())
                     return "Can not upload excel data due to study code not match.";
+
+                if (((DataRow)item).ItemArray[4].ToString().Trim() != details.FirstOrDefault().DisplayName.Trim())
+                    return "Can not upload excel data due to visit name not match.";
+
+                //if (((DataRow)item).ItemArray[0].ToString().Trim() != details.FirstOrDefault().TemplateName.Trim())
+                //    return "Can not upload excel data due to template not match.";
 
                 LabManagementUploadExcelData obj = new LabManagementUploadExcelData();
                 obj.ScreeningNo = ((DataRow)item).ItemArray[2].ToString();

@@ -329,5 +329,6 @@ namespace GSC.Domain.Context
         DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
         DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }
         DbSet<FileSizeConfiguration> FileSizeConfiguration { get; set; }
+        DbSet<RandomizationSetup> RandomizationSetup { get; set; }
     }
 }

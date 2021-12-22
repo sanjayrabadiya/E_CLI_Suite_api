@@ -38,20 +38,20 @@ namespace GSC.Api.Controllers.LabManagement
         }
 
         // GET: api/<controller>
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        [HttpGet("{LabManagementConfigurationId}")]
+        public IActionResult Get(int LabManagementConfigurationId)
         {
-            return Ok();
+            return Ok(_labManagementVariableMappingRepository.GetLabManagementVariableMappingList(LabManagementConfigurationId));
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if (id <= 0) return BadRequest();
-            var mapping = _labManagementVariableMappingRepository.Find(id);
-            var mappingDto = _mapper.Map<LabManagementVariableMappingDto>(mapping);
-            return Ok(mappingDto);
-        }
+        //[HttpGet("{id}")]
+        //public IActionResult Get(int id)
+        //{
+        //    if (id <= 0) return BadRequest();
+        //    var mapping = _labManagementVariableMappingRepository.Find(id);
+        //    var mappingDto = _mapper.Map<LabManagementVariableMappingDto>(mapping);
+        //    return Ok(mappingDto);
+        //}
 
 
         [HttpPost]

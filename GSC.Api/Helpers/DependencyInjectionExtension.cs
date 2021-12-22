@@ -353,7 +353,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISyncConfigurationMasterRepository, SyncConfigurationMasterRepository>();
             services.AddScoped<ISyncConfigurationMasterDetailsRepository, SyncConfigurationMasterDetailsRepository>();
             services.AddScoped<ISyncConfigurationMasterDetailsRepositoryAudit, SyncConfigurationMasterDetailsRepositoryAudit>();
-            services.AddScoped<IFileSizeConfigurationRepository, FileSizeConfigurationRepository>();
+            services.AddScoped<IRandomizationSetupRepository, RandomizationSetupRepository>();
         }
     }
 }

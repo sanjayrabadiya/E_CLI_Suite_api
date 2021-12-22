@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.LabManagement;
@@ -24,6 +25,12 @@ namespace GSC.Respository.LabManagement
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
+        }
+
+        public List<LabManagementVariableMappingGridDto> GetLabManagementVariableMappingList(int LabMangementConfigurationId)
+        {
+            return All.Where(x => x.LabManagementConfigurationId == LabMangementConfigurationId).
+                   ProjectTo<LabManagementVariableMappingGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public void DeleteMapping(LabManagementVariableMappingDto mappingDto)

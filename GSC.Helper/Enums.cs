@@ -769,4 +769,24 @@ namespace GSC.Helper
         [Description("Resolved")] Resolved = 3,
         [Description("Closed")] Closed = 4,
     }
+
+    public enum LabManagementExcelFileColumn : short
+    {
+        [Description("Screening ID")] ScreeningID = 1,
+        [Description("Randomization Number")] RandomizationNumber = 2,
+        [Description("Visit")] Visit = 3,
+        [Description("Repeat sample collection               (Yes, No)")] RepeatSampleCollection = 4,
+        [Description("Laboratory Name")] LaboratoryName = 5,
+        [Description("Date of sample collection                   (dd-mmm-yyyy)")] DateOfSampleCollection = 6,
+        [Description("Date of Report          (dd-mmm-yyyy)")] DateOfReport = 7,
+        [Description("Panel                     (Hematology, Biochemistry, serology, Urinalysis)")] Panel = 8,
+        [Description("Test Name")] TestName = 9,
+        [Description("Result")] Result = 10,
+        [Description("Unit")] Unit = 11,
+        [Description("Abnormal Flag (L=Low, H=High, N=Normal)")] AbnormalFlag = 12,
+        [Description("Reference Range Low")] ReferenceRangeLow = 13,
+        [Description("Reference Range High")] ReferenceRangeHigh = 14,
+        [Description("Clinically Significant (Yes, No)")] ClinicallySignificant = 15,
+
+    }
 }

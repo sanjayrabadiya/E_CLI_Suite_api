@@ -387,6 +387,13 @@ namespace GSC.Api.Helpers
             CreateMap<FileSizeConfiguration, FileSizeConfigurationGridDto>()
                 .ForMember(x => x.ScreenName, x => x.MapFrom(a => a.AppScreens.ScreenName))
                 .ForMember(x => x.ScreenCode, x => x.MapFrom(a => a.AppScreens.ScreenCode)).ReverseMap();
+
+            CreateMap<RandomizationSetup, RandomizationSetupGridDto>()
+                .ForMember(x => x.StudyName, x => x.MapFrom(a => a.Project.ProjectCode)).ReverseMap();
+
+            CreateMap<LabManagementVariableMapping, LabManagementVariableMappingGridDto>()
+                .ForMember(x => x.ProjectDesignVariable, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
+                .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName)).ReverseMap();
         }
     }
 }

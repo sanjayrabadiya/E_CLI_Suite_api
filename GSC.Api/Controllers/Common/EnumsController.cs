@@ -617,5 +617,17 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("LabManagementExcelFileColumn")]
+        public IList<DropDownEnum> LabManagementExcelFileColumn()
+        {
+            return Enum.GetValues(typeof(LabManagementExcelFileColumn))
+                .Cast<LabManagementExcelFileColumn>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription(),
+                }).OrderBy(o => o.Id).ToList();
+        }
     }
 }
