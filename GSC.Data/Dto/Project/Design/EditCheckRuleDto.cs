@@ -51,5 +51,6 @@ namespace GSC.Data.Dto.Project.Design
             set => _scheduleDate = value?.UtcDateTime();
         }
         public ScreeningTemplateStatus Status { get; set; }
+        public bool IsEnable { get; set; }
     }
 }

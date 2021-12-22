@@ -21,5 +21,7 @@ namespace GSC.Data.Entities.UserMgt
 
         public bool IsExport { get; set; }
         public bool IsSync { get; set; }
+
+        public AppScreen AppScreens { get; set; }
     }
 }

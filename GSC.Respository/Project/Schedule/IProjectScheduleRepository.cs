@@ -10,5 +10,7 @@ namespace GSC.Respository.Project.Schedule
         IList<ProjectScheduleTemplateDto> GetDataByPeriod(long periodId, long projectId);
         IList<ProjectScheduleDto> GetData(int id);
         int GetRefVariableValuefromTargetVariable(int projectDesignVariableId);
+
+        IList<ProjectScheduleReportDto> GetProjectScheduleSetupList(int ProjectId);
     }
 }

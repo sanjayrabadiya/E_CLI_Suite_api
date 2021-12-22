@@ -21,5 +21,6 @@ namespace GSC.Data.Dto.Master
     {
         public string CategoryCode { get; set; }
         public string CategoryName { get; set; }
+        public VariableCategoryType? SystemType { get; set; }
     }
 }

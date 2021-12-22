@@ -180,7 +180,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
                .ForMember(x => x.ActivityMode, x => x.MapFrom(a => a.ActivityMode.GetDescription()))
                .ForMember(x => x.ActivityName, x => x.MapFrom(a => a.Activity.ActivityName))
-               .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.ModuleId.GetDescription()))
+               .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.AppScreen.ScreenName))
                .ReverseMap();
 
             CreateMap<InvestigatorContact, InvestigatorContactGridDto>()

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
+using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
@@ -14,11 +16,13 @@ namespace GSC.Api.Controllers.UserMgt
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IRolePermissionRepository _rolePermissionRepository;
+        private readonly IMapper _mapper;
 
-        public RolePermissionController(IRolePermissionRepository rolePermissionRepository, IJwtTokenAccesser jwtTokenAccesser)
+        public RolePermissionController(IRolePermissionRepository rolePermissionRepository, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
         {
             _rolePermissionRepository = rolePermissionRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _mapper = mapper;
         }
 
         [HttpGet("{id}")]
@@ -60,5 +64,13 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok();
         }
 
+        [HttpGet("GetScreenByRole/{roleid}")]
+        public IActionResult GetScreenByRole(int roleid)
+        {
+            var rolePermission = _rolePermissionRepository.FindByInclude(q => q.UserRoleId == roleid && q.DeletedDate == null, x => x.AppScreens)
+                .Where(s => s.AppScreens.ParentAppScreenId == null).ToList();
+
+            return Ok(_mapper.Map<List<RolePermissionDto>>(rolePermission));
+        }
     }
 }

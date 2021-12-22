@@ -114,5 +114,49 @@ namespace GSC.Respository.Project.Schedule
                 return 0;
             return referenceVariable.id;
         }
+
+        public IList<ProjectScheduleReportDto> GetProjectScheduleSetupList(int ProjectId)
+        {
+            var queryResult = from pst in _context.ProjectScheduleTemplate
+                              join ps in _context.ProjectSchedule on pst.ProjectScheduleId equals ps.Id
+                              join p in _context.Project on ps.ProjectId equals p.Id
+                              join refPeriod in _context.ProjectDesignPeriod on ps.ProjectDesignPeriodId equals refPeriod.Id
+                              join refVisit in _context.ProjectDesignVisit on ps.ProjectDesignVisitId equals refVisit.Id
+                              join refTemplate in _context.ProjectDesignTemplate on ps.ProjectDesignTemplateId equals refTemplate.Id
+                              join refVariable in _context.ProjectDesignVariable on ps.ProjectDesignVariableId equals refVariable.Id
+                              join tarPeriod in _context.ProjectDesignPeriod on pst.ProjectDesignPeriodId equals tarPeriod.Id
+                              join tarVisit in _context.ProjectDesignVisit on pst.ProjectDesignVisitId equals tarVisit.Id
+                              join tarTemplate in _context.ProjectDesignTemplate on pst.ProjectDesignTemplateId equals tarTemplate.Id
+                              join tarVariable in _context.ProjectDesignVariable on pst.ProjectDesignVariableId equals tarVariable.Id
+                              where (p.Id == ProjectId)
+                              select new ProjectScheduleReportDto()
+                              {
+                                  ProjectCode = p.ProjectCode,
+                                  AutoNumber = ps.AutoNumber,
+                                  ReferencePeriod = refPeriod.DisplayName,
+                                  ReferenceVisit = refVisit.DisplayName,
+                                  ReferenceTemplate = refTemplate.TemplateName,
+                                  ReferenceVariable = refVariable.VariableName,
+                                  TargetPeriod = tarPeriod.DisplayName,
+                                  TargetVisit = tarVisit.DisplayName,
+                                  TargetTemplate = tarTemplate.TemplateName,
+                                  TargetVariable = tarVariable.VariableName,
+                                  Operator = pst.Operator.GetDescription(),
+                                  RefTimeInterValHH = pst.HH,
+                                  RefTimeInterValMM = pst.MM,
+                                  RefTimeInterNoOfDay = pst.NoOfDay,
+                                  PositiveDeviation = pst.PositiveDeviation,
+                                  NegativeDeviation = pst.NegativeDeviation,
+                                  Message = pst.Message,
+                                  CreatedByUser = pst.CreatedByUser.UserName,
+                                  CreatedDate = pst.CreatedDate,
+                                  ModifiedByUser = pst.ModifiedByUser.UserName,
+                                  ModifiedDate = pst.ModifiedDate,
+                                  DeletedByUser = pst.DeletedByUser.UserName,
+                                  DeletedDate = pst.DeletedDate
+                              };
+
+            return queryResult.ToList();
+        }
     }
 }

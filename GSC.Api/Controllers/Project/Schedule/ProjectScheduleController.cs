@@ -265,5 +265,12 @@ namespace GSC.Api.Controllers.Project.Schedule
             var data = _projectScheduleRepository.GetRefVariableValuefromTargetVariable(projectDesignVariableId);
             return Ok(data);
         }
+
+
+        [HttpGet("GetProjectScheduleReport/{projectid}")]
+        public IActionResult GetProjectScheduleReport(int projectid)
+        {
+            return Ok(_projectScheduleRepository.GetProjectScheduleSetupList(projectid));
+        }
     }
 }
