@@ -56,7 +56,9 @@ namespace GSC.Respository.Project.Schedule
 
         public void UpdateDesignTemplatesSchedule(int projectDesignPeriodId)
         {
-            var targetVisits = All.Where(r => r.DeletedDate == null && (r.Operator == Helper.ProjectScheduleOperator.Equal || r.Operator == Helper.ProjectScheduleOperator.Plus) && r.ProjectDesignPeriodId == projectDesignPeriodId).Select(t => t.ProjectDesignVisitId).ToList();
+            var targetVisits = All.Where(r => r.DeletedDate == null && (r.Operator == Helper.ProjectScheduleOperator.Equal ||
+            r.Operator == Helper.ProjectScheduleOperator.Plus) && r.ProjectDesignPeriodId == projectDesignPeriodId
+            && r.ProjectSchedule.ProjectDesignVisitId != r.ProjectDesignVisitId).Select(t => t.ProjectDesignVisitId).ToList();
             var projectDesingVisit = _projectDesignVisitRepository.All.Where(r => r.ProjectDesignPeriodId == projectDesignPeriodId).ToList();
             projectDesingVisit.ForEach(r =>
             {
