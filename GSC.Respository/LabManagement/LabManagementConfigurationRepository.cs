@@ -88,7 +88,7 @@ namespace GSC.Respository.LabManagement
             var projectList = _projectRightRepository.GetParentProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
-            return All.Where(x => x.DeletedDate == null
+            var result = All.Where(x => x.DeletedDate == null
                     && projectList.Any(c => c == x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId))
                 .Select(c => new ProjectDropDown
                 {
@@ -99,6 +99,18 @@ namespace GSC.Respository.LabManagement
                     ParentProjectId = c.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ParentProjectId ?? c.Id,
                     IsDeleted = c.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.DeletedDate != null
                 }).Distinct().OrderBy(o => o.Value).ToList();
+
+            result = result.GroupBy(x => x.Id).Select(c => new ProjectDropDown
+            {
+                Id = c.Key,
+                Value = c.FirstOrDefault().Value,
+                Code = c.FirstOrDefault().Code,
+                IsStatic = c.FirstOrDefault().IsStatic,
+                ParentProjectId = c.FirstOrDefault().ParentProjectId,
+                IsDeleted = c.FirstOrDefault().IsDeleted
+            }).OrderBy(o => o.Value).ToList();
+
+            return result;
         }
 
         // Add by vipul for only bind that visit which map in lab management configuration
@@ -114,6 +126,14 @@ namespace GSC.Respository.LabManagement
                     "( V : " + t.ProjectDesignTemplate.ProjectDesignVisit.StudyVersion + (t.ProjectDesignTemplate.ProjectDesignVisit.StudyVersion != null && t.ProjectDesignTemplate.ProjectDesignVisit.InActiveVersion != null ? " - " : "" + t.ProjectDesignTemplate.ProjectDesignVisit.InActiveVersion) + ")" : "",
                     ExtraData = t.ProjectDesignTemplate.ProjectDesignVisit.IsNonCRF,
                 }).ToList();
+
+            visits = visits.GroupBy(x => x.Id).Select(c => new DropDownDto
+            {
+                Id = c.Key,
+                Value = c.FirstOrDefault().Value,
+                Code = c.FirstOrDefault().Code,
+                ExtraData = c.FirstOrDefault().ExtraData
+            }).ToList();
 
             return visits;
         }
@@ -136,7 +156,7 @@ namespace GSC.Respository.LabManagement
         public int getProjectDesignVariableId(int LabManagementConfigurationId, string VariableName)
         {
             var ProjectDesignTemplateId = All.Where(x => x.Id == LabManagementConfigurationId && x.DeletedDate == null).FirstOrDefault().ProjectDesignTemplateId;
-            var ProjectDesignVariable = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == ProjectDesignTemplateId 
+            var ProjectDesignVariable = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == ProjectDesignTemplateId
             && x.VariableName.Trim().ToLower() == VariableName.Trim().ToLower() && x.DeletedDate == null).ToList();
 
             if (ProjectDesignVariable.Count() == 0)

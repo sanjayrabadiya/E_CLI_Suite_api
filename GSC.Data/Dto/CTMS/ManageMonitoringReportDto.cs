@@ -19,7 +19,7 @@ namespace GSC.Data.Dto.CTMS
         public string Status { get; set; }
         public MonitoringReportStatus StatusId { get; set; }
         public string VariableTemplate { get; set; }
-        public int VariableTemplateId { get; set; }
+        public int? VariableTemplateId { get; set; }
         public string ActivityName { get; set; }
         public DateTime? ActualStartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }

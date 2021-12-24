@@ -55,8 +55,8 @@ namespace GSC.Respository.CTMS
                 ActualStartDate = x.ActualStartDate,
                 ActualEndDate = x.ActualEndDate,
                 ActivityName = x.Activity.ActivityName,
-                VariableTemplate = _variableTemplateRepository.All.Any(t => t.ActivityId == x.ActivityId) ? _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).FirstOrDefault().TemplateName : "",
-                VariableTemplateId = _variableTemplateRepository.All.Any(t => t.ActivityId == x.ActivityId) ? _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).FirstOrDefault().Id : 0
+                VariableTemplate = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).Select(q => q.TemplateName).FirstOrDefault(),
+                VariableTemplateId = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).Select(q => q.Id).FirstOrDefault()
             }).ToList();
 
             return result;
