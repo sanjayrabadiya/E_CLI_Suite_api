@@ -93,7 +93,7 @@ namespace GSC.Data.Dto.Medra
         public string UpdatedBy { get; set; }
         public string UpdatedByRole { get; set; }
 
-
+        public string ScreeningNumber { get; set; }
         public DateTime? LastUpdateOn { get; set; }
 
         public int SocId { get; set; }

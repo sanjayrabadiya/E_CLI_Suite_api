@@ -15,7 +15,7 @@ namespace GSC.Data.Entities.Master
         public int DomainId { get; set; }
         public bool IsRepeated { get; set; }
         public int? CompanyId { get; set; }
-        public bool SystemType { get; set; }
+      //  public bool SystemType { get; set; }
         public List<VariableTemplateDetail> VariableTemplateDetails { get; set; }
         public Domain Domain { get; set; }
         public ActivityMode ActivityMode { get; set; }
