@@ -112,7 +112,7 @@ namespace GSC.Api.Controllers.LabManagement
             var labManagementUploadData = _mapper.Map<LabManagementUploadData>(labManagementUploadDataDto);
 
             //Upload Excel data into database table
-            var validate = _labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadData, SiteCode);
+            var validate = _labManagementUploadDataRepository.InsertExcelDataIntoDatabaseTable(labManagementUploadData, _projectRepository.GetParentProjectCode(labManagementUploadDataDto.ProjectId));
 
             if (!string.IsNullOrEmpty(validate))
             {

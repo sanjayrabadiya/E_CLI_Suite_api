@@ -107,7 +107,7 @@ namespace GSC.Respository.LabManagement
                 if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != details.FirstOrDefault().ProjectCode.ToLower().Trim())
                     return "Can not upload excel data due to study code not match.";
 
-                if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != SiteCode.ToLower().Trim())
+                if (((DataRow)item).ItemArray[1].ToString().ToLower().Trim() != SiteCode.ToLower().Trim())
                     return "Can not upload excel data due to site code not match.";
 
                 if (((DataRow)item).ItemArray[4].ToString().ToLower().Trim() != details.FirstOrDefault().DisplayName.ToLower().Trim())
