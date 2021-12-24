@@ -71,7 +71,7 @@ namespace GSC.Respository.LabManagement
 
         // Upload excel data insert into database
         //public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData)
-        public string InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData, string StudyCode)
+        public string InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData, string SiteCode)
         {
             if (!_labManagementVariableMappingRepository.All.Any(x => x.LabManagementConfigurationId == labManagementUploadData.LabManagementConfigurationId && x.DeletedDate == null))
                 return "You can not upload excel data before mapping variable in configuration.";
@@ -82,6 +82,7 @@ namespace GSC.Respository.LabManagement
                  {
                      t.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
                      t.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                     t.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode
                  }).ToList();
 
             // Add Lab Management Upload Data and status
@@ -103,8 +104,11 @@ namespace GSC.Respository.LabManagement
 
             foreach (var item in results.Tables[0].Rows)
             {
-                if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != StudyCode.ToLower().Trim())
+                if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != details.FirstOrDefault().ProjectCode.ToLower().Trim())
                     return "Can not upload excel data due to study code not match.";
+
+                if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != SiteCode.ToLower().Trim())
+                    return "Can not upload excel data due to site code not match.";
 
                 if (((DataRow)item).ItemArray[4].ToString().ToLower().Trim() != details.FirstOrDefault().DisplayName.ToLower().Trim())
                     return "Can not upload excel data due to visit name not match.";
@@ -287,7 +291,7 @@ namespace GSC.Respository.LabManagement
         public string CheckDataIsUploadForDeleteConfiguration(int Id)
         {
             if (All.Any(x => x.LabManagementConfigurationId == Id && x.DeletedDate == null))
-                return "You can not delete configuration due to already upload excel data.";
+                return "Labdata is uploaded, so cannot delete file.";
             return "";
         }
 
@@ -295,7 +299,7 @@ namespace GSC.Respository.LabManagement
         public string CheckDataIsUploadForRemapping(int Id)
         {
             if (All.Any(x => x.LabManagementConfigurationId == Id && x.DeletedDate == null && x.LabManagementUploadStatus == LabManagementUploadStatus.Approve))
-                return "You can not re-map variable due to upload excel data already approve.";
+                return "Labdata is uploaded, so can not Re-mapping variable.";
             return "";
         }
     }

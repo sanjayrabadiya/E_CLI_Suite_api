@@ -377,6 +377,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.Status, x => x.MapFrom(a => a.LabManagementUploadStatus.GetDescription()))
                 .ForMember(x => x.ProjectDesignVisitName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
                 .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.LabManagementConfiguration.ProjectDesignTemplate.TemplateName))
+                .ForMember(x => x.Reason, x => x.MapFrom(a => a.AuditReason.ReasonName))
                 .ReverseMap();
             CreateMap<ManageMonitoringReportVariable, ManageMonitoringReportVariableDto>().ReverseMap();
             CreateMap<ManageMonitoringReportReview, ManageMonitoringReportReviewDto>().ReverseMap();

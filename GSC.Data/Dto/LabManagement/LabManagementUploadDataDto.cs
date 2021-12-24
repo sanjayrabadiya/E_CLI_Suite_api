@@ -38,5 +38,7 @@ namespace GSC.Data.Dto.LabManagement
         public string MimeType { get; set; }
         public string PathName { get; set; }
         public string FullPath { get; set; }
+        public string Reason { get; set; }
+        public string ReasonOth { get; set; }
     }
 }
