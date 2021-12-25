@@ -100,6 +100,7 @@ namespace GSC.Respository.Screening
             designVisits = designVisits.Where(x => (x.StudyVersion == null || x.StudyVersion <= studyVersion) &&
             (x.InActiveVersion == null || x.InActiveVersion > studyVersion)).ToList();
 
+
             screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
             designVisits.ForEach(r =>
             {
@@ -117,15 +118,16 @@ namespace GSC.Respository.Screening
                     _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.Open, visitDate);
                 }
 
-                r.Templates.Where(b => b.StudyVersion == null || b.StudyVersion <= studyVersion).ToList().ForEach(t =>
+                r.Templates.Where(b => (b.StudyVersion == null || b.StudyVersion <= studyVersion)
+                && (b.InActiveVersion == null || b.InActiveVersion > studyVersion)).ToList().ForEach(t =>
                 {
-                    var screeningTemplate = new ScreeningTemplate
-                    {
-                        ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                        Status = ScreeningTemplateStatus.Pending
-                    };
-                    _screeningTemplateRepository.Add(screeningTemplate);
-                    screeningVisit.ScreeningTemplates.Add(screeningTemplate);
+                   var screeningTemplate = new ScreeningTemplate
+                   {
+                       ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                       Status = ScreeningTemplateStatus.Pending
+                   };
+                   _screeningTemplateRepository.Add(screeningTemplate);
+                   screeningVisit.ScreeningTemplates.Add(screeningTemplate);
 
                 });
 
