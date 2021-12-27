@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Project.Design;
+using GSC.Data.Entities.UserMgt;
 using GSC.Shared.DocumentService;
 
 namespace GSC.Data.Dto.LabManagement
@@ -13,8 +14,10 @@ namespace GSC.Data.Dto.LabManagement
         public string FileName { get; set; }
         public string PathName { get; set; }
         public string MimeType { get; set; }
+        public int SecurityRoleId { get; set; }
         public Entities.Master.Project Project { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
+        public SecurityRole SecurityRole { get; set; }
     }
 
     public class LabManagementConfigurationGridDto : BaseAuditDto
@@ -25,5 +28,6 @@ namespace GSC.Data.Dto.LabManagement
         public string ProjectDesignVisitName { get; set; }
         public string ProjectDesignTemplateName { get; set; }
         public string MimeType { get; set; }
+        public string ApproveProfile { get; set; }
     }
 }
