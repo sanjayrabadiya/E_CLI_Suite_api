@@ -187,7 +187,7 @@ namespace GSC.Api.Controllers.Configuration
         }
 
         [HttpDelete("DeleteLanguageConfigration/{id}")]
-        [Route("DeleteLanguageConfigration")]
+        //[Route("DeleteLanguageConfigration")]
         public ActionResult DeleteLanguageConfigration(int id)
         {
             var record = _context.LanguageConfigurationDetails.Find(id);

@@ -84,7 +84,6 @@ namespace GSC.Respository.Etmf
                 var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Site);
                 if (!String.IsNullOrEmpty(validateDeails))
                     return validateDeails;
-                //save on country folder
                 return "";
             }
             else if (details.ProjectId > 0 && details.SiteId > 0)
@@ -92,7 +91,6 @@ namespace GSC.Respository.Etmf
                 var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Site);
                 if (!String.IsNullOrEmpty(validateDeails))
                     return validateDeails;
-                // save on site
                 return "";
             }
             else if (details.ProjectId > 0 && details.CountryId > 0)
@@ -100,7 +98,6 @@ namespace GSC.Respository.Etmf
                 var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Country);
                 if (!String.IsNullOrEmpty(validateDeails))
                     return validateDeails;
-                // save on site
                 return "";
             }
             else
@@ -184,6 +181,11 @@ namespace GSC.Respository.Etmf
                SectionName = x.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
                ArtificateName = x.EtmfArtificateMasterLbrary.ArtificateName,
            }).FirstOrDefault();
+            if (projectDetails == null)
+            {
+                ProjectWorkplaceArtificateId = 0;
+                return "";
+            }
             ProjectWorkplaceArtificateId = projectDetails.ProjectWorkplaceArtificateId;
             string[] paths = { projectDetails.ProjectCode, FolderType.Etmf.GetDescription(), projectDetails.WorkPlaceFolder, projectDetails.ItemName != null ? projectDetails.ItemName : "", projectDetails.ZonName, projectDetails.SectionName, projectDetails.ArtificateName };
             var fullPath = Path.Combine(paths);

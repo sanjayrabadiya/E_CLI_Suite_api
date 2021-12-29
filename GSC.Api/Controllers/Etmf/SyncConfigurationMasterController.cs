@@ -193,7 +193,12 @@ namespace GSC.Api.Controllers.Etmf
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            var path = _syncConfigurationMasterRepository.GetsyncConfigurationPath(details,out ProjectWorkplaceArtificateId);    
+            var path = _syncConfigurationMasterRepository.GetsyncConfigurationPath(details,out ProjectWorkplaceArtificateId);
+            if (string.IsNullOrEmpty(path))
+            {
+                ModelState.AddModelError("Message", "Please Assign Rights");
+                return BadRequest(ModelState);
+            }
             return  Ok(new { PathDetail = path });
         }
     }
