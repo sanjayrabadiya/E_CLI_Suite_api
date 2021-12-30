@@ -772,21 +772,23 @@ namespace GSC.Helper
 
     public enum LabManagementExcelFileColumn : short
     {
-        [Description("Screening ID")] ScreeningID = 1,
-        [Description("Randomization Number")] RandomizationNumber = 2,
-        [Description("Visit")] Visit = 3,
-        [Description("Repeat sample collection               (Yes, No)")] RepeatSampleCollection = 4,
-        [Description("Laboratory Name")] LaboratoryName = 5,
-        [Description("Date of sample collection                   (dd-mmm-yyyy)")] DateOfSampleCollection = 6,
-        [Description("Date of Report          (dd-mmm-yyyy)")] DateOfReport = 7,
-        [Description("Panel                     (Hematology, Biochemistry, serology, Urinalysis)")] Panel = 8,
-        [Description("Test Name")] TestName = 9,
-        [Description("Result")] Result = 10,
-        [Description("Unit")] Unit = 11,
-        [Description("Abnormal Flag (L=Low, H=High, N=Normal)")] AbnormalFlag = 12,
-        [Description("Reference Range Low")] ReferenceRangeLow = 13,
-        [Description("Reference Range High")] ReferenceRangeHigh = 14,
-        [Description("Clinically Significant (Yes, No)")] ClinicallySignificant = 15,
+        [Description("Study Code")] StudyCode = 1,
+        [Description("Site Code")] SiteCode = 2,
+        [Description("Screening ID")] ScreeningID = 3,
+        [Description("Randomization Number")] RandomizationNumber = 4,
+        [Description("Visit")] Visit = 5,
+        [Description("Repeat sample collection               (Yes, No)")] RepeatSampleCollection = 6,
+        [Description("Laboratory Name")] LaboratoryName = 7,
+        [Description("Date of sample collection                   (dd-mmm-yyyy)")] DateOfSampleCollection = 8,
+        [Description("Date of Report          (dd-mmm-yyyy)")] DateOfReport = 9,
+        [Description("Panel                     (Hematology, Biochemistry, serology, Urinalysis)")] Panel = 10,
+        [Description("Test Name")] TestName = 11,
+        [Description("Result")] Result = 12,
+        [Description("Unit")] Unit = 13,
+        [Description("Abnormal Flag (L=Low, H=High, N=Normal)")] AbnormalFlag = 14,
+        [Description("Reference Range Low")] ReferenceRangeLow = 15,
+        [Description("Reference Range High")] ReferenceRangeHigh = 16,
+        [Description("Clinically Significant (Yes, No)")] ClinicallySignificant = 17,
 
     }
 }

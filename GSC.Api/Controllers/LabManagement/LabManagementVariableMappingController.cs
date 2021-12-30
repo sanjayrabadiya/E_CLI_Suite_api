@@ -44,16 +44,6 @@ namespace GSC.Api.Controllers.LabManagement
             return Ok(_labManagementVariableMappingRepository.GetLabManagementVariableMappingList(LabManagementConfigurationId));
         }
 
-        //[HttpGet("{id}")]
-        //public IActionResult Get(int id)
-        //{
-        //    if (id <= 0) return BadRequest();
-        //    var mapping = _labManagementVariableMappingRepository.Find(id);
-        //    var mappingDto = _mapper.Map<LabManagementVariableMappingDto>(mapping);
-        //    return Ok(mappingDto);
-        //}
-
-
         [HttpPost]
         [TransactionRequired]
         public IActionResult Post([FromBody] LabManagementVariableMappingDto mappingDto)

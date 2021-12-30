@@ -70,7 +70,6 @@ namespace GSC.Respository.LabManagement
         }
 
         // Upload excel data insert into database
-        //public List<LabManagementUploadExcelData> InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData)
         public string InsertExcelDataIntoDatabaseTable(LabManagementUploadData labManagementUploadData, string SiteCode)
         {
             if (!_labManagementVariableMappingRepository.All.Any(x => x.LabManagementConfigurationId == labManagementUploadData.LabManagementConfigurationId && x.DeletedDate == null))
@@ -113,9 +112,6 @@ namespace GSC.Respository.LabManagement
                 if (((DataRow)item).ItemArray[4].ToString().ToLower().Trim() != details.FirstOrDefault().DisplayName.ToLower().Trim())
                     return "Can not upload excel data due to visit name not match.";
 
-                //if (((DataRow)item).ItemArray[0].ToString().Trim() != details.FirstOrDefault().TemplateName.Trim())
-                //    return "Can not upload excel data due to template not match.";
-
                 LabManagementUploadExcelData obj = new LabManagementUploadExcelData();
                 obj.ScreeningNo = ((DataRow)item).ItemArray[2].ToString();
                 obj.RandomizationNo = ((DataRow)item).ItemArray[3].ToString();
@@ -145,7 +141,6 @@ namespace GSC.Respository.LabManagement
                 _labManagementUploadExcelDataRepository.Add(item);
             }
             return "";
-            // return objLst;
         }
 
         // Insert data into data entry screening template, screening template value and screening template audit
@@ -206,8 +201,7 @@ namespace GSC.Respository.LabManagement
                                 // get upload Excel data by lab management upload id and variale name
                                 var r = GetExcelDataByScreeningNumber.Where(x => x.TestName == item.TargetVariable).FirstOrDefault();
                                 var dataType = item.CollectionSource;
-                                //foreach (var r in result)
-                                //{
+
                                 // insert screening template value
                                 var obj = _screeningTemplateValueRepository.All.Where(x => x.ProjectDesignVariableId == item.ProjectDesignVariableId
                                   && x.ScreeningTemplateId == screeningTemplate.Id).FirstOrDefault() ?? new ScreeningTemplateValue();
@@ -259,6 +253,8 @@ namespace GSC.Respository.LabManagement
                                     }
                                     else
                                         obj.Value = r.Result;
+
+                                    if (r.AbnoramalFlag.ToLower() != "n") { }
                                 }
 
                                 obj.ReviewLevel = 0;
@@ -279,7 +275,6 @@ namespace GSC.Respository.LabManagement
                                     Note = "Added by Lab management"
                                 };
                                 _screeningTemplateValueAuditRepository.Save(aduit);
-                                // }
                             }
                         }
                     }
