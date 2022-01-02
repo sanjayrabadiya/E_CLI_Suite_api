@@ -77,7 +77,8 @@ namespace GSC.Respository.Screening
                    IsDisable = c.IsDisable,
                    PatientStatus = c.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId,
                    VisitStatus = c.ScreeningVisit.Status,
-                   ParentId = c.ParentId
+                   ParentId = c.ParentId,
+                   LastReviewLevel = c.LastReviewLevel
                }).FirstOrDefault();
         }
 
@@ -100,18 +101,26 @@ namespace GSC.Respository.Screening
 
             designTemplateDto.ScreeningTemplateId = screeningTemplateId;
             designTemplateDto.IsSubmittedButton = statusId < 3 && workflowlevel.IsStartTemplate;
+            designTemplateDto.IsUnSubmittedButton = screeningTemplateBasic.Status == ScreeningTemplateStatus.Submitted && workflowlevel.IsStartTemplate;
+
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Reviewed)
+                designTemplateDto.IsUnReviewedButton = workflowlevel.LevelNo == screeningTemplateBasic.LastReviewLevel;
+
             if (workflowlevel.LevelNo >= 0 && designTemplateDto.IsRepeated)
                 designTemplateDto.IsRepeated = workflowlevel.IsStartTemplate;
             if (screeningTemplateBasic.ParentId != null)
                 designTemplateDto.IsRepeated = false;
 
             var isRestriction = false;
+
+
             if (_projectDesingTemplateRestrictionRepository.All.Any(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId
             && x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null))
             {
                 designTemplateDto.IsSubmittedButton = false;
                 designTemplateDto.IsRepeated = false;
                 isRestriction = true;
+                designTemplateDto.IsUnSubmittedButton = false;
             }
 
             designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;

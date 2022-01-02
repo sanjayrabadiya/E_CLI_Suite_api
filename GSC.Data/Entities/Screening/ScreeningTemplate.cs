@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.Screening
         public int? ParentId { get; set; }
         public int? Progress { get; set; }
         public short? ReviewLevel { get; set; }
+        public short? LastReviewLevel { get; set; }
         public short? StartLevel { get; set; }
         public int ScreeningVisitId { get; set; }
         public ScreeningVisit ScreeningVisit { get; set; }
@@ -37,7 +38,6 @@ namespace GSC.Data.Entities.Screening
             get => _actualeDate?.UtcDateTime();
             set => _actualeDate = value?.UtcDateTime();
         }
-        public int? DayDiverse { get; set; }
         public bool IsLocked { get; set; }
         public bool IsCompleteReview { get; set; }
         public bool IsDisable { get; set; }

@@ -49,4 +49,30 @@ namespace GSC.Data.Dto.Screening
         public QueryStatus QueryStatus { get; set; }
 
     }
+
+
+
+    public class ScreeningTemplateValueQueryGridDto 
+    {
+        public int Id { get; set; }
+        private DateTime? _createdDate;
+        public string Value { get; set; }
+        public string ReasonOth { get; set; }
+        public CollectionSources? CollectionSource { get; set; }
+        public string ReasonName { get; set; }
+        public QueryStatus? QueryStatus { get; set; }
+        public string CreatedByName { get; set; }
+
+        public string Note { get; set; }
+
+        public DateTime? CreatedDate
+        {
+            get => _createdDate?.UtcDateTime();
+            set => _createdDate = value?.UtcDateTime();
+        }
+
+        public string OldValue { get; set; }
+        public string StatusName { get; set; }
+        public string QueryResponseTime { get; set; }
+    }
 }

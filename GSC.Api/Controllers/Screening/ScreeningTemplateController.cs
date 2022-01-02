@@ -152,6 +152,32 @@ namespace GSC.Api.Controllers.Screening
             return Ok(result);
         }
 
+
+        [HttpPut]
+        [Route("UnSubmitTemplate/{id}")]
+        [TransactionRequired]
+        public IActionResult UnSubmitTemplate(int id)
+        {
+
+            var screeningTemplate = _screeningTemplateRepository.Find(id);
+
+            screeningTemplate.Status = ScreeningTemplateStatus.Pending;
+            screeningTemplate.ReviewLevel = null;
+            screeningTemplate.StartLevel = null;
+
+            var screeningTemplateReview = _screeningTemplateReviewRepository.All.Where(x => x.ScreeningTemplateId == id).ToList();
+
+            screeningTemplateReview.ForEach(c =>
+            {
+                c.IsRepeat = true;
+                _screeningTemplateReviewRepository.Update(c);
+            });
+            _screeningTemplateRepository.Update(screeningTemplate);
+            _uow.Save();
+
+            return Ok();
+        }
+
         private void SubmittedTemplate(int id)
         {
             if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id
@@ -199,6 +225,41 @@ namespace GSC.Api.Controllers.Screening
             Ok();
         }
 
+
+        [HttpPut]
+        [Route("UnReviewedTemplate/{id}")]
+        [TransactionRequired]
+        public IActionResult UnReviewedTemplate(int id)
+        {
+            var validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(id);
+
+            if (!string.IsNullOrEmpty(validateMsg))
+            {
+                ModelState.AddModelError("Message", "Queries generated, please close it");
+                return BadRequest(ModelState);
+            }
+
+            var screeningTemplate = _screeningTemplateRepository.Find(id);
+            screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
+            screeningTemplate.ReviewLevel = screeningTemplate.LastReviewLevel;
+            screeningTemplate.LastReviewLevel = null;
+            screeningTemplate.IsCompleteReview = false;
+            _screeningTemplateRepository.Update(screeningTemplate);
+
+            var screeningTemplateReview = _screeningTemplateReviewRepository.All.Where(x => x.ScreeningTemplateId == id && x.ReviewLevel == screeningTemplate.LastReviewLevel).ToList();
+
+            screeningTemplateReview.ForEach(c =>
+            {
+                c.IsRepeat = true;
+                _screeningTemplateReviewRepository.Update(c);
+            });
+
+            _uow.Save();
+
+            return Ok(id);
+        }
+
+
         [HttpPut]
         [Route("ReviewedTemplate/{id}")]
         public IActionResult ReviewedTemplate(int id)
@@ -217,7 +278,6 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
-            //            if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id && x.Status == ScreeningTemplateStatus.Reviewed && !x.IsRepeat))
             if (_screeningTemplateReviewRepository.All.Any(x => x.ScreeningTemplateId == id
                                                                             && x.CreatedBy == _jwtTokenAccesser.UserId &&
                                                                             x.Status == ScreeningTemplateStatus.Reviewed
@@ -228,6 +288,7 @@ namespace GSC.Api.Controllers.Screening
             }
 
             screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
+            screeningTemplate.LastReviewLevel = screeningTemplate.ReviewLevel;
 
             _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, (short)screeningTemplate.ReviewLevel);
 

@@ -63,6 +63,8 @@ namespace GSC.Data.Dto.Project.Design
         public bool MyReview { get; set; }
         public string StatusName { get; set; }
         public bool IsSubmittedButton { get; set; }
+        public bool IsUnSubmittedButton { get; set; }
+        public bool IsUnReviewedButton { get; set; }
         public int ScreeningTemplateId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public bool IsSchedule { get; set; }

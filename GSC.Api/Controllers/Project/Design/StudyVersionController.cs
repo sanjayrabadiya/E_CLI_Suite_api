@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,15 +23,18 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         private readonly IStudyVersionStatusRepository _studyVersionVisitStatusRepository;
+        private readonly IVersionEffectRepository _versionEffectRepository;
 
         public StudyVersionController(IStudyVersionRepository studyVersionRepository,
-            IUnitOfWork uow, IMapper mapper, IGSCContext context, IStudyVersionStatusRepository studyVersionVisitStatusRepository)
+            IUnitOfWork uow, IMapper mapper, IGSCContext context, IStudyVersionStatusRepository studyVersionVisitStatusRepository,
+            IVersionEffectRepository versionEffectRepository)
         {
             _studyVersionRepository = studyVersionRepository;
             _uow = uow;
             _mapper = mapper;
             _context = context;
             _studyVersionVisitStatusRepository = studyVersionVisitStatusRepository;
+            _versionEffectRepository = versionEffectRepository;
         }
 
 
@@ -135,6 +140,7 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpPut("GoLive")]
+        [TransactionRequired]
         public IActionResult GoLive([FromBody] StudyGoLiveDto studyGoLiveDto)
         {
             var studyVersion = _studyVersionRepository.All.AsNoTracking().Where(x => x.DeletedDate == null && x.ProjectDesignId == studyGoLiveDto.ProjectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial).FirstOrDefault();
@@ -145,10 +151,16 @@ namespace GSC.Api.Controllers.Project.Design
                 return BadRequest(ModelState);
             }
 
-             _studyVersionRepository.UpdateGoLive(studyGoLiveDto, studyVersion);
+            _studyVersionRepository.UpdateGoLive(studyGoLiveDto, studyVersion);
             _uow.Save();
+
+            _versionEffectRepository.ApplyNewVersion(studyGoLiveDto.ProjectDesignId, studyGoLiveDto.IsOnTrial, studyGoLiveDto.VersionNumber);
+            _uow.Save();
+
             return Ok();
         }
+
+
 
     }
 }

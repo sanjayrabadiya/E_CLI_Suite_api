@@ -47,6 +47,7 @@ namespace GSC.Data.Dto.Project.Design
         public IList<ScreeningPatientStatus> PatientStatusId { get; set; }
         public string GoLiveNote { get; set; }
         public bool IsOnTrial { get; set; }
+        public double VersionNumber { get; set; }
 
     }
 }

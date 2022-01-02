@@ -57,6 +57,7 @@ namespace GSC.Data.Dto.Screening
         public bool IsDisable { get; set; }
         public int ProjectDesignVisitId { get; set; }
         public double? StudyVersion { get; set; }
+        public short? LastReviewLevel { get; set; }
 
     }
 

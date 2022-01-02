@@ -2,6 +2,7 @@
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
@@ -21,16 +22,20 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IGSCContext _context;
+        private readonly IStudyVersionStatusRepository _studyVersionStatusRepository;
+        private readonly IRandomizationRepository _randomizationRepository;
         public VersionEffectRepository(IGSCContext context,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
-           IProjectDesignPeriodRepository projectDesignPeriodRepository,
-           IScreeningVisitRepository screeningVisitRepository,
+            IProjectDesignPeriodRepository projectDesignPeriodRepository,
+            IScreeningVisitRepository screeningVisitRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository
+            IProjectDesignTemplateRepository projectDesignTemplateRepository,
+            IStudyVersionStatusRepository studyVersionStatusRepository,
+            IRandomizationRepository randomizationRepository
         ) : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -40,18 +45,26 @@ namespace GSC.Respository.Screening
             _context = context;
             _screeningVisitRepository = screeningVisitRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _studyVersionStatusRepository = studyVersionStatusRepository;
+            _randomizationRepository = randomizationRepository;
         }
 
         public void ApplyNewVersion(int projectDesignId, bool isTrial, double versionNumber)
         {
-            var visits = _projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriod.ProjectDesignId == projectDesignId
-            && t.DeletedDate == null && ((t.StudyVersion != null && t.StudyVersion <= versionNumber) || (t.InActiveVersion != null && t.InActiveVersion <= versionNumber)));
+            //var visits = _projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriod.ProjectDesignId == projectDesignId
+            //&& t.DeletedDate == null && ((t.StudyVersion != null && t.StudyVersion <= versionNumber) || (t.InActiveVersion != null && t.InActiveVersion <= versionNumber)));
 
-            var entries = All.Where(x => x.ProjectDesignId == projectDesignId && x.Project.IsTestSite == isTrial).ToList();
+            //var entries = All.Where(x => x.ProjectDesignId == projectDesignId && x.Project.IsTestSite == isTrial).ToList();
+
+            var patientStatusIds = _studyVersionStatusRepository.All.Where(x => x.StudyVerion.ProjectDesignId == projectDesignId
+            && x.StudyVerion.VersionNumber == versionNumber).Select(t => t.PatientStatusId).ToList();
+
+            VisitProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
+            TemplateProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
         }
 
 
-        void VisitProcess(int projectDesignId, bool isTrial, double versionNumber)
+        void VisitProcess(int projectDesignId, bool isTrial, double versionNumber, List<ScreeningPatientStatus> patientStatuses)
         {
             var deletedVisitIds = _projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriod.ProjectDesignId == projectDesignId
             && t.DeletedDate == null && t.InActiveVersion != null && t.InActiveVersion <= versionNumber).Select(t => t.Id).ToList();
@@ -59,6 +72,7 @@ namespace GSC.Respository.Screening
             var screeningVisits = _screeningVisitRepository.All.AsNoTracking().Include(t => t.ScreeningEntry).
                 Include(t => t.ScreeningTemplates).
                 ThenInclude(t => t.ScreeningTemplateValues).Where(x => x.DeletedDate == null && x.ScreeningEntry.ProjectDesignId == projectDesignId &&
+                patientStatuses.Contains(x.ScreeningEntry.Randomization.PatientStatusId) &&
                 x.ScreeningEntry.Project.IsTestSite == isTrial && deletedVisitIds.Contains(x.ProjectDesignVisitId)).ToList();
 
             screeningVisits.ForEach(x =>
@@ -96,8 +110,8 @@ namespace GSC.Respository.Screening
 
             var addVisitIds = addVisits.Select(t => t.Id).ToList();
 
-            var screeningEntrys = All.Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignId &&
-            x.Project.IsTestSite == isTrial && x.ScreeningVisit.Any(t => t.DeletedDate == null && !addVisitIds.Contains(t.ProjectDesignVisitId))).ToList();
+            var screeningEntrys = All.Include(r => r.Randomization).Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignId &&
+           x.Project.IsTestSite == isTrial && x.ScreeningVisit.Any(t => t.DeletedDate == null && !addVisitIds.Contains(t.ProjectDesignVisitId))).ToList();
 
             addVisits.ForEach(t =>
             {
@@ -133,10 +147,19 @@ namespace GSC.Respository.Screening
 
             _context.SaveChangesAsync().Wait();
             _context.DetachAllEntities();
+
+            screeningEntrys.Where(t =>  t.Randomization != null && t.Randomization.PatientStatusId == ScreeningPatientStatus.Completed).ToList().ForEach(x =>
+            {
+                x.Randomization.PatientStatusId = ScreeningPatientStatus.Screening;
+                _randomizationRepository.Update(x.Randomization);
+            });
+
+
+            _context.SaveChangesAsync().Wait();
         }
 
 
-        void TemplateProcess(int projectDesignId, bool isTrial, double versionNumber)
+        void TemplateProcess(int projectDesignId, bool isTrial, double versionNumber, List<ScreeningPatientStatus> patientStatuses)
         {
             var deletedTemplatedIds = _projectDesignTemplateRepository.All.Where(t => t.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId
             && t.DeletedDate == null && t.InActiveVersion != null && t.InActiveVersion <= versionNumber).Select(t => t.Id).ToList();
@@ -144,6 +167,7 @@ namespace GSC.Respository.Screening
             var screeningTemplates = _screeningTemplateRepository.All.AsNoTracking().Include(t => t.ScreeningVisit).
                 ThenInclude(t => t.ScreeningEntry).
                 Include(t => t.ScreeningTemplateValues).Where(x => x.DeletedDate == null && x.ScreeningVisit.ScreeningEntry.ProjectDesignId == projectDesignId &&
+                patientStatuses.Contains(x.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId) &&
                 x.ScreeningVisit.ScreeningEntry.Project.IsTestSite == isTrial && deletedTemplatedIds.Contains(x.ProjectDesignTemplateId)).ToList();
 
             screeningTemplates.ForEach(x =>
@@ -191,6 +215,15 @@ namespace GSC.Respository.Screening
 
             _context.SaveChangesAsync().Wait();
             _context.DetachAllEntities();
+
+            screeningVisits.Where(t => t.Status == ScreeningVisitStatus.Completed).ToList().ForEach(x =>
+           {
+               x.Status = ScreeningVisitStatus.InProgress;
+               _screeningVisitRepository.Update(x);
+           });
+
+
+            _context.SaveChangesAsync().Wait();
         }
     }
 }
