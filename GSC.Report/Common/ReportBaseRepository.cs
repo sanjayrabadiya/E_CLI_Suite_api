@@ -506,51 +506,7 @@ namespace GSC.Report.Common
             "WHERE Company.Id=" + Convert.ToString(_jwtTokenAccesser.CompanyId == 0 ? 1 : _jwtTokenAccesser.CompanyId);
             return assa;
         }
-
-        //private void EventsReport_NewPage(object sender, PageEventArgs e)
-        //{
-        //    string text = string.Format("Page {0} of {1}", e.PageNumber, e.PageCount);
-        //    Telerik.Reporting.Processing.Report report = (Telerik.Reporting.Processing.Report)sender;
-        //    Telerik.Reporting.Processing.ReportItemBase[] items = report.Items.Find("txtPageNumber", true);
-        //    if (items.Length > 0)
-        //    {
-        //        Processing.TextBox pageNo = items[0] as Processing.TextBox;
-        //        if (null != pageNo)
-        //        {
-        //            pageNo.Text = text;
-        //        }
-        //    }
-        //}
-
-        //public List<DossierPdfDataDto> GetpdfReportData()
-        //{
-        //    SqlParameter parameter = new SqlParameter("@projectId",13);
-        //    string sqlqry = @"select 
-        //                      pg.ProjectId
-        //                      ,pdv.ProjectDesignPeriodId
-        //                      ,pdt.ProjectDesignVisitId
-        //                      ,pdva.ProjectDesignTemplateId
-        //                      ,p.ProjectCode,
-        //                      p.ProjectName,
-        //                      pdv.DisplayName,
-        //                      pdt.TemplateCode,
-        //                      pdt.TemplateName,
-        //                      pdva.VariableName 
-        //                      ,d.DomainName
-        //                      ,d.DomainCode
-        //                      FROM Project p 
-        //                      INNER JOIN  ProjectDesign pg on pg.ProjectId=p.Id
-        //                      INNER JOIN ProjectDesignPeriod pdp on pg.Id=pdp.ProjectDesignId
-        //                      INNER JOIN ProjectDesignVisit pdv on pdv.ProjectDesignPeriodId=pdp.Id AND pdv.DeletedDate IS NULL 
-        //                      INNER JOIN ProjectDesignTemplate pdt on pdt.ProjectDesignVisitId=pdv.Id AND pdt.DeletedDate IS NULL
-        //                      INNER JOIN Domain d on d.Id=pdt.DomainId
-        //                      INNER JOIN ProjectDesignVariable pdva on pdva.ProjectDesignTemplateId=pdt.Id
-        //                      WHERE ProjectId=13  
-        //                      Order By pdv.DesignOrder,pdt.DesignOrder";
-        //    var finaldata = _context.FromSql <DossierPdfDataDto>(sqlqry).ToList();
-        //    return finaldata;
-        //}
-
+        //blank report query
         public List<DossierReportDto> GetBlankPdfData(ReportSettingNew reportSetting)
         {
 
@@ -595,7 +551,7 @@ namespace GSC.Report.Common
             }).ToList();
             return finaldata;
         }
-
+        //data query
         public List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting)
         {
 

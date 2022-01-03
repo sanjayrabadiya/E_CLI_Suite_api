@@ -147,9 +147,10 @@ namespace GSC.Api.Helpers
             CreateMap<VariableCategory, VariableCategoryDto>().ReverseMap();
             CreateMap<Unit, UnitDto>().ReverseMap();
             CreateMap<NumberFormat, NumberFormatDto>().ReverseMap();
-            CreateMap<RolePermission, RolePermissionDto>()
-                .ForMember(x => x.ScreenName, x => x.MapFrom(a => a.AppScreens.ScreenName))
-                .ReverseMap();
+            //tinku
+            //CreateMap<RolePermission, RolePermissionDto>()
+            //    .ForMember(x => x.ScreenName, x => x.MapFrom(a => a.AppScreens.ScreenName))
+            //    .ReverseMap();
             CreateMap<AuditReason, AuditReasonDto>().ReverseMap();
             CreateMap<VolunteerAuditTrail, VolunteerAuditTrailDto>().ReverseMap();
             CreateMap<ProjectDesign, ProjectDesignDto>().ReverseMap();

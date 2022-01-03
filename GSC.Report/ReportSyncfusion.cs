@@ -99,6 +99,7 @@ namespace GSC.Report
             Stream stream = new MemoryStream(file);
             return stream;
         }
+        //pdf header
         private PdfPageTemplateElement AddHeader(PdfDocument doc, string studyName, bool isClientLogo, bool isCompanyLogo, int ClientId)
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);

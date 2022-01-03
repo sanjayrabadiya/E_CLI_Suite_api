@@ -20,10 +20,11 @@ namespace GSC.Data.Entities.Master
         public Domain Domain { get; set; }
         public ActivityMode ActivityMode { get; set; }
         public IList<VariableTemplateNote> Notes { get; set; }
-        public int? ModuleId { get; set; }
+        public AuditModule? ModuleId { get; set; }
+        //public int? ModuleId { get; set; }
         public Activity Activity { get; set; }
-        [ForeignKey("ModuleId")]
+        //[ForeignKey("ModuleId")]
 
-        public AppScreen AppScreen { get; set; }
+        //public AppScreen AppScreen { get; set; }
     }
 }

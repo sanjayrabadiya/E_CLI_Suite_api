@@ -108,6 +108,8 @@ namespace GSC.Api.Controllers.InformConcent
         {
             // delivered flag update when message delivered
             var econsentChat = _econsentChatRepository.Find(messageId);
+            if (econsentChat == null)
+                return Ok();
             econsentChat.IsDelivered = true;
             econsentChat.DeliveredDateTime = _jwtTokenAccesser.GetClientDate();
             _econsentChatRepository.Update(econsentChat);

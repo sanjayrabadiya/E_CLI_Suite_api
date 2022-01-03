@@ -175,12 +175,12 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
                 .ForMember(x => x.TherapeuticIndicationName, x => x.MapFrom(a => string.Join(", ", a.ManageSiteRole.Where(x => x.DeletedDate == null).Select(s => s.TrialType.TrialTypeName).ToList())))
                 .ReverseMap();
-
+            //tinku
             CreateMap<VariableTemplate, VariableTemplateGridDto>()
                .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
                .ForMember(x => x.ActivityMode, x => x.MapFrom(a => a.ActivityMode.GetDescription()))
                .ForMember(x => x.ActivityName, x => x.MapFrom(a => a.Activity.ActivityName))
-               .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.AppScreen.ScreenName))
+               .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.ModuleId.GetDescription()))
                .ReverseMap();
 
             CreateMap<InvestigatorContact, InvestigatorContactGridDto>()

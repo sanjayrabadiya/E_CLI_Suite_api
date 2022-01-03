@@ -76,7 +76,7 @@ namespace GSC.Respository.Configuration
                     return "Please set upload limit for particular Study";
                 double dirsize = GetDirectorySize(fullPath);
                 if (dirsize > uploadlimit)
-                    return "Upload limit is full Please Contact to Administrator";
+                    return "Upload limit is full, Please Contact to Administrator";
             }
             return "";
         }

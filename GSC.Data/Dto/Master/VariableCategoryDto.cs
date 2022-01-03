@@ -12,7 +12,6 @@ namespace GSC.Data.Dto.Master
 
         [Required(ErrorMessage = "Category Name is required.")]
         public string CategoryName { get; set; }
-
         public VariableCategoryType? SystemType { get; set; }
         public int? CompanyId { get; set; }
     }
