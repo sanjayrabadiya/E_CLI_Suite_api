@@ -248,9 +248,11 @@ namespace GSC.Respository.Project.Design
 
         public IList<DropDownDto> GetVariabeDropDownForLabManagementMapping(int projectDesignTemplateId)
         {
-            return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId && x.CollectionSource != CollectionSources.CheckBox
-            && x.CollectionSource != CollectionSources.ComboBox && x.CollectionSource != CollectionSources.MultiCheckBox && x.CollectionSource != CollectionSources.NumericScale
-            && x.CollectionSource != CollectionSources.RadioButton && x.CollectionSource != CollectionSources.Relation)
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId && (x.CollectionSource == CollectionSources.TextBox
+            || x.CollectionSource == CollectionSources.MultilineTextBox))
+            
+            //&& x.CollectionSource != CollectionSources.MultiCheckBox && x.CollectionSource != CollectionSources.NumericScale
+            //&& x.CollectionSource != CollectionSources.RadioButton && x.CollectionSource != CollectionSources.Relation)
                 .OrderBy(o => o.DesignOrder)
                 .Select(c => new DropDownDto
                 {

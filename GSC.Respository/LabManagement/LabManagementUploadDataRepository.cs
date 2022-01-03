@@ -10,6 +10,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Project.Design;
+using GSC.Respository.ProjectRight;
 using GSC.Respository.Screening;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ namespace GSC.Respository.LabManagement
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
+        private readonly IProjectRightRepository _projectRightRepository;
 
         public LabManagementUploadDataRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository,
@@ -44,6 +46,7 @@ namespace GSC.Respository.LabManagement
          IScreeningTemplateValueRepository screeningTemplateValueRepository,
         IScreeningTemplateRepository screeningTemplateRepository,
         IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
+        IProjectRightRepository projectRightRepository,
             IAppSettingRepository appSettingRepository)
             : base(context)
         {
@@ -58,11 +61,13 @@ namespace GSC.Respository.LabManagement
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
+            _projectRightRepository = projectRightRepository;
         }
 
         public List<LabManagementUploadDataGridDto> GetUploadDataList(bool isDeleted)
         {
-            var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
                    ProjectTo<LabManagementUploadDataGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             result.ForEach(t => t.FullPath = documentUrl + t.PathName);
@@ -127,7 +132,7 @@ namespace GSC.Respository.LabManagement
                 obj.AbnoramalFlag = ((DataRow)item).ItemArray[13].ToString();
                 obj.ReferenceRangeLow = ((DataRow)item).ItemArray[14].ToString();
                 obj.ReferenceRangeHigh = ((DataRow)item).ItemArray[15].ToString();
-                obj.ClinicallySignificant = ((DataRow)item).ItemArray[16].ToString();
+            //    obj.ClinicallySignificant = ((DataRow)item).ItemArray[16].ToString();
                 obj.CreatedBy = _jwtTokenAccesser.UserId;
                 obj.CreatedDate = _jwtTokenAccesser.GetClientDate();
                 objLst.Add(obj);
@@ -235,11 +240,11 @@ namespace GSC.Respository.LabManagement
                                     obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().LaboratryName.ToString();
                                     r = GetExcelDataByScreeningNumber.FirstOrDefault();
                                 }
-                                else if (item.TargetVariable.Trim().ToLower() == "clinically significant")
-                                {
-                                    obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().ClinicallySignificant.ToString();
-                                    r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                }
+                                //else if (item.TargetVariable.Trim().ToLower() == "clinically significant")
+                                //{
+                                //    obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().ClinicallySignificant.ToString();
+                                //    r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                //}
                                 else
                                 {
                                     // set date time format if data type is date datetime or time
