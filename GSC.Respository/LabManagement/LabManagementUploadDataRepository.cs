@@ -66,7 +66,7 @@ namespace GSC.Respository.LabManagement
 
         public List<LabManagementUploadDataGridDto> GetUploadDataList(bool isDeleted)
         {
-            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            var projectList = _projectRightRepository.GetProjectRightIdList();
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
                    ProjectTo<LabManagementUploadDataGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
