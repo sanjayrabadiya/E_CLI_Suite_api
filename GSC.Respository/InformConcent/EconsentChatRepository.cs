@@ -111,14 +111,21 @@ namespace GSC.Respository.InformConcent
             return result;
         }
 
-        public List<EconsentChatDto> GetEconsentChat(EconcentChatParameterDto details)
+        public EconsentChatDetailDto GetEconsentChat(EconcentChatParameterDto details)
         {
             IList<int> intList = new List<int>() { details.UserId, _jwtTokenAccesser.UserId };
             //var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && details.LastDate!=null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now && x.Message.Contains(details.SearchString)).Take(details.PageSize).OrderBy(x=>x.SendDateTime).ToList();
-            var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && (details.LastDate != null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now)).Take(details.PageSize).OrderBy(x => x.SendDateTime).ToList();
-            data.ForEach(x => x.Message = EncryptionDecryption.DecryptString(x.Salt, x.Message));
+            //var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId) && (details.LastDate != null ? x.SendDateTime <= details.LastDate : x.SendDateTime <= DateTime.Now)).Take(details.PageSize).OrderBy(x => x.SendDateTime).ToList();
+            var data = FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).Take(details.PageSize).OrderBy(x => x.SendDateTime).Skip(10 * (details.PageNumber - 1)).Take(10).ToList();
+            int totalRecord= FindBy(x => intList.Contains(x.SenderId) && intList.Contains(x.ReceiverId)).Count();
+            data.ForEach(x => x.Message = EncryptionDecryption.DecryptString(x.Salt, x.Message));            
             var result = _mapper.Map<List<EconsentChatDto>>(data);
-            return result;
+            EconsentChatDetailDto _details = new EconsentChatDetailDto();
+            _details.ChatDetails = result;
+            _details.PageNumber = details.PageNumber;
+            _details.PageSize = details.PageSize;
+            _details.TotalRecord = totalRecord;
+            return _details;
         }
 
         public int GetUnReadMessagecount()

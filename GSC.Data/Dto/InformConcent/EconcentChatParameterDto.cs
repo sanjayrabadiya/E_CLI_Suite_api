@@ -9,9 +9,10 @@ namespace GSC.Data.Dto.InformConcent
     {
         [Required(ErrorMessage = "User Id is required.")]
         public int UserId { get; set; }
-        public DateTime? LastDate { get; set; }
+        //public DateTime? LastDate { get; set; }
         //public string SearchString { get; set; }
         [Required(ErrorMessage = "Page Size is required.")]
         public int PageSize { get; set; }
+        public int PageNumber { get; set; }       
     }
 }

@@ -65,6 +65,7 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(data);
         }
 
+        
         [HttpPost]
         [Route("GetEconsentChat")]
         public IActionResult GetEconsentChat([FromBody] EconcentChatParameterDto details)

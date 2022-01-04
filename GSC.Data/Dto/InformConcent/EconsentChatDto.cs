@@ -18,5 +18,14 @@ namespace GSC.Data.Dto.InformConcent
         public DateTime? ReadDateTIme { get; set; }
         public bool IsDocument { get; set; }
         public string DocumentPath { get; set; }
+        public int TotalRecord { get; set; }
+    }
+
+    public class EconsentChatDetailDto
+    {
+        public int TotalRecord { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public List<EconsentChatDto> ChatDetails { get; set; }
     }
 }
