@@ -787,8 +787,7 @@ namespace GSC.Helper
         [Description("Unit")] Unit = 13,
         [Description("Abnormal Flag (L=Low, H=High, N=Normal)")] AbnormalFlag = 14,
         [Description("Reference Range Low")] ReferenceRangeLow = 15,
-        [Description("Reference Range High")] ReferenceRangeHigh = 16,
-        [Description("Clinically Significant (Yes, No)")] ClinicallySignificant = 17,
+        [Description("Reference Range High")] ReferenceRangeHigh = 16
 
     }
 }

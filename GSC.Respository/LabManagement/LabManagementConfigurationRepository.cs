@@ -41,7 +41,9 @@ namespace GSC.Respository.LabManagement
 
         public List<LabManagementConfigurationGridDto> GetConfigurationList(bool isDeleted)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId)).
                    ProjectTo<LabManagementConfigurationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
