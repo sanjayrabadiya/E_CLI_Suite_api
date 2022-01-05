@@ -34,7 +34,7 @@ namespace GSC.Common.Base
 
             SetAuditInformation();
             var audits = _commonSharedService.AuditTracker.GetAuditTracker(GetAuditTracker(), this);
-            var result = base.SaveChangesAsync(cancellationToken);
+            var result =  base.SaveChangesAsync(cancellationToken);
             AduitSave(audits);
             return result;
         }

@@ -125,7 +125,7 @@ namespace GSC.Respository.Project.Design
                         DateValidate = x.DateValidate,
                         Alignment = x.Alignment ?? Alignment.Right,
                         StudyVersion = x.StudyVersion,
-                        InActiveVersion=x.InActiveVersion,
+                        InActiveVersion = x.InActiveVersion,
                         Note = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
@@ -139,7 +139,7 @@ namespace GSC.Respository.Project.Design
                          ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
                          SeqNo = c.SeqNo,
                          StudyVersion = c.StudyVersion,
-                         InActiveVersion=c.InActiveVersion,
+                         InActiveVersion = c.InActiveVersion,
                          Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
                      }).ToList();
 
@@ -270,7 +270,7 @@ namespace GSC.Respository.Project.Design
             var checkVersion = CheckStudyVersion(projectDesignVisitId);
             var vistInActiveVersion = _projectDesignVisitRepository.All.Where(x => x.Id == projectDesignVisitId).Select(t => t.InActiveVersion).FirstOrDefault();
 
-            var result = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId).ProjectTo<ProjectDesignTemplateDto>(_mapper.ConfigurationProvider).ToList();
+            var result = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ProjectTo<ProjectDesignTemplateDto>(_mapper.ConfigurationProvider).ToList();
             result.ForEach(x =>
             {
                 x.AllowActive = vistInActiveVersion != x.InActiveVersion && checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
