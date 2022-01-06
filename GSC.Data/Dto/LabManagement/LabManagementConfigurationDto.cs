@@ -1,7 +1,9 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.UserMgt;
 using GSC.Shared.DocumentService;
+using System.Collections.Generic;
 
 namespace GSC.Data.Dto.LabManagement
 {
@@ -15,9 +17,11 @@ namespace GSC.Data.Dto.LabManagement
         public string PathName { get; set; }
         public string MimeType { get; set; }
         public int SecurityRoleId { get; set; }
+        public int?[] UserIds { get; set; }
         public Entities.Master.Project Project { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public SecurityRole SecurityRole { get; set; }
+        public List<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
     }
 
     public class LabManagementConfigurationGridDto : BaseAuditDto

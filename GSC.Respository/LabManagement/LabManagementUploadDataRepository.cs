@@ -9,6 +9,7 @@ using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.EmailSender;
 using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.Screening;
@@ -37,6 +38,8 @@ namespace GSC.Respository.LabManagement
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly IScreeningProgress _screeningProgress;
 
         public LabManagementUploadDataRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository,
@@ -47,7 +50,9 @@ namespace GSC.Respository.LabManagement
         IScreeningTemplateRepository screeningTemplateRepository,
         IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
         IProjectRightRepository projectRightRepository,
-            IAppSettingRepository appSettingRepository)
+            IAppSettingRepository appSettingRepository,
+            IEmailSenderRespository emailSenderRespository,
+            IScreeningProgress screeningProgress)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -62,6 +67,8 @@ namespace GSC.Respository.LabManagement
             _screeningTemplateRepository = screeningTemplateRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _projectRightRepository = projectRightRepository;
+            _emailSenderRespository = emailSenderRespository;
+            _screeningProgress = screeningProgress;
         }
 
         public List<LabManagementUploadDataGridDto> GetUploadDataList(bool isDeleted)
@@ -132,7 +139,7 @@ namespace GSC.Respository.LabManagement
                 obj.AbnoramalFlag = ((DataRow)item).ItemArray[13].ToString();
                 obj.ReferenceRangeLow = ((DataRow)item).ItemArray[14].ToString();
                 obj.ReferenceRangeHigh = ((DataRow)item).ItemArray[15].ToString();
-            //    obj.ClinicallySignificant = ((DataRow)item).ItemArray[16].ToString();
+                //    obj.ClinicallySignificant = ((DataRow)item).ItemArray[16].ToString();
                 obj.CreatedBy = _jwtTokenAccesser.UserId;
                 obj.CreatedDate = _jwtTokenAccesser.GetClientDate();
                 objLst.Add(obj);
@@ -162,7 +169,8 @@ namespace GSC.Respository.LabManagement
                       t.TargetVariable,
                       t.ProjectDesignVariableId,
                       t.ProjectDesignVariable.CollectionSource,
-                      t.LabManagementConfiguration.ProjectDesignTemplateId
+                      t.LabManagementConfiguration.ProjectDesignTemplateId,
+                      t.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode
                   }).ToList();
 
             if (MappingData != null)
@@ -204,7 +212,7 @@ namespace GSC.Respository.LabManagement
                             foreach (var item in MappingData)
                             {
                                 // get upload Excel data by lab management upload id and variale name
-                                var r = GetExcelDataByScreeningNumber.Where(x => x.TestName == item.TargetVariable).FirstOrDefault();
+                                var r = GetExcelDataByScreeningNumber.Where(x => x.TestName.Trim() == item.TargetVariable).FirstOrDefault();
                                 var dataType = item.CollectionSource;
 
                                 // insert screening template value
@@ -280,6 +288,24 @@ namespace GSC.Respository.LabManagement
                                     Note = "Added by Lab management"
                                 };
                                 _screeningTemplateValueAuditRepository.Save(aduit);
+
+                                // _screeningProgress.GetScreeningProgress(screeningTemplate.ScreeningVisit.ScreeningEntry.Id, obj.ScreeningTemplateId);
+                                // send email to user
+                                if (r.AbnoramalFlag.ToString().ToLower() != "n" && r.AbnoramalFlag != "")
+                                {
+                                    var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId).ToList();
+                                    if (studyUsers != null)
+                                    {
+                                        var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+                                        var projectRight = projectListbyId.OrderByDescending(x => x.Id).GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+                                        var emailuser = projectRight.Where(a => studyUsers.Any(x => x.UserId == a.UserId)).Select(x => x.User.Email).ToList();
+                                        foreach (var email in emailuser)
+                                        {
+                                            _emailSenderRespository.SendLabManagementAbnormalEMail(email, r.ScreeningNo, item.ProjectCode, labManagementUpload.Project.ProjectCode, r.Visit, r.TestName, r.ReferenceRangeLow, r.ReferenceRangeHigh, r.AbnoramalFlag);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

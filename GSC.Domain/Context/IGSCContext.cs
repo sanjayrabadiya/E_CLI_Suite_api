@@ -330,5 +330,6 @@ namespace GSC.Domain.Context
         DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }
         DbSet<FileSizeConfiguration> FileSizeConfiguration { get; set; }
         DbSet<RandomizationSetup> RandomizationSetup { get; set; }
+        DbSet<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
     }
 }

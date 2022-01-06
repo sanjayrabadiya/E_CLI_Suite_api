@@ -378,6 +378,8 @@ namespace GSC.Domain.Context
         public DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }
         public DbSet<FileSizeConfiguration> FileSizeConfiguration { get; set; }
         public DbSet<RandomizationSetup> RandomizationSetup { get; set; }
+
+        public DbSet<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
     }
 
 

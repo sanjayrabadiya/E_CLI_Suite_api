@@ -167,5 +167,23 @@ namespace GSC.Respository.LabManagement
                 return ProjectDesignVariable.FirstOrDefault().Id;
         }
 
+        public List<DropDownDto> EmailUsers(int ProjectId)
+        {
+            var siterList = _context.Project.Where(x => x.ParentProjectId == ProjectId).Select(x => x.Id).ToList();
+
+            var projectListbyId = _projectRightRepository.FindByInclude(x => siterList.Contains(x.ProjectId) && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+            return latestProjectRight.Where(x => x.DeletedDate == null)
+                .Select(c => new DropDownDto
+                {
+                    Id = c.UserId,
+                    Value = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                }).ToList();
+
+            //return users.Where(x => x.IsRights == true).ToList();
+        }
+
     }
 }

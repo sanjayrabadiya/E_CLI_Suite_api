@@ -2,6 +2,7 @@
 using GSC.Common.Common;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.UserMgt;
+using System.Collections.Generic;
 
 namespace GSC.Data.Entities.LabManagement
 {
@@ -14,5 +15,6 @@ namespace GSC.Data.Entities.LabManagement
         public int SecurityRoleId { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public SecurityRole SecurityRole { get; set; }
+        public List<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; } = null;
     }
 }

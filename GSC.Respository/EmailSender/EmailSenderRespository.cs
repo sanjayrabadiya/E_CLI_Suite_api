@@ -21,14 +21,14 @@ namespace GSC.Respository.EmailSender
     public class EmailSenderRespository : GenericRespository<EmailTemplate>, IEmailSenderRespository
     {
         private readonly IGSCContext _context;
-        private readonly IEmailService _emailService;      
+        private readonly IEmailService _emailService;
         private readonly ISMSSettingRepository _iSMSSettingRepository;
         private readonly HttpClient _httpClient;
 
         public EmailSenderRespository(IGSCContext context,
             HttpClient httpClient,
             IJwtTokenAccesser jwtTokenAccesser,
-            IEmailService emailService,          
+            IEmailService emailService,
             ISMSSettingRepository iSMSSettingRepository)
             : base(context)
         {
@@ -38,38 +38,38 @@ namespace GSC.Respository.EmailSender
             _iSMSSettingRepository = iSMSSettingRepository;
         }
 
-        public void SendRegisterEMail(string toMail, string password, string userName,string companyName)
+        public void SendRegisterEMail(string toMail, string password, string userName, string companyName)
         {
             var emailMessage = ConfigureEmail("empreg", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password,companyName);
+            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password, companyName);
             _emailService.SendMail(emailMessage);
         }
 
 
-        public void SendChangePasswordEMail(string toMail, string password, string userName,string companyName)
+        public void SendChangePasswordEMail(string toMail, string password, string userName, string companyName)
         {
             var emailMessage = ConfigureEmail("resetpass", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password,companyName);
+            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password, companyName);
             _emailService.SendMail(emailMessage);
         }
 
-        public async Task SendForgotPasswordEMail(string toMail, string mobile, string password, string userName,string companyName)
-            //void SendForgotPasswordEMail(string toMail, string password, string userName)
+        public async Task SendForgotPasswordEMail(string toMail, string mobile, string password, string userName, string companyName)
+        //void SendForgotPasswordEMail(string toMail, string password, string userName)
         {
             var emailMessage = ConfigureEmail("forgotpass", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password,companyName);
+            emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password, companyName);
             if (toMail != null && toMail != "")
             {
                 _emailService.SendMail(emailMessage);
             }
             if (mobile != null && mobile != "")
             {
-                await SendSMS(mobile, emailMessage.MessageBody,emailMessage.DLTTemplateId);
+                await SendSMS(mobile, emailMessage.MessageBody, emailMessage.DLTTemplateId);
             }
-                
+
         }
 
         public void SendPdfGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf)
@@ -124,7 +124,7 @@ namespace GSC.Respository.EmailSender
         {
             var emailMessage = ConfigureEmail("StartEconsent", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBodyForStartEconsent(emailMessage.MessageBody, userName,documentName, ProjectName);
+            emailMessage.MessageBody = ReplaceBodyForStartEconsent(emailMessage.MessageBody, userName, documentName, ProjectName);
             _emailService.SendMail(emailMessage);
         }
 
@@ -177,7 +177,7 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-        public async Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName,string mobile,int sendtype, bool isSendEmail, bool isSendSMS)
+        public async Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName, string mobile, int sendtype, bool isSendEmail, bool isSendSMS)
         {
             if (isSendEmail == true || isSendSMS == true)
             {
@@ -188,12 +188,12 @@ namespace GSC.Respository.EmailSender
                 if (toMail != null && toMail != "" && (sendtype == 1 || sendtype == 2))
                 {
                     if (isSendEmail == true)
-                    _emailService.SendMail(emailMessage);
+                        _emailService.SendMail(emailMessage);
                 }
                 if (mobile != "" && (sendtype == 0 || sendtype == 2))
                 {
                     if (isSendSMS == true)
-                    await SendSMS(mobile, emailMessage.MessageBody, emailMessage.DLTTemplateId);
+                        await SendSMS(mobile, emailMessage.MessageBody, emailMessage.DLTTemplateId);
                 }
             }
         }
@@ -205,10 +205,10 @@ namespace GSC.Respository.EmailSender
             emailMessage.MessageBody = ReplaceBodyForAdverseEventAlerttoInvestigator(emailMessage.MessageBody, userName, patientname, projectName, reportdate);
             emailMessage.Subject = ReplaceSubjectForAdverseEventAlerttoInvestigator(emailMessage.Subject, patientname);
             _emailService.SendMail(emailMessage);
-            await SendSMS(mobile, emailMessage.MessageBody,emailMessage.DLTTemplateId);
+            await SendSMS(mobile, emailMessage.MessageBody, emailMessage.DLTTemplateId);
         }
 
-        public void SendOfflineChatNotification(string toMail,string userName)
+        public void SendOfflineChatNotification(string toMail, string userName)
         {
             var emailMessage = ConfigureEmail("empreg", userName);
             emailMessage.SendTo = toMail;
@@ -258,7 +258,7 @@ namespace GSC.Respository.EmailSender
             return body;
         }
 
-        public async Task SendSMS(string mobile,string messagebody,string? DLTTemplateId)
+        public async Task SendSMS(string mobile, string messagebody, string? DLTTemplateId)
         {
             var smstemplate = messagebody;//emailMessage.MessageBody;
             smstemplate = smstemplate.Replace("<p>", "");
@@ -298,7 +298,7 @@ namespace GSC.Respository.EmailSender
 
         private EmailMessage ConfigureEmail(string keyName, string userName)
         {
-    //        var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
+            //        var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
             var result = All.Include(x => x.EmailSetting).FirstOrDefault(x =>
                x.DeletedDate == null && x.KeyName == keyName);
             var emailMessage = new EmailMessage();
@@ -331,7 +331,7 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-        private string ReplaceBody(string body, string userName, string password,string companyName)
+        private string ReplaceBody(string body, string userName, string password, string companyName)
         {
             body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>username</strong>##", "<strong>" + userName + "</strong>",
@@ -446,7 +446,7 @@ namespace GSC.Respository.EmailSender
 
         private string ReplaceSubjectForPatientReviewedPDFtoInvestigator(string body, string documentName, string patientName)
         {
-           body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##document##", documentName, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>documentName</strong>##", "<strong>" + documentName + "</strong>",
                 RegexOptions.IgnoreCase);
 
@@ -518,6 +518,36 @@ namespace GSC.Respository.EmailSender
             body = Regex.Replace(body, "##<strong>patientname</strong>##", "<strong>" + patientname + "</strong>",
                 RegexOptions.IgnoreCase);
             return body;
+        }
+
+        public void SendLabManagementAbnormalEMail(string toMail, string screeningNo, string studycode, string siteCode, string visit, string testName, string lowRange, string highRange, string flag)
+        {
+            var emailMessage = ConfigureEmail("LabManagementAbnormalEmail", "");
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, screeningNo, studycode, siteCode, visit, testName, lowRange, highRange, flag);
+            emailMessage.Subject = ReplaceSubjectForLabManagementEmail(emailMessage.Subject, screeningNo);
+            _emailService.SendMail(emailMessage);
+        }
+
+        private string ReplaceBodyForLabManagementEmail(string body, string screeningNo, string studycode, string siteCode, string visit, string testName, string lowRange, string highRange, string flag)
+        {
+            body = Regex.Replace(body, "##studyCode##", studycode, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##siteCode##", siteCode, RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##visit##", visit, RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##testName##", testName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##lowRange##", lowRange, RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##highRange##", highRange, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##flag##", flag, RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceSubjectForLabManagementEmail(string subject, string screeningId)
+        {
+            subject = Regex.Replace(subject, "##screeningId##", screeningId, RegexOptions.IgnoreCase);
+            return subject;
         }
 
 

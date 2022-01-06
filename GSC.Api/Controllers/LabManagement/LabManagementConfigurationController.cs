@@ -3,6 +3,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.LabManagement;
+using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.LabManagement;
@@ -26,20 +27,22 @@ namespace GSC.Api.Controllers.LabManagement
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IProjectRepository _projectRepository;
+        private readonly IGSCContext _context;
 
         public LabManagementConfigurationController(
             ILabManagementConfigurationRepository configurationRepository,
             ILabManagementUploadDataRepository labManagementUploadDataRepository,
         IUploadSettingRepository uploadSettingRepository,
         IProjectRepository projectRepository,
-            IUnitOfWork uow, IMapper mapper,
+        IGSCContext context,
+        IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _configurationRepository = configurationRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _projectRepository = projectRepository;
             _labManagementUploadDataRepository = labManagementUploadDataRepository;
-
+            _context = context;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -86,6 +89,18 @@ namespace GSC.Api.Controllers.LabManagement
             _configurationRepository.Add(configuration);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Configuration failed on save.");
+
+            if (configurationDto.UserIds.Length != 0)
+            {
+                LabManagementSendEmailUser obj = new LabManagementSendEmailUser();
+                obj.LabManagementConfigurationId = configuration.Id;
+                configurationDto.UserIds.ToList().ForEach(x =>
+                {
+                    obj.UserId = (int)x;
+                    _context.LabManagementSendEmailUser.Add(obj);
+                });
+            }
+            _uow.Save();
             return Ok(configuration.Id);
         }
 
@@ -199,6 +214,15 @@ namespace GSC.Api.Controllers.LabManagement
         public IActionResult GetTemplateDropDownForUploadLabData(int projectDesignVisitId)
         {
             return Ok(_configurationRepository.GetTemplateDropDownForUploadLabData(projectDesignVisitId));
+        }
+
+        // Get user for role profile
+        [HttpGet]
+        [Route("EmailUsers/{ProjectId}")]
+        public IActionResult EmailUsers(int ProjectId)
+        {
+            if (ProjectId <= 0) return BadRequest();
+            return Ok(_configurationRepository.EmailUsers(ProjectId));
         }
     }
 }

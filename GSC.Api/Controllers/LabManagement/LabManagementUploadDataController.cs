@@ -110,9 +110,7 @@ namespace GSC.Api.Controllers.LabManagement
             labManagementUpload.ReasonOth = labManagementUploadDataDto.ReasonOth;
 
             if (labManagementUploadDataDto.LabManagementUploadStatus == LabManagementUploadStatus.Approve)
-            {
                 _labManagementUploadDataRepository.InsertDataIntoDataEntry(labManagementUpload);
-            }
             _labManagementUploadDataRepository.Update(labManagementUpload);
 
             if (_uow.Save() <= 0) throw new Exception("Updating lab management data failed on action.");
