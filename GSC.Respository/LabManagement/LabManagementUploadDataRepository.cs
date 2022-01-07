@@ -108,51 +108,61 @@ namespace GSC.Respository.LabManagement
             else
                 reader = ExcelReaderFactory.CreateOpenXmlReader(streamer);
             DataSet results = reader.AsDataSet();
+
             results.Tables[0].Rows[0].Delete();
             results.Tables[0].AcceptChanges();
 
-            List<LabManagementUploadExcelData> objLst = new List<LabManagementUploadExcelData>();
+            DataRow[] r = results.Tables[0].Select("Column0 is null or Column1 is null or Column2 is null or Column4 is null or Column5 is null or Column10 is null or Column11 is null or Column12 is null or Column13 is null or Column14 is null or Column15 is null");
 
-            foreach (var item in results.Tables[0].Rows)
+            if (r.Length == 0)
             {
-                if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != details.FirstOrDefault().ProjectCode.ToLower().Trim())
-                    return "Can not upload excel data due to study code not match.";
+                List<LabManagementUploadExcelData> objLst = new List<LabManagementUploadExcelData>();
 
-                if (((DataRow)item).ItemArray[1].ToString().ToLower().Trim() != SiteCode.ToLower().Trim())
-                    return "Can not upload excel data due to site code not match.";
+                foreach (var item in results.Tables[0].Rows)
+                {
+                    if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != details.FirstOrDefault().ProjectCode.ToLower().Trim())
+                        return "Can not upload excel data due to study code not match.";
 
-                if (((DataRow)item).ItemArray[4].ToString().ToLower().Trim() != details.FirstOrDefault().DisplayName.ToLower().Trim())
-                    return "Can not upload excel data due to visit name not match.";
+                    if (((DataRow)item).ItemArray[1].ToString().ToLower().Trim() != SiteCode.ToLower().Trim())
+                        return "Can not upload excel data due to site code not match.";
 
-                LabManagementUploadExcelData obj = new LabManagementUploadExcelData();
-                obj.ScreeningNo = ((DataRow)item).ItemArray[2].ToString();
-                obj.RandomizationNo = ((DataRow)item).ItemArray[3].ToString();
-                obj.Visit = ((DataRow)item).ItemArray[4].ToString();
-                obj.RepeatSampleCollection = ((DataRow)item).ItemArray[5].ToString();
-                obj.LaboratryName = ((DataRow)item).ItemArray[6].ToString();
-                obj.DateOfSampleCollection = (DateTime)((DataRow)item).ItemArray[7];
-                obj.DateOfReport = (DateTime)((DataRow)item).ItemArray[8];
-                obj.Panel = ((DataRow)item).ItemArray[9].ToString();
-                obj.TestName = ((DataRow)item).ItemArray[10].ToString();
-                obj.Result = ((DataRow)item).ItemArray[11].ToString();
-                obj.Unit = ((DataRow)item).ItemArray[12].ToString();
-                obj.AbnoramalFlag = ((DataRow)item).ItemArray[13].ToString();
-                obj.ReferenceRangeLow = ((DataRow)item).ItemArray[14].ToString();
-                obj.ReferenceRangeHigh = ((DataRow)item).ItemArray[15].ToString();
-                //    obj.ClinicallySignificant = ((DataRow)item).ItemArray[16].ToString();
-                obj.CreatedBy = _jwtTokenAccesser.UserId;
-                obj.CreatedDate = _jwtTokenAccesser.GetClientDate();
-                objLst.Add(obj);
+                    if (((DataRow)item).ItemArray[4].ToString().ToLower().Trim() != details.FirstOrDefault().DisplayName.ToLower().Trim())
+                        return "Can not upload excel data due to visit name not match.";
+
+                    LabManagementUploadExcelData obj = new LabManagementUploadExcelData();
+                    obj.ScreeningNo = ((DataRow)item).ItemArray[2].ToString();
+                    obj.RandomizationNo = ((DataRow)item).ItemArray[3].ToString();
+                    obj.Visit = ((DataRow)item).ItemArray[4].ToString();
+                    obj.RepeatSampleCollection = ((DataRow)item).ItemArray[5].ToString();
+                    obj.LaboratryName = ((DataRow)item).ItemArray[6].ToString();
+                    obj.DateOfSampleCollection = ((DataRow)item).ItemArray[7].ToString() == "" ? (DateTime?)null : (DateTime)((DataRow)item).ItemArray[7];
+                    obj.DateOfReport = ((DataRow)item).ItemArray[8].ToString() == "" ? (DateTime?)null : (DateTime)((DataRow)item).ItemArray[8];//(DateTime)((DataRow)item).ItemArray[8];
+                    obj.Panel = ((DataRow)item).ItemArray[9].ToString();
+                    obj.TestName = ((DataRow)item).ItemArray[10].ToString();
+                    obj.Result = ((DataRow)item).ItemArray[11].ToString();
+                    obj.Unit = ((DataRow)item).ItemArray[12].ToString();
+                    obj.AbnoramalFlag = ((DataRow)item).ItemArray[13].ToString();
+                    obj.ReferenceRangeLow = ((DataRow)item).ItemArray[14].ToString();
+                    obj.ReferenceRangeHigh = ((DataRow)item).ItemArray[15].ToString();
+                    //    obj.ClinicallySignificant = ((DataRow)item).ItemArray[16].ToString();
+                    obj.CreatedBy = _jwtTokenAccesser.UserId;
+                    obj.CreatedDate = _jwtTokenAccesser.GetClientDate();
+                    objLst.Add(obj);
+                }
+                streamer.Dispose();
+                labManagementUploadData.LabManagementUploadExcelDatas = objLst;
+
+                // Add Lab Management Upload excel Data into db table
+                foreach (var item in labManagementUploadData.LabManagementUploadExcelDatas)
+                {
+                    _labManagementUploadExcelDataRepository.Add(item);
+                }
+                return "";
             }
-            streamer.Dispose();
-            labManagementUploadData.LabManagementUploadExcelDatas = objLst;
-
-            // Add Lab Management Upload excel Data into db table
-            foreach (var item in labManagementUploadData.LabManagementUploadExcelDatas)
+            else
             {
-                _labManagementUploadExcelDataRepository.Add(item);
+                return "Please fill invalid null cell value.";
             }
-            return "";
         }
 
         // Insert data into data entry screening template, screening template value and screening template audit
@@ -211,7 +221,7 @@ namespace GSC.Respository.LabManagement
                             }
                         }
 
-                        if (screeningTemplate != null)
+                        if (screeningTemplate != null && (int)screeningTemplate.Status <= 2)
                         {
                             foreach (var item in MappingData)
                             {
