@@ -186,15 +186,19 @@ namespace GSC.Respository.LabManagement
                     {
                         var GetExcelDataByScreeningNumber = ExcelDataResult.Where(x => x.ScreeningNo == ScreningNumber).ToList();
 
-                        var screeningTemplate = _screeningTemplateRepository.All.Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == ScreningNumber
-                                                   && x.ProjectDesignTemplateId == MappingData.FirstOrDefault().ProjectDesignTemplateId).FirstOrDefault();
+                        var screeningTemplate = _screeningTemplateRepository.All.Include(a => a.ProjectDesignTemplate).Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == ScreningNumber
+                                                     && x.ProjectDesignTemplateId == MappingData.FirstOrDefault().ProjectDesignTemplateId).FirstOrDefault();
 
                         var isRepatTemplated = GetExcelDataByScreeningNumber.Any(t => t.RepeatSampleCollection == "Yes");
 
                         if (isRepatTemplated && screeningTemplate != null)
                         {
-                            screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplate.Id);
-                            screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                            if (screeningTemplate.ProjectDesignTemplate.IsRepeated)
+                            {
+                                screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplate.Id);
+                                screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                            }
+                            else screeningTemplate = null;
                         }
                         else if (screeningTemplate != null)
                         {
@@ -218,7 +222,7 @@ namespace GSC.Respository.LabManagement
                                 // insert screening template value
                                 var obj = _screeningTemplateValueRepository.All.Where(x => x.ProjectDesignVariableId == item.ProjectDesignVariableId
                                   && x.ScreeningTemplateId == screeningTemplate.Id).FirstOrDefault() ?? new ScreeningTemplateValue();
-
+                                var oldValue = obj.Value;
                                 obj.ScreeningTemplateId = screeningTemplate.Id;
                                 obj.ScreeningTemplate = screeningTemplate;
 
@@ -232,6 +236,7 @@ namespace GSC.Respository.LabManagement
                                                                                 .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
                                     obj.Value = dt;
                                     r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                    r.Result = dt;
                                 }
                                 else if (item.TargetVariable.Trim().ToLower() == "date of report")
                                 {
@@ -242,11 +247,13 @@ namespace GSC.Respository.LabManagement
                                                                                     .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
                                     obj.Value = dt;
                                     r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                    r.Result = dt;
                                 }
                                 else if (item.TargetVariable.Trim().ToLower() == "laboratory name")
                                 {
                                     obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().LaboratryName.ToString();
                                     r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                    r.Result = obj.Value;
                                 }
                                 //else if (item.TargetVariable.Trim().ToLower() == "clinically significant")
                                 //{
@@ -266,8 +273,6 @@ namespace GSC.Respository.LabManagement
                                     }
                                     else
                                         obj.Value = r.Result;
-
-                                    if (r.AbnoramalFlag.ToLower() != "n") { }
                                 }
 
                                 obj.ReviewLevel = 0;
@@ -284,12 +289,13 @@ namespace GSC.Respository.LabManagement
                                 var aduit = new ScreeningTemplateValueAudit
                                 {
                                     ScreeningTemplateValue = obj,
+                                    OldValue = oldValue,
                                     Value = r.Result,
                                     Note = "Added by Lab management"
                                 };
                                 _screeningTemplateValueAuditRepository.Save(aduit);
 
-                                // _screeningProgress.GetScreeningProgress(screeningTemplate.ScreeningVisit.ScreeningEntry.Id, obj.ScreeningTemplateId);
+                                _screeningProgress.GetScreeningProgress(_context.ScreeningEntry.Where(x => x.Randomization.ScreeningNumber == r.ScreeningNo).Select(x => x.Id).FirstOrDefault(), obj.ScreeningTemplateId);
                                 // send email to user
                                 if (r.AbnoramalFlag.ToString().ToLower() != "n" && r.AbnoramalFlag != "")
                                 {
@@ -299,10 +305,10 @@ namespace GSC.Respository.LabManagement
                                         var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
                                         var projectRight = projectListbyId.OrderByDescending(x => x.Id).GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
-                                        var emailuser = projectRight.Where(a => studyUsers.Any(x => x.UserId == a.UserId)).Select(x => x.User.Email).ToList();
+                                        var emailuser = projectRight.Where(a => studyUsers.Any(x => x.UserId == a.UserId)).Select(a => _context.Users.Where(p => p.Id == a.UserId).Select(r => r.Email).FirstOrDefault()).ToList();
                                         foreach (var email in emailuser)
                                         {
-                                            _emailSenderRespository.SendLabManagementAbnormalEMail(email, r.ScreeningNo, item.ProjectCode, labManagementUpload.Project.ProjectCode, r.Visit, r.TestName, r.ReferenceRangeLow, r.ReferenceRangeHigh, r.AbnoramalFlag);
+                                            _emailSenderRespository.SendLabManagementAbnormalEMail(email, r.ScreeningNo, item.ProjectCode, _context.Project.Find(labManagementUpload.ProjectId).ProjectCode, r.Visit, r.TestName, r.ReferenceRangeLow, r.ReferenceRangeHigh, r.AbnoramalFlag);
                                         }
                                     }
                                 }
