@@ -38,6 +38,9 @@ namespace GSC.Data.Entities.Screening
         public SecurityRole SecurityRole { get; set; }
         public bool IsSystem { get; set; }
         public int? LabManagementUploadExcelDataId { get; set; }
+        public string Unit { get; set; }
+        public string ReferenceRangeLow { get; set; }
+        public string ReferenceRangeHigh { get; set; }
     }
 
 

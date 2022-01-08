@@ -282,7 +282,13 @@ namespace GSC.Respository.LabManagement
                                         obj.Value = dt;
                                     }
                                     else
+                                    {
                                         obj.Value = r.Result;
+                                        obj.ReferenceRangeHigh = r.ReferenceRangeHigh;
+                                        obj.ReferenceRangeLow = r.ReferenceRangeLow;
+                                        obj.Unit = r.Unit;
+                                    }
+
                                 }
 
                                 obj.ReviewLevel = 0;

@@ -33,6 +33,12 @@ namespace GSC.Data.Dto.Screening
         public ScreeningTemplateStatus ScreeningStatus { get; set; }
         public int ScreeningEntryId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
+
+        // For lab management
+        public int? LabManagementUploadExcelDataId { get; set; }
+        public string Unit { get; set; }
+        public string ReferenceRangeLow { get; set; }
+        public string ReferenceRangeHigh { get; set; }
     }
 
     public class ScreeningTemplateValueSaveBasics
