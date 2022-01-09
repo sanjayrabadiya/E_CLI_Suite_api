@@ -82,17 +82,14 @@ namespace GSC.Respository.Screening
                }).FirstOrDefault();
         }
 
-        private List<Data.Dto.Screening.ScreeningTemplateValueBasic> GetScreeningValues(int screeningTemplateId)
+        private List<ScreeningTemplateValueBasic> GetScreeningValues(int screeningTemplateId)
         {
             return _screeningTemplateValueRepository.All.AsNoTracking().Where(t => t.ScreeningTemplateId == screeningTemplateId)
-                    .ProjectTo<Data.Dto.Screening.ScreeningTemplateValueBasic>(_mapper.ConfigurationProvider).ToList();
+                    .ProjectTo<ScreeningTemplateValueBasic>(_mapper.ConfigurationProvider).ToList();
         }
 
         public DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId)
         {
-
-            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-
             var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
 
             var statusId = (int)screeningTemplateBasic.Status;
@@ -111,23 +108,47 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.ParentId != null)
                 designTemplateDto.IsRepeated = false;
 
+            designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
+            designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
+            designTemplateDto.IsLocked = screeningTemplateBasic.IsLocked;
+            designTemplateDto.Status = screeningTemplateBasic.Status;
+            designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic, workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
+
+            SetScreeningValue(designTemplateDto, screeningTemplateBasic, workflowlevel);
+
+            if (designTemplateDto.Status == ScreeningTemplateStatus.Pending && designTemplateDto.IsSchedule &&
+                (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
+               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Withdrawal ||
+               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
+               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold))
+                designTemplateDto.IsSubmittedButton = false;
+
+            designTemplateDto.Variables.Where(x => x.IsEncrypt == true).ToList().ForEach(c =>
+            {
+                c.ScreeningValueOld = null;
+                c.ScreeningValue = null;
+                c.HasQueries = false;
+                c.WorkFlowButton = null;
+                c.EditCheckValidation = null;
+            });
+
+            return designTemplateDto;
+        }
+
+        private void SetScreeningValue(DesignScreeningTemplateDto designTemplateDto, ScreeningTemplateBasic screeningTemplateBasic, WorkFlowLevelDto workflowlevel)
+        {
+            var values = GetScreeningValues(screeningTemplateBasic.Id);
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+
             var isRestriction = false;
 
-
-            if (_projectDesingTemplateRestrictionRepository.All.Any(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId
-            && x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null))
+            if (_projectDesingTemplateRestrictionRepository.All.Any(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId && x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null))
             {
                 designTemplateDto.IsSubmittedButton = false;
                 designTemplateDto.IsRepeated = false;
                 isRestriction = true;
                 designTemplateDto.IsUnSubmittedButton = false;
             }
-
-            designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
-            designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
-            designTemplateDto.IsLocked = screeningTemplateBasic.IsLocked;
-            designTemplateDto.Status = screeningTemplateBasic.Status;
-            designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic, workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
 
             designTemplateDto.Variables = designTemplateDto.Variables.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
             && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
@@ -139,12 +160,8 @@ namespace GSC.Respository.Screening
                     && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
             });
 
-            var values = GetScreeningValues(screeningTemplateBasic.Id);
-
-            designTemplateDto.Variables.
-                Where(x => x.CollectionSource == CollectionSources.Relation && x.RelationProjectDesignVariableId > 0).ToList().ForEach(t =>
-                    t.Values = _screeningTemplateValueRepository.GetScreeningRelation(t.RelationProjectDesignVariableId ?? 0, screeningTemplateBasic.ScreeningEntryId)
-                );
+            designTemplateDto.Variables.Where(x => x.CollectionSource == CollectionSources.Relation && x.RelationProjectDesignVariableId > 0).ToList().
+                ForEach(t => t.Values = _screeningTemplateValueRepository.GetScreeningRelation(t.RelationProjectDesignVariableId ?? 0, screeningTemplateBasic.ScreeningEntryId));
 
             values.ForEach(t =>
             {
@@ -160,6 +177,15 @@ namespace GSC.Respository.Screening
                     variable.HasQueries = t.QueryStatus != null ? true : false;
                     variable.IsNaValue = t.IsNa;
                     variable.IsSystem = t.QueryStatus == QueryStatus.Closed ? false : t.IsSystem;
+
+                    if (!string.IsNullOrEmpty(t.ReferenceRangeLow) && t.ReferenceRangeLow != "0")
+                        variable.LowRangeValue = t.ReferenceRangeLow;
+
+                    if (!string.IsNullOrEmpty(t.ReferenceRangeHigh) && t.ReferenceRangeHigh != "0")
+                        variable.HighRangeValue = t.ReferenceRangeHigh;
+
+                    if (!string.IsNullOrEmpty(t.Unit) && t.Unit != "0")
+                        variable.UnitName = t.Unit;
 
                     if (!isRestriction)
                         variable.WorkFlowButton = SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
@@ -191,25 +217,8 @@ namespace GSC.Respository.Screening
                 EditCheckProcess(designTemplateDto, values, screeningTemplateBasic);
                 CheckSchedule(designTemplateDto, values, screeningTemplateBasic);
             }
-
-            if (designTemplateDto.Status == ScreeningTemplateStatus.Pending && designTemplateDto.IsSchedule &&
-                (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
-               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Withdrawal ||
-               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
-               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold))
-                designTemplateDto.IsSubmittedButton = false;
-
-            designTemplateDto.Variables.Where(x => x.IsEncrypt == true).ToList().ForEach(c =>
-            {
-                c.ScreeningValueOld = null;
-                c.ScreeningValue = null;
-                c.HasQueries = false;
-                c.WorkFlowButton = null;
-                c.EditCheckValidation = null;
-            });
-
-            return designTemplateDto;
         }
+
 
         public bool IsRepated(int screeningTemplateId)
         {

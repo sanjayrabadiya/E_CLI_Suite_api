@@ -21,7 +21,6 @@ namespace GSC.Data.Entities.LabManagement
         public string AbnoramalFlag { get; set; }
         public string ReferenceRangeLow { get; set; }
         public string ReferenceRangeHigh { get; set; }
-        // public string ClinicallySignificant { get; set; }
         public LabManagementUploadData LabManagementUploadData { get; set; }
 
     }

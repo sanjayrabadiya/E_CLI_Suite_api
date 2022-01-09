@@ -42,11 +42,4 @@ namespace GSC.Data.Entities.Screening
         public string ReferenceRangeLow { get; set; }
         public string ReferenceRangeHigh { get; set; }
     }
-
-
-    public class ScreeningTemplateValueBasic 
-    {
-        public int ScreeningTemplateId { get; set; }
-        public QueryStatus? QueryStatus { get; set; }
-    }
 }
