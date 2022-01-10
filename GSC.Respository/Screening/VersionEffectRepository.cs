@@ -150,6 +150,7 @@ namespace GSC.Respository.Screening
                         var screeningTemplate = new ScreeningTemplate
                         {
                             ProjectDesignTemplateId = t,
+                            ScreeningVisit= screeningVisit,
                             Status = ScreeningTemplateStatus.Pending
                         };
                         _screeningTemplateRepository.Add(screeningTemplate);
