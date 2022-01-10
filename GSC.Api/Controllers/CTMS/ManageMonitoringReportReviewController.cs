@@ -97,5 +97,13 @@ namespace GSC.Api.Controllers.CTMS
             _uow.Save();
             return Ok();
         }
+
+        [Route("GetManageMonitoringReportReviewHistory/{Id}")]
+        [HttpGet]
+        public IActionResult GetManageMonitoringReportReviewHistory(int Id)
+        {
+            var History = _manageMonitoringReportReviewRepository.GetManageMonitoringReportReviewHistory(Id);
+            return Ok(History);
+        }
     }
 }

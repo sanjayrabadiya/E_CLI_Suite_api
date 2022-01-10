@@ -22,21 +22,19 @@ namespace GSC.Data.Dto.CTMS
         public User User { get; set; }
     }
 
-    //public class ProjectSubSecArtificateDocumentReviewHistory : BaseAuditDto
-    //{
-    //    public int ProjectWorkplaceSubSecArtificateDocumentId { get; set; }
-    //    public int ProjectArtificateDocumentHistoryId { get; set; }
-    //    public int UserId { get; set; }
-    //    public int RoleId { get; set; }
-    //    public bool IsSendBack { get; set; }
-    //    public string Name { get; set; }
-    //    public bool IsSelected { get; set; }
-    //    public DateTime? SendBackDate { get; set; }
-    //    public string DocumentName { get; set; }
-    //    public string UserName { get; set; }
-    //    public string Message { get; set; }
-    //    public List<ProjectSubSecArtificateDocumentReviewDto> users { get; set; }
-    //    public string Reason { get; set; }
-    //    public string ReasonOth { get; set; }
-    //}
+    public class ManageMonitoringReportReviewHistory : BaseAuditDto
+    {
+        public int ManageMonitoringReportId { get; set; }
+        public int UserId { get; set; }
+        public int RoleId { get; set; }
+        public bool IsSendBack { get; set; }
+        public string Name { get; set; }
+        public bool IsSelected { get; set; }
+        public DateTime? SendBackDate { get; set; }
+        public string DocumentName { get; set; }
+        public string UserName { get; set; }
+        public string Message { get; set; }
+        public string Reason { get; set; }
+        public string ReasonOth { get; set; }
+    }
 }

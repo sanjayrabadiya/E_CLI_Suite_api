@@ -162,5 +162,7 @@ namespace GSC.Data.Dto.Master
         public Alignment? Alignment { get; set; }
         public int? LargeStep { get; set; }
         public bool HasComments { get; set; }
+        public bool IsReviewPerson { get; set; }
+        public CtmsCommentStatus QueryStatus { get; set; }
     }
 }

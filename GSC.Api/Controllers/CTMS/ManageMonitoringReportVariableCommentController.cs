@@ -10,6 +10,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Respository.Screening;
 using GSC.Shared.JWTAuth;
@@ -59,11 +60,30 @@ namespace GSC.Api.Controllers.Screening
             var manageMonitoringReportVariableComment = _mapper.Map<ManageMonitoringReportVariableComment>(manageMonitoringReportVariableCommentDto);
 
             manageMonitoringReportVariableComment.Id = 0;
-            manageMonitoringReportVariableComment.RoleId = _jwtTokenAccesser.RoleId;
 
             _manageMonitoringReportVariableCommentRepository.Add(manageMonitoringReportVariableComment);
 
             if (_uow.Save() <= 0) throw new Exception("Creating comment failed on save.");
+            return Ok(manageMonitoringReportVariableComment.Id);
+        }
+
+        [HttpPost("generate")]
+        public IActionResult Generate([FromBody] ManageMonitoringReportVariableCommentDto manageMonitoringReportVariableCommentDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var manageMonitoringReportVariable = _manageMonitoringReportVariableRepository.Find(manageMonitoringReportVariableCommentDto.ManageMonitoringReportVariableId);
+            var comment = _manageMonitoringReportVariableCommentRepository.All.Where(x => x.ManageMonitoringReportVariableId == manageMonitoringReportVariableCommentDto.ManageMonitoringReportVariableId).OrderByDescending(x => x.Id).FirstOrDefault();
+            if (comment != null && comment.QueryStatus  == CtmsCommentStatus.Open)
+            {
+                ModelState.AddModelError("Message", "Query is already generated.");
+                return BadRequest(ModelState);
+            }
+
+            var manageMonitoringReportVariableComment = _mapper.Map<ManageMonitoringReportVariableComment>(manageMonitoringReportVariableCommentDto);
+            _manageMonitoringReportVariableCommentRepository.GenerateQuery(manageMonitoringReportVariableCommentDto, manageMonitoringReportVariableComment, manageMonitoringReportVariable);
+            _uow.Save();
+
             return Ok(manageMonitoringReportVariableComment.Id);
         }
 
@@ -74,24 +94,43 @@ namespace GSC.Api.Controllers.Screening
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var manageMonitoringReportVariable = _manageMonitoringReportVariableRepository.Find(manageMonitoringReportVariableCommentDto.ManageMonitoringReportVariableId);
-            //if (screeningTemplateValue.com == QueryStatus.Answered ||
-            //    screeningTemplateValue.QueryStatus == QueryStatus.Resolved)
-            //{
-            //    ModelState.AddModelError("Message", "Query is already updated.");
-            //    return BadRequest(ModelState);
-            //}
+            if (manageMonitoringReportVariable.QueryStatus == Helper.CtmsCommentStatus.Answered)
+            {
+                ModelState.AddModelError("Message", "Query is already updated.");
+                return BadRequest(ModelState);
+            }
 
-            var comment = _manageMonitoringReportVariableCommentRepository.All.Where(x => x.ManageMonitoringReportVariableId == manageMonitoringReportVariableCommentDto.ManageMonitoringReportVariableId).OrderByDescending(x=>x.Id).FirstOrDefault();
-
-            manageMonitoringReportVariableCommentDto.Id = comment.Id;
-            manageMonitoringReportVariableCommentDto.Comment = comment.Comment;
             var manageMonitoringReportVariableComment = _mapper.Map<ManageMonitoringReportVariableComment>(manageMonitoringReportVariableCommentDto);
 
             _manageMonitoringReportVariableCommentRepository.UpdateQuery(manageMonitoringReportVariableCommentDto, manageMonitoringReportVariableComment, manageMonitoringReportVariable);
 
             _uow.Save();
-
             return Ok(manageMonitoringReportVariableComment.Id);
+        }
+
+        [HttpPost("delete")]
+        public IActionResult Delete([FromBody] ManageMonitoringReportVariableCommentDto manageMonitoringReportVariableCommentDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var manageMonitoringReportVariable = _manageMonitoringReportVariableRepository.Find(manageMonitoringReportVariableCommentDto.ManageMonitoringReportVariableId);
+            if (manageMonitoringReportVariable.QueryStatus == CtmsCommentStatus.Answered ||
+                manageMonitoringReportVariable.QueryStatus == CtmsCommentStatus.Resolved)
+            {
+                ModelState.AddModelError("Message", "Query is already updated.");
+                return BadRequest(ModelState);
+            }
+
+            var manageMonitoringReportVariableComment = _mapper.Map<ManageMonitoringReportVariableComment>(manageMonitoringReportVariableCommentDto);
+            manageMonitoringReportVariableComment.QueryStatus = CtmsCommentStatus.Closed;
+            _manageMonitoringReportVariableCommentRepository.SaveCloseQuery(manageMonitoringReportVariableComment);
+
+            manageMonitoringReportVariable.QueryStatus = CtmsCommentStatus.Closed;
+            _manageMonitoringReportVariableRepository.Update(manageMonitoringReportVariable);
+
+            if (_uow.Save() <= 0) throw new Exception("DeleteQuery failed!");
+
+            return Ok();
         }
     }
 }

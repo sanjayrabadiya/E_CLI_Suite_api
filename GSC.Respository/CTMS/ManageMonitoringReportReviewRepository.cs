@@ -113,7 +113,7 @@ namespace GSC.Respository.CTMS
             var Activity = Review.ManageMonitoringReport.ManageMonitoringVisit.Activity.ActivityCode;
             var Template = Review.ManageMonitoringReport.VariableTemplate.TemplateName;
             var User = _userRepository.Find(ReviewDto.UserId);
-            
+
             _emailSenderRespository.SendEmailOfTemplateSendBack(User.Email, User.UserName, Activity, Template, ProjectName);
         }
 
@@ -129,35 +129,28 @@ namespace GSC.Respository.CTMS
         //    _context.Save();
         //}
 
-        //public List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id)
-        //{
+        public List<ManageMonitoringReportReviewHistory> GetManageMonitoringReportReviewHistory(int id)
+        {
+            var result = (from review in _context.ManageMonitoringReportReview.Include(x => x.ManageMonitoringReport).ThenInclude(x => x.ManageMonitoringVisit)
+                          .Where(x => x.ManageMonitoringReportId == id)
+                              //join auditreasontemp in _context.AuditTrail.Where(x => x.TableName == "ManageMonitoringReportReview" && x.ColumnName == "sendback date")
+                              //on review.Id equals auditreasontemp.RecordId into auditreasondto
+                              //from auditreason in auditreasondto.DefaultIfEmpty()
+                          select new ManageMonitoringReportReviewHistory
+                          {
+                              Id = review.Id,
+                              CreatedDate = review.CreatedDate,
+                              CreatedByUser = review.CreatedByUser.UserName,
+                              Message = review.Message,
+                              UserName = review.User.UserName,
+                              SendBackDate = review.SendBackDate,
+                              IsSendBack = review.IsSendBack,
+                              //Reason = auditreason.Reason,
+                              //ReasonOth = auditreason.ReasonOth
+                          }).OrderByDescending(x => x.Id).ToList();
 
-        //    var result = (from review in _context.ProjectArtificateDocumentReview.Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x => x.ProjectArtificateDocumentHistory)
-        //                  .Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy)
-        //                  join auditReasonTemp in _context.AuditTrail.Where(x => x.TableName == "ProjectArtificateDocumentReview" && x.ColumnName == "SendBack Date")
-        //                  on review.Id equals auditReasonTemp.RecordId into auditReasonDto
-        //                  from auditReason in auditReasonDto.DefaultIfEmpty()
-        //                  select new ProjectArtificateDocumentReviewHistory
-        //                  {
-        //                      Id = review.Id,
-        //                      DocumentName = review.ProjectArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().DocumentName,
-        //                      ProjectArtificateDocumentHistoryId = review.ProjectArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().Id,
-        //                      UserName = _context.Users.Where(y => y.Id == review.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
-        //                      IsSendBack = review.IsSendBack,
-        //                      UserId = review.UserId,
-        //                      ProjectWorkplaceArtificatedDocumentId = review.ProjectWorkplaceArtificatedDocumentId,
-        //                      CreatedDate = review.CreatedDate,
-        //                      CreatedByUser = review.CreatedByUser.UserName,
-        //                      ModifiedDate = review.ModifiedDate,
-        //                      ModifiedByUser = review.ModifiedByUser.UserName,
-        //                      SendBackDate = review.SendBackDate,
-        //                      Message = review.Message,
-        //                      Reason = auditReason.Reason,
-        //                      ReasonOth = auditReason.ReasonOth
-        //                  }).OrderByDescending(x => x.Id).ToList();
-
-        //    return result;
-        //}
+            return result;
+        }
 
         public List<DashboardDto> GetSendTemplateList(int ProjectId)
         {
@@ -203,6 +196,13 @@ namespace GSC.Respository.CTMS
                         }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
+        }
+
+        public bool GetReview(int ManageMonitoringReportId)
+        {
+            var result = All.Where(x => x.ManageMonitoringReportId == ManageMonitoringReportId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
+                         .OrderByDescending(x => x.Id).FirstOrDefault();
+            return result != null;
         }
     }
 }

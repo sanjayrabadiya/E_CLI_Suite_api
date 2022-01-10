@@ -19,25 +19,31 @@ namespace GSC.Respository.CTMS
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly IManageMonitoringReportReviewRepository _manageMonitoringReportReviewRepository;
 
         public ManageMonitoringReportVariableRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
+            IManageMonitoringReportReviewRepository manageMonitoringReportReviewRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
+            _manageMonitoringReportReviewRepository = manageMonitoringReportReviewRepository;
         }
 
         public MonitoringReportTemplateDto GetReportTemplateVariable(MonitoringReportTemplateDto designTemplateDto, int ManageMonitoringReportId)
         {
-            int reportTemplateId = _context.ManageMonitoringReport.Where(x => x.Id == ManageMonitoringReportId && x.DeletedDate == null).FirstOrDefault().VariableTemplateId;
+            var manageMonitoringReport = _context.ManageMonitoringReport.Where(x => x.Id == ManageMonitoringReportId && x.DeletedDate == null).FirstOrDefault();
 
             var ManageMonitoringTemplateBasic = GetScreeningTemplateBasic(ManageMonitoringReportId);
 
-            designTemplateDto.VariableTemplateId = reportTemplateId;
+            designTemplateDto.VariableTemplateId = manageMonitoringReport.VariableTemplateId;
             designTemplateDto.ManageMonitoringReportId = ManageMonitoringReportId;
             designTemplateDto.ProjectId = ManageMonitoringTemplateBasic.ProjectId;
+            designTemplateDto.IsSender = manageMonitoringReport.CreatedBy == _jwtTokenAccesser.UserId;
+            
+            var reviewPerson = _manageMonitoringReportReviewRepository.GetReview(ManageMonitoringReportId);
 
             var values = GetVariableValues(ManageMonitoringTemplateBasic.Id);
 
@@ -51,6 +57,8 @@ namespace GSC.Respository.CTMS
                     variable.ManageMonitoringReportVariableId = t.Id;
                     variable.HasComments = t.IsComment;
                     variable.IsNaValue = t.IsNa;
+                    variable.IsReviewPerson = reviewPerson;
+                    variable.QueryStatus = t.QueryStatus;
 
                     if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
                         variable.Values.ToList().ForEach(val =>
@@ -126,6 +134,11 @@ namespace GSC.Respository.CTMS
             var childs = _context.ManageMonitoringReportVariableChild
                 .Where(t => t.ManageMonitoringReportVariableId == manageMonitoringReportVariableId).ToList();
             _context.ManageMonitoringReportVariableChild.RemoveRange(childs);
+        }
+
+        public void UpdateChild(List<ManageMonitoringReportVariableChild> children)
+        {
+            _context.ManageMonitoringReportVariableChild.UpdateRange(children);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace GSC.Data.Dto.Master
         public IList<VariableTemplateNoteDto> Notes { get; set; }
         public int? CompanyId { get; set; }
         public Activity Activity { get; set; }
-       // public bool SystemType { get; set; }
+        // public bool SystemType { get; set; }
     }
 
     public class VariableTemplateGridDto : BaseAuditDto
@@ -39,7 +39,7 @@ namespace GSC.Data.Dto.Master
         public string ActivityMode { get; set; }
         public string TemplateName { get; set; }
         public bool IsRepeated { get; set; }
-       // public bool SystemType { get; set; }
+        // public bool SystemType { get; set; }
 
     }
 
@@ -64,10 +64,12 @@ namespace GSC.Data.Dto.Master
         public int VariableTemplateId { get; set; }
         public string VariableTemplateName { get; set; }
         public int DesignOrder { get; set; }
-        public IList<ManageMonitoringVariableDto> Variables { get; set; }
         public int ManageMonitoringReportId { get; set; }
         public int ProjectId { get; set; }
+        public bool IsSender { get; set; }
         public List<string> Notes { get; set; }
         public List<VariableTemplateDetail> VariableTemplateDetails { get; set; }
+        public IList<ManageMonitoringVariableDto> Variables { get; set; }
+
     }
 }

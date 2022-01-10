@@ -59,6 +59,25 @@ namespace GSC.Respository.CTMS
                 VariableTemplateId = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).Select(q => q.Id).FirstOrDefault()
             }).ToList();
 
+            //var result = All.Include(x => x.VariableTemplate)
+            //    .Include(x => x.ManageMonitoringVisit).ThenInclude(x => x.Project)
+            //    .Include(x => x.ManageMonitoringVisit).ThenInclude(x => x.Activity)
+            //    .Where(x => x.DeletedDate == null && x.ManageMonitoringVisit.ActualStartDate != null && x.ManageMonitoringVisit.ProjectId == projectId
+            //    && visit.Select(z => z.Id).Contains(x.ManageMonitoringVisitId))
+            //    .Select(x => new ManageMonitoringReportGridDto
+            //    {
+            //        Id = x.Id,
+            //        ProjectId = x.ManageMonitoringVisit.Id,
+            //        ManageMonitoringVisitId = x.ManageMonitoringVisitId,
+            //        Status = MonitoringReportStatus.NotInitiated.GetDescription(),
+            //        StatusId = MonitoringReportStatus.NotInitiated,
+            //        ActualStartDate = x.ManageMonitoringVisit.ActualStartDate,
+            //        ActualEndDate = x.ManageMonitoringVisit.ActualEndDate,
+            //        ActivityName = x.ManageMonitoringVisit.Activity.ActivityName,
+            //        VariableTemplate = x.VariableTemplate.TemplateName,
+            //        VariableTemplateId = x.VariableTemplateId
+            //    }).ToList();
+
             return result;
         }
     }

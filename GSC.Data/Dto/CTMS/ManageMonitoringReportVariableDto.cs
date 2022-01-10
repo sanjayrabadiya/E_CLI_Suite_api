@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.CTMS;
+using GSC.Helper;
 using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.CTMS
@@ -17,6 +18,7 @@ namespace GSC.Data.Dto.CTMS
         public string OldValue { get; set; }
         public int ManageMonitoringReportVariableId { get; set; }
         public bool IsComment { get; set; }
+        public CtmsCommentStatus? QueryStatus { get; set; }
         public ManageMonitoringReport ManageMonitoringReport { get; set; }
         public ICollection<ManageMonitoringReportVariableChildDto> Children { get; set; }
     }
@@ -36,6 +38,7 @@ namespace GSC.Data.Dto.CTMS
         public bool IsNa { get; set; }
         public int? UserRoleId { get; set; }
         public bool IsComment { get; set; }
+        public CtmsCommentStatus QueryStatus { get; set; }
         public ICollection<ManageMonitoringReportVariableChild> Children { get; set; }
     }
 

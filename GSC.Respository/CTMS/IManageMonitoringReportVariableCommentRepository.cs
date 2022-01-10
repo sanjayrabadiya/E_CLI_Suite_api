@@ -9,5 +9,9 @@ namespace GSC.Respository.CTMS
     {
         IList<ManageMonitoringReportVariableCommentDto> GetComments(int manageMonitoringReportVariableId);
         void UpdateQuery(ManageMonitoringReportVariableCommentDto manageMonitoringReportVariableCommentDto, ManageMonitoringReportVariableComment manageMonitoringReportVariableComment, ManageMonitoringReportVariable manageMonitoringReportVariable);
+        void GenerateQuery(ManageMonitoringReportVariableCommentDto manageMonitoringReportVariableCommentDto,
+           ManageMonitoringReportVariableComment manageMonitoringReportVariableComment, ManageMonitoringReportVariable manageMonitoringReportVariables);
+
+        void SaveCloseQuery(ManageMonitoringReportVariableComment manageMonitoringReportVariableComment);
     }
 }

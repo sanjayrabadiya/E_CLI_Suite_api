@@ -17,9 +17,9 @@ namespace GSC.Respository.CTMS
         void SaveTemplateReview(List<ManageMonitoringReportReviewDto> manageMonitoringReportReviewDto);
         void SendMailToReviewer(ManageMonitoringReportReviewDto ReviewDto);
         void SendMailToSendBack(ManageMonitoringReportReview ReviewDto);
-        //List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id);
+        List<ManageMonitoringReportReviewHistory> GetManageMonitoringReportReviewHistory(int id);
         List<DashboardDto> GetSendTemplateList(int ProjectId);
         List<DashboardDto> GetSendBackTemplateList(int ProjectId);
-
+        bool GetReview(int ManageMonitoringReportId);
     }
 }
