@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.Configuration;
 using System.Threading.Tasks;
 
@@ -28,6 +29,6 @@ namespace GSC.Respository.EmailSender
         public void SendEmailOfRejectedDocumenttoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath);
         void SendEmailOfTemplateReview(string toMail, string userName, string activity, string template, string project);
         void SendEmailOfTemplateSendBack(string toMail, string userName, string activity, string template, string ProjectName);
-        void SendLabManagementAbnormalEMail(string toMail, string screeningNo, string studycode, string siteCode, string visit, string testName, string lowRange, string highRange, string flag);
+        void SendLabManagementAbnormalEMail(string toMail, LabManagementEmail email);
     }
 }

@@ -197,6 +197,7 @@ namespace GSC.Respository.LabManagement
                         var GetExcelDataByScreeningNumber = ExcelDataResult.Where(x => x.ScreeningNo == ScreningNumber).ToList();
 
                         var screeningTemplate = _screeningTemplateRepository.All.Include(a => a.ProjectDesignTemplate).Where(x => x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber == ScreningNumber
+                                                    && x.ScreeningVisit.ScreeningEntry.Randomization.ProjectId == labManagementUpload.ProjectId
                                                      && x.ProjectDesignTemplateId == MappingData.FirstOrDefault().ProjectDesignTemplateId).FirstOrDefault();
 
                         var isRepatTemplated = GetExcelDataByScreeningNumber.Any(t => t.RepeatSampleCollection == "Yes");
@@ -223,6 +224,8 @@ namespace GSC.Respository.LabManagement
 
                         if (screeningTemplate != null && (int)screeningTemplate.Status <= 2)
                         {
+                            LabManagementEmail emailObj = new LabManagementEmail();
+                            emailObj.LabManagementEmailDetail = new List<LabManagementEmailDetail>();
                             foreach (var item in MappingData)
                             {
                                 // get upload Excel data by lab management upload id and variale name
@@ -312,20 +315,57 @@ namespace GSC.Respository.LabManagement
                                 _screeningTemplateValueAuditRepository.Save(aduit);
 
                                 _screeningProgress.GetScreeningProgress(_context.ScreeningEntry.Where(x => x.Randomization.ScreeningNumber == r.ScreeningNo).Select(x => x.Id).FirstOrDefault(), obj.ScreeningTemplateId);
-                                // send email to user
-                                if (r.AbnoramalFlag.ToString().ToLower() != "n" && r.AbnoramalFlag != "")
-                                {
-                                    var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId).ToList();
-                                    if (studyUsers != null)
-                                    {
-                                        var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
-                                        var projectRight = projectListbyId.OrderByDescending(x => x.Id).GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
-                                        var emailuser = projectRight.Where(a => studyUsers.Any(x => x.UserId == a.UserId)).Select(a => _context.Users.Where(p => p.Id == a.UserId).Select(r => r.Email).FirstOrDefault()).ToList();
-                                        foreach (var email in emailuser)
-                                        {
-                                            _emailSenderRespository.SendLabManagementAbnormalEMail(email, r.ScreeningNo, item.ProjectCode, _context.Project.Find(labManagementUpload.ProjectId).ProjectCode, r.Visit, r.TestName, r.ReferenceRangeLow, r.ReferenceRangeHigh, r.AbnoramalFlag);
-                                        }
+                                // send email to user
+                                if (r.AbnoramalFlag.ToString().ToLower() != "n" && r.AbnoramalFlag != ""
+                                    && item.TargetVariable.Trim().ToLower() != "date of sample collection"
+                                    && item.TargetVariable.Trim().ToLower() != "date of report"
+                                    && item.TargetVariable.Trim().ToLower() != "laboratory name")
+                                {
+                                    //var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId).ToList();
+                                    //if (studyUsers != null)
+                                    //{
+                                    LabManagementEmailDetail emailObjDetail = new LabManagementEmailDetail();
+                                    if (emailObj.ScreeningNumber == null)
+                                    {
+                                        emailObj.ScreeningNumber = r.ScreeningNo;
+                                        emailObj.StudyCode = item.ProjectCode;
+                                        emailObj.SiteCode = _context.Project.Find(labManagementUpload.ProjectId).ProjectCode;
+                                        emailObj.Visit = r.Visit;
+                                    }
+
+                                    emailObjDetail.TestName = r.TestName;
+                                    emailObjDetail.ReferenceRangeLow = r.ReferenceRangeLow;
+                                    emailObjDetail.ReferenceRangeHigh = r.ReferenceRangeHigh;
+                                    emailObjDetail.AbnoramalFlag = r.AbnoramalFlag;
+                                    
+                                    emailObj.LabManagementEmailDetail.Add(emailObjDetail);
+
+                                    //var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+                                    //var projectRight = projectListbyId.OrderByDescending(x => x.Id).GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+                                    //var emailuser = projectRight.Where(a => studyUsers.Any(x => x.UserId == a.UserId)).Select(a => _context.Users.Where(p => p.Id == a.UserId).Select(r => r.Email).FirstOrDefault()).ToList();
+                                    //foreach (var email in emailuser)
+                                    //{
+                                    //    _emailSenderRespository.SendLabManagementAbnormalEMail(email, r.ScreeningNo, item.ProjectCode, _context.Project.Find(labManagementUpload.ProjectId).ProjectCode, r.Visit, r.TestName, r.ReferenceRangeLow, r.ReferenceRangeHigh, r.AbnoramalFlag);
+                                    //}
+                                    // }
+                                }
+                            }
+
+                            // patient wise mail
+                            if (emailObj != null)
+                            {
+                                var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId).ToList();
+                                if (studyUsers.Count != 0)
+                                {
+                                    var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+                                    var projectRight = projectListbyId.OrderByDescending(x => x.Id).GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+                                    var emailuser = projectRight.Where(a => studyUsers.Any(x => x.UserId == a.UserId)).Select(a => _context.Users.Where(p => p.Id == a.UserId).Select(r => r.Email).FirstOrDefault()).ToList();
+                                    foreach (var email in emailuser)
+                                    {
+                                        _emailSenderRespository.SendLabManagementAbnormalEMail(email, emailObj);
                                     }
                                 }
                             }

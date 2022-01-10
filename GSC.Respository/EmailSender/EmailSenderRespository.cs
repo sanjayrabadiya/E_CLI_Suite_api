@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
@@ -520,27 +521,31 @@ namespace GSC.Respository.EmailSender
             return body;
         }
 
-        public void SendLabManagementAbnormalEMail(string toMail, string screeningNo, string studycode, string siteCode, string visit, string testName, string lowRange, string highRange, string flag)
+        public void SendLabManagementAbnormalEMail(string toMail, LabManagementEmail email)
         {
             var emailMessage = ConfigureEmail("LabManagementAbnormalEmail", "");
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, screeningNo, studycode, siteCode, visit, testName, lowRange, highRange, flag);
-            emailMessage.Subject = ReplaceSubjectForLabManagementEmail(emailMessage.Subject, screeningNo);
+            emailMessage.MessageBody = ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, email);
+            emailMessage.Subject = ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
             _emailService.SendMail(emailMessage);
         }
 
-        private string ReplaceBodyForLabManagementEmail(string body, string screeningNo, string studycode, string siteCode, string visit, string testName, string lowRange, string highRange, string flag)
+        private string ReplaceBodyForLabManagementEmail(string body, LabManagementEmail email)
         {
-            body = Regex.Replace(body, "##studyCode##", studycode, RegexOptions.IgnoreCase);
-            body = Regex.Replace(body, "##siteCode##", siteCode, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##studyCode##", email.StudyCode, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##siteCode##", email.SiteCode, RegexOptions.IgnoreCase);
 
-            body = Regex.Replace(body, "##visit##", visit, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##visit##", email.Visit, RegexOptions.IgnoreCase);
 
-            body = Regex.Replace(body, "##testName##", testName, RegexOptions.IgnoreCase);
-            body = Regex.Replace(body, "##lowRange##", lowRange, RegexOptions.IgnoreCase);
+            string temp = "";
 
-            body = Regex.Replace(body, "##highRange##", highRange, RegexOptions.IgnoreCase);
-            body = Regex.Replace(body, "##flag##", flag, RegexOptions.IgnoreCase);
+            foreach (var item in email.LabManagementEmailDetail)
+            {
+                temp += "<p>Test Name: " + item.TestName + ".</p><p>Low Range: " + item.ReferenceRangeLow + ".</p><p>High Range :" + item.ReferenceRangeHigh + ".</p><p>Flag : " + item.AbnoramalFlag + ".</p>";
+              
+              
+            }
+            body = Regex.Replace(body, "##appendBody##", temp, RegexOptions.IgnoreCase);
             return body;
         }
 

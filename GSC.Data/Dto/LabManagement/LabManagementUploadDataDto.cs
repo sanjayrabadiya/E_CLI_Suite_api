@@ -42,4 +42,22 @@ namespace GSC.Data.Dto.LabManagement
         public string ReasonOth { get; set; }
         public int SecurityRoleId { get; set; }
     }
+
+    public class LabManagementEmail
+    {
+        public string StudyCode { get; set; }
+        public string SiteCode { get; set; }
+        public string ScreeningNumber { get; set; }
+        public string Visit { get; set; }
+
+        public IList<LabManagementEmailDetail> LabManagementEmailDetail { get; set; }
+    }
+
+    public class LabManagementEmailDetail
+    {
+        public string TestName { get; set; }
+        public string ReferenceRangeLow { get; set; }
+        public string ReferenceRangeHigh { get; set; }
+        public string AbnoramalFlag { get; set; }
+    }
 }
