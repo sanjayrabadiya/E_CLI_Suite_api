@@ -6,6 +6,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,8 @@ namespace GSC.Respository.Screening
         private readonly IGSCContext _context;
         private readonly IStudyVersionStatusRepository _studyVersionStatusRepository;
         private readonly IRandomizationRepository _randomizationRepository;
+        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public VersionEffectRepository(IGSCContext context,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
@@ -35,32 +38,32 @@ namespace GSC.Respository.Screening
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IStudyVersionStatusRepository studyVersionStatusRepository,
-            IRandomizationRepository randomizationRepository
+            IRandomizationRepository randomizationRepository,
+            IProjectDesignVariableRepository projectDesignVariableRepository,
+            IJwtTokenAccesser jwtTokenAccesser
         ) : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
-            _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _context = context;
             _screeningVisitRepository = screeningVisitRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _studyVersionStatusRepository = studyVersionStatusRepository;
             _randomizationRepository = randomizationRepository;
+            _projectDesignVariableRepository = projectDesignVariableRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
         }
 
         public void ApplyNewVersion(int projectDesignId, bool isTrial, double versionNumber)
         {
-            //var visits = _projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriod.ProjectDesignId == projectDesignId
-            //&& t.DeletedDate == null && ((t.StudyVersion != null && t.StudyVersion <= versionNumber) || (t.InActiveVersion != null && t.InActiveVersion <= versionNumber)));
-
-            //var entries = All.Where(x => x.ProjectDesignId == projectDesignId && x.Project.IsTestSite == isTrial).ToList();
-
             var patientStatusIds = _studyVersionStatusRepository.All.Where(x => x.StudyVerion.ProjectDesignId == projectDesignId
             && x.StudyVerion.VersionNumber == versionNumber).Select(t => t.PatientStatusId).ToList();
 
             VisitProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
             TemplateProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
+            VariableProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
             ScreeningEntryProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
         }
 
@@ -150,7 +153,7 @@ namespace GSC.Respository.Screening
                         var screeningTemplate = new ScreeningTemplate
                         {
                             ProjectDesignTemplateId = t,
-                            ScreeningVisit= screeningVisit,
+                            ScreeningVisit = screeningVisit,
                             Status = ScreeningTemplateStatus.Pending
                         };
                         _screeningTemplateRepository.Add(screeningTemplate);
@@ -215,14 +218,80 @@ namespace GSC.Respository.Screening
                     };
                     _screeningTemplateRepository.Add(screeningTemplate);
                 }
-               
+
                 if (x.Status == ScreeningVisitStatus.Completed)
                 {
                     x.Status = ScreeningVisitStatus.InProgress;
                     _screeningVisitRepository.Update(x);
                 }
-               
+
             }
+
+            _context.Save();
+            _context.DetachAllEntities();
+
+        }
+
+
+        void VariableProcess(int projectDesignId, bool isTrial, double versionNumber, List<ScreeningPatientStatus> patientStatuses)
+        {
+            var deletedVariableIds = _projectDesignVariableRepository.All.Where(t => t.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId
+            && t.DeletedDate == null && t.InActiveVersion != null && t.InActiveVersion <= versionNumber).Select(t => t.Id).ToList();
+
+            var variables = _screeningTemplateValueRepository.All.Where(x => x.DeletedDate == null &&
+            x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignId == projectDesignId &&
+                patientStatuses.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId) &&
+                x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite == isTrial && deletedVariableIds.Contains(x.ProjectDesignVariableId)).ToList();
+
+            variables.ForEach(x =>
+            {
+                _screeningTemplateValueRepository.Delete(x.Id);
+
+            });
+            _context.Save();
+            _context.DetachAllEntities();
+
+
+            var addVariableIds = _projectDesignVariableRepository.All.AsNoTracking().Where(t => t.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId
+              && t.DeletedDate == null && t.StudyVersion != null && t.StudyVersion <= versionNumber).Select(t => t.Id).ToList();
+
+
+            var screeningTemplates = _screeningTemplateRepository.All.AsNoTracking().Where(x => x.DeletedDate == null &&
+             x.ScreeningVisit.ScreeningEntry.ProjectDesignId == projectDesignId && x.Status > ScreeningTemplateStatus.InProcess &&
+             x.ScreeningVisit.ScreeningEntry.Project.IsTestSite == isTrial && x.ScreeningTemplateValues.Any(t => !addVariableIds.Contains(t.ProjectDesignVariableId))).ToList();
+
+            addVariableIds.ForEach(v =>
+            {
+
+                screeningTemplates.ForEach(x =>
+                {
+                    if (!_screeningTemplateValueRepository.All.Any(r => r.ProjectDesignVariableId == v && r.ScreeningTemplateId == x.Id))
+                    {
+                        var screeningTemplateValue = new ScreeningTemplateValue
+                        {
+                            ScreeningTemplateId = x.Id,
+                            ProjectDesignVariableId = v,
+                            Value = null,
+                            ReviewLevel = x.ReviewLevel ?? 1,
+                            IsSystem = true,
+                            QueryStatus = QueryStatus.Open
+                        };
+                        _screeningTemplateValueRepository.Add(screeningTemplateValue);
+
+                        var valueQuery = new ScreeningTemplateValueQuery();
+                        valueQuery.QueryStatus = QueryStatus.Open;
+                        valueQuery.IsSystem = true;
+                        valueQuery.ScreeningTemplateValue = screeningTemplateValue;
+                        valueQuery.QueryLevel = screeningTemplateValue.ReviewLevel;
+                        valueQuery.QueryStatus = QueryStatus.Open;
+                        screeningTemplateValue.AcknowledgeLevel = -1;
+                        screeningTemplateValue.UserRoleId = _jwtTokenAccesser.RoleId;
+                        _screeningTemplateValueQueryRepository.Add(valueQuery);
+                    }
+
+                });
+            });
+
 
             _context.Save();
             _context.DetachAllEntities();
