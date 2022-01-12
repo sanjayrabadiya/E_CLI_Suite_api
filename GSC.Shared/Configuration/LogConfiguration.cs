@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
@@ -44,8 +45,9 @@ namespace GSC.Shared.Configuration
             _next = next;
         }
 
-        public Task Invoke(HttpContext httpContext)
+        public async Task Invoke(HttpContext httpContext)
         {
+            var bodyStr = "";
             var user = httpContext.Request.Headers["user"];
             if (!string.IsNullOrEmpty(user))
             {
@@ -55,21 +57,29 @@ namespace GSC.Shared.Configuration
             }
             try
             {
-                return _next(httpContext);
+                var req = httpContext.Request;
+                req.EnableBuffering();
+                using (StreamReader reader = new StreamReader(req.Body, Encoding.UTF8, true, 1024, true))
+                {
+                    bodyStr = await reader.ReadToEndAsync();
+                    req.Body.Position = 0;
+
+                }
+                await _next(httpContext);
             }
             catch (Exception ex)
             {
-                return HandleException(httpContext, ex);
+                await HandleException(httpContext, ex, bodyStr);
             }
 
         }
 
-        private Task HandleException(HttpContext httpContext, Exception ex)
+        private async Task HandleException(HttpContext httpContext, Exception ex, string bodyStr)
         {
             httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             var message = ParseMessage(ex);
-            Log.Error(ex, "HandleException");
-            return httpContext.Response.WriteAsync(message);
+            Log.Error(ex, $"{httpContext.Request.Method} || {httpContext.Request.Path} || {ex.Message}");
+            await httpContext.Response.WriteAsync(message);
         }
 
         private static string ParseMessage(Exception ex)

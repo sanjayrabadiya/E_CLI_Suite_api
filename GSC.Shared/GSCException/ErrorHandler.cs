@@ -40,7 +40,7 @@ namespace GSC.Shared.GSCException
                             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                         else
                         {
-                            Log.Error(ex.Error, "Exception");
+                            Log.Error(ex.Error, $"{context.Request.Method} || {context.Request.Path} || {ex.Error.Message}");
                             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         }
                         await context.Response.WriteAsync(JsonConvert.SerializeObject(new
