@@ -17,6 +17,8 @@ namespace GSC.Api.Controllers.Screening
             _manageMonitoringReportVariableAuditRepository = manageMonitoringReportVariableAuditRepository;
         }
 
+        /// Get variable audit by manageMonitoringReportVariableId
+        /// Created By Swati
         [HttpGet("{manageMonitoringReportVariableId}")]
         public IActionResult Get(int manageMonitoringReportVariableId)
         {

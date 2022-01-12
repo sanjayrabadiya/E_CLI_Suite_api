@@ -24,24 +24,23 @@ namespace GSC.Api.Controllers.Screening
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IManageMonitoringReportVariableCommentRepository _manageMonitoringReportVariableCommentRepository;
-        private readonly IManageMonitoringReportReviewRepository _manageMonitoringReportReviewRepository;
         private readonly IManageMonitoringReportVariableRepository _manageMonitoringReportVariableRepository;
         private readonly IUnitOfWork _uow;
 
         public ManageMonitoringReportVariableCommentController(
             IManageMonitoringReportVariableCommentRepository manageMonitoringReportVariableCommentRepository,
             IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser,
-            IManageMonitoringReportReviewRepository manageMonitoringReportReviewRepository,
             IManageMonitoringReportVariableRepository manageMonitoringReportVariableRepository)
         {
             _manageMonitoringReportVariableCommentRepository = manageMonitoringReportVariableCommentRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _manageMonitoringReportReviewRepository = manageMonitoringReportReviewRepository;
             _manageMonitoringReportVariableRepository = manageMonitoringReportVariableRepository;
         }
 
+        /// Get comment by manageMonitoringReportVariableId
+        /// Created By Swati
         [HttpGet("{ManageMonitoringReportVariableId}")]
         public IActionResult Get(int manageMonitoringReportVariableId)
         {
@@ -67,6 +66,8 @@ namespace GSC.Api.Controllers.Screening
             return Ok(manageMonitoringReportVariableComment.Id);
         }
 
+        /// Generate Query
+        /// Created By Swati
         [HttpPost("generate")]
         public IActionResult Generate([FromBody] ManageMonitoringReportVariableCommentDto manageMonitoringReportVariableCommentDto)
         {
@@ -87,6 +88,8 @@ namespace GSC.Api.Controllers.Screening
             return Ok(manageMonitoringReportVariableComment.Id);
         }
 
+        /// Update Query
+        /// Created By Swati
         [HttpPost("update")]
         [TransactionRequired]
         public IActionResult Update([FromBody] ManageMonitoringReportVariableCommentDto manageMonitoringReportVariableCommentDto)
@@ -108,18 +111,20 @@ namespace GSC.Api.Controllers.Screening
             return Ok(manageMonitoringReportVariableComment.Id);
         }
 
+        /// Delete Query
+        /// Created By Swati
         [HttpPost("delete")]
         public IActionResult Delete([FromBody] ManageMonitoringReportVariableCommentDto manageMonitoringReportVariableCommentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var manageMonitoringReportVariable = _manageMonitoringReportVariableRepository.Find(manageMonitoringReportVariableCommentDto.ManageMonitoringReportVariableId);
-            if (manageMonitoringReportVariable.QueryStatus == CtmsCommentStatus.Answered ||
-                manageMonitoringReportVariable.QueryStatus == CtmsCommentStatus.Resolved)
-            {
-                ModelState.AddModelError("Message", "Query is already updated.");
-                return BadRequest(ModelState);
-            }
+            //if (manageMonitoringReportVariable.QueryStatus == CtmsCommentStatus.Answered ||
+            //    manageMonitoringReportVariable.QueryStatus == CtmsCommentStatus.Resolved)
+            //{
+            //    ModelState.AddModelError("Message", "Query is already updated.");
+            //    return BadRequest(ModelState);
+            //}
 
             var manageMonitoringReportVariableComment = _mapper.Map<ManageMonitoringReportVariableComment>(manageMonitoringReportVariableCommentDto);
             manageMonitoringReportVariableComment.QueryStatus = CtmsCommentStatus.Closed;

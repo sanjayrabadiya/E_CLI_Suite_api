@@ -16,10 +16,11 @@ namespace GSC.Respository.CTMS
         List<ManageMonitoringReportReviewDto> UserRoles(int Id, int ProjectId);
         void SaveTemplateReview(List<ManageMonitoringReportReviewDto> manageMonitoringReportReviewDto);
         void SendMailToReviewer(ManageMonitoringReportReviewDto ReviewDto);
-        void SendMailToSendBack(ManageMonitoringReportReview ReviewDto);
+        void SendMailForApproved(ManageMonitoringReportReview ReviewDto);
         List<ManageMonitoringReportReviewHistory> GetManageMonitoringReportReviewHistory(int id);
         List<DashboardDto> GetSendTemplateList(int ProjectId);
         List<DashboardDto> GetSendBackTemplateList(int ProjectId);
         bool GetReview(int ManageMonitoringReportId);
+        ManageMonitoringReportReviewDto GetManageMonitoringReportReview(int id);
     }
 }

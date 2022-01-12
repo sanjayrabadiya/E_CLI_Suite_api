@@ -14,6 +14,8 @@ namespace GSC.Data.Entities.CTMS
         public bool IsSendBack { get; set; }
         public int CompanyId { get; set; }
         public DateTime? SendBackDate { get; set; }
+        public bool IsApproved { get; set; }
+        public DateTime? ApproveDate { get; set; }
         public string Message { get; set; }
         public ManageMonitoringReport ManageMonitoringReport { get; set; }
         public User User { get; set; }

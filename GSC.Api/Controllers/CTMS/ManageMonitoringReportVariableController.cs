@@ -52,7 +52,6 @@ namespace GSC.Api.Controllers.Master
             _manageMonitoringReportVariableRepository.Add(manageMonitoringReportVariable);
             if (_uow.Save() <= 0) throw new Exception("Creating value failed on save.");
             return Ok(manageMonitoringReportVariable.Id);
-
         }
 
         [HttpPut]
@@ -71,6 +70,8 @@ namespace GSC.Api.Controllers.Master
             return Ok(manageMonitoringReportVariable.Id);
         }
 
+        /// Get Form & Variable & VariableValue by manageMonitoringReportId
+        /// Created By Swati
         [HttpGet]
         [Route("GetTemplate/{id}/{manageMonitoringReportId}")]
         public IActionResult GetTemplate(int id, int manageMonitoringReportId)
@@ -79,6 +80,8 @@ namespace GSC.Api.Controllers.Master
             return Ok(_manageMonitoringReportVariableRepository.GetReportTemplateVariable(designTemplate, manageMonitoringReportId));
         }
 
+        /// Save Variable value 
+        /// Created By Swati
         [HttpPut]
         [TransactionRequired]
         [Route("SaveVariableValue")]
@@ -130,6 +133,12 @@ namespace GSC.Api.Controllers.Master
             }
             if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
             return Ok(manageMonitoringReportValueSaveDto.MonitoringVariableValueList[0].Id);
+        }
+
+        [HttpGet("GetQueryStatusByReportId/{id}")]
+        public IActionResult GetQueryStatusByReportId(int id)
+        {
+            return Ok(_manageMonitoringReportVariableRepository.GetQueryStatusByReportId(id));
         }
     }
 }

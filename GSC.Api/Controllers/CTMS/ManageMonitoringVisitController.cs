@@ -30,6 +30,8 @@ namespace GSC.Api.Controllers.Master
             _mapper = mapper;
         }
 
+        /// Get Monitoring Visit list 
+        /// Created By Swati
         [HttpGet]
         [Route("GetMonitoringVisit/{projectId}")]
         public IActionResult GetMonitoringVisit(int projectId)
@@ -40,6 +42,8 @@ namespace GSC.Api.Controllers.Master
             return Ok(result);
         }
 
+        /// Add Monitoring Visit
+        /// Created By Swati
         [HttpPost]
         public IActionResult Post([FromBody] ManageMonitoringVisitDto manageMonitoringVisitDto)
         {
@@ -52,6 +56,8 @@ namespace GSC.Api.Controllers.Master
             return Ok(manageMonitoringVisit.Id);
         }
 
+        /// Update Monitoring Visit
+        /// Created By Swati
         [HttpPut]
         public IActionResult Put([FromBody] ManageMonitoringVisitDto manageMonitoringVisitDto)
         {

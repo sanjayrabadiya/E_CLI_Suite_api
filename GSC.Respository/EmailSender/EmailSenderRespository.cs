@@ -105,6 +105,14 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendEmailOfTemplateApprove(string toMail, string userName, string activity, string template, string project)
+        {
+            var emailMessage = ConfigureEmail("TemplateApprove", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForTemplate(emailMessage.MessageBody, userName, activity, template, project);
+            _emailService.SendMail(emailMessage);
+        }
+
         public void SendEmailOfSendBack(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
         {
             var emailMessage = ConfigureEmail("ArtificateSendBack", userName);

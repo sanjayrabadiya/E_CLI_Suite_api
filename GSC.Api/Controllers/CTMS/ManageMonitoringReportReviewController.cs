@@ -58,22 +58,22 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
-        //Save user for send back
+        //Save approver for template
         //Created By Swati
         [HttpPut]
-        [Route("SendBackTemplate/{id}")]
-        public IActionResult SendBackTemplate(int id)
+        [Route("ApproveTemplate/{id}")]
+        public IActionResult ApproveTemplate(int id)
         {
             var manageMonitoringReportReviewDto = _manageMonitoringReportReviewRepository.FindByInclude(x => x.ManageMonitoringReportId == id
-            && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.DeletedDate == null).FirstOrDefault();
+            && x.UserId == _jwtTokenAccesser.UserId && x.ApproveDate == null && x.DeletedDate == null).FirstOrDefault();
 
-            manageMonitoringReportReviewDto.IsSendBack = true;
-            manageMonitoringReportReviewDto.SendBackDate = _jwtTokenAccesser.GetClientDate();
+            manageMonitoringReportReviewDto.IsApproved = true;
+            manageMonitoringReportReviewDto.ApproveDate = _jwtTokenAccesser.GetClientDate();
             var manageMonitoringReportReview = _mapper.Map<ManageMonitoringReportReview>(manageMonitoringReportReviewDto);
             _manageMonitoringReportReviewRepository.Update(manageMonitoringReportReview);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
-            _manageMonitoringReportReviewRepository.SendMailToSendBack(manageMonitoringReportReview);
+            if (_uow.Save() <= 0) throw new Exception("Updating Approve failed on save.");
+            _manageMonitoringReportReviewRepository.SendMailForApproved(manageMonitoringReportReview);
 
             return Ok();
         }
@@ -98,11 +98,21 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
+        /// Get user review history By manageMonitoringReportId
+        /// Created By Swati
         [Route("GetManageMonitoringReportReviewHistory/{Id}")]
         [HttpGet]
         public IActionResult GetManageMonitoringReportReviewHistory(int Id)
         {
             var History = _manageMonitoringReportReviewRepository.GetManageMonitoringReportReviewHistory(Id);
+            return Ok(History);
+        }
+
+        [Route("GetManageMonitoringReportReview/{Id}")]
+        [HttpGet]
+        public IActionResult GetManageMonitoringReportReview(int Id)
+        {
+            var History = _manageMonitoringReportReviewRepository.GetManageMonitoringReportReview(Id);
             return Ok(History);
         }
     }

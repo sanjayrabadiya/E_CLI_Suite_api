@@ -12,5 +12,6 @@ namespace GSC.Respository.CTMS
         string GetValueForAudit(ManageMonitoringReportVariableDto manageMonitoringReportVariableDto);
         void DeleteChild(int manageMonitoringReportVariableId);
         void UpdateChild(List<ManageMonitoringReportVariableChild> children);
+        bool GetQueryStatusByReportId(int manageMonitoringReportId);
     }
 }

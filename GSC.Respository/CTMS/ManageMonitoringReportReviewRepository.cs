@@ -101,7 +101,7 @@ namespace GSC.Respository.CTMS
         }
 
         // Send mail for sendback
-        public void SendMailToSendBack(ManageMonitoringReportReview ReviewDto)
+        public void SendMailForApproved(ManageMonitoringReportReview ReviewDto)
         {
             var Review = All.Include(x => x.ManageMonitoringReport).ThenInclude(x => x.ManageMonitoringVisit).ThenInclude(x => x.Project)
                 .Include(x => x.ManageMonitoringReport).ThenInclude(x => x.VariableTemplate)
@@ -114,28 +114,16 @@ namespace GSC.Respository.CTMS
             var Template = Review.ManageMonitoringReport.VariableTemplate.TemplateName;
             var User = _userRepository.Find(ReviewDto.UserId);
 
-            _emailSenderRespository.SendEmailOfTemplateSendBack(User.Email, User.UserName, Activity, Template, ProjectName);
+            _emailSenderRespository.SendEmailOfTemplateApprove(User.Email, User.UserName, Activity, Template, ProjectName);
         }
-
-        //public void SaveByDocumentIdInReview(int projectWorkplaceArtificateDocumentId)
-        //{
-        //    Add(new ProjectArtificateDocumentReview
-        //    {
-        //        ProjectWorkplaceArtificatedDocumentId = projectWorkplaceArtificateDocumentId,
-        //        UserId = _jwtTokenAccesser.UserId,
-        //        RoleId = _jwtTokenAccesser.RoleId
-        //    });
-
-        //    _context.Save();
-        //}
 
         public List<ManageMonitoringReportReviewHistory> GetManageMonitoringReportReviewHistory(int id)
         {
             var result = (from review in _context.ManageMonitoringReportReview.Include(x => x.ManageMonitoringReport).ThenInclude(x => x.ManageMonitoringVisit)
                           .Where(x => x.ManageMonitoringReportId == id)
-                              //join auditreasontemp in _context.AuditTrail.Where(x => x.TableName == "ManageMonitoringReportReview" && x.ColumnName == "sendback date")
-                              //on review.Id equals auditreasontemp.RecordId into auditreasondto
-                              //from auditreason in auditreasondto.DefaultIfEmpty()
+                          join auditreasontemp in _context.AuditTrail.Where(x => x.TableName == "ManageMonitoringReportReview" && x.ColumnName == "sendback date")
+                          on review.Id equals auditreasontemp.RecordId into auditreasondto
+                          from auditreason in auditreasondto.DefaultIfEmpty()
                           select new ManageMonitoringReportReviewHistory
                           {
                               Id = review.Id,
@@ -145,8 +133,8 @@ namespace GSC.Respository.CTMS
                               UserName = review.User.UserName,
                               SendBackDate = review.SendBackDate,
                               IsSendBack = review.IsSendBack,
-                              //Reason = auditreason.Reason,
-                              //ReasonOth = auditreason.ReasonOth
+                              Reason = auditreason.Reason,
+                              ReasonOth = auditreason.ReasonOth
                           }).OrderByDescending(x => x.Id).ToList();
 
             return result;
@@ -202,7 +190,22 @@ namespace GSC.Respository.CTMS
         {
             var result = All.Where(x => x.ManageMonitoringReportId == ManageMonitoringReportId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
                          .OrderByDescending(x => x.Id).FirstOrDefault();
-            return result != null;
+            return result != null ? true : false;
+        }
+
+        public ManageMonitoringReportReviewDto GetManageMonitoringReportReview(int id)
+        {
+            var result = All.Where(x => x.DeletedDate == null && x.ManageMonitoringReportId == id && x.UserId == _jwtTokenAccesser.UserId)
+                .Select(x => new ManageMonitoringReportReviewDto
+                {
+                    Id = x.Id,
+                    ManageMonitoringReportId = x.ManageMonitoringReportId,
+                    UserId = x.UserId,
+                    IsApproved = x.IsApproved,
+                    ApproveDate = x.ApproveDate,
+                }).FirstOrDefault();
+
+            return result;
         }
     }
 }

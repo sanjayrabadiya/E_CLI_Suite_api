@@ -31,6 +31,8 @@ namespace GSC.Api.Controllers.Master
             _mapper = mapper;
         }
 
+        /// Get monitoring report list by projectid
+        /// Created By Swati
         [HttpGet]
         [Route("GetMonitoringReport/{projectId}")]
         public IActionResult GetMonitoringReport(int projectId)
@@ -41,6 +43,8 @@ namespace GSC.Api.Controllers.Master
             return Ok(result);
         }
 
+        /// Add monitoring report
+        /// Created By Swati
         [HttpPost]
         public IActionResult Post([FromBody] ManageMonitoringReportDto manageMonitoringReportDto)
         {

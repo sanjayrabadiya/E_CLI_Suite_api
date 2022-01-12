@@ -42,7 +42,7 @@ namespace GSC.Respository.CTMS
             designTemplateDto.ManageMonitoringReportId = ManageMonitoringReportId;
             designTemplateDto.ProjectId = ManageMonitoringTemplateBasic.ProjectId;
             designTemplateDto.IsSender = manageMonitoringReport.CreatedBy == _jwtTokenAccesser.UserId;
-            
+
             var reviewPerson = _manageMonitoringReportReviewRepository.GetReview(ManageMonitoringReportId);
 
             var values = GetVariableValues(ManageMonitoringTemplateBasic.Id);
@@ -139,6 +139,15 @@ namespace GSC.Respository.CTMS
         public void UpdateChild(List<ManageMonitoringReportVariableChild> children)
         {
             _context.ManageMonitoringReportVariableChild.UpdateRange(children);
+        }
+
+        public bool GetQueryStatusByReportId(int manageMonitoringReportId)
+        {
+            var result = All.Where(x => x.DeletedDate == null 
+                    && x.ManageMonitoringReportId == manageMonitoringReportId && x.QueryStatus != null
+                    && x.QueryStatus != CtmsCommentStatus.Closed).Count();
+
+            return result != 0;
         }
     }
 }

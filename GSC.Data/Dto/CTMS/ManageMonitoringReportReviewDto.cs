@@ -16,6 +16,8 @@ namespace GSC.Data.Dto.CTMS
         public string Name { get; set; }
         public bool IsSelected { get; set; }
         public DateTime? SendBackDate { get; set; }
+        public bool IsApproved { get; set; }
+        public DateTime? ApproveDate { get; set; }
         public string Message { get; set; }
         public bool IsRights { get; set; }
         public List<ManageMonitoringReportReviewDto> users { get; set; }
@@ -31,6 +33,8 @@ namespace GSC.Data.Dto.CTMS
         public string Name { get; set; }
         public bool IsSelected { get; set; }
         public DateTime? SendBackDate { get; set; }
+        public bool IsApproved { get; set; }
+        public DateTime? ApproveDate { get; set; }
         public string DocumentName { get; set; }
         public string UserName { get; set; }
         public string Message { get; set; }
