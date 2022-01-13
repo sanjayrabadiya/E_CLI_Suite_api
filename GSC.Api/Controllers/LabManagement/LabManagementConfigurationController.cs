@@ -52,10 +52,10 @@ namespace GSC.Api.Controllers.LabManagement
         }
 
         // GET: api/<controller>
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        [HttpGet("{projectId}/{isDeleted:bool?}")]
+        public IActionResult Get(int projectid,bool isDeleted)
         {
-            return Ok(_configurationRepository.GetConfigurationList(isDeleted));
+            return Ok(_configurationRepository.GetConfigurationList(projectid,isDeleted));
         }
 
         [HttpGet("{id}")]

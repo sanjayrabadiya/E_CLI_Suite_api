@@ -9,7 +9,7 @@ namespace GSC.Respository.LabManagement
     public interface ILabManagementConfigurationRepository : IGenericRepository<LabManagementConfiguration>
     {
         string Duplicate(Data.Entities.LabManagement.LabManagementConfiguration objSave);
-        List<LabManagementConfigurationGridDto> GetConfigurationList(bool isDeleted);
+        List<LabManagementConfigurationGridDto> GetConfigurationList(int ProjectId, bool isDeleted);
         T[] GetMappingData<T>(int LabManagementConfigurationId);
         List<ProjectDropDown> GetParentProjectDropDownForUploadLabData();
         IList<DropDownDto> GetVisitDropDownForUploadLabData(int projectDesignPeriodId);

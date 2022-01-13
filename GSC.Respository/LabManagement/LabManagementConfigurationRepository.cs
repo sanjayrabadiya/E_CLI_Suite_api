@@ -39,11 +39,11 @@ namespace GSC.Respository.LabManagement
             _context = context;
         }
 
-        public List<LabManagementConfigurationGridDto> GetConfigurationList(bool isDeleted)
+        public List<LabManagementConfigurationGridDto> GetConfigurationList(int ProjectId,bool isDeleted)
         {
-            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            // var projectList = _projectRightRepository.GetParentProjectRightIdList();
 
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId)).
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == ProjectId).
                    ProjectTo<LabManagementConfigurationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
