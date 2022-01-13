@@ -26,6 +26,7 @@ namespace GSC.Data.Dto.LabManagement
 
     public class LabManagementConfigurationGridDto : BaseAuditDto
     {
+        public int ProjectId { get; set; }
         public string StudyCode { get; set; }
         public string SiteCode { get; set; }
         public int ProjectDesignTemplateId { get; set; }
@@ -33,5 +34,12 @@ namespace GSC.Data.Dto.LabManagement
         public string ProjectDesignTemplateName { get; set; }
         public string MimeType { get; set; }
         public string ApproveProfile { get; set; }
+    }
+
+    public class LabManagementConfigurationEdit
+    {
+        public int Id { get; set; }
+       // public int SecurityRoleId { get; set; }
+        public int?[] UserIds { get; set; }
     }
 }

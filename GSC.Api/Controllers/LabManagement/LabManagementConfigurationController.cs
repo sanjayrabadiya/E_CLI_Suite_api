@@ -23,6 +23,7 @@ namespace GSC.Api.Controllers.LabManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILabManagementConfigurationRepository _configurationRepository;
         private readonly ILabManagementUploadDataRepository _labManagementUploadDataRepository;
+        private readonly ILabManagementSendEmailUserRepository _labManagementSendEmailUserRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
@@ -32,16 +33,18 @@ namespace GSC.Api.Controllers.LabManagement
         public LabManagementConfigurationController(
             ILabManagementConfigurationRepository configurationRepository,
             ILabManagementUploadDataRepository labManagementUploadDataRepository,
-        IUploadSettingRepository uploadSettingRepository,
-        IProjectRepository projectRepository,
-        IGSCContext context,
-        IUnitOfWork uow, IMapper mapper,
+            ILabManagementSendEmailUserRepository labManagementSendEmailUserRepository,
+            IUploadSettingRepository uploadSettingRepository,
+            IProjectRepository projectRepository,
+            IGSCContext context,
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _configurationRepository = configurationRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _projectRepository = projectRepository;
             _labManagementUploadDataRepository = labManagementUploadDataRepository;
+            _labManagementSendEmailUserRepository = labManagementSendEmailUserRepository;
             _context = context;
             _uow = uow;
             _mapper = mapper;
@@ -59,7 +62,7 @@ namespace GSC.Api.Controllers.LabManagement
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var configuration = _configurationRepository.FindByInclude(x => x.Id == id, x => x.ProjectDesignTemplate.ProjectDesignVisit).FirstOrDefault();
+            var configuration = _configurationRepository.FindByInclude(x => x.Id == id, x => x.ProjectDesignTemplate.ProjectDesignVisit, x => x.LabManagementSendEmailUser.Where(t => t.DeletedDate == null)).FirstOrDefault();
             var configurationDto = _mapper.Map<LabManagementConfigurationDto>(configuration);
             return Ok(configurationDto);
         }
@@ -92,10 +95,10 @@ namespace GSC.Api.Controllers.LabManagement
 
             if (configurationDto.UserIds.Length != 0)
             {
-                LabManagementSendEmailUser obj = new LabManagementSendEmailUser();
-                obj.LabManagementConfigurationId = configuration.Id;
                 configurationDto.UserIds.ToList().ForEach(x =>
                 {
+                    LabManagementSendEmailUser obj = new LabManagementSendEmailUser();
+                    obj.LabManagementConfigurationId = configuration.Id;
                     obj.UserId = (int)x;
                     _context.LabManagementSendEmailUser.Add(obj);
                 });
@@ -134,8 +137,7 @@ namespace GSC.Api.Controllers.LabManagement
                 return BadRequest(ModelState);
             }
 
-            /* Added by swati for effective Date on 02-06-2019 */
-            _configurationRepository.AddOrUpdate(configuration);
+            _configurationRepository.Update(configuration);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Configuration failed on save.");
             return Ok(configuration.Id);
@@ -223,6 +225,39 @@ namespace GSC.Api.Controllers.LabManagement
         {
             if (ProjectId <= 0) return BadRequest();
             return Ok(_configurationRepository.EmailUsers(ProjectId));
+        }
+
+        [HttpPut]
+        [Route("UpdateLabManagementConfiguration")]
+        public IActionResult UpdateLabManagementConfiguration([FromBody] LabManagementConfigurationEdit configurationDto)
+        {
+            //var configure = _configurationRepository.Find(configurationDto.Id);
+            //configure.SecurityRoleId = configurationDto.SecurityRoleId;
+            //_configurationRepository.Update(configure);
+
+            // get role by Lab Management Configuration id
+            var data = _labManagementSendEmailUserRepository.FindBy(x => x.LabManagementConfigurationId == configurationDto.Id && x.DeletedDate == null).ToList();
+
+            foreach (var item in configurationDto.UserIds)
+            {
+                var role = data.Where(t => t.UserId == item).FirstOrDefault();
+                // add role if new select in dropdown
+                if (role == null)
+                {
+                    LabManagementSendEmailUser obj = new LabManagementSendEmailUser();
+                    obj.LabManagementConfigurationId = configurationDto.Id;
+                    obj.UserId = (int)item;
+                    _labManagementSendEmailUserRepository.Add(obj);
+                }
+            }
+
+            var Exists = data.Where(x => !configurationDto.UserIds.Contains(x.UserId)).ToList();
+            if (Exists.Count != 0)
+                foreach (var item in Exists)
+                    _labManagementSendEmailUserRepository.Delete(item);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating Configuration failed on save.");
+            return Ok();
         }
     }
 }
