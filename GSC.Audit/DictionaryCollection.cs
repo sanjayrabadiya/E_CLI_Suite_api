@@ -539,7 +539,10 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "DisplayInformation", DisplayName = "Barcode Disp. Info" });
             _dictionaries.Add(new Dictionary { FieldName = "OrderNumber", DisplayName = "Order Number" });
             _dictionaries.Add(new Dictionary { FieldName = "OrderNumber", DisplayName = "Order Number" });
-            _dictionaries.Add(new Dictionary { FieldName = "IsSameLine", DisplayName = "Same Line" });            
+            _dictionaries.Add(new Dictionary { FieldName = "IsSameLine", DisplayName = "Same Line" });
+
+            //ManageMonitoringReportReview
+            _dictionaries.Add(new Dictionary { FieldName = "ApproveDate", DisplayName = "Approve Date" });
         }
 
 

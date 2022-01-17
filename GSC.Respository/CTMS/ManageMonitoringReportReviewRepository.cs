@@ -47,7 +47,7 @@ namespace GSC.Respository.CTMS
 
         public List<ManageMonitoringReportReviewDto> UserRoles(int Id, int ProjectId)
         {
-            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null && x.User.DeletedDate == null).ToList();
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
@@ -121,7 +121,7 @@ namespace GSC.Respository.CTMS
         {
             var result = (from review in _context.ManageMonitoringReportReview.Include(x => x.ManageMonitoringReport).ThenInclude(x => x.ManageMonitoringVisit)
                           .Where(x => x.ManageMonitoringReportId == id)
-                          join auditreasontemp in _context.AuditTrail.Where(x => x.TableName == "ManageMonitoringReportReview" && x.ColumnName == "sendback date")
+                          join auditreasontemp in _context.AuditTrail.Where(x => x.TableName == "ManageMonitoringReportReview" && x.ColumnName == "Approve Date")
                           on review.Id equals auditreasontemp.RecordId into auditreasondto
                           from auditreason in auditreasondto.DefaultIfEmpty()
                           select new ManageMonitoringReportReviewHistory
@@ -131,8 +131,8 @@ namespace GSC.Respository.CTMS
                               CreatedByUser = review.CreatedByUser.UserName,
                               Message = review.Message,
                               UserName = review.User.UserName,
-                              SendBackDate = review.SendBackDate,
-                              IsSendBack = review.IsSendBack,
+                              ApproveDate = review.ApproveDate,
+                              IsApproved = review.IsApproved,
                               Reason = auditreason.Reason,
                               ReasonOth = auditreason.ReasonOth
                           }).OrderByDescending(x => x.Id).ToList();
