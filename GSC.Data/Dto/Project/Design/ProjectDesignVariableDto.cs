@@ -128,6 +128,7 @@ namespace GSC.Data.Dto.Project.Design
         public int? LargeStep { get; set; }
         public double? StudyVersion { get; set; }
         public double? InActiveVersion { get; set; }
+        public int? LabManagementUploadExcelDataId { get; set; }
 
     }
 

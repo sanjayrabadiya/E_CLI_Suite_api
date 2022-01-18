@@ -178,6 +178,7 @@ namespace GSC.Respository.Screening
                     variable.IsNaValue = t.IsNa;
                     variable.IsSystem = t.QueryStatus == QueryStatus.Closed ? false : t.IsSystem;
 
+                    variable.LabManagementUploadExcelDataId = t.LabManagementUploadExcelDataId;
                     if (!string.IsNullOrEmpty(t.ReferenceRangeLow) && t.ReferenceRangeLow != "0")
                         variable.LowRangeValue = t.ReferenceRangeLow;
 

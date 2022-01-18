@@ -87,6 +87,7 @@ namespace GSC.Data.Dto.Screening
         public int? UserRoleId { get; set; }
         public short? AcknowledgeLevel { get; set; }
         public ICollection<ScreeningTemplateValueChild> Children { get; set; }
+        public int? LabManagementUploadExcelDataId { get; set; }
         public string Unit { get; set; }
         public string ReferenceRangeLow { get; set; }
         public string ReferenceRangeHigh { get; set; }
