@@ -25,18 +25,21 @@ namespace GSC.Api.Controllers.Screening
         private readonly IMapper _mapper;
         private readonly IManageMonitoringReportVariableCommentRepository _manageMonitoringReportVariableCommentRepository;
         private readonly IManageMonitoringReportVariableRepository _manageMonitoringReportVariableRepository;
+        private readonly IManageMonitoringReportRepository _manageMonitoringReportRepository;
         private readonly IUnitOfWork _uow;
 
         public ManageMonitoringReportVariableCommentController(
             IManageMonitoringReportVariableCommentRepository manageMonitoringReportVariableCommentRepository,
             IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser,
-            IManageMonitoringReportVariableRepository manageMonitoringReportVariableRepository)
+            IManageMonitoringReportVariableRepository manageMonitoringReportVariableRepository,
+            IManageMonitoringReportRepository manageMonitoringReportRepository)
         {
             _manageMonitoringReportVariableCommentRepository = manageMonitoringReportVariableCommentRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _manageMonitoringReportVariableRepository = manageMonitoringReportVariableRepository;
+            _manageMonitoringReportRepository = manageMonitoringReportRepository;
         }
 
         /// Get comment by manageMonitoringReportVariableId
@@ -83,6 +86,11 @@ namespace GSC.Api.Controllers.Screening
 
             var manageMonitoringReportVariableComment = _mapper.Map<ManageMonitoringReportVariableComment>(manageMonitoringReportVariableCommentDto);
             _manageMonitoringReportVariableCommentRepository.GenerateQuery(manageMonitoringReportVariableCommentDto, manageMonitoringReportVariableComment, manageMonitoringReportVariable);
+
+            var manageMonitoringReport = _manageMonitoringReportRepository.Find(manageMonitoringReportVariable.ManageMonitoringReportId);
+            manageMonitoringReport.Status = MonitoringReportStatus.QueryGenerated;
+            _manageMonitoringReportRepository.Update(manageMonitoringReport);
+           
             _uow.Save();
 
             return Ok(manageMonitoringReportVariableComment.Id);

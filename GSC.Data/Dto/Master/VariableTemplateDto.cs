@@ -67,6 +67,7 @@ namespace GSC.Data.Dto.Master
         public int ManageMonitoringReportId { get; set; }
         public int ProjectId { get; set; }
         public bool IsSender { get; set; }
+        public MonitoringReportStatus StatusId { get; set; }
         public List<string> Notes { get; set; }
         public List<VariableTemplateDetail> VariableTemplateDetails { get; set; }
         public IList<ManageMonitoringVariableDto> Variables { get; set; }

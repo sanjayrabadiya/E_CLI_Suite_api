@@ -10,6 +10,7 @@ using GSC.Shared.JWTAuth;
 using GSC.Respository.CTMS;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Helper;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,16 +24,19 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IUnitOfWork _uow;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IManageMonitoringReportReviewRepository _manageMonitoringReportReviewRepository;
+        private readonly IManageMonitoringReportRepository _manageMonitoringReportRepository;
 
         public ManageMonitoringReportReviewController(IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-            IManageMonitoringReportReviewRepository manageMonitoringReportReviewRepository)
+            IManageMonitoringReportReviewRepository manageMonitoringReportReviewRepository,
+            IManageMonitoringReportRepository manageMonitoringReportRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _manageMonitoringReportReviewRepository = manageMonitoringReportReviewRepository;
+            _manageMonitoringReportRepository = manageMonitoringReportRepository;
         }
 
         /// Get user for send for review
@@ -53,8 +57,19 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var review = _manageMonitoringReportReviewRepository.FindByInclude(x => x.ManageMonitoringReportId == manageMonitoringReportReviewDto[0].ManageMonitoringReportId && x.DeletedDate == null && x.IsApproved == false, x => x.User).FirstOrDefault();
+            if (review != null)
+            {
+                ModelState.AddModelError("Message", "Review is already sent to " + review.User.UserName);
+                return BadRequest(ModelState);
+            }
             _manageMonitoringReportReviewRepository.SaveTemplateReview(manageMonitoringReportReviewDto);
 
+            var manageMonitoringReport = _manageMonitoringReportRepository.Find(manageMonitoringReportReviewDto[0].ManageMonitoringReportId);
+            manageMonitoringReport.Status = MonitoringReportStatus.SendForReview;
+            _manageMonitoringReportRepository.Update(manageMonitoringReport);
+
+            if (_uow.Save() <= 0) throw new Exception("Updating status failed on save.");
             return Ok();
         }
 
@@ -71,6 +86,10 @@ namespace GSC.Api.Controllers.CTMS
             manageMonitoringReportReviewDto.ApproveDate = _jwtTokenAccesser.GetClientDate();
             var manageMonitoringReportReview = _mapper.Map<ManageMonitoringReportReview>(manageMonitoringReportReviewDto);
             _manageMonitoringReportReviewRepository.Update(manageMonitoringReportReview);
+
+            var manageMonitoringReport = _manageMonitoringReportRepository.Find(manageMonitoringReportReviewDto.ManageMonitoringReportId);
+            manageMonitoringReport.Status = MonitoringReportStatus.FormApproved;
+            _manageMonitoringReportRepository.Update(manageMonitoringReport);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Approve failed on save.");
             _manageMonitoringReportReviewRepository.SendMailForApproved(manageMonitoringReportReview);

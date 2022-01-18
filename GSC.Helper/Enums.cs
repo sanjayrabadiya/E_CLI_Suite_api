@@ -744,6 +744,9 @@ namespace GSC.Helper
     {
         [Description("Not Initiated")] NotInitiated = 1,
         [Description("Initiated")] Initiated = 2,
+        [Description("Send For Review")] SendForReview = 3,
+        [Description("Query Generated")] QueryGenerated = 4,
+        [Description("Form Approved")] FormApproved = 5,
     }
 
 

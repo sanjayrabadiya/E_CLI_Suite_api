@@ -7,6 +7,7 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Shared.JWTAuth;
@@ -18,6 +19,7 @@ namespace GSC.Api.Controllers.Master
     public class ManageMonitoringReportVariableController : BaseController
     {
         private readonly IManageMonitoringReportVariableRepository _manageMonitoringReportVariableRepository;
+        private readonly IManageMonitoringReportRepository _manageMonitoringReportRepository;
         private readonly IManageMonitoringReportVariableAuditRepository _manageMonitoringReportVariableAuditRepository;
         private readonly IManageMonitoringReportVariableChildRepository _manageMonitoringReportVariableChildRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
@@ -30,11 +32,13 @@ namespace GSC.Api.Controllers.Master
             IManageMonitoringReportVariableRepository manageMonitoringReportVariableRepository,
             IManageMonitoringReportVariableAuditRepository manageMonitoringReportVariableAuditRepository,
             IManageMonitoringReportVariableChildRepository manageMonitoringReportVariableChildRepository,
-            IVariableTemplateRepository variableTemplateRepository)
+            IVariableTemplateRepository variableTemplateRepository,
+            IManageMonitoringReportRepository manageMonitoringReportRepository)
         {
             _manageMonitoringReportVariableRepository = manageMonitoringReportVariableRepository;
             _manageMonitoringReportVariableAuditRepository = manageMonitoringReportVariableAuditRepository;
             _manageMonitoringReportVariableChildRepository = manageMonitoringReportVariableChildRepository;
+            _manageMonitoringReportRepository = manageMonitoringReportRepository;
             _variableTemplateRepository = variableTemplateRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -85,7 +89,7 @@ namespace GSC.Api.Controllers.Master
         [HttpPut]
         [TransactionRequired]
         [Route("SaveVariableValue")]
-        public IActionResult SendByApprover([FromBody] ManageMonitoringReportValueSaveDto manageMonitoringReportValueSaveDto)
+        public IActionResult SaveVariableValue([FromBody] ManageMonitoringReportValueSaveDto manageMonitoringReportValueSaveDto)
         {
             if (manageMonitoringReportValueSaveDto.MonitoringVariableValueList != null)
             {
@@ -125,11 +129,15 @@ namespace GSC.Api.Controllers.Master
                             _manageMonitoringReportVariableRepository.DeleteChild(Exists.Id);
 
                         _manageMonitoringReportVariableChildRepository.Save(manageMonitoringReportVariable);
-                        
+
                         manageMonitoringReportVariable.Id = Exists.Id;
                         _manageMonitoringReportVariableRepository.Update(manageMonitoringReportVariable);
                     }
                 }
+
+                var manageMonitoringReport = _manageMonitoringReportRepository.Find(manageMonitoringReportValueSaveDto.MonitoringVariableValueList[0].ManageMonitoringReportId);
+                manageMonitoringReport.Status = MonitoringReportStatus.Initiated;
+                _manageMonitoringReportRepository.Update(manageMonitoringReport);
             }
             if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
             return Ok(manageMonitoringReportValueSaveDto.MonitoringVariableValueList[0].Id);

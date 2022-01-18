@@ -42,6 +42,7 @@ namespace GSC.Respository.CTMS
             designTemplateDto.ManageMonitoringReportId = ManageMonitoringReportId;
             designTemplateDto.ProjectId = ManageMonitoringTemplateBasic.ProjectId;
             designTemplateDto.IsSender = manageMonitoringReport.CreatedBy == _jwtTokenAccesser.UserId;
+            designTemplateDto.StatusId = manageMonitoringReport.Status;
 
             var reviewPerson = _manageMonitoringReportReviewRepository.GetReview(ManageMonitoringReportId);
 
