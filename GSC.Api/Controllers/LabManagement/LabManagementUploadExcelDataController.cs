@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.LabManagement;
 using GSC.Respository.LabManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +36,13 @@ namespace GSC.Api.Controllers.LabManagement
             return Ok(_labManagementUploadExcelDataRepository.GetExcelDataList(labManagementUploadDataId));
         }
 
+        
+        [HttpPost]
+        [Route("GetDataNotUseInDataEntry")]
+        public IActionResult GetDataNotUseInDataEntry([FromBody] LabManagementUploadDataDto search)
+        {
+            return _labManagementUploadExcelDataRepository.GetDataNotUseInDataEntry(search);
+        }
 
     }
 }
