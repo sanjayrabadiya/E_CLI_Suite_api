@@ -39,12 +39,14 @@ namespace GSC.Respository.LabManagement
             _context = context;
         }
 
-        public List<LabManagementConfigurationGridDto> GetConfigurationList(int ProjectId,bool isDeleted)
+        public List<LabManagementConfigurationGridDto> GetConfigurationList(int ProjectId, bool isDeleted)
         {
             // var projectList = _projectRightRepository.GetParentProjectRightIdList();
 
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == ProjectId).
+            var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == ProjectId).
                    ProjectTo<LabManagementConfigurationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            result.ForEach(t => { t.SiteCode = t.ProjectId == null ? "" : _context.Project.Find(t.ProjectId).ProjectCode; });
+            return result;
         }
 
         public string Duplicate(LabManagementConfiguration objSave)
@@ -79,7 +81,16 @@ namespace GSC.Respository.LabManagement
             else
             {
                 var result = _context.LabManagementVariableMapping.Where(x => x.LabManagementConfigurationId == LabManagementConfigurationId && x.DeletedDate == null).
-                    Select(x => new { ProjectDesignVariable = x.ProjectDesignVariable.VariableName, TargetVariable = x.TargetVariable }).ToList();
+                    Select(x => new
+                    {
+                        ProjectDesignVariable = x.ProjectDesignVariable.VariableName,
+                        TargetVariable = x.TargetVariable,
+                        MaleLowRange = x.MaleLowRange,
+                        MaleHighRange = x.MaleHighRange,
+                        FemaleLowRange = x.FemaleLowRange,
+                        FemaleHighRange = x.FemaleHighRange,
+                        Unit = x.Unit
+                    }).ToList();
                 return (T[])(object)result.ToArray();
             }
         }

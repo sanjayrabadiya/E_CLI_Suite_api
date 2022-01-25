@@ -77,7 +77,7 @@ namespace GSC.Respository.LabManagement
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.Project.ParentProjectId == projectId).
                    ProjectTo<LabManagementUploadDataGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-            result.ForEach(t => t.FullPath = documentUrl + t.PathName);
+            result.ForEach(t => { t.FullPath = documentUrl + t.PathName; t.IsDifference = !_context.ScreeningTemplateValue.AsNoTracking().Any(a => a.LabManagementUploadExcelDataId == t.Id ); });
             return result;
         }
 
@@ -338,7 +338,7 @@ namespace GSC.Respository.LabManagement
                                     emailObjDetail.ReferenceRangeLow = r.ReferenceRangeLow;
                                     emailObjDetail.ReferenceRangeHigh = r.ReferenceRangeHigh;
                                     emailObjDetail.AbnoramalFlag = r.AbnoramalFlag;
-                                    
+
                                     emailObj.LabManagementEmailDetail.Add(emailObjDetail);
 
                                     //var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();

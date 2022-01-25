@@ -9,7 +9,8 @@ namespace GSC.Data.Dto.LabManagement
 {
     public class LabManagementConfigurationDto : BaseDto
     {
-        public int ProjectId { get; set; }
+        public int ParentProjectId { get; set; }
+        public int? ProjectId { get; set; }
         public int ProjectDesignVisitId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public FileModel FileModel { get; set; }
@@ -26,7 +27,8 @@ namespace GSC.Data.Dto.LabManagement
 
     public class LabManagementConfigurationGridDto : BaseAuditDto
     {
-        public int ProjectId { get; set; }
+        public int ParentProjectId { get; set; }
+        public int? ProjectId { get; set; }
         public string StudyCode { get; set; }
         public string SiteCode { get; set; }
         public int ProjectDesignTemplateId { get; set; }

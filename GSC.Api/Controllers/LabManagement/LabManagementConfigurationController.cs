@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.LabManagement
             //set file path and extension
             if (configurationDto.FileModel?.Base64?.Length > 0)
             {
-                configurationDto.PathName = DocumentService.SaveUploadDocument(configurationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(configurationDto.ProjectId), FolderType.LabManagement, "");
+                configurationDto.PathName = DocumentService.SaveUploadDocument(configurationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(configurationDto.ParentProjectId), FolderType.LabManagement, "");
                 configurationDto.MimeType = configurationDto.FileModel.Extension;
                 configurationDto.FileName = "LabManagement_" + DateTime.Now.Ticks + "." + configurationDto.FileModel.Extension;
             }
@@ -118,7 +118,7 @@ namespace GSC.Api.Controllers.LabManagement
             var productRec = _configurationRepository.Find(configurationDto.Id);
             if (configurationDto.FileModel?.Base64?.Length > 0)
             {
-                configurationDto.PathName = DocumentService.SaveUploadDocument(configurationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(configurationDto.ProjectId), FolderType.LabManagement, "");
+                configurationDto.PathName = DocumentService.SaveUploadDocument(configurationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(configurationDto.ParentProjectId), FolderType.LabManagement, "");
                 configurationDto.MimeType = configurationDto.FileModel.Extension;
                 configurationDto.FileName = "LabManagement_" + DateTime.Now.Ticks + "." + configurationDto.FileModel.Extension;
             }

@@ -41,6 +41,7 @@ namespace GSC.Data.Dto.LabManagement
         public string Reason { get; set; }
         public string ReasonOth { get; set; }
         public int SecurityRoleId { get; set; }
+        public bool IsDifference { get; set; }
     }
 
     public class LabManagementEmail

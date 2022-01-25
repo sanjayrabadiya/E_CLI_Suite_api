@@ -8,6 +8,7 @@ namespace GSC.Data.Entities.LabManagement
 {
     public class LabManagementConfiguration : BaseEntity, ICommonAduit
     {
+        public int? ProjectId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public string FileName { get; set; }
         public string PathName { get; set; }

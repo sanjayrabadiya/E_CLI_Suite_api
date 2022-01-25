@@ -56,6 +56,12 @@ namespace GSC.Api.Controllers.LabManagement
                 LabManagementVariableMapping mapping = new LabManagementVariableMapping();
                 mapping.LabManagementConfigurationId = mappingDto.LabManagementConfigurationId;
                 mapping.ProjectDesignVariableId = item.ProjectDesignVariableId;
+                mapping.MaleLowRange = item.MaleLowRange;
+                mapping.MaleHighRange = item.MaleHighRange;
+                mapping.FemaleLowRange = item.FemaleLowRange;
+                mapping.FemaleHighRange = item.FemaleHighRange;
+                mapping.Unit = item.Unit;
+
                 if (item.ProjectDesignVariableId == 0)
                 {
                     // Get Project design variable id by lab management configuration Id

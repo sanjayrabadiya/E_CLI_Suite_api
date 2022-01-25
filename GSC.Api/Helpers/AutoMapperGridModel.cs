@@ -367,7 +367,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<Data.Entities.LabManagement.LabManagementConfiguration, LabManagementConfigurationGridDto>()
                 .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
-                .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id))
+                .ForMember(x => x.ParentProjectId, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id))
                 .ForMember(x => x.ProjectDesignVisitName, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
                 .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
                 .ForMember(x => x.ApproveProfile, x => x.MapFrom(a => a.SecurityRole.RoleName))
