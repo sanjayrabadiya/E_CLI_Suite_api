@@ -61,10 +61,14 @@ namespace GSC.Respository.Screening
             var patientStatusIds = _studyVersionStatusRepository.All.Where(x => x.StudyVerion.ProjectDesignId == projectDesignId
             && x.StudyVerion.VersionNumber == versionNumber).Select(t => t.PatientStatusId).ToList();
 
-            VisitProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
-            TemplateProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
-            VariableProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
-            ScreeningEntryProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
+            if (patientStatusIds.Count > 0)
+            {
+                VisitProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
+                TemplateProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
+                VariableProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
+                ScreeningEntryProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
+            }
+
         }
 
         void ScreeningEntryProcess(int projectDesignId, bool isTrial, double versionNumber, List<ScreeningPatientStatus> patientStatuses)
@@ -132,6 +136,7 @@ namespace GSC.Respository.Screening
             var addVisitIds = addVisits.Select(t => t.Id).ToList();
 
             screeningEntrys = All.Include(r => r.Randomization).Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignId &&
+                patientStatuses.Contains(x.Randomization.PatientStatusId) &&
                 x.Project.IsTestSite == isTrial && x.ScreeningVisit.Any(t => t.DeletedDate == null && !addVisitIds.Contains(t.ProjectDesignVisitId))).ToList();
 
 
@@ -202,6 +207,7 @@ namespace GSC.Respository.Screening
 
 
             var screeningVisits = _screeningVisitRepository.All.AsNoTracking().Where(x => x.DeletedDate == null && x.ScreeningEntry.ProjectDesignId == projectDesignId &&
+            patientStatuses.Contains(x.ScreeningEntry.Randomization.PatientStatusId) &&
             x.ScreeningEntry.Project.IsTestSite == isTrial && x.ScreeningTemplates.Any(t => t.DeletedDate == null && !addTemplateIds.Contains(t.ProjectDesignTemplateId))).ToList();
 
 
@@ -258,6 +264,7 @@ namespace GSC.Respository.Screening
 
             var screeningTemplates = _screeningTemplateRepository.All.AsNoTracking().Where(x => x.DeletedDate == null &&
              x.ScreeningVisit.ScreeningEntry.ProjectDesignId == projectDesignId && x.Status > ScreeningTemplateStatus.InProcess &&
+             patientStatuses.Contains(x.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId) &&
              x.ScreeningVisit.ScreeningEntry.Project.IsTestSite == isTrial && x.ScreeningTemplateValues.Any(t => !addVariableIds.Contains(t.ProjectDesignVariableId))).ToList();
 
             addVariableIds.ForEach(v =>
