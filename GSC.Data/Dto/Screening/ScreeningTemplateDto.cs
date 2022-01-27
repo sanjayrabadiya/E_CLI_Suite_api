@@ -52,12 +52,14 @@ namespace GSC.Data.Dto.Screening
         public int ScreeningVisitId { get; set; }
         public int ProjectDesignId { get; set; }
         public short? ReviewLevel { get; set; }
+        public int ProjectId { get; set; }
         public bool IsLocked { get; set; }
         public bool IsNoCRF { get; set; }
         public bool IsDisable { get; set; }
         public int ProjectDesignVisitId { get; set; }
         public double? StudyVersion { get; set; }
         public short? LastReviewLevel { get; set; }
+        public Gender Gender { get; set; }
 
     }
 

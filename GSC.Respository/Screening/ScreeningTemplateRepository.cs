@@ -14,6 +14,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
+using GSC.Respository.LabManagement;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
@@ -35,6 +36,7 @@ namespace GSC.Respository.Screening
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
         private readonly IGSCContext _context;
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
+        private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
         public ScreeningTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository, IMapper mapper,
@@ -42,7 +44,8 @@ namespace GSC.Respository.Screening
             IEditCheckImpactRepository editCheckImpactRepository,
             IScheduleRuleRespository scheduleRuleRespository,
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
-            IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository)
+            IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository,
+            ILabManagementVariableMappingRepository labManagementVariableMappingRepository)
             : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -55,6 +58,7 @@ namespace GSC.Respository.Screening
             _editCheckImpactRepository = editCheckImpactRepository;
             _context = context;
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
+            _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
         }
 
         private ScreeningTemplateBasic GetScreeningTemplateBasic(int screeningTemplateId)
@@ -78,7 +82,9 @@ namespace GSC.Respository.Screening
                    PatientStatus = c.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId,
                    VisitStatus = c.ScreeningVisit.Status,
                    ParentId = c.ParentId,
-                   LastReviewLevel = c.LastReviewLevel
+                   LastReviewLevel = c.LastReviewLevel,
+                   ProjectId = c.ScreeningVisit.ScreeningEntry.ProjectId,
+                   Gender = c.ScreeningVisit.ScreeningEntry.Randomization.Gender ?? Gender.Male
                }).FirstOrDefault();
         }
 
@@ -135,10 +141,48 @@ namespace GSC.Respository.Screening
             return designTemplateDto;
         }
 
+        private void SetLabVariable(List<DesignScreeningVariableDto> variables, ScreeningTemplateBasic screeningTemplateBasic)
+        {
+            var labVariable = _labManagementVariableMappingRepository.All.Where(x => x.LabManagementConfiguration.ProjectId == screeningTemplateBasic.ProjectId
+            && x.LabManagementConfiguration.ProjectDesignTemplateId == screeningTemplateBasic.ProjectDesignTemplateId).Select(t => new
+            {
+                t.ProjectDesignVariableId,
+                t.FemaleHighRange,
+                t.FemaleLowRange,
+                t.MaleHighRange,
+                t.MaleLowRange,
+                t.Unit
+            }).ToList();
+
+            labVariable.ForEach(x =>
+            {
+                var screeningVariable = variables.FirstOrDefault(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId);
+                if (screeningVariable != null)
+                {
+                    if (screeningTemplateBasic.Gender == Gender.Female)
+                    {
+                        screeningVariable.HighRangeValue = x.FemaleHighRange != null ? x.FemaleHighRange.ToString() : "";
+                        screeningVariable.LowRangeValue = x.FemaleLowRange != null ? x.FemaleLowRange.ToString() : "";
+                    }
+                    else
+                    {
+                        screeningVariable.HighRangeValue = x.MaleHighRange != null ? x.MaleHighRange.ToString() : "";
+                        screeningVariable.LowRangeValue = x.MaleLowRange != null ? x.MaleLowRange.ToString() : "";
+                    }
+                    screeningVariable.UnitName = x.Unit;
+
+                }
+            });
+
+
+        }
+
         private void SetScreeningValue(DesignScreeningTemplateDto designTemplateDto, ScreeningTemplateBasic screeningTemplateBasic, WorkFlowLevelDto workflowlevel)
         {
             var values = GetScreeningValues(screeningTemplateBasic.Id);
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+
+            SetLabVariable(designTemplateDto.Variables.ToList(), screeningTemplateBasic);
 
             var isRestriction = false;
 
@@ -177,16 +221,6 @@ namespace GSC.Respository.Screening
                     variable.HasQueries = t.QueryStatus != null ? true : false;
                     variable.IsNaValue = t.IsNa;
                     variable.IsSystem = t.QueryStatus == QueryStatus.Closed ? false : t.IsSystem;
-
-                    variable.LabManagementUploadExcelDataId = t.LabManagementUploadExcelDataId;
-                    if (!string.IsNullOrEmpty(t.ReferenceRangeLow) && t.ReferenceRangeLow != "0")
-                        variable.LowRangeValue = t.ReferenceRangeLow;
-
-                    if (!string.IsNullOrEmpty(t.ReferenceRangeHigh) && t.ReferenceRangeHigh != "0")
-                        variable.HighRangeValue = t.ReferenceRangeHigh;
-
-                    if (!string.IsNullOrEmpty(t.Unit) && t.Unit != "0")
-                        variable.UnitName = t.Unit;
 
                     if (!isRestriction)
                         variable.WorkFlowButton = SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
