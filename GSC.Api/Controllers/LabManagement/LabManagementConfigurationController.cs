@@ -12,6 +12,7 @@ using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace GSC.Api.Controllers.LabManagement
@@ -53,9 +54,9 @@ namespace GSC.Api.Controllers.LabManagement
 
         // GET: api/<controller>
         [HttpGet("{projectId}/{isDeleted:bool?}")]
-        public IActionResult Get(int projectid,bool isDeleted)
+        public IActionResult Get(int projectid, bool isDeleted)
         {
-            return Ok(_configurationRepository.GetConfigurationList(projectid,isDeleted));
+            return Ok(_configurationRepository.GetConfigurationList(projectid, isDeleted));
         }
 
         [HttpGet("{id}")]
@@ -72,6 +73,13 @@ namespace GSC.Api.Controllers.LabManagement
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             configurationDto.Id = 0;
+
+            var checkConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == configurationDto.ProjectDesignTemplateId && x.DeletedDate == null).ToList();
+            if (checkConfiguration.Count() != 0)
+            {
+                ModelState.AddModelError("Message", "Form already configured!");
+                return BadRequest(ModelState);
+            }
 
             //set file path and extension
             if (configurationDto.FileModel?.Base64?.Length > 0)
@@ -258,6 +266,17 @@ namespace GSC.Api.Controllers.LabManagement
 
             if (_uow.Save() <= 0) throw new Exception("Updating Configuration failed on save.");
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetFilePathByProjectDesignTemplateId/{projectDesignTemplateId}")]
+        public IActionResult GetFilePathByProjectDesignTemplateId(int projectDesignTemplateId)
+        {
+            if (projectDesignTemplateId <= 0) return BadRequest();
+            var configuration = _configurationRepository.FindByInclude(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+            var configurationDto = _mapper.Map<LabManagementConfigurationDto>(configuration);
+            configurationDto.FullPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), configurationDto.PathName);
+            return Ok(configurationDto);
         }
     }
 }

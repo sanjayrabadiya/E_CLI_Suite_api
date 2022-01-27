@@ -42,6 +42,7 @@ namespace GSC.Data.Dto.LabManagement
         public string ReasonOth { get; set; }
         public int SecurityRoleId { get; set; }
         public bool IsDifference { get; set; }
+        public IList<LabManagementUploadExcelData> LabManagementUploadExcelDatas { get; set; } = null;
     }
 
     public class LabManagementEmail

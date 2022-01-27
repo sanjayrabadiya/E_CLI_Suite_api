@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.LabManagement
         public FileModel FileModel { get; set; }
         public string FileName { get; set; }
         public string PathName { get; set; }
+        public string FullPath { get; set; }
         public string MimeType { get; set; }
         public int SecurityRoleId { get; set; }
         public int?[] UserIds { get; set; }

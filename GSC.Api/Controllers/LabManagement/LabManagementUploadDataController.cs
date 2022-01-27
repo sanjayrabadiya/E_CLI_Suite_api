@@ -68,7 +68,9 @@ namespace GSC.Api.Controllers.LabManagement
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             labManagementUploadDataDto.Id = 0;
             string SiteCode = "";
-            var LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+
+
+            var LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectId == labManagementUploadDataDto.ProjectId && x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
 
             labManagementUploadDataDto.LabManagementConfigurationId = LabManagementConfiguration.Id;
 
