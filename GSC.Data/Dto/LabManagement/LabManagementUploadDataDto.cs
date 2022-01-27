@@ -57,6 +57,7 @@ namespace GSC.Data.Dto.LabManagement
     public class LabManagementEmailDetail
     {
         public string TestName { get; set; }
+        public string Result { get; set; }
         public string ReferenceRangeLow { get; set; }
         public string ReferenceRangeHigh { get; set; }
         public string AbnoramalFlag { get; set; }

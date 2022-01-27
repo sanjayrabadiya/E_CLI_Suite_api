@@ -112,7 +112,7 @@ namespace GSC.Respository.LabManagement
             results.Tables[0].Rows[0].Delete();
             results.Tables[0].AcceptChanges();
 
-            DataRow[] r = results.Tables[0].Select("Column0 is null or Column1 is null or Column2 is null or Column4 is null or Column5 is null or Column10 is null or Column11 is null or Column12 is null or Column13 is null or Column14 is null or Column15 is null");
+            DataRow[] r = results.Tables[0].Select("Column0 is null or Column1 is null or Column2 is null or Column4 is null or Column5 is null or Column10 is null or Column12 is null or Column13 is null or Column14 is null or Column15 is null");
 
             if (r.Length == 0)
             {
@@ -161,7 +161,7 @@ namespace GSC.Respository.LabManagement
             }
             else
             {
-                return "Please fill invalid null cell value.";
+                return "Please fill required cell value.";
             }
         }
 
@@ -338,6 +338,7 @@ namespace GSC.Respository.LabManagement
                                     emailObjDetail.ReferenceRangeLow = r.ReferenceRangeLow;
                                     emailObjDetail.ReferenceRangeHigh = r.ReferenceRangeHigh;
                                     emailObjDetail.AbnoramalFlag = r.AbnoramalFlag;
+                                    emailObjDetail.Result = r.Result;
 
                                     emailObj.LabManagementEmailDetail.Add(emailObjDetail);
 

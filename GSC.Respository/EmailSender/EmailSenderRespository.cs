@@ -542,17 +542,15 @@ namespace GSC.Respository.EmailSender
         {
             body = Regex.Replace(body, "##studyCode##", email.StudyCode, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##siteCode##", email.SiteCode, RegexOptions.IgnoreCase);
-
             body = Regex.Replace(body, "##visit##", email.Visit, RegexOptions.IgnoreCase);
 
-            string temp = "";
+            string temp = "<table style='width: 100 %;'><tr><th style='border: 1px solid black;'>Test Name</th><th style='border: 1px solid black;'>Result</th><th style='border: 1px solid black;'>Low Range</th><th style='border: 1px solid black;'>High Range</th><th style='border: 1px solid black;'>Flag</th></tr>";
 
             foreach (var item in email.LabManagementEmailDetail)
             {
-                temp += "<p>Test Name: " + item.TestName + ".</p><p>Low Range: " + item.ReferenceRangeLow + ".</p><p>High Range :" + item.ReferenceRangeHigh + ".</p><p>Flag : " + item.AbnoramalFlag + ".</p>";
-              
-              
+                temp += "<tr><td style='border: 1px solid black;'>" + item.TestName + "</td><td style='border: 1px solid black;'>" + item.Result + "</td><td style='border: 1px solid black;'> " + item.ReferenceRangeLow + "</td><td style='border: 1px solid black;'>" + item.ReferenceRangeHigh + "</td><td style='border: 1px solid black;'>" + item.AbnoramalFlag + "</td></tr>";
             }
+            temp += "</table>";
             body = Regex.Replace(body, "##appendBody##", temp, RegexOptions.IgnoreCase);
             return body;
         }
