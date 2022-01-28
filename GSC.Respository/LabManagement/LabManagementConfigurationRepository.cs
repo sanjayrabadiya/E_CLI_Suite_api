@@ -74,7 +74,7 @@ namespace GSC.Respository.LabManagement
                 DataSet results = reader.AsDataSet();
                 results.Tables[0].Rows[0].Delete();
                 results.Tables[0].AcceptChanges();
-                var data = results.Tables[0].AsEnumerable().Select(r => r.Field<string>("Column10").Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+                var data = results.Tables[0].AsEnumerable().Select(r => r.Field<string>("Column10")?.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
                 streamer.Dispose();
                 return (T[])(object)data.ToArray();
             }
