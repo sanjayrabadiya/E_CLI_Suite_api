@@ -355,7 +355,7 @@ namespace GSC.Respository.LabManagement
                             }
 
                             // patient wise mail
-                            if (emailObj != null)
+                            if (emailObj != null && emailObj.StudyCode != null)
                             {
                                 var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId).ToList();
                                 if (studyUsers.Count != 0)
