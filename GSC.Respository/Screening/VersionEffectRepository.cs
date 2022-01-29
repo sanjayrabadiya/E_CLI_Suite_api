@@ -29,11 +29,8 @@ namespace GSC.Respository.Screening
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public VersionEffectRepository(IGSCContext context,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IProjectRightRepository projectRightRepository,
-            IProjectWorkflowRepository projectWorkflowRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
-            IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IScreeningVisitRepository screeningVisitRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
@@ -95,31 +92,26 @@ namespace GSC.Respository.Screening
             var deletedVisitIds = _projectDesignVisitRepository.All.Where(t => t.ProjectDesignPeriod.ProjectDesignId == projectDesignId
             && t.DeletedDate == null && t.InActiveVersion != null && t.InActiveVersion <= versionNumber).Select(t => t.Id).ToList();
 
-            var screeningEntrys = All.Where(t => t.DeletedDate == null &&
-            t.Project.IsTestSite == isTrial && t.ProjectDesignId == projectDesignId &&
-             patientStatuses.Contains(t.Randomization.PatientStatusId) &&
-             t.ScreeningVisit.Any(r => deletedVisitIds.Contains(r.ProjectDesignVisitId))).
-             Include(a => a.ScreeningVisit).
-             ThenInclude(a => a.ScreeningTemplates).
+            var screeningVisit = _screeningVisitRepository.All.Where(t => t.DeletedDate == null &&
+            t.ScreeningEntry.Project.IsTestSite == isTrial && t.ScreeningEntry.ProjectDesignId == projectDesignId &&
+             patientStatuses.Contains(t.ScreeningEntry.Randomization.PatientStatusId) &&
+             deletedVisitIds.Contains(t.ProjectDesignVisitId)).
+             Include(a => a.ScreeningTemplates).
              ThenInclude(a => a.ScreeningTemplateValues).ToList();
 
-            screeningEntrys.ForEach(screeningEntry =>
+            screeningVisit.ForEach(x =>
             {
-                screeningEntry.ScreeningVisit.ToList().ForEach(x =>
+                x.ScreeningTemplates.ForEach(a =>
                 {
-                    x.ScreeningTemplates.ForEach(a =>
+                    _screeningTemplateRepository.Delete(a.Id);
+
+                    a.ScreeningTemplateValues.ToList().ForEach(c =>
                     {
-                        _screeningTemplateRepository.Delete(a.Id);
-
-                        a.ScreeningTemplateValues.ToList().ForEach(c =>
-                        {
-                            _screeningTemplateValueRepository.Delete(c.Id);
-                        });
-
+                        _screeningTemplateValueRepository.Delete(c.Id);
                     });
-                    _screeningVisitRepository.Delete(x.Id);
-                });
 
+                });
+                _screeningVisitRepository.Delete(x.Id);
             });
 
             _context.Save();
@@ -135,7 +127,7 @@ namespace GSC.Respository.Screening
 
             var addVisitIds = addVisits.Select(t => t.Id).ToList();
 
-            screeningEntrys = All.Include(r => r.Randomization).Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignId &&
+           var screeningEntrys = All.Include(r => r.Randomization).Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignId &&
                 patientStatuses.Contains(x.Randomization.PatientStatusId) &&
                 x.Project.IsTestSite == isTrial && x.ScreeningVisit.Any(t => t.DeletedDate == null && !addVisitIds.Contains(t.ProjectDesignVisitId))).ToList();
 

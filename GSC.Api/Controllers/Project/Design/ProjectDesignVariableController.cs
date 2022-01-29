@@ -54,6 +54,8 @@ namespace GSC.Api.Controllers.Project.Design
             var variableDto = _mapper.Map<ProjectDesignVariableDto>(variable);
             var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(variableDto.ProjectDesignTemplateId);
 
+            variableDto.CollectionValueDisable = checkVersion.VersionNumber == variableDto.StudyVersion;
+
             if (variableDto.Values != null)
             {
                 variableDto.Values.ToList().ForEach(x =>
