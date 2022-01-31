@@ -279,7 +279,7 @@ namespace GSC.Api.Controllers.LabManagement
                 }
             }
 
-            var Exists = data.Where(x => configurationDto.UserIds.Contains(x.UserId)).ToList();
+            var Exists = data.ToList();
             if (Exists.Count != 0)
                 foreach (var item in Exists)
                     _labManagementSendEmailUserRepository.Delete(item);
