@@ -112,7 +112,7 @@ namespace GSC.Respository.LabManagement
             results.Tables[0].Rows[0].Delete();
             results.Tables[0].AcceptChanges();
 
-            DataRow[] r = results.Tables[0].Select("Column0 is null or Column1 is null or Column2 is null or Column4 is null or Column5 is null or Column10 is null or Column12 is null or Column13 is null or Column14 is null or Column15 is null");
+            DataRow[] r = results.Tables[0].Select("Column0 is null or Column1 is null or Column2 is null or Column4 is null or Column5 is null or Column10 is null or Column13 is null");
 
             if (r.Length == 0)
             {
