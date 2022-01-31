@@ -58,7 +58,7 @@ namespace GSC.Api.Controllers.LabManagement
         [HttpGet("{projectId}/{isDeleted:bool?}")]
         public IActionResult Get(int projectid, bool isDeleted)
         {
-            return Ok(_labManagementUploadDataRepository.GetUploadDataList(projectid,isDeleted));
+            return Ok(_labManagementUploadDataRepository.GetUploadDataList(projectid, isDeleted));
         }
 
         [HttpPost]
@@ -69,8 +69,16 @@ namespace GSC.Api.Controllers.LabManagement
             labManagementUploadDataDto.Id = 0;
             string SiteCode = "";
 
-
-            var LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectId == labManagementUploadDataDto.ProjectId && x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+            var isExist = _configurationRepository.All.Where(x => x.ProjectId == labManagementUploadDataDto.ProjectId && x.DeletedDate == null && x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId).FirstOrDefault();
+            var LabManagementConfiguration = new LabManagementConfiguration();
+            if (isExist != null)
+            {
+                LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectId == labManagementUploadDataDto.ProjectId && x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+            }
+            else
+            {
+                LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+            }
 
             labManagementUploadDataDto.LabManagementConfigurationId = LabManagementConfiguration.Id;
 

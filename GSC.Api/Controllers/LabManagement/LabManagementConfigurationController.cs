@@ -75,10 +75,30 @@ namespace GSC.Api.Controllers.LabManagement
             configurationDto.Id = 0;
 
             var checkConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == configurationDto.ProjectDesignTemplateId && x.DeletedDate == null).ToList();
-            if (checkConfiguration.Count() != 0)
+
+            if (checkConfiguration.All(x => x.ProjectId == null))
             {
-                ModelState.AddModelError("Message", "Form already configured!");
-                return BadRequest(ModelState);
+                if (checkConfiguration.Count() != 0)
+                {
+                    ModelState.AddModelError("Message", "Form already configured!");
+                    return BadRequest(ModelState);
+                }
+            }
+            else
+            {
+                if (checkConfiguration.Any(x => x.ProjectId == null))
+                {
+                    if (checkConfiguration.Count() != 0)
+                    {
+                        ModelState.AddModelError("Message", "Form already configured study wise!");
+                        return BadRequest(ModelState);
+                    }
+                }
+                if (checkConfiguration.Where(x => x.ProjectId == configurationDto.ProjectId).Count() != 0)
+                {
+                    ModelState.AddModelError("Message", "Form already configured!");
+                    return BadRequest(ModelState);
+                }
             }
 
             //set file path and extension
@@ -269,11 +289,24 @@ namespace GSC.Api.Controllers.LabManagement
         }
 
         [HttpGet]
-        [Route("GetFilePathByProjectDesignTemplateId/{projectDesignTemplateId}")]
-        public IActionResult GetFilePathByProjectDesignTemplateId(int projectDesignTemplateId)
+        [Route("GetFilePathByProjectDesignTemplateId/{projectDesignTemplateId}/{projectId}")]
+        public IActionResult GetFilePathByProjectDesignTemplateId(int projectDesignTemplateId, int projectId)
         {
             if (projectDesignTemplateId <= 0) return BadRequest();
-            var configuration = _configurationRepository.FindByInclude(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+
+            var isExist = _configurationRepository.All.Where(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+            var configuration = new LabManagementConfiguration();
+            if (isExist != null)
+            {
+                configuration = _configurationRepository.All.Where(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+            }
+            else
+            {
+                configuration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
+            }
+
+
+            //var configuration = _configurationRepository.FindByInclude(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
             var configurationDto = _mapper.Map<LabManagementConfigurationDto>(configuration);
             configurationDto.FullPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), configurationDto.PathName);
             return Ok(configurationDto);

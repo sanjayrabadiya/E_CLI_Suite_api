@@ -77,7 +77,9 @@ namespace GSC.Respository.LabManagement
             var result = All.Include(x => x.LabManagementUploadExcelDatas).Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.Project.ParentProjectId == projectId).
                    ProjectTo<LabManagementUploadDataGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-            result.ForEach(t => { t.FullPath = documentUrl + t.PathName; t.IsDifference = _context.ScreeningTemplateValue.AsNoTracking().All(a => !t.LabManagementUploadExcelDatas.Select(a => a.Id).ToList().Contains((int)a.LabManagementUploadExcelDataId)); });
+            result.ForEach(t => { t.FullPath = documentUrl + t.PathName; t.IsDifference = _context.ScreeningTemplateValue.AsNoTracking().All(a => !t.LabManagementUploadExcelDatas.Select(a => a.Id).ToList().Contains((int)a.LabManagementUploadExcelDataId));
+                t.ScreeningNo = string.Join(",", t.LabManagementUploadExcelDatas.Where(y => y.LabManagementUploadDataId == t.Id).Select(s => s.ScreeningNo).Distinct().ToList());
+            });
             return result;
         }
 
