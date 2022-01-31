@@ -359,7 +359,7 @@ namespace GSC.Respository.LabManagement
                             // patient wise mail
                             if (emailObj != null && emailObj.StudyCode != null)
                             {
-                                var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId).ToList();
+                                var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId && x.DeletedDate==null).ToList();
                                 if (studyUsers.Count != 0)
                                 {
                                     var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
