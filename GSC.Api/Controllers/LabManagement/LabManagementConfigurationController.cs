@@ -110,12 +110,12 @@ namespace GSC.Api.Controllers.LabManagement
             }
 
             var configuration = _mapper.Map<LabManagementConfiguration>(configurationDto);
-            var validate = _configurationRepository.Duplicate(configuration);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+            //var validate = _configurationRepository.Duplicate(configuration);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
 
             _configurationRepository.Add(configuration);
 
