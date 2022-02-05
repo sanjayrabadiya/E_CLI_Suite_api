@@ -27,6 +27,7 @@ namespace GSC.Respository.Screening
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectDesignRepository _projectDesignRepository;
         public VersionEffectRepository(IGSCContext context,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
@@ -37,7 +38,8 @@ namespace GSC.Respository.Screening
             IStudyVersionStatusRepository studyVersionStatusRepository,
             IRandomizationRepository randomizationRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
-            IJwtTokenAccesser jwtTokenAccesser
+            IJwtTokenAccesser jwtTokenAccesser,
+            IProjectDesignRepository projectDesignRepository
         ) : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -51,12 +53,15 @@ namespace GSC.Respository.Screening
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
+            _projectDesignRepository = projectDesignRepository;
         }
 
         public void ApplyNewVersion(int projectDesignId, bool isTrial, double versionNumber)
         {
             var patientStatusIds = _studyVersionStatusRepository.All.Where(x => x.StudyVerion.ProjectDesignId == projectDesignId
             && x.StudyVerion.VersionNumber == versionNumber).Select(t => t.PatientStatusId).ToList();
+
+            var projectId = _projectDesignRepository.All.Where(t => t.Id == projectDesignId).Select(r => r.ProjectId).FirstOrDefault();
 
             if (patientStatusIds.Count > 0)
             {
@@ -65,6 +70,7 @@ namespace GSC.Respository.Screening
                 VariableProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
                 ScreeningEntryProcess(projectDesignId, isTrial, versionNumber, patientStatusIds);
             }
+            RandomizationProcess(projectId, isTrial, versionNumber);
 
         }
 
@@ -78,6 +84,24 @@ namespace GSC.Respository.Screening
             {
                 screeningEntry.StudyVersion = versionNumber;
                 Update(screeningEntry);
+
+            });
+
+            _context.Save();
+            _context.DetachAllEntities();
+
+        }
+
+        void RandomizationProcess(int projectId, bool isTrial, double versionNumber)
+        {
+            var randomizations = _randomizationRepository.All.Where(t => t.DeletedDate == null &&
+            t.Project.IsTestSite == isTrial && t.Project.ParentProjectId == projectId
+            && t.ScreeningEntry == null).ToList();
+
+            randomizations.ForEach(x =>
+            {
+                x.StudyVersion = versionNumber;
+                _randomizationRepository.Update(x);
 
             });
 
@@ -127,9 +151,9 @@ namespace GSC.Respository.Screening
 
             var addVisitIds = addVisits.Select(t => t.Id).ToList();
 
-           var screeningEntrys = All.Include(r => r.Randomization).Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignId &&
-                patientStatuses.Contains(x.Randomization.PatientStatusId) &&
-                x.Project.IsTestSite == isTrial && x.ScreeningVisit.Any(t => t.DeletedDate == null && !addVisitIds.Contains(t.ProjectDesignVisitId))).ToList();
+            var screeningEntrys = All.Include(r => r.Randomization).Where(x => x.DeletedDate == null && x.ProjectDesignId == projectDesignId &&
+                 patientStatuses.Contains(x.Randomization.PatientStatusId) &&
+                 x.Project.IsTestSite == isTrial && x.ScreeningVisit.Any(t => t.DeletedDate == null && !addVisitIds.Contains(t.ProjectDesignVisitId))).ToList();
 
 
             screeningEntrys.ForEach(x =>
