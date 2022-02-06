@@ -82,7 +82,7 @@ namespace GSC.Respository.Screening
             }).ToListAsync();
 
             var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
-             && x.ScreeningEntry == null).Select(t => new DataCaptureGridData
+             && x.PatientStatusId == ScreeningPatientStatus.Screening && x.ScreeningEntry == null).Select(t => new DataCaptureGridData
              {
                  RandomizationId = t.Id,
                  VolunteerName = t.Initial,

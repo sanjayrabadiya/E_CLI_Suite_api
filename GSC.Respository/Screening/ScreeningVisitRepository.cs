@@ -447,8 +447,10 @@ namespace GSC.Respository.Screening
             if (cloneVisit != null)
                 repeatedCount = All.Where(x => x.ScreeningEntryId == cloneVisit.ScreeningEntryId && x.ProjectDesignVisitId == cloneVisit.ProjectDesignVisitId).Max(t => t.RepeatedVisitNumber) ?? 0;
 
-
-            var templates = _projectDesignTemplateRepository.All.Where(x => x.ProjectDesignVisitId == cloneVisit.ProjectDesignVisitId && x.DeletedDate == null).OrderBy(a => a.DesignOrder).ToList();
+            var templates = _screeningTemplateRepository.All.Where(r => r.DeletedDate == null && r.ScreeningVisitId == screeningVisitDto.ScreeningVisitId).Select(t => new
+            {
+                t.ProjectDesignTemplateId,
+            }).ToList();
 
             var screeningVisit = new ScreeningVisit
             {
@@ -466,7 +468,7 @@ namespace GSC.Respository.Screening
             {
                 var template = new ScreeningTemplate
                 {
-                    ProjectDesignTemplateId = t.Id,
+                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                     Status = ScreeningTemplateStatus.Pending
                 };
                 _screeningTemplateRepository.Add(template);
