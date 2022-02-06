@@ -108,8 +108,9 @@ namespace GSC.Respository.Project.Design
                     InActiveVersion = c.InActiveVersion,
                     StudyVersion = c.StudyVersion,
                     DesignOrder = c.DesignOrder,
-                    DisplayVersion = c.StudyVersion != null || c.InActiveVersion != null ?
-                    "( V : " + c.StudyVersion + (c.StudyVersion != null && c.InActiveVersion != null ? " - " : "") + c.InActiveVersion + ")" : "",
+                    DisplayVersion = c.StudyVersion > 0 && c.InActiveVersion > 0 ?
+                    $"(V : {c.StudyVersion} - {c.InActiveVersion})" : c.StudyVersion > 0 ? $"(N : {c.StudyVersion})" :
+                    c.InActiveVersion != null ? $"(D : {c.InActiveVersion})" : "",
                     AllowActive = checkVersion.VersionNumber == c.InActiveVersion && c.InActiveVersion != null
                 }).OrderBy(o => o.DesignOrder).ToList();
         }
@@ -250,9 +251,9 @@ namespace GSC.Respository.Project.Design
         {
             return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId && (x.CollectionSource == CollectionSources.TextBox
             || x.CollectionSource == CollectionSources.MultilineTextBox || x.CollectionSource == CollectionSources.Date))
-            
-            //&& x.CollectionSource != CollectionSources.MultiCheckBox && x.CollectionSource != CollectionSources.NumericScale
-            //&& x.CollectionSource != CollectionSources.RadioButton && x.CollectionSource != CollectionSources.Relation)
+
+                //&& x.CollectionSource != CollectionSources.MultiCheckBox && x.CollectionSource != CollectionSources.NumericScale
+                //&& x.CollectionSource != CollectionSources.RadioButton && x.CollectionSource != CollectionSources.Relation)
                 .OrderBy(o => o.DesignOrder)
                 .Select(c => new DropDownDto
                 {

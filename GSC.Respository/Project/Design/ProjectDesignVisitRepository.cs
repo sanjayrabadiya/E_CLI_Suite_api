@@ -101,8 +101,9 @@ namespace GSC.Respository.Project.Design
                 {
                     Id = t.Id,
                     DisplayName = t.DisplayName,
-                    DisplayVersion = t.StudyVersion != null || t.InActiveVersion != null ?
-                    "( V : " + t.StudyVersion + (t.StudyVersion != null && t.InActiveVersion != null ? " - " : "") + t.InActiveVersion + ")" : "",
+                    DisplayVersion = t.StudyVersion > 0 && t.InActiveVersion > 0 ?
+                    $"(V : {t.StudyVersion} - {t.InActiveVersion})" : t.StudyVersion > 0 ? $"(N : {t.StudyVersion})" :
+                    t.InActiveVersion != null ? $"(D : {t.InActiveVersion})" : "",
                     IsNonCRF = t.IsNonCRF,
                     StudyVersion = t.StudyVersion,
                     InActiveVersion = t.InActiveVersion,

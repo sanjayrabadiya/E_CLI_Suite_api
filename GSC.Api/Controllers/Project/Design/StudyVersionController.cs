@@ -7,6 +7,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -160,6 +161,16 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
+        [HttpGet]
+        [Route("GoLiveT")]
+        [AllowAnonymous]
+        public IActionResult GoLiveT()
+        {
+            _versionEffectRepository.ApplyNewVersion(210, true, 1.2);
+            _uow.Save();
+
+            return Ok();
+        }
 
 
     }
