@@ -440,7 +440,7 @@ namespace GSC.Respository.Screening
                                  .ThenInclude(x => x.ScreeningEntry)
                                  .Where(t => ParentProject != null ? t.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId
                                  : sites.Contains(t.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId))
-                                 join userTemp in _context.Users on value.CreatedBy equals userTemp.Id into userDto
+                                 join userTemp in _context.Users.Where(x => x.CreatedBy != null) on value.CreatedBy equals userTemp.Id into userDto
                                  from user in userDto.DefaultIfEmpty()
                                  join roleTemp in _context.SecurityRole on value.UserRoleId equals roleTemp.Id into roleDto
                                  from role in roleDto.DefaultIfEmpty()

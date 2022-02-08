@@ -27,7 +27,7 @@ namespace GSC.Data.Dto.Screening
         public int? ParentId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public string ProjectDesignTemplateName { get; set; }
-        public decimal DesignOrder { get; set; }
+        public string DesignOrder { get; set; }
         public int Progress { get; set; }
         public short? ReviewLevel { get; set; }
         public string StatusName { get; set; }
