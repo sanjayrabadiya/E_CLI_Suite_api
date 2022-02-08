@@ -99,6 +99,15 @@ namespace GSC.Api.Controllers.LabManagement
                     ModelState.AddModelError("Message", "Form already configured!");
                     return BadRequest(ModelState);
                 }
+
+                if (!checkConfiguration.Any(x => x.ProjectId == null))
+                {
+                    if (configurationDto.ProjectId == null)
+                    {
+                        ModelState.AddModelError("Message", "Form already configured site wise!");
+                        return BadRequest(ModelState);
+                    }
+                }
             }
 
             //set file path and extension
