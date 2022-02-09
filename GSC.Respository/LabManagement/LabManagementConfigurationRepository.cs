@@ -160,7 +160,7 @@ namespace GSC.Respository.LabManagement
                 {
                     Id = t.ProjectDesignTemplate.Id,
                     Value = t.ProjectDesignTemplate.TemplateName
-                }).ToList();
+                }).Distinct().ToList();
 
             return templates;
         }
