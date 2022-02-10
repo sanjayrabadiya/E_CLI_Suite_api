@@ -244,55 +244,111 @@ namespace GSC.Respository.LabManagement
 
                                 var r = GetExcelDataByScreeningNumber.Where(x => x.TestName.Trim() == item.TargetVariable).FirstOrDefault();
 
-                                if (r != null && !(item.TargetVariable.Trim().ToLower() == "date of sample collection" ||
-                                    item.TargetVariable.Trim().ToLower() == "date of report" || item.TargetVariable.Trim().ToLower() == "laboratory name"))
+                                if (r == null)
                                 {
-                                    if (item.TargetVariable.Trim().ToLower() == "date of sample collection")
+                                    if ((item.TargetVariable.Trim().ToLower() == "date of sample collection" || item.TargetVariable.Trim().ToLower() == "date of report" || item.TargetVariable.Trim().ToLower() == "laboratory name"))
                                     {
-                                        DateTime dDate;
-                                        string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfSampleCollection.ToString();
-                                        var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                                                                    .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                        obj.Value = dt;
-                                        r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                        r.Result = dt;
-                                    }
-                                    else if (item.TargetVariable.Trim().ToLower() == "date of report")
-                                    {
-
-                                        DateTime dDate;
-                                        string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfReport.ToString();
-                                        var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                                                                        .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                        obj.Value = dt;
-                                        r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                        r.Result = dt;
-                                    }
-                                    else if (item.TargetVariable.Trim().ToLower() == "laboratory name")
-                                    {
-                                        obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().LaboratryName.ToString();
-                                        r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                        r.Result = obj.Value;
-                                    }
-                                    else
-                                    {
-                                        // set date time format if data type is date datetime or time
-                                        if (dataType == CollectionSources.Date || dataType == CollectionSources.DateTime || dataType == CollectionSources.Time)
+                                        if (item.TargetVariable.Trim().ToLower() == "date of sample collection")
                                         {
                                             DateTime dDate;
-                                            string variablevalueformat = r.Result;
+                                            string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfSampleCollection.ToString();
                                             var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
                                                                                         .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
                                             obj.Value = dt;
+                                            r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            r.Result = dt;
                                         }
-                                        else
+                                        else if (item.TargetVariable.Trim().ToLower() == "date of report")
                                         {
-                                            obj.Value = r.Result;
-                                            obj.ReferenceRangeHigh = r.ReferenceRangeHigh;
-                                            obj.ReferenceRangeLow = r.ReferenceRangeLow;
-                                            obj.Unit = r.Unit;
+                                            DateTime dDate;
+                                            string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfReport.ToString();
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                                                                            .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                            obj.Value = dt;
+                                            r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            r.Result = dt;
                                         }
+                                        else if (item.TargetVariable.Trim().ToLower() == "laboratory name")
+                                        {
+                                            obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().LaboratryName.ToString();
+                                            r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            r.Result = obj.Value;
+                                        }
+
+                                        obj.ReviewLevel = 0;
+                                        obj.IsNa = false;
+                                        obj.IsSystem = false;
+                                        obj.LabManagementUploadExcelDataId = r.Id;
+
+                                        if (obj.Id > 0)
+                                            _screeningTemplateValueRepository.Update(obj);
+                                        else
+                                            _screeningTemplateValueRepository.Add(obj);
+
+                                        // insert screening template value audit
+                                        var aduit = new ScreeningTemplateValueAudit
+                                        {
+                                            ScreeningTemplateValue = obj,
+                                            OldValue = oldValue,
+                                            Value = r.Result,
+                                            Note = "Added by Lab management"
+                                        };
+                                        _screeningTemplateValueAuditRepository.Save(aduit);
+
+                                        _screeningProgress.GetScreeningProgress(_context.ScreeningEntry.Where(x => x.Randomization.ScreeningNumber == r.ScreeningNo).Select(x => x.Id).FirstOrDefault(), obj.ScreeningTemplateId);
+
                                     }
+                                }
+                                else
+                                //if (r != null || (item.TargetVariable.Trim().ToLower() == "date of sample collection" ||
+                                //        item.TargetVariable.Trim().ToLower() == "date of report" || item.TargetVariable.Trim().ToLower() == "laboratory name"))
+                                {
+                                    //if (item.TargetVariable.Trim().ToLower() == "date of sample collection")
+                                    //{
+                                    //    DateTime dDate;
+                                    //    string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfSampleCollection.ToString();
+                                    //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                    //                                                .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                    //    obj.Value = dt;
+                                    //    r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                    //    r.Result = dt;
+                                    //}
+                                    //else if (item.TargetVariable.Trim().ToLower() == "date of report")
+                                    //{
+
+                                    //    DateTime dDate;
+                                    //    string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfReport.ToString();
+                                    //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                    //                                                    .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                    //    obj.Value = dt;
+                                    //    r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                    //    r.Result = dt;
+                                    //}
+                                    //else if (item.TargetVariable.Trim().ToLower() == "laboratory name")
+                                    //{
+                                    //    obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().LaboratryName.ToString();
+                                    //    r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                    //    r.Result = obj.Value;
+                                    //}
+                                    //else
+                                    //{
+                                    // set date time format if data type is date datetime or time
+                                    if (dataType == CollectionSources.Date || dataType == CollectionSources.DateTime || dataType == CollectionSources.Time)
+                                    {
+                                        DateTime dDate;
+                                        string variablevalueformat = r.Result;
+                                        var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                                                                    .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                        obj.Value = dt;
+                                    }
+                                    else
+                                    {
+                                        obj.Value = r.Result;
+                                        obj.ReferenceRangeHigh = r.ReferenceRangeHigh;
+                                        obj.ReferenceRangeLow = r.ReferenceRangeLow;
+                                        obj.Unit = r.Unit;
+                                    }
+                                    // }
 
                                     obj.ReviewLevel = 0;
                                     obj.IsNa = false;
