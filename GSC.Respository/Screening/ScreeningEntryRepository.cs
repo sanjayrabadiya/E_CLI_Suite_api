@@ -131,7 +131,7 @@ namespace GSC.Respository.Screening
 
             visits.ForEach(x =>
             {
-                x.ScreeningTemplates = templates.Where(a => a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).OrderBy(c => c.DesignOrder).ToList();
+                x.ScreeningTemplates = templates.Where(a => a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).OrderBy(c => Convert.ToDecimal(c.DesignOrder)).ToList();
                 x.ScreeningTemplates.ForEach(v => v.Children = templates.Where(a => a.ParentId == v.Id).OrderBy(x => x.Id).ThenBy(c => c.DesignOrder).ToList());
 
                 x.IsVisitRepeated = x.ParentScreeningVisitId != null ? false :
