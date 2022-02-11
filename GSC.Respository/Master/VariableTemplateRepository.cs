@@ -167,7 +167,7 @@ namespace GSC.Respository.Master
                     Id = r.Id,
                     VariableTemplateId = r.Id,
                     VariableTemplateName = r.TemplateName,
-                    ActivityName = r.Activity.ActivityName,
+                    //ActivityName = r.Activity.CtmsActivity.ActivityName,
                     Notes = r.Notes.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     VariableTemplateDetails = r.VariableTemplateDetails.Where(c => c.Variable.DeletedDate == null).ToList()
                 }
@@ -229,7 +229,7 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                 (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null &&
-                 (int)x.ModuleId == moduleId)
+                 (int)x.AppScreenId == moduleId)
             .Select(c => new DropDownDto { Id = c.Id, Value = c.TemplateName, Code = c.TemplateCode })
             .OrderBy(o => o.Value).ToList();
         }
@@ -243,7 +243,7 @@ namespace GSC.Respository.Master
                     Id = r.Id,
                     VariableTemplateId = r.Id,
                     VariableTemplateName = r.TemplateName,
-                    ActivityName = r.Activity.ActivityName,
+                    //ActivityName = r.Activity.CtmsActivity.ActivityName,
                     Notes = r.Notes.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
                     VariableTemplateDetails = r.VariableTemplateDetails.Where(c => c.Variable.DeletedDate == null).ToList()
                 }

@@ -428,6 +428,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<FileSizeConfiguration, FileSizeConfigurationDto>().ReverseMap();
             CreateMap<RandomizationSetup, RandomizationSetupDto>().ReverseMap();
+            CreateMap<CtmsActivity, CtmsActivityDto>().ReverseMap();
         }
     }
 }

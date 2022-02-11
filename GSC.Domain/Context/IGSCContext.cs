@@ -331,5 +331,6 @@ namespace GSC.Domain.Context
         DbSet<FileSizeConfiguration> FileSizeConfiguration { get; set; }
         DbSet<RandomizationSetup> RandomizationSetup { get; set; }
         DbSet<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
+        DbSet<CtmsActivity> CtmsActivity { get; set; }
     }
 }

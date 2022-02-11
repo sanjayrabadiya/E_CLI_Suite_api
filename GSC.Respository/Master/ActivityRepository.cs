@@ -29,7 +29,7 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.ActivityName }).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CtmsActivity.ActivityName }).OrderBy(o => o.Value).ToList();
         }
 
         public List<ActivityGridDto> GetActivityList(bool isDeleted)
@@ -42,8 +42,8 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null
-                    && x.ModuleId == ((AuditModule)moduleId))
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.ActivityName }).OrderBy(o => o.Value).ToList();
+                    && x.AppScreenId == moduleId)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CtmsActivity.ActivityName }).OrderBy(o => o.Value).ToList();
         }
     }
 }

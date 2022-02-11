@@ -355,6 +355,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISyncConfigurationMasterDetailsRepositoryAudit, SyncConfigurationMasterDetailsRepositoryAudit>();
             services.AddScoped<IRandomizationSetupRepository, RandomizationSetupRepository>();
             services.AddScoped<ILabManagementSendEmailUserRepository, LabManagementSendEmailUserRepository>();
+            services.AddScoped<ICtmsActivityRepository, CtmsActivityRepository>();
         }
     }
 }

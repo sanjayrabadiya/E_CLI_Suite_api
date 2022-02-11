@@ -7,6 +7,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
+using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
@@ -17,15 +18,18 @@ namespace GSC.Api.Controllers.Master
     public class ActivityController : BaseController
     {
         private readonly IActivityRepository _activityRepository;
+        private readonly ICtmsActivityRepository _ctmsActivityRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public ActivityController(IActivityRepository activityRepository,
+            ICtmsActivityRepository ctmsActivityRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _activityRepository = activityRepository;
+            _ctmsActivityRepository = ctmsActivityRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
@@ -116,6 +120,13 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetActivityDropDownByModuleId(int moduleId)
         {
             return Ok(_activityRepository.GetActivityDropDownByModuleId(moduleId));
+        }
+
+        [HttpGet]
+        [Route("GetCtmsActivity")]
+        public IActionResult GetCtmsActivity()
+        {
+            return Ok(_ctmsActivityRepository.GetCtmsActivityList());
         }
     }
 }

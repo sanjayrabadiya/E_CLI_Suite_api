@@ -380,6 +380,9 @@ namespace GSC.Domain.Context
         public DbSet<RandomizationSetup> RandomizationSetup { get; set; }
 
         public DbSet<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
+
+        public DbSet<CtmsActivity> CtmsActivity { get; set; }
+
     }
 
 

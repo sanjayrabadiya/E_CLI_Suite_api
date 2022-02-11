@@ -54,9 +54,9 @@ namespace GSC.Respository.CTMS
                 StatusId = ManageMonitoringReport.Any(t => t.ManageMonitoringVisitId == x.Id) ? ManageMonitoringReport.Where(t => t.ManageMonitoringVisitId == x.Id).FirstOrDefault().Status : MonitoringReportStatus.NotInitiated,
                 ActualStartDate = x.ActualStartDate,
                 ActualEndDate = x.ActualEndDate,
-                ActivityName = x.Activity.ActivityName,
-                VariableTemplate = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).Select(q => q.TemplateName).FirstOrDefault(),
-                VariableTemplateId = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).Select(q => q.Id).FirstOrDefault()
+                ActivityName = x.Activity.CtmsActivity.ActivityName,
+                //VariableTemplate = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).Select(q => q.TemplateName).FirstOrDefault(),
+                //VariableTemplateId = _variableTemplateRepository.All.Where(y => y.ActivityId == x.ActivityId).Select(q => q.Id).FirstOrDefault()
             }).ToList();
 
             //var result = All.Include(x => x.VariableTemplate)

@@ -12,7 +12,7 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Template Code is required.")]
         public string TemplateCode { get; set; }
 
-        public int ActivityId { get; set; }
+        //public int ActivityId { get; set; }
 
         [Required(ErrorMessage = "Template Name is required.")]
         public string TemplateName { get; set; }
@@ -22,18 +22,18 @@ namespace GSC.Data.Dto.Master
 
         public bool IsRepeated { get; set; }
         public ActivityMode ActivityMode { get; set; }
-        public AuditModule? ModuleId { get; set; }
+        public int? AppScreenId { get; set; }
         public List<VariableTemplateDetailDto> VariableTemplateDetails { get; set; }
         public IList<VariableTemplateNoteDto> Notes { get; set; }
         public int? CompanyId { get; set; }
-        public Activity Activity { get; set; }
+        //public Activity Activity { get; set; }
         // public bool SystemType { get; set; }
     }
 
     public class VariableTemplateGridDto : BaseAuditDto
     {
         public string TemplateCode { get; set; }
-        public string ActivityName { get; set; }
+        //public string ActivityName { get; set; }
         public string ModuleName { get; set; }
         public string DomainName { get; set; }
         public string ActivityMode { get; set; }

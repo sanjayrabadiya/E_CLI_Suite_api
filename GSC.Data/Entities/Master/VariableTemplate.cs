@@ -10,7 +10,7 @@ namespace GSC.Data.Entities.Master
     public class VariableTemplate : BaseEntity, ICommonAduit
     {
         public string TemplateCode { get; set; }
-        public int ActivityId { get; set; }
+        //public int ActivityId { get; set; }
         public string TemplateName { get; set; }
         public int DomainId { get; set; }
         public bool IsRepeated { get; set; }
@@ -20,11 +20,9 @@ namespace GSC.Data.Entities.Master
         public Domain Domain { get; set; }
         public ActivityMode ActivityMode { get; set; }
         public IList<VariableTemplateNote> Notes { get; set; }
-        public AuditModule? ModuleId { get; set; }
-        //public int? ModuleId { get; set; }
-        public Activity Activity { get; set; }
-        //[ForeignKey("ModuleId")]
-
-        //public AppScreen AppScreen { get; set; }
+        //public AuditModule? ModuleId { get; set; }
+        public int? AppScreenId { get; set; }
+        //public Activity Activity { get; set; }
+        public AppScreen AppScreen { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Respository.UserMgt;
@@ -71,6 +72,21 @@ namespace GSC.Api.Controllers.UserMgt
                 .Where(s => s.AppScreens.ParentAppScreenId == null).ToList();
 
             return Ok(_mapper.Map<List<RolePermissionDto>>(rolePermission));
+        }
+
+        [HttpGet("GetParentScreen")]
+        public IActionResult GetParentScreen()
+        {
+            var result = _rolePermissionRepository.FindByInclude(q => q.UserRoleId == _jwtTokenAccesser.RoleId && q.DeletedDate == null, x => x.AppScreens)
+                .Where(s => s.AppScreens.ParentAppScreenId == null && (s.AppScreens.ScreenCode == "mnu_adverseevent" || s.AppScreens.ScreenCode == "mnu_ctms" || s.AppScreens.ScreenCode == "mnu_supplymanagement"))
+                .Select(x => new DropDownDto
+                {
+                    Id = x.AppScreens.Id,
+                    Value = x.AppScreens.ScreenName,
+                    Code = x.AppScreens.ScreenCode
+                }).ToList();
+            
+            return Ok(result);
         }
     }
 }

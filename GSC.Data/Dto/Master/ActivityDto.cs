@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.CTMS;
 using GSC.Helper;
 
 namespace GSC.Data.Dto.Master
@@ -10,11 +11,12 @@ namespace GSC.Data.Dto.Master
         public string ActivityCode { get; set; }
 
         [Required(ErrorMessage = "Activity Name is required.")]
-        public string ActivityName { get; set; }
+        public int CtmsActivityId { get; set; }
 
         [Required(ErrorMessage = "Module Name is required.")]
-        public AuditModule ModuleId { get; set; }
+        public int AppScreenId { get; set; }
         public int? CompanyId { get; set; }
+        public CtmsActivity CtmsActivity { get; set; }
     }
 
     public class ActivityGridDto : BaseAuditDto

@@ -29,7 +29,7 @@ namespace GSC.Respository.CTMS
 
         public List<ManageMonitoringVisitDto> GetMonitoringVisit(int projectId)
         {
-            var Activity = _context.Activity.Where(x => x.DeletedDate == null && x.ModuleId == Helper.AuditModule.CTMS).ToList();
+            var Activity = _context.Activity.Where(x => x.DeletedDate == null && x.AppScreenId == 7194).ToList();
 
             var result = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId)
                 .Select(x => new ManageMonitoringVisitDto
@@ -51,7 +51,7 @@ namespace GSC.Respository.CTMS
             var data = Activity.Select(x => new ManageMonitoringVisitDto
             {
                 Id = result.Where(y => y.ActivityId == x.Id).FirstOrDefault() != null ? result.Where(y => y.ActivityId == x.Id).FirstOrDefault().Id : 0,
-                ActivityName = x.ActivityName,
+                ActivityName = x.CtmsActivity.ActivityName,
                 ActivityId = x.Id,
                 ScheduleStartDate = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.ScheduleStartDate,
                 ScheduleEndDate = result.Where(y => y.ActivityId == x.Id).FirstOrDefault()?.ScheduleEndDate,
