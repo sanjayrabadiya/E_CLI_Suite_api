@@ -243,7 +243,10 @@ namespace GSC.Api.Controllers.Project.Design
             var i = 0;
             foreach (var item in orderedList)
             {
-                item.DesignOrder = ++i;
+                if (item.InActiveVersion != null)
+                    item.DesignOrder = i;
+                else
+                    item.DesignOrder = ++i;
                 _projectDesignVariableRepository.Update(item);
             }
 
@@ -252,9 +255,9 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
-       
 
-        
+
+
         private void UpdateVariableEncryptRole(ProjectDesignVariable variable)
         {
             // get role by projectdesign variable id

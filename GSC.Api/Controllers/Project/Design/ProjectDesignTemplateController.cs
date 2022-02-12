@@ -142,7 +142,11 @@ namespace GSC.Api.Controllers.Project.Design
                     projectDesignVariable.Id = 0;
                     projectDesignVariable.StudyVersion = checkVersion.VersionNumber;
                     projectDesignVariable.VariableId = variableDetail.VariableId;
-                    projectDesignVariable.DesignOrder = ++variableOrder;
+                    if (projectDesignVariable.InActiveVersion != null)
+                        projectDesignVariable.DesignOrder = variableOrder;
+                    else
+                        projectDesignVariable.DesignOrder = ++variableOrder;
+
                     projectDesignVariable.Note = variableDetail.Note;
                     _projectDesignVariableRepository.Add(projectDesignVariable);
                     projectDesignTemplate.Variables.Add(projectDesignVariable);
@@ -541,7 +545,10 @@ namespace GSC.Api.Controllers.Project.Design
             var i = 0;
             foreach (var item in orderedList)
             {
-                item.DesignOrder = ++i;
+                if (item.InActiveVersion != null)
+                    item.DesignOrder = i;
+                else
+                    item.DesignOrder = ++i;
                 _projectDesignTemplateRepository.Update(item);
             }
 

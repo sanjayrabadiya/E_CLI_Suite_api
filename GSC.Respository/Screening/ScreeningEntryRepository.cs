@@ -100,7 +100,9 @@ namespace GSC.Respository.Screening
                     PatientStatusId = t.RandomizationId != null ? t.Randomization.PatientStatusId : 0,
                     Progress = t.Progress,
                     ProjectDesignPeriodId = t.ProjectDesignPeriodId,
-                    ProjectId = t.ProjectId
+                    ProjectId = t.ProjectId,
+                    StudyVersion = t.StudyVersion ?? 1
+
                 }).FirstOrDefault();
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningEntryDto.ProjectDesignId);

@@ -48,7 +48,10 @@ namespace GSC.Respository.Project.Schedule
             var i = 0;
             foreach (var item in orderedList)
             {
-                item.DesignOrder = ++i;
+                if (item.InActiveVersion != null)
+                    item.DesignOrder = i;
+                else
+                    item.DesignOrder = ++i;
                 _projectDesignTemplateRepository.Update(item);
             }
         }
