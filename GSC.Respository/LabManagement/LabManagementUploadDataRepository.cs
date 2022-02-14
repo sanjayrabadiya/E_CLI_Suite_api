@@ -256,7 +256,7 @@ namespace GSC.Respository.LabManagement
                                                                                         .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
                                             obj.Value = dt;
                                             r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                            r.Result = dt;
+                                           // r.Result = dt;
                                         }
                                         else if (item.TargetVariable.Trim().ToLower() == "date of report")
                                         {
@@ -266,13 +266,13 @@ namespace GSC.Respository.LabManagement
                                                                                             .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
                                             obj.Value = dt;
                                             r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                            r.Result = dt;
+                                            //r.Result = dt;
                                         }
                                         else if (item.TargetVariable.Trim().ToLower() == "laboratory name")
                                         {
                                             obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().LaboratryName.ToString();
                                             r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                            r.Result = obj.Value;
+                                            //r.Result = obj.Value;
                                         }
 
                                         obj.ReviewLevel = 0;
@@ -290,7 +290,7 @@ namespace GSC.Respository.LabManagement
                                         {
                                             ScreeningTemplateValue = obj,
                                             OldValue = oldValue,
-                                            Value = r.Result,
+                                            Value = obj.Value,
                                             Note = "Added by Lab management"
                                         };
                                         _screeningTemplateValueAuditRepository.Save(aduit);
