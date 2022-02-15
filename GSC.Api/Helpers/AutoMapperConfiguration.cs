@@ -22,6 +22,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
 using GSC.Data.Dto.Project.GeneralConfig;
 using GSC.Data.Dto.Project.Schedule;
+using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Screening;
@@ -50,6 +51,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.EditCheck;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Project.Schedule;
+using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Data.Entities.Report;
@@ -429,6 +431,11 @@ namespace GSC.Api.Helpers
             CreateMap<FileSizeConfiguration, FileSizeConfigurationDto>().ReverseMap();
             CreateMap<RandomizationSetup, RandomizationSetupDto>().ReverseMap();
             CreateMap<CtmsActivity, CtmsActivityDto>().ReverseMap();
+            CreateMap<CtmsSettings, CtmsSettingsDto>().ReverseMap();
+            CreateMap<StudyLevelForm, StudyLevelFormDto>().ReverseMap();
+            CreateMap<StudyLevelFormVariable, StudyLevelFormVariableDto>().ReverseMap();
+            CreateMap<StudyLevelFormVariableValue, StudyLevelFormVariableValueDto>().ReverseMap();
+            CreateMap<StudyLevelFormVariableRemarks, StudyLevelFormVariableRemarksDto>().ReverseMap();
         }
     }
 }

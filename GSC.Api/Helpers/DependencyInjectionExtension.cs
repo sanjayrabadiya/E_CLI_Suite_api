@@ -45,6 +45,7 @@ using GSC.Respository.CTMS;
 using GSC.Respository.SupplyManagement;
 using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.LabManagement;
+using GSC.Respository.Project.StudyLevelFormSetup;
 
 namespace GSC.Api.Helpers
 {
@@ -356,6 +357,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IRandomizationSetupRepository, RandomizationSetupRepository>();
             services.AddScoped<ILabManagementSendEmailUserRepository, LabManagementSendEmailUserRepository>();
             services.AddScoped<ICtmsActivityRepository, CtmsActivityRepository>();
+            services.AddScoped<ICtmsSettingsRepository, CtmsSettingsRepository>();
+            services.AddScoped<IStudyLevelFormRepository, StudyLevelFormRepository>();
         }
     }
 }

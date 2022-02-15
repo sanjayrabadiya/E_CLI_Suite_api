@@ -38,6 +38,8 @@ using GSC.Data.Dto.Barcode;
 using System.Configuration;
 using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.LabManagement;
+using GSC.Data.Entities.Project.StudyLevelFormSetup;
+using GSC.Data.Dto.Project.StudyLevelFormSetup;
 
 namespace GSC.Api.Helpers
 {
@@ -400,6 +402,12 @@ namespace GSC.Api.Helpers
             CreateMap<LabManagementVariableMapping, LabManagementVariableMappingGridDto>()
                 .ForMember(x => x.ProjectDesignVariable, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
                 .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName)).ReverseMap();
+
+            CreateMap<StudyLevelForm, StudyLevelFormGridDto>()
+                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
+                .ForMember(x => x.VariableTemplateName, x => x.MapFrom(a => a.VariableTemplate.TemplateName))
+                .ForMember(x => x.Activity, x => x.MapFrom(a => a.Activity.CtmsActivity.ActivityName))
+                .ForMember(x => x.AppScreenName, x => x.MapFrom(a => a.AppScreen.ScreenName)).ReverseMap();
         }
     }
 }

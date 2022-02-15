@@ -33,6 +33,7 @@ using GSC.Data.Entities.Project.EditCheck;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Project.Rights;
 using GSC.Data.Entities.Project.Schedule;
+using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Project.Workflow;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Data.Entities.Report;
@@ -382,6 +383,11 @@ namespace GSC.Domain.Context
         public DbSet<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
 
         public DbSet<CtmsActivity> CtmsActivity { get; set; }
+        public DbSet<CtmsSettings> CtmsSettings { get; set; }
+        public DbSet<StudyLevelForm> StudyLevelForm { get; set; }
+        public DbSet<StudyLevelFormVariable> StudyLevelFormVariable { get; set; }
+        public DbSet<StudyLevelFormVariableValue> StudyLevelFormVariableValue { get; set; }
+        public DbSet<StudyLevelFormVariableRemarks> StudyLevelFormVariableRemarks { get; set; }
 
     }
 
