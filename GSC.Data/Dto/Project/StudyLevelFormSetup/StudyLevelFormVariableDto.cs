@@ -59,7 +59,7 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public VariableCategoryType? SystemType { get; set; }
         public bool IsNa { get; set; }
         public DateValidateType? DateValidate { get; set; }
-        public int? RelationProjectDesignVariableId { get; set; }
+        public int? RelationStudyLevelFormVariableId { get; set; }
         public bool IsNaValue { get; set; }
         public bool IsSystem { get; set; }
         public string Note { get; set; }

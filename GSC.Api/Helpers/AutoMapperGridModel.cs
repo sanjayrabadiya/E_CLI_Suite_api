@@ -404,7 +404,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName)).ReverseMap();
 
             CreateMap<StudyLevelForm, StudyLevelFormGridDto>()
-                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
+                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
                 .ForMember(x => x.VariableTemplateName, x => x.MapFrom(a => a.VariableTemplate.TemplateName))
                 .ForMember(x => x.Activity, x => x.MapFrom(a => a.Activity.CtmsActivity.ActivityName))
                 .ForMember(x => x.AppScreenName, x => x.MapFrom(a => a.AppScreen.ScreenName)).ReverseMap();

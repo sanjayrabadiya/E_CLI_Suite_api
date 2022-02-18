@@ -43,7 +43,7 @@ namespace GSC.Data.Entities.Project.StudyLevelFormSetup
         public StudyLevelForm StudyLevelForm { get; set; }
         public int DesignOrder { get; set; }
         public VariableCategory VariableCategory { get; set; }
-        public int? RelationProjectDesignVariableId { get; set; }
+        public int? RelationStudyLevelFormVariableId { get; set; }
         [NotMapped] 
         public string VariableCategoryName { get; set; }
         public VariableCategoryType? SystemType { get; set; }

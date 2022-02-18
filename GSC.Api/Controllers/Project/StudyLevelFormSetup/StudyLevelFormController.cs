@@ -28,11 +28,13 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         private readonly IStudyLevelFormVariableRepository _studyLevelFormVariableRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IStudyLevelFormVariableValueRepository _studyLevelFormVariableValueRepository;
+        private readonly IStudyLevelFormVariableRemarksRepository _studyLevelFormVariableRemarksRepository;
         public StudyLevelFormController(
             IUnitOfWork uow, IMapper mapper, IStudyLevelFormRepository studyLevelFormRepository,
             IVariableTemplateRepository variableTemplateRepository,
             IStudyLevelFormVariableRepository studyLevelFormVariableRepository,
-            IStudyLevelFormVariableValueRepository studyLevelFormVariableValueRepository)
+            IStudyLevelFormVariableValueRepository studyLevelFormVariableValueRepository,
+            IStudyLevelFormVariableRemarksRepository studyLevelFormVariableRemarksRepository)
         {
             _uow = uow;
             _mapper = mapper;
@@ -40,12 +42,21 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             _variableTemplateRepository = variableTemplateRepository;
             _studyLevelFormVariableRepository = studyLevelFormVariableRepository;
             _studyLevelFormVariableValueRepository = studyLevelFormVariableValueRepository;
+            _studyLevelFormVariableRemarksRepository = studyLevelFormVariableRemarksRepository;
+        }
+
+        // GET: api/<controller>
+        [HttpGet("{isDeleted:bool?}")]
+        public IActionResult Get(bool isDeleted)
+        {
+            var form = _studyLevelFormRepository.GetStudyLevelFormList(isDeleted);
+            return Ok(form);
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var studyLevelForm = _studyLevelFormRepository.FindBy(x => x.ProjectId == id).FirstOrDefault();
+            var studyLevelForm = _studyLevelFormRepository.FindBy(x => x.Id == id).FirstOrDefault();
             var studyLevelFormDto = _mapper.Map<StudyLevelFormDto>(studyLevelForm);
             return Ok(studyLevelFormDto);
         }
@@ -57,7 +68,15 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             studyLevelFormDto.Id = 0;
             var studyLevelForm = _mapper.Map<StudyLevelForm>(studyLevelFormDto);
-            _studyLevelFormRepository.Add(studyLevelForm);
+
+            var validate = _studyLevelFormRepository.Duplicate(studyLevelForm);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            studyLevelForm.Variables = new List<StudyLevelFormVariable>();
 
             var variableTemplate = _variableTemplateRepository.GetTemplate(studyLevelFormDto.VariableTemplateId);
 
@@ -92,6 +111,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                     studyLevelFormVariable.Values.Add(studyLevelFormVariableValue);
                 }
             }
+            _studyLevelFormRepository.Add(studyLevelForm);
 
             if (_uow.Save() <= 0) throw new Exception("Creating setup form failed on save.");
             return Ok(studyLevelForm.Id);
@@ -106,10 +126,90 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             var studyLevelForm = _mapper.Map<StudyLevelForm>(studyLevelFormDto);
 
+            var validate = _studyLevelFormRepository.Duplicate(studyLevelForm);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
             _studyLevelFormRepository.Update(studyLevelForm);
 
             if (_uow.Save() <= 0) throw new Exception("Update setup form failed on save.");
             return Ok(studyLevelForm.Id);
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var record = _studyLevelFormRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+
+            _studyLevelFormRepository.Delete(record);
+
+            var studyLevelFormVariable = _studyLevelFormVariableRepository.FindByInclude(x => x.StudyLevelFormId == record.Id).ToList();
+
+            studyLevelFormVariable.ForEach(temp =>
+            {
+                _studyLevelFormVariableRepository.Delete(temp);
+
+                var studyLevelFormVariableValue = _studyLevelFormVariableValueRepository.FindByInclude(x => x.StudyLevelFormVariableId == temp.Id).ToList();
+                studyLevelFormVariableValue.ForEach(variableValue =>
+                {
+                    _studyLevelFormVariableValueRepository.Delete(variableValue);
+                });
+
+                var studyLevelFormVariableRemarks = _studyLevelFormVariableRemarksRepository.FindByInclude(x => x.StudyLevelFormVariableId == temp.Id).ToList();
+                studyLevelFormVariableRemarks.ForEach(remarks =>
+                {
+                    _studyLevelFormVariableRemarksRepository.Delete(remarks);
+                });
+            });
+            _uow.Save();
+
+            return Ok();
+        }
+
+        [HttpPatch("{id}")]
+        public ActionResult Active(int id)
+        {
+            var record = _studyLevelFormRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+
+            var validate = _studyLevelFormRepository.Duplicate(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            _studyLevelFormRepository.Active(record);
+
+            var studyLevelFormVariable = _studyLevelFormVariableRepository.FindByInclude(x => x.StudyLevelFormId == record.Id).ToList();
+
+            studyLevelFormVariable.ForEach(temp =>
+            {
+                _studyLevelFormVariableRepository.Active(temp);
+
+                var studyLevelFormVariableValue = _studyLevelFormVariableValueRepository.FindByInclude(x => x.StudyLevelFormVariableId == temp.Id).ToList();
+                studyLevelFormVariableValue.ForEach(variableValue =>
+                {
+                    _studyLevelFormVariableValueRepository.Active(variableValue);
+                });
+
+                var studyLevelFormVariableRemarks = _studyLevelFormVariableRemarksRepository.FindByInclude(x => x.StudyLevelFormVariableId == temp.Id).ToList();
+                studyLevelFormVariableRemarks.ForEach(remarks =>
+                {
+                    _studyLevelFormVariableRemarksRepository.Active(remarks);
+                });
+            });
+            _uow.Save();
+
+            return Ok();
         }
     }
 }

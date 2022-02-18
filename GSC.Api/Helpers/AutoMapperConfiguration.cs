@@ -436,6 +436,9 @@ namespace GSC.Api.Helpers
             CreateMap<StudyLevelFormVariable, StudyLevelFormVariableDto>().ReverseMap();
             CreateMap<StudyLevelFormVariableValue, StudyLevelFormVariableValueDto>().ReverseMap();
             CreateMap<StudyLevelFormVariableRemarks, StudyLevelFormVariableRemarksDto>().ReverseMap();
+            CreateMap<Variable, StudyLevelFormVariable>().ReverseMap();
+            CreateMap<VariableValue, StudyLevelFormVariableValue>().ReverseMap();
+            CreateMap<VariableRemarks, StudyLevelFormVariableRemarks>().ReverseMap();
         }
     }
 }
