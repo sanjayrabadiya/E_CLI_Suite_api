@@ -359,6 +359,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<ICtmsActivityRepository, CtmsActivityRepository>();
             services.AddScoped<ICtmsSettingsRepository, CtmsSettingsRepository>();
             services.AddScoped<IStudyLevelFormRepository, StudyLevelFormRepository>();
+            services.AddScoped<IStudyLevelFormVariableRepository, StudyLevelFormVariableRepository>();
+            services.AddScoped<IStudyLevelFormVariableValueRepository, StudyLevelFormVariableValueRepository>();
+            services.AddScoped<IStudyLevelFormVariableRemarksRepository, StudyLevelFormVariableRemarksRepository>();
         }
     }
 }

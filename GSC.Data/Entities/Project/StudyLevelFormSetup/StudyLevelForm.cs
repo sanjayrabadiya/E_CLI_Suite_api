@@ -15,7 +15,7 @@ namespace GSC.Data.Entities.Project.StudyLevelFormSetup
         public Master.Project Project { get; set; }
         public AppScreen AppScreen { get; set; }
         public Activity Activity { get; set; }
-       // public VariableTemplate VariableTemplate { get; set; }
+        public VariableTemplate VariableTemplate { get; set; }
         public IList<StudyLevelFormVariable> Variables { get; set; }
     }
 }
