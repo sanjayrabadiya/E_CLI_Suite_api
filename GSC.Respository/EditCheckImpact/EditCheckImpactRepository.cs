@@ -21,6 +21,7 @@ namespace GSC.Respository.EditCheckImpact
         private readonly IImpactService _impactService;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
         private List<EditCheckTargetValidationList> _editCheckTargetValidationLists;
+        private List<EditCheckTargetEnableViewModel> _editCheckTargetEnableViewModels;
         private readonly IMeddraCodingRepository _meddraCodingRepository;
         private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
         private readonly IScreeningTemplateReviewRepository _screeningTemplateReviewRepository;
@@ -298,6 +299,9 @@ namespace GSC.Respository.EditCheckImpact
             if (_editCheckTargetValidationLists == null)
                 _editCheckTargetValidationLists = new List<EditCheckTargetValidationList>();
 
+            if (_editCheckTargetEnableViewModels == null)
+                _editCheckTargetEnableViewModels = new List<EditCheckTargetEnableViewModel>();
+
             var variableIds = editCheckValidateDto.Where(a => a.ScreeningTemplateId > 0).Select(c => c.ProjectDesignVariableId).Distinct().ToList();
             variableIds.ForEach(t =>
             {
@@ -312,13 +316,13 @@ namespace GSC.Respository.EditCheckImpact
 
                     if (r.Operator == Operator.Enable)
                     {
-                        var enableVariable = editCheckValidateDto.FirstOrDefault(b => b.ProjectDesignVariableId == t && b.ValidateType == EditCheckValidateType.Passed);
+                        var enableVariable = _editCheckTargetEnableViewModels.FirstOrDefault(b => b.ProjectDesignVariableId == t);
                         if (enableVariable != null)
                         {
                             editCheckTarget.InfoType = EditCheckInfoType.Info;
                             editCheckTarget.EditCheckDisable = false;
                             editCheckTarget.IsValueSet = false;
-                            editCheckTarget.Value = enableVariable.ScreeningTemplateValue;
+                            editCheckTarget.Value = enableVariable.Value;
                         }
                         else
                         {
@@ -341,6 +345,9 @@ namespace GSC.Respository.EditCheckImpact
                             if (isQueryRaise) editCheckTarget.HasQueries = true;
                             r.ValidateType = EditCheckValidateType.Failed;
                         }
+
+                        if (r.ValidateType == EditCheckValidateType.Passed)
+                            _editCheckTargetEnableViewModels.Add(new EditCheckTargetEnableViewModel { ProjectDesignVariableId = t, Value = r.ScreeningTemplateValue });
 
                     }
                     else if (r.IsFormula || r.Operator == Operator.HardFetch)
@@ -671,21 +678,23 @@ namespace GSC.Respository.EditCheckImpact
                 Select(x => new EditCheckValidate
                 {
                     Id = x.EditCheckDetailId,
-                    CollectionValue = x.CollectionValue,
-                    CollectionValue2 = x.CollectionValue2,
-                    OperatorName = x.Operator != null ? x.Operator.GetDescription() : "",
+                    CollectionValue = x.IsNa ? "1" : x.CollectionValue,
+                    CollectionValue2 = x.IsNa ? "1" : x.CollectionValue2,
+                    OperatorName = x.Operator != null ? x.IsNa ? Operator.Equal.GetDescription() : x.Operator.GetDescription() : "",
                     LogicalOperator = x.LogicalOperator,
                     EndParens = x.EndParens,
                     StartParens = x.StartParens,
                     CollectionSource = x.CollectionSource,
                     DataType = x.DataType,
-                    InputValue = x.IsFormula && x.CollectionSource == CollectionSources.NumericScale ? x.NumberScale.ToString() : x.ScreeningTemplateValue,
+                    InputValue = x.IsFormula && x.CollectionSource == CollectionSources.NumericScale ?
+                    x.NumberScale.ToString() : x.IsNa ? "1" : x.ScreeningTemplateValue,
                     IsReferenceValue = x.IsReferenceValue,
-                    Operator = x.Operator,
+                    Operator = x.IsNa ? Operator.Equal : x.Operator,
                     IsFormula = x.IsFormula,
                     IsTarget = x.IsTarget,
                     CheckBy = x.CheckBy
                 }).ToList();
+
 
 
                 var validateResult = _editCheckRuleRepository.ValidateEditCheck(editCheckValidates);
