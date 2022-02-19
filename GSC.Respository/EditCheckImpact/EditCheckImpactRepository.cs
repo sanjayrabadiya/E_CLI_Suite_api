@@ -761,14 +761,23 @@ namespace GSC.Respository.EditCheckImpact
                  collectionSource == CollectionSources.NumericScale ||
                  collectionSource == CollectionSources.ComboBox)
             {
-                decimal id;
-                decimal.TryParse(value, out id);
-                if (id > 0)
-                    valueName = _projectDesignVariableValueRepository.All.Where(x => x.Id == id).Select(t => t.ValueName).FirstOrDefault();
+                int id;
+                if (!string.IsNullOrEmpty(value))
+                {
+                    int.TryParse(value, out id);
+                    if (id > 0)
+                        valueName = _projectDesignVariableValueRepository.All.Where(x => x.Id == id).Select(t => t.ValueName).FirstOrDefault();
+                }
 
-                decimal.TryParse(oldValueName, out id);
-                if (id > 0)
-                    oldValueName = _projectDesignVariableValueRepository.All.Where(x => x.Id == id).Select(t => t.ValueName).FirstOrDefault();
+                if (!string.IsNullOrEmpty(oldValueName))
+                {
+                 
+                    int.TryParse(oldValueName, out id);
+                    if (id > 0)
+                        oldValueName = _projectDesignVariableValueRepository.All.Where(x => x.Id == id).Select(t => t.ValueName).FirstOrDefault();
+                }
+
+                
 
             }
 
