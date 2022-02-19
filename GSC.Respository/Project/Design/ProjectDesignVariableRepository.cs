@@ -47,7 +47,8 @@ namespace GSC.Respository.Project.Design
                 Code = c.Annotation,
                 DataType = c.DataType,
                 CollectionSources = c.CollectionSource,
-                ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList())
+                ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList()),
+                InActive = c.InActiveVersion != null
             }).ToList();
 
         }

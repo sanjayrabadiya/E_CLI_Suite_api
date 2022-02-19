@@ -11,6 +11,16 @@ namespace GSC.Data.Dto.Master
         public string Value { get; set; }
         public string Code { get; set; }
         public object ExtraData { get; set; }
+        public bool InActive { get; set; }
+    }
+
+
+    public class DesignDropDownDto
+    {
+        public int Id { get; set; }
+        public string Value { get; set; }
+        public bool IsAnyLive { get; set; }
+        public bool IsTrial { get; set; }
     }
 
 
@@ -21,6 +31,7 @@ namespace GSC.Data.Dto.Master
         public DataType? DataType { get; set; }
         public string VisitName { get; set; }
         public CollectionSources CollectionSources { get; set; }
+        public bool InActive { get; set; }
         public List<ProjectDesignVariableValueDropDown> ExtraData { get; set; }        
     }
 

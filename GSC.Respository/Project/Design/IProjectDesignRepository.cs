@@ -9,7 +9,7 @@ namespace GSC.Respository.Project.Design
 {
     public interface IProjectDesignRepository : IGenericRepository<ProjectDesign>
     {
-        IList<DropDownDto> GetProjectByDesignDropDown();
+        IList<DesignDropDownDto> GetProjectByDesignDropDown();
         bool IsCompleteExist(int projectDesignId, string moduleName, bool isComplete);
         bool IsWorkFlowOrEditCheck(int projectDesignid);
 

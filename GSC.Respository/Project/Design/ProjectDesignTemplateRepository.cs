@@ -177,7 +177,8 @@ namespace GSC.Respository.Project.Design
                 {
                     Id = t.Id,
                     Value = t.TemplateName,
-                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : ""
+                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : "",
+                    InActive = t.InActiveVersion != null
                 }).ToList();
 
             return templates;
@@ -199,6 +200,7 @@ namespace GSC.Respository.Project.Design
                     Id = t.Id,
                     Value = t.TemplateName,
                     Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : "",
+                    InActive = t.InActiveVersion != null,
                     ExtraData = t.Variables.Where(y => y.Id != refVariable
                                                && !_context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Select(x => x.ProjectDesignVariableId).Contains(y.Id)
                                                && (collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :

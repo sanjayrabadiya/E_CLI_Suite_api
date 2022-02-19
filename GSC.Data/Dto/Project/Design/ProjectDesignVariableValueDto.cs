@@ -46,6 +46,7 @@ namespace GSC.Data.Dto.Project.Design
         public int Id { get; set; }
         public string ValueCode { get; set; }
         public string ValueName { get; set; }
+        public bool InActive { get; set; }
     }
 
     public class ProjectDesignReportDto

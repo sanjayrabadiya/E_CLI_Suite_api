@@ -22,18 +22,19 @@ namespace GSC.Respository.Project.Design
             _context = context;
         }
 
-        public IList<DropDownDto> GetProjectByDesignDropDown()
+        public IList<DesignDropDownDto> GetProjectByDesignDropDown()
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
             return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                                   && x.DeletedDate == null
                                   && projectList.Any(c => c == x.ProjectId)
-                ).Select(c => new DropDownDto
+                ).Select(c => new DesignDropDownDto
                 {
                     Id = c.Id,
                     Value = c.Project.ProjectCode,
-                    ExtraData = c.StudyVersions.Any(t => t.VersionStatus == Helper.VersionStatus.OnTrial && t.DeletedDate == null)
+                    IsTrial = c.StudyVersions.Any(t => t.VersionStatus == Helper.VersionStatus.OnTrial && t.DeletedDate == null),
+                    IsAnyLive = c.StudyVersions.Any(t => t.VersionStatus == Helper.VersionStatus.GoLive && t.DeletedDate == null)
 
                 }).OrderBy(o => o.Value).ToList();
         }

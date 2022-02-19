@@ -85,6 +85,7 @@ namespace GSC.Respository.Project.Design
                     Code = t.StudyVersion != null || t.InActiveVersion != null ?
                     "( V : " + t.StudyVersion + (t.StudyVersion != null && t.InActiveVersion != null ? " - " : "" + t.InActiveVersion) + ")" : "",
                     ExtraData = t.IsNonCRF,
+                    InActive = t.InActiveVersion != null
                 }).ToList();
 
             return visits;

@@ -82,18 +82,6 @@ namespace GSC.Api.Controllers.Project.Workflow
             return Ok(projectDesign);
         }
 
-        [HttpGet("checkProjectWorkflowLocked/{projectDesignId}")]
-        public IActionResult checkProjectWorkflowLocked(int projectDesignId)
-        {
-            if (projectDesignId <= 0) return BadRequest();
-            var projectDesign = _projectDesignRepository
-                .FindBy(t => t.Id == projectDesignId && t.DeletedDate == null).FirstOrDefault();
-
-            var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
-            if (projectDesign != null) projectDesignDto.Locked = !_studyVersionRepository.IsOnTrialByProjectDesing(projectDesignDto.Id);
-
-            return Ok(projectDesignDto);
-        }
 
         [HttpPost]
         public IActionResult Post([FromBody] ProjectWorkflowDto projectWorkflowDto)
