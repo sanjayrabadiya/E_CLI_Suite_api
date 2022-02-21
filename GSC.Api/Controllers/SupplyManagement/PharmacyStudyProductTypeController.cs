@@ -19,13 +19,16 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IPharmacyStudyProductTypeRepository _pharmacyStudyProductTypeRepository;
+        private readonly IProductReceiptRepository _productReceiptRepository;
         private readonly IUnitOfWork _uow;
 
         public PharmacyStudyProductTypeController(IPharmacyStudyProductTypeRepository pharmacyStudyProductTypeRepository,
+            IProductReceiptRepository productReceiptRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _pharmacyStudyProductTypeRepository = pharmacyStudyProductTypeRepository;
+            _productReceiptRepository = productReceiptRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -81,6 +84,13 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var result = _productReceiptRepository.StudyProductTypeAlreadyUse(pharmacyStudyProductTypeDto.Id);
+            if (!string.IsNullOrEmpty(result))
+            {
+                ModelState.AddModelError("Message", result);
+                return BadRequest(ModelState);
+            }
+
             var pharmacyStudyProductType = _mapper.Map<PharmacyStudyProductType>(pharmacyStudyProductTypeDto);
             var validate = _pharmacyStudyProductTypeRepository.Duplicate(pharmacyStudyProductType);
             if (!string.IsNullOrEmpty(validate))
@@ -102,6 +112,14 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
+
+            var validate = _productReceiptRepository.StudyProductTypeAlreadyUse(id);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
 
             _pharmacyStudyProductTypeRepository.Delete(record);
             _uow.Save();

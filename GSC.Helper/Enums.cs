@@ -793,4 +793,12 @@ namespace GSC.Helper
         [Description("Reference Range High")] ReferenceRangeHigh = 16
 
     }
+
+    public enum ProductVerificationStatus : short
+    {
+        [Description("Quarantine")] Quarantine = 1,
+        [Description("Sent For Approval")] SentForApproval = 2,
+        [Description("Approved")] Approved = 3,
+        [Description("Rejected")] Rejected = 4,
+    }
 }

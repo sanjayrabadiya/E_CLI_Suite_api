@@ -3,6 +3,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.SupplyManagement;
@@ -28,28 +29,30 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly ICentralDepotRepository _centralDepotRepository;
+        private readonly IGSCContext _context;
+        private readonly IProductVerificationRepository _productVerificationRepository;
+        private readonly IProductVerificationDetailRepository _productVerificationDetailRepository;
 
 
         public ProductReceiptController(IProductReceiptRepository productReceiptRepository,
             ICentralDepotRepository centralDepotRepository,
             IUploadSettingRepository uploadSettingRepository,
+            IProductVerificationDetailRepository productVerificationDetailRepository,
+            IProductVerificationRepository productVerificationRepository,
+            IGSCContext context,
         IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _productReceiptRepository = productReceiptRepository;
             _centralDepotRepository = centralDepotRepository;
             _uploadSettingRepository = uploadSettingRepository;
-
+            _productVerificationRepository = productVerificationRepository;
+            _productVerificationDetailRepository = productVerificationDetailRepository;
+            _context = context;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
-
-        //[HttpGet("{isDeleted:bool?}")]
-        //public IActionResult Get(bool isDeleted)
-        //{
-        //    return Ok(_productReceiptRepository.GetProductReceiptList(isDeleted));
-        //}
 
         [HttpGet("GetProductReceiptList/{projectId}/{isDeleted:bool?}")]
         public IActionResult GetProductReceiptList(int projectId, bool isDeleted)
@@ -58,8 +61,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             var productReciept = _productReceiptRepository.GetProductReceiptList(projectId, isDeleted);
             productReciept.ForEach(t => t.PathName = documentUrl + t.PathName);
             return Ok(productReciept);
-
-            //return Ok();
         }
 
         [HttpPost]
@@ -71,13 +72,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             //set file path and extension
             if (productReceiptDto.FileModel?.Base64?.Length > 0)
             {
-                productReceiptDto.PathName = DocumentService.SaveUploadDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductReceipt,"");
+                productReceiptDto.PathName = DocumentService.SaveUploadDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductReceipt, "");
                 productReceiptDto.MimeType = productReceiptDto.FileModel.Extension;
-                productReceiptDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + productReceiptDto.FileModel.Extension;
+                // productReceiptDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + productReceiptDto.FileModel.Extension;
             }
 
-
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);
+            productReceipt.Status = ProductVerificationStatus.Quarantine;
             var validate = _productReceiptRepository.Duplicate(productReceipt);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -110,17 +111,20 @@ namespace GSC.Api.Controllers.SupplyManagement
             var productRec = _productReceiptRepository.Find(productReceiptDto.Id);
             if (productReceiptDto.FileModel?.Base64?.Length > 0)
             {
-                productReceiptDto.PathName = DocumentService.SaveUploadDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductReceipt, "");
+                productReceiptDto.PathName = DocumentService.SaveUploadDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductReceipt, "");
                 productReceiptDto.MimeType = productReceiptDto.FileModel.Extension;
-                productReceiptDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + productReceiptDto.FileModel.Extension;
+                //productReceiptDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + productReceiptDto.FileModel.Extension;
             }
-            else {
+            else
+            {
                 productReceiptDto.PathName = productRec.PathName;
                 productReceiptDto.MimeType = productRec.MimeType;
-                productReceiptDto.FileName = productRec.FileName;
+                // productReceiptDto.FileName = productRec.FileName;
             }
 
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);
+            productReceipt.Status = productRec.Status;
+
             var validate = _productReceiptRepository.Duplicate(productReceipt);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -129,7 +133,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
 
             _productReceiptRepository.AddOrUpdate(productReceipt);
-
             if (_uow.Save() <= 0) throw new Exception("Updating product receipt failed on save.");
             return Ok(productReceipt.Id);
         }
@@ -142,7 +145,17 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (record == null)
                 return NotFound();
 
+            var verification = _productVerificationRepository.All.Where(x => x.ProductReceiptId == id).FirstOrDefault();
+            if (verification != null)
+                _productVerificationRepository.Delete(verification);
+
+            var verificationDetail = _productVerificationDetailRepository.All.Where(x => x.ProductReceiptId == id).FirstOrDefault();
+            if (verificationDetail != null)
+                _productVerificationDetailRepository.Delete(verificationDetail);
+
             _productReceiptRepository.Delete(record);
+
+
             _uow.Save();
 
             return Ok();
@@ -163,6 +176,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
 
             _productReceiptRepository.Active(record);
+            var verification = _productVerificationRepository.All.Where(x => x.ProductReceiptId == id).FirstOrDefault();
+            if (verification != null)
+                _productVerificationRepository.Active(verification);
+
+            var verificationDetail = _productVerificationDetailRepository.All.Where(x => x.ProductReceiptId == id).FirstOrDefault();
+            if (verificationDetail != null)
+                _productVerificationDetailRepository.Active(verificationDetail);
             _uow.Save();
 
             return Ok();
@@ -173,6 +193,13 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult GetProductReceipteDropDown(int projectId)
         {
             return Ok(_productReceiptRepository.GetProductReceipteDropDown(projectId));
+        }
+
+        [HttpGet]
+        [Route("IsCentralExists/{projectId}")]
+        public IActionResult IsCentralExists(int projectId)
+        {
+            return Ok(_centralDepotRepository.IsCentralExists(projectId));
         }
     }
 }

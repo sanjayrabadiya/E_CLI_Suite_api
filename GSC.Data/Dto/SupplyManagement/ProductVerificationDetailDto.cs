@@ -8,7 +8,7 @@ namespace GSC.Data.Dto.SupplyManagement
     public class ProductVerificationDetailDto : BaseDto
     {
         public int ProductReceiptId { get; set; }
-        public int ProductVerificationId { get; set; }
+        // public int ProductVerificationId { get; set; }
         public int? QuantityVerification { get; set; }
         public string Description { get; set; }
         public string Remarks { get; set; }
@@ -25,7 +25,6 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool IsApprove { get; set; }
         public bool IsSendForApprove { get; set; }
         public int? VerificationApprovalTemplateId { get; set; }
-        public string Comment { get; set; }
         public int? RetentionSampleQty { get; set; }
     }
 }

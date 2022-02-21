@@ -11,5 +11,9 @@ namespace GSC.Respository.SupplyManagement
         List<DropDownDto> GetStorageAreaByDepoDropDown();
         List<CentralDepotGridDto> GetCentralDepotList(bool isDeleted);
         List<DropDownDto> GetStorageAreaByProjectDropDown(int ProjectId);
+        string Duplicate(CentralDepot objSave);
+        bool IsCentralExists(int ProjectId);
+        string ExistsInReceipt(int Id);
+        string StudyUseInReceipt(CentralDepot objSave);
     }
 }

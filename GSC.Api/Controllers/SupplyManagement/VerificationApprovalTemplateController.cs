@@ -26,6 +26,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IVerificationApprovalTemplateHistoryRepository _verificationApprovalTemplateHistoryRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IProductVerificationDetailRepository _productVerificationDetail;
+        private readonly IProductReceiptRepository _productReceiptRepository;
         private readonly IVerificationApprovalTemplateValueChildRepository _verificationApprovalTemplateValueChildRepository;
         private readonly IVerificationApprovalTemplateValueRepository _verificationApprovalTemplateValueRepository;
         private readonly IVerificationApprovalTemplateValueAuditRepository _verificationApprovalTemplateValueAuditRepository;
@@ -35,7 +36,8 @@ namespace GSC.Api.Controllers.SupplyManagement
         public VerificationApprovalTemplateController(IVerificationApprovalTemplateRepository verificationApprovalTemplateRepository,
             IVerificationApprovalTemplateHistoryRepository verificationApprovalTemplateHistoryRepository,
             IProductVerificationDetailRepository productVerificationDetail,
-            IVerificationApprovalTemplateValueAuditRepository verificationApprovalTemplateValueAuditRepository,
+            IProductReceiptRepository productReceiptRepository,
+        IVerificationApprovalTemplateValueAuditRepository verificationApprovalTemplateValueAuditRepository,
         IUnitOfWork uow, IMapper mapper,
             IVariableTemplateRepository variableTemplateRepository,
             IVerificationApprovalTemplateValueChildRepository verificationApprovalTemplateValueChildRepository,
@@ -49,6 +51,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _productVerificationDetail = productVerificationDetail;
             _verificationApprovalTemplateValueChildRepository = verificationApprovalTemplateValueChildRepository;
             _verificationApprovalTemplateValueRepository = verificationApprovalTemplateValueRepository;
+            _productReceiptRepository = productReceiptRepository;
             _supplyManagementConfigurationRepository = supplyManagementConfigurationRepository;
             _uow = uow;
             _mapper = mapper;
@@ -60,7 +63,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("GetTemplate/{id}")]
         public IActionResult GetTemplate([FromRoute] int id)
         {
-            var TemplateId = _verificationApprovalTemplateRepository.All.Where(x=>x.ProductVerificationDetailId == id).FirstOrDefault().VariableTemplateId;
+            var TemplateId = _verificationApprovalTemplateRepository.All.Where(x => x.ProductVerificationDetailId == id).FirstOrDefault().VariableTemplateId;
             var designTemplate = _variableTemplateRepository.GetVerificationApprovalTemplate(TemplateId);
             return Ok(_verificationApprovalTemplateRepository.GetVerificationApprovalTemplate(designTemplate, id));
         }
@@ -85,7 +88,17 @@ namespace GSC.Api.Controllers.SupplyManagement
             verificationApprovalTemplate.VerificationApprovalTemplateHistory = new VerificationApprovalTemplateHistory();
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendBy = _jwtTokenAccesser.UserId;
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendOn = _jwtTokenAccesser.GetClientDate();
+            verificationApprovalTemplate.VerificationApprovalTemplateHistory.Status = Helper.ProductVerificationStatus.SentForApproval; 
             _verificationApprovalTemplateHistoryRepository.Add(verificationApprovalTemplate.VerificationApprovalTemplateHistory);
+
+            // Set status Send for Approval
+            var verificationDetail = _productVerificationDetail.Find(verificationApprovalTemplate.ProductVerificationDetailId);
+            var receipt = _productReceiptRepository.Find(verificationDetail.ProductReceiptId);
+            if (receipt != null)
+            {
+                receipt.Status = Helper.ProductVerificationStatus.SentForApproval;
+                _productReceiptRepository.Update(receipt);
+            }
 
             if (_uow.Save() <= 0) throw new Exception("Creating Verification Approval Template failed on save.");
             return Ok(verificationApprovalTemplate.Id);
@@ -136,6 +149,25 @@ namespace GSC.Api.Controllers.SupplyManagement
             verificationApprovalTemplateDto.VerificationApprovalTemplateId = verification.VerificationApprovalTemplateId;
 
             var verificationApprovalTemplate = _mapper.Map<VerificationApprovalTemplateHistory>(verificationApprovalTemplateDto);
+            // Set status Send for Approval
+            var verificationTemplate = _verificationApprovalTemplateRepository.Find(verificationApprovalTemplateDto.VerificationApprovalTemplateId);
+            var verificationDetail = _productVerificationDetail.Find(verificationTemplate.ProductVerificationDetailId);
+            var receipt = _productReceiptRepository.Find(verificationDetail.ProductReceiptId);
+            if (receipt != null)
+            {
+                if (verificationApprovalTemplateDto.IsSendBack)
+                {
+                    verificationApprovalTemplate.Status = Helper.ProductVerificationStatus.Rejected;
+                    receipt.Status = Helper.ProductVerificationStatus.Rejected;
+                }
+                else
+                {
+                    verificationApprovalTemplate.Status = Helper.ProductVerificationStatus.SentForApproval;
+                    receipt.Status = Helper.ProductVerificationStatus.SentForApproval;
+                }
+                _productReceiptRepository.Update(receipt);
+            }
+
             _verificationApprovalTemplateHistoryRepository.Add(verificationApprovalTemplate);
             if (_uow.Save() <= 0) throw new Exception("Updating Verification Approval Template failed on save.");
             return Ok(verificationApprovalTemplate.Id);
@@ -163,15 +195,40 @@ namespace GSC.Api.Controllers.SupplyManagement
                 var detail = _verificationApprovalTemplateHistoryRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id).OrderByDescending(x => x.Id).LastOrDefault();
                 history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
                 history.IsSendBack = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.IsSendBack;
+                history.AuditReasonId = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.AuditReasonId;
+                history.ReasonOth = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.ReasonOth;
+                history.Status = Helper.ProductVerificationStatus.Rejected;
+                history.SendBy = _jwtTokenAccesser.UserId;
+                history.SendOn = _jwtTokenAccesser.GetClientDate();
+                _verificationApprovalTemplateHistoryRepository.Add(history);
+            }
+            else
+            {
+                var detail = _verificationApprovalTemplateHistoryRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id).OrderByDescending(x => x.Id).LastOrDefault();
+                history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
+                history.IsSendBack = false;
+                history.AuditReasonId = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.AuditReasonId;
+                history.ReasonOth = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.ReasonOth;
+                history.Status = Helper.ProductVerificationStatus.Approved;
                 history.SendBy = _jwtTokenAccesser.UserId;
                 history.SendOn = _jwtTokenAccesser.GetClientDate();
                 _verificationApprovalTemplateHistoryRepository.Add(history);
             }
             _verificationApprovalTemplateRepository.Update(verificationApprovalTemplate);
 
+            // Set status Send for Approval
+            var verificationDetail = _productVerificationDetail.Find(verificationApprovalTemplate.ProductVerificationDetailId);
+            var receipt = _productReceiptRepository.Find(verificationDetail.ProductReceiptId);
+            if (receipt != null)
+            {
+                if (verificationApprovalTemplateDto.IsApprove)
+                    receipt.Status = Helper.ProductVerificationStatus.Approved;
+                else
+                    receipt.Status = Helper.ProductVerificationStatus.Rejected;
+                _productReceiptRepository.Update(receipt);
+            }
 
             // Verification template value save
-
             if (verificationApprovalTemplateDto.VerificationApprovalTemplateValueList != null)
             {
                 foreach (var item in verificationApprovalTemplateDto.VerificationApprovalTemplateValueList)
@@ -215,6 +272,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                     }
                 }
             }
+
             if (_uow.Save() <= 0) throw new Exception("Updating Verification Approval Template failed on save.");
             return Ok(verificationApprovalTemplate.Id);
         }

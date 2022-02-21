@@ -11,5 +11,6 @@ namespace GSC.Respository.SupplyManagement
         string Duplicate(ProductReceipt objSave);
         List<DropDownDto> GetProductReceipteDropDown(int ProjectId);
         List<ProductReceiptGridDto> GetProductReceiptList(int ProjectId, bool isDeleted);
+        string StudyProductTypeAlreadyUse(int PharmacyStudyProductTypeId);
     }
 }

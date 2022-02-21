@@ -89,7 +89,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 productVerificationDto.PathName = DocumentService.SaveUploadDocument(productVerificationDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductVerification,"");
                 productVerificationDto.MimeType = productVerificationDto.FileModel.Extension;
-                productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
+                //productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
             }
 
             var productVerification = _mapper.Map<ProductVerification>(productVerificationDto);
@@ -114,13 +114,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 productVerificationDto.PathName = DocumentService.SaveDocument(productVerificationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.ProductReceipt, "");
                 productVerificationDto.MimeType = productVerificationDto.FileModel.Extension;
-                productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
+                //productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
             }
             else
             {
                 productVerificationDto.PathName = productRec.PathName;
                 productVerificationDto.MimeType = productRec.MimeType;
-                productVerificationDto.FileName = productRec.FileName;
+               // productVerificationDto.FileName = productRec.FileName;
             }
 
             var productVerification = _mapper.Map<ProductVerification>(productVerificationDto);
@@ -139,10 +139,10 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return NotFound();
             _productVerificationRepository.Delete(record);
 
-            var verifyRecord = _productVerificationDetailRepository.FindByInclude(x => x.ProductVerificationId == id).ToList();
+            var verifyRecord = _productVerificationDetailRepository.All.Where(x => x.ProductReceiptId == record.ProductReceiptId).FirstOrDefault();
 
             if (verifyRecord != null)
-                _productVerificationDetailRepository.Delete(verifyRecord[0]);
+                _productVerificationDetailRepository.Delete(verifyRecord);
 
             _uow.Save();
             return Ok();
@@ -184,10 +184,10 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             _productVerificationRepository.Active(record);
 
-            var verifyRecord = _productVerificationDetailRepository.FindByInclude(x => x.ProductVerificationId == id).ToList();
+            //var verifyRecord = _productVerificationDetailRepository.FindByInclude(x => x.ProductVerificationId == id).ToList();
 
-            if (verifyRecord != null)
-                _productVerificationDetailRepository.Active(verifyRecord[0]);
+            //if (verifyRecord != null)
+            //    _productVerificationDetailRepository.Active(verifyRecord[0]);
 
             _uow.Save();
 

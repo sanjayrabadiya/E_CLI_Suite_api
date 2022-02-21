@@ -39,7 +39,7 @@ namespace GSC.Respository.SupplyManagement
 
         public string Duplicate(PharmacyStudyProductType objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.ProductTypeId == objSave.ProductTypeId && x.ProductUnitType == objSave.ProductUnitType && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.ProductTypeId == objSave.ProductTypeId && x.DeletedDate == null))
                 return "Duplicate record found.";
             return "";
         }

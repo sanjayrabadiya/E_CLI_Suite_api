@@ -20,15 +20,17 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ConditionOfPackReceived { get; set; }
         public string TransporterName { get; set; }
         public FileModel FileModel { get; set; }
-        public string FileName { get; set; }
+        // public string FileName { get; set; }
         public string PathName { get; set; }
         public string MimeType { get; set; }
         public DepotType? DepotType { get; set; }
+        public ProductVerificationStatus? Status { get; set; }
     }
 
     public class ProductReceiptGridDto : BaseAuditDto
     {
         public string StudyCode { get; set; }
+        public string Status { get; set; }
         public string StorageArea { get; set; }
         public string PharmacyStudyProductType { get; set; }
         public string ProductName { get; set; }
@@ -38,7 +40,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ShipmentNo { get; set; }
         public string ConditionOfPackReceived { get; set; }
         public string TransporterName { get; set; }
-        public string FileName { get; set; }
+        // public string FileName { get; set; }
         public string PathName { get; set; }
         public string MimeType { get; set; }
     }

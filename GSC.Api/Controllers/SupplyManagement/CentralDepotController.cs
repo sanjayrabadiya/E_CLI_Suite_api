@@ -58,7 +58,20 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             centralDepotDto.Id = 0;
             var centralDepot = _mapper.Map<CentralDepot>(centralDepotDto);
-           
+            var validate = _centralDepotRepository.Duplicate(centralDepot);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            var receipt = _centralDepotRepository.StudyUseInReceipt(centralDepot);
+            if (!string.IsNullOrEmpty(receipt))
+            {
+                ModelState.AddModelError("Message", receipt);
+                return BadRequest(ModelState);
+            }
+
             _centralDepotRepository.Add(centralDepot);
             if (_uow.Save() <= 0) throw new Exception("Creating central depot failed on save.");
             return Ok(centralDepot.Id);
@@ -73,6 +86,26 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var centralDepot = _mapper.Map<CentralDepot>(centralDepotDto);
+            var validate = _centralDepotRepository.Duplicate(centralDepot);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            var exists = _centralDepotRepository.ExistsInReceipt(centralDepot.Id);
+            if (!string.IsNullOrEmpty(exists))
+            {
+                ModelState.AddModelError("Message", exists);
+                return BadRequest(ModelState);
+            }
+
+            var receipt = _centralDepotRepository.StudyUseInReceipt(centralDepot);
+            if (!string.IsNullOrEmpty(receipt))
+            {
+                ModelState.AddModelError("Message", receipt);
+                return BadRequest(ModelState);
+            }
 
             _centralDepotRepository.AddOrUpdate(centralDepot);
 
@@ -88,6 +121,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (record == null)
                 return NotFound();
 
+            var exists = _centralDepotRepository.ExistsInReceipt(id);
+            if (!string.IsNullOrEmpty(exists))
+            {
+                ModelState.AddModelError("Message", exists);
+                return BadRequest(ModelState);
+            }
+
             _centralDepotRepository.Delete(record);
             _uow.Save();
 
@@ -101,6 +141,13 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
+
+            var validate = _centralDepotRepository.Duplicate(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             _centralDepotRepository.Active(record);
             _uow.Save();

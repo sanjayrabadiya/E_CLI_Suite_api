@@ -19,7 +19,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string DistributedBy { get; set; }
         public string PackDesc { get; set; }
         public FileModel FileModel { get; set; }
-        public string FileName { get; set; }
+        // public string FileName { get; set; }
         public string PathName { get; set; }
         public string MimeType { get; set; }
         public string MarketAuthorization { get; set; }
@@ -65,5 +65,6 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? CompanyId { get; set; }
         public VerificationApprovalTemplate VerificationApprovalTemplate { get; set; }
         public VerificationApprovalTemplateHistory VerificationApprovalTemplateHistory { get; set; }
+        public string Status { get; set; }
     }
 }
