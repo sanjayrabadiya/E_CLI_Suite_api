@@ -25,7 +25,7 @@ namespace GSC.Respository.UserMgt
             IUserPasswordRepository userPasswordRepository)
             : base(context)
         {
-             _jwtTokenAccesser= jwtTokenAccesser;
+            _jwtTokenAccesser = jwtTokenAccesser;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
             _userPasswordRepository = userPasswordRepository;
@@ -33,7 +33,7 @@ namespace GSC.Respository.UserMgt
 
         public async Task<string> InsertOtp(string username)
         {
-            var user = _userRepository.FindByInclude(x => x.UserName == username && x.DeletedDate == null,x=>x.Company).FirstOrDefault();
+            var user = _userRepository.FindByInclude(x => x.UserName == username && x.DeletedDate == null, x => x.Company).FirstOrDefault();
             if (user == null) return "Invalid user name!";
 
             var userOtp = new UserOtp();
@@ -43,7 +43,7 @@ namespace GSC.Respository.UserMgt
             userOtp.CreatedDate = DateTime.Now;
             Add(userOtp);
 
-            await _emailSenderRespository.SendForgotPasswordEMail(user.Email,user.Phone, opt, user.UserName,user.Company.CompanyName);
+            await _emailSenderRespository.SendForgotPasswordEMail(user.Email, user.Phone, opt, user.UserName, user.Company.CompanyName);
             return "";
         }
 
@@ -95,7 +95,8 @@ namespace GSC.Respository.UserMgt
                 return "OTP you have entered is expire!";
 
             _userPasswordRepository.CreatePassword(userOtpDto.Password, user.Id);
-
+            
+            _emailSenderRespository.SendChangePasswordEMail(user.Email, userOtpDto.Password, user.UserName, user.Company?.CompanyName);
             return "";
         }
     }
