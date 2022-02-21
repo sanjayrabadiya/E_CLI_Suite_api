@@ -16,6 +16,7 @@ namespace GSC.Respository.Master
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
+        private readonly IGSCContext _context;
 
         public ActivityRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
@@ -23,6 +24,7 @@ namespace GSC.Respository.Master
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _context = context;
         }
 
         public List<DropDownDto> GetActivityDropDown()
@@ -44,6 +46,19 @@ namespace GSC.Respository.Master
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null
                     && x.AppScreenId == moduleId)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.CtmsActivity.ActivityName }).OrderBy(o => o.Value).ToList();
+        }
+
+        public string Duplicate(Activity objSave)
+        {
+            if (All.Any(x => x.Id != objSave.Id && x.AppScreenId == objSave.AppScreenId && x.ActivityCode == objSave.ActivityCode.Trim() && x.DeletedDate == null))
+                return "Duplicate Activity code : " + objSave.ActivityCode;
+            if (All.Any(x =>
+                x.Id != objSave.Id && x.AppScreenId == objSave.AppScreenId && x.CtmsActivityId == objSave.CtmsActivityId && x.DeletedDate == null))
+            {
+                var ActivityName = _context.CtmsActivity.Where(x => x.Id == objSave.CtmsActivityId).FirstOrDefault().ActivityName;
+                return "Duplicate Activity name : " + ActivityName;
+            }
+            return "";
         }
     }
 }

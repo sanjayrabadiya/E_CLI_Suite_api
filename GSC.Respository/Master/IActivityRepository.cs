@@ -10,5 +10,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetActivityDropDown();
         List<ActivityGridDto> GetActivityList(bool isDeleted);
         List<DropDownDto> GetActivityDropDownByModuleId(int moduleId);
+        string Duplicate(Activity objSave);
     }
 }

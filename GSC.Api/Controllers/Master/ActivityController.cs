@@ -60,6 +60,13 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             activityDto.Id = 0;
             var activity = _mapper.Map<Activity>(activityDto);
+            var validate = _activityRepository.Duplicate(activity);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
             _activityRepository.Add(activity);
             if (_uow.Save() <= 0) throw new Exception("Creating Contact Type failed on save.");
 
@@ -74,6 +81,12 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var activity = _mapper.Map<Activity>(activityDto);
+            var validate = _activityRepository.Duplicate(activity);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             _activityRepository.Update(activity);
             if (_uow.Save() <= 0) throw new Exception("Updating Contact Type failed on save.");
@@ -102,6 +115,14 @@ namespace GSC.Api.Controllers.Master
 
             if (record == null)
                 return NotFound();
+
+            var validate = _activityRepository.Duplicate(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
             _activityRepository.Active(record);
             _uow.Save();
 
