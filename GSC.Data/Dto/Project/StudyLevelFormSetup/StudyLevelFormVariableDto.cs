@@ -69,4 +69,12 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public double? StudyVersion { get; set; }
         public bool CollectionValueDisable { get; set; }
     }
+
+    public class StudyLevelFormVariableBasicDto : BaseDto
+    {
+        public string Value { get; set; }
+        public bool AllowActive { get; set; }
+        public int DesignOrder { get; set; }
+
+    }
 }
