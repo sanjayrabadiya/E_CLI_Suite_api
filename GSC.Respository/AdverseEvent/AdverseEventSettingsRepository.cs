@@ -41,9 +41,10 @@ namespace GSC.Respository.AdverseEvent
 
         public IList<DropDownDto> GetTemplateDropDownforPatientAEReporting(int projectId)
         {
+            var appscreen = _context.AppScreen.Where(c => c.ScreenCode == "mnu_adverseevent").FirstOrDefault();
             var templates = _context.ProjectDesignTemplate.Where(x =>
                             x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
-                            && x.VariableTemplate.ModuleId == Helper.AuditModule.AdverseEvent
+                            && x.VariableTemplate.AppScreenId == appscreen.Id
                             && x.IsParticipantView == true
                             && x.ProjectDesignVisit.DeletedDate == null
                             && x.ProjectDesignVisit.IsNonCRF == true
