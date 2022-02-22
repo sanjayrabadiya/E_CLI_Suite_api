@@ -35,6 +35,7 @@ namespace GSC.Api.Controllers.AdverseEvent
         private readonly IUnitOfWork _uow;
         private readonly IAEReportingValueRepository _aEReportingValueRepository;
         private readonly IGSCContext _context;
+        private readonly IAdverseEventSettingsRepository _adverseEventSettingsRepository;
         public AEReportingController(IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper,
             IAEReportingRepository iAEReportingRepository,
@@ -45,7 +46,8 @@ namespace GSC.Api.Controllers.AdverseEvent
             IEmailSenderRespository emailSenderRespository,
             IProjectRepository projectRepository,
             IAEReportingValueRepository aEReportingValueRepository,
-            IGSCContext context
+            IGSCContext context,
+            IAdverseEventSettingsRepository adverseEventSettingsRepository
             )
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -59,11 +61,18 @@ namespace GSC.Api.Controllers.AdverseEvent
             _projectRepository = projectRepository;
             _aEReportingValueRepository = aEReportingValueRepository;
             _context = context;
+            _adverseEventSettingsRepository = adverseEventSettingsRepository;
         }
 
         [HttpGet("GetAEReportingList")]
         public IActionResult GetAEReportingList()
         {
+            var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            if (randomization == null || string.IsNullOrEmpty(randomization.RandomizationNumber))
+            {
+                ModelState.AddModelError("Message", "Randomization is pending!");
+                return BadRequest(ModelState);
+            }
             var data = _iAEReportingRepository.GetAEReportingList();
             return Ok(data);
         }
@@ -97,28 +106,25 @@ namespace GSC.Api.Controllers.AdverseEvent
             return Ok(data);
         }
 
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] AEReportingDto aEReportingDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var aEReporting = _mapper.Map<AEReporting>(aEReportingDto);
-            var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
             if (randomization == null)
             {
                 ModelState.AddModelError("Message", "Error to save Adverse Event Reporting.");
                 return BadRequest(ModelState);
             }
+            var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
+            var studyname = _projectRepository.Find((int)studyId).ProjectCode;
+
             aEReporting.RandomizationId = randomization.Id;
             aEReporting.IsReviewedDone = false;
-            var parentprojectId = _context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault().ParentProjectId;
-            var adverseeventsettings = _context.AdverseEventSettings.Where(x => x.ProjectId == parentprojectId).ToList().FirstOrDefault();
-            aEReporting.ProjectDesignTemplateIdInvestigator = adverseeventsettings.ProjectDesignTemplateIdInvestigator;
-            aEReporting.ProjectDesignTemplateIdPatient = adverseeventsettings.ProjectDesignTemplateIdPatient;
-            aEReporting.SeveritySeqNo1 = adverseeventsettings.SeveritySeqNo1;
-            aEReporting.SeveritySeqNo2 = adverseeventsettings.SeveritySeqNo2;
-            aEReporting.SeveritySeqNo3 = adverseeventsettings.SeveritySeqNo3;
-            aEReporting.ProjectDesignVariableIdForEvent = (int)aEReportingDto.template.Variables.Where(x => x.CollectionSource == Helper.CollectionSources.RadioButton).ToList().FirstOrDefault().ProjectDesignVariableId;
+            aEReporting.AdverseEventSettingsId = studyId > 0 ? _adverseEventSettingsRepository.All.Where(x => x.ProjectId == (int)studyId).Select(x => x.Id).FirstOrDefault() : 0;
             _iAEReportingRepository.Add(aEReporting);
             _uow.Save();
             for (int i = 0; i <= aEReportingDto.template.Variables.Count - 1; i++)
@@ -139,9 +145,7 @@ namespace GSC.Api.Controllers.AdverseEvent
                 Email = _usersRepository.Find(c.UserId).Email,
                 Phone = _usersRepository.Find(c.UserId).Phone
             }).Distinct().ToList();
-            userdata = userdata.Distinct().ToList();
-            var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
-            var studyname = _projectRepository.Find((int)studyId).ProjectCode;
+
             userdata.ForEach(async x =>
             {
                 await _emailSenderRespository.SendAdverseEventAlertEMailtoInvestigator(x.Email, x.Phone, x.UserName, studyname, randomization.Initial + " " + randomization.ScreeningNumber, DateTime.Now.ToString("dd-MMM-yyyy"));
@@ -160,6 +164,8 @@ namespace GSC.Api.Controllers.AdverseEvent
             data.IsReviewedDone = true;
             data.IsApproved = true;
             data.ApproveRejectDateTime = _jwtTokenAccesser.GetClientDate();
+            data.ReviewedByUser = _jwtTokenAccesser.UserId;
+            data.ReviewedByRole = _jwtTokenAccesser.RoleId;
             _iAEReportingRepository.Update(data);
 
             if (_uow.Save() <= 0) throw new Exception("Approve Failed.");
@@ -177,7 +183,8 @@ namespace GSC.Api.Controllers.AdverseEvent
             data.RejectReasonId = aEReportingDto.RejectReasonId;
             data.RejectReasonOth = aEReportingDto.RejectReasonOth;
             data.ApproveRejectDateTime = _jwtTokenAccesser.GetClientDate();
-
+            data.ReviewedByUser = _jwtTokenAccesser.UserId;
+            data.ReviewedByRole = _jwtTokenAccesser.RoleId;
             _iAEReportingRepository.Update(data);
 
             if (_uow.Save() <= 0) throw new Exception("Approve Failed.");

@@ -16,20 +16,21 @@ namespace GSC.Respository.AdverseEvent
     {
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
-        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        private readonly IAdverseEventSettingsDetailRepository _adverseEventSettingsDetailRepository;
         public AdverseEventSettingsRepository(IGSCContext context, IMapper mapper,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository) : base(context)
+            IAdverseEventSettingsDetailRepository adverseEventSettingsDetailRepository) : base(context)
         {
             _context = context;
             _mapper = mapper;
-            _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _adverseEventSettingsDetailRepository = adverseEventSettingsDetailRepository;
+
         }
 
         public IList<DropDownDto> GetVisitDropDownforAEReportingInvestigatorForm(int projectId)
         {
-            var projectdesigns = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
-            var projectdesignperiods = _context.ProjectDesignPeriod.Where(x => projectdesigns.Contains(x.ProjectDesignId) && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
-            var visits = _context.ProjectDesignVisit.Where(x => projectdesignperiods.Contains(x.ProjectDesignPeriodId) && x.DeletedDate == null).ToList()
+            var visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+             && x.ProjectDesignPeriod.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
+             && x.DeletedDate == null)
                 .Select(x => new DropDownDto
                 {
                     Id = x.Id,
@@ -38,32 +39,28 @@ namespace GSC.Respository.AdverseEvent
             return visits;
         }
 
-        public IList<DropDownDto> GetVisitDropDownforAEReportingPatientForm(int projectId)
+        public IList<DropDownDto> GetTemplateDropDownforPatientAEReporting(int projectId)
         {
-            var projectdesigns = _context.ProjectDesign.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
-            var projectdesignperiods = _context.ProjectDesignPeriod.Where(x => projectdesigns.Contains(x.ProjectDesignId) && x.DeletedDate == null).ToList().Select(x => x.Id).ToList();
-            var visits = _context.ProjectDesignVisit.Where(x => projectdesignperiods.Contains(x.ProjectDesignPeriodId) && x.DeletedDate == null && x.IsNonCRF == true).ToList()
-                .Select(x => new DropDownDto
-                {
-                    Id = x.Id,
-                    Value = x.DisplayName,
-                }).Distinct().ToList();
-            return visits;
-        }
-        public IList<DropDownDto> GetTemplateDropDownforPatientAEReporting(int visitId)
-        {
-            var templates = _context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisitId == visitId && x.DeletedDate == null).ToList()
-                .Select(x => new DropDownDto
-                {
-                    Id = x.Id,
-                    Value = x.TemplateName,
-                }).Distinct().ToList();
+            var templates = _context.ProjectDesignTemplate.Where(x =>
+                            x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+                            && x.VariableTemplate.ModuleId == Helper.AuditModule.AdverseEvent
+                            && x.IsParticipantView == true
+                            && x.ProjectDesignVisit.DeletedDate == null
+                            && x.ProjectDesignVisit.IsNonCRF == true
+                            && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null
+                            && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
+                            && x.DeletedDate == null)
+                            .Select(x => new DropDownDto
+                            {
+                                Id = x.Id,
+                                Value = x.TemplateName,
+                            }).Distinct().ToList();
             return templates;
         }
 
         public IList<DropDownDto> GetTemplateDropDownforInvestigatorAEReporting(int visitId)
         {
-            var templates = _context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisitId == visitId && x.DeletedDate == null && x.IsRepeated == true).ToList()
+            var templates = _context.ProjectDesignTemplate.Where(x => x.ProjectDesignVisitId == visitId && x.DeletedDate == null)
                 .Select(x => new DropDownDto
                 {
                     Id = x.Id,
@@ -74,8 +71,9 @@ namespace GSC.Respository.AdverseEvent
 
         public IList<AdverseEventSettingsVariableValue> GetAdverseEventSettingsVariableValue(int projectDesignTemplateId)
         {
-            var projectdesignvariableid = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.CollectionSource == Helper.CollectionSources.RadioButton).ToList().FirstOrDefault().Id;
-            var projectdesignvariablevalues = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariableId == projectdesignvariableid).ToList()
+
+            var projectdesignvariableid = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.RadioButton).ToList().FirstOrDefault().Id;
+            var projectdesignvariablevalues = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariableId == projectdesignvariableid)
                 .Select(x => new AdverseEventSettingsVariableValue
                 {
                     ProjectDesignVariableId = x.ProjectDesignVariableId,
@@ -88,43 +86,54 @@ namespace GSC.Respository.AdverseEvent
             return projectdesignvariablevalues;
         }
 
-        public AdverseEventSettingsDto GetData(int projectId)
+        public AdverseEventSettingsListDto GetData(int projectId)
         {
-            var adverseEventSettings = FindBy(x => x.ProjectId == projectId).ToList().FirstOrDefault();
-            var adverseEventSettingsDto = _mapper.Map<AdverseEventSettingsDto>(adverseEventSettings);
-            if (adverseEventSettingsDto != null)
-            {
-                adverseEventSettingsDto.ProjectDesignVisitIdInvestigator = _projectDesignTemplateRepository.Find(adverseEventSettingsDto.ProjectDesignTemplateIdInvestigator).ProjectDesignVisitId;
-                adverseEventSettingsDto.ProjectDesignVisitIdPatient = _projectDesignTemplateRepository.Find(adverseEventSettingsDto.ProjectDesignTemplateIdPatient).ProjectDesignVisitId;
-                List<AdverseEventSettingsVariableValue> variableValues = new List<AdverseEventSettingsVariableValue>();
-                var projectdesignvariableid = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == adverseEventSettingsDto.ProjectDesignTemplateIdPatient && x.CollectionSource == Helper.CollectionSources.RadioButton).ToList().FirstOrDefault().Id;
-                var projectdesignvariablevalues = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariableId == projectdesignvariableid).ToList();
-                AdverseEventSettingsVariableValue obj1 = new AdverseEventSettingsVariableValue();
-                obj1.ProjectDesignVariableId = projectdesignvariableid;
-                obj1.ProjectDesignVariableValueId = adverseEventSettingsDto.SeveritySeqNo1;
-                obj1.Severity = "Low";
-                obj1.Value = projectdesignvariablevalues.Where(x => x.Id == obj1.ProjectDesignVariableValueId).ToList().FirstOrDefault().ValueName;
-                obj1.SeveritySeqNo = 1;
-                variableValues.Add(obj1);
-                AdverseEventSettingsVariableValue obj2 = new AdverseEventSettingsVariableValue();
-                obj2.ProjectDesignVariableId = projectdesignvariableid;
-                obj2.ProjectDesignVariableValueId = adverseEventSettingsDto.SeveritySeqNo2;
-                obj2.Severity = "Medium";
-                obj2.Value = projectdesignvariablevalues.Where(x => x.Id == obj2.ProjectDesignVariableValueId).ToList().FirstOrDefault().ValueName;
-                obj2.SeveritySeqNo = 2;
-                variableValues.Add(obj2);
-                AdverseEventSettingsVariableValue obj3 = new AdverseEventSettingsVariableValue();
-                obj3.ProjectDesignVariableId = projectdesignvariableid;
-                obj3.ProjectDesignVariableValueId = adverseEventSettingsDto.SeveritySeqNo3;
-                obj3.Severity = "High";
-                obj3.Value = projectdesignvariablevalues.Where(x => x.Id == obj3.ProjectDesignVariableValueId).ToList().FirstOrDefault().ValueName;
-                obj3.SeveritySeqNo = 3;
-                variableValues.Add(obj3);
-                adverseEventSettingsDto.variableValues = variableValues;
-            }
+            var adverseEventSettingsDto = _context.AdverseEventSettings.Where(x => x.ProjectId == projectId)
+                .Select(x => new AdverseEventSettingsListDto
+                {
+                    Id = x.Id,
+                    ProjectDesignVisitIdInvestigator = x.ProjectDesignVisitIdInvestigator,
+                    ProjectDesignTemplateIdInvestigator = x.ProjectDesignTemplateIdInvestigator,
+                    ProjectDesignTemplateIdPatient = x.ProjectDesignTemplateIdPatient,
+                    adverseEventSettingsDetails = x.adverseEventSettingsDetails != null ? x.adverseEventSettingsDetails.Select(c => new AdverseEventSettingsVariableValue
+                    {
+                        Id = c.Id,
+                        ProjectDesignVariableId = c.ProjectDesignVariableId,
+                        ProjectDesignVariableValueId = c.ProjectDesignVariableValueId,
+                        AdverseEventSettingsId = c.AdverseEventSettingsId,
+                        SeqNo = c.SeveritySeqNo,
+                        SeveritySeqNo = c.SeveritySeqNo,
+                        Severity = c.Severity,
+                        Value = c.Value
+                    }).ToList() : null
+
+                }).FirstOrDefault();
+
             return adverseEventSettingsDto;
         }
 
-        
+        public void RemoveExistingAdverseDetail(int id)
+        {
+            var data = _adverseEventSettingsDetailRepository.All.Where(x => x.AdverseEventSettingsId == id).ToList();
+            if (data != null)
+            {
+                _context.AdverseEventSettingsDetails.RemoveRange(data);
+                _context.Save();
+            }
+        }
+
+        public bool IsvalidPatientTemplate(int projectDesignTemplateId)
+        {
+            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.MultilineTextBox) > 1)
+                return false;
+            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.DateTime) > 1)
+                return false;
+            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.RadioButton) > 1)
+                return false;
+
+            return true;
+        }
+
+
     }
 }

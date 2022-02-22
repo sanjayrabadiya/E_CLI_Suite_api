@@ -6,6 +6,7 @@ using AutoMapper;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Entities.AdverseEvent;
+using GSC.Domain.Context;
 using GSC.Respository.AdverseEvent;
 using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Http;
@@ -18,17 +19,20 @@ namespace GSC.Api.Controllers.AdverseEvent
     public class AdverseEventSettingsController : ControllerBase
     {
         private readonly IAdverseEventSettingsRepository _adverseEventSettingsRepository;
-        
+        private readonly IAEReportingRepository _aEReportingRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IAdverseEventSettingsDetailRepository _adverseEventSettingsDetailRepository;
         public AdverseEventSettingsController(IAdverseEventSettingsRepository adverseEventSettingsRepository,
             IMapper mapper,
-            IUnitOfWork uow)
+            IUnitOfWork uow, IAEReportingRepository aEReportingRepository, IAdverseEventSettingsDetailRepository adverseEventSettingsDetailRepository)
         {
             _adverseEventSettingsRepository = adverseEventSettingsRepository;
             _mapper = mapper;
             _uow = uow;
-            
+            _aEReportingRepository = aEReportingRepository;
+            _adverseEventSettingsDetailRepository = adverseEventSettingsDetailRepository;
+
         }
 
         [HttpGet("{projectId}")]
@@ -46,15 +50,21 @@ namespace GSC.Api.Controllers.AdverseEvent
         public IActionResult Post([FromBody] AdverseEventSettingsDto adverseEventSettingsDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var existingdata = _adverseEventSettingsRepository.FindBy(x => x.ProjectId == adverseEventSettingsDto.ProjectId).ToList();
+            var existingdata = _adverseEventSettingsRepository.All.Where(x => x.ProjectId == adverseEventSettingsDto.ProjectId).ToList();
             if (existingdata != null && existingdata.Count > 0)
             {
                 throw new Exception("Error to save Adverse Event settings.");
             }
             var adverseEventSettings = _mapper.Map<AdverseEventSettings>(adverseEventSettingsDto);
             _adverseEventSettingsRepository.Add(adverseEventSettings);
+
+            foreach (var item in adverseEventSettingsDto.adverseEventSettingsDetails)
+            {
+                item.AdverseEventSettingsId = adverseEventSettings.Id;
+                _adverseEventSettingsDetailRepository.Add(item);
+            }
             if (_uow.Save() <= 0) throw new Exception("Error to save Adverse Event settings.");
-            return Ok();
+            return Ok(adverseEventSettings.Id);
         }
 
         [HttpPut]
@@ -62,18 +72,23 @@ namespace GSC.Api.Controllers.AdverseEvent
         {
             if (adverseEventSettingsDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            var existingdata = _aEReportingRepository.All.Where(x => x.AdverseEventSettingsId == adverseEventSettingsDto.Id).FirstOrDefault();
+            if (existingdata != null)
+            {
+                throw new Exception("Patient already reported.You can not modify the data!");
+            }
             var adverseEventSettings = _mapper.Map<AdverseEventSettings>(adverseEventSettingsDto);
             _adverseEventSettingsRepository.Update(adverseEventSettings);
+            _adverseEventSettingsRepository.RemoveExistingAdverseDetail(adverseEventSettings.Id);
+            foreach (var item in adverseEventSettingsDto.adverseEventSettingsDetails)
+            {
+                item.AdverseEventSettingsId = adverseEventSettings.Id;
+                _adverseEventSettingsDetailRepository.Add(item);
+            }
             if (_uow.Save() <= 0) throw new Exception("Error to save Adverse Event settings.");
-            return Ok();
+            return Ok(adverseEventSettings.Id);
         }
 
-        [HttpGet]
-        [Route("GetVisitDropDownforAEReportingPatientForm/{projectId}")]
-        public IActionResult GetVisitDropDownforAEReportingPatientForm(int projectId)
-        {
-            return Ok(_adverseEventSettingsRepository.GetVisitDropDownforAEReportingPatientForm(projectId));
-        }
 
         [HttpGet]
         [Route("GetVisitDropDownforAEReportingInvestigatorForm/{projectId}")]
@@ -83,10 +98,10 @@ namespace GSC.Api.Controllers.AdverseEvent
         }
 
         [HttpGet]
-        [Route("GetTemplateDropDownforPatientAEReporting/{visitId}")]
-        public IActionResult GetTemplateDropDownforPatientAEReporting(int visitId)
+        [Route("GetTemplateDropDownforPatientAEReporting/{projectId}")]
+        public IActionResult GetTemplateDropDownforPatientAEReporting(int projectId)
         {
-            return Ok(_adverseEventSettingsRepository.GetTemplateDropDownforPatientAEReporting(visitId));
+            return Ok(_adverseEventSettingsRepository.GetTemplateDropDownforPatientAEReporting(projectId));
         }
 
         [HttpGet]
@@ -100,6 +115,11 @@ namespace GSC.Api.Controllers.AdverseEvent
         [Route("GetAdverseEventSettingsVariableValue/{projectDesignTemplateId}")]
         public IActionResult GetAdverseEventSettingsVariableValue(int projectDesignTemplateId)
         {
+            if (!_adverseEventSettingsRepository.IsvalidPatientTemplate(projectDesignTemplateId))
+            {
+                ModelState.AddModelError("Message", "Patient Template Is Not Valid!");
+                return BadRequest(ModelState);
+            }
             return Ok(_adverseEventSettingsRepository.GetAdverseEventSettingsVariableValue(projectDesignTemplateId));
         }
 
