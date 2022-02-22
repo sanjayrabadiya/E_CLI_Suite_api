@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Domain.Context;
@@ -38,6 +39,19 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                 return "Duplicate Form  : " + objSave.VariableTemplate.TemplateName;
 
             return "";
+        }
+
+        public IList<DropDownDto> GetTemplateDropDown(int projectId)
+        {
+            var template = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId).Select(
+                t => new DropDownDto
+                {
+                    Id = t.Id,
+                    Value = t.VariableTemplate.TemplateName,
+                    Code = t.VariableTemplate.TemplateCode
+                }).ToList();
+
+            return template;
         }
     }
 }

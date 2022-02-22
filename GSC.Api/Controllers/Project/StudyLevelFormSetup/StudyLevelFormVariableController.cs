@@ -255,5 +255,20 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             //var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(projectDesignTemplateId);
             return Ok(_studyLevelFormVariableRepository.GetVariabeBasic(studyLevelFormId));
         }
+
+        [HttpGet]
+        [Route("GetVariabeDropDown/{studyLevelFormId}")]
+        public IActionResult GetVariabeDropDown(int studyLevelFormId)
+        {
+            return Ok(_studyLevelFormVariableRepository.GetVariableDropDown(studyLevelFormId));
+        }
+
+        [HttpGet]
+        [Route("GetStudyLevelFormVariableRelation/{id}")]
+        public IActionResult GetStudyLevelFormVariableRelation(int id)
+        {
+            var result = _studyLevelFormVariableRepository.GetStudyLevelFormVariableRelation(id);
+            return Ok(result);
+        }
     }
 }
