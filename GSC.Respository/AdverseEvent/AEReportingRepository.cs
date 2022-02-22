@@ -163,7 +163,9 @@ namespace GSC.Respository.AdverseEvent
             var entry = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).ToList();
             if (entry == null || entry.Count <= 0)
             {
-                return new ScreeningDetailsforAE();
+                data.RandomizationId = randomization.Id;
+                data.ProjectDesignVisitId = projectDesignVisitId;
+                return data;
             }
             data.ScreeningEntryId = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).ToList().FirstOrDefault().Id;
             data.ProjectDesignPeriodId = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).ToList().FirstOrDefault().ProjectDesignPeriodId;

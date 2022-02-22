@@ -60,6 +60,9 @@ namespace GSC.Data.Dto.AdverseEvent
         public int ProjectDesignTemplateId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
 
+        public int RandomizationId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
+
     }
 
 }
