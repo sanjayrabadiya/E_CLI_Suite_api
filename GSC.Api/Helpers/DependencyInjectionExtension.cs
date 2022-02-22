@@ -362,6 +362,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IStudyLevelFormVariableRepository, StudyLevelFormVariableRepository>();
             services.AddScoped<IStudyLevelFormVariableValueRepository, StudyLevelFormVariableValueRepository>();
             services.AddScoped<IStudyLevelFormVariableRemarksRepository, StudyLevelFormVariableRemarksRepository>();
+            services.AddScoped<IAdverseEventSettingsDetailRepository, AdverseEventSettingsDetailRepository>();
         }
     }
 }

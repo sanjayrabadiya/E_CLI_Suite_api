@@ -389,6 +389,8 @@ namespace GSC.Domain.Context
         public DbSet<StudyLevelFormVariableValue> StudyLevelFormVariableValue { get; set; }
         public DbSet<StudyLevelFormVariableRemarks> StudyLevelFormVariableRemarks { get; set; }
 
+        public DbSet<AdverseEventSettingsDetails> AdverseEventSettingsDetails { get; set; }
+
     }
 
 
