@@ -50,7 +50,7 @@ namespace GSC.Respository.SupplyManagement
         public string StudyProductTypeAlreadyUse(int PharmacyStudyProductTypeId)
         {
             if (All.Any(x => x.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId && x.DeletedDate == null))
-                return "Can not perform any operation, due to already used in receipt.";
+                return "Study Product is in use. Cannot edit or delete!";
             return "";
         }
 

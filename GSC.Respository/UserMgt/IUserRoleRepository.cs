@@ -11,5 +11,6 @@ namespace GSC.Respository.UserMgt
         IList<DropDownDto> GetRoleByUserName(string userName);
 
         IList<DropDownDto> GetUserNameByRoleId(int roleId);
+        IList<string> GetUserEmailByRole(int roleId);
     }
 }

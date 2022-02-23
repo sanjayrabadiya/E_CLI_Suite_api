@@ -83,7 +83,7 @@ namespace GSC.Respository.SupplyManagement
         {
             var exists = _context.ProductReceipt.Any(x => x.CentralDepotId == Id && x.DeletedDate == null);
             if (exists)
-                return "Can't changes reccord, due to already use in reciept.";
+                return "Receipt is already in use. Cannot delete record!";
             return "";
         }
 
@@ -96,6 +96,15 @@ namespace GSC.Respository.SupplyManagement
                     if (objSave.DepotType == DepotType.Central)
                         return "Can't add central depot for this study, due to already use in reciept as local depot.";
             return "";
+        }
+
+        public List<DropDownDto> GetStorageAreaByIdDropDown(int Id)
+        {
+            var central = Find(Id);
+            if (central.ProjectId != null)
+                return GetStorageAreaByProjectDropDown((int)central.ProjectId);
+            else
+                return GetStorageAreaByDepoDropDown();
         }
     }
 }

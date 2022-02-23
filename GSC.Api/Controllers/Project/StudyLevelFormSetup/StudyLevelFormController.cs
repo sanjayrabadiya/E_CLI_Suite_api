@@ -211,5 +211,12 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetTemplateDropDown/{projectId}")]
+        public IActionResult GetTemplateDropDown(int projectId)
+        {
+            return Ok(_studyLevelFormRepository.GetTemplateDropDown(projectId));
+        }
     }
 }

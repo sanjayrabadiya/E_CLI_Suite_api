@@ -71,6 +71,7 @@ namespace GSC.Respository.SupplyManagement
                                ProductReceiptId = productverification.ProductReceiptId,
                                StudyCode = productReceipt.Project.ProjectCode,
                                StorageArea = productReceipt.CentralDepot.StorageArea,
+                               CentralDepotId = productReceipt.CentralDepotId,
                                ProductType = productReceipt.PharmacyStudyProductType.ProductType.ProductTypeName,
                                ProductName = productReceipt.ProductName,
                                Status = productReceipt.Status.GetDescription(),
@@ -104,8 +105,8 @@ namespace GSC.Respository.SupplyManagement
                                ReceivedQty = productverificationDetail.ReceivedQty,
                                IsConditionProduct = productverificationDetail.IsConditionProduct,
                                VerificationApprovalTemplate = verificationApprovalTemplate,
-                               VerificationApprovalTemplateHistory = _context.VerificationApprovalTemplateHistory.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplate.Id).OrderBy(x => x.Id).LastOrDefault()
-
+                               VerificationApprovalTemplateHistory = _context.VerificationApprovalTemplateHistory.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplate.Id).OrderBy(x => x.Id).LastOrDefault(),
+                               ProductVerificationDetailId = productverificationDetail.Id
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;
@@ -124,7 +125,7 @@ namespace GSC.Respository.SupplyManagement
                                ClientId = project.ClientId,
                                ProductReceiptId = productverification.ProductReceiptId,
                                StudyCode = productReceipt.Project.ProjectCode,
-                               StorageArea = productReceipt.CentralDepot.StorageArea,
+                               StorageArea = productverificationDetail.CentralDepot.StorageArea,//productReceipt.CentralDepot.StorageArea,
                                ProductType = productReceipt.PharmacyStudyProductType.ProductType.ProductTypeName,
                                ProductName = productReceipt.ProductName,
                                BatchLot = productverification.BatchLotId.GetDescription(),
@@ -155,7 +156,9 @@ namespace GSC.Respository.SupplyManagement
                                NumberOfBox = productverificationDetail.NumberOfBox,
                                NumberOfQty = productverificationDetail.NumberOfQty,
                                ReceivedQty = productverificationDetail.ReceivedQty,
-                               IsConditionProduct = productverificationDetail.IsConditionProduct
+                               IsConditionProduct = productverificationDetail.IsConditionProduct,
+                               RetentionSampleQty = productverificationDetail.RetentionSampleQty,
+                               RemainingQuantity = productverificationDetail.RemainingQuantity
 
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 

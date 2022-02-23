@@ -7,5 +7,6 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface IVerificationApprovalTemplateHistoryRepository : IGenericRepository<VerificationApprovalTemplateHistory>
     {
+        List<VerificationApprovalTemplateHistoryViewDto> GetHistoryByVerificationDetail(int ProductVerificationDetailId);
     }
 }

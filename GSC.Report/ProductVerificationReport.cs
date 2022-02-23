@@ -164,8 +164,8 @@ namespace GSC.Report
             tocresult = AddString(VerififcationData[0].LabelClaim, tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
-            tocresult = AddString("Label Claim", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].LabelClaim, tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString("Distributed By", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(VerififcationData[0].DistributedBy, tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             tocresult = AddString("Pack Desc", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -198,29 +198,25 @@ namespace GSC.Report
 
             drectangleStarWith = tocresult.Bounds.Bottom;
 
-            tocresult = AddString("Quantity of Producation Use for Verification", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].QuantityVerification.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
-
             tocresult = AddString("Description", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             tocresult = AddString(VerififcationData[0].Description, tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
-
-            tocresult = AddString("Additional Remarks", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].Remarks, tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             tocresult = AddString("Assay Difference Verified & Meet Requirements", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             tocresult = AddString(VerififcationData[0].IsAssayRequirement.ToString() == "" ? "" : VerififcationData[0].IsAssayRequirement.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
-            tocresult = AddString("Quantity for Retention Samples Confirmed", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].IsRetentionConfirm.ToString() == "" ? "" : VerififcationData[0].IsRetentionConfirm.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
-
             tocresult = AddString("Verification of IMP Done Under Sodium Vapor Lamp", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             tocresult = AddString(VerififcationData[0].IsSodiumVaporLamp.ToString() == "" ? "" : VerififcationData[0].IsSodiumVaporLamp.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
+
+            tocresult = AddString("Product Description Checked With COA/SPC/PACKAGE", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(VerififcationData[0].IsProductDescription.ToString() == "" ? "" : VerififcationData[0].IsProductDescription.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
+
+            tocresult = AddString("Condition of Products Packs", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(VerififcationData[0].IsConditionProduct.ToString() == "" ? "" : VerififcationData[0].IsConditionProduct.ToString() == "False" ? "Not Appropriate" : "Appropriate", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, true);
 
             tocresult = AddString("No. of Boxes", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             tocresult = AddString(VerififcationData[0].NumberOfBox.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -234,21 +230,32 @@ namespace GSC.Report
             tocresult = AddString(VerififcationData[0].ReceivedQty.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
-            tocresult = AddString("Product Description Checked With COLA/SPC/PACKAGE", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].IsProductDescription.ToString() == "" ? "" : VerififcationData[0].IsProductDescription.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString("Quantity of Producation Use for Verification", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(VerififcationData[0].QuantityVerification.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
+
+            tocresult = AddString("Quantity for Retention Samples Confirmed", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(VerififcationData[0].IsRetentionConfirm.ToString() == "" ? "" : VerififcationData[0].IsRetentionConfirm.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
+
+            tocresult = AddString("Quantity of retention sample", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(VerififcationData[0].RetentionSampleQty.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
+
+            tocresult = AddString("Remaining sample quantity", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(VerififcationData[0].RemainingQuantity.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             tocresult = AddString("Storage Area", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             tocresult = AddString(VerififcationData[0].StorageArea, tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
-            tocresult = AddString("Condition of Products Packs", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].IsConditionProduct.ToString() == "" ? "" : VerififcationData[0].IsConditionProduct.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, true);
+            tocresult = AddString("Additional Remarks", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString(VerififcationData[0].Remarks, tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             //pageTOC.Graphics.Save();
             //pageTOC.Graphics.SetTransparency(1, 1, PdfBlendMode.Multiply);
-
 
             PdfStringFormat format = new PdfStringFormat();
             format.Alignment = PdfTextAlignment.Left;

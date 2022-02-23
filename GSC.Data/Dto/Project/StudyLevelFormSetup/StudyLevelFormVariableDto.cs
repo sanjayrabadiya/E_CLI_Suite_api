@@ -77,4 +77,12 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public int DesignOrder { get; set; }
 
     }
+
+    public class StudyLevelFormVariableRelationDto
+    {
+        public int RelationStudyLevelFormVariableId { get; set; }
+        public int StudyLevelFormId { get; set; }
+        public int Id { get; set; }
+
+    }
 }

@@ -46,6 +46,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string DistributedBy { get; set; }
         public string PackDesc { get; set; }
         public string MarketAuthorization { get; set; }
+       
         public DateTime? MfgDate { get; set; }
         public string RetestExpiry { get; set; }
         public DateTime? RetestExpiryDate { get; set; }
@@ -59,12 +60,15 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? NumberOfBox { get; set; }
         public int? NumberOfQty { get; set; }
         public int? ReceivedQty { get; set; }
+        public int? RetentionSampleQty { get; set; }
+        public int RemainingQuantity { get; set; }
         public int? StorageId { get; set; }
         public bool? IsConditionProduct { get; set; }
         public int? ClientId { get; set; }
-        public int? CompanyId { get; set; }
         public VerificationApprovalTemplate VerificationApprovalTemplate { get; set; }
         public VerificationApprovalTemplateHistory VerificationApprovalTemplateHistory { get; set; }
         public string Status { get; set; }
+        public int CentralDepotId { get; set; }
+        public int ProductVerificationDetailId { get; set; }
     }
 }

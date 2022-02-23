@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Domain.Context;
@@ -60,6 +61,32 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                     Value = c.VariableName,
                     DesignOrder = c.DesignOrder,
                 }).OrderBy(o => o.DesignOrder).ToList();
+        }
+
+        public IList<DropDownDto> GetVariableDropDown(int studyLevelFormId)
+        {
+            var variable = All.Where(x => x.DeletedDate == null && x.StudyLevelFormId == studyLevelFormId)
+                .OrderBy(o => o.DesignOrder)
+                .Select(c => new DropDownDto
+                {
+                    Id = c.Id,
+                    Value = c.VariableName,
+                    Code = c.CoreVariableType.ToString(),
+                    ExtraData = c.DesignOrder
+                }).OrderBy(o => o.ExtraData).ToList();
+
+            return variable;
+        }
+
+        public StudyLevelFormVariableRelationDto GetStudyLevelFormVariableRelation(int id)
+        {
+            return All.Where(x => x.Id == id).Select(t => new StudyLevelFormVariableRelationDto
+            {
+                Id = t.Id,
+                RelationStudyLevelFormVariableId = t.Id,
+                StudyLevelFormId = t.StudyLevelFormId,
+            }).FirstOrDefault();
+
         }
     }
 }

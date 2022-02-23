@@ -15,5 +15,6 @@ namespace GSC.Respository.SupplyManagement
         bool IsCentralExists(int ProjectId);
         string ExistsInReceipt(int Id);
         string StudyUseInReceipt(CentralDepot objSave);
+        List<DropDownDto> GetStorageAreaByIdDropDown(int Id);
     }
 }
