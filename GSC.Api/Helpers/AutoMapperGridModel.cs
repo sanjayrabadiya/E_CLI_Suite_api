@@ -409,6 +409,11 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.VariableTemplateName, x => x.MapFrom(a => a.VariableTemplate.TemplateName))
                 .ForMember(x => x.Activity, x => x.MapFrom(a => a.Activity.CtmsActivity.ActivityName))
                 .ForMember(x => x.AppScreenName, x => x.MapFrom(a => a.AppScreen.ScreenName)).ReverseMap();
+
+            CreateMap<VerificationApprovalTemplateHistory, VerificationApprovalTemplateHistoryViewDto>()
+               .ForMember(x => x.SendBy, x => x.MapFrom(a=>a.User.UserName))
+               .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
+               .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription())).ReverseMap();
         }
     }
 }

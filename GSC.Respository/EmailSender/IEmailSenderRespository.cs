@@ -31,5 +31,8 @@ namespace GSC.Respository.EmailSender
         void SendEmailOfTemplateSendBack(string toMail, string userName, string activity, string template, string ProjectName);
         void SendLabManagementAbnormalEMail(string toMail, LabManagementEmail email);
         void SendEmailOfTemplateApprove(string toMail, string userName, string activity, string template, string project);
+        void SendApproveVerificationEmail(string toMail);
+        void ApproveByApproverVerificationEmail(string toMail);
+        void RejectByApproverVerificationEmail(string toMail);
     }
 }

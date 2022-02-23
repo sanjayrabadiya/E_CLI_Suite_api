@@ -32,8 +32,8 @@ namespace GSC.Respository.InformConcent
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             OpenTok opentok = new OpenTok(Convert.ToInt32(_VideoAPISettings.Value.API_KEY), _VideoAPISettings.Value.API_SECRET);
             string sessionId = opentok.CreateSession("",MediaMode.ROUTED, ArchiveMode.ALWAYS).Id;
-            string token = opentok.GenerateToken(sessionId);
-            string token2 = opentok.GenerateToken(sessionId);
+            string token = opentok.GenerateToken(sessionId,Role.MODERATOR);
+            string token2 = opentok.GenerateToken(sessionId, Role.MODERATOR);
             EConsentVideoDto eConsentVideoDto = new EConsentVideoDto();
             eConsentVideoDto.SessionId = sessionId;
             eConsentVideoDto.Publishertoken = token;

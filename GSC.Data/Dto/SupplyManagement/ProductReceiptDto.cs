@@ -43,5 +43,6 @@ namespace GSC.Data.Dto.SupplyManagement
         // public string FileName { get; set; }
         public string PathName { get; set; }
         public string MimeType { get; set; }
+        public int CentralDepotId { get; set; }
     }
 }

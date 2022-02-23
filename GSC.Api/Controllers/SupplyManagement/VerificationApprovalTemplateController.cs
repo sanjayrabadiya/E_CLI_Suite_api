@@ -4,8 +4,11 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Domain.Context;
+using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
 using GSC.Respository.SupplyManagement;
+using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +34,10 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IVerificationApprovalTemplateValueRepository _verificationApprovalTemplateValueRepository;
         private readonly IVerificationApprovalTemplateValueAuditRepository _verificationApprovalTemplateValueAuditRepository;
         private readonly ISupplyManagementConfigurationRepository _supplyManagementConfigurationRepository;
+        private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly IUserRoleRepository _userRoleRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
 
         public VerificationApprovalTemplateController(IVerificationApprovalTemplateRepository verificationApprovalTemplateRepository,
             IVerificationApprovalTemplateHistoryRepository verificationApprovalTemplateHistoryRepository,
@@ -43,7 +49,10 @@ namespace GSC.Api.Controllers.SupplyManagement
             IVerificationApprovalTemplateValueChildRepository verificationApprovalTemplateValueChildRepository,
         IVerificationApprovalTemplateValueRepository verificationApprovalTemplateValueRepository,
         ISupplyManagementConfigurationRepository supplyManagementConfigurationRepository,
-        IJwtTokenAccesser jwtTokenAccesser)
+        IEmailSenderRespository emailSenderRespository,
+        IUserRoleRepository userRoleRepository,
+        IJwtTokenAccesser jwtTokenAccesser,
+         IGSCContext context)
         {
             _verificationApprovalTemplateRepository = verificationApprovalTemplateRepository;
             _verificationApprovalTemplateHistoryRepository = verificationApprovalTemplateHistoryRepository;
@@ -53,10 +62,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             _verificationApprovalTemplateValueRepository = verificationApprovalTemplateValueRepository;
             _productReceiptRepository = productReceiptRepository;
             _supplyManagementConfigurationRepository = supplyManagementConfigurationRepository;
+            _userRoleRepository = userRoleRepository;
             _uow = uow;
             _mapper = mapper;
             _variableTemplateRepository = variableTemplateRepository;
+            _emailSenderRespository = emailSenderRespository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         [HttpGet]
@@ -88,7 +100,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             verificationApprovalTemplate.VerificationApprovalTemplateHistory = new VerificationApprovalTemplateHistory();
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendBy = _jwtTokenAccesser.UserId;
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendOn = _jwtTokenAccesser.GetClientDate();
-            verificationApprovalTemplate.VerificationApprovalTemplateHistory.Status = Helper.ProductVerificationStatus.SentForApproval; 
+            verificationApprovalTemplate.VerificationApprovalTemplateHistory.Status = Helper.ProductVerificationStatus.SentForApproval;
             _verificationApprovalTemplateHistoryRepository.Add(verificationApprovalTemplate.VerificationApprovalTemplateHistory);
 
             // Set status Send for Approval
@@ -98,6 +110,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 receipt.Status = Helper.ProductVerificationStatus.SentForApproval;
                 _productReceiptRepository.Update(receipt);
+                //for email
+                //var usersEmail = _userRoleRepository.GetUserEmailByRole(verificationApprovalTemplate.SecurityRoleId);
+                //if (usersEmail != null)
+                //    foreach (var item in usersEmail)
+                //        _emailSenderRespository.SendApproveVerificationEmail(item);
+
             }
 
             if (_uow.Save() <= 0) throw new Exception("Creating Verification Approval Template failed on save.");
@@ -159,11 +177,22 @@ namespace GSC.Api.Controllers.SupplyManagement
                 {
                     verificationApprovalTemplate.Status = Helper.ProductVerificationStatus.Rejected;
                     receipt.Status = Helper.ProductVerificationStatus.Rejected;
+
+                    //for email
+                    //var email = _context.Users.Find(verification.CreatedBy).Email;
+                    //if (email != null)
+                    //    _emailSenderRespository.RejectByApproverVerificationEmail(email);
                 }
                 else
                 {
                     verificationApprovalTemplate.Status = Helper.ProductVerificationStatus.SentForApproval;
                     receipt.Status = Helper.ProductVerificationStatus.SentForApproval;
+
+                    //for email
+                    //var usersEmail = _userRoleRepository.GetUserEmailByRole(verificationTemplate.SecurityRoleId);
+                    //if (usersEmail != null)
+                    //    foreach (var item in usersEmail)
+                    //        _emailSenderRespository.SendApproveVerificationEmail(item);
                 }
                 _productReceiptRepository.Update(receipt);
             }
@@ -221,10 +250,21 @@ namespace GSC.Api.Controllers.SupplyManagement
             var receipt = _productReceiptRepository.Find(verificationDetail.ProductReceiptId);
             if (receipt != null)
             {
+                var email = _context.Users.Find(verification.CreatedBy).Email;
                 if (verificationApprovalTemplateDto.IsApprove)
+                {
                     receipt.Status = Helper.ProductVerificationStatus.Approved;
+                    //for email
+                    //if (email != null)
+                    //    _emailSenderRespository.ApproveByApproverVerificationEmail(email);
+                }
                 else
+                {
                     receipt.Status = Helper.ProductVerificationStatus.Rejected;
+                    //for email
+                    //if (email != null)
+                    //    _emailSenderRespository.RejectByApproverVerificationEmail(email);
+                }
                 _productReceiptRepository.Update(receipt);
             }
 

@@ -30,5 +30,11 @@ namespace GSC.Api.Controllers.SupplyManagement
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
+
+        [HttpGet("{ProductVerificationDetailId}")]
+        public IActionResult Get(int ProductVerificationDetailId)
+        {
+            return Ok(_verificationApprovalTemplateHistoryRepository.GetHistoryByVerificationDetail(ProductVerificationDetailId));
+        }
     }
 }

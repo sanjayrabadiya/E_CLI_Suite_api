@@ -16,4 +16,13 @@ namespace GSC.Data.Dto.SupplyManagement
         public AuditReason AuditReason { get; set; }
         public string ReasonOth { get; set; }
     }
+
+    public class VerificationApprovalTemplateHistoryViewDto : BaseAuditDto
+    {
+        public string SendBy { get; set; }
+        public DateTime SendOn { get; set; }
+        public string AuditReason { get; set; }
+        public string ReasonOth { get; set; }
+        public string Status { get; set; }
+    }
 }

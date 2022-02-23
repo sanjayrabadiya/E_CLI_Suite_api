@@ -4,6 +4,7 @@ using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace GSC.Data.Entities.SupplyManagement
@@ -19,5 +20,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public string ReasonOth { get; set; }
         public VerificationApprovalTemplate VerificationApprovalTemplate { get; set; }
         public ProductVerificationStatus? Status { get; set; }
+        [ForeignKey("SendBy")]
+        public User User { get; set; }
     }
 }

@@ -562,5 +562,32 @@ namespace GSC.Respository.EmailSender
         }
 
 
+        public void SendApproveVerificationEmail(string toMail)
+        {
+            var emailMessage = ConfigureEmail("SendForVerification", "");
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";//ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, email);
+            emailMessage.Subject ="Verification template received." ;//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void RejectByApproverVerificationEmail(string toMail)
+        {
+            var emailMessage = ConfigureEmail("SendBackByApprover", "");
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";//ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, email);
+            emailMessage.Subject = "Rejected Verification By Approver.";//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void ApproveByApproverVerificationEmail(string toMail)
+        {
+            var emailMessage = ConfigureEmail("SendBackByApprover", "");
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";//ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, email);
+            emailMessage.Subject = "Approved Verification By Approver.";//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
+            _emailService.SendMail(emailMessage);
+        }
+
     }
 }

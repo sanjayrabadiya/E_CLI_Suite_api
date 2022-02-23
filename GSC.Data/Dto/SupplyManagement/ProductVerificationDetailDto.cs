@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.SupplyManagement;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,5 +27,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool IsSendForApprove { get; set; }
         public int? VerificationApprovalTemplateId { get; set; }
         public int? RetentionSampleQty { get; set; }
+
+        public int CentralDepotId { get; set; }
+        public CentralDepot CentralDepot { get; set; }
+        public int RemainingQuantity { get; set; }
     }
 }
