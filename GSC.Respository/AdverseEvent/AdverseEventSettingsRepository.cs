@@ -73,18 +73,22 @@ namespace GSC.Respository.AdverseEvent
         public IList<AdverseEventSettingsVariableValue> GetAdverseEventSettingsVariableValue(int projectDesignTemplateId)
         {
 
-            var projectdesignvariableid = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.RadioButton).ToList().FirstOrDefault().Id;
-            var projectdesignvariablevalues = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariableId == projectdesignvariableid)
-                .Select(x => new AdverseEventSettingsVariableValue
-                {
-                    ProjectDesignVariableId = x.ProjectDesignVariableId,
-                    ProjectDesignVariableValueId = x.Id,
-                    Value = x.ValueName,
-                    SeqNo = x.SeqNo,
-                    SeveritySeqNo = x.SeqNo,
-                    Severity = x.SeqNo == 1 ? "Low" : (x.SeqNo == 2 ? "Medium" : "High")
-                }).ToList();
-            return projectdesignvariablevalues;
+            var projectdesignvariable = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.RadioButton).FirstOrDefault();
+            if (projectdesignvariable != null)
+            {
+                var projectdesignvariablevalues = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariableId == projectdesignvariable.Id)
+                    .Select(x => new AdverseEventSettingsVariableValue
+                    {
+                        ProjectDesignVariableId = x.ProjectDesignVariableId,
+                        ProjectDesignVariableValueId = x.Id,
+                        Value = x.ValueName,
+                        SeqNo = x.SeqNo,
+                        SeveritySeqNo = x.SeqNo,
+                        Severity = x.SeqNo == 1 ? "Low" : (x.SeqNo == 2 ? "Medium" : "High")
+                    }).ToList();
+                return projectdesignvariablevalues;
+            }
+            return null;
         }
 
         public AdverseEventSettingsListDto GetData(int projectId)
