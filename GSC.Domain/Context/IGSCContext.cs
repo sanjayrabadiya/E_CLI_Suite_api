@@ -340,5 +340,12 @@ namespace GSC.Domain.Context
         DbSet<StudyLevelFormVariableRemarks> StudyLevelFormVariableRemarks { get; set; }
 
         DbSet<AdverseEventSettingsDetails> AdverseEventSettingsDetails { get; set; }
+        DbSet<CtmsMonitoring> CtmsMonitoring { get; set; }
+        DbSet<CtmsMonitoringReport> CtmsMonitoringReport { get; set; }
+        DbSet<CtmsMonitoringReportReview> CtmsMonitoringReportReview { get; set; }
+        DbSet<CtmsMonitoringReportVariableValue> CtmsMonitoringReportVariableValue { get; set; }
+        DbSet<CtmsMonitoringReportVariableValueQuery> CtmsMonitoringReportVariableValueQuery { get; set; }
+        DbSet<CtmsMonitoringReportVariableValueAudit> CtmsMonitoringReportVariableValueAudit { get; set; }
+        DbSet<CtmsMonitoringReportVariableValueChild> CtmsMonitoringReportVariableValueChild { get; set; }
     }
 }

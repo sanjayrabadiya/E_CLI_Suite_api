@@ -149,5 +149,12 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_ctmsActivityRepository.GetCtmsActivityList());
         }
+
+        [HttpGet]
+        [Route("GetActivityForFormList/{tabNumber}")]
+        public IActionResult GetActivityForFormList(int tabNumber)
+        {
+            return Ok(_activityRepository.GetActivityForFormList(tabNumber));
+        }
     }
 }

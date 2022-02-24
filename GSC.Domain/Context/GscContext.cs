@@ -390,6 +390,13 @@ namespace GSC.Domain.Context
         public DbSet<StudyLevelFormVariableRemarks> StudyLevelFormVariableRemarks { get; set; }
 
         public DbSet<AdverseEventSettingsDetails> AdverseEventSettingsDetails { get; set; }
+        public DbSet<CtmsMonitoring> CtmsMonitoring { get; set; }
+        public DbSet<CtmsMonitoringReport> CtmsMonitoringReport { get; set; }
+        public DbSet<CtmsMonitoringReportReview> CtmsMonitoringReportReview { get; set; }
+        public DbSet<CtmsMonitoringReportVariableValue> CtmsMonitoringReportVariableValue { get; set; }
+        public DbSet<CtmsMonitoringReportVariableValueQuery> CtmsMonitoringReportVariableValueQuery { get; set; }
+        public DbSet<CtmsMonitoringReportVariableValueAudit> CtmsMonitoringReportVariableValueAudit { get; set; }
+        public DbSet<CtmsMonitoringReportVariableValueChild> CtmsMonitoringReportVariableValueChild { get; set; }
 
     }
 

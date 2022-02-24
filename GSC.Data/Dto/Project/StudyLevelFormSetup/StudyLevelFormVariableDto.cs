@@ -42,7 +42,6 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public string UnitAnnotation { get; set; }
         public PrintType? PrintType { get; set; }
         public IList<StudyLevelFormVariableValueDto> Values { get; set; } = null;
-       
         public UnitDto Unit { get; set; }
         public int DesignOrder { get; set; }
         public bool? IsDocument { get; set; }
@@ -54,7 +53,7 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public bool HasComments { get; set; }
         public bool HasQueries { get; set; }
         public string DocPath { get; set; }
-        public QueryStatus? QueryStatus { get; set; }
+        public CtmsCommentStatus? QueryStatus { get; set; }
         public string VariableCategoryName { get; set; }
         public VariableCategoryType? SystemType { get; set; }
         public bool IsNa { get; set; }
@@ -65,9 +64,17 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public string Note { get; set; }
         public Alignment? Alignment { get; set; }
         public int? LargeStep { get; set; }
-        public double? InActiveVersion{ get; set; }
+        public double? InActiveVersion { get; set; }
         public double? StudyVersion { get; set; }
         public bool CollectionValueDisable { get; set; }
+        public string UnitName { get; set; }
+        public string ValidationMessage { get; set; }
+
+        public string VariableValue { get; set; }
+        public int CtmsMonitoringReportVariableValueId { get; set; }
+        public string VariableValueOld { get; set; }
+        public bool IsReviewPerson { get; set; }
+        public int StudyLevelFormVariableId { get; set; }
     }
 
     public class StudyLevelFormVariableBasicDto : BaseDto

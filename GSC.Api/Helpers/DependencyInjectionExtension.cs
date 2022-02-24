@@ -363,6 +363,13 @@ namespace GSC.Api.Helpers
             services.AddScoped<IStudyLevelFormVariableValueRepository, StudyLevelFormVariableValueRepository>();
             services.AddScoped<IStudyLevelFormVariableRemarksRepository, StudyLevelFormVariableRemarksRepository>();
             services.AddScoped<IAdverseEventSettingsDetailRepository, AdverseEventSettingsDetailRepository>();
+            services.AddScoped<ICtmsMonitoringRepository, CtmsMonitoringRepository>();
+            services.AddScoped<ICtmsMonitoringReportRepository, CtmsMonitoringReportRepository>();
+            services.AddScoped<ICtmsMonitoringReportReviewRepository, CtmsMonitoringReportReviewRepository>();
+            services.AddScoped<ICtmsMonitoringReportVariableValueRepository, CtmsMonitoringReportVariableValueRepository>();
+            services.AddScoped<ICtmsMonitoringReportVariableValueQueryRepository, CtmsMonitoringReportVariableValueQueryRepository>();
+            services.AddScoped<ICtmsMonitoringReportVariableValueAuditRepository, CtmsMonitoringReportVariableValueAuditRepository>();
+            services.AddScoped<ICtmsMonitoringReportVariableValueChildRepository, CtmsMonitoringReportVariableValueChildRepository>();
         }
     }
 }

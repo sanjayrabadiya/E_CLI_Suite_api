@@ -9,6 +9,7 @@ using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
@@ -59,6 +60,29 @@ namespace GSC.Respository.Master
                 return "Duplicate Activity name : " + ActivityName;
             }
             return "";
+        }
+
+        public DropDownDto GetActivityForFormList(int tabNumber)
+        {
+            var result = new DropDownDto();
+
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            
+            string ActivityCode = tabNumber == 0 ? "act_001" : tabNumber == 1 ? "act_002" : tabNumber == 2 ? "act_003" :
+                tabNumber == 3 ? "act_004" : "act_005";
+
+            result = All.Include(x => x.CtmsActivity)
+            .Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null
+            && x.CtmsActivity.ActivityCode == ActivityCode && x.CtmsActivity.DeletedDate == null && x.AppScreenId == appscreen.Id)
+            .Select(x => new DropDownDto
+            {
+                Id = x.Id,
+                Value = x.CtmsActivity.ActivityName,
+                Code = x.ActivityCode,
+                ExtraData = x.CtmsActivity.ActivityCode
+            }).FirstOrDefault();
+
+            return result;
         }
     }
 }

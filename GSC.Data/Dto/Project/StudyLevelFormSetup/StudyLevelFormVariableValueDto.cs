@@ -19,10 +19,11 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public double? StudyVersion { get; set; }
         public int SeqNo { get; set; }
         public string Label { get; set; }
-        //public string ScreeningValue { get; set; }
-        //public string ScreeningValueOld { get; set; }
         public bool AllowActive { get; set; }
         public string DisplayVersion { get; set; }
+        public string VariableValue { get; set; }
+        public int CtmsMonitoringReportVariableValueId { get; set; }
+        public string VariableValueOld { get; set; }
     }
     
     public class StudyLevelFormVariableValueDropDown

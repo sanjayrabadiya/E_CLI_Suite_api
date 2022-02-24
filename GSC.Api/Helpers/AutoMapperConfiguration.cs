@@ -440,6 +440,16 @@ namespace GSC.Api.Helpers
             CreateMap<Variable, StudyLevelFormVariable>().ReverseMap();
             CreateMap<VariableValue, StudyLevelFormVariableValue>().ReverseMap();
             CreateMap<VariableRemarks, StudyLevelFormVariableRemarks>().ReverseMap();
+
+            CreateMap<CtmsMonitoring, CtmsMonitoringDto>().ReverseMap();
+            CreateMap<CtmsMonitoringReport, CtmsMonitoringReportDto>().ReverseMap();
+            CreateMap<CtmsMonitoringReportReview, CtmsMonitoringReportReviewDto>().ReverseMap();
+            CreateMap<CtmsMonitoringReportVariableValue, CtmsMonitoringReportVariableValueDto>().ReverseMap();
+            CreateMap<CtmsMonitoringReportVariableValueQuery, CtmsMonitoringReportVariableValueQueryDto>().ReverseMap();
+            CreateMap<CtmsMonitoringReportVariableValueAudit, CtmsMonitoringReportVariableValueAuditDto>().ReverseMap();
+            CreateMap<CtmsMonitoringReportVariableValueChild, CtmsMonitoringReportVariableValueChildDto>().ReverseMap();
+            CreateMap<CtmsMonitoringReportVariableValue, CtmsMonitoringReportVariableValueBasic>()
+                .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Queryies.Any()));
         }
     }
 }

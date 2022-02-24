@@ -14,5 +14,6 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
         List<StudyLevelFormGridDto> GetStudyLevelFormList(bool isDeleted);
         string Duplicate(StudyLevelForm objSave);
         IList<DropDownDto> GetTemplateDropDown(int projectId);
+        CtmsMonitoringReportFormDto GetReportFormVariable(int id);
     }
 }
