@@ -55,6 +55,10 @@ namespace GSC.Api.Controllers.AdverseEvent
             {
                 throw new Exception("Error to save Adverse Event settings.");
             }
+            if (adverseEventSettingsDto.adverseEventSettingsDetails == null)
+            {
+                throw new Exception("Severity is mandatory to save!");
+            }
             var adverseEventSettings = _mapper.Map<AdverseEventSettings>(adverseEventSettingsDto);
             _adverseEventSettingsRepository.Add(adverseEventSettings);
 
@@ -76,6 +80,10 @@ namespace GSC.Api.Controllers.AdverseEvent
             if (existingdata != null)
             {
                 throw new Exception("Patient already reported.You can not modify the data!");
+            }
+            if (adverseEventSettingsDto.adverseEventSettingsDetails == null)
+            {
+                throw new Exception("Severity is mandatory to save!");
             }
             var adverseEventSettings = _mapper.Map<AdverseEventSettings>(adverseEventSettingsDto);
             _adverseEventSettingsRepository.Update(adverseEventSettings);
@@ -120,7 +128,13 @@ namespace GSC.Api.Controllers.AdverseEvent
                 ModelState.AddModelError("Message", "Patient Template Is Not Valid!");
                 return BadRequest(ModelState);
             }
-            return Ok(_adverseEventSettingsRepository.GetAdverseEventSettingsVariableValue(projectDesignTemplateId));
+            var data = _adverseEventSettingsRepository.GetAdverseEventSettingsVariableValue(projectDesignTemplateId);
+            if (data == null)
+            {
+                ModelState.AddModelError("Message", "Please set variable for this template!");
+                return BadRequest(ModelState);
+            }
+            return Ok(data);
         }
 
     }
