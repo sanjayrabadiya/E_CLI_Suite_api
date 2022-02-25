@@ -413,6 +413,7 @@ namespace GSC.Api.Helpers
             CreateMap<VerificationApprovalTemplateHistory, VerificationApprovalTemplateHistoryViewDto>()
                .ForMember(x => x.SendBy, x => x.MapFrom(a=>a.User.UserName))
                .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
+               .ForMember(x => x.Role, x => x.MapFrom(a => a.SecurityRole.RoleName))
                .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription())).ReverseMap();
 
             CreateMap<CtmsMonitoring, CtmsMonitoringGridDto>().ReverseMap();

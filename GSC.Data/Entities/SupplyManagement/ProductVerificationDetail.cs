@@ -27,5 +27,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public int CentralDepotId { get; set; }
         public CentralDepot CentralDepot { get; set; }
         public int RemainingQuantity { get; set; }
+
+        public ProductReceipt ProductReceipt { get; set; }
     }
 }

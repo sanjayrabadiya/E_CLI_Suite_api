@@ -59,7 +59,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var productReciept = _productReceiptRepository.GetProductReceiptList(projectId, isDeleted);
-            productReciept.ForEach(t => t.PathName = documentUrl + t.PathName);
+            productReciept.ForEach(t => t.PathName = t.PathName == null ? "" : documentUrl + t.PathName);
             return Ok(productReciept);
         }
 

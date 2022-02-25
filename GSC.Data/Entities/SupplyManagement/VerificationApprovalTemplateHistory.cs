@@ -12,6 +12,7 @@ namespace GSC.Data.Entities.SupplyManagement
     public class VerificationApprovalTemplateHistory : BaseEntity
     {
         public int VerificationApprovalTemplateId { get; set; }
+        public int SecurityRoleId { get; set; }
         public int SendBy { get; set; }
         public DateTime SendOn { get; set; }
         public bool IsSendBack { get; set; }
@@ -22,5 +23,6 @@ namespace GSC.Data.Entities.SupplyManagement
         public ProductVerificationStatus? Status { get; set; }
         [ForeignKey("SendBy")]
         public User User { get; set; }
+        public SecurityRole SecurityRole { get; set; }
     }
 }
