@@ -1,5 +1,6 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.AdverseEvent;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.AdverseEvent;
 using System;
@@ -15,5 +16,6 @@ namespace GSC.Respository.AdverseEvent
         DesignScreeningTemplateDto GetAEReportingForm();
         AEReportingDto GetAEReportingFilledForm(int id);
         ScreeningDetailsforAE GetScreeningDetailsforAE(int id);
+        List<DashboardDto> GetAEReportingMyTaskList(int ProjectId);
     }
 }
