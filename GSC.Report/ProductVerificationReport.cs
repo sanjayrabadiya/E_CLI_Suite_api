@@ -120,7 +120,7 @@ namespace GSC.Report
 
 
             PdfStringFormat tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            PdfTextElement indexheader = new PdfTextElement("Product Verififcation", headerfont, PdfBrushes.Black);
+            PdfTextElement indexheader = new PdfTextElement("Product Verification", headerfont, PdfBrushes.Black);
             indexheader.StringFormat = tocformat;
             tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
@@ -194,7 +194,7 @@ namespace GSC.Report
             //bounds = new RectangleF(0, 40, pageTOC.GetClientSize().Width, tocresult.Bounds.Y);
             //pageTOC.Graphics.DrawRectangle(PdfPens.Black, brush, bounds);
 
-            tocresult = AddString("Product Verififcation Detail", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 50, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
+            tocresult = AddString("Product Verification Detail", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 50, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
 
             drectangleStarWith = tocresult.Bounds.Bottom;
 
@@ -230,7 +230,7 @@ namespace GSC.Report
             tocresult = AddString(VerififcationData[0].ReceivedQty.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
-            tocresult = AddString("Quantity of Producation Use for Verification", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            tocresult = AddString("Quantity of Product Use for Verification", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             tocresult = AddString(VerififcationData[0].QuantityVerification.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
