@@ -24,4 +24,22 @@ namespace GSC.Data.Dto.CTMS
         public List<ManageMonitoringReportReviewDto> users { get; set; }
         public User User { get; set; }
     }
+
+    public class CtmsMonitoringReportReviewHistory : BaseAuditDto
+    {
+        public int CtmsMonitoringReportId { get; set; }
+        public int UserId { get; set; }
+        public int RoleId { get; set; }
+        public bool IsSendBack { get; set; }
+        public string Name { get; set; }
+        public bool IsSelected { get; set; }
+        public DateTime? SendBackDate { get; set; }
+        public bool IsApproved { get; set; }
+        public DateTime? ApproveDate { get; set; }
+        public string DocumentName { get; set; }
+        public string UserName { get; set; }
+        public string Message { get; set; }
+        public string Reason { get; set; }
+        public string ReasonOth { get; set; }
+    }
 }

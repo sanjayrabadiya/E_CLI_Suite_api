@@ -7,16 +7,19 @@ using GSC.Helper;
 using GSC.Shared.Extension;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace GSC.Data.Entities.CTMS
 {
-    public class CtmsMonitoringReportVariableValueQuery : BaseEntity, ICommonAduit
+    public class CtmsMonitoringReportVariableValueQuery 
     {
+        [Key]
+        public int Id { get; set; }
         public int CtmsMonitoringReportVariableValueId { get; set; }
         public string Value { get; set; }
-        public int ReasonId { get; set; }
+        public int? ReasonId { get; set; }
         public string ReasonOth { get; set; }
         public CtmsCommentStatus? QueryStatus { get; set; }
         public short QueryLevel { get; set; }
@@ -28,8 +31,13 @@ namespace GSC.Data.Entities.CTMS
         public string TimeZone { get; set; }
         public int? QueryParentId { get; set; }
         public DateTime? PreviousQueryDate { get; set; }
+        private DateTime? _createdDate;
+        public DateTime? CreatedDate
+        {
+            get => _createdDate?.UtcDateTime();
+            set => _createdDate = value?.UtcDateTime();
+        }
         public CtmsMonitoringReportVariableValue CtmsMonitoringReportVariableValue { get; set; }
-        public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
         [ForeignKey("ReasonId")] public AuditReason Reason { get; set; }
     }
 }

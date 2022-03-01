@@ -125,8 +125,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("GetQueryStatusByReportId/{id}")]
         public IActionResult GetQueryStatusByReportId(int id)
         {
-            return Ok();
-            //return Ok(_manageMonitoringReportVariableRepository.GetQueryStatusByReportId(id));
+            return Ok(_ctmsMonitoringReportVariableValueRepository.GetQueryStatusByReportId(id));
         }
     }
 }
