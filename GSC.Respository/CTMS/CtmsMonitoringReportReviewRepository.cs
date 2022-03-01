@@ -79,8 +79,9 @@ namespace GSC.Respository.CTMS
         public void SendMailToReviewer(CtmsMonitoringReportReviewDto ReviewDto)
         {
             var Review = All.Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.Project)
-                .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x=>x.VariableTemplate)
-                .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x=>x.Activity)
+                .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
+                .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.Activity)
+                .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.Activity).ThenInclude(x => x.CtmsActivity)
                 .Where(x => x.CtmsMonitoringReportId == ReviewDto.CtmsMonitoringReportId)
                 .FirstOrDefault();
 
@@ -93,7 +94,7 @@ namespace GSC.Respository.CTMS
         }
 
         // Send mail for Approve
-        public void SendMailForApproved(CtmsMonitoringReportReviewDto ReviewDto)
+        public void SendMailForApproved(CtmsMonitoringReportReview ReviewDto)
         {
             var Review = All.Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.Project)
                 .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
@@ -114,6 +115,44 @@ namespace GSC.Respository.CTMS
             var result = All.Where(x => x.CtmsMonitoringReportId == CtmsMonitoringReportId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
                          .OrderByDescending(x => x.Id).FirstOrDefault();
             return result != null ? true : false;
+        }
+
+        public List<CtmsMonitoringReportReviewHistory> GetCtmsMonitoringReportReviewHistory(int id)
+        {
+            var result = (from review in _context.CtmsMonitoringReportReview.Include(x => x.CtmsMonitoringReport)
+                          .Where(x => x.CtmsMonitoringReportId == id)
+                          join auditreasontemp in _context.AuditTrail.Where(x => x.TableName == "CtmsMonitoringReportReview" && x.ColumnName == "Approve Date")
+                          on review.Id equals auditreasontemp.RecordId into auditreasondto
+                          from auditreason in auditreasondto.DefaultIfEmpty()
+                          select new CtmsMonitoringReportReviewHistory
+                          {
+                              Id = review.Id,
+                              CreatedDate = review.CreatedDate,
+                              CreatedByUser = review.CreatedByUser.UserName,
+                              Message = review.Message,
+                              UserName = review.User.UserName,
+                              ApproveDate = review.ApproveDate,
+                              IsApproved = review.IsApproved,
+                              Reason = auditreason.Reason,
+                              ReasonOth = auditreason.ReasonOth
+                          }).OrderByDescending(x => x.Id).ToList();
+
+            return result;
+        }
+
+        public CtmsMonitoringReportReviewDto GetCtmsMonitoringReportReview(int id)
+        {
+            var result = All.Where(x => x.DeletedDate == null && x.CtmsMonitoringReportId == id && x.UserId == _jwtTokenAccesser.UserId)
+                .Select(x => new CtmsMonitoringReportReviewDto
+                {
+                    Id = x.Id,
+                    CtmsMonitoringReportId = x.CtmsMonitoringReportId,
+                    UserId = x.UserId,
+                    IsApproved = x.IsApproved,
+                    ApproveDate = x.ApproveDate,
+                }).FirstOrDefault();
+
+            return result;
         }
     }
 }

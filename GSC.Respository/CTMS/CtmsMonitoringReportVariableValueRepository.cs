@@ -7,6 +7,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -78,6 +79,15 @@ namespace GSC.Respository.CTMS
             var childs = _context.CtmsMonitoringReportVariableValueChild
                 .Where(t => t.CtmsMonitoringReportVariableValueId == ctmsMonitoringReportVariableValueId).ToList();
             _context.CtmsMonitoringReportVariableValueChild.RemoveRange(childs);
+        }
+
+        public bool GetQueryStatusByReportId(int ctmsMonitoringReportId)
+        {
+            var result = All.Where(x => x.DeletedDate == null
+                    && x.CtmsMonitoringReportId == ctmsMonitoringReportId && x.QueryStatus != null
+                    && x.QueryStatus != CtmsCommentStatus.Closed).Count();
+
+            return result != 0;
         }
     }
 }
