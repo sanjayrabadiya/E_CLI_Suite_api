@@ -55,16 +55,10 @@ namespace GSC.Respository.SupplyManagement
                     t.SupplyManagementShipmentId = shipmentdata.Id;
                     t.Status = shipmentdata.Status.GetDescription();
                     t.ApproveRejectDateTime = shipmentdata.CreatedDate;
-                    t.AuditReason = _context.AuditReason.Where(x => x.Id == shipmentdata.AuditReasonId).FirstOrDefault() != null ?
-                    _context.AuditReason.Where(x => x.Id == shipmentdata.AuditReasonId).FirstOrDefault().ReasonName : "";
+                    t.AuditReason = shipmentdata.AuditReason != null ? shipmentdata.AuditReason.ReasonName : "";
                     t.ReasonOth = shipmentdata.ReasonOth;
                 }
-                var toproject = _context.Project.Where(x => x.Id == t.ToProjectId).FirstOrDefault();
-                if (toproject != null)
-                {
-                    t.ToProjectCode = toproject.ProjectCode;
 
-                }
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {

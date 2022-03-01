@@ -34,36 +34,24 @@ namespace GSC.Respository.SupplyManagement
         {
             var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            if (data == null)
-            {
-                data = new List<SupplyManagementShipmentGridDto>();
-            }
-            else
-            {
-                data.ForEach(t =>
-                {               
 
-                    var toproject = _context.Project.Where(x => x.Id == t.ToProjectId).FirstOrDefault();
-                    if (toproject != null)
-                    {
-                        t.ToProjectCode = toproject.ProjectCode;
+            data.ForEach(t =>
+            {
+                var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
+                if (fromproject != null)
+                {
+                    var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
+                    t.StudyProjectCode = study != null ? study.ProjectCode : "";
+                }
+            });
 
-                    }
-                    var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
-                    if (fromproject != null)
-                    {
-                        var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
-                        t.StudyProjectCode = study != null ? study.ProjectCode : "";
-                    }
-                });
-            }
 
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                      ProjectTo<SupplyManagementRequestGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             requestdata.ForEach(t =>
             {
-                if (!data.Any(x => x.SupplyManagementRequestId == t.Id))
+                if (data != null && !data.Any(x => x.SupplyManagementRequestId == t.Id))
                 {
                     SupplyManagementShipmentGridDto obj = new SupplyManagementShipmentGridDto();
                     obj.IsSiteRequest = t.IsSiteRequest;
@@ -72,17 +60,18 @@ namespace GSC.Respository.SupplyManagement
                     obj.SupplyManagementRequestId = t.Id;
                     obj.RequestQty = t.RequestQty;
                     obj.FromProjectCode = t.FromProjectCode;
-                    var toproject = _context.Project.Where(x => x.Id == t.ToProjectId).FirstOrDefault();
-                    if (toproject != null)
-                    {
-                        t.ToProjectCode = toproject.ProjectCode;
-
-                    }
+                    obj.ToProjectCode = t.ToProjectCode;
+                    obj.CreatedByUser = t.CreatedByUser;
+                    obj.ModifiedByUser = t.ModifiedByUser;
+                    obj.CreatedDate = t.CreatedDate;
+                    obj.DeletedDate = t.DeletedDate;
+                    obj.DeletedByUser = t.DeletedByUser;
+                    obj.IsDeleted = t.IsDeleted;
                     var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                     if (fromproject != null)
                     {
                         var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
-                        t.StudyProjectCode = study != null ? study.ProjectCode : "";
+                        obj.StudyProjectCode = study != null ? study.ProjectCode : "";
                     }
                     data.Add(obj);
                 }

@@ -419,7 +419,8 @@ namespace GSC.Api.Helpers
             CreateMap<CtmsMonitoring, CtmsMonitoringGridDto>().ReverseMap();
 
             CreateMap<SupplyManagementRequest, SupplyManagementRequestGridDto>()
-                  .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.FromProject.ProjectCode))                  
+                  .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.FromProject.ProjectCode))
+                  .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.ToProject.ProjectCode))
                   .ReverseMap();
             CreateMap<SupplyManagementShipment, SupplyManagementShipmentGridDto>()
                   .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyManagementRequest.FromProject.ProjectCode))                  
@@ -436,6 +437,7 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.FromProjectId, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.FromProjectId))
                  .ForMember(x => x.ToProjectId, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.ToProjectId))
                  .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode))
+                 .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode))
                  .ForMember(x => x.Status, x => x.MapFrom(a => a.SupplyManagementShipment.Status))
                  .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
                  .ForMember(x => x.StatusName, x => x.MapFrom(a => a.SupplyManagementShipment.Status.GetDescription()))                
