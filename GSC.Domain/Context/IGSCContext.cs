@@ -347,5 +347,9 @@ namespace GSC.Domain.Context
         DbSet<CtmsMonitoringReportVariableValueQuery> CtmsMonitoringReportVariableValueQuery { get; set; }
         DbSet<CtmsMonitoringReportVariableValueAudit> CtmsMonitoringReportVariableValueAudit { get; set; }
         DbSet<CtmsMonitoringReportVariableValueChild> CtmsMonitoringReportVariableValueChild { get; set; }
+
+        DbSet<SupplyManagementRequest> SupplyManagementRequest { get; set; }
+        DbSet<SupplyManagementShipment> SupplyManagementShipment { get; set; }
+        DbSet<SupplyManagementReceipt> SupplyManagementReceipt { get; set; }
     }
 }

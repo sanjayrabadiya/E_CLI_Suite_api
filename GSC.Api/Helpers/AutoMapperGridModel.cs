@@ -411,11 +411,39 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.AppScreenName, x => x.MapFrom(a => a.AppScreen.ScreenName)).ReverseMap();
 
             CreateMap<VerificationApprovalTemplateHistory, VerificationApprovalTemplateHistoryViewDto>()
-               .ForMember(x => x.SendBy, x => x.MapFrom(a=>a.User.UserName))
+               .ForMember(x => x.SendBy, x => x.MapFrom(a => a.User.UserName))
                .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
                .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription())).ReverseMap();
 
             CreateMap<CtmsMonitoring, CtmsMonitoringGridDto>().ReverseMap();
+
+            CreateMap<SupplyManagementRequest, SupplyManagementRequestGridDto>()
+                  .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.FromProject.ProjectCode))                  
+                  .ReverseMap();
+            CreateMap<SupplyManagementShipment, SupplyManagementShipmentGridDto>()
+                  .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyMangementRequest.FromProject.ProjectCode))                  
+                  .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
+                  .ForMember(x => x.IsSiteRequest, x => x.MapFrom(a => a.SupplyMangementRequest.IsSiteRequest))
+                  .ForMember(x => x.RequestQty, x => x.MapFrom(a => a.SupplyMangementRequest.RequestQty))
+                  .ForMember(x => x.FromProjectId, x => x.MapFrom(a => a.SupplyMangementRequest.FromProjectId))
+                  .ForMember(x => x.ToProjectId, x => x.MapFrom(a => a.SupplyMangementRequest.ToProjectId))
+                  .ForMember(x => x.IsSiteRequest, x => x.MapFrom(a => a.SupplyMangementRequest.IsSiteRequest))
+                  .ReverseMap();
+
+            CreateMap<SupplyManagementReceipt, SupplyManagementReceiptGridDto>()
+                 .ForMember(x => x.FromProjectId, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyMangementRequest.FromProjectId))
+                 .ForMember(x => x.ToProjectId, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyMangementRequest.ToProjectId))
+                 .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyMangementRequest.FromProject.ProjectCode))
+                 .ForMember(x => x.Status, x => x.MapFrom(a => a.SupplyManagementShipment.Status))
+                 .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
+                 .ForMember(x => x.StatusName, x => x.MapFrom(a => a.SupplyManagementShipment.Status.GetDescription()))                
+                 .ForMember(x => x.ApprovedQty, x => x.MapFrom(a => a.SupplyManagementShipment.ApprovedQty))
+                 .ForMember(x => x.ApproveRejectDateTime, x => x.MapFrom(a => a.SupplyManagementShipment.CreatedDate))
+                 .ForMember(x => x.ShipmentNo, x => x.MapFrom(a => a.SupplyManagementShipment.ShipmentNo))
+                 .ForMember(x => x.CourierName, x => x.MapFrom(a => a.SupplyManagementShipment.CourierName))
+                 .ForMember(x => x.CourierDate, x => x.MapFrom(a => a.SupplyManagementShipment.CourierDate))
+                 .ForMember(x => x.CourierTrackingNo, x => x.MapFrom(a => a.SupplyManagementShipment.CourierTrackingNo))
+                 .ReverseMap();
         }
     }
 }

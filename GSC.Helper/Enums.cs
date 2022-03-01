@@ -341,7 +341,7 @@ namespace GSC.Helper
         [Description("By Variable Annotation")]
         ByVariableAnnotation = 2,
 
-        [Description("By Form")] 
+        [Description("By Form")]
         ByTemplate = 3,
 
         [Description("By Template Annotation")]
@@ -800,5 +800,10 @@ namespace GSC.Helper
         [Description("Sent For Approval")] SentForApproval = 2,
         [Description("Approved")] Approved = 3,
         [Description("Rejected")] Rejected = 4,
+    }
+    public enum SupplyMangementShipmentStatus : short
+    {
+        [Description("Approve")] Approve = 1,
+        [Description("Reject")] Reject = 2
     }
 }

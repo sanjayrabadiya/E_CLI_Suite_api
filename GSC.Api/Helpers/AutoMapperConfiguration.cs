@@ -450,6 +450,9 @@ namespace GSC.Api.Helpers
             CreateMap<CtmsMonitoringReportVariableValueChild, CtmsMonitoringReportVariableValueChildDto>().ReverseMap();
             CreateMap<CtmsMonitoringReportVariableValue, CtmsMonitoringReportVariableValueBasic>()
                 .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Queryies.Any()));
+            CreateMap<SupplyManagementRequest, SupplyManagementRequestDto>().ReverseMap();
+            CreateMap<SupplyManagementShipment, SupplyManagementShipmentDto>().ReverseMap();
+            CreateMap<SupplyManagementReceipt, SupplyManagementReceiptDto>().ReverseMap();
         }
     }
 }

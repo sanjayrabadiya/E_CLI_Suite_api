@@ -370,6 +370,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<ICtmsMonitoringReportVariableValueQueryRepository, CtmsMonitoringReportVariableValueQueryRepository>();
             services.AddScoped<ICtmsMonitoringReportVariableValueAuditRepository, CtmsMonitoringReportVariableValueAuditRepository>();
             services.AddScoped<ICtmsMonitoringReportVariableValueChildRepository, CtmsMonitoringReportVariableValueChildRepository>();
+            services.AddScoped<ISupplyManagementRequestRepository, SupplyManagementRequestRepository>();
+            services.AddScoped<ISupplyManagementShipmentRepository, SupplyManagementShipmentRepository>();
+            services.AddScoped<ISupplyManagementReceiptRepository, SupplyManagementReceiptRepository>();
         }
     }
 }
