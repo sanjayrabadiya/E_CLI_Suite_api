@@ -100,6 +100,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             verificationApprovalTemplate.VerificationApprovalTemplateHistory = new VerificationApprovalTemplateHistory();
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendBy = _jwtTokenAccesser.UserId;
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendOn = _jwtTokenAccesser.GetClientDate();
+            verificationApprovalTemplate.VerificationApprovalTemplateHistory.SecurityRoleId = _jwtTokenAccesser.RoleId;
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.Status = Helper.ProductVerificationStatus.SentForApproval;
             _verificationApprovalTemplateHistoryRepository.Add(verificationApprovalTemplate.VerificationApprovalTemplateHistory);
 
@@ -164,6 +165,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             verificationApprovalTemplateDto.IsSendBack = false;
             verificationApprovalTemplateDto.SendBy = _jwtTokenAccesser.UserId;
             verificationApprovalTemplateDto.SendOn = _jwtTokenAccesser.GetClientDate();
+            verificationApprovalTemplateDto.SecurityRoleId = _jwtTokenAccesser.RoleId;
             verificationApprovalTemplateDto.VerificationApprovalTemplateId = verification.VerificationApprovalTemplateId;
 
             var verificationApprovalTemplate = _mapper.Map<VerificationApprovalTemplateHistory>(verificationApprovalTemplateDto);
@@ -229,6 +231,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 history.Status = Helper.ProductVerificationStatus.Rejected;
                 history.SendBy = _jwtTokenAccesser.UserId;
                 history.SendOn = _jwtTokenAccesser.GetClientDate();
+                history.SecurityRoleId = _jwtTokenAccesser.RoleId;
                 _verificationApprovalTemplateHistoryRepository.Add(history);
             }
             else
@@ -241,6 +244,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 history.Status = Helper.ProductVerificationStatus.Approved;
                 history.SendBy = _jwtTokenAccesser.UserId;
                 history.SendOn = _jwtTokenAccesser.GetClientDate();
+                history.SecurityRoleId = _jwtTokenAccesser.RoleId;
                 _verificationApprovalTemplateHistoryRepository.Add(history);
             }
             _verificationApprovalTemplateRepository.Update(verificationApprovalTemplate);
