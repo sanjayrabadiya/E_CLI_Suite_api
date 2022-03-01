@@ -124,7 +124,7 @@ namespace GSC.Respository.AdverseEvent
         public List<DashboardDto> GetAEReportingMyTaskList(int ProjectId)
         {
             var projectIdlist = _context.Project.Where(x => x.ParentProjectId == ProjectId).Select(x => x.Id).ToList();
-            var rolelist = _context.SiteTeam.Where(x => projectIdlist.Contains(x.ProjectId) && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
+            var rolelist = _context.SiteTeam.Where(x => projectIdlist.Contains(x.ProjectId) && x.DeletedDate == null).Select(x => x.RoleId).ToList();
             if (_context.ProjectRight.Any(x => rolelist.Contains(x.RoleId) && x.DeletedDate == null && x.RoleId == _jwtTokenAccesser.RoleId && x.UserId == _jwtTokenAccesser.UserId))
             {
                 var result = All.Include(x => x.Randomization).Include(x => x.AEReportingValueValues).Where(x => projectIdlist.Contains(x.Randomization.ProjectId) && x.DeletedDate == null && x.Randomization.DeletedDate == null && !x.IsReviewedDone).Select(x => new DashboardDto
