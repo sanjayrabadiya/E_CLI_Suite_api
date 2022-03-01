@@ -48,7 +48,7 @@ namespace GSC.Respository.SupplyManagement
                     ProjectTo<SupplyManagementRequestGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             data.ForEach(t =>
             {
-                var shipmentdata = _context.SupplyManagementShipment.Where(x => x.SupplyMangementRequestId == t.Id).FirstOrDefault();
+                var shipmentdata = _context.SupplyManagementShipment.Where(x => x.SupplyManagementRequestId == t.Id).FirstOrDefault();
                 if (shipmentdata != null)
                 {
                     t.ApprovedQty = shipmentdata.ApprovedQty;

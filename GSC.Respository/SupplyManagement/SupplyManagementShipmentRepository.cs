@@ -41,9 +41,7 @@ namespace GSC.Respository.SupplyManagement
             else
             {
                 data.ForEach(t =>
-                {
-                    t.AuditReason = _context.AuditReason.Where(x => x.Id == t.AuditReasonId).FirstOrDefault() != null ?
-                   _context.AuditReason.Where(x => x.Id == t.AuditReasonId).FirstOrDefault().ReasonName : "";
+                {               
 
                     var toproject = _context.Project.Where(x => x.Id == t.ToProjectId).FirstOrDefault();
                     if (toproject != null)

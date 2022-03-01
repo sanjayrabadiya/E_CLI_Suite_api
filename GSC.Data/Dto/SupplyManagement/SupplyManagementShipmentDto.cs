@@ -8,7 +8,7 @@ namespace GSC.Data.Dto.SupplyManagement
 {
     public class SupplyManagementShipmentDto : BaseDto
     {
-        public int SupplyMangementRequestId { get; set; }
+        public int SupplyManagementRequestId { get; set; }
         public SupplyMangementShipmentStatus Status { get; set; }
         public int ApprovedQty { get; set; }
         public string ShipmentNo { get; set; }
