@@ -505,7 +505,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "LabelClaim", DisplayName = "Label Claim" });
             _dictionaries.Add(new Dictionary { FieldName = "DistributedBy", DisplayName = "Distributed By" });
             _dictionaries.Add(new Dictionary { FieldName = "PackDesc", DisplayName = "Pack Desc" });
-            _dictionaries.Add(new Dictionary { FieldName = "MfgDate", DisplayName = "Market Authorization" });
+            _dictionaries.Add(new Dictionary { FieldName = "MarketAuthorization", DisplayName = "Market Authorization" });
             _dictionaries.Add(new Dictionary { FieldName = "MfgDate", DisplayName = "Mfg Date" });
             _dictionaries.Add(new Dictionary { FieldName = "RetestExpiryId", DisplayName = "Re-Test/Expiry" });
             _dictionaries.Add(new Dictionary { FieldName = "RetestExpiryDate", DisplayName = "Re-Test/Expiry Date" });

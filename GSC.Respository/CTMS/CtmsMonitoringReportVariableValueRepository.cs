@@ -38,5 +38,46 @@ namespace GSC.Respository.CTMS
             return All.Include(x => x.CtmsMonitoringReport).AsNoTracking().Where(t => t.CtmsMonitoringReportId == CtmsMonitoringReportId)
                     .ProjectTo<CtmsMonitoringReportVariableValueBasic>(_mapper.ConfigurationProvider).ToList();
         }
+
+        public string GetValueForAudit(CtmsMonitoringReportVariableValueDto cstmsMonitoringReportVariableValueDto)
+        {
+            if (cstmsMonitoringReportVariableValueDto.IsDeleted) return null;
+
+            if (cstmsMonitoringReportVariableValueDto.Children?.Count > 0)
+            {
+                var child = cstmsMonitoringReportVariableValueDto.Children.First();
+
+                var variableValue = _context.StudyLevelFormVariableValue.Find(child.StudyLevelFormVariableValueId);
+                if (variableValue != null)
+                {
+                    var valueChild = _context.CtmsMonitoringReportVariableValueChild.AsNoTracking()
+                        .FirstOrDefault(t => t.Id == child.Id);
+                    if (valueChild != null && child.Value == "false")
+                    {
+                        cstmsMonitoringReportVariableValueDto.OldValue = variableValue.ValueName;
+                        return "";
+                    }
+
+                    cstmsMonitoringReportVariableValueDto.OldValue = "";
+                    return variableValue.ValueName;
+                }
+
+                return child.Value;
+            }
+
+            if (cstmsMonitoringReportVariableValueDto.IsNa)
+                return "N/A";
+
+            return string.IsNullOrWhiteSpace(cstmsMonitoringReportVariableValueDto.ValueName)
+                ? cstmsMonitoringReportVariableValueDto.Value
+                : cstmsMonitoringReportVariableValueDto.ValueName;
+        }
+
+        public void DeleteChild(int ctmsMonitoringReportVariableValueId)
+        {
+            var childs = _context.CtmsMonitoringReportVariableValueChild
+                .Where(t => t.CtmsMonitoringReportVariableValueId == ctmsMonitoringReportVariableValueId).ToList();
+            _context.CtmsMonitoringReportVariableValueChild.RemoveRange(childs);
+        }
     }
 }

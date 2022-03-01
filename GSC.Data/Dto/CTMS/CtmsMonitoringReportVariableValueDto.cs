@@ -16,10 +16,11 @@ namespace GSC.Data.Dto.CTMS
         public string Value { get; set; }
         public string ValueName { get; set; }
         public string OldValue { get; set; }
+        public bool IsNa { get; set; }
         public CtmsCommentStatus? QueryStatus { get; set; }
         public CtmsMonitoringReport CtmsMonitoringReport { get; set; }
         public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
-        public ICollection<ManageMonitoringReportVariableChildDto> Children { get; set; }
+        public ICollection<CtmsMonitoringReportVariableValueChildDto> Children { get; set; }
     }
 
     public class CtmsMonitoringReportVariableValueBasic : BaseAuditDto
@@ -32,7 +33,14 @@ namespace GSC.Data.Dto.CTMS
         public int? UserRoleId { get; set; }
         public bool IsComment { get; set; }
         public CtmsCommentStatus QueryStatus { get; set; }
+        public bool IsNa { get; set; }
         public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
-        public ICollection<ManageMonitoringReportVariableChild> Children { get; set; }
+        public ICollection<CtmsMonitoringReportVariableValueChild> Children { get; set; }
+    }
+
+    public class CtmsMonitoringReportVariableValueSaveDto : BaseDto
+    {
+        //public int VariableTemplateId { get; set; }
+        public List<CtmsMonitoringReportVariableValueDto> CtmsMonitoringReportVariableValueList { get; set; }
     }
 }

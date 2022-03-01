@@ -15,4 +15,12 @@ namespace GSC.Data.Entities.CTMS
         public MonitoringReportStatus? ReportStatus { get; set; }
         public CtmsMonitoring CtmsMonitoring { get; set; }
     }
+
+    public class CtmsMonitoringReportBasic
+    {
+        public int Id { get; set; }
+        public int ProjectId { get; set; }
+        public int StudyLevelFormId { get; set; }
+        public int VariableTemplateId { get; set; }
+    }
 }

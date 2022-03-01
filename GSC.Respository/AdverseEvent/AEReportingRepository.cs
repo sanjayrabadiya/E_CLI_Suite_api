@@ -2,9 +2,11 @@
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.AdverseEvent;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.AdverseEvent;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
@@ -117,6 +119,24 @@ namespace GSC.Respository.AdverseEvent
                 RejectReason = c.RejectReasonId == null ? "" : _context.AuditReason.Where(x => x.Id == c.RejectReasonId).ToList().FirstOrDefault().ReasonName,
             }).OrderByDescending(x => x.CreatedDate).ToList();
             return aEGridData;
+        }
+
+        public List<DashboardDto> GetAEReportingMyTaskList(int ProjectId)
+        {
+            var projectIdlist = _context.Project.Where(x => x.ParentProjectId == ProjectId).Select(x => x.Id).ToList();
+            var rolelist = _context.SiteTeam.Where(x => projectIdlist.Contains(x.ProjectId) && x.DeletedDate == null).Select(x => x.RoleId).ToList();
+            if (_context.ProjectRight.Any(x => rolelist.Contains(x.RoleId) && x.DeletedDate == null && x.RoleId == _jwtTokenAccesser.RoleId && x.UserId == _jwtTokenAccesser.UserId))
+            {
+                var result = All.Include(x => x.Randomization).Include(x => x.AEReportingValueValues).Where(x => projectIdlist.Contains(x.Randomization.ProjectId) && x.DeletedDate == null && x.Randomization.DeletedDate == null && !x.IsReviewedDone).Select(x => new DashboardDto
+                {
+                    Id = x.Id,
+                    TaskInformation = $"{x.Randomization.FirstName} {x.Randomization.LastName} - {x.Randomization.ScreeningNumber}",
+                    ExtraData = new { ReviewDone = x.IsReviewedDone, createdByUser = x.CreatedByUser.UserName, CreatedDate = x.CreatedDate, Data = x.AEReportingValueValues },
+                    Module = MyTaskModule.AdverseEvent.GetDescription(),
+                }).ToList();
+                return result;
+            }
+            return new List<DashboardDto>();
         }
 
         public string GetEventEffectName(int id, int? adversesettingId)

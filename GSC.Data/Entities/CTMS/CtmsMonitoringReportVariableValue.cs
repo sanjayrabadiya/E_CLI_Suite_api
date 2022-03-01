@@ -16,6 +16,7 @@ namespace GSC.Data.Entities.CTMS
         public int StudyLevelFormVariableId { get; set; }
         public string Value { get; set; }
         public CtmsCommentStatus? QueryStatus { get; set; }
+        public bool IsNa { get; set; }
         public CtmsMonitoringReport CtmsMonitoringReport { get; set; }
         public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
         public List<CtmsMonitoringReportVariableValueChild> Children { get; set; }

@@ -46,9 +46,6 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public int DesignOrder { get; set; }
         public bool? IsDocument { get; set; }
         public bool? IsEncrypt { get; set; }
-        public string ScreeningValue { get; set; }
-        public int ScreeningTemplateValueId { get; set; }
-        public string ScreeningValueOld { get; set; }
         public bool? IsValid { get; set; }
         public bool HasComments { get; set; }
         public bool HasQueries { get; set; }

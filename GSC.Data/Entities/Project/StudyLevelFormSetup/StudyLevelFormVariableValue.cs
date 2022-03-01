@@ -15,6 +15,5 @@ namespace GSC.Data.Entities.Project.StudyLevelFormSetup
         public int SeqNo { get; set; }
         public string Label { get; set; }
         public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
-      //  public List<VariableValueLanguage> VariableValueLanguage { get; set; }
     }
 }

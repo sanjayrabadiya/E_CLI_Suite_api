@@ -7,6 +7,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Domain.Context;
+using GSC.Respository.AdverseEvent;
 using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
 using GSC.Respository.Etmf;
@@ -27,6 +28,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
         private readonly IManageMonitoringReportReviewRepository _manageMonitoringReportReviewRepository;
+        private readonly IAEReportingRepository _aEReportingRepository;
 
         public DashboardController(
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
@@ -34,7 +36,8 @@ namespace GSC.Api.Controllers.Master
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
-            IManageMonitoringReportReviewRepository manageMonitoringReportReviewRepository
+            IManageMonitoringReportReviewRepository manageMonitoringReportReviewRepository,
+            IAEReportingRepository aEReportingRepository
             )
         {
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
@@ -43,6 +46,7 @@ namespace GSC.Api.Controllers.Master
             _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
             _manageMonitoringReportReviewRepository = manageMonitoringReportReviewRepository;
+            _aEReportingRepository = aEReportingRepository;
         }
 
         [HttpGet]
@@ -57,6 +61,7 @@ namespace GSC.Api.Controllers.Master
             objdashboard.eTMFSendBackData = _projectWorkplaceArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId);
             objdashboard.eTMFSubSecSendBackData = _projectSubSecArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId);
             objdashboard.eConsentData = _econsentReviewDetailsRepository.GetEconsentMyTaskList(ProjectId);
+            objdashboard.eAdverseEventData = _aEReportingRepository.GetAEReportingMyTaskList(ProjectId);
             objdashboard.manageMonitoringReportSendData = _manageMonitoringReportReviewRepository.GetSendTemplateList((int)(SiteId != null ? SiteId : ProjectId));
             objdashboard.manageMonitoringReportSendBackData = _manageMonitoringReportReviewRepository.GetSendBackTemplateList((int)(SiteId != null ? SiteId : ProjectId));
             return Ok(objdashboard);

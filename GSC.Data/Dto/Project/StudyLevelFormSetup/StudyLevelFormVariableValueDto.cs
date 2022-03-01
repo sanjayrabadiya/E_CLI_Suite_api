@@ -23,6 +23,7 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public string DisplayVersion { get; set; }
         public string VariableValue { get; set; }
         public int CtmsMonitoringReportVariableValueId { get; set; }
+        public int CtmsMonitoringReportVariableValueChildId { get; set; }
         public string VariableValueOld { get; set; }
     }
     

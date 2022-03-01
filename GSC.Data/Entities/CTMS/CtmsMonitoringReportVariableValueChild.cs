@@ -14,9 +14,9 @@ namespace GSC.Data.Entities.CTMS
     public class CtmsMonitoringReportVariableValueChild : BaseEntity, ICommonAduit
     {
         public int CtmsMonitoringReportVariableValueId { get; set; }
-        public int VariableValueId { get; set; }
+        public int StudyLevelFormVariableValueId { get; set; }
         public string Value { get; set; }
         public CtmsMonitoringReportVariableValue CtmsMonitoringReportVariableValue { get; set; }
-        public VariableValue VariableValue { get; set; }
+        public StudyLevelFormVariableValue StudyLevelFormVariableValue { get; set; }
     }
 }

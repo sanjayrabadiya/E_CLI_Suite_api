@@ -574,6 +574,7 @@ namespace GSC.Helper
         [Description("Inform Consent")] InformConsent = 18,
         //[Description("Study Output")] StudyOutput = 18,
         [Description("CTMS")] CTMS = 22,
+        [Description("Adverse Event")] AdverseEvent = 23
     }
 
     public enum MyTaskMethodModule : short
