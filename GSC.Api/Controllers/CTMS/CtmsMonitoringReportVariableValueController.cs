@@ -22,10 +22,9 @@ namespace GSC.Api.Controllers.Master
         private readonly IStudyLevelFormRepository _studyLevelFormRepository;
         private readonly IStudyLevelFormVariableRepository _studyLevelFormVariableRepository;
         private readonly ICtmsMonitoringReportRepository _ctmsMonitoringReportRepository;
-        private readonly IManageMonitoringReportVariableRepository _manageMonitoringReportVariableRepository;
-        private readonly IManageMonitoringReportRepository _manageMonitoringReportRepository;
-        private readonly IManageMonitoringReportVariableAuditRepository _manageMonitoringReportVariableAuditRepository;
-        private readonly IManageMonitoringReportVariableChildRepository _manageMonitoringReportVariableChildRepository;
+        private readonly ICtmsMonitoringReportVariableValueRepository _ctmsMonitoringReportVariableValueRepository;
+        private readonly ICtmsMonitoringReportVariableValueAuditRepository _ctmsMonitoringReportVariableValueAuditRepository;
+        private readonly ICtmsMonitoringReportVariableValueChildRepository _ctmsMonitoringReportVariableValueChildRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
@@ -35,20 +34,18 @@ namespace GSC.Api.Controllers.Master
             IJwtTokenAccesser jwtTokenAccesser,
             IStudyLevelFormRepository studyLevelFormRepository,
             ICtmsMonitoringReportRepository ctmsMonitoringReportRepository,
+            ICtmsMonitoringReportVariableValueRepository ctmsMonitoringReportVariableValueRepository,
+            ICtmsMonitoringReportVariableValueAuditRepository ctmsMonitoringReportVariableValueAuditRepository,
+            ICtmsMonitoringReportVariableValueChildRepository ctmsMonitoringReportVariableValueChildRepository,
             IStudyLevelFormVariableRepository studyLevelFormVariableRepository,
-            IManageMonitoringReportVariableRepository manageMonitoringReportVariableRepository,
-            IManageMonitoringReportVariableAuditRepository manageMonitoringReportVariableAuditRepository,
-            IManageMonitoringReportVariableChildRepository manageMonitoringReportVariableChildRepository,
-            IVariableTemplateRepository variableTemplateRepository,
-            IManageMonitoringReportRepository manageMonitoringReportRepository)
+            IVariableTemplateRepository variableTemplateRepository)
         {
             _studyLevelFormRepository = studyLevelFormRepository;
             _studyLevelFormVariableRepository = studyLevelFormVariableRepository;
             _ctmsMonitoringReportRepository = ctmsMonitoringReportRepository;
-            _manageMonitoringReportVariableRepository = manageMonitoringReportVariableRepository;
-            _manageMonitoringReportVariableAuditRepository = manageMonitoringReportVariableAuditRepository;
-            _manageMonitoringReportVariableChildRepository = manageMonitoringReportVariableChildRepository;
-            _manageMonitoringReportRepository = manageMonitoringReportRepository;
+            _ctmsMonitoringReportVariableValueRepository = ctmsMonitoringReportVariableValueRepository;
+            _ctmsMonitoringReportVariableValueAuditRepository = ctmsMonitoringReportVariableValueAuditRepository;
+            _ctmsMonitoringReportVariableValueChildRepository = ctmsMonitoringReportVariableValueChildRepository;
             _variableTemplateRepository = variableTemplateRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -58,7 +55,7 @@ namespace GSC.Api.Controllers.Master
         /// Get Form & Variable & VariableValue by manageMonitoringReportId
         /// Created By Swati
         [HttpGet]
-        [Route("GetReportFormVariable/{Id}/{StudyLevelFormId}")]
+        [Route("GetReportFormVariable/{Id}/{CtmsMonitoringReportId}")]
         public IActionResult GetReportFormVariable([FromRoute] int Id, int CtmsMonitoringReportId)
         {
             var designTemplate = _studyLevelFormRepository.GetReportFormVariable(Id);
@@ -71,64 +68,65 @@ namespace GSC.Api.Controllers.Master
         [HttpPut]
         [TransactionRequired]
         [Route("SaveVariableValue")]
-        public IActionResult SaveVariableValue([FromBody] ManageMonitoringReportValueSaveDto manageMonitoringReportValueSaveDto)
+        public IActionResult SaveVariableValue([FromBody] CtmsMonitoringReportVariableValueSaveDto ctmsMonitoringReportVariableValueSaveDto)
         {
-            if (manageMonitoringReportValueSaveDto.MonitoringVariableValueList != null)
+            if (ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList != null)
             {
-                foreach (var item in manageMonitoringReportValueSaveDto.MonitoringVariableValueList)
+                foreach (var item in ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList)
                 {
-                    var value = _manageMonitoringReportVariableRepository.GetValueForAudit(item);
-                    var manageMonitoringReportVariable = _mapper.Map<ManageMonitoringReportVariable>(item);
+                    var value = _ctmsMonitoringReportVariableValueRepository.GetValueForAudit(item);
+                    var ctmsMonitoringReportVariableValue = _mapper.Map<CtmsMonitoringReportVariableValue>(item);
 
-                    var Exists = _manageMonitoringReportVariableRepository.All.Where(x => x.DeletedDate == null && x.ManageMonitoringReportId == manageMonitoringReportVariable.ManageMonitoringReportId && x.VariableId == item.VariableId).FirstOrDefault();
+                    var Exists = _ctmsMonitoringReportVariableValueRepository.All.Where(x => x.DeletedDate == null && x.CtmsMonitoringReportId == ctmsMonitoringReportVariableValue.CtmsMonitoringReportId && x.StudyLevelFormVariableId == item.StudyLevelFormVariableId).FirstOrDefault();
 
                     ManageMonitoringReportVariableAudit audit = new ManageMonitoringReportVariableAudit();
 
                     if (Exists == null)
                     {
-                        manageMonitoringReportVariable.Id = 0;
-                        _manageMonitoringReportVariableRepository.Add(manageMonitoringReportVariable);
+                        ctmsMonitoringReportVariableValue.Id = 0;
+                        _ctmsMonitoringReportVariableValueRepository.Add(ctmsMonitoringReportVariableValue);
 
-                        var aduit = new ManageMonitoringReportVariableAudit
+                        var aduit = new CtmsMonitoringReportVariableValueAudit
                         {
-                            ManageMonitoringReportVariable = manageMonitoringReportVariable,
+                            CtmsMonitoringReportVariableValue = ctmsMonitoringReportVariableValue,
                             Value = item.IsNa ? "N/A" : value,
                             OldValue = item.OldValue,
                         };
-                        _manageMonitoringReportVariableAuditRepository.Save(aduit);
-                        _manageMonitoringReportVariableChildRepository.Save(manageMonitoringReportVariable);
+                        _ctmsMonitoringReportVariableValueAuditRepository.Save(aduit);
+                        _ctmsMonitoringReportVariableValueChildRepository.Save(ctmsMonitoringReportVariableValue);
                     }
                     else
                     {
-                        var aduit = new ManageMonitoringReportVariableAudit
+                        var aduit = new CtmsMonitoringReportVariableValueAudit
                         {
-                            ManageMonitoringReportVariableId = Exists.Id,
+                            CtmsMonitoringReportVariableValueId = Exists.Id,
                             Value = item.IsNa ? "N/A" : value,
                             OldValue = item.OldValue,
                         };
-                        _manageMonitoringReportVariableAuditRepository.Save(aduit);
+                        _ctmsMonitoringReportVariableValueAuditRepository.Save(aduit);
                         if (item.IsDeleted)
-                            _manageMonitoringReportVariableRepository.DeleteChild(Exists.Id);
+                            _ctmsMonitoringReportVariableValueRepository.DeleteChild(Exists.Id);
 
-                        _manageMonitoringReportVariableChildRepository.Save(manageMonitoringReportVariable);
+                        _ctmsMonitoringReportVariableValueChildRepository.Save(ctmsMonitoringReportVariableValue);
 
-                        manageMonitoringReportVariable.Id = Exists.Id;
-                        _manageMonitoringReportVariableRepository.Update(manageMonitoringReportVariable);
+                        ctmsMonitoringReportVariableValue.Id = Exists.Id;
+                        _ctmsMonitoringReportVariableValueRepository.Update(ctmsMonitoringReportVariableValue);
                     }
                 }
 
-                var manageMonitoringReport = _manageMonitoringReportRepository.Find(manageMonitoringReportValueSaveDto.MonitoringVariableValueList[0].ManageMonitoringReportId);
-                manageMonitoringReport.Status = MonitoringReportStatus.Initiated;
-                _manageMonitoringReportRepository.Update(manageMonitoringReport);
+                var ctmsMonitoringReport = _ctmsMonitoringReportRepository.Find(ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList[0].CtmsMonitoringReportId);
+                ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.Initiated;
+                _ctmsMonitoringReportRepository.Update(ctmsMonitoringReport);
             }
             if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
-            return Ok(manageMonitoringReportValueSaveDto.MonitoringVariableValueList[0].Id);
+            return Ok(ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList[0].Id);
         }
 
         [HttpGet("GetQueryStatusByReportId/{id}")]
         public IActionResult GetQueryStatusByReportId(int id)
         {
-            return Ok(_manageMonitoringReportVariableRepository.GetQueryStatusByReportId(id));
+            return Ok();
+            //return Ok(_manageMonitoringReportVariableRepository.GetQueryStatusByReportId(id));
         }
     }
 }

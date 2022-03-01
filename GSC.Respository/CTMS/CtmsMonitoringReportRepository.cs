@@ -40,21 +40,21 @@ namespace GSC.Respository.CTMS
         {
             var ctmsMonitoringReport = All.Where(x => x.Id == CtmsMonitoringReportId && x.DeletedDate == null).FirstOrDefault();
 
-            var ManageMonitoringTemplateBasic = GetFormBasic(CtmsMonitoringReportId);
+            var ctmsMonitoringReportFormBasic = GetFormBasic(CtmsMonitoringReportId);
 
             designTemplateDto.VariableTemplateId = designTemplateDto.VariableTemplateId;
             designTemplateDto.CtmsMonitoringReportId = CtmsMonitoringReportId;
-            designTemplateDto.ProjectId = ManageMonitoringTemplateBasic.ProjectId;
+            designTemplateDto.ProjectId = ctmsMonitoringReportFormBasic.ProjectId;
             designTemplateDto.IsSender = ctmsMonitoringReport.CreatedBy == _jwtTokenAccesser.UserId;
             designTemplateDto.ReportStatus = ctmsMonitoringReport.ReportStatus;
 
             var reviewPerson = _ctmsMonitoringReportReviewRepository.GetReview(CtmsMonitoringReportId);
 
-            var values = _ctmsMonitoringReportVariableValueRepository.GetVariableValues(ManageMonitoringTemplateBasic.Id);
+            var values = _ctmsMonitoringReportVariableValueRepository.GetVariableValues(ctmsMonitoringReportFormBasic.Id);
 
             values.ForEach(t =>
             {
-                var variable = designTemplateDto.Variables.FirstOrDefault(v => v.VariableId == t.StudyLevelFormVariableId);
+                var variable = designTemplateDto.Variables.FirstOrDefault(v => v.StudyLevelFormVariableId == t.StudyLevelFormVariableId);
                 if (variable != null)
                 {
                     variable.VariableValue = t.Value;
@@ -63,16 +63,20 @@ namespace GSC.Respository.CTMS
                     variable.HasComments = t.IsComment;
                     variable.IsReviewPerson = reviewPerson;
                     variable.QueryStatus = t.QueryStatus;
+                    variable.IsNaValue = t.IsNa;
+                    if (!string.IsNullOrWhiteSpace(variable.VariableValue) || variable.IsNaValue)
+                        variable.IsValid = true;
 
                     if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
                         variable.Values.ToList().ForEach(val =>
                         {
-                            var childValue = t.Children.FirstOrDefault(v => v.VariableValueId == val.Id);
+                            var childValue = t.Children.FirstOrDefault(v => v.StudyLevelFormVariableValueId == val.Id);
                             if (childValue != null)
                             {
+                                variable.IsValid = true;
                                 val.VariableValue = childValue.Value;
                                 val.VariableValueOld = childValue.Value;
-                                val.CtmsMonitoringReportVariableValueId = childValue.Id;
+                                val.CtmsMonitoringReportVariableValueChildId = childValue.Id;
                             }
                         });
                 }
@@ -81,16 +85,19 @@ namespace GSC.Respository.CTMS
             return designTemplateDto;
         }
 
-        private ManageMonitoringTemplateBasic GetFormBasic(int ManageMonitoringReportId)
+        public CtmsMonitoringReportBasic GetFormBasic(int ManageMonitoringReportId)
         {
-            return _context.ManageMonitoringReport.Where(r => r.Id == ManageMonitoringReportId).Select(
-               c => new ManageMonitoringTemplateBasic
+            return All.Include(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
+                .Where(r => r.Id == ManageMonitoringReportId).Select(
+               c => new CtmsMonitoringReportBasic
                {
                    Id = c.Id,
-                   ManageMonitoringVisitId = c.ManageMonitoringVisitId,
-                   ProjectId = c.ManageMonitoringVisit.ProjectId,
-                   VariableTemplateId = c.VariableTemplateId,
+                   StudyLevelFormId = c.CtmsMonitoring.StudyLevelFormId,
+                   ProjectId = c.CtmsMonitoring.ProjectId,
+                   VariableTemplateId = c.CtmsMonitoring.StudyLevelForm.VariableTemplateId,
                }).FirstOrDefault();
         }
+
+       
     }
 }

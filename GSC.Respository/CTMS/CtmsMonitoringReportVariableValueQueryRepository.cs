@@ -99,7 +99,7 @@ namespace GSC.Respository.CTMS
                         .Select(t => t.ValueName).ToList());
 
                 var newVariableValueIds = ctmsMonitoringReportVariableValueQueryDto.Children
-                    .Where(t => t.Value == "true").Select(t => t.VariableValueId).ToList();
+                    .Where(t => t.Value == "true").Select(t => t.StudyLevelFormVariableValueId).ToList();
 
                 queryValue = string.Join(", ",
                     _context.VariableValue.Where(t => newVariableValueIds.Contains(t.Id))
