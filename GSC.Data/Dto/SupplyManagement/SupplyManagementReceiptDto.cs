@@ -12,6 +12,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool WithIssue { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+        public string Description { get; set; }
     }
     public class SupplyManagementReceiptGridDto : BaseAuditDto
     {
@@ -33,6 +34,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string CourierName { get; set; }
         public DateTime? CourierDate { get; set; }
         public string CourierTrackingNo { get; set; }
+
+        public string Description { get; set; }
     }
 
 }
