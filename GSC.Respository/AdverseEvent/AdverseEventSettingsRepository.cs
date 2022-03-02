@@ -129,16 +129,22 @@ namespace GSC.Respository.AdverseEvent
 
         public bool IsvalidPatientTemplate(int projectDesignTemplateId)
         {
-            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.MultilineTextBox) > 1)
+            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.MultilineTextBox) > 1 ||
+                _context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.MultilineTextBox) == 0)
                 return false;
-            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.DateTime) > 1)
+            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.DateTime) > 1 ||
+                _context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.DateTime) == 0)
                 return false;
-            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.RadioButton) > 1)
+            if (_context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.RadioButton) > 1 ||
+                _context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.RadioButton) == 0)
                 return false;
-
+            var data = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null
+            && (x.CollectionSource != Helper.CollectionSources.RadioButton || x.CollectionSource == Helper.CollectionSources.DateTime || x.CollectionSource == Helper.CollectionSources.RadioButton)).FirstOrDefault();
+            if (data != null)
+            {
+                return false;
+            }
             return true;
         }
-
-
     }
 }
