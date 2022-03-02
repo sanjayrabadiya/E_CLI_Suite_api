@@ -448,6 +448,29 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.CourierDate, x => x.MapFrom(a => a.SupplyManagementShipment.CourierDate))
                  .ForMember(x => x.CourierTrackingNo, x => x.MapFrom(a => a.SupplyManagementShipment.CourierTrackingNo))
                  .ReverseMap();
+
+            CreateMap<SupplyManagementRequest, SupplyManagementShipmentGridDto>()
+                  .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.FromProject.ProjectCode))
+                  .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.ToProject.ProjectCode))
+                  .ForMember(x => x.SupplyManagementRequestId, x => x.MapFrom(a => a.Id))
+                  .ReverseMap();
+
+            CreateMap<SupplyManagementShipment, SupplyManagementReceiptGridDto>()
+                 .ForMember(x => x.FromProjectId, x => x.MapFrom(a => a.SupplyManagementRequest.FromProjectId))
+                 .ForMember(x => x.ToProjectId, x => x.MapFrom(a => a.SupplyManagementRequest.ToProjectId))
+                 .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyManagementRequest.FromProject.ProjectCode))
+                 .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.SupplyManagementRequest.ToProject.ProjectCode))
+                 .ForMember(x => x.Status, x => x.MapFrom(a => a.Status))
+                 .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
+                 .ForMember(x => x.ApprovedQty, x => x.MapFrom(a => a.ApprovedQty))
+                 .ForMember(x => x.ApproveRejectDateTime, x => x.MapFrom(a => a.CreatedDate))
+                 .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
+                 .ForMember(x => x.ShipmentNo, x => x.MapFrom(a => a.ShipmentNo))
+                 .ForMember(x => x.CourierName, x => x.MapFrom(a => a.CourierName))
+                 .ForMember(x => x.CourierDate, x => x.MapFrom(a => a.CourierDate))
+                 .ForMember(x => x.CourierTrackingNo, x => x.MapFrom(a => a.CourierTrackingNo))
+                 .ForMember(x => x.SupplyManagementShipmentId, x => x.MapFrom(a => a.Id))
+                 .ReverseMap();
         }
     }
 }

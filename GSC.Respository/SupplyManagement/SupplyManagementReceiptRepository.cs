@@ -46,39 +46,21 @@ namespace GSC.Respository.SupplyManagement
 
 
             var requestdata = _context.SupplyManagementShipment.Where(x =>
-                x.Status == SupplyMangementShipmentStatus.Approve && x.DeletedDate == null).
-                 ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).ToList();
+                !data.Select(x => x.SupplyManagementShipmentId).Contains(x.Id)
+                && x.Status == SupplyMangementShipmentStatus.Approve && x.DeletedDate == null).
+                 ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).ToList();
             requestdata.ForEach(t =>
             {
-                if (data != null && !data.Any(x => x.SupplyManagementShipmentId == t.Id))
+                SupplyManagementReceiptGridDto obj = new SupplyManagementReceiptGridDto();
+                obj = t;
+                obj.Id = 0;                
+                var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
+                if (fromproject != null)
                 {
-                    SupplyManagementReceiptGridDto obj = new SupplyManagementReceiptGridDto();
-                    obj.ApprovedQty = t.ApprovedQty;
-                    obj.ApproveRejectDateTime = t.CreatedDate;
-                    obj.SupplyManagementShipmentId = t.Id;
-                    obj.FromProjectCode = t.FromProjectCode;
-                    obj.ShipmentNo = t.ShipmentNo;
-                    obj.FromProjectId = t.FromProjectId;
-                    obj.ToProjectId = t.ToProjectId;
-                    obj.CourierName = t.CourierName;
-                    obj.CourierDate = t.CourierDate;
-                    obj.CourierTrackingNo = t.CourierTrackingNo;
-                    obj.Status = t.Status;
-                    obj.ToProjectCode = t.ToProjectCode;
-                    obj.CreatedByUser = t.CreatedByUser;
-                    obj.ModifiedByUser = t.ModifiedByUser;
-                    obj.CreatedDate = t.CreatedDate;
-                    obj.DeletedDate = t.DeletedDate;
-                    obj.DeletedByUser = t.DeletedByUser;
-                    obj.IsDeleted = t.IsDeleted;
-                    var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
-                    if (fromproject != null)
-                    {
-                        var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
-                        obj.StudyProjectCode = study != null ? study.ProjectCode : "";
-                    }
-                    data.Add(obj);
+                    var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
+                    obj.StudyProjectCode = study != null ? study.ProjectCode : "";
                 }
+                data.Add(obj);
             });
             return data.OrderByDescending(x => x.CreatedDate).ToList();
         }

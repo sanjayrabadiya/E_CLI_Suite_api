@@ -47,34 +47,22 @@ namespace GSC.Respository.SupplyManagement
 
 
 
-            var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-                     ProjectTo<SupplyManagementRequestGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+                        && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
+                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             requestdata.ForEach(t =>
             {
-                if (data != null && !data.Any(x => x.SupplyManagementRequestId == t.Id))
+                SupplyManagementShipmentGridDto obj = new SupplyManagementShipmentGridDto();
+                obj = t;
+                obj.Id = 0;
+                var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
+                if (fromproject != null)
                 {
-                    SupplyManagementShipmentGridDto obj = new SupplyManagementShipmentGridDto();
-                    obj.IsSiteRequest = t.IsSiteRequest;
-                    obj.FromProjectId = t.FromProjectId;
-                    obj.ToProjectId = t.ToProjectId;
-                    obj.SupplyManagementRequestId = t.Id;
-                    obj.RequestQty = t.RequestQty;
-                    obj.FromProjectCode = t.FromProjectCode;
-                    obj.ToProjectCode = t.ToProjectCode;
-                    obj.CreatedByUser = t.CreatedByUser;
-                    obj.ModifiedByUser = t.ModifiedByUser;
-                    obj.CreatedDate = t.CreatedDate;
-                    obj.DeletedDate = t.DeletedDate;
-                    obj.DeletedByUser = t.DeletedByUser;
-                    obj.IsDeleted = t.IsDeleted;
-                    var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
-                    if (fromproject != null)
-                    {
-                        var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
-                        obj.StudyProjectCode = study != null ? study.ProjectCode : "";
-                    }
-                    data.Add(obj);
+                    var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
+                    obj.StudyProjectCode = study != null ? study.ProjectCode : "";
                 }
+                data.Add(obj);
+
             });
             return data.OrderByDescending(x => x.CreatedDate).ToList();
         }
