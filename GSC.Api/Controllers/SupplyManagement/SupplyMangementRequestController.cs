@@ -3,6 +3,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Domain.Context;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
@@ -22,15 +23,16 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly ISupplyManagementRequestRepository _supplyManagementRequestRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly IGSCContext _context;
         public SupplyMangementRequestController(ISupplyManagementRequestRepository supplyManagementRequestRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context)
         {
             _supplyManagementRequestRepository = supplyManagementRequestRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -44,7 +46,17 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult Post([FromBody] SupplyManagementRequestDto supplyManagementRequestDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
+            var project = _context.Project.Where(x => x.Id == supplyManagementRequestDto.FromProjectId).FirstOrDefault();
+            if (project == null)
+            {
+                ModelState.AddModelError("Message", "From site not found");
+                return BadRequest(ModelState);
+            }
+            if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementRequestDto.RequestQty, (int)project.ParentProjectId, supplyManagementRequestDto.StudyProductTypeId))
+            {
+                ModelState.AddModelError("Message", "Request Qauntity is greater than remaining Qauntity!");
+                return BadRequest(ModelState);
+            }
             supplyManagementRequestDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementRequest>(supplyManagementRequestDto);
 

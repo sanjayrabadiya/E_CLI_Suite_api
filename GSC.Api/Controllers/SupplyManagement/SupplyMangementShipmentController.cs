@@ -3,6 +3,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Domain.Context;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
@@ -22,21 +23,38 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly ISupplyManagementRequestRepository _supplyManagementRequestRepository;
+        private readonly IGSCContext _context;
         public SupplyMangementShipmentController(ISupplyManagementShipmentRepository supplyManagementShipmentRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementRequestRepository supplyManagementRequestRepository, IGSCContext context)
         {
             _supplyManagementShipmentRepository = supplyManagementShipmentRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _supplyManagementRequestRepository = supplyManagementRequestRepository;
+            _context = context;
         }
         [HttpPost]
         public IActionResult Post([FromBody] SupplyManagementShipmentDto supplyManagementshipmentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
+            if (supplyManagementshipmentDto.SupplyManagementRequestId <= 0)
+            {
+                return BadRequest();
+            }
+            var shipmentData = _context.SupplyManagementRequest.Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementRequestId).FirstOrDefault();
+            if (shipmentData == null)
+            {
+                ModelState.AddModelError("Message", "Request data not found!");
+                return BadRequest(ModelState);
+            }
+            if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)shipmentData.FromProject.ParentProjectId, shipmentData.StudyProductTypeId))
+            {
+                ModelState.AddModelError("Message", "Approve Qauntity is greater than remaining Qauntity!");
+                return BadRequest(ModelState);
+            }
             supplyManagementshipmentDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementShipment>(supplyManagementshipmentDto);
             bool isnotexist = false;

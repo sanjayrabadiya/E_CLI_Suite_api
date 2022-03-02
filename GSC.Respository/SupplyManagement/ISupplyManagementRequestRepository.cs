@@ -13,5 +13,7 @@ namespace GSC.Respository.SupplyManagement
         ProductUnitType GetPharmacyStudyProductUnitType(int id);
 
         List<SupplyManagementRequestGridDto> GetShipmentRequestList(bool isDeleted);
+
+        bool CheckAvailableRemainingQty(int reqQty, int ProjectId, int PharmacyStudyProductTypeId);
     }
 }
