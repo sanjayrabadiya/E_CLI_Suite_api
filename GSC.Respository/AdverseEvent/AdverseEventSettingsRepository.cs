@@ -139,7 +139,7 @@ namespace GSC.Respository.AdverseEvent
                 _context.ProjectDesignVariable.Count(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null && x.CollectionSource == Helper.CollectionSources.RadioButton) == 0)
                 return false;
             var data = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null
-            && (x.CollectionSource != Helper.CollectionSources.RadioButton || x.CollectionSource == Helper.CollectionSources.DateTime || x.CollectionSource == Helper.CollectionSources.RadioButton)).FirstOrDefault();
+            && x.CollectionSource != Helper.CollectionSources.RadioButton && x.CollectionSource == Helper.CollectionSources.DateTime && x.CollectionSource == Helper.CollectionSources.RadioButton).FirstOrDefault();
             if (data != null)
             {
                 return false;
