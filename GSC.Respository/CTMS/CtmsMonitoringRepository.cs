@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
@@ -79,7 +80,10 @@ namespace GSC.Respository.CTMS
             {
                 var CtmsMonitoringReport = _context.CtmsMonitoringReport.Where(y => y.DeletedDate == null && y.CtmsMonitoringId == x.Id);
                 if (CtmsMonitoringReport?.FirstOrDefault() != null)
+                {
                     x.CtmsMonitoringReportId = CtmsMonitoringReport.FirstOrDefault().Id;
+                    x.IsReviewerApprovedForm = _context.CtmsMonitoringReportReview.Where(y => y.CtmsMonitoringReportId == x.CtmsMonitoringReportId && y.DeletedDate == null).All(z => z.IsApproved == true);
+                }
             });
 
             return result;

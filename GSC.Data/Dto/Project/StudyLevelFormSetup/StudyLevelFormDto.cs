@@ -43,6 +43,7 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public int ProjectId { get; set; }
         public bool IsSender { get; set; }
         public MonitoringReportStatus? ReportStatus { get; set; }
+        public bool VariableDisable { get; set; }
         public List<string> Notes { get; set; }
         public List<VariableTemplateDetail> VariableTemplateDetails { get; set; }
         public IList<StudyLevelFormVariableDto> Variables { get; set; }

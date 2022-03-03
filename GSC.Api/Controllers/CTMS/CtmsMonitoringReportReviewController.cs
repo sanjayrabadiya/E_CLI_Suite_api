@@ -134,5 +134,13 @@ namespace GSC.Api.Controllers.CTMS
             var History = _ctmsMonitoringReportReviewRepository.GetCtmsMonitoringReportReview(Id);
             return Ok(History);
         }
+
+        [Route("isAnyReportReviewer/{Id}")]
+        [HttpGet]
+        public IActionResult isAnyReportReviewer(int Id)
+        {
+            var result = _ctmsMonitoringReportReviewRepository.isAnyReportReviewer(Id);
+            return Ok(result);
+        }
     }
 }

@@ -47,6 +47,9 @@ namespace GSC.Respository.CTMS
             designTemplateDto.ProjectId = ctmsMonitoringReportFormBasic.ProjectId;
             designTemplateDto.IsSender = ctmsMonitoringReport.CreatedBy == _jwtTokenAccesser.UserId;
             designTemplateDto.ReportStatus = ctmsMonitoringReport.ReportStatus;
+            designTemplateDto.VariableDisable = ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.SendForReview
+                || ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.QueryGenerated
+                || ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.FormApproved;
 
             var reviewPerson = _ctmsMonitoringReportReviewRepository.GetReview(CtmsMonitoringReportId);
 
@@ -98,6 +101,6 @@ namespace GSC.Respository.CTMS
                }).FirstOrDefault();
         }
 
-       
+
     }
 }
