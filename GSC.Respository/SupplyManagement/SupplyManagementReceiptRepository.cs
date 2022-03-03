@@ -42,6 +42,7 @@ namespace GSC.Respository.SupplyManagement
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     t.StudyProjectCode = study != null ? study.ProjectCode : "";
                 }
+               
             });
 
 
@@ -55,6 +56,8 @@ namespace GSC.Respository.SupplyManagement
                 obj = t;
                 obj.Id = 0;
                 obj.WithIssue = null;
+                obj.CreatedByUser = null;
+                obj.CreatedDate = null;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {

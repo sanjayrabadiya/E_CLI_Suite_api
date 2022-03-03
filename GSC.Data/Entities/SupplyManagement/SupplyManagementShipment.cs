@@ -23,7 +23,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public string ReasonOth { get; set; }
         public SupplyManagementRequest SupplyManagementRequest { get; set; }
 
-        public AuditReason AuditReason { get; set; }
+        //public AuditReason AuditReason { get; set; }
 
     }
 }

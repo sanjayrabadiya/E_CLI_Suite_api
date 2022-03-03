@@ -43,6 +43,7 @@ namespace GSC.Respository.SupplyManagement
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     t.StudyProjectCode = study != null ? study.ProjectCode : "";
                 }
+                t.AuditReason = t.AuditReasonId != null ? _context.AuditReason.Where(x => x.Id == t.AuditReasonId).FirstOrDefault().ReasonName : "";
             });
 
 
@@ -55,12 +56,14 @@ namespace GSC.Respository.SupplyManagement
                 SupplyManagementShipmentGridDto obj = new SupplyManagementShipmentGridDto();
                 obj = t;
                 obj.Id = 0;
+                obj.CreatedByUser = null;
+                obj.CreatedDate = null;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     obj.StudyProjectCode = study != null ? study.ProjectCode : "";
-                }
+                }               
                 data.Add(obj);
 
             });

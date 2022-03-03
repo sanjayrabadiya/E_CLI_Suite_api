@@ -56,7 +56,7 @@ namespace GSC.Respository.SupplyManagement
                     t.SupplyManagementShipmentId = shipmentdata.Id;
                     t.Status = shipmentdata.Status.GetDescription();
                     t.ApproveRejectDateTime = shipmentdata.CreatedDate;
-                    t.AuditReason = shipmentdata.AuditReason != null ? shipmentdata.AuditReason.ReasonName : "";
+                    t.AuditReason = shipmentdata.AuditReasonId != null ? _context.AuditReason.Where(x => x.Id == shipmentdata.AuditReasonId).FirstOrDefault().ReasonName : "";
                     t.ReasonOth = shipmentdata.ReasonOth;
                     t.ApproveRejectBy = shipmentdata.CreatedByUser.UserName;
                 }
