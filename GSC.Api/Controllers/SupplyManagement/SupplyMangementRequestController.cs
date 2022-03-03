@@ -52,11 +52,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "From site not found");
                 return BadRequest(ModelState);
             }
-            if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementRequestDto.RequestQty, (int)project.ParentProjectId, supplyManagementRequestDto.StudyProductTypeId))
-            {
-                ModelState.AddModelError("Message", "Request Qauntity is greater than remaining Qauntity!");
-                return BadRequest(ModelState);
-            }
+            
             supplyManagementRequestDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementRequest>(supplyManagementRequestDto);
 

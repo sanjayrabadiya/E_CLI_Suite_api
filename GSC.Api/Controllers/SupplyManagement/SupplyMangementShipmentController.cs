@@ -44,6 +44,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 return BadRequest();
             }
+
             var shipmentData = _context.SupplyManagementRequest.Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementRequestId).FirstOrDefault();
             if (shipmentData == null)
             {
@@ -54,6 +55,20 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (project == null)
             {
                 ModelState.AddModelError("Message", "From project code not found!");
+                return BadRequest(ModelState);
+            }
+            var productreciept = _context.ProductReceipt.Where(x => x.ProjectId == project.ParentProjectId
+                                && x.Status == Helper.ProductVerificationStatus.Approved).FirstOrDefault();
+            if (productreciept == null)
+            {
+                ModelState.AddModelError("Message", "Product receipt is pending!");
+                return BadRequest(ModelState);
+            }
+            var productVerificationDetail = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == project.ParentProjectId
+                                && x.ProductReceipt.Status == Helper.ProductVerificationStatus.Approved).FirstOrDefault();
+            if (productVerificationDetail == null)
+            {
+                ModelState.AddModelError("Message", "Product verification is pending!");
                 return BadRequest(ModelState);
             }
             if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, shipmentData.StudyProductTypeId))
