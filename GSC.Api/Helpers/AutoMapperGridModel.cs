@@ -426,6 +426,7 @@ namespace GSC.Api.Helpers
                   .ReverseMap();
             CreateMap<SupplyManagementShipment, SupplyManagementShipmentGridDto>()
                   .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyManagementRequest.FromProject.ProjectCode))
+                  .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyManagementRequest.ToProject.ProjectCode))
                   .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
                   .ForMember(x => x.IsSiteRequest, x => x.MapFrom(a => a.SupplyManagementRequest.IsSiteRequest))
                   .ForMember(x => x.RequestQty, x => x.MapFrom(a => a.SupplyManagementRequest.RequestQty))

@@ -64,21 +64,24 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             supplyManagementshipmentDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementShipment>(supplyManagementshipmentDto);
-            bool isnotexist = false;
-            while (!isnotexist)
+            if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                var str = _supplyManagementShipmentRepository.GenerateShipmentNo();
-                if (!string.IsNullOrEmpty(str))
+                bool isnotexist = false;
+                while (!isnotexist)
                 {
-                    var data = _supplyManagementShipmentRepository.All.Where(x => x.ShipmentNo == str).FirstOrDefault();
-                    if (data == null)
+                    var str = _supplyManagementShipmentRepository.GenerateShipmentNo();
+                    if (!string.IsNullOrEmpty(str))
                     {
-                        isnotexist = true;
-                        supplyManagementRequest.ShipmentNo = str;
-                        break;
+                        var data = _supplyManagementShipmentRepository.All.Where(x => x.ShipmentNo == str).FirstOrDefault();
+                        if (data == null)
+                        {
+                            isnotexist = true;
+                            supplyManagementRequest.ShipmentNo = str;
+                            break;
+                        }
                     }
-                }
 
+                }
             }
             _supplyManagementShipmentRepository.Add(supplyManagementRequest);
             if (_uow.Save() <= 0) throw new Exception("Creating shipment failed on save.");
