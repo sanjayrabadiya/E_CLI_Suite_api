@@ -23,6 +23,7 @@ namespace GSC.Data.Dto.CTMS
     {
         public int StudyLevelFormId { get; set; }
         public int? CtmsMonitoringReportId { get; set; } = 0;
+        public bool IsReviewerApprovedForm { get; set; }
         public string ProjectName { get; set; }
         public string ActivityName { get; set; }
         public string VariableTemplateName { get; set; }

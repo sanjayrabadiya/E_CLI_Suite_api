@@ -99,6 +99,7 @@ namespace GSC.Respository.CTMS
             var Review = All.Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.Project)
                 .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
                 .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.Activity)
+                .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.Activity).ThenInclude(x => x.CtmsActivity)
                 .Where(x => x.CtmsMonitoringReportId == ReviewDto.CtmsMonitoringReportId)
                 .FirstOrDefault();
 
@@ -153,6 +154,11 @@ namespace GSC.Respository.CTMS
                 }).FirstOrDefault();
 
             return result;
+        }
+
+        public bool isAnyReportReviewer(int id)
+        {
+            return All.Any(x => x.DeletedDate == null && x.CtmsMonitoringReportId == id);
         }
     }
 }
