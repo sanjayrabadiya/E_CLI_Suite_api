@@ -91,6 +91,10 @@ namespace GSC.Respository.SupplyManagement
                     isAvailable = false;
                 }
             }
+            else
+            {
+                isAvailable = false;
+            }
             return isAvailable;
         }
 
