@@ -27,7 +27,7 @@ namespace GSC.Respository.SupplyManagement
 
         public List<DropDownDto> GetPharmacyStudyProductTypeDropDown(int ProjectId)
         {
-            return All.Where(c=>c.ProjectId == ProjectId).Select(c => new DropDownDto { Id = c.Id, Value = c.ProductType.ProductTypeCode + "-" + c.ProductType.ProductTypeName, IsDeleted = c.DeletedDate != null })
+            return All.Where(c=>c.ProjectId == ProjectId).Select(c => new DropDownDto { Id = c.Id, Value = c.ProductType.ProductTypeCode + "-" + c.ProductType.ProductTypeName, IsDeleted = c.DeletedDate != null,ExtraData=((int)c.ProductUnitType) })
                 .OrderBy(o => o.Value).ToList();
         }
 
