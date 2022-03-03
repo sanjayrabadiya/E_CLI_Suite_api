@@ -49,6 +49,14 @@ namespace GSC.Data.Dto.SupplyManagement
         public SupplyMangementShipmentStatus Status { get; set; }
 
         public int? AuditReasonId { get; set; }
+
+        public DateTime? RequestDate { get; set; }
+
+        public string RequestBy { get; set; }
+
+        public string StudyProductTypeName { get; set; }
+
+        public string StudyProductTypeUnitName { get; set; }
     }
 
 }

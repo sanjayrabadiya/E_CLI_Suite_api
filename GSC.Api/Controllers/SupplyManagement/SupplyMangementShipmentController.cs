@@ -50,11 +50,18 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "Request data not found!");
                 return BadRequest(ModelState);
             }
-            if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)shipmentData.FromProject.ParentProjectId, shipmentData.StudyProductTypeId))
+            var project = _context.Project.Where(x => x.Id == shipmentData.FromProjectId).FirstOrDefault();
+            if (project == null)
+            {
+                ModelState.AddModelError("Message", "From project code not found!");
+                return BadRequest(ModelState);
+            }
+            if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, shipmentData.StudyProductTypeId))
             {
                 ModelState.AddModelError("Message", "Approve Qauntity is greater than remaining Qauntity!");
                 return BadRequest(ModelState);
             }
+
             supplyManagementshipmentDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementShipment>(supplyManagementshipmentDto);
             bool isnotexist = false;

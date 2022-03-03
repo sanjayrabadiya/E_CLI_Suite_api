@@ -47,13 +47,14 @@ namespace GSC.Respository.SupplyManagement
 
             var requestdata = _context.SupplyManagementShipment.Where(x =>
                 !data.Select(x => x.SupplyManagementShipmentId).Contains(x.Id)
-                && x.Status == SupplyMangementShipmentStatus.Approve && x.DeletedDate == null).
+                && x.Status == SupplyMangementShipmentStatus.Approved && x.DeletedDate == null).
                  ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).ToList();
             requestdata.ForEach(t =>
             {
                 SupplyManagementReceiptGridDto obj = new SupplyManagementReceiptGridDto();
                 obj = t;
-                obj.Id = 0;                
+                obj.Id = 0;
+                obj.WithIssue = null;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {

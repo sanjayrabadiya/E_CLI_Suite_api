@@ -31,6 +31,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string StudyProductTypeName { get; set; }
 
+        public string StudyProductTypeUnitName { get; set; }
+
         public string StudyProjectCode { get; set; }
 
         public string FromProjectCode { get; set; }
@@ -39,9 +41,13 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public DateTime? ApproveRejectDateTime { get; set; }
 
+        public string ApproveRejectBy { get; set; }
+
         public string AuditReason { get; set; }
 
         public string ReasonOth { get; set; }
+
+        
     }
 
 }

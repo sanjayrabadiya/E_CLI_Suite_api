@@ -20,7 +20,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ToProjectId { get; set; }
 
         public int SupplyManagementShipmentId { get; set; }
-        public bool WithIssue { get; set; }        
+        public bool? WithIssue { get; set; }        
         public string ReasonOth { get; set; }         
         public int? ApprovedQty { get; set; }      
         public string StatusName { get; set; }
@@ -36,6 +36,15 @@ namespace GSC.Data.Dto.SupplyManagement
         public string CourierTrackingNo { get; set; }
 
         public string Description { get; set; }
+        public string ApproveRejectBy { get; set; }
+
+        public string StudyProductTypeName { get; set; }
+
+        public string StudyProductTypeUnitName { get; set; }
+
+        public string ShipmentReason { get; set; }
+
+        public string ShipmentReasonOth { get; set; }
     }
 
 }

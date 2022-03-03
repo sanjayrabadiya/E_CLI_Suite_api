@@ -8,6 +8,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +49,7 @@ namespace GSC.Respository.SupplyManagement
                     ProjectTo<SupplyManagementRequestGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             data.ForEach(t =>
             {
-                var shipmentdata = _context.SupplyManagementShipment.Where(x => x.SupplyManagementRequestId == t.Id).FirstOrDefault();
+                var shipmentdata = _context.SupplyManagementShipment.Include(z => z.CreatedByUser).Where(x => x.SupplyManagementRequestId == t.Id).FirstOrDefault();
                 if (shipmentdata != null)
                 {
                     t.ApprovedQty = shipmentdata.ApprovedQty;
@@ -57,6 +58,7 @@ namespace GSC.Respository.SupplyManagement
                     t.ApproveRejectDateTime = shipmentdata.CreatedDate;
                     t.AuditReason = shipmentdata.AuditReason != null ? shipmentdata.AuditReason.ReasonName : "";
                     t.ReasonOth = shipmentdata.ReasonOth;
+                    t.ApproveRejectBy = shipmentdata.CreatedByUser.UserName;
                 }
 
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
