@@ -265,6 +265,24 @@ namespace GSC.Respository.Project.Design
                 }).OrderBy(o => o.ExtraData).ToList();
         }
 
+        public IList<DropDownDto> GetVariabeDropDownForRelationMapping(int projectDesignTemplateId)
+        {
+            return All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == projectDesignTemplateId && (x.CollectionSource == CollectionSources.TextBox
+            || x.CollectionSource == CollectionSources.MultilineTextBox || x.CollectionSource == CollectionSources.Date || x.CollectionSource == CollectionSources.Time
+            || x.CollectionSource == CollectionSources.DateTime || x.CollectionSource == CollectionSources.PartialDate || x.CollectionSource == CollectionSources.HorizontalScale))
+
+                //&& x.CollectionSource != CollectionSources.MultiCheckBox && x.CollectionSource != CollectionSources.NumericScale
+                //&& x.CollectionSource != CollectionSources.RadioButton && x.CollectionSource != CollectionSources.Relation)
+                .OrderBy(o => o.DesignOrder)
+                .Select(c => new DropDownDto
+                {
+                    Id = c.Id,
+                    Value = c.VariableName,
+                    Code = c.CoreVariableType.ToString(),
+                    ExtraData = c.DesignOrder
+                }).OrderBy(o => o.ExtraData).ToList();
+        }
+
 
     }
 }

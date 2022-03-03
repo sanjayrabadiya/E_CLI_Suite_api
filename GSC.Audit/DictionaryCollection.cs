@@ -512,7 +512,7 @@ namespace GSC.Audit
 
             // Product Verification Detail
             _dictionaries.Add(new Dictionary { FieldName = "ProductVerificationId", DisplayName = "Product Verification Id", TableName = "ProductVerification", PkName = "Id" });
-            _dictionaries.Add(new Dictionary { FieldName = "QuantityVerification", DisplayName = "Quantity of Producation Use for Verification" });
+            _dictionaries.Add(new Dictionary { FieldName = "QuantityVerification", DisplayName = "Quantity of Product Use for Verification" });
             _dictionaries.Add(new Dictionary { FieldName = "IsAssayRequirement", DisplayName = "Assay Difference Verified & Meet Requirements" });
             _dictionaries.Add(new Dictionary { FieldName = "IsRetentionConfirm", DisplayName = "Quantity for Retention Samples Confirmed" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSodiumVaporLamp", DisplayName = "Verification of IMP Done Under Sodium Vapor Lamp" });

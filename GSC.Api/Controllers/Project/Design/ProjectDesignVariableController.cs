@@ -401,5 +401,13 @@ namespace GSC.Api.Controllers.Project.Design
         {
             return Ok(_projectDesignVariableRepository.GetVariabeDropDownForLabManagementMapping(projectDesignTemplateId));
         }
+
+        // added by vipul take only variable which have no collection source for relation variable collection source
+        [HttpGet]
+        [Route("GetVariabeDropDownForRelationMapping/{projectDesignTemplateId}")]
+        public IActionResult GetVariabeDropDownForRelationMapping(int projectDesignTemplateId)
+        {
+            return Ok(_projectDesignVariableRepository.GetVariabeDropDownForRelationMapping(projectDesignTemplateId));
+        }
     }
 }
