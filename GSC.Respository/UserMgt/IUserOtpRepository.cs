@@ -10,5 +10,6 @@ namespace GSC.Respository.UserMgt
         string VerifyOtp(UserOtpDto userOtpDto);
         Task<string> InsertOtp(string username);
         string ChangePasswordByOtp(UserOtpDto userOtpDto);
+        void SendResetPasswordEMail(string email, string password, string username, string company);
     }
 }

@@ -50,7 +50,7 @@ namespace GSC.Api.Controllers.UserMgt
         {
             var validateMessage = "";
             if (_environmentSetting.Value.IsPremise)
-                 validateMessage = await _userOtpRepository.InsertOtp(userName);
+                validateMessage = await _userOtpRepository.InsertOtp(userName);
             else
                 validateMessage = await _centreUserService.InsertOtpCenteral($"{_environmentSetting.Value.CentralApi}UserOtp/InsertOtp/{userName}");
 
@@ -71,7 +71,7 @@ namespace GSC.Api.Controllers.UserMgt
         {
             var validateMessage = "";
             if (_environmentSetting.Value.IsPremise)
-                 validateMessage = _userOtpRepository.VerifyOtp(userOtpDto);
+                validateMessage = _userOtpRepository.VerifyOtp(userOtpDto);
             else
                 validateMessage = await _centreUserService.VerifyOtpCenteral($"{_environmentSetting.Value.CentralApi}UserOtp/VerifyOtp", userOtpDto);
 
@@ -112,6 +112,11 @@ namespace GSC.Api.Controllers.UserMgt
             else
             {
                 validateMessage = await _centreUserService.ChangePasswordByOtpCenteral($"{_environmentSetting.Value.CentralApi}UserOtp/ChangePasswordByOtp", userOtpDto);
+                if (string.IsNullOrEmpty(validateMessage))
+                {
+                    var user = _userRepository.FindBy(x => x.UserName == userOtpDto.UserName && x.DeletedDate == null).FirstOrDefault();
+                    _userOtpRepository.SendResetPasswordEMail(user.Email, "", user.UserName, user.Company?.CompanyName);
+                }
             }
 
             if (!string.IsNullOrEmpty(validateMessage))
@@ -166,12 +171,13 @@ namespace GSC.Api.Controllers.UserMgt
             User userExists = new User();
             if (!_environmentSetting.Value.IsPremise)
             {
-                 userExists = await _centreUserService.GetUserData($"{_environmentSetting.Value.CentralApi}Login/GetUserData/{userName}");//_userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
-            } else
+                userExists = await _centreUserService.GetUserData($"{_environmentSetting.Value.CentralApi}Login/GetUserData/{userName}");//_userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
+            }
+            else
             {
                 userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
             }
-                
+
             if (userExists == null)
             {
                 ModelState.AddModelError("Message", "UserName not valid");
@@ -222,7 +228,7 @@ namespace GSC.Api.Controllers.UserMgt
                     return BadRequest(ModelState);
                 }
                 _uow.Save();
-                    return Ok(userDto);
+                return Ok(userDto);
             }
             else
                 return Ok(userDto);

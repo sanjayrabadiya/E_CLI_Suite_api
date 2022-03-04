@@ -99,5 +99,10 @@ namespace GSC.Respository.UserMgt
             _emailSenderRespository.SendChangePasswordEMail(user.Email, userOtpDto.Password, user.UserName, user.Company?.CompanyName);
             return "";
         }
+
+        public void SendResetPasswordEMail(string email, string password,string username,string company)
+        {
+            _emailSenderRespository.SendChangePasswordEMail(email, password, username, company);
+        }
     }
 }
