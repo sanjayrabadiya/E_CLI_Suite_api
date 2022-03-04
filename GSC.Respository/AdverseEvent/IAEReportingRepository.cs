@@ -16,6 +16,6 @@ namespace GSC.Respository.AdverseEvent
         DesignScreeningTemplateDto GetAEReportingForm();
         AEReportingDto GetAEReportingFilledForm(int id);
         ScreeningDetailsforAE GetScreeningDetailsforAE(int id);
-        List<DashboardDto> GetAEReportingMyTaskList(int ProjectId);
+        List<DashboardDto> GetAEReportingMyTaskList(int ProjectId, int SiteId);
     }
 }
