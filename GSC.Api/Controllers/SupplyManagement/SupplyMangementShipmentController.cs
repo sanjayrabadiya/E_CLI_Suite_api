@@ -71,10 +71,13 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "Product verification is pending!");
                 return BadRequest(ModelState);
             }
-            if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, shipmentData.StudyProductTypeId))
+            if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                ModelState.AddModelError("Message", "Approve Qauntity is greater than remaining Qauntity!");
-                return BadRequest(ModelState);
+                if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, shipmentData.StudyProductTypeId))
+                {
+                    ModelState.AddModelError("Message", "Approve Qauntity is greater than remaining Qauntity!");
+                    return BadRequest(ModelState);
+                }
             }
 
             supplyManagementshipmentDto.Id = 0;

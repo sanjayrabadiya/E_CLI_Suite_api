@@ -46,6 +46,12 @@ namespace GSC.Data.Dto.AdverseEvent
         }
         public string EventEffectName { get; set; }
         public bool IsReviewedDone { get; set; }
+
+        public string Status { get; set; }
+
+        public string ReviewBy { get; set; }
+
+        public bool? IsApproved { get; set; }
     }
 
     public class ScreeningDetailsforAE

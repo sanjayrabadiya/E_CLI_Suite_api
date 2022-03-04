@@ -102,7 +102,7 @@ namespace GSC.Respository.AdverseEvent
 
         public List<AEReportingGridDto> GetAEReportingGridData(int projectId)
         {
-            var aEData = All.Include(x => x.Randomization).Include(x => x.AEReportingValueValues).Where(x => x.Randomization.ProjectId == projectId && x.DeletedDate == null).ToList();
+            var aEData = All.Include(x => x.CreatedByUser).Include(x => x.Randomization).Include(x => x.AEReportingValueValues).Where(x => x.Randomization.ProjectId == projectId && x.DeletedDate == null).ToList();
             var aEGridData = aEData.Select(c => new AEReportingGridDto
             {
                 Id = c.Id,
@@ -117,6 +117,9 @@ namespace GSC.Respository.AdverseEvent
                 ApproveRejectDateTime = c.ApproveRejectDateTime,
                 RejectReasonOth = c.RejectReasonOth,
                 RejectReason = c.RejectReasonId == null ? "" : _context.AuditReason.Where(x => x.Id == c.RejectReasonId).ToList().FirstOrDefault().ReasonName,
+                Status = c.IsReviewedDone ? "Review Done" : "Review Pending",
+                ReviewBy = c.CreatedByUser.UserName,
+                IsApproved = c.IsApproved
             }).OrderByDescending(x => x.CreatedDate).ToList();
             return aEGridData;
         }
