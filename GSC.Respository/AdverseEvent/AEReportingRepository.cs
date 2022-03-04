@@ -118,7 +118,7 @@ namespace GSC.Respository.AdverseEvent
                 RejectReasonOth = c.RejectReasonOth,
                 RejectReason = c.RejectReasonId == null ? "" : _context.AuditReason.Where(x => x.Id == c.RejectReasonId).ToList().FirstOrDefault().ReasonName,
                 Status = c.IsReviewedDone ? "Review Done" : "Review Pending",
-                ReviewBy = c.CreatedByUser.UserName,
+                ReviewBy = c.ReviewedByUser != null ? _context.Users.Where(x => x.Id == c.ReviewedByUser).FirstOrDefault().UserName : "",
                 IsApproved = c.IsApproved
             }).OrderByDescending(x => x.CreatedDate).ToList();
             return aEGridData;
