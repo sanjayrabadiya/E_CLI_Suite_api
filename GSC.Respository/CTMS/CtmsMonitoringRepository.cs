@@ -82,7 +82,8 @@ namespace GSC.Respository.CTMS
                 if (CtmsMonitoringReport?.FirstOrDefault() != null)
                 {
                     x.CtmsMonitoringReportId = CtmsMonitoringReport.FirstOrDefault().Id;
-                    x.IsReviewerApprovedForm = _context.CtmsMonitoringReportReview.Where(y => y.CtmsMonitoringReportId == x.CtmsMonitoringReportId && y.DeletedDate == null).All(z => z.IsApproved == true);
+                    var CtmsMonitoringReportReviewList = _context.CtmsMonitoringReportReview.Where(a => a.CtmsMonitoringReportId == x.CtmsMonitoringReportId && a.DeletedDate == null).ToList();
+                    x.IsReviewerApprovedForm = CtmsMonitoringReportReviewList.Count() != 0 && CtmsMonitoringReportReviewList.All(z => z.IsApproved == true);
                 }
             });
 
