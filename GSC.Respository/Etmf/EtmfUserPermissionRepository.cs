@@ -162,17 +162,20 @@ namespace GSC.Respository.Etmf
                     Delete(existing);
                     _context.Save();
 
-                    existing.Id = 0;
-                    existing.DeletedBy = null;
-                    existing.DeletedDate = null;
-                    existing.IsAdd = item.IsAdd;
-                    existing.IsDelete = item.IsDelete;
-                    existing.IsView = item.IsView;
-                    existing.IsEdit = item.IsEdit;
-                    existing.IsExport = item.IsExport;
-                    existing.ModifiedAuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
-                    existing.ModifiedRollbackReason = _jwtTokenAccesser.GetHeader("audit-reason-oth");
-                    Add(existing);
+                    var ToAddPermission = new EtmfUserPermission();
+                    ToAddPermission.Id = 0;
+                    ToAddPermission.UserId = existing.UserId;
+                    ToAddPermission.ProjectWorkplaceDetailId = existing.ProjectWorkplaceDetailId;
+                    ToAddPermission.DeletedBy = null;
+                    ToAddPermission.DeletedDate = null;
+                    ToAddPermission.IsAdd = item.IsAdd;
+                    ToAddPermission.IsDelete = item.IsDelete;
+                    ToAddPermission.IsView = item.IsView;
+                    ToAddPermission.IsEdit = item.IsEdit;
+                    ToAddPermission.IsExport = item.IsExport;
+                    ToAddPermission.ModifiedAuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+                    ToAddPermission.ModifiedRollbackReason = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+                    Add(ToAddPermission);
                     _context.Save();
                 }
             }
@@ -202,7 +205,7 @@ namespace GSC.Respository.Etmf
             var ParentProject = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().ParentProjectId;
             // get etmf rights list
             var result = All
-                .Where(x => (ParentProject == null ? x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId && (x.ProjectWorkplaceDetail.WorkPlaceFolderId == 3 || x.ProjectWorkplaceDetail.WorkPlaceFolderId == 1) 
+                .Where(x => (ParentProject == null ? x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId && (x.ProjectWorkplaceDetail.WorkPlaceFolderId == 3 || x.ProjectWorkplaceDetail.WorkPlaceFolderId == 1)
                 : x.ProjectWorkplaceDetail.ItemId == ProjectId))
                 .Select(y => new EtmfUserPermissionDto
                 {

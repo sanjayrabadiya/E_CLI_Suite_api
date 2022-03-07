@@ -124,20 +124,23 @@ namespace GSC.Respository.AdverseEvent
             return aEGridData;
         }
 
-        public List<DashboardDto> GetAEReportingMyTaskList(int ProjectId)
+        public List<DashboardDto> GetAEReportingMyTaskList(int ProjectId, int SiteId)
         {
-            var projectIdlist = _context.Project.Where(x => x.ParentProjectId == ProjectId).Select(x => x.Id).ToList();
-            var rolelist = _context.SiteTeam.Where(x => projectIdlist.Contains(x.ProjectId) && x.DeletedDate == null).Select(x => x.RoleId).ToList();
-            if (_context.ProjectRight.Any(x => rolelist.Contains(x.RoleId) && x.DeletedDate == null && x.RoleId == _jwtTokenAccesser.RoleId && x.UserId == _jwtTokenAccesser.UserId))
+            if (_context.RolePermission.Any(x => x.ScreenCode == "mnu_adverseevent" && x.IsView && x.UserRoleId == _jwtTokenAccesser.RoleId))
             {
-                var result = All.Include(x => x.Randomization).Include(x => x.AEReportingValueValues).Where(x => projectIdlist.Contains(x.Randomization.ProjectId) && x.DeletedDate == null && x.Randomization.DeletedDate == null && !x.IsReviewedDone).Select(x => new DashboardDto
+                var projectIdlist = _context.Project.Where(x => x.ParentProjectId == ProjectId && x.Id == SiteId).Select(x => x.Id).ToList();
+                var rolelist = _context.SiteTeam.Where(x => x.ProjectId == SiteId && x.DeletedDate == null).Select(x => x.RoleId).ToList();
+                if (_context.ProjectRight.Any(x => rolelist.Contains(x.RoleId) && x.DeletedDate == null && x.RoleId == _jwtTokenAccesser.RoleId && x.UserId == _jwtTokenAccesser.UserId))
                 {
-                    Id = x.Id,
-                    TaskInformation = $"{x.Randomization.FirstName} {x.Randomization.LastName} - {x.Randomization.ScreeningNumber}",
-                    ExtraData = new { ReviewDone = x.IsReviewedDone, createdByUser = x.CreatedByUser.UserName, CreatedDate = x.CreatedDate, Data = x.AEReportingValueValues },
-                    Module = MyTaskModule.AdverseEvent.GetDescription(),
-                }).ToList();
-                return result;
+                    var result = All.Include(x => x.Randomization).Include(x => x.AEReportingValueValues).Where(x => projectIdlist.Contains(x.Randomization.ProjectId) && x.DeletedDate == null && x.Randomization.DeletedDate == null && !x.IsReviewedDone).Select(x => new DashboardDto
+                    {
+                        Id = x.Id,
+                        TaskInformation = $"{x.Randomization.FirstName} {x.Randomization.LastName} - {x.Randomization.ScreeningNumber}",
+                        ExtraData = new { Approved = x.IsApproved, ReviewDone = x.IsReviewedDone, createdByUser = x.CreatedByUser.UserName, CreatedDate = x.CreatedDate, Data = x.AEReportingValueValues },
+                        Module = MyTaskModule.AdverseEvent.GetDescription(),
+                    }).ToList();
+                    return result;
+                }
             }
             return new List<DashboardDto>();
         }

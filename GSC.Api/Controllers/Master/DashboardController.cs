@@ -61,7 +61,7 @@ namespace GSC.Api.Controllers.Master
             objdashboard.eTMFSendBackData = _projectWorkplaceArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId);
             objdashboard.eTMFSubSecSendBackData = _projectSubSecArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId);
             objdashboard.eConsentData = _econsentReviewDetailsRepository.GetEconsentMyTaskList(ProjectId);
-            objdashboard.eAdverseEventData = _aEReportingRepository.GetAEReportingMyTaskList(ProjectId);
+            objdashboard.eAdverseEventData = _aEReportingRepository.GetAEReportingMyTaskList(ProjectId, (int)(SiteId != null ? SiteId : ProjectId));
             objdashboard.manageMonitoringReportSendData = _manageMonitoringReportReviewRepository.GetSendTemplateList((int)(SiteId != null ? SiteId : ProjectId));
             objdashboard.manageMonitoringReportSendBackData = _manageMonitoringReportReviewRepository.GetSendBackTemplateList((int)(SiteId != null ? SiteId : ProjectId));
             return Ok(objdashboard);
