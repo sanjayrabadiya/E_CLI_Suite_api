@@ -80,13 +80,13 @@ namespace GSC.Respository.SupplyManagement
                  && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
                  .Sum(z => z.RemainingQuantity);
             if (RemainingQuantity > 0)
-            {
+            {   
                 var approvedQty = _context.SupplyManagementShipment.Where(x => x.DeletedDate == null
                  && x.SupplyManagementRequest.FromProject.ParentProjectId == ProjectId && x.SupplyManagementRequest.StudyProductTypeId == PharmacyStudyProductTypeId
                  && x.Status == SupplyMangementShipmentStatus.Approved).Sum(x => x.ApprovedQty);
 
                 var finalRemainingQty = RemainingQuantity - approvedQty;
-                if (reqQty > approvedQty)
+                if (reqQty > finalRemainingQty)
                 {
                     isAvailable = false;
                 }
