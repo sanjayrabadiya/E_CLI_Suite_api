@@ -101,6 +101,27 @@ namespace GSC.Respository.CTMS
                }).FirstOrDefault();
         }
 
+        public string GetMonitoringFormApprovedOrNOt(int projectId, int siteId, int tabNumber)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
 
+            string ActivityCode = tabNumber == 0 ? "act_001" : tabNumber == 1 ? "act_002" : tabNumber == 2 ? "act_003" :
+                tabNumber == 3 ? "act_004" : "act_005";
+
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == ActivityCode).FirstOrDefault();
+
+            var Activity = _context.Activity.Where(x => x.CtmsActivityId == CtmsActivity.Id && x.AppScreenId == appscreen.Id).FirstOrDefault();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                                .Where(x => x.ProjectId == projectId && x.ActivityId == Activity.Id
+                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+            var CtmsMonitoringReport = All.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
+                                       && x.CtmsMonitoring.DeletedDate == null).ToList();
+            if (!(CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.FormApproved)))
+                return "Please Complete Previous Form.";
+
+            return "";
+        }
     }
 }

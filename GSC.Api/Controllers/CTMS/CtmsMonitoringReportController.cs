@@ -46,5 +46,21 @@ namespace GSC.Api.Controllers.Master
             if (_uow.Save() <= 0) throw new Exception("Creating Report failed on save.");
             return Ok(ctmsMonitoringReport.Id);
         }
+
+        [HttpGet]
+        [Route("GetMonitoringFormApprovedOrNOt/{projectId}/{siteId}/{tabNumber}")]
+        public IActionResult GetMonitoringFormApprovedOrNOt(int projectId, int siteId, int tabNumber)
+        {
+            if (projectId <= 0) return BadRequest();
+
+            var result = _ctmsMonitoringReportRepository.GetMonitoringFormApprovedOrNOt(projectId, siteId, tabNumber);
+            if (!string.IsNullOrEmpty(result))
+            {
+                ModelState.AddModelError("Message", result);
+                return BadRequest(ModelState);
+            }
+            
+            return Ok();
+        }
     }
 }

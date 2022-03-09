@@ -8,6 +8,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -82,8 +83,7 @@ namespace GSC.Respository.CTMS
                 if (CtmsMonitoringReport?.FirstOrDefault() != null)
                 {
                     x.CtmsMonitoringReportId = CtmsMonitoringReport.FirstOrDefault().Id;
-                    var CtmsMonitoringReportReviewList = _context.CtmsMonitoringReportReview.Where(a => a.CtmsMonitoringReportId == x.CtmsMonitoringReportId && a.DeletedDate == null).ToList();
-                    x.IsReviewerApprovedForm = CtmsMonitoringReportReviewList.Count() != 0 && CtmsMonitoringReportReviewList.All(z => z.IsApproved == true);
+                    x.IsReviewerApprovedForm = CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.FormApproved);
                 }
             });
 
