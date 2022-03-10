@@ -353,20 +353,20 @@ namespace GSC.Respository.ProjectRight
         public List<ProjectDropDown> GetChildProjectDropDownProjectRight(int ParentProjectId)
         {
             // changes by swati for child project
-            var projectList = _context.Project.Where(x => x.ParentProjectId == ParentProjectId
-                                             && _context.ProjectRight.Any(a => a.ProjectId == x.Id
-                                                                              && a.UserId == _jwtTokenAccesser.UserId &&
-                                                                              a.RoleId == _jwtTokenAccesser.RoleId
-                                                                              && a.DeletedDate == null &&
-                                                                              a.RollbackReason == null) &&
-                                             x.DeletedDate == null).Select(c => new ProjectDropDown
-                                             {
-                                                 Id = c.Id,
-                                                 Value = c.ProjectCode,
-                                                 Code = c.ProjectCode,
-                                                 ParentProjectId = (int)c.ParentProjectId,
-                                                 CountryId = c.ManageSite.City.State.CountryId
-                                             }).OrderBy(o => o.Value).Distinct().ToList();
+            var projectList = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == ParentProjectId
+                                               && _context.ProjectRight.Any(a => a.ProjectId == x.Id
+                                                                                && a.UserId == _jwtTokenAccesser.UserId &&
+                                                                                a.RoleId == _jwtTokenAccesser.RoleId
+                                                                                && a.DeletedDate == null &&
+                                                                                a.RollbackReason == null) &&
+                                               x.DeletedDate == null).Select(c => new ProjectDropDown
+                                               {
+                                                   Id = c.Id,
+                                                   Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
+                                                   Code = c.ProjectCode,
+                                                   ParentProjectId = (int)c.ParentProjectId,
+                                                   CountryId = c.ManageSite.City.State.CountryId
+                                               }).OrderBy(o => o.Value).Distinct().ToList();
 
             if (projectList == null || projectList.Count == 0) return null;
             return projectList;
@@ -458,9 +458,9 @@ namespace GSC.Respository.ProjectRight
 
         public int GetPendingProjectTrainingCount(int id)
         {
-           return All.Where(x => x.UserId == _jwtTokenAccesser.UserId && !x.IsReview 
-                                                             && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId && a.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null) 
-                                                             && x.ProjectId == id && x.DeletedDate == null).Count();
+            return All.Where(x => x.UserId == _jwtTokenAccesser.UserId && !x.IsReview
+                                                              && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId && a.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
+                                                              && x.ProjectId == id && x.DeletedDate == null).Count();
         }
 
     }

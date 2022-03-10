@@ -171,7 +171,7 @@ namespace GSC.Api.Controllers.Master
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
                 KeyId = project.Id,
-                SubjectName = project.ProjectCode,
+                SubjectName = project.ProjectName,
                 SubjectName1 = project.ProjectName,
                 ScreenType = UserRecent.Project
             });
@@ -191,7 +191,7 @@ namespace GSC.Api.Controllers.Master
             var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
             project.Id = projectDto.Id;
             var details = _projectRepository.Find(projectDto.Id);
-           
+
             project.IsSendEmail = details.IsSendEmail;
             project.IsSendSMS = details.IsSendSMS;
 
@@ -447,7 +447,7 @@ namespace GSC.Api.Controllers.Master
                 //noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Company/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
                 //int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null && x.DeletedDate == null).Count();
                 //if (studycount < noofstudy)
-                    IsAddmoreStudy = true;
+                IsAddmoreStudy = true;
             }
             return Ok(IsAddmoreStudy);
         }
@@ -474,6 +474,21 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetProjectForAttendance(bool isStatic)
         {
             return Ok(_projectRepository.GetProjectForAttendance(isStatic));
+        }
+
+        [HttpPut]
+        [Route("UpdateProjectCodeFromCtms/{ProjectId}/{ProjectCode}")]
+        public IActionResult UpdateProjectCodeFromCtms(int ProjectId, string ProjectCode)
+        {
+            if (ProjectId <= 0) return BadRequest();
+
+            var project = _projectRepository.FindBy(x => x.Id == ProjectId).FirstOrDefault();
+
+            project.ProjectCode = ProjectCode != "null" ? ProjectCode : _projectRepository.GetProjectSitesCode(project);
+
+            _projectRepository.Update(project);
+            if (_uow.Save() <= 0) throw new Exception("Update Project Code  failed on save.");
+            return Ok(project.Id);
         }
     }
 }

@@ -85,7 +85,7 @@ namespace GSC.Respository.CTMS
                 .Where(x => x.CtmsMonitoringReportId == ReviewDto.CtmsMonitoringReportId)
                 .FirstOrDefault();
 
-            var ProjectName = Review.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectCode;
+            var ProjectName = Review.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectName;
             var Activity = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName;
             var Template = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplate.TemplateName;
             var User = _userRepository.Find(ReviewDto.UserId);
@@ -103,7 +103,7 @@ namespace GSC.Respository.CTMS
                 .Where(x => x.CtmsMonitoringReportId == ReviewDto.CtmsMonitoringReportId)
                 .FirstOrDefault();
 
-            var ProjectName = Review.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectCode;
+            var ProjectName = Review.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectName;
             var Activity = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName;
             var Template = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplate.TemplateName;
             var User = _userRepository.Find(ReviewDto.UserId);
