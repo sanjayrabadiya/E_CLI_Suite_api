@@ -1,0 +1,15 @@
+﻿using GSC.Data.Entities.Common;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace GSC.Data.Dto.SupplyManagement
+{
+    public class SupplyManagementUploadFileDetailDto : BaseDto
+    {
+        public int SupplyManagementUploadFileId { get; set; }
+        public int RandomizationNo { get; set; }
+        public string TreatmentType { get; set; }
+        public IList<SupplyManagementUploadFileVisitDto> Visits { get; set; } = null;
+    }
+}

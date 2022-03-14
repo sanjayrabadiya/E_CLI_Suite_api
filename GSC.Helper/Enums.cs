@@ -807,4 +807,11 @@ namespace GSC.Helper
         [Description("Approve")] Approved = 1,
         [Description("Reject")] Rejected = 2
     }
+
+    public enum SupplyManagementUploadFileLevel : short
+    {
+        [Description("Study")] Study = 1,
+        [Description("Country")] Country = 2,
+        [Description("Site")] Site = 3
+    }
 }

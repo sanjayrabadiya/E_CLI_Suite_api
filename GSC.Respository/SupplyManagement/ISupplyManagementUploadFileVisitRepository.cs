@@ -5,8 +5,7 @@ using System.Collections.Generic;
 
 namespace GSC.Respository.SupplyManagement
 {
-    public interface IRandomizationSetupRepository : IGenericRepository<RandomizationSetup>
+    public interface ISupplyManagementUploadFileVisitRepository : IGenericRepository<SupplyManagementUploadFileVisit>
     {
-        List<RandomizationSetupGridDto> GetRandomizationSetupList(bool isDeleted);
     }
 }

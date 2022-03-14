@@ -123,6 +123,7 @@ namespace GSC.Api.Controllers.Medra
             {
                 recodeData.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                 recodeData.ModifiedBy = _jwtTokenAccesser.UserId;
+                recodeData.LastUpdateBy = _jwtTokenAccesser.UserId;
                 recodeData.CreatedRole = _jwtTokenAccesser.RoleId;
                 recodeData.MeddraLowLevelTermId = data.MeddraLowLevelTermId;
                 recodeData.MeddraSocTermId = data.MeddraSocTermId;
@@ -139,6 +140,7 @@ namespace GSC.Api.Controllers.Medra
             }
             else
             {
+                data.LastUpdateBy= _jwtTokenAccesser.UserId;
                 data.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                 data.ModifiedBy = _jwtTokenAccesser.UserId;
                 data.CreatedRole = _jwtTokenAccesser.RoleId;
@@ -166,6 +168,7 @@ namespace GSC.Api.Controllers.Medra
                 var recodeData = _meddraCodingRepository.CheckForRecode((int)item);
                 if (recodeData != null)
                 {
+                    recodeData.LastUpdateBy = _jwtTokenAccesser.UserId;
                     recodeData.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                     recodeData.ModifiedBy = _jwtTokenAccesser.UserId;
                     recodeData.CreatedRole = _jwtTokenAccesser.RoleId;
@@ -187,6 +190,7 @@ namespace GSC.Api.Controllers.Medra
                     data.IsApproved = false;
                     data.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                     data.ModifiedBy = _jwtTokenAccesser.UserId;
+                    data.LastUpdateBy = _jwtTokenAccesser.UserId;
                     data.CreatedRole = _jwtTokenAccesser.RoleId;
                     var autoCode = _mapper.Map<MeddraCoding>(data);
                     _meddraCodingRepository.Add(autoCode);

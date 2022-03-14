@@ -10,24 +10,18 @@ using System.Linq;
 
 namespace GSC.Respository.SupplyManagement
 {
-    public class RandomizationSetupRepository : GenericRespository<RandomizationSetup>, IRandomizationSetupRepository
+    public class SupplyManagementUploadFileVisitRepository : GenericRespository<SupplyManagementUploadFileVisit>, ISupplyManagementUploadFileVisitRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
-        public RandomizationSetupRepository(IGSCContext context,
+        public SupplyManagementUploadFileVisitRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-        }
-
-        public List<RandomizationSetupGridDto> GetRandomizationSetupList(bool isDeleted)
-        {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-                   ProjectTo<RandomizationSetupGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

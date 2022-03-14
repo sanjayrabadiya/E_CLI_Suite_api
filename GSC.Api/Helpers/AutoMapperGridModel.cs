@@ -397,8 +397,13 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.ScreenName, x => x.MapFrom(a => a.AppScreens.ScreenName))
                 .ForMember(x => x.ScreenCode, x => x.MapFrom(a => a.AppScreens.ScreenCode)).ReverseMap();
 
-            CreateMap<RandomizationSetup, RandomizationSetupGridDto>()
-                .ForMember(x => x.StudyName, x => x.MapFrom(a => a.Project.ProjectCode)).ReverseMap();
+            CreateMap<SupplyManagementUploadFile, SupplyManagementUploadFileGridDto>()
+                .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ForMember(x => x.Country, x => x.MapFrom(a => a.Country.CountryName))
+                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Site.ProjectCode))
+                .ForMember(x => x.Level, x => x.MapFrom(a => a.SupplyManagementUploadFileLevel.GetDescription()))
+                .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription()))
+                .ForMember(x => x.Reason, x => x.MapFrom(a => a.AuditReason.ReasonName)).ReverseMap();
 
             CreateMap<LabManagementVariableMapping, LabManagementVariableMappingGridDto>()
                 .ForMember(x => x.ProjectDesignVariable, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))

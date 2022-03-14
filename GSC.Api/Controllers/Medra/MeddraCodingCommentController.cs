@@ -59,6 +59,7 @@ namespace GSC.Api.Controllers.Medra
             {
                 recodeData.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                 recodeData.ModifiedBy = _jwtTokenAccesser.UserId;
+                recodeData.LastUpdateBy = _jwtTokenAccesser.UserId;
                 recodeData.CreatedRole = _jwtTokenAccesser.RoleId;
                 recodeData.MeddraLowLevelTermId = meddraCodingCommentDto.MeddraLowLevelTermId;
                 recodeData.MeddraSocTermId = meddraCodingCommentDto.MeddraSocTermId;
