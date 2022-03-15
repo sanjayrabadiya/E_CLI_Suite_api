@@ -123,7 +123,7 @@ namespace GSC.Respository.Screening
                 if (workFlowLevel.IsNoCRF)
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
                 else if (workFlowLevel.IsWorkFlowBreak)
-                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
                 else
                     screeningTemplateValue.AcknowledgeLevel = 1;
             }
@@ -225,7 +225,7 @@ namespace GSC.Respository.Screening
             if (workFlowLevel.IsNoCRF)
                 screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
             else if (workFlowLevel.IsWorkFlowBreak)
-                screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
+                screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
             else
                 screeningTemplateValue.AcknowledgeLevel = 1;
 
@@ -269,24 +269,15 @@ namespace GSC.Respository.Screening
             {
                 screeningTemplateValue.QueryStatus = QueryStatus.SelfCorrection;
                 screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
-                if (workFlowLevel.IsNoCRF)
+
+                if (workFlowLevel.IsWorkFlowBreak)
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                else if (workFlowLevel.IsNoCRF)
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
                 else
                     screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 2 : 1);
 
-                if (workFlowLevel.IsWorkFlowBreak)
-                {
-                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo);
-                    if (workFlowLevel.LevelNo != screeningTemplate.ReviewLevel)
-                    {
-                        if (workFlowLevel.IsNoCRF)
-                            screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
-                        else
-                            screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
-                    }
-                }
-
-                if (screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
+                if (screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel || screeningTemplateValue.AcknowledgeLevel > screeningTemplate.ReviewLevel)
                 {
                     screeningTemplateValue.QueryStatus = QueryStatus.Closed;
                     screeningTemplateValue.AcknowledgeLevel = null;
