@@ -232,7 +232,7 @@ namespace GSC.Respository.Screening
             else if (workFlowLevel.IsWorkFlowBreak)
                 screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
             else
-                screeningTemplateValue.AcknowledgeLevel = 1;
+                screeningTemplateValue.AcknowledgeLevel = (short)(workFlowLevel.LevelNo + 1);
 
             screeningTemplateValueQuery.QueryLevel = workFlowLevel.LevelNo;
             screeningTemplateValueQuery.QueryStatus = QueryStatus.Acknowledge;
