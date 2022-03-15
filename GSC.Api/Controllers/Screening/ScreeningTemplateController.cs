@@ -158,6 +158,13 @@ namespace GSC.Api.Controllers.Screening
         [TransactionRequired]
         public IActionResult UnSubmitTemplate(int id)
         {
+            var validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(id);
+
+            if (!string.IsNullOrEmpty(validateMsg))
+            {
+                ModelState.AddModelError("Message", "Queries generated, please close it");
+                return BadRequest(ModelState);
+            }
 
             var screeningTemplate = _screeningTemplateRepository.Find(id);
 
