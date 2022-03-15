@@ -241,12 +241,12 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplate = _screeningTemplateRepository.Find(id);
             screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
+            var reviewLevel = screeningTemplate.ReviewLevel;
             screeningTemplate.ReviewLevel = screeningTemplate.LastReviewLevel;
-            screeningTemplate.LastReviewLevel = null;
             screeningTemplate.IsCompleteReview = false;
             _screeningTemplateRepository.Update(screeningTemplate);
 
-            var screeningTemplateReview = _screeningTemplateReviewRepository.All.Where(x => x.ScreeningTemplateId == id && x.ReviewLevel == screeningTemplate.LastReviewLevel).ToList();
+            var screeningTemplateReview = _screeningTemplateReviewRepository.All.Where(x => x.ScreeningTemplateId == id && x.ReviewLevel == reviewLevel).ToList();
 
             screeningTemplateReview.ForEach(c =>
             {

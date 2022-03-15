@@ -222,9 +222,12 @@ namespace GSC.Respository.Screening
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
 
 
-            screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
             if (workFlowLevel.IsNoCRF)
                 screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+            else if (workFlowLevel.IsWorkFlowBreak)
+                screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
+            else
+                screeningTemplateValue.AcknowledgeLevel = 1;
 
             screeningTemplateValueQuery.QueryLevel = workFlowLevel.LevelNo;
             screeningTemplateValueQuery.QueryStatus = QueryStatus.Acknowledge;
