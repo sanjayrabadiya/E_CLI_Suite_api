@@ -240,9 +240,6 @@ namespace GSC.Respository.Screening
 
             ClosedSelfCorrection(screeningTemplateValue, (short)screeningTemplate.ReviewLevel);
 
-            if (screeningTemplateValue.QueryStatus == QueryStatus.SelfCorrection && screeningTemplateValue.AcknowledgeLevel == screeningTemplateValue.ReviewLevel)
-                screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, (short)screeningTemplateValue.AcknowledgeLevel);
-
             ClosedSelfCorrection(screeningTemplateValue, screeningTemplateValue.ReviewLevel);
 
             if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
