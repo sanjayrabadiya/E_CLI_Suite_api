@@ -153,7 +153,7 @@ namespace GSC.Respository.CTMS
         {
             ctmsMonitoringReportVariableValueQuery.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             ctmsMonitoringReportVariableValueQuery.UserName = _jwtTokenAccesser.UserName;
-            //manageMonitoringReportVariableComment.RoleId = _jwtTokenAccesser.RoleId;
+            ctmsMonitoringReportVariableValueQuery.UserRole = _jwtTokenAccesser.RoleName;
             ctmsMonitoringReportVariableValueQuery.CreatedDate = _jwtTokenAccesser.GetClientDate();
             Add(ctmsMonitoringReportVariableValueQuery);
         }

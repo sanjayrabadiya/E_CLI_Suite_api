@@ -11,12 +11,10 @@ namespace GSC.Data.Dto.CTMS
         public int ProjectId { get; set; }
         public int StudyLevelFormId { get; set; }
         public DateTime? ScheduleStartDate { get; set; }
-
         public DateTime? ScheduleEndDate { get; set; }
-
         public DateTime? ActualStartDate { get; set; }
-
         public DateTime? ActualEndDate { get; set; }
+        public int? ParentId { get; set; }
     }
 
     public class CtmsMonitoringGridDto : BaseAuditDto
@@ -32,6 +30,6 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? ScheduleEndDate { get; set; }
         public DateTime? ActualStartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
-
+        public int? ParentId { get; set; }
     }
 }

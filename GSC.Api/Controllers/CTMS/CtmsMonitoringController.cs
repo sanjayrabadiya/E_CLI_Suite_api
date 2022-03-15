@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
@@ -102,6 +104,27 @@ namespace GSC.Api.Controllers.CTMS
 
             var result = _ctmsMonitoringRepository.GetMonitoringForm(projectId, siteId, activityId);
             return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("CloneForm/{ctmsMonitoringId}/{noOfClones}")]
+        [TransactionRequired]
+        public IActionResult CloneForm(int ctmsMonitoringId, int noOfClones)
+        {
+            var CtmsMonitoringId = _ctmsMonitoringRepository.Find(ctmsMonitoringId).Id;
+
+            for (var i = 1; i <= noOfClones; i++)
+            {
+                var monitoring = _ctmsMonitoringRepository.FindBy(t => t.Id == CtmsMonitoringId && t.DeletedDate == null).FirstOrDefault();
+                monitoring.Id = 0;
+                monitoring.ParentId = ctmsMonitoringId;
+
+                _ctmsMonitoringRepository.Add(monitoring);
+            }
+
+            _uow.Save();
+
+            return Ok();
         }
     }
 }

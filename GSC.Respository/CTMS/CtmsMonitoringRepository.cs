@@ -57,10 +57,11 @@ namespace GSC.Respository.CTMS
                     DeletedDate = x.DeletedDate,
                     CreatedByUser = x.CreatedByUser.UserName,
                     ModifiedByUser = x.ModifiedByUser.UserName,
-                    DeletedByUser = x.DeletedByUser.UserName
+                    DeletedByUser = x.DeletedByUser.UserName,
+                    ParentId = x.ParentId
                 }).ToList();
 
-            var result = StudyLevelForm.Select(x => new CtmsMonitoringGridDto
+            var StudyLevelFormList = StudyLevelForm.Select(x => new CtmsMonitoringGridDto
             {
                 Id = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault() != null ? ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault().Id : 0,
                 StudyLevelFormId = x.Id,
@@ -76,7 +77,10 @@ namespace GSC.Respository.CTMS
                 CreatedByUser = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.CreatedByUser,
                 ModifiedByUser = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.ModifiedByUser,
                 DeletedByUser = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.DeletedByUser,
+                ParentId = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.ParentId
             }).ToList();
+
+            var result = ctmsMonitorings.Count() == 0 ? StudyLevelFormList : ctmsMonitorings;
 
             result.ForEach(x =>
             {

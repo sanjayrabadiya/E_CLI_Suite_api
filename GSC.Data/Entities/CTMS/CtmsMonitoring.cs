@@ -18,5 +18,7 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? ActualEndDate { get; set; }
         public StudyLevelForm StudyLevelForm { get; set; }
         public Data.Entities.Master.Project Project { get; set; }
+        public int? ParentId { get; set; }
+
     }
 }
