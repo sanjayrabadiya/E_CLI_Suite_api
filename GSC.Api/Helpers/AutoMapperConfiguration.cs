@@ -455,6 +455,11 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementReceipt, SupplyManagementReceiptDto>().ReverseMap();
             CreateMap<SupplyManagementUploadFileVisit, SupplyManagementUploadFileVisitDto>().ReverseMap();
             CreateMap<SupplyManagementUploadFileDetail, SupplyManagementUploadFileDetailDto>().ReverseMap();
+
+            CreateMap<PageConfiguration, PageConfigurationDto>().ReverseMap();
+            CreateMap<PageConfiguration, PageConfigurationCommon>()
+              .ForMember(x => x.ActualFieldName, a => a.MapFrom(m => m.PageConfigurationFields.FieldName)).ReverseMap();
+            CreateMap<PageConfigurationFields, PageConfigurationFieldsDto>().ReverseMap();
         }
     }
 }

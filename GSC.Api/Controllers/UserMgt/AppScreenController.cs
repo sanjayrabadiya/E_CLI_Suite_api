@@ -4,6 +4,7 @@ using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
@@ -149,9 +150,9 @@ namespace GSC.Api.Controllers.UserMgt
         public IActionResult GetSubMenus()
         {
             var appScreens = _appScreenRepository.All.Where(x => x.DeletedDate == null && x.ParentAppScreenId != null
-            ).OrderByDescending(x => x.Id).ToList();
-            var appScreensDto = _mapper.Map<IEnumerable<AppScreenDto>>(appScreens);
-            return Ok(appScreensDto);
+            ).OrderByDescending(x => x.Id).Select(c => new DropDownDto { Id = c.Id, Value = c.ScreenName, Code = c.ScreenCode, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value)
+               .ToList();
+            return Ok(appScreens);
         }
     }
 }
