@@ -114,7 +114,7 @@ namespace GSC.Respository.Project.Workflow
                     IsLock = false,
                     WorkFlowText = workFlowText,
                     IsStartTemplate = independent.IsStartTemplate,
-                    IsWorkFlowBreak = independent.IsWorkFlowBreak,
+                    IsWorkFlowBreak = projectWorkflowLevel.Any(t => t.IsWorkFlowBreak),
                     LevelNo = levelNo,
                     SelfCorrection = independent.IsDataEntryUser,
                     IsGenerateQuery = independent.IsGenerateQuery
