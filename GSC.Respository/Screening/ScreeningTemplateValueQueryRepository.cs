@@ -238,8 +238,6 @@ namespace GSC.Respository.Screening
                                                        ? "Self Correction"
                                                        : " Query");
 
-            ClosedSelfCorrection(screeningTemplateValue, (short)screeningTemplate.ReviewLevel);
-
             ClosedSelfCorrection(screeningTemplateValue, screeningTemplateValue.ReviewLevel);
 
             if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
