@@ -7,6 +7,5 @@ namespace GSC.Respository.Screening
     public interface IScreeningTemplateValueChildRepository : IGenericRepository<ScreeningTemplateValueChild>
     {
         void Save(ScreeningTemplateValue screeningTemplateValue);
-        bool IsSameValue(ScreeningTemplateValue screeningTemplateValue);
     }
 }

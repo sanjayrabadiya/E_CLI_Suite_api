@@ -91,20 +91,19 @@ namespace GSC.Respository.Screening
                 ? screeningTemplateValueQueryDto.Value
                 : screeningTemplateValueQueryDto.ValueName;
 
-            var updateQueryStatus = screeningTemplateValueQueryDto.Value == screeningTemplateValue.Value
-                ? QueryStatus.Answered
-                : QueryStatus.Resolved;
+            var updateQueryStatus = value != screeningTemplateValueQueryDto.OldValue
+                ? QueryStatus.Resolved
+                : QueryStatus.Answered;
+
+            if (string.IsNullOrEmpty(value) && string.IsNullOrEmpty(screeningTemplateValueQueryDto.OldValue))
+                updateQueryStatus = QueryStatus.Answered;
 
             if (screeningTemplateValue.IsSystem)
             {
                 screeningTemplateValue.AcknowledgeLevel = null;
                 updateQueryStatus = QueryStatus.Closed;
             }
-            else if (updateQueryStatus == QueryStatus.Answered && screeningTemplateValue.Children != null && screeningTemplateValue.Children.Count() > 0)
-            {
-                if (!_screeningTemplateValueChildRepository.IsSameValue(screeningTemplateValue))
-                    updateQueryStatus = QueryStatus.Resolved;
-            }
+           
 
             screeningTemplateValueQuery.IsSystem = false;
             screeningTemplateValueQuery.QueryStatus = updateQueryStatus;
