@@ -60,6 +60,7 @@ namespace GSC.Data.Dto.Screening
         public double? StudyVersion { get; set; }
         public short? LastReviewLevel { get; set; }
         public Gender Gender { get; set; }
+        public bool IsCompleteReview { get; set; }
 
     }
 

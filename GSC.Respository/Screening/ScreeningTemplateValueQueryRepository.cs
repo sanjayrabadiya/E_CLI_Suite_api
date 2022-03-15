@@ -100,6 +100,11 @@ namespace GSC.Respository.Screening
                 screeningTemplateValue.AcknowledgeLevel = null;
                 updateQueryStatus = QueryStatus.Closed;
             }
+            else if (updateQueryStatus == QueryStatus.Answered && screeningTemplateValue.Children != null && screeningTemplateValue.Children.Count() > 0)
+            {
+                if (!_screeningTemplateValueChildRepository.IsSameValue(screeningTemplateValue))
+                    updateQueryStatus = QueryStatus.Resolved;
+            }
 
             screeningTemplateValueQuery.IsSystem = false;
             screeningTemplateValueQuery.QueryStatus = updateQueryStatus;
