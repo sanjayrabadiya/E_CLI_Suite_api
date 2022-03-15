@@ -625,6 +625,9 @@ namespace GSC.Respository.Screening
                 }
             }
 
+            if (templateBasic.Status == ScreeningTemplateStatus.Completed)
+                workFlowButton.SelfCorrection = false;
+
             workFlowButton.Clear = designTemplateDto.IsSubmittedButton;
 
             return workFlowButton;
