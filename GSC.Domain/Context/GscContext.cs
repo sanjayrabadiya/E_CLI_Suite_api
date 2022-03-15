@@ -403,6 +403,8 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementReceipt> SupplyManagementReceipt { get; set; }
         public DbSet<SupplyManagementUploadFileVisit> SupplyManagementUploadFileVisit { get; set; }
         public DbSet<SupplyManagementUploadFileDetail> SupplyManagementUploadFileDetail { get; set; }
+        public DbSet<PageConfiguration> PageConfiguration { get; set; }
+        public DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
     }
 
 

@@ -353,5 +353,8 @@ namespace GSC.Domain.Context
         DbSet<SupplyManagementReceipt> SupplyManagementReceipt { get; set; }
         DbSet<SupplyManagementUploadFileVisit> SupplyManagementUploadFileVisit { get; set; }
         DbSet<SupplyManagementUploadFileDetail> SupplyManagementUploadFileDetail { get; set; }
+
+        DbSet<PageConfiguration> PageConfiguration { get; set; }
+        DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
     }
 }

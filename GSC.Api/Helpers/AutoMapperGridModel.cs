@@ -496,6 +496,12 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName))
                  .ForMember(x => x.StudyProductTypeUnitName, x => x.MapFrom(a => a.SupplyManagementRequest.PharmacyStudyProductType.ProductUnitType.GetDescription()))
                  .ReverseMap();
+
+            CreateMap<PageConfiguration, PageConfigurationGridDto>()
+               .ForMember(x => x.ActualFieldName, a => a.MapFrom(m => m.PageConfigurationFields.FieldName))
+               .ReverseMap();
+            CreateMap<PageConfigurationFields, PageConfigurationFieldsGridDto>()
+                .ForMember(x => x.AppScreen, a => a.MapFrom(m => m.AppScreens.ScreenName)).ReverseMap();
         }
     }
 }

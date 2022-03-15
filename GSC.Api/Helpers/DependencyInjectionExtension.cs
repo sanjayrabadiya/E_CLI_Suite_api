@@ -375,6 +375,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementReceiptRepository, SupplyManagementReceiptRepository>();
             services.AddScoped<ISupplyManagementUploadFileVisitRepository, SupplyManagementUploadFileVisitRepository>();
             services.AddScoped<ISupplyManagementUploadFileDetailRepository, SupplyManagementUploadFileDetailRepository>();
+            services.AddScoped<IPageConfigurationRepository, PageConfigurationRepository>();
+            services.AddScoped<IPageConfigurationFieldsRepository, PageConfigurationFieldsRepository>();
         }
     }
 }
