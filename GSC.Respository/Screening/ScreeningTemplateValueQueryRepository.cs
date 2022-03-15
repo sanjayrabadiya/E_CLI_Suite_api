@@ -119,8 +119,11 @@ namespace GSC.Respository.Screening
             else if (updateQueryStatus == QueryStatus.Resolved)
             {
                 var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
-                if (workFlowLevel.IsWorkFlowBreak)
-                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(screeningTemplate.StartLevel + 1);
+
+                if (workFlowLevel.IsNoCRF)
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                else if (workFlowLevel.IsWorkFlowBreak)
+                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
                 else
                     screeningTemplateValue.AcknowledgeLevel = 1;
             }
