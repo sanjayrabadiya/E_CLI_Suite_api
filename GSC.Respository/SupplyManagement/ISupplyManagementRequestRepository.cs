@@ -15,5 +15,7 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementRequestGridDto> GetShipmentRequestList(bool isDeleted);
 
         bool CheckAvailableRemainingQty(int reqQty, int ProjectId, int PharmacyStudyProductTypeId);
+
+       int GetAvailableRemainingQty(int ProjectId, int PharmacyStudyProductTypeId);
     }
 }

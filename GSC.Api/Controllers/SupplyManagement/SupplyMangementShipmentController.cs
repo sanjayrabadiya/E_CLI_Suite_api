@@ -111,5 +111,17 @@ namespace GSC.Api.Controllers.SupplyManagement
             var data = _supplyManagementShipmentRepository.GetSupplyShipmentList(isDeleted);
             return Ok(data);
         }
+        [HttpGet]
+        [Route("GetRemainingQty/{SupplyManagementRequestId}/{ProjectId}")]
+        public IActionResult GetRemainingQty(int SupplyManagementRequestId, int ProjectId)
+        {
+            var shipmentData = _context.SupplyManagementRequest.Where(x => x.Id == SupplyManagementRequestId).FirstOrDefault();
+            if (shipmentData == null)
+            {
+                ModelState.AddModelError("Message", "Request data not found!");
+                return BadRequest(ModelState);
+            }
+            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty(ProjectId, shipmentData.StudyProductTypeId));
+        }
     }
 }

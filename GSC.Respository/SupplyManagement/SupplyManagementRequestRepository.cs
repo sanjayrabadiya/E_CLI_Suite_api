@@ -49,7 +49,8 @@ namespace GSC.Respository.SupplyManagement
                     ProjectTo<SupplyManagementRequestGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             data.ForEach(t =>
             {
-                var shipmentdata = _context.SupplyManagementShipment.Include(z => z.CreatedByUser).Where(x => x.SupplyManagementRequestId == t.Id).FirstOrDefault();
+                var shipmentdata = _context.SupplyManagementShipment.Include(z => z.CreatedByUser).Where(x =>
+                 x.SupplyManagementRequestId == t.Id && x.Status == SupplyMangementShipmentStatus.Rejected).FirstOrDefault();
                 if (shipmentdata != null)
                 {
                     t.ApprovedQty = shipmentdata.ApprovedQty;
@@ -70,7 +71,7 @@ namespace GSC.Respository.SupplyManagement
 
             });
 
-            return data;
+            return data.Where(x => x.Status == null || x.Status == "" || x.Status == "Reject").ToList();
         }
         public bool CheckAvailableRemainingQty(int reqQty, int ProjectId, int PharmacyStudyProductTypeId)
         {
@@ -80,7 +81,7 @@ namespace GSC.Respository.SupplyManagement
                  && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
                  .Sum(z => z.RemainingQuantity);
             if (RemainingQuantity > 0)
-            {   
+            {
                 var approvedQty = _context.SupplyManagementShipment.Where(x => x.DeletedDate == null
                  && x.SupplyManagementRequest.FromProject.ParentProjectId == ProjectId && x.SupplyManagementRequest.StudyProductTypeId == PharmacyStudyProductTypeId
                  && x.Status == SupplyMangementShipmentStatus.Approved).Sum(x => x.ApprovedQty);
@@ -97,6 +98,25 @@ namespace GSC.Respository.SupplyManagement
             }
             return isAvailable;
         }
+        public int GetAvailableRemainingQty(int ProjectId, int PharmacyStudyProductTypeId)
+        {
+            
+            var RemainingQuantity = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == ProjectId
+                 && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                 && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
+                 .Sum(z => z.RemainingQuantity);
+            if (RemainingQuantity > 0)
+            {
+                var approvedQty = _context.SupplyManagementShipment.Where(x => x.DeletedDate == null
+                 && x.SupplyManagementRequest.FromProject.ParentProjectId == ProjectId && x.SupplyManagementRequest.StudyProductTypeId == PharmacyStudyProductTypeId
+                 && x.Status == SupplyMangementShipmentStatus.Approved).Sum(x => x.ApprovedQty);
 
+                var finalRemainingQty = RemainingQuantity - approvedQty;
+                return finalRemainingQty;
+                
+            }
+            
+            return 0;
+        }
     }
 }

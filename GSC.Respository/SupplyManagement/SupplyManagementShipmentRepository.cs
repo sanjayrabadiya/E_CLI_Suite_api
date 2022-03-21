@@ -32,21 +32,9 @@ namespace GSC.Respository.SupplyManagement
         }
         public List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(bool isDeleted)
         {
+            List<SupplyManagementShipmentGridDto> FinalData = new List<SupplyManagementShipmentGridDto>();
             var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-
-            data.ForEach(t =>
-            {
-                var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
-                if (fromproject != null)
-                {
-                    var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
-                    t.StudyProjectCode = study != null ? study.ProjectCode : "";
-                }
-                t.AuditReason = t.AuditReasonId != null ? _context.AuditReason.Where(x => x.Id == t.AuditReasonId).FirstOrDefault().ReasonName : "";
-            });
-
-
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                         && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
@@ -63,11 +51,11 @@ namespace GSC.Respository.SupplyManagement
                 {
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     obj.StudyProjectCode = study != null ? study.ProjectCode : "";
-                }               
-                data.Add(obj);
+                }
+                FinalData.Add(obj);
 
             });
-            return data.OrderByDescending(x => x.CreatedDate).ToList();
+            return FinalData.OrderByDescending(x => x.CreatedDate).ToList();
         }
 
         public string GenerateShipmentNo()
