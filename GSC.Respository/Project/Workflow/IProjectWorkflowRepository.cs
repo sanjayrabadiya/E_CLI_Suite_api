@@ -12,5 +12,6 @@ namespace GSC.Respository.Project.Workflow
         bool IsElectronicsSignatureComplete(int ProjectDesignId);
 
         short GetNoCRFLevel(int projectDesignId, short levelNo);
+        short GetNextLevelWorkBreak(int projectDesignId, short levelNo);
     }
 }

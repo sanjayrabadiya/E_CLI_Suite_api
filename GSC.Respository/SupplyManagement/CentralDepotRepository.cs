@@ -83,7 +83,7 @@ namespace GSC.Respository.SupplyManagement
         {
             var exists = _context.ProductReceipt.Any(x => x.CentralDepotId == Id && x.DeletedDate == null);
             if (exists)
-                return "Receipt is already in use. Cannot delete record!";
+                return "Receipt is already in use cannot EDIT or DELETE Record!";
             return "";
         }
 

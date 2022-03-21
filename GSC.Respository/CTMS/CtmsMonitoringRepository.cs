@@ -8,7 +8,9 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.CTMS;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,10 +57,11 @@ namespace GSC.Respository.CTMS
                     DeletedDate = x.DeletedDate,
                     CreatedByUser = x.CreatedByUser.UserName,
                     ModifiedByUser = x.ModifiedByUser.UserName,
-                    DeletedByUser = x.DeletedByUser.UserName
+                    DeletedByUser = x.DeletedByUser.UserName,
+                    ParentId = x.ParentId
                 }).ToList();
 
-            var result = StudyLevelForm.Select(x => new CtmsMonitoringGridDto
+            var StudyLevelFormList = StudyLevelForm.Select(x => new CtmsMonitoringGridDto
             {
                 Id = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault() != null ? ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault().Id : 0,
                 StudyLevelFormId = x.Id,
@@ -74,7 +77,10 @@ namespace GSC.Respository.CTMS
                 CreatedByUser = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.CreatedByUser,
                 ModifiedByUser = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.ModifiedByUser,
                 DeletedByUser = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.DeletedByUser,
+                ParentId = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.ParentId
             }).ToList();
+
+            var result = ctmsMonitorings.Count() == 0 ? StudyLevelFormList : ctmsMonitorings;
 
             result.ForEach(x =>
             {
@@ -82,8 +88,8 @@ namespace GSC.Respository.CTMS
                 if (CtmsMonitoringReport?.FirstOrDefault() != null)
                 {
                     x.CtmsMonitoringReportId = CtmsMonitoringReport.FirstOrDefault().Id;
-                    var CtmsMonitoringReportReviewList = _context.CtmsMonitoringReportReview.Where(a => a.CtmsMonitoringReportId == x.CtmsMonitoringReportId && a.DeletedDate == null).ToList();
-                    x.IsReviewerApprovedForm = CtmsMonitoringReportReviewList.Count() != 0 && CtmsMonitoringReportReviewList.All(z => z.IsApproved == true);
+                    x.ReportStatus = CtmsMonitoringReport.FirstOrDefault().ReportStatus.GetDescription();
+                    x.IsReviewerApprovedForm = CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.FormApproved);
                 }
             });
 

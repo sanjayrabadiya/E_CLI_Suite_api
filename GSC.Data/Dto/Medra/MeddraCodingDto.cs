@@ -29,6 +29,7 @@ namespace GSC.Data.Dto.Medra
         public int? TemplateStatus { get; set; }
         public bool? ExtraData { get; set; }
         public DateTime? ApproveDate { get; set; }
+        public int? LastUpdateBy { get; set; }
     }
 
     public class MeddraCodingSearchDto

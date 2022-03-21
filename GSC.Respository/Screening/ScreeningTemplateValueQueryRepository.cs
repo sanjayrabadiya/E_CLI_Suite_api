@@ -91,15 +91,19 @@ namespace GSC.Respository.Screening
                 ? screeningTemplateValueQueryDto.Value
                 : screeningTemplateValueQueryDto.ValueName;
 
-            var updateQueryStatus = screeningTemplateValueQueryDto.Value == screeningTemplateValue.Value
-                ? QueryStatus.Answered
-                : QueryStatus.Resolved;
+            var updateQueryStatus = value != screeningTemplateValueQueryDto.OldValue
+                ? QueryStatus.Resolved
+                : QueryStatus.Answered;
+
+            if (string.IsNullOrEmpty(value) && string.IsNullOrEmpty(screeningTemplateValueQueryDto.OldValue))
+                updateQueryStatus = QueryStatus.Answered;
 
             if (screeningTemplateValue.IsSystem)
             {
                 screeningTemplateValue.AcknowledgeLevel = null;
                 updateQueryStatus = QueryStatus.Closed;
             }
+
 
             screeningTemplateValueQuery.IsSystem = false;
             screeningTemplateValueQuery.QueryStatus = updateQueryStatus;
@@ -119,10 +123,18 @@ namespace GSC.Respository.Screening
             else if (updateQueryStatus == QueryStatus.Resolved)
             {
                 var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
-                if (workFlowLevel.IsWorkFlowBreak)
-                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(screeningTemplate.StartLevel + 1);
+
+                if (workFlowLevel.IsNoCRF)
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                else if (workFlowLevel.IsWorkFlowBreak)
+                {
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                }
                 else
                     screeningTemplateValue.AcknowledgeLevel = 1;
+
+                if (screeningTemplateValue.AcknowledgeLevel > screeningTemplate.ReviewLevel)
+                    screeningTemplateValue.AcknowledgeLevel = screeningTemplate.ReviewLevel;
             }
 
             QueryAudit(screeningTemplateValueQueryDto, screeningTemplateValue, updateQueryStatus.ToString(), value, screeningTemplateValueQuery);
@@ -219,9 +231,12 @@ namespace GSC.Respository.Screening
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
 
 
-            screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
             if (workFlowLevel.IsNoCRF)
                 screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+            else if (workFlowLevel.IsWorkFlowBreak)
+                screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+            else
+                screeningTemplateValue.AcknowledgeLevel = (short)(workFlowLevel.LevelNo + 1);
 
             screeningTemplateValueQuery.QueryLevel = workFlowLevel.LevelNo;
             screeningTemplateValueQuery.QueryStatus = QueryStatus.Acknowledge;
@@ -231,11 +246,6 @@ namespace GSC.Respository.Screening
                                                    screeningTemplateValueQuery.QueryStatus == QueryStatus.SelfCorrection
                                                        ? "Self Correction"
                                                        : " Query");
-
-            ClosedSelfCorrection(screeningTemplateValue, (short)screeningTemplate.ReviewLevel);
-
-            if (screeningTemplateValue.QueryStatus == QueryStatus.SelfCorrection && screeningTemplateValue.AcknowledgeLevel == screeningTemplateValue.ReviewLevel)
-                screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, (short)screeningTemplateValue.AcknowledgeLevel);
 
             ClosedSelfCorrection(screeningTemplateValue, screeningTemplateValue.ReviewLevel);
 
@@ -268,24 +278,15 @@ namespace GSC.Respository.Screening
             {
                 screeningTemplateValue.QueryStatus = QueryStatus.SelfCorrection;
                 screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
-                if (workFlowLevel.IsNoCRF)
+
+                if (workFlowLevel.IsWorkFlowBreak)
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                else if (workFlowLevel.IsNoCRF)
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
                 else
                     screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 2 : 1);
 
-                if (workFlowLevel.IsWorkFlowBreak)
-                {
-                    screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo);
-                    if (workFlowLevel.LevelNo != screeningTemplate.ReviewLevel)
-                    {
-                        if (workFlowLevel.IsNoCRF)
-                            screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
-                        else
-                            screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo + 1);
-                    }
-                }
-
-                if (screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
+                if (screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel || screeningTemplateValue.AcknowledgeLevel > screeningTemplate.ReviewLevel)
                 {
                     screeningTemplateValue.QueryStatus = QueryStatus.Closed;
                     screeningTemplateValue.AcknowledgeLevel = null;

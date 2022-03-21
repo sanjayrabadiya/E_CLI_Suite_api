@@ -430,7 +430,7 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
 
             CreateMap<FileSizeConfiguration, FileSizeConfigurationDto>().ReverseMap();
-            CreateMap<RandomizationSetup, RandomizationSetupDto>().ReverseMap();
+            CreateMap<SupplyManagementUploadFile, SupplyManagementUploadFileDto>().ReverseMap();
             CreateMap<CtmsActivity, CtmsActivityDto>().ReverseMap();
             CreateMap<CtmsSettings, CtmsSettingsDto>().ReverseMap();
             CreateMap<StudyLevelForm, StudyLevelFormDto>().ReverseMap();
@@ -453,6 +453,13 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementRequest, SupplyManagementRequestDto>().ReverseMap();
             CreateMap<SupplyManagementShipment, SupplyManagementShipmentDto>().ReverseMap();
             CreateMap<SupplyManagementReceipt, SupplyManagementReceiptDto>().ReverseMap();
+            CreateMap<SupplyManagementUploadFileVisit, SupplyManagementUploadFileVisitDto>().ReverseMap();
+            CreateMap<SupplyManagementUploadFileDetail, SupplyManagementUploadFileDetailDto>().ReverseMap();
+
+            CreateMap<PageConfiguration, PageConfigurationDto>().ReverseMap();
+            CreateMap<PageConfiguration, PageConfigurationCommon>()
+              .ForMember(x => x.ActualFieldName, a => a.MapFrom(m => m.PageConfigurationFields.FieldName)).ReverseMap();
+            CreateMap<PageConfigurationFields, PageConfigurationFieldsDto>().ReverseMap();
         }
     }
 }

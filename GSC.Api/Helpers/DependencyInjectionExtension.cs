@@ -354,7 +354,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISyncConfigurationMasterRepository, SyncConfigurationMasterRepository>();
             services.AddScoped<ISyncConfigurationMasterDetailsRepository, SyncConfigurationMasterDetailsRepository>();
             services.AddScoped<ISyncConfigurationMasterDetailsRepositoryAudit, SyncConfigurationMasterDetailsRepositoryAudit>();
-            services.AddScoped<IRandomizationSetupRepository, RandomizationSetupRepository>();
+            services.AddScoped<ISupplyManagementUploadFileRepository, SupplyManagementUploadFileRepository>();
             services.AddScoped<ILabManagementSendEmailUserRepository, LabManagementSendEmailUserRepository>();
             services.AddScoped<ICtmsActivityRepository, CtmsActivityRepository>();
             services.AddScoped<ICtmsSettingsRepository, CtmsSettingsRepository>();
@@ -373,6 +373,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementRequestRepository, SupplyManagementRequestRepository>();
             services.AddScoped<ISupplyManagementShipmentRepository, SupplyManagementShipmentRepository>();
             services.AddScoped<ISupplyManagementReceiptRepository, SupplyManagementReceiptRepository>();
+            services.AddScoped<ISupplyManagementUploadFileVisitRepository, SupplyManagementUploadFileVisitRepository>();
+            services.AddScoped<ISupplyManagementUploadFileDetailRepository, SupplyManagementUploadFileDetailRepository>();
+            services.AddScoped<IPageConfigurationRepository, PageConfigurationRepository>();
+            services.AddScoped<IPageConfigurationFieldsRepository, PageConfigurationFieldsRepository>();
         }
     }
 }

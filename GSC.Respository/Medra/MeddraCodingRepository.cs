@@ -247,7 +247,7 @@ namespace GSC.Respository.Medra
                           join md in _context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == filters.MeddraConfigId)
                           on meddraSoc.soc_code equals md.soc_code into mdDto
                           from meddraMD in mdDto.DefaultIfEmpty()
-                          join users in _context.Users on meddraCoding.ModifiedBy equals users.Id into userDto
+                          join users in _context.Users on meddraCoding.LastUpdateBy equals users.Id into userDto
                           from user in userDto.DefaultIfEmpty()
                           join roles in _context.SecurityRole on meddraCoding.CreatedRole equals roles.Id into roleDto
                           from role in roleDto.DefaultIfEmpty()
@@ -513,6 +513,7 @@ namespace GSC.Respository.Medra
             {
                 data.CodedType = CodedType.ReCoded;
                 data.ModifiedBy = _jwtTokenAccesser.UserId;
+                data.LastUpdateBy = _jwtTokenAccesser.UserId;
                 data.CreatedRole = _jwtTokenAccesser.RoleId;
                 data.ModifiedDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.ToUniversalTime();
                 data.MeddraLowLevelTermId = null;

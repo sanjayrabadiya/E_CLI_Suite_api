@@ -58,19 +58,38 @@ namespace GSC.Respository.Project.Workflow
 
         }
 
+        public short GetNextLevelWorkBreak(int projectDesignId, short levelNo)
+        {
+
+            var result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
+                && x.DeletedDate == null && x.IsWorkFlowBreak
+                && x.LevelNo > levelNo).Min(a => (short?)a.LevelNo) ?? 0;
+
+            if (result == 0)
+                return _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
+                && x.DeletedDate == null).Max(a => (short?)a.LevelNo) ?? 0;
+
+            return result;
+
+        }
+
         public WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId)
         {
             short levelNo = -1;
             var projectWorkId = FindBy(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).Select(t => t.Id).FirstOrDefault();
             var workFlowText = new List<WorkFlowText>();
+
+            var projectWorkflowLevel = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
+                                                                      && x.DeletedDate == null).ToList();
+
             if (projectWorkId > 0)
-                workFlowText = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
-                                                                        && x.DeletedDate == null).Select(r =>
-                    new WorkFlowText
-                    {
-                        LevelNo = r.LevelNo,
-                        RoleName = r.SecurityRole.RoleShortName
-                    }).ToList();
+            {
+                workFlowText = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId && x.DeletedDate == null).Select(r => new WorkFlowText
+                {
+                    LevelNo = r.LevelNo,
+                    RoleName = r.SecurityRole.RoleShortName
+                }).ToList();
+            }
 
             if (projectWorkId == 0)
                 return new WorkFlowLevelDto
@@ -95,19 +114,15 @@ namespace GSC.Respository.Project.Workflow
                     IsLock = false,
                     WorkFlowText = workFlowText,
                     IsStartTemplate = independent.IsStartTemplate,
-                    IsWorkFlowBreak = independent.IsWorkFlowBreak,
+                    IsWorkFlowBreak = projectWorkflowLevel.Any(t => t.IsWorkFlowBreak),
                     LevelNo = levelNo,
                     SelfCorrection = independent.IsDataEntryUser,
                     IsGenerateQuery = independent.IsGenerateQuery
                 };
 
-            var level = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
-                                                                          && x.SecurityRoleId ==
-                                                                          _jwtTokenAccesser.RoleId
-                                                                          && x.DeletedDate == null).FirstOrDefault();
+            var level = projectWorkflowLevel.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null).FirstOrDefault();
 
-            var totalLevels = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWorkId
-                                                                       && x.DeletedDate == null).Select(c => c.LevelNo).ToList();
+            var totalLevels = projectWorkflowLevel.Select(c => c.LevelNo).ToList();
 
             int totalLevel = 0;
             if (totalLevels != null && totalLevels.Count > 0)
@@ -122,7 +137,7 @@ namespace GSC.Respository.Project.Workflow
                     WorkFlowText = workFlowText,
                     TotalLevel = totalLevel,
                     IsStartTemplate = level.IsStartTemplate,
-                    IsWorkFlowBreak = level.IsWorkFlowBreak,
+                    IsWorkFlowBreak = projectWorkflowLevel.Any(t => t.IsWorkFlowBreak),
                     LevelNo = level.LevelNo,
                     SelfCorrection = level.IsDataEntryUser,
                     IsGenerateQuery = level.IsGenerateQuery,

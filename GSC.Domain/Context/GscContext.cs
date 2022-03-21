@@ -378,7 +378,7 @@ namespace GSC.Domain.Context
         public DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
         public DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }
         public DbSet<FileSizeConfiguration> FileSizeConfiguration { get; set; }
-        public DbSet<RandomizationSetup> RandomizationSetup { get; set; }
+        public DbSet<SupplyManagementUploadFile> SupplyManagementUploadFile { get; set; }
 
         public DbSet<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
 
@@ -401,7 +401,10 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementRequest> SupplyManagementRequest { get; set; }
         public DbSet<SupplyManagementShipment> SupplyManagementShipment { get; set; }
         public DbSet<SupplyManagementReceipt> SupplyManagementReceipt { get; set; }
-
+        public DbSet<SupplyManagementUploadFileVisit> SupplyManagementUploadFileVisit { get; set; }
+        public DbSet<SupplyManagementUploadFileDetail> SupplyManagementUploadFileDetail { get; set; }
+        public DbSet<PageConfiguration> PageConfiguration { get; set; }
+        public DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
     }
 
 

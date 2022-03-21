@@ -10,6 +10,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
+using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
@@ -30,6 +31,7 @@ namespace GSC.Respository.Master
         private readonly IDesignTrialRepository _designTrialRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly INumberFormatRepository _numberFormatRepository;
+        private readonly ICtmsSettingsRepository _ctmsSettingsRepository;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IVolunteerRepository _volunteerRepository;
@@ -42,6 +44,7 @@ namespace GSC.Respository.Master
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             INumberFormatRepository numberFormatRepository,
+            ICtmsSettingsRepository ctmsSettingsRepository,
             ICountryRepository countryRepository,
             IDesignTrialRepository designTrialRepository,
             IProjectRightRepository projectRightRepository,
@@ -52,6 +55,7 @@ namespace GSC.Respository.Master
             : base(context)
         {
             _numberFormatRepository = numberFormatRepository;
+            _ctmsSettingsRepository = ctmsSettingsRepository;
             _companyRepository = companyRepository;
             _userRepository = userRepository;
             _countryRepository = countryRepository;
@@ -93,9 +97,18 @@ namespace GSC.Respository.Master
             else
             {
                 var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).FirstOrDefault();
-                project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectSitesCode(project);
-                if (project.IsTestSite)
-                    project.ProjectCode = "T-" + project.ProjectCode;
+                var ctmsSettings = _ctmsSettingsRepository.All.Where(x => x.ProjectId == project.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
+
+                if (ctmsSettings != null && ctmsSettings.IsCtms)
+                {
+                    project.ProjectCode = null;
+                }
+                else
+                {
+                    project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectSitesCode(project);
+                    if (project.IsTestSite)
+                        project.ProjectCode = "T-" + project.ProjectCode;
+                }
             }
 
             project.ProjectRight = new List<Data.Entities.ProjectRight.ProjectRight>();
@@ -128,7 +141,7 @@ namespace GSC.Respository.Master
                     x.Id != objSave.Id && x.ProjectName == objSave.ProjectName.Trim() && x.DeletedDate == null && x.ParentProjectId == null))
                     return "Duplicate Study name : " + objSave.ProjectName;
 
-                if (All.Any(x => x.Id != objSave.Id && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
+                if (All.Any(x => x.Id != objSave.Id && x.ProjectCode != null && x.ProjectCode == objSave.ProjectCode && x.DeletedDate == null))
                     return "Duplicate Study Code : " + objSave.ProjectCode;
             }
 
@@ -343,7 +356,7 @@ namespace GSC.Respository.Master
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
-                    Value = c.ProjectCode,
+                    Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
                     CountryId = c.ManageSite != null && c.ManageSite.City != null && c.ManageSite.City.State != null ? c.ManageSite.City.State.CountryId : 0,
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
@@ -372,7 +385,7 @@ namespace GSC.Respository.Master
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
-                    Value = c.ProjectCode,
+                    Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
                     CountryId = c.CountryId,
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? 0,
@@ -445,7 +458,7 @@ namespace GSC.Respository.Master
             return parent.ProjectCode + "-" + number.ToString().PadLeft(2, '0');
         }
 
-        private string GetProjectSitesCode(Data.Entities.Master.Project project)
+        public string GetProjectSitesCode(Data.Entities.Master.Project project)
         {
             var SiteCount = 0;
             if (!project.IsTestSite)
@@ -707,7 +720,7 @@ namespace GSC.Respository.Master
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
-                    Value = c.ProjectCode,
+                    Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? c.Id,
@@ -750,7 +763,7 @@ namespace GSC.Respository.Master
 
         public string GetParentProjectCode(int ProjectId)
         {
-            return All.Where(x => x.Id == ProjectId).Select(x=>x.ProjectCode).FirstOrDefault();
+            return All.Where(x => x.Id == ProjectId).Select(x => x.ProjectCode).FirstOrDefault();
         }
     }
 }

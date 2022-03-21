@@ -330,7 +330,7 @@ namespace GSC.Domain.Context
         DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
         DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }
         DbSet<FileSizeConfiguration> FileSizeConfiguration { get; set; }
-        DbSet<RandomizationSetup> RandomizationSetup { get; set; }
+        DbSet<SupplyManagementUploadFile> SupplyManagementUploadFile { get; set; }
         DbSet<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
         DbSet<CtmsActivity> CtmsActivity { get; set; }
         DbSet<CtmsSettings> CtmsSettings { get; set; }
@@ -351,5 +351,10 @@ namespace GSC.Domain.Context
         DbSet<SupplyManagementRequest> SupplyManagementRequest { get; set; }
         DbSet<SupplyManagementShipment> SupplyManagementShipment { get; set; }
         DbSet<SupplyManagementReceipt> SupplyManagementReceipt { get; set; }
+        DbSet<SupplyManagementUploadFileVisit> SupplyManagementUploadFileVisit { get; set; }
+        DbSet<SupplyManagementUploadFileDetail> SupplyManagementUploadFileDetail { get; set; }
+
+        DbSet<PageConfiguration> PageConfiguration { get; set; }
+        DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
     }
 }

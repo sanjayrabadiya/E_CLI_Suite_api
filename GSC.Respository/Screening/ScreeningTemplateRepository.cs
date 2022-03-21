@@ -84,7 +84,8 @@ namespace GSC.Respository.Screening
                    ParentId = c.ParentId,
                    LastReviewLevel = c.LastReviewLevel,
                    ProjectId = c.ScreeningVisit.ScreeningEntry.ProjectId,
-                   Gender = c.ScreeningVisit.ScreeningEntry.Randomization.Gender ?? Gender.Male
+                   Gender = c.ScreeningVisit.ScreeningEntry.Randomization.Gender ?? Gender.Male,
+                   IsCompleteReview = c.IsCompleteReview
                }).FirstOrDefault();
         }
 
@@ -416,8 +417,6 @@ namespace GSC.Respository.Screening
             return All.Where(x => x.Id == screeningTemplateId).Select(r => r.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
         }
 
-
-
         public List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, WorkFlowLevelDto workFlowLevel)
         {
 
@@ -511,17 +510,6 @@ namespace GSC.Respository.Screening
 
         public IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
-            //var parentId = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
-            //var parentIds = new List<int>();
-            //if (parentId == null)
-            //{
-            //    parentIds = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId).Select(y => y.Id).ToList();
-            //}
-            //else
-            //{
-            //    parentIds.Add(filters.ProjectId);
-            //}
-
             int parentprojectid = filters.ProjectId;
             int? siteId = filters.SiteId;
             var parentIds = new List<int>();
@@ -572,7 +560,7 @@ namespace GSC.Respository.Screening
             }).ToList();
         }
 
-        private WorkFlowButton SetWorkFlowButton(Data.Dto.Screening.ScreeningTemplateValueBasic screeningValue,
+        private WorkFlowButton SetWorkFlowButton(ScreeningTemplateValueBasic screeningValue,
             WorkFlowLevelDto workflowlevel, DesignScreeningTemplateDto designTemplateDto,
             ScreeningTemplateBasic templateBasic)
         {
@@ -624,6 +612,9 @@ namespace GSC.Respository.Screening
                     workFlowButton.Acknowledge = false;
                 }
             }
+
+            if (templateBasic.Status == ScreeningTemplateStatus.Completed || templateBasic.IsCompleteReview)
+                workFlowButton.SelfCorrection = false;
 
             workFlowButton.Clear = designTemplateDto.IsSubmittedButton;
 

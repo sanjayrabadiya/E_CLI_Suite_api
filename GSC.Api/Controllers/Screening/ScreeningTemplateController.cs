@@ -158,6 +158,13 @@ namespace GSC.Api.Controllers.Screening
         [TransactionRequired]
         public IActionResult UnSubmitTemplate(int id)
         {
+            var validateMsg = _screeningTemplateValueRepository.CheckCloseQueries(id);
+
+            if (!string.IsNullOrEmpty(validateMsg))
+            {
+                ModelState.AddModelError("Message", "Queries generated, please close it");
+                return BadRequest(ModelState);
+            }
 
             var screeningTemplate = _screeningTemplateRepository.Find(id);
 
@@ -241,12 +248,13 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplate = _screeningTemplateRepository.Find(id);
             screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
+            var lastReviewLevel = screeningTemplate.LastReviewLevel;
             screeningTemplate.ReviewLevel = screeningTemplate.LastReviewLevel;
             screeningTemplate.LastReviewLevel = null;
             screeningTemplate.IsCompleteReview = false;
             _screeningTemplateRepository.Update(screeningTemplate);
 
-            var screeningTemplateReview = _screeningTemplateReviewRepository.All.Where(x => x.ScreeningTemplateId == id && x.ReviewLevel == screeningTemplate.LastReviewLevel).ToList();
+            var screeningTemplateReview = _screeningTemplateReviewRepository.All.Where(x => x.ScreeningTemplateId == id && x.ReviewLevel == lastReviewLevel).ToList();
 
             screeningTemplateReview.ForEach(c =>
             {

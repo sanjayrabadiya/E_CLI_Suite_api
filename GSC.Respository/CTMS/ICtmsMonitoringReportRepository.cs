@@ -12,5 +12,6 @@ namespace GSC.Respository.CTMS
     {
         CtmsMonitoringReportFormDto GetCtmsMonitoringReportVariableValue(CtmsMonitoringReportFormDto designTemplateDto, int CtmsMonitoringReportId);
         CtmsMonitoringReportBasic GetFormBasic(int ManageMonitoringReportId);
+        string GetMonitoringFormApprovedOrNOt(int projectId, int siteId, int tabNumber);
     }
 }

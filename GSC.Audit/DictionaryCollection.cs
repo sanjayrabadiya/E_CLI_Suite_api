@@ -516,7 +516,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsAssayRequirement", DisplayName = "Assay Difference Verified & Meet Requirements" });
             _dictionaries.Add(new Dictionary { FieldName = "IsRetentionConfirm", DisplayName = "Quantity for Retention Samples Confirmed" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSodiumVaporLamp", DisplayName = "Verification of IMP Done Under Sodium Vapor Lamp" });
-            _dictionaries.Add(new Dictionary { FieldName = "IsProductDescription", DisplayName = "Product Description Checked With COLA/SPC/PACKAGE" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsProductDescription", DisplayName = "Product Description Checked With COA/SPC/PACKAGE" });
             _dictionaries.Add(new Dictionary { FieldName = "NumberOfBox", DisplayName = "No. of Boxes" });
             _dictionaries.Add(new Dictionary { FieldName = "NumberOfQty", DisplayName = "No. of Qty/Boxes" });
             _dictionaries.Add(new Dictionary { FieldName = "ReceivedQty", DisplayName = "Received Qty" });
