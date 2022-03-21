@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -24,6 +25,8 @@ namespace GSC.Data.Dto.CTMS
         public bool IsReviewerApprovedForm { get; set; }
         public string ProjectName { get; set; }
         public string ReportStatus { get; set; }
+        public int? ReportStatusId { get; set; }
+        public bool IsSender { get; set; }
         public string ActivityName { get; set; }
         public string VariableTemplateName { get; set; }
         public DateTime? ScheduleStartDate { get; set; }

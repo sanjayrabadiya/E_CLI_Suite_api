@@ -89,6 +89,8 @@ namespace GSC.Respository.CTMS
                 {
                     x.CtmsMonitoringReportId = CtmsMonitoringReport.FirstOrDefault().Id;
                     x.ReportStatus = CtmsMonitoringReport.FirstOrDefault().ReportStatus.GetDescription();
+                    x.ReportStatusId = (int)CtmsMonitoringReport.FirstOrDefault().ReportStatus;
+                    x.IsSender = CtmsMonitoringReport.FirstOrDefault().CreatedBy == _jwtTokenAccesser.UserId;
                     x.IsReviewerApprovedForm = CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.FormApproved);
                 }
             });

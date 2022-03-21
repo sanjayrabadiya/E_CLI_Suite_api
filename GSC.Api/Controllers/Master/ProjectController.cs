@@ -99,7 +99,7 @@ namespace GSC.Api.Controllers.Master
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {
                 KeyId = project.Id,
-                SubjectName = project.ProjectCode,
+                SubjectName = project.ProjectName,
                 SubjectName1 = project.ProjectName,
                 ScreenType = UserRecent.Project
             });
@@ -482,13 +482,28 @@ namespace GSC.Api.Controllers.Master
         {
             if (ProjectId <= 0) return BadRequest();
 
+            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).FirstOrDefault();
+
             var project = _projectRepository.FindBy(x => x.Id == ProjectId).FirstOrDefault();
 
-            project.ProjectCode = ProjectCode != "null" ? ProjectCode : _projectRepository.GetProjectSitesCode(project);
+            project.ProjectCode = numberFormat.IsManual ? ProjectCode : _projectRepository.GetProjectSitesCode(project);
 
             _projectRepository.Update(project);
             if (_uow.Save() <= 0) throw new Exception("Update Project Code  failed on save.");
             return Ok(project.Id);
+        }
+
+        [HttpGet]
+        [Route("GetSiteCode/{ProjectId}")]
+        public IActionResult GetSiteCode(int ProjectId)
+        {
+            if (ProjectId <= 0) return BadRequest();
+
+            var Project = _projectRepository.FindBy(x => x.Id == ProjectId).FirstOrDefault();
+
+            var ProjectCode = _projectRepository.GetProjectSitesCode(Project);
+            Project.ProjectCode = ProjectCode;
+            return Ok(Project);
         }
     }
 }
