@@ -12,6 +12,7 @@ using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -65,15 +66,13 @@ namespace GSC.Respository.SupplyManagement
         // Upload excel data insert into database
         public string InsertExcelDataIntoDatabaseTable(SupplyManagementUploadFile supplyManagementUploadFile)
         {
-            var validate = All.Where(x => x.ProjectId == supplyManagementUploadFile.ProjectId && x.DeletedDate == null).FirstOrDefault();
+            // check level for the upload file
+            var validate = All.Where(x => x.ProjectId == supplyManagementUploadFile.ProjectId && x.Status != Helper.LabManagementUploadStatus.Reject && x.DeletedDate == null).FirstOrDefault();
             if (validate != null)
-            {
                 if (validate.SupplyManagementUploadFileLevel != supplyManagementUploadFile.SupplyManagementUploadFileLevel)
-                {
-                    return "can not upload data, it's already upload different level.";
-                }
-            }
+                    return "Please Select Appropriate Level.";
 
+            // Read excel to stream reader
             var documentUrl = _uploadSettingRepository.GetDocumentPath();
             string pathname = documentUrl + supplyManagementUploadFile.PathName;
             FileStream streamer = new FileStream(pathname, FileMode.Open);
@@ -83,46 +82,60 @@ namespace GSC.Respository.SupplyManagement
             else
                 reader = ExcelReaderFactory.CreateOpenXmlReader(streamer);
 
+            // convert excel to dataset
             DataSet results = reader.AsDataSet();
+
+            // validate excel file
+            var isValid = validateExcel(results, supplyManagementUploadFile);
+
+            if (isValid != "")
+                return isValid;
+
+            // Get detail in data table 
             DataTable dt = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable();
             if (validate != null)
             {
-                var isValidRandomizationNo = RandomizationNumberValidation(dt, supplyManagementUploadFile.ProjectId);
+                // check randomization number with already upload file
+                var isValidRandomizationNo = RandomizationNumberValidation(dt, supplyManagementUploadFile.ProjectId, validate);
                 if (isValidRandomizationNo != "")
                     return isValidRandomizationNo;
+
+                // check visit with older upload excel sheet
+                var visitMatch = matchVisitWithOlderUpload(results, supplyManagementUploadFile.ProjectId, validate);
+                if (visitMatch != "")
+                    return visitMatch;
             }
             else
             {
+                // check randomization number for first file uploaded
                 var isValidRandomizationNoInSerial = RandomizationNumberCheckSeries(dt, 0);
                 if (isValidRandomizationNoInSerial != "")
                     return isValidRandomizationNoInSerial;
             }
 
+            // validate product type
             var productType = validateProductType(dt, supplyManagementUploadFile.ProjectId);
             if (productType != "")
                 return productType;
 
-            var isValid = validateExcel(results, supplyManagementUploadFile);
+            // insert data into table if excel is valid
+            InserFileData(results, supplyManagementUploadFile);
 
-            if (isValid == "")
-                return "";
-            else
-                return isValid;
+            return "";
         }
 
+        // Generate excecl format for download
         public FileStreamResult DownloadFormat(SupplyManagementUploadFileDto supplyManagementUploadFile)
         {
-            var studyCode = GetProjectCode(supplyManagementUploadFile.ProjectId); //_projectRepository.Find(supplyManagementUploadFile.ProjectId).ProjectCode;
+            var studyCode = GetProjectCode(supplyManagementUploadFile.ProjectId);
             string site = "";
             string country = "";
             if (supplyManagementUploadFile.SiteId != null)
-                site = (string)GetProjectCode((int)supplyManagementUploadFile.SiteId); //_projectRepository.Find((int)supplyManagementUploadFile.SiteId).ProjectCode;
+                site = (string)GetProjectCode((int)supplyManagementUploadFile.SiteId);
             if (supplyManagementUploadFile.CountryId != null)
-                country = (string)GetCountry((int)supplyManagementUploadFile.CountryId); //_countryRepository.Find((int)supplyManagementUploadFile.CountryId).CountryName;
+                country = (string)GetCountry((int)supplyManagementUploadFile.CountryId);
 
-            var projectDesignVisits = GetProjectDesignVisit(supplyManagementUploadFile.ProjectId); //_projectDesignVisitRepository.All
-            //                            .Where(x => x.ProjectDesignPeriod.ProjectDesign.Project.Id == supplyManagementUploadFile.ProjectId
-            //                            && x.DeletedDate == null).ToList();
+            var projectDesignVisits = GetProjectDesignVisit(supplyManagementUploadFile.ProjectId);
             #region Excel Report Design
             using (var workbook = new XLWorkbook())
             {
@@ -190,12 +203,12 @@ namespace GSC.Respository.SupplyManagement
             if (supplyManagementUploadFile.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Study)
             {
                 if (country.Trim() != "" || site.Trim() != "")
-                    return "Don't enter country or site when it's upload as study level.";
+                    return "Remove Site Code or Country Name if file uploaded for the Study.";
             }
             else if (supplyManagementUploadFile.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Site)
             {
                 if (country.Trim() != "")
-                    return "Don't enter country when it's upload as site level.";
+                    return "Remove Site Code if file uploaded for the Country.";
                 if (site.Trim() != "")
                 {
                     if (site.Trim().ToLower() != Convert.ToString(GetProjectCode((int)supplyManagementUploadFile.SiteId)).ToLower())
@@ -206,7 +219,7 @@ namespace GSC.Respository.SupplyManagement
             else
             {
                 if (site.Trim() != "")
-                    return "Don't enter site code when it's upload as country level.";
+                    return "Remove Country Name if file uploaded for the Site.";
                 if (country.Trim() != "")
                 {
                     if (country.Trim().ToLower() != Convert.ToString(GetCountry((int)supplyManagementUploadFile.CountryId)).ToLower())
@@ -226,25 +239,25 @@ namespace GSC.Respository.SupplyManagement
                 {
                     var r = projectDesignVisits.Any(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
                     if (!r)
-                        return "visit not match please check the sheet.";
+                        return "Visit name not match with design visit.";
                 }
                 else
                 {
                     if (j == 0)
                         if (item.ToString().Trim().ToLower() != "randomization no")
-                            return "Format not match.Please check the format.";
+                            return "File is not Compatible!";
                     if (j == 1)
                         if (item.ToString().Trim().ToLower() != "treatment type")
-                            return "Format not match.Please check the format.";
+                            return "File is not Compatible!";
                 }
                 j++;
             }
 
             DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.Substring(0, selectQuery.Length - 3));
             if (dr.Length != 0)
-                return "Please fill required cell value.";
+                return "Please fill required Value!";
             else
-                return InserFileData(results, supplyManagementUploadFile);
+                return "";
         }
 
         public string InserFileData(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile)
@@ -291,15 +304,33 @@ namespace GSC.Respository.SupplyManagement
             return visitIds.ToArray();
         }
 
-        public string RandomizationNumberValidation(DataTable dt, int projectId)
+        public string RandomizationNumberValidation(DataTable dt, int projectId, SupplyManagementUploadFile supplyManagementUploadFileDetail)
         {
-            var supplyManagementUploadFile = All.Where(x => x.ProjectId == projectId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
-            var maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
+            // get last upload sheet data
+            var supplyManagementUploadFile = All.Where(x => x.ProjectId == projectId && x.Status != Helper.LabManagementUploadStatus.Reject && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
+
+            // get last upload excel file max randomization number
+            var maxRandomizationNo = new SupplyManagementUploadFileDetail();
+
+            if (supplyManagementUploadFileDetail.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Country)
+                maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
+                All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.CountryId == supplyManagementUploadFileDetail.CountryId).OrderByDescending(x => x.Id).FirstOrDefault();
+            if (supplyManagementUploadFileDetail.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Site)
+                maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
+                All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.CountryId == supplyManagementUploadFileDetail.SiteId).OrderByDescending(x => x.Id).FirstOrDefault();
+            if (supplyManagementUploadFileDetail.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Study)
+                maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
                 All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id).OrderByDescending(x => x.Id).FirstOrDefault();
 
-            var checkRandomizationNumber = RandomizationNumberCheckSeries(dt, maxRandomizationNo.RandomizationNo);
+            int MaxNo = 0;
+
+            if (maxRandomizationNo != null)
+                MaxNo = maxRandomizationNo.RandomizationNo;
+
+            // check randomization number is serial no or not
+            var checkRandomizationNumber = RandomizationNumberCheckSeries(dt, MaxNo);
             if (checkRandomizationNumber != "")
-                return "randomization no not properformat";
+                return checkRandomizationNumber;
             else
                 return "";
         }
@@ -310,7 +341,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 lastNo += 1;
                 if (Convert.ToInt32(dt.Rows[i][0]) != lastNo)
-                    return "randomization no not properformat";
+                    return "Randomization Number not in a Proper Format!";
             }
             return "";
         }
@@ -322,22 +353,44 @@ namespace GSC.Respository.SupplyManagement
 
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                var re = true;
-                foreach (var r in productTypes)
-                {
-                    var types = dt.Rows[i][1].ToString().Contains(r.ProductTypeCode.ToString());
-                    if (types)
-                    {
-                        re = types;
-                        break;
-                    }
-                    else
-                        re = types;
-                }
-                if (!re)
-                    return "product type not match.";
+                string[] str = dt.Rows[i][1].ToString().Split(',').ToArray();
+                var result = str.All(m => productTypes.Select(x => x.ProductTypeCode).Contains(m));
+                var columns = dt.Columns.Count;
+
+                if (!result)
+                    return "Treatment type not match.";
+
+                string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).ToArray();
+                var cellResult = dataRow.All(m => str.Contains(m));
+
+                if (!cellResult)
+                    return "Treatment type not match in cell.";
             }
 
+            return "";
+        }
+
+        public string matchVisitWithOlderUpload(DataSet results, int projectId, SupplyManagementUploadFile supplyManagementUploadFile)
+        {
+            // get last upload sheet data
+            var supplyManagementUploadDetail = _supplyManagementUploadFileDetailRepository.All.Where(x => x.SupplyManagementUploadFileId == supplyManagementUploadFile.Id)
+            .OrderByDescending(x => x.Id).FirstOrDefault();
+
+            var supplyManagementUploadDetailVisit = _supplyManagementUploadFileVisitRepository.All.Include(x => x.ProjectDesignVisit).Where(x => x.SupplyManagementUploadFileDetailId == supplyManagementUploadDetail.Id)
+                .Select(x => x.ProjectDesignVisit.DisplayName)
+            .ToList();
+
+            if (supplyManagementUploadDetailVisit.Count() != results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").Count() - 2)
+                return "visit not match with previous upload file.";
+
+            var j = 0;
+            foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
+            {
+                if (j >= 2)
+                    if (item.ToString().ToLower().Trim() != supplyManagementUploadDetailVisit[j - 2].ToString().ToLower().Trim())
+                        return "visit not match with previous upload file.";
+                j++;
+            }
             return "";
         }
     }
