@@ -60,7 +60,7 @@ namespace GSC.Api.Controllers.CTMS
             var review = _ctmsMonitoringReportReviewRepository.FindByInclude(x => x.CtmsMonitoringReportId == ctmsMonitoringReportReviewDto[0].CtmsMonitoringReportId && x.DeletedDate == null && x.IsApproved == false, x => x.User).FirstOrDefault();
             if (review != null)
             {
-                ModelState.AddModelError("Message", "Review is already sent to " + review.User.UserName);
+                ModelState.AddModelError("Message", "Form is already sent for review to " + review.User.UserName);
                 return BadRequest(ModelState);
             }
             _ctmsMonitoringReportReviewRepository.SaveTemplateReview(ctmsMonitoringReportReviewDto);
