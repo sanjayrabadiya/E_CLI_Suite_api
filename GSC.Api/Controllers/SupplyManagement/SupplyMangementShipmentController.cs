@@ -112,8 +112,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             return Ok(data);
         }
         [HttpGet]
-        [Route("GetRemainingQty/{SupplyManagementRequestId}/{ProjectId}")]
-        public IActionResult GetRemainingQty(int SupplyManagementRequestId, int ProjectId)
+        [Route("GetRemainingQty/{SupplyManagementRequestId}")]
+        public IActionResult GetRemainingQty(int SupplyManagementRequestId)
         {
             var shipmentData = _context.SupplyManagementRequest.Where(x => x.Id == SupplyManagementRequestId).FirstOrDefault();
             if (shipmentData == null)
@@ -121,7 +121,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "Request data not found!");
                 return BadRequest(ModelState);
             }
-            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty(ProjectId, shipmentData.StudyProductTypeId));
+            int getParentProjectId = (int)_context.Project.Where(x => x.Id == shipmentData.FromProjectId).FirstOrDefault().ParentProjectId;
+            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty(getParentProjectId, shipmentData.StudyProductTypeId));
         }
     }
 }

@@ -117,6 +117,10 @@ namespace GSC.Api.Controllers.CTMS
             {
                 var monitoring = _ctmsMonitoringRepository.FindBy(t => t.Id == CtmsMonitoringId && t.DeletedDate == null).FirstOrDefault();
                 monitoring.Id = 0;
+                monitoring.ScheduleStartDate = null;
+                monitoring.ScheduleEndDate = null;  
+                monitoring.ActualStartDate = null;
+                monitoring.ActualEndDate = null;
                 monitoring.ParentId = ctmsMonitoringId;
 
                 _ctmsMonitoringRepository.Add(monitoring);
