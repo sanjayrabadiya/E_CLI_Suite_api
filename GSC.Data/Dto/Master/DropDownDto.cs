@@ -71,4 +71,11 @@ namespace GSC.Data.Dto.Master
         public bool IsSendSMS { get; set; }
         public bool IsSendEmail { get; set; }
     }
+
+    public class DropDownStudyDto
+    {
+        public int Id { get; set; }
+        public string Value { get; set; }
+       
+    }
 }

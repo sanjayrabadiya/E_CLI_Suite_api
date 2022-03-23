@@ -22,7 +22,7 @@ namespace GSC.Data.Entities.AdverseEvent
         public Randomization Randomization { get; set; }
         public bool? IsApproved { get; set; }
         public int? RejectReasonId { get; set; }
-        public string? RejectReasonOth { get; set; }
+        public string RejectReasonOth { get; set; }
         public DateTime? ApproveRejectDateTime { get; set; }
        
         public int? ScreeningTemplateId { get; set; }

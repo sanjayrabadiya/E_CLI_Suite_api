@@ -20,7 +20,7 @@ namespace GSC.Data.Dto.AdverseEvent
         public DesignScreeningTemplateDto template { get; set; }
         public bool? IsApproved { get; set; }
         public int? RejectReasonId { get; set; }
-        public string? RejectReasonOth { get; set; }
+        public string RejectReasonOth { get; set; }
         public DateTime? ApproveRejectDateTime { get; set; }
    
         public int? ScreeningTemplateId { get; set; }
@@ -36,8 +36,8 @@ namespace GSC.Data.Dto.AdverseEvent
         public string EventDescription { get; set; }
         public string ReviewStatus { get; set; }
         public DateTime? ApproveRejectDateTime { get; set; }
-        public string? RejectReasonOth { get; set; }
-        public string? RejectReason { get; set; }
+        public string RejectReasonOth { get; set; }
+        public string RejectReason { get; set; }
         private DateTime _StartDate { get; set; }
         public DateTime StartDate
         {

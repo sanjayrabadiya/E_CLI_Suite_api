@@ -377,6 +377,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementUploadFileDetailRepository, SupplyManagementUploadFileDetailRepository>();
             services.AddScoped<IPageConfigurationRepository, PageConfigurationRepository>();
             services.AddScoped<IPageConfigurationFieldsRepository, PageConfigurationFieldsRepository>();
+            services.AddHttpClient<IProjectDataRemoveService, ProjectDataRemoveService>();
         }
     }
 }
