@@ -63,7 +63,7 @@ namespace GSC.Respository.Project.Workflow
 
             var result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
                 && x.DeletedDate == null && x.IsWorkFlowBreak
-                && x.LevelNo > levelNo).Min(a => (short?)a.LevelNo) ?? 0;
+                && x.LevelNo > levelNo).Max(a => (short?)a.LevelNo) ?? 0;
 
             if (result == 0)
                 return _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
