@@ -97,5 +97,13 @@ namespace GSC.Respository.CTMS
 
             return result;
         }
+
+        // If Study Level Form already use than not delete and Edit
+        public string StudyLevelFormAlreadyUse(int StudyLevelFormId)
+        {
+            if (All.Any(x => x.StudyLevelFormId == StudyLevelFormId && x.DeletedDate == null))
+                return "Study Level Form is in use. Cannot edit or delete!";
+            return "";
+        }
     }
 }

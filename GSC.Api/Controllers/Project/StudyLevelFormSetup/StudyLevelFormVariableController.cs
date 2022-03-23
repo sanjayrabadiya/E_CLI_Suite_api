@@ -9,6 +9,7 @@ using GSC.Data.Dto.Project.GeneralConfig;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
+using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.Project.StudyLevelFormSetup;
@@ -30,13 +31,15 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         private readonly IVariableRepository _variableRepository;
         private readonly IStudyLevelFormVariableValueRepository _studyLevelFormVariableValueRepository;
         private readonly IStudyLevelFormVariableRemarksRepository _studyLevelFormVariableRemarksRepository;
+        private readonly ICtmsMonitoringRepository _ctmsMonitoringRepository;
         public StudyLevelFormVariableController(
             IUnitOfWork uow, IMapper mapper, IStudyLevelFormRepository studyLevelFormRepository,
             IVariableTemplateRepository variableTemplateRepository,
             IStudyLevelFormVariableRepository studyLevelFormVariableRepository,
             IStudyLevelFormVariableValueRepository studyLevelFormVariableValueRepository,
             IStudyLevelFormVariableRemarksRepository studyLevelFormVariableRemarksRepository,
-            IVariableRepository variableRepository)
+            IVariableRepository variableRepository,
+            ICtmsMonitoringRepository ctmsMonitoringRepository)
         {
             _uow = uow;
             _mapper = mapper;
@@ -46,6 +49,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             _studyLevelFormVariableValueRepository = studyLevelFormVariableValueRepository;
             _studyLevelFormVariableRemarksRepository = studyLevelFormVariableRemarksRepository;
             _variableRepository = variableRepository;
+            _ctmsMonitoringRepository = ctmsMonitoringRepository;
         }
 
         [HttpGet("{id}")]
@@ -56,16 +60,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 FindByInclude(t => t.Id == id, t => t.Values.Where(x => x.DeletedDate == null).OrderBy(x => x.SeqNo)).FirstOrDefault();
             var variableDto = _mapper.Map<StudyLevelFormVariableDto>(variable);
             
-            //if (variableDto.Values != null)
-            //{
-            //    variableDto.Values.ToList().ForEach(x =>
-            //    {
-            //        x.AllowActive = checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
-            //        x.DisplayVersion = x.StudyVersion != null || x.InActiveVersion != null ?
-            //        "( V : " + x.StudyVersion + (x.StudyVersion != null && x.InActiveVersion != null ? " - " : "") + x.InActiveVersion + ")" : "";
-            //    });
-            //}
-
             return Ok(variableDto);
         }
 
@@ -124,8 +118,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 return BadRequest(ModelState);
             }
 
-            //var checkVersion = _studyLevelFormRepository.CheckStudyVersionForTemplate(variable.StudyLevelFormId);
-            //variable.StudyVersion = checkVersion.VersionNumber;
             _studyLevelFormVariableRepository.Add(variable);
 
             foreach (var item in variable.Values)
@@ -134,14 +126,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 item.InActiveVersion = null;
                 _studyLevelFormVariableValueRepository.Add(item);
             }
-
-            //if (variable.IsEncrypt)
-            //{
-            //    foreach (var item in variable.Roles)
-            //    {
-            //        _projectDesignVariableEncryptRoleRepository.Add(item);
-            //    }
-            //}
 
             _uow.Save();
             return Ok(variable.Id);
@@ -154,6 +138,13 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var validatemsg = _ctmsMonitoringRepository.StudyLevelFormAlreadyUse(variableDto.StudyLevelFormId);
+            if (!string.IsNullOrEmpty(validatemsg))
+            {
+                ModelState.AddModelError("Message", validatemsg);
+                return BadRequest(ModelState);
+            }
+
             var variable = _mapper.Map<StudyLevelFormVariable>(variableDto);
 
             var validate = _studyLevelFormVariableRepository.Duplicate(variable);
@@ -163,22 +154,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 return BadRequest(ModelState);
             }
 
-            //// added by vipul validation if variable use in visit status than data type not except date or datetime deleted on 25092020
-            //var Exists = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVariableId == variableDto.Id && x.DeletedDate == null).Any();
-            //if (Exists)
-            //{
-            //    if (variableDto.CollectionSource != CollectionSources.Date && variableDto.CollectionSource != CollectionSources.DateTime)
-            //    {
-            //        ModelState.AddModelError("Message", "Variable collection source must be date or date time.");
-            //        return BadRequest(ModelState);
-            //    }
-            //}
-
-            //UpdateVariableEncryptRole(variable);
-
             _studyLevelFormVariableRepository.Update(variable);
-
-            //var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(variableDto.ProjectDesignTemplateId);
 
             _studyLevelFormVariableValueRepository.UpdateVariableValues(variableDto, variableDto.CollectionValueDisable);
 
@@ -195,6 +171,13 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             if (record == null)
                 return NotFound();
 
+            var validatemsg = _ctmsMonitoringRepository.StudyLevelFormAlreadyUse(record.StudyLevelFormId);
+            if (!string.IsNullOrEmpty(validatemsg))
+            {
+                ModelState.AddModelError("Message", validatemsg);
+                return BadRequest(ModelState);
+            }
+
             if (record.VariableId != null)
             {
                 var variable = _variableRepository.Find((int)record.VariableId);
@@ -204,31 +187,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                     return BadRequest(ModelState);
                 }
             }
-
-            //// added by vipul validation if variable use in visit status than it's not deleted on 24092020
-            //var Exists = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVariableId == id && x.DeletedDate == null).Any();
-            //if (Exists)
-            //{
-            //    ModelState.AddModelError("Message", "Variable use in visit status.");
-            //    return BadRequest(ModelState);
-            //}
-
-            //var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(record.ProjectDesignTemplateId);
-            //if (checkVersion.AnyLive)
-            //{
-            //    record.InActiveVersion = checkVersion.VersionNumber;
-            //    _projectDesignVariableRepository.Update(record);
-
-            //    var variables = _projectDesignVariableValueRepository.All.Where(x => x.DeletedDate == null
-            //       && x.ProjectDesignVariableId == id && x.InActiveVersion == null).ToList();
-            //    variables.ForEach(x =>
-            //    {
-            //        x.InActiveVersion = checkVersion.VersionNumber;
-            //        _projectDesignVariableValueRepository.Update(x);
-            //    });
-
-            //}
-            //else
             _studyLevelFormVariableRepository.Delete(record);
 
             _uow.Save();

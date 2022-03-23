@@ -9,6 +9,7 @@ using GSC.Data.Dto.Project.GeneralConfig;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
+using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.Project.StudyLevelFormSetup;
@@ -29,12 +30,14 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IStudyLevelFormVariableValueRepository _studyLevelFormVariableValueRepository;
         private readonly IStudyLevelFormVariableRemarksRepository _studyLevelFormVariableRemarksRepository;
+        private readonly ICtmsMonitoringRepository _ctmsMonitoringRepository;
         public StudyLevelFormController(
             IUnitOfWork uow, IMapper mapper, IStudyLevelFormRepository studyLevelFormRepository,
             IVariableTemplateRepository variableTemplateRepository,
             IStudyLevelFormVariableRepository studyLevelFormVariableRepository,
             IStudyLevelFormVariableValueRepository studyLevelFormVariableValueRepository,
-            IStudyLevelFormVariableRemarksRepository studyLevelFormVariableRemarksRepository)
+            IStudyLevelFormVariableRemarksRepository studyLevelFormVariableRemarksRepository,
+            ICtmsMonitoringRepository ctmsMonitoringRepository)
         {
             _uow = uow;
             _mapper = mapper;
@@ -43,6 +46,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             _studyLevelFormVariableRepository = studyLevelFormVariableRepository;
             _studyLevelFormVariableValueRepository = studyLevelFormVariableValueRepository;
             _studyLevelFormVariableRemarksRepository = studyLevelFormVariableRemarksRepository;
+            _ctmsMonitoringRepository = ctmsMonitoringRepository;
         }
 
         // GET: api/<controller>
@@ -124,6 +128,13 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var validatemsg = _ctmsMonitoringRepository.StudyLevelFormAlreadyUse(studyLevelFormDto.Id);
+            if (!string.IsNullOrEmpty(validatemsg))
+            {
+                ModelState.AddModelError("Message", validatemsg);
+                return BadRequest(ModelState);
+            }
+
             var studyLevelForm = _mapper.Map<StudyLevelForm>(studyLevelFormDto);
 
             var validate = _studyLevelFormRepository.Duplicate(studyLevelForm);
@@ -146,6 +157,13 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             if (record == null)
                 return NotFound();
+
+            var validate = _ctmsMonitoringRepository.StudyLevelFormAlreadyUse(id);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             _studyLevelFormRepository.Delete(record);
 
