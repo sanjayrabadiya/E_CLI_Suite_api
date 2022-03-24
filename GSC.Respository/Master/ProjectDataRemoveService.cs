@@ -74,6 +74,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
@@ -116,6 +117,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
@@ -158,6 +160,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
@@ -270,6 +273,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
@@ -312,6 +316,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
@@ -348,6 +353,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
@@ -463,6 +469,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
@@ -560,6 +567,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
@@ -749,6 +757,7 @@ namespace GSC.Respository.Master
             catch (Exception ex)
             {
                 finaldata.IsSuccess = false;
+                finaldata.Message = ex.Message.ToString();
                 return finaldata;
             }
         }
