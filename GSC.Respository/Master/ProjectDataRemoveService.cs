@@ -231,22 +231,29 @@ namespace GSC.Respository.Master
                     studylevelform.ForEach(slf =>
                     {
                         var StudyLevelFormVariable = _context.StudyLevelFormVariable.Where(x => x.StudyLevelFormId == slf.Id).ToList();
-
-                        StudyLevelFormVariable.ForEach(slfv =>
+                        if (StudyLevelFormVariable != null)
                         {
-                            var StudyLevelFormVariableRemarks = _context.StudyLevelFormVariableRemarks.Where(x => x.StudyLevelFormVariableId == slfv.Id).ToList();
-                            _context.StudyLevelFormVariableRemarks.RemoveRange(StudyLevelFormVariableRemarks);
+                            StudyLevelFormVariable.ForEach(slfv =>
+                            {
+                                var StudyLevelFormVariableRemarks = _context.StudyLevelFormVariableRemarks.Where(x => x.StudyLevelFormVariableId == slfv.Id).ToList();
+                                if (StudyLevelFormVariableRemarks != null)
+                                    _context.StudyLevelFormVariableRemarks.RemoveRange(StudyLevelFormVariableRemarks);
 
-                            var StudyLevelFormVariableValue = _context.StudyLevelFormVariableValue.Where(x => x.StudyLevelFormVariableId == slfv.Id).ToList();
-                            _context.StudyLevelFormVariableValue.RemoveRange(StudyLevelFormVariableValue);
-                        });
-                        _context.StudyLevelFormVariable.RemoveRange(StudyLevelFormVariable);
+                                var StudyLevelFormVariableValue = _context.StudyLevelFormVariableValue.Where(x => x.StudyLevelFormVariableId == slfv.Id).ToList();
+                                if (StudyLevelFormVariableValue != null)
+                                    _context.StudyLevelFormVariableValue.RemoveRange(StudyLevelFormVariableValue);
+                            });
+                            if (StudyLevelFormVariable != null)
+                                _context.StudyLevelFormVariable.RemoveRange(StudyLevelFormVariable);
+                        }
                     });
-                    _context.StudyLevelForm.RemoveRange(studylevelform);
+                    if (studylevelform != null)
+                        _context.StudyLevelForm.RemoveRange(studylevelform);
                 }
 
                 var CtmsSettings = _context.CtmsSettings.Where(x => x.ProjectId == obj.ProjectId).ToList();
-                _context.CtmsSettings.RemoveRange(CtmsSettings);
+                if (CtmsSettings.Count > 0)
+                    _context.CtmsSettings.RemoveRange(CtmsSettings);
 
                 var HolidayMaster = _context.HolidayMaster.Where(x => x.ProjectId == obj.ProjectId).ToList();
                 if (HolidayMaster.Count > 0)
@@ -350,7 +357,15 @@ namespace GSC.Respository.Master
             ProjectRemoveDataSuccess finaldata = new ProjectRemoveDataSuccess();
             try
             {
-                var ProjectWorkplace = _context.ProjectWorkplace.Where(x => x.ProjectId == obj.ProjectId).ToList();
+                var ProjectWorkplace = _context.ProjectWorkplace
+                    .Include(x => x.ProjectWorkplaceDetail)
+                    .ThenInclude(x => x.ProjectWorkPlaceZone)
+                    .ThenInclude(x => x.ProjectWorkplaceSection)
+                    .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                    .ThenInclude(x => x.ProjectWorkplaceArtificatedocument)
+                    .ThenInclude(x => x.ProjectArtificateDocumentApprover)
+
+                    .Where(x => x.ProjectId == obj.ProjectId).ToList();
                 if (ProjectWorkplace.Count > 0)
                 {
                     ProjectWorkplace.ForEach(pw =>
@@ -367,17 +382,33 @@ namespace GSC.Respository.Master
 
                                          pwa.ProjectWorkplaceArtificatedocument.ForEach(pwaart =>
                                          {
-                                             _context.ProjectArtificateDocumentApprover.RemoveRange(pwaart.ProjectArtificateDocumentApprover);
-                                             _context.ProjectArtificateDocumentComment.RemoveRange(pwaart.ProjectArtificateDocumentComment);
-                                             _context.ProjectArtificateDocumentHistory.RemoveRange(pwaart.ProjectArtificateDocumentHistory);
-                                             _context.ProjectArtificateDocumentReview.RemoveRange(pwaart.ProjectArtificateDocumentReview);
+                                             if (pwaart.ProjectArtificateDocumentApprover != null)
+                                                 _context.ProjectArtificateDocumentApprover.RemoveRange(pwaart.ProjectArtificateDocumentApprover);
+
+                                             var ProjectArtificateDocumentComment = _context.ProjectArtificateDocumentComment.Where(x => x.ProjectWorkplaceArtificatedDocumentId == pwaart.Id).ToList();
+                                             if (ProjectArtificateDocumentComment != null)
+                                                 _context.ProjectArtificateDocumentComment.RemoveRange(ProjectArtificateDocumentComment);
+                                             var ProjectArtificateDocumentHistory = _context.ProjectArtificateDocumentHistory.Where(x => x.ProjectWorkplaceArtificateDocumentId == pwaart.Id).ToList();
+                                             if (ProjectArtificateDocumentHistory != null)
+                                                 _context.ProjectArtificateDocumentHistory.RemoveRange(ProjectArtificateDocumentHistory);
+                                             var ProjectArtificateDocumentReview = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == pwaart.Id).ToList();
+                                             if (ProjectArtificateDocumentReview != null)
+                                                 _context.ProjectArtificateDocumentReview.RemoveRange(ProjectArtificateDocumentReview);
 
                                          });
-                                         _context.ProjectWorkplaceArtificatedocument.RemoveRange(pwa.ProjectWorkplaceArtificatedocument);
+                                         if (pwa.ProjectWorkplaceArtificatedocument != null)
+                                             _context.ProjectWorkplaceArtificatedocument.RemoveRange(pwa.ProjectWorkplaceArtificatedocument);
                                      });
-                                     _context.ProjectWorkplaceArtificate.RemoveRange(pwsection.ProjectWorkplaceArtificate);
-                                     var ProjectWorkplaceSubSection = _context.ProjectWorkplaceSubSection.Where(a => a.ProjectWorkplaceSectionId == pwsection.Id).ToList();
-                                     if (ProjectWorkplaceSubSection.Count > 0)
+                                     if (pwsection.ProjectWorkplaceArtificate != null)
+                                         _context.ProjectWorkplaceArtificate.RemoveRange(pwsection.ProjectWorkplaceArtificate);
+
+                                     var ProjectWorkplaceSubSection = _context.ProjectWorkplaceSubSection
+                                     .Include(x => x.ProjectWorkplaceSubSectionArtifact)
+                                     .ThenInclude(x => x.ProjectWorkplaceSubSecArtificatedocument)
+                                     .ThenInclude(x => x.ProjectSubSecArtificateDocumentReview)
+                                     .Where(a => a.ProjectWorkplaceSectionId == pwsection.Id).ToList();
+
+                                     if (ProjectWorkplaceSubSection != null && ProjectWorkplaceSubSection.Count > 0)
                                      {
                                          ProjectWorkplaceSubSection.ForEach(PWsubsection =>
                                          {
@@ -385,29 +416,44 @@ namespace GSC.Respository.Master
                                              {
                                                  PWsubsectionart.ProjectWorkplaceSubSecArtificatedocument.ForEach(PWsubsectionartDoc =>
                                                  {
-                                                     _context.ProjectSubSecArtificateDocumentReview.RemoveRange(PWsubsectionartDoc.ProjectSubSecArtificateDocumentReview);
-                                                     _context.ProjectSubSecArtificateDocumentComment.RemoveRange(PWsubsectionartDoc.ProjectSubSecArtificateDocumentComment);
-                                                     _context.ProjectSubSecArtificateDocumentApprover.RemoveRange(PWsubsectionartDoc.ProjectSubSecArtificateDocumentApprover);
-                                                     _context.ProjectSubSecArtificateDocumentHistory.RemoveRange(PWsubsectionartDoc.ProjectSubSecArtificateDocumentHistory);
+                                                     if (PWsubsectionartDoc.ProjectSubSecArtificateDocumentReview != null)
+                                                         _context.ProjectSubSecArtificateDocumentReview.RemoveRange(PWsubsectionartDoc.ProjectSubSecArtificateDocumentReview);
+
+                                                     var ProjectSubSecArtificateDocumentComment = _context.ProjectSubSecArtificateDocumentComment.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == PWsubsectionartDoc.Id).ToList();
+                                                     if (ProjectSubSecArtificateDocumentComment != null)
+                                                         _context.ProjectSubSecArtificateDocumentComment.RemoveRange(ProjectSubSecArtificateDocumentComment);
+                                                     var ProjectSubSecArtificateDocumentApprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == PWsubsectionartDoc.Id).ToList();
+                                                     if (ProjectSubSecArtificateDocumentApprover != null)
+                                                         _context.ProjectSubSecArtificateDocumentApprover.RemoveRange(ProjectSubSecArtificateDocumentApprover);
+                                                     var ProjectSubSecArtificateDocumentHistory = _context.ProjectSubSecArtificateDocumentHistory.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == PWsubsectionartDoc.Id).ToList();
+                                                     if (ProjectSubSecArtificateDocumentHistory != null)
+                                                         _context.ProjectSubSecArtificateDocumentHistory.RemoveRange(ProjectSubSecArtificateDocumentHistory);
                                                  });
-                                                 _context.ProjectWorkplaceSubSecArtificatedocument.RemoveRange(PWsubsectionart.ProjectWorkplaceSubSecArtificatedocument);
+                                                 if (PWsubsectionart.ProjectWorkplaceSubSecArtificatedocument != null)
+                                                     _context.ProjectWorkplaceSubSecArtificatedocument.RemoveRange(PWsubsectionart.ProjectWorkplaceSubSecArtificatedocument);
 
                                              });
-                                             _context.ProjectWorkplaceSubSectionArtifact.RemoveRange(PWsubsection.ProjectWorkplaceSubSectionArtifact);
+                                             if (PWsubsection.ProjectWorkplaceSubSectionArtifact != null)
+                                                 _context.ProjectWorkplaceSubSectionArtifact.RemoveRange(PWsubsection.ProjectWorkplaceSubSectionArtifact);
 
                                          });
+
                                          _context.ProjectWorkplaceSubSection.RemoveRange(ProjectWorkplaceSubSection);
                                      }
                                  });
-                                 _context.ProjectWorkplaceSection.RemoveRange(pwpz.ProjectWorkplaceSection);
+                                 if (pwpz.ProjectWorkplaceSection != null)
+                                     _context.ProjectWorkplaceSection.RemoveRange(pwpz.ProjectWorkplaceSection);
 
                              });
-                             _context.ProjectWorkPlaceZone.RemoveRange(pwd.ProjectWorkPlaceZone);
+                             if (pwd.ProjectWorkPlaceZone != null)
+                                 _context.ProjectWorkPlaceZone.RemoveRange(pwd.ProjectWorkPlaceZone);
 
                          });
-                        _context.ProjectWorkplaceDetail.RemoveRange(pw.ProjectWorkplaceDetail);
+                        if (pw.ProjectWorkplaceDetail != null)
+                            _context.ProjectWorkplaceDetail.RemoveRange(pw.ProjectWorkplaceDetail);
                     });
-                    _context.ProjectWorkplace.RemoveRange(ProjectWorkplace);
+                    if (ProjectWorkplace != null)
+                        _context.ProjectWorkplace.RemoveRange(ProjectWorkplace);
                 }
 
                 _context.Save();
@@ -431,7 +477,13 @@ namespace GSC.Respository.Master
                 {
                     Randomization.ForEach(rand =>
                     {
-                        var ScreeningEntry = _context.ScreeningEntry.Where(x => x.RandomizationId == rand.Id).ToList();
+                        var ScreeningEntry = _context.ScreeningEntry
+                        .Include(x => x.ScreeningHistory)
+                        .Include(x => x.ScreeningVisit)
+                        .ThenInclude(x => x.ScreeningTemplates)
+                        .ThenInclude(x => x.ScreeningTemplateValues)
+                        .ThenInclude(x => x.ScreeningTemplateValueAudits)
+                        .Where(x => x.RandomizationId == rand.Id).ToList();
                         if (ScreeningEntry.Count > 0)
                         {
                             ScreeningEntry.ForEach(sentry =>
@@ -442,39 +494,63 @@ namespace GSC.Respository.Master
                                     {
                                         svisit.ScreeningTemplates.ForEach(stemplate =>
                                         {
-                                            _context.ScreeningTemplateReview.RemoveRange(stemplate.ScreeningTemplateReview);
+                                            var ScreeningTemplateReview = _context.ScreeningTemplateReview.Where(x => x.ScreeningTemplateId == stemplate.Id).ToList();
+                                            if (ScreeningTemplateReview != null && ScreeningTemplateReview.Count > 0)
+                                                _context.ScreeningTemplateReview.RemoveRange(ScreeningTemplateReview);
 
                                             var ScreeningTemplateEditCheckValue = _context.ScreeningTemplateEditCheckValue.Where(x => x.ScreeningTemplateId == stemplate.Id).ToList();
-                                            if (ScreeningTemplateEditCheckValue.Count > 0)
+                                            if (ScreeningTemplateEditCheckValue != null && ScreeningTemplateEditCheckValue.Count > 0)
                                                 _context.ScreeningTemplateEditCheckValue.RemoveRange(ScreeningTemplateEditCheckValue);
 
                                             stemplate.ScreeningTemplateValues.ToList().ForEach(stemplatevalue =>
                                             {
-                                                _context.ScreeningTemplateValueAudit.RemoveRange(stemplatevalue.ScreeningTemplateValueAudits);
-                                                _context.ScreeningTemplateValueChild.RemoveRange(stemplatevalue.Children);
-                                                _context.ScreeningTemplateValueQuery.RemoveRange(stemplatevalue.ScreeningTemplateValueQuerys);
-                                                _context.ScreeningTemplateValueComment.RemoveRange(stemplatevalue.Comments.ToList());
+                                                if (stemplatevalue.ScreeningTemplateValueAudits != null && stemplatevalue.ScreeningTemplateValueAudits.Count > 0)
+                                                    _context.ScreeningTemplateValueAudit.RemoveRange(stemplatevalue.ScreeningTemplateValueAudits);
+
+                                                var ScreeningTemplateValueChild = _context.ScreeningTemplateValueChild.Where(z => z.ScreeningTemplateValueId == stemplatevalue.Id).ToList();
+                                                if (ScreeningTemplateValueChild != null && ScreeningTemplateValueChild.Count > 0)
+                                                    _context.ScreeningTemplateValueChild.RemoveRange(ScreeningTemplateValueChild);
+
+                                                var ScreeningTemplateValueQuerys = _context.ScreeningTemplateValueQuery.Where(z => z.ScreeningTemplateValueId == stemplatevalue.Id).ToList();
+                                                if (ScreeningTemplateValueQuerys != null && ScreeningTemplateValueQuerys.Count > 0)
+                                                    _context.ScreeningTemplateValueQuery.RemoveRange(ScreeningTemplateValueQuerys);
+
+                                                var ScreeningTemplateValueComment = _context.ScreeningTemplateValueComment.Where(z => z.ScreeningTemplateValueId == stemplatevalue.Id).ToList();
+                                                if (ScreeningTemplateValueComment != null && ScreeningTemplateValueComment.Count > 0)
+                                                    _context.ScreeningTemplateValueComment.RemoveRange(ScreeningTemplateValueComment);
+
                                                 var ScreeningTemplateRemarksChild = _context.ScreeningTemplateRemarksChild.Where(z => z.ScreeningTemplateValueId == stemplatevalue.Id).ToList();
-                                                if (ScreeningTemplateRemarksChild.Count > 0)
+                                                if (ScreeningTemplateRemarksChild != null && ScreeningTemplateRemarksChild.Count > 0)
                                                     _context.ScreeningTemplateRemarksChild.RemoveRange(ScreeningTemplateRemarksChild);
                                             });
-                                            _context.ScreeningTemplateValue.RemoveRange(stemplate.ScreeningTemplateValues);
+                                            if (stemplate.ScreeningTemplateValues != null && stemplate.ScreeningTemplateValues.Count > 0)
+                                                _context.ScreeningTemplateValue.RemoveRange(stemplate.ScreeningTemplateValues);
                                         });
-                                        _context.ScreeningTemplate.RemoveRange(svisit.ScreeningTemplates);
+                                        if (svisit.ScreeningTemplates != null && svisit.ScreeningTemplates.Count > 0)
+                                            _context.ScreeningTemplate.RemoveRange(svisit.ScreeningTemplates);
+
+                                        var ScreeningVisitHistory = _context.ScreeningVisitHistory.Where(x => x.ScreeningVisitId == svisit.Id).ToList();
+                                        if (ScreeningVisitHistory != null && ScreeningVisitHistory.Count > 0)
+                                            _context.ScreeningVisitHistory.RemoveRange(ScreeningVisitHistory);
+
                                     });
-                                    _context.ScreeningVisit.RemoveRange(sentry.ScreeningVisit.ToList());
+                                    if (sentry.ScreeningVisit != null && sentry.ScreeningVisit.ToList().Count > 0)
+                                        _context.ScreeningVisit.RemoveRange(sentry.ScreeningVisit.ToList());
                                 }
-                                _context.ScreeningHistory.RemoveRange(sentry.ScreeningHistory);
+                                if (sentry.ScreeningHistory != null)
+                                    _context.ScreeningHistory.RemoveRange(sentry.ScreeningHistory);
                                 var ScreeningTemplateLockUnlockAudit = _context.ScreeningTemplateLockUnlockAudit.Where(x => x.ScreeningEntryId == sentry.Id).ToList();
-                                if (ScreeningTemplateLockUnlockAudit.Count > 0)
+                                if (ScreeningTemplateLockUnlockAudit != null && ScreeningTemplateLockUnlockAudit.Count > 0)
                                 {
                                     _context.ScreeningTemplateLockUnlockAudit.RemoveRange(ScreeningTemplateLockUnlockAudit);
                                 }
                             });
-                            _context.ScreeningEntry.RemoveRange(ScreeningEntry);
+                            if (ScreeningEntry != null && ScreeningEntry.Count > 0)
+                                _context.ScreeningEntry.RemoveRange(ScreeningEntry);
 
                         }
                     });
+                    _context.Randomization.RemoveRange(Randomization);
 
                     _context.Save();
                 }
@@ -493,7 +569,16 @@ namespace GSC.Respository.Master
             ProjectRemoveDataSuccess finaldata = new ProjectRemoveDataSuccess();
             try
             {
-                var project = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
+                var project = _context.Project
+                    .Include(x => x.ChildProject)
+                    .Include(x => x.ProjectDesigns)
+                    .ThenInclude(x => x.ProjectDesignPeriods)
+                    .ThenInclude(x => x.VisitList)
+                    .ThenInclude(x => x.Templates)
+                    .ThenInclude(x => x.Variables)
+                    .ThenInclude(x => x.Values)
+                    .ThenInclude(x => x.VariableValueLanguage)
+                    .Where(x => x.Id == obj.ProjectId).FirstOrDefault();
                 if (project != null)
                 {
                     if (project.ProjectDesigns.Count > 0)
@@ -510,113 +595,149 @@ namespace GSC.Respository.Master
                                         {
                                             variables.Values.ToList().ForEach(values =>
                                             {
-                                                _context.VariableValueLanguage.RemoveRange(values.VariableValueLanguage);
+                                                if (values.VariableValueLanguage != null && values.VariableValueLanguage.Count > 0)
+                                                    _context.VariableValueLanguage.RemoveRange(values.VariableValueLanguage);
 
                                             });
-                                            _context.ProjectDesignVariableValue.RemoveRange(variables.Values);
-                                            _context.VariableLanguage.RemoveRange(variables.VariableLanguage);
-                                            _context.VariableNoteLanguage.RemoveRange(variables.VariableNoteLanguage);
-                                            _context.ProjectDesignVariableEncryptRole.RemoveRange(variables.Roles);
+                                            if (variables.Values != null && variables.Values.Count > 0)
+                                                _context.ProjectDesignVariableValue.RemoveRange(variables.Values);
+
+                                            var ProjectDesignVariableEncryptRole = _context.ProjectDesignVariableEncryptRole.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
+                                            if (ProjectDesignVariableEncryptRole != null && ProjectDesignVariableEncryptRole.Count > 0)
+                                                _context.ProjectDesignVariableEncryptRole.RemoveRange(ProjectDesignVariableEncryptRole);
+
+                                            var VariableNoteLanguage = _context.VariableNoteLanguage.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
+                                            if (VariableNoteLanguage != null && VariableNoteLanguage.Count > 0)
+                                                _context.VariableNoteLanguage.RemoveRange(VariableNoteLanguage);
+
+                                            var VariableLanguage = _context.VariableLanguage.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
+                                            if (VariableLanguage != null && VariableLanguage.Count > 0)
+                                                _context.VariableLanguage.RemoveRange(VariableLanguage);
 
                                             var remarks = _context.ProjectDesignVariableRemarks.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
-                                            _context.ProjectDesignVariableRemarks.RemoveRange(remarks);
+                                            if (remarks != null && remarks.Count > 0)
+                                                _context.ProjectDesignVariableRemarks.RemoveRange(remarks);
                                         });
-                                        _context.ProjectDesignVariable.RemoveRange(templates.Variables);
-                                        _context.TemplateLanguage.RemoveRange(templates.TemplateLanguage);
-                                        _context.ProjectDesignTemplateNote.RemoveRange(templates.ProjectDesignTemplateNote);
-                                        _context.ProjectDesingTemplateRestriction.RemoveRange(templates.ProjectDesingTemplateRestriction);
+                                        if (templates.Variables != null && templates.Variables.Count > 0)
+                                            _context.ProjectDesignVariable.RemoveRange(templates.Variables);
+
+                                        var TemplateLanguage = _context.TemplateLanguage.Where(x => x.ProjectDesignTemplateId == templates.Id).ToList();
+                                        if (TemplateLanguage != null && TemplateLanguage.Count > 0)
+                                            _context.TemplateLanguage.RemoveRange(TemplateLanguage);
+
+                                        var ProjectDesignTemplateNote = _context.ProjectDesignTemplateNote.Where(x => x.ProjectDesignTemplateId == templates.Id).ToList();
+                                        if (ProjectDesignTemplateNote != null && ProjectDesignTemplateNote.Count > 0)
+                                            _context.ProjectDesignTemplateNote.RemoveRange(ProjectDesignTemplateNote);
+
+                                        var ProjectDesingTemplateRestriction = _context.ProjectDesingTemplateRestriction.Where(x => x.ProjectDesignTemplateId == templates.Id).ToList();
+                                        if (ProjectDesingTemplateRestriction != null && ProjectDesingTemplateRestriction.Count > 0)
+                                            _context.ProjectDesingTemplateRestriction.RemoveRange(ProjectDesingTemplateRestriction);
+
+
                                     });
-                                    _context.ProjectDesignTemplate.RemoveRange(visitList.Templates);
-                                    _context.ProjectDesignVisitStatus.RemoveRange(visitList.ProjectDesignVisitStatus);
+                                    if (visitList.Templates != null && visitList.Templates.Count > 0)
+                                        _context.ProjectDesignTemplate.RemoveRange(visitList.Templates);
+                                    if (visitList.ProjectDesignVisitStatus != null && visitList.ProjectDesignVisitStatus.Count > 0)
+                                        _context.ProjectDesignVisitStatus.RemoveRange(visitList.ProjectDesignVisitStatus);
                                 });
-                                _context.ProjectDesignVisit.RemoveRange(designperiod.VisitList);
+                                if (designperiod.VisitList != null && designperiod.VisitList.Count > 0)
+                                    _context.ProjectDesignVisit.RemoveRange(designperiod.VisitList);
 
                             });
+                            if (design.ProjectDesignPeriods != null && design.ProjectDesignPeriods.Count > 0)
+                                _context.ProjectDesignPeriod.RemoveRange(design.ProjectDesignPeriods);
 
-                            _context.ProjectDesignPeriod.RemoveRange(design.ProjectDesignPeriods);
-
-                            if (design.StudyVersions.Count > 0)
+                            var StudyVersions = _context.StudyVersion.Include(x => x.StudyVersionStatus).Where(x => x.ProjectDesignId == design.Id).ToList();
+                            if (StudyVersions != null && StudyVersions.Count > 0)
                             {
-                                design.StudyVersions.ForEach(version =>
+                                StudyVersions.ForEach(version =>
                                 {
-                                    _context.StudyVersionStatus.RemoveRange(version.StudyVersionStatus);
+                                    if (version.StudyVersionStatus != null && version.StudyVersionStatus.Count > 0)
+                                        _context.StudyVersionStatus.RemoveRange(version.StudyVersionStatus);
                                 });
                                 _context.StudyVersion.RemoveRange(design.StudyVersions);
                             }
-                            var ProjectSchedule = _context.ProjectSchedule.Where(x => x.ProjectDesignId == design.Id).ToList();
+                            var ProjectSchedule = _context.ProjectSchedule.Include(x => x.Templates).Where(x => x.ProjectDesignId == design.Id).ToList();
 
-                            if (ProjectSchedule.Count > 0)
+                            if (ProjectSchedule != null && ProjectSchedule.Count > 0)
                             {
                                 ProjectSchedule.ForEach(pschedule =>
                                 {
-                                    _context.ProjectScheduleTemplate.RemoveRange(pschedule.Templates);
+                                    if (pschedule.Templates != null && pschedule.Templates.Count > 0)
+                                        _context.ProjectScheduleTemplate.RemoveRange(pschedule.Templates);
                                 });
                                 _context.ProjectSchedule.RemoveRange(ProjectSchedule);
                             }
-                            var editCheck = _context.EditCheck.Where(x => x.ProjectDesignId == design.Id).ToList();
+                            var editCheck = _context.EditCheck.Include(x => x.EditCheckDetails).Where(x => x.ProjectDesignId == design.Id).ToList();
 
-                            if (editCheck.Count > 0)
+                            if (editCheck != null && editCheck.Count > 0)
                             {
                                 editCheck.ForEach(editcheck =>
                                 {
-                                    _context.EditCheckDetail.RemoveRange(editcheck.EditCheckDetails.ToList());
+                                    if (editcheck != null && editcheck.EditCheckDetails.ToList().Count > 0)
+                                        _context.EditCheckDetail.RemoveRange(editcheck.EditCheckDetails.ToList());
                                 });
                                 _context.EditCheck.RemoveRange(editCheck);
                             }
-                            var pworkflow = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == design.Id).ToList();
-                            if (pworkflow.Count > 0)
+                            var pworkflow = _context.ProjectWorkflow.Include(x => x.Levels).Include(x => x.Independents).Where(x => x.ProjectDesignId == design.Id).ToList();
+                            if (pworkflow != null && pworkflow.Count > 0)
                             {
                                 pworkflow.ForEach(pflow =>
                                 {
-                                    _context.ProjectWorkflowLevel.RemoveRange(pflow.Levels);
-                                    _context.ProjectWorkflowIndependent.RemoveRange(pflow.Independents);
+                                    if (pflow.Levels != null && pflow.Levels.Count > 0)
+                                        _context.ProjectWorkflowLevel.RemoveRange(pflow.Levels);
+                                    if (pflow.Independents != null && pflow.Independents.Count > 0)
+                                        _context.ProjectWorkflowIndependent.RemoveRange(pflow.Independents);
                                 });
                                 _context.ProjectWorkflow.RemoveRange(pworkflow);
                             }
                             var pdreportsetting = _context.ProjectDesignReportSetting.Where(x => x.ProjectDesignId == design.Id).ToList();
 
-                            if (pdreportsetting.Count > 0)
+                            if (pdreportsetting != null && pdreportsetting.Count > 0)
                             {
                                 _context.ProjectDesignReportSetting.RemoveRange(pdreportsetting);
                             }
                         });
-                        _context.ProjectDesign.RemoveRange(project.ProjectDesigns);
+                        if (project.ProjectDesigns != null && project.ProjectDesigns.Count > 0)
+                            _context.ProjectDesign.RemoveRange(project.ProjectDesigns);
                     }
 
 
                     var randomizationNumberSettings = _context.RandomizationNumberSettings.Where(x => (x.Project.ParentProjectId == null && x.ProjectId == obj.ProjectId)
                     || (x.Project.ParentProjectId != null && x.Project.ParentProjectId == obj.ProjectId)).ToList();
-                    if (randomizationNumberSettings.Count > 0)
+                    if (randomizationNumberSettings != null && randomizationNumberSettings.Count > 0)
                         _context.RandomizationNumberSettings.RemoveRange(randomizationNumberSettings);
 
                     var screeningNumberSettings = _context.ScreeningNumberSettings.Where(x => (x.Project.ParentProjectId == null && x.ProjectId == obj.ProjectId)
                    || (x.Project.ParentProjectId != null && x.Project.ParentProjectId == obj.ProjectId)).ToList();
-                    if (screeningNumberSettings.Count > 0)
+                    if (screeningNumberSettings != null && screeningNumberSettings.Count > 0)
                         _context.ScreeningNumberSettings.RemoveRange(screeningNumberSettings);
 
                     var uploadLimit = _context.UploadLimit.Where(x => x.ProjectId == obj.ProjectId).ToList();
-                    if (uploadLimit.Count > 0)
+                    if (uploadLimit != null && uploadLimit.Count > 0)
                         _context.UploadLimit.RemoveRange(uploadLimit);
 
-                    if (project.ProjectRight.Count > 0)
+                    if (project.ProjectRight != null && project.ProjectRight.Count > 0)
                         _context.ProjectRight.RemoveRange(project.ProjectRight);
 
                     var SiteTeam = _context.SiteTeam.Where(x => project.ChildProject.Select(z => z.Id).Contains(x.ProjectId)).ToList();
-                    if (SiteTeam.Count > 0)
+                    if (SiteTeam != null && SiteTeam.Count > 0)
                         _context.SiteTeam.RemoveRange(SiteTeam);
 
                     var ProjectDocument = _context.ProjectDocument.Where(x => (x.Project.ParentProjectId == null && x.ProjectId == obj.ProjectId)
                    || (x.Project.ParentProjectId != null && x.Project.ParentProjectId == obj.ProjectId)).ToList();
-                    if (ProjectDocument.Count > 0)
+                    if (ProjectDocument != null && ProjectDocument.Count > 0)
                     {
                         ProjectDocument.ForEach(projdata =>
                         {
                             var ProjectDocumentReview = _context.ProjectDocumentReview.Where(x => x.ProjectDocumentId == projdata.Id).ToList();
-                            _context.ProjectDocumentReview.RemoveRange(ProjectDocumentReview);
+                            if (ProjectDocumentReview != null && ProjectDocumentReview.Count > 0)
+                                _context.ProjectDocumentReview.RemoveRange(ProjectDocumentReview);
                         });
                         _context.ProjectDocument.RemoveRange(ProjectDocument);
                     }
-                    _context.Project.RemoveRange(project.ChildProject);
+                    if (project.ChildProject != null && project.ChildProject.Count > 0)
+                        _context.Project.RemoveRange(project.ChildProject);
                     _context.Project.RemoveRange(project);
                 }
 
