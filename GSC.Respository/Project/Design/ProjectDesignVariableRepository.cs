@@ -156,7 +156,7 @@ namespace GSC.Respository.Project.Design
                                             .ProjectDesignId == projectDesignId);
 
             if (isFormula)
-                result = result.Where(x => (x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character) || (x.CollectionSource == CollectionSources.NumericScale));
+                result = result.Where(x => (x.CollectionSource == CollectionSources.TextBox && x.DataType != DataType.Character) || x.CollectionSource == CollectionSources.HorizontalScale || x.CollectionSource == CollectionSources.NumericScale);
 
             var variableResult = result.Select(c => new DropDownVaribleDto
             {
