@@ -39,9 +39,10 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
 
         public string Duplicate(StudyLevelForm objSave)
         {
+            var VariableTemplate = _context.VariableTemplate.Where(x => x.Id == objSave.VariableTemplateId).FirstOrDefault();
             if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.AppScreenId == objSave.AppScreenId
             && x.ActivityId == objSave.ActivityId && x.VariableTemplateId == objSave.VariableTemplateId && x.DeletedDate == null))
-                return "Duplicate Form  : " + objSave.VariableTemplate.TemplateName;
+                return "Duplicate Form  : " + VariableTemplate.TemplateName;
 
             return "";
         }
@@ -117,8 +118,6 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                          StudyLevelFormVariableId = c.StudyLevelFormVariableId,
                          ValueName = c.ValueName,
                          SeqNo = c.SeqNo,
-                         StudyVersion = c.StudyVersion,
-                         InActiveVersion = c.InActiveVersion,
                          Label = c.Label,
                      }).ToList();
 
@@ -195,8 +194,6 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                          StudyLevelFormVariableId = c.StudyLevelFormVariableId,
                          ValueName = c.ValueName,
                          SeqNo = c.SeqNo,
-                         StudyVersion = c.StudyVersion,
-                         InActiveVersion = c.InActiveVersion,
                          Label = c.Label,
                      }).ToList();
 
