@@ -154,5 +154,13 @@ namespace GSC.Api.Controllers.UserMgt
                .ToList();
             return Ok(appScreens);
         }
+
+
+        [HttpGet]
+        [Route("GetAppScreenDropDownByParentScreenCode/{screenCode}")]
+        public IActionResult GetAppScreenDropDownByParentScreenCode(string screenCode)
+        {
+            return Ok(_appScreenRepository.GetAppScreenDropDownByParentScreenCode(screenCode));
+        }
     }
 }

@@ -15,7 +15,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetVariableTemplateByCRFByDomainId(bool isNonCRF, int domainId);
         void AddRequieredTemplate(Variable variable);
         List<DropDownDto> GetVariableTemplateNonCRFDropDown();
-        DesignVerificationApprovalTemplateDto GetVerificationApprovalTemplate(int id);
         List<DropDownDto> GetVariableTemplateByModuleId(int moduleId);
 
         MonitoringReportTemplateDto GetReportTemplate(int id);

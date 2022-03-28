@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
@@ -39,30 +40,29 @@ namespace GSC.Respository.SupplyManagement
           int verificationApprovalTemplateId = All.Where(x => x.ProductVerificationDetailId == ProductVerificationDetailId && x.DeletedDate == null).FirstOrDefault().Id;
 
             var verificationApprovalTemplateBasic = GetScreeningTemplateBasic(verificationApprovalTemplateId);
-
+            
             designTemplateDto.VerificationApprovalTemplateId = verificationApprovalTemplateId;
     //        designTemplateDto.VerificationApprovalTemplateId = verificationApprovalTemplateBasic.Id;
             var values = GetVerificationValues(verificationApprovalTemplateBasic.Id);
 
             values.ForEach(t =>
             {
-                var variable = designTemplateDto.Variables.FirstOrDefault(v => v.VariableId == t.VariableId);
+                var variable = designTemplateDto.Variables.FirstOrDefault(v => v.StudyLevelFormVariableId == t.StudyLevelFormVariableId);
                 if (variable != null)
                 {
-                    variable.VerificationApprovalValue = t.Value;
-                    variable.VerificationApprovalValueOld = t.IsNa ? "N/A" : t.Value;
+                    variable.VariableValue = t.Value;
+                    variable.VariableValueOld = t.IsNa ? "N/A" : t.Value;
                     variable.VerificationApprovalTemplateValueId = t.Id;
-
                     variable.IsNaValue = t.IsNa;
 
                     if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
                         variable.Values.ToList().ForEach(val =>
                         {
-                            var childValue = t.Children.FirstOrDefault(v => v.VariableValueId == val.Id);
+                            var childValue = t.Children.FirstOrDefault(v => v.StudyLevelFormVariableValueId == val.Id);
                             if (childValue != null)
                             {
-                                val.VerificationApprovalValue = childValue.Value;
-                                val.VerificationApprovalValueOld = childValue.Value;
+                                val.VariableValue = childValue.Value;
+                                val.VariableValueOld = childValue.Value;
                                 val.VerificationApprovalTemplateValueChildId = childValue.Id;
                             }
                         });
@@ -74,12 +74,12 @@ namespace GSC.Respository.SupplyManagement
 
         private VerificationApprovalTemplateBasic GetScreeningTemplateBasic(int verificationApprovalTemplateId)
         {
-            return All.AsNoTracking().Where(r => r.Id == verificationApprovalTemplateId).Select(
+            return All.Include(x=>x.StudyLevelForm).ThenInclude(x=>x.VariableTemplate).Where(r => r.Id == verificationApprovalTemplateId).Select(
                c => new VerificationApprovalTemplateBasic
                {
                    Id = c.Id,
-                   ProductVerificationDetailId = c.ProductVerificationDetailId,
-                   VariableTemplateId = c.VariableTemplateId,
+                   VariableTemplateId = c.StudyLevelForm.VariableTemplateId,
+                   StudyLevelFormId = c.StudyLevelFormId,
                }).FirstOrDefault();
         }
 

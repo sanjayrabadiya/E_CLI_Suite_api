@@ -25,6 +25,8 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public int CtmsMonitoringReportVariableValueId { get; set; }
         public int CtmsMonitoringReportVariableValueChildId { get; set; }
         public string VariableValueOld { get; set; }
+        public int? VerificationApprovalTemplateValueId { get; set; }
+        public int? VerificationApprovalTemplateValueChildId { get; set; }
     }
     
     public class StudyLevelFormVariableValueDropDown

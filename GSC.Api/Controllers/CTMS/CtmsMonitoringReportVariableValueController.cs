@@ -79,8 +79,6 @@ namespace GSC.Api.Controllers.Master
 
                     var Exists = _ctmsMonitoringReportVariableValueRepository.All.Where(x => x.DeletedDate == null && x.CtmsMonitoringReportId == ctmsMonitoringReportVariableValue.CtmsMonitoringReportId && x.StudyLevelFormVariableId == item.StudyLevelFormVariableId).FirstOrDefault();
 
-                    ManageMonitoringReportVariableAudit audit = new ManageMonitoringReportVariableAudit();
-
                     if (Exists == null)
                     {
                         ctmsMonitoringReportVariableValue.Id = 0;

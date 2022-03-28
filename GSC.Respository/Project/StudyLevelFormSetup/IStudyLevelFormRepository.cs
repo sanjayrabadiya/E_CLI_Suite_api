@@ -15,5 +15,7 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
         string Duplicate(StudyLevelForm objSave);
         IList<DropDownDto> GetTemplateDropDown(int projectId);
         CtmsMonitoringReportFormDto GetReportFormVariable(int id);
+        StudyLevelForm GetTemplateForVerification(int ProjectId);
+        DesignVerificationApprovalTemplateDto GetReportFormVariableForVerification(int id);
     }
 }

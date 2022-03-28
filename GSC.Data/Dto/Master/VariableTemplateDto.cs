@@ -43,20 +43,6 @@ namespace GSC.Data.Dto.Master
 
     }
 
-    public class DesignVerificationApprovalTemplateDto
-    {
-        public int Id { get; set; }
-        public string ActivityName { get; set; }
-        public string TemplateCode { get; set; }
-        public int VariableTemplateId { get; set; }
-        public string VariableTemplateName { get; set; }
-        public int DesignOrder { get; set; }
-        public IList<VerificationApprovalVariableDto> Variables { get; set; }
-        public int VerificationApprovalTemplateId { get; set; }
-        public List<string> Notes { get; set; }
-        public List<VariableTemplateDetail> VariableTemplateDetails { get; set; }
-    }
-
     public class MonitoringReportTemplateDto : BaseDto
     {
         public string ActivityName { get; set; }

@@ -55,5 +55,12 @@ namespace GSC.Respository.UserMgt
                     x.DeletedDate == null && x.IsMaster == true)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.TableName }).OrderBy(o => o.Value).ToList();
         }
+
+        public List<DropDownDto> GetAppScreenDropDownByParentScreenCode(string parentScreenCode)
+        {
+            var parent = All.Where(x => x.DeletedDate == null && x.ScreenCode == parentScreenCode).FirstOrDefault().Id;
+            return All.Where(x => x.DeletedDate == null && x.ParentAppScreenId == parent)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.ScreenName }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

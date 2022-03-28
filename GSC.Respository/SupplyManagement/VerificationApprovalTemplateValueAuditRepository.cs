@@ -38,7 +38,7 @@ namespace GSC.Respository.SupplyManagement
                 Role = r.UserRole,
                 TimeZone = r.TimeZone,
                 User = r.UserName,
-                CollectionSource = r.VerificationApprovalTemplateValue.Variable.CollectionSource,
+                CollectionSource = r.VerificationApprovalTemplateValue.StudyLevelFormVariable.CollectionSource,
                 Id = r.Id
             }).OrderByDescending(t => t.Id).ToList();
         }

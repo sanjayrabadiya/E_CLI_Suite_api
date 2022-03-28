@@ -1,4 +1,5 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Data.Dto.Master;
+using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
 using System;
@@ -49,4 +50,18 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public IList<StudyLevelFormVariableDto> Variables { get; set; }
 
     }
+
+    public class DesignVerificationApprovalTemplateDto : BaseDto
+    {
+        public string ActivityName { get; set; }
+        public string TemplateCode { get; set; }
+        public int VariableTemplateId { get; set; }
+        public string TemplateName { get; set; }
+        public int DesignOrder { get; set; }
+        public int VerificationApprovalTemplateId { get; set; }
+        public List<string> Notes { get; set; }
+        public List<VariableTemplateDetail> VariableTemplateDetails { get; set; }
+        public IList<VerificationApprovalVariableDto> Variables { get; set; }
+    }
+
 }

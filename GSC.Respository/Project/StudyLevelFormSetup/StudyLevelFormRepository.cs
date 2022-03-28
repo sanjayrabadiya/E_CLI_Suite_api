@@ -39,11 +39,9 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
 
         public string Duplicate(StudyLevelForm objSave)
         {
-            var VariableTemplate = _context.VariableTemplate.Where(x => x.Id == objSave.VariableTemplateId).FirstOrDefault();
-
             if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.AppScreenId == objSave.AppScreenId
             && x.ActivityId == objSave.ActivityId && x.VariableTemplateId == objSave.VariableTemplateId && x.DeletedDate == null))
-                return "Duplicate Form  : " + VariableTemplate.TemplateName;
+                return "Duplicate Form  : " + objSave.VariableTemplate.TemplateName;
 
             return "";
         }
@@ -132,6 +130,83 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                 result.Variables = variables;
             }
 
+            return result;
+        }
+
+        public StudyLevelForm GetTemplateForVerification(int ProjectId)
+        {
+            return All.Where(x => x.Activity.CtmsActivity.ActivityCode == "sm_001" && x.ProjectId == ProjectId && x.DeletedDate == null).FirstOrDefault();
+        }
+
+        public DesignVerificationApprovalTemplateDto GetReportFormVariableForVerification(int id)
+        {
+            var result = All.Where(t => t.Id == id).Include(x => x.Activity).ThenInclude(x => x.CtmsActivity)
+                .Include(x => x.VariableTemplate).ThenInclude(d => d.VariableTemplateDetails)
+                .Include(x => x.VariableTemplate).ThenInclude(d => d.Notes)
+                .Select(r => new DesignVerificationApprovalTemplateDto
+                {
+                    Id = r.Id,
+                    VariableTemplateId = r.Id,
+                    TemplateName = r.VariableTemplate.TemplateName,
+                    ActivityName = r.Activity.CtmsActivity.ActivityName,
+                    Notes = r.VariableTemplate.Notes.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList()
+                }
+            ).FirstOrDefault();
+
+            if (result != null)
+            {
+                var variables = _context.StudyLevelFormVariable.Where(t => t.StudyLevelFormId == id && t.DeletedDate == null)
+                    .Select(x => new VerificationApprovalVariableDto
+                    {
+                        StudyLevelFormId = x.StudyLevelFormId,
+                        StudyLevelFormVariableId = x.Id,
+                        Id = x.Id,
+                        VariableName = x.VariableName,
+                        VariableCode = x.VariableCode,
+                        CollectionSource = x.CollectionSource,
+                        ValidationType = x.ValidationType,
+                        DataType = x.DataType,
+                        Length = x.Length,
+                        DefaultValue = string.IsNullOrEmpty(x.DefaultValue) && x.CollectionSource == CollectionSources.HorizontalScale ? "1" : x.DefaultValue,
+                        LargeStep = x.LargeStep,
+                        LowRangeValue = x.LowRangeValue,
+                        HighRangeValue = x.HighRangeValue,
+                        RelationStudyLevelFormVariableId = x.RelationStudyLevelFormVariableId,
+                        PrintType = x.PrintType,
+                        UnitName = x.Unit.UnitName,
+                        DesignOrder = x.DesignOrder,
+                        IsDocument = x.IsDocument,
+                        VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
+                        SystemType = x.SystemType,
+                        IsNa = x.IsNa,
+                        DateValidate = x.DateValidate,
+                        Alignment = x.Alignment ?? Alignment.Right,
+                        StudyVersion = x.StudyVersion,
+                        InActiveVersion = x.InActiveVersion,
+                        Note = x.Note,
+                        ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
+                    }).OrderBy(r => r.DesignOrder).ToList();
+
+                var values = _studyLevelFormVariableValueRepository.All.
+                     Where(x => x.StudyLevelFormVariable.StudyLevelFormId == id && x.DeletedDate == null).Select(c => new StudyLevelFormVariableValueDto
+                     {
+                         Id = c.Id,
+                         StudyLevelFormVariableId = c.StudyLevelFormVariableId,
+                         ValueName = c.ValueName,
+                         SeqNo = c.SeqNo,
+                         StudyVersion = c.StudyVersion,
+                         InActiveVersion = c.InActiveVersion,
+                         Label = c.Label,
+                     }).ToList();
+
+                variables.ForEach(x =>
+                {
+                    x.Values = values.Where(c => c.StudyLevelFormVariableId == x.StudyLevelFormVariableId).OrderBy(c => c.SeqNo).ToList();
+                });
+
+                result.Variables = variables;
+            }
             return result;
         }
     }
