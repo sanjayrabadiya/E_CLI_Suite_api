@@ -361,7 +361,8 @@ namespace GSC.Respository.Master
                     Code = c.ProjectCode,
                     IsStatic = c.IsStatic,
                     IsTestSite = c.IsTestSite,
-                    ParentProjectId = c.ParentProjectId ?? 0
+                    ParentProjectId = c.ParentProjectId ?? 0,
+                    AttendanceLimit = c.AttendanceLimit ?? 0, //Add for site limt (Tinku Mahato)
                 }).OrderBy(o => o.Value).ToList();
         }
 

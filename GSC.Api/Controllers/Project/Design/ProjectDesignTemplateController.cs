@@ -433,9 +433,10 @@ namespace GSC.Api.Controllers.Project.Design
                         });
                     }
                 }
-            });
 
-            _uow.Save();
+                _uow.Save(); //Change by Tinku Mahato
+            });
+            //_uow.Save(); (Error occured when save clone template)
 
             return Ok();
         }
