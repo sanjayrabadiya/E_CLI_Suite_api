@@ -50,7 +50,7 @@ namespace GSC.Respository.SupplyManagement
             data.ForEach(t =>
             {
                 var shipmentdata = _context.SupplyManagementShipment.Include(z => z.CreatedByUser).Where(x =>
-                 x.SupplyManagementRequestId == t.Id && x.Status == SupplyMangementShipmentStatus.Rejected).FirstOrDefault();
+                 x.SupplyManagementRequestId == t.Id).FirstOrDefault();
                 if (shipmentdata != null)
                 {
                     t.ApprovedQty = shipmentdata.ApprovedQty;
@@ -59,7 +59,7 @@ namespace GSC.Respository.SupplyManagement
                     t.ApproveRejectDateTime = shipmentdata.CreatedDate;
                     t.AuditReason = shipmentdata.AuditReasonId != null ? _context.AuditReason.Where(x => x.Id == shipmentdata.AuditReasonId).FirstOrDefault().ReasonName : "";
                     t.ReasonOth = shipmentdata.ReasonOth;
-                    t.ApproveRejectBy = shipmentdata.CreatedByUser.UserName;
+                    t.ApproveRejectBy = shipmentdata.CreatedByUser != null ? shipmentdata.CreatedByUser.UserName : "";
                 }
 
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
@@ -100,7 +100,7 @@ namespace GSC.Respository.SupplyManagement
         }
         public int GetAvailableRemainingQty(int ProjectId, int PharmacyStudyProductTypeId)
         {
-            
+
             var RemainingQuantity = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == ProjectId
                  && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
                  && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
@@ -113,9 +113,9 @@ namespace GSC.Respository.SupplyManagement
 
                 var finalRemainingQty = RemainingQuantity - approvedQty;
                 return finalRemainingQty;
-                
+
             }
-            
+
             return 0;
         }
     }
