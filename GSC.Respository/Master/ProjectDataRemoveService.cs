@@ -282,34 +282,34 @@ namespace GSC.Respository.Master
             ProjectRemoveDataSuccess finaldata = new ProjectRemoveDataSuccess();
             try
             {
-                var LabManagementUploadData = _context.LabManagementUploadData
-                    .Where(x => x.Project.ParentProjectId == obj.ProjectId).ToList();
-                if (LabManagementUploadData.Count > 0)
+                var LabManagementConfiguration = _context.LabManagementConfiguration
+                       .Where(a => a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == obj.ProjectId).ToList();
+                if (LabManagementConfiguration.Count > 0)
                 {
-                    LabManagementUploadData.ForEach(e =>
+                    LabManagementConfiguration.ForEach(e =>
                     {
-                        var LabManagementSendEmailUser = _context.LabManagementSendEmailUser.Where(a => a.LabManagementConfigurationId == e.LabManagementConfigurationId).ToList();
+                        var LabManagementUploadData = _context.LabManagementUploadData.Include(x => x.LabManagementUploadExcelDatas).Where(a => a.LabManagementConfigurationId == e.Id).ToList();
+                        if (LabManagementUploadData.Count > 0)
+                        {
+                            LabManagementUploadData.ForEach(z =>
+                            {
+                                _context.LabManagementUploadExcelData.RemoveRange(z.LabManagementUploadExcelDatas);
+                            });
+                            _context.LabManagementUploadData.RemoveRange(LabManagementUploadData);
+                        }
+                        var LabManagementSendEmailUser = _context.LabManagementSendEmailUser.Where(a => a.LabManagementConfigurationId == e.Id).ToList();
                         if (LabManagementSendEmailUser.Count > 0)
                             _context.LabManagementSendEmailUser.RemoveRange(LabManagementSendEmailUser);
 
-                        var LabManagementVariableMapping = _context.LabManagementVariableMapping.Where(a => a.LabManagementConfigurationId == e.LabManagementConfigurationId).ToList();
+                        var LabManagementVariableMapping = _context.LabManagementVariableMapping.Where(a => a.LabManagementConfigurationId == e.Id).ToList();
                         if (LabManagementVariableMapping.Count > 0)
                             _context.LabManagementVariableMapping.RemoveRange(LabManagementVariableMapping);
 
-                        var LabManagementUploadExcelData = _context.LabManagementUploadExcelData.Where(a => a.LabManagementUploadDataId == e.Id).ToList();
-                        if (LabManagementUploadExcelData.Count > 0)
-                            _context.LabManagementUploadExcelData.RemoveRange(LabManagementUploadExcelData);
-
                     });
-                    _context.LabManagementUploadData.RemoveRange(LabManagementUploadData);
-                    var LabManagementConfiguration = _context.LabManagementConfiguration
-                        .Where(a => a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == obj.ProjectId).ToList();
-                    if (LabManagementConfiguration.Count > 0)
-                        _context.LabManagementConfiguration.RemoveRange(LabManagementConfiguration);
-
-
-                    _context.Save();
+                    _context.LabManagementConfiguration.RemoveRange(LabManagementConfiguration);
                 }
+
+                _context.Save();
                 finaldata.IsSuccess = true;
                 return finaldata;
             }
@@ -625,6 +625,10 @@ namespace GSC.Respository.Master
                                             var remarks = _context.ProjectDesignVariableRemarks.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
                                             if (remarks != null && remarks.Count > 0)
                                                 _context.ProjectDesignVariableRemarks.RemoveRange(remarks);
+
+                                            var ProjectDesignVisitStatus = _context.ProjectDesignVisitStatus.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
+                                            if (ProjectDesignVisitStatus != null && ProjectDesignVisitStatus.Count > 0)
+                                                _context.ProjectDesignVisitStatus.RemoveRange(ProjectDesignVisitStatus);
                                         });
                                         if (templates.Variables != null && templates.Variables.Count > 0)
                                             _context.ProjectDesignVariable.RemoveRange(templates.Variables);
@@ -645,8 +649,7 @@ namespace GSC.Respository.Master
                                     });
                                     if (visitList.Templates != null && visitList.Templates.Count > 0)
                                         _context.ProjectDesignTemplate.RemoveRange(visitList.Templates);
-                                    if (visitList.ProjectDesignVisitStatus != null && visitList.ProjectDesignVisitStatus.Count > 0)
-                                        _context.ProjectDesignVisitStatus.RemoveRange(visitList.ProjectDesignVisitStatus);
+                                   
                                 });
                                 if (designperiod.VisitList != null && designperiod.VisitList.Count > 0)
                                     _context.ProjectDesignVisit.RemoveRange(designperiod.VisitList);
