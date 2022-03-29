@@ -61,7 +61,6 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                         seqNo += 1;
                         variableValue.StudyLevelFormVariableId = variableDto.Id;
                         variableValue.SeqNo = seqNo;
-                        variableValue.StudyVersion = null;
                         Add(variableValue);
                     }
                 });

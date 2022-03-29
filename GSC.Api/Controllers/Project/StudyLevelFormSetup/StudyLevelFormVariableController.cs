@@ -122,8 +122,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             foreach (var item in variable.Values)
             {
-                item.StudyVersion = null;
-                item.InActiveVersion = null;
                 _studyLevelFormVariableValueRepository.Add(item);
             }
 
