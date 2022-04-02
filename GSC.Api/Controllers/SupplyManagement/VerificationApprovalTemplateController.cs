@@ -417,7 +417,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                         var aduit = new VerificationApprovalTemplateValueAudit
                         {
                             VerificationApprovalTemplateValue = verificationApprovalTemplateValue,
-                            Value = item.IsNa ? "N/A" : value,
+                            Value = value,
                             OldValue = item.OldValue,
                         };
                         _verificationApprovalTemplateValueAuditRepository.Save(aduit);
@@ -428,7 +428,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                         var aduit = new VerificationApprovalTemplateValueAudit
                         {
                             VerificationApprovalTemplateValueId = Exists.Id,
-                            Value = item.IsNa ? "N/A" : value,
+                            Value = value,
                             OldValue = item.OldValue,
                         };
                         _verificationApprovalTemplateValueAuditRepository.Save(aduit);

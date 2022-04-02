@@ -145,7 +145,7 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                 .Select(r => new DesignVerificationApprovalTemplateDto
                 {
                     Id = r.Id,
-                    VariableTemplateId = r.Id,
+                    VariableTemplateId = r.VariableTemplateId,
                     TemplateName = r.VariableTemplate.TemplateName,
                     ActivityName = r.Activity.CtmsActivity.ActivityName,
                     Notes = r.VariableTemplate.Notes.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList()

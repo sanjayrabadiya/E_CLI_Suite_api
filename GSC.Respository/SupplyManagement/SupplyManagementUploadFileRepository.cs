@@ -208,7 +208,7 @@ namespace GSC.Respository.SupplyManagement
             else if (supplyManagementUploadFile.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Site)
             {
                 if (country.Trim() != "")
-                    return "Remove Site Code if file uploaded for the Country.";
+                    return "Remove country if file uploaded for the site level.";
                 if (site.Trim() != "")
                 {
                     if (site.Trim().ToLower() != Convert.ToString(GetProjectCode((int)supplyManagementUploadFile.SiteId)).ToLower())
@@ -219,7 +219,7 @@ namespace GSC.Respository.SupplyManagement
             else
             {
                 if (site.Trim() != "")
-                    return "Remove Country Name if file uploaded for the Site.";
+                    return "Remove site code if file uploaded for the country level.";
                 if (country.Trim() != "")
                 {
                     if (country.Trim().ToLower() != Convert.ToString(GetCountry((int)supplyManagementUploadFile.CountryId)).ToLower())
@@ -252,12 +252,16 @@ namespace GSC.Respository.SupplyManagement
                 }
                 j++;
             }
-
-            DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.Substring(0, selectQuery.Length - 3));
-            if (dr.Length != 0)
-                return "Please fill required Value!";
+            if (results.Tables[0].AsEnumerable().Where((row, index) => index > 4).ToList().Count > 0)
+            {
+                DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.Substring(0, selectQuery.Length - 3));
+                if (dr.Length != 0)
+                    return "Data is blank in Randomization number, Visit, treatment type!";
+                else
+                    return "";
+            }
             else
-                return "";
+                return "No data found,Data is blank in Randomization number, Visit, treatment type.";
         }
 
         public string InserFileData(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile)
@@ -317,7 +321,7 @@ namespace GSC.Respository.SupplyManagement
                 All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.CountryId == supplyManagementUploadFileDetail.CountryId).OrderByDescending(x => x.Id).FirstOrDefault();
             if (supplyManagementUploadFileDetail.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Site)
                 maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
-                All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.CountryId == supplyManagementUploadFileDetail.SiteId).OrderByDescending(x => x.Id).FirstOrDefault();
+                All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.SiteId == supplyManagementUploadFileDetail.SiteId).OrderByDescending(x => x.Id).FirstOrDefault();
             if (supplyManagementUploadFileDetail.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Study)
                 maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
                 All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id).OrderByDescending(x => x.Id).FirstOrDefault();
@@ -349,7 +353,7 @@ namespace GSC.Respository.SupplyManagement
         public string validateProductType(DataTable dt, int ProjectId)
         {
             var productTypes = _pharmacyStudyProductTypeRepository.All.Where(x => x.ProjectId == ProjectId).
-                Select(a => new { a.ProductType.ProductTypeCode }).Distinct().ToList();
+                Select(a => new { ProductTypeCode = a.ProductType.ProductTypeCode.ToString().Trim() }).Distinct().ToList();
 
             for (int i = 0; i < dt.Rows.Count; i++)
             {
