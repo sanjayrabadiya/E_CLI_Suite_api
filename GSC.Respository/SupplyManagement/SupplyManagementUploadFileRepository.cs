@@ -96,7 +96,7 @@ namespace GSC.Respository.SupplyManagement
             if (validate != null)
             {
                 // check randomization number with already upload file
-                var isValidRandomizationNo = RandomizationNumberValidation(dt, supplyManagementUploadFile.ProjectId, validate);
+                var isValidRandomizationNo = RandomizationNumberValidation(dt, supplyManagementUploadFile.ProjectId, validate, supplyManagementUploadFile.SiteId, supplyManagementUploadFile.CountryId);
                 if (isValidRandomizationNo != "")
                     return isValidRandomizationNo;
 
@@ -153,12 +153,12 @@ namespace GSC.Respository.SupplyManagement
 
                 var j = 3;
                 projectDesignVisits.ForEach(d =>
-                 {
-                     worksheet.Row(5).Cell(j).Style.Fill.BackgroundColor = XLColor.LightGreen;
-                     worksheet.Row(5).Cell(j).Style.Font.SetBold();
-                     worksheet.Row(5).Cell(j).SetValue(d.DisplayName);
-                     j++;
-                 });
+                {
+                    worksheet.Row(5).Cell(j).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                    worksheet.Row(5).Cell(j).Style.Font.SetBold();
+                    worksheet.Row(5).Cell(j).SetValue(d.DisplayName);
+                    j++;
+                });
 
                 worksheet.Row(1).Cell(2).SetValue(studyCode);
                 worksheet.Row(2).Cell(2).SetValue(country);
@@ -256,12 +256,12 @@ namespace GSC.Respository.SupplyManagement
             {
                 DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.Substring(0, selectQuery.Length - 3));
                 if (dr.Length != 0)
-                    return "Data is blank in Randomization number, Visit, treatment type!";
+                    return "Please fill required randomization details!";
                 else
                     return "";
             }
             else
-                return "No data found,Data is blank in Randomization number, Visit, treatment type.";
+                return "Please fill required randomization details.";
         }
 
         public string InserFileData(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile)
@@ -308,24 +308,59 @@ namespace GSC.Respository.SupplyManagement
             return visitIds.ToArray();
         }
 
-        public string RandomizationNumberValidation(DataTable dt, int projectId, SupplyManagementUploadFile supplyManagementUploadFileDetail)
+        public string RandomizationNumberValidation(DataTable dt, int projectId, SupplyManagementUploadFile supplyManagementUploadFileDetail, int? siteId, int? countryId)
         {
-            // get last upload sheet data
-            var supplyManagementUploadFile = All.Where(x => x.ProjectId == projectId && x.Status != Helper.LabManagementUploadStatus.Reject && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
-
             // get last upload excel file max randomization number
             var maxRandomizationNo = new SupplyManagementUploadFileDetail();
 
             if (supplyManagementUploadFileDetail.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Country)
+            {
+                // get last upload sheet data
+                var supplyManagementUploadFile = All.Where(x => x.ProjectId == projectId && x.CountryId == countryId && x.Status != Helper.LabManagementUploadStatus.Reject && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
+                if (supplyManagementUploadFile == null)
+                {
+                    // check randomization number is serial no or not
+                    var result = RandomizationNumberCheckSeries(dt, 0);
+                    if (result != "")
+                        return result;
+                    else
+                        return "";
+                }
                 maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
-                All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.CountryId == supplyManagementUploadFileDetail.CountryId).OrderByDescending(x => x.Id).FirstOrDefault();
+                All.Where(x => x.SupplyManagementUploadFileId == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.CountryId == countryId).OrderByDescending(x => x.Id).FirstOrDefault();
+            }
             if (supplyManagementUploadFileDetail.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Site)
+            {
+                // get last upload sheet data
+                var supplyManagementUploadFile = All.Where(x => x.ProjectId == projectId && x.SiteId == siteId && x.Status != Helper.LabManagementUploadStatus.Reject && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
+                if (supplyManagementUploadFile == null)
+                {
+                    // check randomization number is serial no or not
+                    var result = RandomizationNumberCheckSeries(dt, 0);
+                    if (result != "")
+                        return result;
+                    else
+                        return "";
+                }
                 maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
-                All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.SiteId == supplyManagementUploadFileDetail.SiteId).OrderByDescending(x => x.Id).FirstOrDefault();
+                All.Where(x => x.SupplyManagementUploadFileId == supplyManagementUploadFile.Id && x.SupplyManagementUploadFile.SiteId == siteId).OrderByDescending(x => x.Id).FirstOrDefault();
+            }
             if (supplyManagementUploadFileDetail.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Study)
+            {
+                // get last upload sheet data
+                var supplyManagementUploadFile = All.Where(x => x.ProjectId == projectId && x.Status != Helper.LabManagementUploadStatus.Reject && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
+                if (supplyManagementUploadFile == null)
+                {
+                    // check randomization number is serial no or not
+                    var result = RandomizationNumberCheckSeries(dt, 0);
+                    if (result != "")
+                        return result;
+                    else
+                        return "";
+                }
                 maxRandomizationNo = _supplyManagementUploadFileDetailRepository.
-                All.Where(x => x.SupplyManagementUploadFile.Id == supplyManagementUploadFile.Id).OrderByDescending(x => x.Id).FirstOrDefault();
-
+                All.Where(x => x.SupplyManagementUploadFileId == supplyManagementUploadFile.Id).OrderByDescending(x => x.Id).FirstOrDefault();
+            }
             int MaxNo = 0;
 
             if (maxRandomizationNo != null)
