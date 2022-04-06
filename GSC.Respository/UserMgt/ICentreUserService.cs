@@ -1,4 +1,5 @@
-﻿using GSC.Data.Dto.UserMgt;
+﻿using GSC.Data.Dto.Master;
+using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Shared.Security;
 using System;
@@ -30,7 +31,7 @@ namespace GSC.Respository.UserMgt
         Task Logout(string clientUrl);
         Task GetBlockedUser(string clientUrl);
         Task SentConnectionString(int CompanyID, string clientUrl);
-        Task<int> Getnoofstudy(string clientUrl);
+        Task<Companystudyconfig> Getnoofstudy(string clientUrl);
 
     }
 }

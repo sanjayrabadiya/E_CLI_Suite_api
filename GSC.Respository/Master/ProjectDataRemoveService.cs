@@ -207,7 +207,7 @@ namespace GSC.Respository.Master
                     _context.CtmsMonitoring.RemoveRange(CtmsMonitoring);
                 }
 
-                var StudyPlan = _context.StudyPlan.Where(x => x.ProjectId == obj.ProjectId).ToList();
+                var StudyPlan = _context.StudyPlan.Where(x => x.ProjectId == obj.ProjectId || x.Project.ParentProjectId == obj.ProjectId).ToList();
                 if (StudyPlan.Count > 0)
                 {
                     StudyPlan.ForEach(value =>
@@ -258,11 +258,11 @@ namespace GSC.Respository.Master
                 if (CtmsSettings.Count > 0)
                     _context.CtmsSettings.RemoveRange(CtmsSettings);
 
-                var HolidayMaster = _context.HolidayMaster.Where(x => x.ProjectId == obj.ProjectId).ToList();
+                var HolidayMaster = _context.HolidayMaster.Where(x => x.ProjectId == obj.ProjectId || x.Project.ParentProjectId == obj.ProjectId).ToList();
                 if (HolidayMaster.Count > 0)
                     _context.HolidayMaster.RemoveRange(HolidayMaster);
 
-                var WeekEndMaster = _context.WeekEndMaster.Where(x => x.ProjectId == obj.ProjectId).ToList();
+                var WeekEndMaster = _context.WeekEndMaster.Where(x => x.ProjectId == obj.ProjectId || x.Project.ParentProjectId == obj.ProjectId).ToList();
                 if (WeekEndMaster.Count > 0)
                     _context.WeekEndMaster.RemoveRange(WeekEndMaster);
 
@@ -454,6 +454,9 @@ namespace GSC.Respository.Master
                              if (pwd.ProjectWorkPlaceZone != null)
                                  _context.ProjectWorkPlaceZone.RemoveRange(pwd.ProjectWorkPlaceZone);
 
+                             var EtmfUserPermission = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == pwd.Id).ToList();
+                             if (EtmfUserPermission != null)
+                                 _context.EtmfUserPermission.RemoveRange(EtmfUserPermission);
                          });
                         if (pw.ProjectWorkplaceDetail != null)
                             _context.ProjectWorkplaceDetail.RemoveRange(pw.ProjectWorkplaceDetail);
@@ -578,6 +581,7 @@ namespace GSC.Respository.Master
             try
             {
                 var project = _context.Project
+                    .Include(x => x.ProjectRight)
                     .Include(x => x.ChildProject)
                     .Include(x => x.ProjectDesigns)
                     .ThenInclude(x => x.ProjectDesignPeriods)
@@ -586,6 +590,8 @@ namespace GSC.Respository.Master
                     .ThenInclude(x => x.Variables)
                     .ThenInclude(x => x.Values)
                     .ThenInclude(x => x.VariableValueLanguage)
+                    .Include(x => x.ChildProject)
+                    .ThenInclude(x => x.ProjectRight)
                     .Where(x => x.Id == obj.ProjectId).FirstOrDefault();
                 if (project != null)
                 {
@@ -637,6 +643,10 @@ namespace GSC.Respository.Master
                                         if (TemplateLanguage != null && TemplateLanguage.Count > 0)
                                             _context.TemplateLanguage.RemoveRange(TemplateLanguage);
 
+                                        var TemplateNoteLanguage = _context.TemplateNoteLanguage.Where(x => x.ProjectDesignTemplateNote.ProjectDesignTemplateId == templates.Id).ToList();
+                                        if (TemplateNoteLanguage != null && TemplateNoteLanguage.Count > 0)
+                                            _context.TemplateNoteLanguage.RemoveRange(TemplateNoteLanguage);
+
                                         var ProjectDesignTemplateNote = _context.ProjectDesignTemplateNote.Where(x => x.ProjectDesignTemplateId == templates.Id).ToList();
                                         if (ProjectDesignTemplateNote != null && ProjectDesignTemplateNote.Count > 0)
                                             _context.ProjectDesignTemplateNote.RemoveRange(ProjectDesignTemplateNote);
@@ -649,7 +659,10 @@ namespace GSC.Respository.Master
                                     });
                                     if (visitList.Templates != null && visitList.Templates.Count > 0)
                                         _context.ProjectDesignTemplate.RemoveRange(visitList.Templates);
-                                   
+
+                                    var VisitLanguage = _context.VisitLanguage.Where(x => x.ProjectDesignVisitId == visitList.Id).ToList();
+                                    if (VisitLanguage != null && VisitLanguage.Count > 0)
+                                        _context.VisitLanguage.RemoveRange(VisitLanguage);
                                 });
                                 if (designperiod.VisitList != null && designperiod.VisitList.Count > 0)
                                     _context.ProjectDesignVisit.RemoveRange(designperiod.VisitList);
@@ -666,7 +679,7 @@ namespace GSC.Respository.Master
                                     if (version.StudyVersionStatus != null && version.StudyVersionStatus.Count > 0)
                                         _context.StudyVersionStatus.RemoveRange(version.StudyVersionStatus);
                                 });
-                                _context.StudyVersion.RemoveRange(design.StudyVersions);
+                                _context.StudyVersion.RemoveRange(StudyVersions);
                             }
                             var ProjectSchedule = _context.ProjectSchedule.Include(x => x.Templates).Where(x => x.ProjectDesignId == design.Id).ToList();
 
@@ -747,6 +760,14 @@ namespace GSC.Respository.Master
                         });
                         _context.ProjectDocument.RemoveRange(ProjectDocument);
                     }
+                    if (project.ChildProject != null && project.ChildProject.Count > 0)
+                    {
+                        project.ChildProject.ForEach(x =>
+                        {
+                            _context.ProjectRight.RemoveRange(x.ProjectRight);
+                        });
+                    }
+
                     if (project.ChildProject != null && project.ChildProject.Count > 0)
                         _context.Project.RemoveRange(project.ChildProject);
                     _context.Project.RemoveRange(project);
