@@ -145,11 +145,21 @@ namespace GSC.Respository.Master
                     });
                     _context.Attendance.RemoveRange(Attendance);
                 }
+                var childproject = _context.Project.Where(x => x.ParentProjectId == obj.ProjectId).ToList();
+                if (childproject != null)
+                {
+                    childproject.ForEach(z =>
+                    {
+                        var AppScreenPatientRights = _context.AppScreenPatientRights.Where(x => x.ProjectId == z.Id).ToList();
+                        if (AppScreenPatientRights.Count > 0)
+                            _context.AppScreenPatientRights.RemoveRange(AppScreenPatientRights);
+                    });
+                }
                 var AppScreenPatientRights = _context.AppScreenPatientRights.Where(x => x.ProjectId == obj.ProjectId).ToList();
                 if (AppScreenPatientRights.Count > 0)
                     _context.AppScreenPatientRights.RemoveRange(AppScreenPatientRights);
 
-                var UserSetting = _context.UserSetting.Where(x => x.ProjectId == obj.ProjectId).ToList();
+                var UserSetting = _context.UserSetting.Where(x => x.ProjectId == obj.ProjectId || x.Project.ParentProjectId == obj.ProjectId).ToList();
                 if (UserSetting.Count > 0)
                     _context.UserSetting.RemoveRange(UserSetting);
 
