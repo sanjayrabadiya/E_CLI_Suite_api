@@ -21,4 +21,12 @@ namespace GSC.Data.Dto.Master
         public bool IsSuccess { get; set; }
 
     }
+    public class Companystudyconfig
+    {
+        public DateTime? ValidFrom { get; set; }
+
+        public DateTime? ValidTo { get; set; }
+
+        public int NoofStudy { get; set; }
+    }
 }

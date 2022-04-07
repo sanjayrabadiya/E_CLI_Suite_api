@@ -1,4 +1,5 @@
-﻿using GSC.Data.Dto.UserMgt;
+﻿using GSC.Data.Dto.Master;
+using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
@@ -177,9 +178,9 @@ namespace GSC.Respository.UserMgt
             }
         }
 
-        public async Task<int> Getnoofstudy(string clientUrl)
+        public async Task<Companystudyconfig> Getnoofstudy(string clientUrl)
         {
-            int result = await HttpService.Get<int>(_httpClient, clientUrl);
+            var result = await HttpService.Get<Companystudyconfig>(_httpClient, clientUrl);
             return result;
         }
     }
