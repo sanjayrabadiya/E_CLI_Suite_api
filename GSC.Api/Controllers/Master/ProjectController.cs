@@ -440,7 +440,7 @@ namespace GSC.Api.Controllers.Master
         [Route("validatenoofStudy")]
         public async Task<IActionResult> ValidatenoofStudy()
         {
-            bool IsAddmoreStudy = false;
+            bool IsAddmoreStudy = true;
 
             //if (!_environmentSetting.Value.IsPremise)
             //{
