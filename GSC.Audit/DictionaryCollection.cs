@@ -468,6 +468,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "DefaultValue", DisplayName = "Default Value" });
             _dictionaries.Add(new Dictionary { FieldName = "RelationProjectDesignVariableId", DisplayName = "Relation Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "Alignment", DisplayName = "Alignment" });
+            _dictionaries.Add(new Dictionary { FieldName = "DisplayStepValue", DisplayName = "Display step/label value to patient?" });
 
             _dictionaries.Add(new Dictionary { FieldName = "Display", DisplayName = "Conversion" });
             _dictionaries.Add(new Dictionary { FieldName = "IsParticipantView", DisplayName = "Is ParticipantView" });
