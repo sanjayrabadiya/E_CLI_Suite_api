@@ -7,6 +7,7 @@ namespace GSC.Data.Dto.Screening
         public int ScreeningTemplateValueId { get; set; }
         public int ProjectDesignVariableValueId { get; set; }
         public string Value { get; set; }
+        public short? LevelNo { get; set; }
     }
 
     public class ScreeningTemplateValueChildBasic

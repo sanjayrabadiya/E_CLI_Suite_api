@@ -38,6 +38,7 @@ namespace GSC.Data.Dto.Project.Design
         public int SeqNo { get; set; }
         public double? StudyVersion { get; set; }
         public double? InActiveVersion { get; set; }
+        public short? LevelNo { get; set; }
     }
 
 

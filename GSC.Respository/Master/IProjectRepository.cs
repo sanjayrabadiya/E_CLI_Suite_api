@@ -45,5 +45,7 @@ namespace GSC.Respository.Master
         string GetStudyCode(int ProjectId);
         string GetParentProjectCode(int ProjectId);
         string GetProjectSitesCode(Data.Entities.Master.Project project);
+
+        void CloneStudy(int cloneProjectId, Data.Entities.Master.Project project);//Clone Study Tinku Mahato (01-04-2022)
     }
 }

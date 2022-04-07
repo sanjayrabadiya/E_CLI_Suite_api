@@ -507,5 +507,83 @@ namespace GSC.Api.Controllers.Master
             Project.ProjectCode = ProjectCode;
             return Ok(Project);
         }
+
+
+
+        //Code for clone Study Tinku Mahato (01-04-2022)
+
+        [HttpPost("{cloneProjectId}")]
+        public IActionResult Post([FromRoute] int cloneProjectId, [FromBody] ProjectDto projectDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            projectDto.Id = 0;
+            var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
+            project.IsSendEmail = true;
+            project.IsSendSMS = false;
+
+            if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
+            {
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null && x.IsTestSite == false).ToList().Count > 0)
+                {
+                    ModelState.AddModelError("Message", "This site is already exist, please select other site.");
+                    return BadRequest(ModelState);
+                }
+                var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPost(project);
+                if (!string.IsNullOrEmpty(CheckAttendanceLimit))
+                {
+                    ModelState.AddModelError("Message", CheckAttendanceLimit);
+                    return BadRequest(ModelState);
+                }
+            }
+
+            var validate = _projectRepository.Duplicate(project);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            _projectRepository.Save(project);
+            if (_uow.Save() <= 0) throw new Exception("Creating Project failed on save.");
+
+            ScreeningNumberSettings screeningNumberSettings = new ScreeningNumberSettings();
+            screeningNumberSettings.Id = 0;
+            screeningNumberSettings.ProjectId = project.Id;
+            screeningNumberSettings.IsManualScreeningNo = false;
+            screeningNumberSettings.IsSiteDependentScreeningNo = false;
+            screeningNumberSettings.IsAlphaNumScreeningNo = false;
+            screeningNumberSettings.ScreeningLength = 0;
+            screeningNumberSettings.ScreeningNoStartsWith = 0;
+            screeningNumberSettings.ScreeningNoseries = 0;
+            screeningNumberSettings.PrefixScreeningNo = "";
+            _screeningNumberSettingsRepository.Add(screeningNumberSettings);
+
+            RandomizationNumberSettings randomizationNumberSettings = new RandomizationNumberSettings();
+            randomizationNumberSettings.Id = 0;
+            randomizationNumberSettings.ProjectId = project.Id;
+            randomizationNumberSettings.IsManualRandomNo = false;
+            randomizationNumberSettings.IsSiteDependentRandomNo = false;
+            randomizationNumberSettings.IsAlphaNumRandomNo = false;
+            randomizationNumberSettings.RandomNoLength = 0;
+            randomizationNumberSettings.RandomNoStartsWith = 0;
+            randomizationNumberSettings.RandomizationNoseries = 0;
+            randomizationNumberSettings.PrefixRandomNo = "";
+            _randomizationNumberSettingsRepository.Add(randomizationNumberSettings);
+
+            _uow.Save();
+
+            _projectRepository.CloneStudy(cloneProjectId, project);
+
+            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
+            {
+                KeyId = project.Id,
+                SubjectName = project.ProjectName,
+                SubjectName1 = project.ProjectName,
+                ScreenType = UserRecent.Project
+            });
+
+
+            return Ok(project);
+        }
     }
 }
