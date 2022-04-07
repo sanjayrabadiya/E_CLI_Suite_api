@@ -120,7 +120,8 @@ namespace GSC.Helper
         [Description("Scale Horizontal")] HorizontalScale = 12,
         //   [Description("Scale Vertical")] VerticalScale = 13,
         [Description("Numeric Scale")] NumericScale = 14,
-        [Description("Relation")] Relation = 15
+        [Description("Relation")] Relation = 15,
+        [Description("Table")] Table = 16
     }
 
     public enum VolunteerStatus : short

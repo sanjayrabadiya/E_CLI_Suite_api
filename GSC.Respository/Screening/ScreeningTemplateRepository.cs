@@ -9,6 +9,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -37,6 +38,7 @@ namespace GSC.Respository.Screening
         private readonly IGSCContext _context;
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
+        private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         public ScreeningTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository, IMapper mapper,
@@ -45,7 +47,8 @@ namespace GSC.Respository.Screening
             IScheduleRuleRespository scheduleRuleRespository,
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
             IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository,
-            ILabManagementVariableMappingRepository labManagementVariableMappingRepository)
+            ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
+            IProjectDesignVariableValueRepository projectDesignVariableValueRepository)
             : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -59,6 +62,7 @@ namespace GSC.Respository.Screening
             _context = context;
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
+            _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
         }
 
         private ScreeningTemplateBasic GetScreeningTemplateBasic(int screeningTemplateId)
@@ -93,6 +97,16 @@ namespace GSC.Respository.Screening
         {
             return _screeningTemplateValueRepository.All.AsNoTracking().Where(t => t.ScreeningTemplateId == screeningTemplateId)
                     .ProjectTo<ScreeningTemplateValueBasic>(_mapper.ConfigurationProvider).ToList();
+        }
+
+        private List<ScreeningTemplateValueChild> GetScreeningTemplateValueChild(int ScreeningTemplateValueId)
+        {
+            return _screeningTemplateValueChildRepository.All.AsNoTracking().Where(t => t.ScreeningTemplateValueId == ScreeningTemplateValueId && t.DeletedDate == null).ToList();
+        }
+
+        private List<ProjectDesignVariableValue> GetProjectDesignVariableValue(int ProjectDesignVariableId)
+        {
+            return _projectDesignVariableValueRepository.All.AsNoTracking().Where(t => t.ProjectDesignVariableId == ProjectDesignVariableId && t.DeletedDate == null).ToList();
         }
 
         public DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId)
@@ -199,17 +213,27 @@ namespace GSC.Respository.Screening
             && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
 
             designTemplateDto.Variables.ToList().ForEach(r =>
-            {
-                if (r.Values != null)
-                    r.Values = r.Values.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
-                    && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
-            });
+             {
+                 if (r.Values != null)
+                     r.Values = r.Values.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
+                     && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
+             });
 
             designTemplateDto.Variables.Where(x => x.CollectionSource == CollectionSources.Relation && x.RelationProjectDesignVariableId > 0).ToList().
                 ForEach(t => t.Values = _screeningTemplateValueRepository.GetScreeningRelation(t.RelationProjectDesignVariableId ?? 0, screeningTemplateBasic.ScreeningEntryId));
 
+            designTemplateDto.Variables.Where(x => x.CollectionSource == CollectionSources.Table).ToList().ForEach(t =>
+            {
+                t.Values.Where(c => c.LevelNo == null).ToList().ForEach(v =>
+                  {
+                      v.LevelNo = 1;
+                  });
+            });
+
             values.ForEach(t =>
             {
+                var ScreeningTemplateValueChild = GetScreeningTemplateValueChild(t.Id);
+                var MaxLevel = ScreeningTemplateValueChild.Max(x => x.LevelNo);
                 var variable = designTemplateDto.Variables.FirstOrDefault(v => v.ProjectDesignVariableId == t.ProjectDesignVariableId);
                 if (variable != null)
                 {
@@ -234,6 +258,7 @@ namespace GSC.Respository.Screening
                     if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
                         variable.Values.ToList().ForEach(val =>
                         {
+
                             var childValue = t.Children.FirstOrDefault(v => v.ProjectDesignVariableValueId == val.Id);
                             if (childValue != null)
                             {
@@ -241,8 +266,69 @@ namespace GSC.Respository.Screening
                                 val.ScreeningValue = childValue.Value;
                                 val.ScreeningValueOld = childValue.Value;
                                 val.ScreeningTemplateValueChildId = childValue.Id;
+                                val.LevelNo = childValue.LevelNo;
                             }
                         });
+
+                    if (variable.Values != null && variable.CollectionSource == CollectionSources.Table)
+                    {
+                        var ValuesList = new List<ScreeningVariableValueDto>();
+
+                        variable.Values.ToList().ForEach(val =>
+                        {
+                            MaxLevel = MaxLevel > 0 ? MaxLevel : 0;
+                            var notExistLevel = Enumerable.Range(1, (int)MaxLevel).ToArray();
+
+                            var childValue = t.Children.Where(v => v.ProjectDesignVariableValueId == val.Id).GroupBy(x => x.LevelNo)
+                            .Select(x => new ScreeningTemplateValueChild
+                            {
+                                Id = x.FirstOrDefault().Id,
+                                ScreeningTemplateValueId = x.FirstOrDefault().ScreeningTemplateValueId,
+                                ProjectDesignVariableValueId = x.FirstOrDefault().ProjectDesignVariableValueId,
+                                Value = x.FirstOrDefault().Value,
+                                LevelNo = x.FirstOrDefault().LevelNo,
+                            }).ToList();
+
+
+                            var Levels = notExistLevel.Where(x => !childValue.Select(y => (int)y.LevelNo).Contains(x)).ToList();
+
+                            Levels.ForEach(x =>
+                            {
+                                ScreeningTemplateValueChild obj = new ScreeningTemplateValueChild();
+                                obj.Id = 0;
+                                obj.ScreeningTemplateValueId = t.Id;
+                                obj.ProjectDesignVariableValueId = val.Id;
+                                obj.Value = null;
+                                obj.LevelNo = (short)x;
+                                childValue.Add(obj);
+                            });
+
+                            if (childValue.Count() == 0 && Levels.Count() == 0)
+                            {
+                                ScreeningTemplateValueChild obj = new ScreeningTemplateValueChild();
+                                obj.Id = 0;
+                                obj.ScreeningTemplateValueId = t.Id;
+                                obj.ProjectDesignVariableValueId = val.Id;
+                                obj.Value = null;
+                                obj.LevelNo = 1;
+                                childValue.Add(obj);
+                            }
+
+                            childValue.ForEach(child =>
+                            {
+                                ScreeningVariableValueDto obj = new ScreeningVariableValueDto();
+                                variable.IsValid = true;
+                                obj.Id = child.ProjectDesignVariableValueId;
+                                obj.ScreeningValue = child.Value;
+                                obj.ScreeningValueOld = child.Value;
+                                obj.ScreeningTemplateValueChildId = child.Id;
+                                obj.LevelNo = child.LevelNo;
+                                obj.ValueName = val.ValueName;
+                                ValuesList.Add(obj);
+                            });
+                        });
+                        variable.Values = ValuesList;
+                    }
 
                     variable.IsSaved = variable.IsValid;
                 }
