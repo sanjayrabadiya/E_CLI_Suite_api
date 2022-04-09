@@ -41,11 +41,7 @@ namespace GSC.Data.Dto.Project.Design
         public short? LevelNo { get; set; }
     }
 
-    public class ProjectDesignValueTableDto
-    {
-        public int Id { get; set; }
-        public string ValueName { get; set; }
-    }
+   
 
 
     public class ProjectDesignVariableValueDropDown
