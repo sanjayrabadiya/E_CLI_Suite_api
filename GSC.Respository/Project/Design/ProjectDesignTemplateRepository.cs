@@ -155,7 +155,16 @@ namespace GSC.Respository.Project.Design
                 {
                     x.IsEncrypt = variableEncryptRole.Any(t => t == x.ProjectDesignVariableId);
                     if (x.IsEncrypt != true)
+                    {
                         x.Values = values.Where(c => c.ProjectDesignVariableId == x.ProjectDesignVariableId).OrderBy(c => c.SeqNo).ToList();
+                        if (x.CollectionSource == CollectionSources.Table)
+                            x.TableValues = x.Values.Select(t => new ProjectDesignValueTableDto
+                            {
+                                Id = t.Id,
+                                ValueName = t.ValueName
+                            }).ToList();
+                    }
+
 
                     if (x.IsEncrypt == true)
                         x.IsNa = false;

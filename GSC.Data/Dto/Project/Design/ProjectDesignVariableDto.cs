@@ -91,7 +91,8 @@ namespace GSC.Data.Dto.Project.Design
         public string HighRangeValue { get; set; }
         public PrintType PrintType { get; set; }
         public IList<ScreeningVariableValueDto> Values { get; set; } = null;
-        // public IList<ScreeningVariableRemarksDto> Remarks { get; set; } = null;
+        public IList<ProjectDesignValueTableDto> TableValues { get; set; }
+
         public string UnitName { get; set; }
         public int DesignOrder { get; set; }
         public bool? IsDocument { get; set; }
