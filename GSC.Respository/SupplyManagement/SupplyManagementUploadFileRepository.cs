@@ -426,8 +426,10 @@ namespace GSC.Respository.SupplyManagement
             foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
             {
                 if (j >= 2)
-                    if (item.ToString().ToLower().Trim() != supplyManagementUploadDetailVisit[j - 2].ToString().ToLower().Trim())
+                {
+                    if (!supplyManagementUploadDetailVisit.Contains(item.ToString(), StringComparer.InvariantCultureIgnoreCase))
                         return "visit not match with previous upload file.";
+                }
                 j++;
             }
             return "";

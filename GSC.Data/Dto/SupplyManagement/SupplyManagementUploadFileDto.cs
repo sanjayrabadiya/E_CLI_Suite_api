@@ -32,6 +32,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool IsApprove { get; set; }
         public string Reason { get; set; }
         public string ReasonOth { get; set; }
-        public string Status { get; set; }
+        public string StatusName { get; set; }
+        public LabManagementUploadStatus Status { get; set; }
     }
 }

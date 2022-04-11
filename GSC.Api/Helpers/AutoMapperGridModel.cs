@@ -402,7 +402,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.Country, x => x.MapFrom(a => a.Country.CountryName))
                 .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Site.ProjectCode))
                 .ForMember(x => x.Level, x => x.MapFrom(a => a.SupplyManagementUploadFileLevel.GetDescription()))
-                .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription()))
+                .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
                 .ForMember(x => x.Reason, x => x.MapFrom(a => a.AuditReason.ReasonName)).ReverseMap();
 
             CreateMap<LabManagementVariableMapping, LabManagementVariableMappingGridDto>()
