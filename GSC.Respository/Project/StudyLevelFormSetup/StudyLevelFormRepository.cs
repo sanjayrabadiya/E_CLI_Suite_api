@@ -6,6 +6,7 @@ using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,19 +22,25 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IStudyLevelFormVariableValueRepository _studyLevelFormVariableValueRepository;
+        private readonly IProjectRightRepository _projectRightRepository;
         public StudyLevelFormRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
-            IStudyLevelFormVariableValueRepository studyLevelFormVariableValueRepository) : base(context)
+            IStudyLevelFormVariableValueRepository studyLevelFormVariableValueRepository,
+            IProjectRightRepository projectRightRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
             _studyLevelFormVariableValueRepository = studyLevelFormVariableValueRepository;
+            _projectRightRepository = projectRightRepository;
         }
 
         public List<StudyLevelFormGridDto> GetStudyLevelFormList(bool isDeleted)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && projectList.Any(c => c == x.ProjectId)).
                    ProjectTo<StudyLevelFormGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 

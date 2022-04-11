@@ -775,6 +775,13 @@ namespace GSC.Helper
         [Description("Closed")] Closed = 4,
     }
 
+    public enum CtmsActionPointStatus : short
+    {
+        [Description("Open")] Open = 1,
+        [Description("Resolved")] Resolved = 2,
+        [Description("Closed")] Closed = 3,
+    }
+
     public enum LabManagementExcelFileColumn : short
     {
         [Description("Study Code")] StudyCode = 1,

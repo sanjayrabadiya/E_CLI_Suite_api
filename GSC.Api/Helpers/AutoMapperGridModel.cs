@@ -502,6 +502,13 @@ namespace GSC.Api.Helpers
                .ReverseMap();
             CreateMap<PageConfigurationFields, PageConfigurationFieldsGridDto>()
                 .ForMember(x => x.AppScreen, a => a.MapFrom(m => m.AppScreens.ScreenName)).ReverseMap();
+
+            CreateMap<CtmsActionPoint, CtmsActionPointGridDto>()
+                .ForMember(x => x.StatusName, a => a.MapFrom(m => m.Status.GetDescription()))
+                .ForMember(x => x.QueryDate, a => a.MapFrom(m => m.CreatedDate))
+                .ForMember(x => x.QueryBy, a => a.MapFrom(m => m.CreatedByUser.UserName))
+                .ForMember(x => x.ResponseBy, a => a.MapFrom(m => m.User.UserName))
+                .ReverseMap();
         }
     }
 }
