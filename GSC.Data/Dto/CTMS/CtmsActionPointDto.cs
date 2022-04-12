@@ -15,11 +15,14 @@ namespace GSC.Data.Dto.CTMS
         public string Response { get; set; }
         public int? ResponseBy { get; set; }
         public DateTime? ResponseDate { get; set; }
+        public int? CloseBy { get; set; }
+        public DateTime? CloseDate { get; set; }
     }
 
     public class CtmsActionPointGridDto : BaseAuditDto
     {
         public int CtmsMonitoringId { get; set; }
+        public CtmsActionPointStatus? Status { get; set; }
         public string StatusName { get; set; }
         public string QueryDescription { get; set; }
         public DateTime QueryDate { get; set; }
@@ -27,5 +30,7 @@ namespace GSC.Data.Dto.CTMS
         public string Response { get; set; }
         public string ResponseBy { get; set; }
         public DateTime? ResponseDate { get; set; }
+        public string CloseBy { get; set; }
+        public DateTime? CloseDate { get; set; }
     }
 }
