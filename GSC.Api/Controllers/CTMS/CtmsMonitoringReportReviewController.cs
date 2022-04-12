@@ -25,18 +25,21 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ICtmsMonitoringReportReviewRepository _ctmsMonitoringReportReviewRepository;
         private readonly ICtmsMonitoringReportRepository _ctmsMonitoringReportRepository;
+        private readonly ICtmsMonitoringRepository _ctmsMonitoringRepository;
 
         public CtmsMonitoringReportReviewController(IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
             ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository,
-            ICtmsMonitoringReportRepository ctmsMonitoringReportRepository)
+            ICtmsMonitoringReportRepository ctmsMonitoringReportRepository,
+            ICtmsMonitoringRepository ctmsMonitoringRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
             _ctmsMonitoringReportRepository = ctmsMonitoringReportRepository;
+            _ctmsMonitoringRepository = ctmsMonitoringRepository;
         }
 
         /// Get user for send for review
@@ -87,9 +90,13 @@ namespace GSC.Api.Controllers.CTMS
             var ctmsMonitoringReportReview = _mapper.Map<CtmsMonitoringReportReview>(ctmsMonitoringReportReviewDto);
             _ctmsMonitoringReportReviewRepository.Update(ctmsMonitoringReportReview);
 
-            var manageMonitoringReport = _ctmsMonitoringReportRepository.Find(ctmsMonitoringReportReviewDto.CtmsMonitoringReportId);
-            manageMonitoringReport.ReportStatus = MonitoringReportStatus.FormApproved;
-            _ctmsMonitoringReportRepository.Update(manageMonitoringReport);
+            var ctmsMonitoringReport = _ctmsMonitoringReportRepository.Find(ctmsMonitoringReportReviewDto.CtmsMonitoringReportId);
+            ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.FormApproved;
+            _ctmsMonitoringReportRepository.Update(ctmsMonitoringReport);
+
+            var ctmsMonitoring = _ctmsMonitoringRepository.Find(ctmsMonitoringReport.CtmsMonitoringId);
+            ctmsMonitoring.ActualEndDate = _jwtTokenAccesser.GetClientDate();
+            _ctmsMonitoringRepository.Update(ctmsMonitoring);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Approve failed on save.");
             _ctmsMonitoringReportReviewRepository.SendMailForApproved(ctmsMonitoringReportReview);
