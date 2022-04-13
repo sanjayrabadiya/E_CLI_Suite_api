@@ -162,6 +162,12 @@ namespace GSC.Respository.Screening
             screeningTemplateValueQuery.QueryStatus = QueryStatus.Open;
             screeningTemplateValueQuery.OldValue = screeningTemplateValueQueryDto.OldValue;
 
+            if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Table)
+            {
+                screeningTemplateValueQuery.Value = "";
+                screeningTemplateValueQuery.OldValue = "";
+            }
+
             screeningTemplateValue.AcknowledgeLevel = -1;
             screeningTemplateValue.UserRoleId = _jwtTokenAccesser.RoleId;
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
