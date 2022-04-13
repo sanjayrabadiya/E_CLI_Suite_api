@@ -166,6 +166,12 @@ namespace GSC.Api.Controllers.Screening
             screeningTemplateValueQuery.OldValue = screeningTemplateValueQueryDto.OldValue;
             screeningTemplateValueQuery.Value = value;
 
+            if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Table)
+            {
+                screeningTemplateValueQuery.Value = "";
+                screeningTemplateValueQuery.OldValue = "";
+            }
+
             _screeningTemplateValueQueryRepository.ReviewQuery(screeningTemplateValue, screeningTemplateValueQuery);
 
             _uow.Save();

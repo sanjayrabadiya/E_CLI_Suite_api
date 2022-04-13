@@ -245,6 +245,17 @@ namespace GSC.Respository.Screening
                         return "";
                     }
 
+                    if (screeningTemplateValueDto.CollectionSource == CollectionSources.Table)
+                    {
+                        if (valueChild != null && child.Value != screeningTemplateValueDto.Value)
+                        {
+                            screeningTemplateValueDto.OldValue = valueChild.Value + "_" +variableValue.ValueName + "_" + child.LevelNo;
+                            return child.Value + "_" + variableValue.ValueName + "_" + child.LevelNo;
+                        }
+                        screeningTemplateValueDto.OldValue = "";
+                        return child.Value + "_" + variableValue.ValueName + "_" + child.LevelNo;
+                    }
+
                     screeningTemplateValueDto.OldValue = "";
                     return variableValue.ValueName;
                 }
@@ -278,7 +289,7 @@ namespace GSC.Respository.Screening
                 var projectList = _projectRightRepository.GetProjectRightIdList();
                 if (projectList == null || projectList.Count == 0) sites = null;
 
-                sites = _context.Project.Where(x => 
+                sites = _context.Project.Where(x =>
                     x.DeletedDate == null && x.ParentProjectId == filters.ParentProjectId && x.IsTestSite == false
                     && projectList.Any(c => c == x.Id)).Select(y => y.Id).ToList();
             }
@@ -414,7 +425,7 @@ namespace GSC.Respository.Screening
                               TemplateId = x.ProjectDesignTemplateId
                           }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList(),
 
-                    LstProjectDataBase = y.Where(v => v.VariableName != null  && v.SubjectNo != null).GroupBy(x => new { x.Initial, x.SubjectNo }).Select(s => new ProjectDatabaseInitialDto
+                    LstProjectDataBase = y.Where(v => v.VariableName != null && v.SubjectNo != null).GroupBy(x => new { x.Initial, x.SubjectNo }).Select(s => new ProjectDatabaseInitialDto
                     {
                         Initial = s.Key.Initial,
                         DomainName = s.FirstOrDefault().DomainName,
@@ -1035,14 +1046,14 @@ namespace GSC.Respository.Screening
 
                         DateTime dDate;
                         var dt = !string.IsNullOrEmpty(m.CodedOn.ToString()) ? DateTime.TryParse(m.CodedOn.ToString(), out dDate) ? DateTime.Parse(m.CodedOn.ToString()).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : m.CodedOn.ToString() : "";
-                            //var dt = DateTime.Parse(m.CodedOn.ToString()).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat);
+                        //var dt = DateTime.Parse(m.CodedOn.ToString()).AddHours(5).AddMinutes(30).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat);
 
-                            worksheet.Cell(mrownumber, 26).Value = dt;
+                        worksheet.Cell(mrownumber, 26).Value = dt;
                         worksheet.Cell(mrownumber, 27).SetValue(m.Version);
                         worksheet.Cell(mrownumber, 28).Value = m.Language;
-                            //worksheet.Cell(mrownumber, 28).Value = this.datetimeformat.transform(new Date(m.codedOn).toLocaleString());
+                        //worksheet.Cell(mrownumber, 28).Value = this.datetimeformat.transform(new Date(m.codedOn).toLocaleString());
 
-                            mrownumber++;
+                        mrownumber++;
                     });
                 }
 
