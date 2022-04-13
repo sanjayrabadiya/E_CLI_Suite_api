@@ -440,30 +440,30 @@ namespace GSC.Api.Controllers.Master
         [Route("validatenoofStudy")]
         public async Task<IActionResult> ValidatenoofStudy()
         {
-            bool IsAddmoreStudy = false;
+            bool IsAddmoreStudy = true;
 
-            if (!_environmentSetting.Value.IsPremise)
-            {
-                var noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Study/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
-                if (noofstudy != null && noofstudy.ValidTo.Value.Date < DateTime.Now.Date)
-                {
-                    IsAddmoreStudy = false;
-                }
-                else if (noofstudy != null && noofstudy.ValidFrom.Value.Date > DateTime.Now.Date)
-                {
-                    IsAddmoreStudy = false;
-                }
-                else
-                {
-                    if (noofstudy != null)
-                    {
-                        int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null
-                        && x.CreatedDate.Value.Date >= noofstudy.ValidFrom && x.CreatedDate.Value.Date <= noofstudy.ValidTo && x.DeletedDate == null).Count();
-                        if (studycount < noofstudy.NoofStudy)
-                            IsAddmoreStudy = true;
-                    }
-                }
-            }
+            //if (!_environmentSetting.Value.IsPremise)
+            //{
+            //    var noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Study/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
+            //    if (noofstudy != null && noofstudy.ValidTo.Value.Date < DateTime.Now.Date)
+            //    {
+            //        IsAddmoreStudy = false;
+            //    }
+            //    else if (noofstudy != null && noofstudy.ValidFrom.Value.Date > DateTime.Now.Date)
+            //    {
+            //        IsAddmoreStudy = false;
+            //    }
+            //    else
+            //    {
+            //        if (noofstudy != null)
+            //        {
+            //            int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null
+            //            && x.CreatedDate.Value.Date >= noofstudy.ValidFrom && x.CreatedDate.Value.Date <= noofstudy.ValidTo && x.DeletedDate == null).Count();
+            //            if (studycount < noofstudy.NoofStudy)
+            //                IsAddmoreStudy = true;
+            //        }
+            //    }
+            //}
 
             return Ok(IsAddmoreStudy);
         }
