@@ -19,14 +19,20 @@ namespace GSC.Respository.CTMS
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-
+        private readonly ICtmsMonitoringReportVariableValueAuditRepository _ctmsMonitoringReportVariableValueAuditRepository;
+        private readonly ICtmsMonitoringReportVariableValueChildRepository _ctmsMonitoringReportVariableValueChildRepository;
+        //private readonly ICtmsMonitoringReportRepository _ctmsMonitoringReportRepository;
         public CtmsMonitoringReportVariableValueRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
+            ICtmsMonitoringReportVariableValueAuditRepository ctmsMonitoringReportVariableValueAuditRepository,
+            ICtmsMonitoringReportVariableValueChildRepository ctmsMonitoringReportVariableValueChildRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
+            _ctmsMonitoringReportVariableValueAuditRepository = ctmsMonitoringReportVariableValueAuditRepository;
+            _ctmsMonitoringReportVariableValueChildRepository = ctmsMonitoringReportVariableValueChildRepository;
         }
 
         public void UpdateChild(List<CtmsMonitoringReportVariableValueChild> children)
@@ -40,13 +46,13 @@ namespace GSC.Respository.CTMS
                     .ProjectTo<CtmsMonitoringReportVariableValueBasic>(_mapper.ConfigurationProvider).ToList();
         }
 
-        public string GetValueForAudit(CtmsMonitoringReportVariableValueDto cstmsMonitoringReportVariableValueDto)
+        public string GetValueForAudit(CtmsMonitoringReportVariableValueDto cstmsMonitoringReportVariableValueDto, CtmsMonitoringReportVariableValueChildDto ctmsMonitoringReportVariableValueChildDto)
         {
             if (cstmsMonitoringReportVariableValueDto.IsDeleted) return null;
 
             if (cstmsMonitoringReportVariableValueDto.Children?.Count > 0)
             {
-                var child = cstmsMonitoringReportVariableValueDto.Children.First();
+                var child = ctmsMonitoringReportVariableValueChildDto;
 
                 var variableValue = _context.StudyLevelFormVariableValue.Find(child.StudyLevelFormVariableValueId);
                 if (variableValue != null)
@@ -88,6 +94,95 @@ namespace GSC.Respository.CTMS
                     && x.QueryStatus != CtmsCommentStatus.Closed).Count();
 
             return result != 0;
+        }
+
+        public void SaveVariableValue(CtmsMonitoringReportVariableValueSaveDto ctmsMonitoringReportVariableValueSaveDto)
+        {
+            if (ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList != null)
+            {
+                foreach (var item in ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList)
+                {
+                    var ctmsMonitoringReportVariableValue = _mapper.Map<CtmsMonitoringReportVariableValue>(item);
+
+                    var Exists = All.Where(x => x.DeletedDate == null && x.CtmsMonitoringReportId == ctmsMonitoringReportVariableValue.CtmsMonitoringReportId && x.StudyLevelFormVariableId == item.StudyLevelFormVariableId).FirstOrDefault();
+
+                    if (Exists == null)
+                    {
+                        ctmsMonitoringReportVariableValue.Id = 0;
+                        Add(ctmsMonitoringReportVariableValue);
+
+                        if (item.Children?.Count > 0)
+                        {
+                            foreach (var child in item.Children)
+                            {
+                                var childvalue = GetValueForAudit(item, child);
+                                var aduit = new CtmsMonitoringReportVariableValueAudit
+                                {
+                                    CtmsMonitoringReportVariableValue = ctmsMonitoringReportVariableValue,
+                                    Value = item.IsNa ? "N/A" : childvalue,
+                                    OldValue = item.OldValue,
+                                };
+                                _ctmsMonitoringReportVariableValueAuditRepository.Save(aduit);
+                            }
+                        }
+                        else
+                        {
+                            var value = GetValueForAudit(item, null);
+
+                            var aduit = new CtmsMonitoringReportVariableValueAudit
+                            {
+                                CtmsMonitoringReportVariableValue = ctmsMonitoringReportVariableValue,
+                                Value = item.IsNa ? "N/A" : value,
+                                OldValue = item.OldValue,
+                            };
+                            _ctmsMonitoringReportVariableValueAuditRepository.Save(aduit);
+                        }
+                        _ctmsMonitoringReportVariableValueChildRepository.Save(ctmsMonitoringReportVariableValue);
+                    }
+                    else
+                    {
+                        if (item.Children?.Count > 0)
+                        {
+                            foreach (var child in item.Children)
+                            {
+                                var childvalue = GetValueForAudit(item, child);
+                                var aduit = new CtmsMonitoringReportVariableValueAudit
+                                {
+                                    CtmsMonitoringReportVariableValueId = Exists.Id,
+                                    Value = item.IsNa ? "N/A" : childvalue,
+                                    OldValue = item.OldValue,
+                                };
+                                _ctmsMonitoringReportVariableValueAuditRepository.Save(aduit);
+                            }
+                        }
+                        else
+                        {
+                            var value = GetValueForAudit(item, null);
+
+                            var aduit = new CtmsMonitoringReportVariableValueAudit
+                            {
+                                CtmsMonitoringReportVariableValueId = Exists.Id,
+                                Value = item.IsNa ? "N/A" : value,
+                                OldValue = item.OldValue,
+                            };
+                            _ctmsMonitoringReportVariableValueAuditRepository.Save(aduit);
+                        }
+
+                        if (item.IsDeleted)
+                            DeleteChild(Exists.Id);
+
+                        _ctmsMonitoringReportVariableValueChildRepository.Save(ctmsMonitoringReportVariableValue);
+
+                        ctmsMonitoringReportVariableValue.Id = Exists.Id;
+                        Update(ctmsMonitoringReportVariableValue);
+                    }
+                }
+
+                var ctmsMonitoringReport = _context.CtmsMonitoringReport.Where(x => x.Id == ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList[0].CtmsMonitoringReportId).FirstOrDefault();
+                ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.Initiated;
+                _context.CtmsMonitoringReport.Update(ctmsMonitoringReport);
+            }
+
         }
     }
 }
