@@ -54,9 +54,7 @@ namespace GSC.Respository.CTMS
             audit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             audit.UserName = _jwtTokenAccesser.UserName;
             audit.UserRole = _jwtTokenAccesser.RoleName;
-
             audit.CreatedDate = _jwtTokenAccesser.GetClientDate();
-
             Add(audit);
         }
     }

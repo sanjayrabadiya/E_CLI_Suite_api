@@ -20,8 +20,13 @@ namespace GSC.Data.Entities.CTMS
         public int? ResponseBy { get; set; }
         public DateTime? ResponseDate { get; set; }
         public CtmsMonitoring CtmsMonitoring { get; set; }
+        public int? CloseBy { get; set; }
+        public DateTime? CloseDate { get; set; }
         [ForeignKey("ResponseBy")]
         public User User { get; set; }
+
+        [ForeignKey("CloseBy")]
+        public User CloseUser { get; set; }
 
     }
 }

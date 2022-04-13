@@ -70,17 +70,17 @@ namespace GSC.Api.Controllers.Master
             var variableTemplateDto = _mapper.Map<VariableTemplateDto>(variableTemplate);
 
             variableTemplateDto.VariableTemplateDetails = _variableTemplateDetailRepository
-                .FindByInclude(x => x.VariableTemplateId == id && x.DeletedBy == null, t => t.Variable).Select(
-                    c => new VariableTemplateDetailDto
-                    {
-                        VariableId = c.VariableId,
-                        SeqNo = c.SeqNo,
-                        Note = c.Note,
-                        Name = c.Variable?.VariableName,
-                        Type = c.Variable == null ? CoreVariableType.Expected : c.Variable.CoreVariableType,
-                        CollectionSourcesName = c.Variable.CollectionSource.ToString(),
-                        DataTypeName = c.Variable.DataType.ToString()
-                    }).OrderBy(c => c.SeqNo).ToList();
+                .FindByInclude(x => x.VariableTemplateId == id && x.DeletedBy == null && x.Variable.DeletedDate == null, t => t.Variable)
+                .Select(c => new VariableTemplateDetailDto
+                {
+                    VariableId = c.VariableId,
+                    SeqNo = c.SeqNo,
+                    Note = c.Note,
+                    Name = c.Variable?.VariableName,
+                    Type = c.Variable == null ? CoreVariableType.Expected : c.Variable.CoreVariableType,
+                    CollectionSourcesName = c.Variable.CollectionSource.ToString(),
+                    DataTypeName = c.Variable.DataType.ToString()
+                }).OrderBy(c => c.SeqNo).ToList();
             return Ok(variableTemplateDto);
         }
 

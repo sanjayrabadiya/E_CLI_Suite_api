@@ -92,5 +92,19 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
+        [HttpPut("CloseQueryActionPoint/{id}")]
+        public IActionResult CloseQueryActionPoint(int id)
+        {
+            var ctmsActionPoint = _ctmsActionPointRepository.Find(id);
+
+            ctmsActionPoint.CloseBy = _jwtTokenAccesser.UserId;
+            ctmsActionPoint.CloseDate = _jwtTokenAccesser.GetClientDate();
+            ctmsActionPoint.Status = Helper.CtmsActionPointStatus.Closed;
+
+            _ctmsActionPointRepository.Update(ctmsActionPoint);
+            if (_uow.Save() <= 0) throw new Exception("Close action point failed on save.");
+            return Ok(ctmsActionPoint.Id);
+        }
+
     }
 }
