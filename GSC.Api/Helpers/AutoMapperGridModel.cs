@@ -505,7 +505,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<CtmsActionPoint, CtmsActionPointGridDto>()
                 .ForMember(x => x.StatusName, a => a.MapFrom(m => m.Status.GetDescription()))
-                //.ForMember(x => x.Status, a => a.MapFrom(m => m.Status))
+                .ForMember(x => x.Activity, a => a.MapFrom(m => m.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName))
                 .ForMember(x => x.QueryDate, a => a.MapFrom(m => m.CreatedDate))
                 .ForMember(x => x.QueryBy, a => a.MapFrom(m => m.CreatedByUser.UserName))
                 .ForMember(x => x.ResponseBy, a => a.MapFrom(m => m.User.UserName))

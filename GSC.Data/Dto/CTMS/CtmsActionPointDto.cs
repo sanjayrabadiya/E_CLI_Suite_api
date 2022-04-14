@@ -32,5 +32,6 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? ResponseDate { get; set; }
         public string CloseBy { get; set; }
         public DateTime? CloseDate { get; set; }
+        public string Activity { get; set; }
     }
 }
