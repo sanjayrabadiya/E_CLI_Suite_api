@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -6,6 +7,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Report;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
+using GSC.Respository.LanguageSetup;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +27,10 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
 
+        private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
+        private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
+        private readonly IVariabeLanguageRepository _variabeLanguageRepository;
+
         public ProjectDesignVariableController(IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
@@ -32,7 +38,11 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             IUnitOfWork uow, IMapper mapper,
             IVariableRepository variableRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository)
+            IProjectDesignTemplateRepository projectDesignTemplateRepository,
+            IVariabeNoteLanguageRepository variableNoteLanguageRepository,
+            IVariabeValueLanguageRepository variableValueLanguageRepository,
+            IVariabeLanguageRepository variabeLanguageRepository
+            )
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
@@ -43,6 +53,9 @@ namespace GSC.Api.Controllers.Project.Design
             _mapper = mapper;
             _variableRepository = variableRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _variableNoteLanguageRepository = variableNoteLanguageRepository;
+            _variableValueLanguageRepository = variableValueLanguageRepository;
+            _variabeLanguageRepository = variabeLanguageRepository;
         }
 
         [HttpGet("{id}")]
@@ -408,6 +421,64 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult GetVariabeDropDownForRelationMapping(int projectDesignTemplateId)
         {
             return Ok(_projectDesignVariableRepository.GetVariabeDropDownForRelationMapping(projectDesignTemplateId));
+        }
+
+
+        //Action add by Tinku Mahato (12-04-2022) for copy variable & varialbe value langualge
+        [HttpGet("CopyVariable/{copyVarialbeId}/{saveVarialbeId}")]
+        public IActionResult CopyVariable(int copyVarialbeId, int saveVarialbeId)
+        {
+            var variableValues = _projectDesignVariableValueRepository.FindBy(q => q.ProjectDesignVariableId == saveVarialbeId && q.DeletedDate == null).ToList();
+
+            variableValues.ForEach(s =>
+            {
+                var copyVarialbeValues = _projectDesignVariableValueRepository.FindBy(a => a.ProjectDesignVariableId == copyVarialbeId && a.ValueCode == s.ValueCode && s.DeletedDate == null).FirstOrDefault();
+
+                var varialbeValueLanguages = _variableValueLanguageRepository.FindBy(q => q.ProjectDesignVariableValueId == copyVarialbeValues.Id && q.DeletedDate == null).ToList();
+
+                varialbeValueLanguages.ForEach(m =>
+                {
+                    m.Id = 0;
+                    m.ProjectDesignVariableValueId = s.Id;
+                    m.ModifiedBy = null;
+                    m.ModifiedDate = null;
+                    m.DeletedBy = null;
+                    m.DeletedDate = null;
+                    _variableValueLanguageRepository.Add(m);
+                    _uow.Save();
+                });
+            });
+
+
+            var variableLanguages = _variabeLanguageRepository.FindBy(q => q.ProjectDesignVariableId == copyVarialbeId && q.DeletedDate == null).ToList();
+            variableLanguages.ForEach(s =>
+            {
+                s.Id = 0;
+                s.ProjectDesignVariableId = saveVarialbeId;
+                s.ModifiedBy = null;
+                s.ModifiedDate = null;
+                s.DeletedBy = null;
+                s.DeletedDate = null;
+                _variabeLanguageRepository.Add(s);
+                _uow.Save();
+            });
+
+            var variableNotLanguages = _variableNoteLanguageRepository.FindBy(q => q.ProjectDesignVariableId == copyVarialbeId && q.DeletedDate == null).ToList();
+            variableNotLanguages.ForEach(m =>
+            {
+                m.Id = 0;
+                m.ProjectDesignVariableId = saveVarialbeId;
+                m.ModifiedBy = null;
+                m.ModifiedDate = null;
+                m.DeletedBy = null;
+                m.DeletedDate = null;
+                _variableNoteLanguageRepository.Add(m);
+                _uow.Save();
+            });
+
+            _uow.Save();
+
+            return Ok(saveVarialbeId);
         }
     }
 }

@@ -6,6 +6,7 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
@@ -824,144 +825,174 @@ namespace GSC.Respository.Master
                     _context.ProjectDesignVisit.Add(visit);
                     _context.Save();
 
-                    var projectTemplates = _context.ProjectDesignTemplate.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null).ToList();
 
+                    var visitLanguageList = _context.VisitLanguage.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null).ToList();
+                    visitLanguageList.ForEach(m =>
+                    {
+                        m.Id = 0;
+                        m.ProjectDesignVisitId = visit.Id;
+                        visit.ModifiedBy = null;
+                        visit.ModifiedDate = null;
+                        visit.DeletedBy = null;
+                        visit.DeletedDate = null;
+                        _context.VisitLanguage.Add(m);
+                        _context.Save();
+                    });
+
+                    var projectTemplates = _context.ProjectDesignTemplate.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null && q.ParentId == null).ToList();
                     foreach (var template in projectTemplates)
                     {
-                        var templateId = template.Id;
-                        template.Id = 0;
-                        template.ProjectDesignVisitId = visit.Id;
-                        template.ModifiedBy = null;
-                        template.ModifiedDate = null;
-                        template.DeletedBy = null;
-                        template.DeletedDate = null;
-                        _context.ProjectDesignTemplate.Add(template);
-                        _context.Save();
+                        var cloneTemplates = _context.ProjectDesignTemplate.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null && q.ParentId == template.Id).ToList();
 
-                        var templateLanguage = _context.TemplateLanguage.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
-                        templateLanguage.ForEach(x =>
+                        var templateId = SaveCloneTemplate(visit.Id, template, null);
+
+                        foreach (var temp in cloneTemplates)
                         {
-                            x.Id = 0;
-                            x.ProjectDesignTemplateId = template.Id;
-                            x.ModifiedBy = null;
-                            x.ModifiedDate = null;
-                            x.DeletedBy = null;
-                            x.DeletedDate = null;
-                            _context.TemplateLanguage.Add(x);
-                            _context.Save();
-                        });
-
-                        var projectDesignNotes = _context.ProjectDesignTemplateNote.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
-                        projectDesignNotes.ForEach(x =>
-                        {
-                            var designNoteId = x.Id;
-                            x.Id = 0;
-                            x.ProjectDesignTemplateId = template.Id;
-                            x.ModifiedBy = null;
-                            x.ModifiedDate = null;
-                            x.DeletedBy = null;
-                            x.DeletedDate = null;
-                            _context.ProjectDesignTemplateNote.Add(x);
-                            _context.Save();
-
-                            var templateNoteLanguages = _context.TemplateNoteLanguage.Where(q => q.ProjectDesignTemplateNoteId == x.Id && q.DeletedDate == null).ToList();
-                            templateNoteLanguages.ForEach(q =>
-                            {
-                                q.Id = 0;
-                                q.ProjectDesignTemplateNoteId = x.Id;
-                                q.ModifiedBy = null;
-                                q.ModifiedDate = null;
-                                q.DeletedBy = null;
-                                q.DeletedDate = null;
-                                _context.TemplateNoteLanguage.Add(q);
-                                _context.Save();
-                            });
-                        });
-
-
-                        var projectDesignVariables = _context.ProjectDesignVariable.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
-                        projectDesignVariables.ForEach(x =>
-                        {
-                            var variableId = x.Id;
-                            x.Id = 0;
-                            x.ProjectDesignTemplateId = template.Id;
-                            x.ModifiedBy = null;
-                            x.ModifiedDate = null;
-                            x.DeletedBy = null;
-                            x.DeletedDate = null;
-                            _context.ProjectDesignVariable.Add(x);
-                            _context.Save();
-
-                            var projectDesignVariableValues = _context.ProjectDesignVariableValue.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
-                            projectDesignVariableValues.ForEach(s =>
-                            {
-                                var varialbeValueId = s.Id;
-                                s.Id = 0;
-                                s.ProjectDesignVariableId = x.Id;
-                                s.ModifiedBy = null;
-                                s.ModifiedDate = null;
-                                s.DeletedBy = null;
-                                s.DeletedDate = null;
-                                _context.ProjectDesignVariableValue.Add(s);
-                                _context.Save();
-
-                                var varialbeValueLanguages = _context.VariableValueLanguage.Where(q => q.ProjectDesignVariableValueId == varialbeValueId && q.DeletedDate == null).ToList();
-                                varialbeValueLanguages.ForEach(m =>
-                                {
-                                    m.Id = 0;
-                                    m.ProjectDesignVariableValueId = s.Id;
-                                    m.ModifiedBy = null;
-                                    m.ModifiedDate = null;
-                                    m.DeletedBy = null;
-                                    m.DeletedDate = null;
-                                    _context.VariableValueLanguage.Add(m);
-                                    _context.Save();
-                                });
-                            });
-
-                            var projectDesignVariableRemarks = _context.ProjectDesignVariableRemarks.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
-                            projectDesignVariableRemarks.ForEach(s =>
-                            {
-                                s.Id = 0;
-                                s.ProjectDesignVariableId = x.Id;
-                                s.ModifiedBy = null;
-                                s.ModifiedDate = null;
-                                s.DeletedBy = null;
-                                s.DeletedDate = null;
-                                _context.ProjectDesignVariableRemarks.Add(s);
-                                _context.Save();
-                            });
-
-                            var variableLanguages = _context.VariableLanguage.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
-                            variableLanguages.ForEach(s =>
-                            {
-                                s.Id = 0;
-                                s.ProjectDesignVariableId = x.Id;
-                                s.ModifiedBy = null;
-                                s.ModifiedDate = null;
-                                s.DeletedBy = null;
-                                s.DeletedDate = null;
-                                _context.VariableLanguage.Add(s);
-                                _context.Save();
-                            });
-
-                            var variableNoteLanguages = _context.VariableNoteLanguage.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
-                            variableNoteLanguages.ForEach(s =>
-                            {
-                                s.Id = 0;
-                                s.ProjectDesignVariableId = x.Id;
-                                s.ModifiedBy = null;
-                                s.ModifiedDate = null;
-                                s.DeletedBy = null;
-                                s.DeletedDate = null;
-                                _context.VariableNoteLanguage.Add(s);
-                                _context.Save();
-                            });
-                        });
+                            SaveCloneTemplate(visit.Id, template, templateId);
+                        }
                     }
+
                 }
             }
 
+        }
+
+
+        private int SaveCloneTemplate(int visitId, ProjectDesignTemplate template, int? parentId)
+        {
+            var templateId = template.Id;
+            template.Id = 0;
+            template.ProjectDesignVisitId = visitId;
+            template.ParentId = parentId;
+            template.ModifiedBy = null;
+            template.ModifiedDate = null;
+            template.DeletedBy = null;
+            template.DeletedDate = null;
+            _context.ProjectDesignTemplate.Add(template);
+            _context.Save();
+
+            var templateLanguage = _context.TemplateLanguage.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
+            templateLanguage.ForEach(x =>
+            {
+                x.Id = 0;
+                x.ProjectDesignTemplateId = template.Id;
+                x.ModifiedBy = null;
+                x.ModifiedDate = null;
+                x.DeletedBy = null;
+                x.DeletedDate = null;
+                _context.TemplateLanguage.Add(x);
+                _context.Save();
+            });
+
+            var projectDesignNotes = _context.ProjectDesignTemplateNote.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
+            projectDesignNotes.ForEach(x =>
+            {
+                var designNoteId = x.Id;
+                x.Id = 0;
+                x.ProjectDesignTemplateId = template.Id;
+                x.ModifiedBy = null;
+                x.ModifiedDate = null;
+                x.DeletedBy = null;
+                x.DeletedDate = null;
+                _context.ProjectDesignTemplateNote.Add(x);
+                _context.Save();
+
+                var templateNoteLanguages = _context.TemplateNoteLanguage.Where(q => q.ProjectDesignTemplateNoteId == designNoteId && q.DeletedDate == null).ToList();
+                templateNoteLanguages.ForEach(q =>
+                {
+                    q.Id = 0;
+                    q.ProjectDesignTemplateNoteId = x.Id;
+                    q.ModifiedBy = null;
+                    q.ModifiedDate = null;
+                    q.DeletedBy = null;
+                    q.DeletedDate = null;
+                    _context.TemplateNoteLanguage.Add(q);
+                    _context.Save();
+                });
+            });
+
+
+            var projectDesignVariables = _context.ProjectDesignVariable.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
+            projectDesignVariables.ForEach(x =>
+            {
+                var variableId = x.Id;
+                x.Id = 0;
+                x.ProjectDesignTemplateId = template.Id;
+                x.ModifiedBy = null;
+                x.ModifiedDate = null;
+                x.DeletedBy = null;
+                x.DeletedDate = null;
+                _context.ProjectDesignVariable.Add(x);
+                _context.Save();
+
+                var projectDesignVariableValues = _context.ProjectDesignVariableValue.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
+                projectDesignVariableValues.ForEach(s =>
+                {
+                    var varialbeValueId = s.Id;
+                    s.Id = 0;
+                    s.ProjectDesignVariableId = x.Id;
+                    s.ModifiedBy = null;
+                    s.ModifiedDate = null;
+                    s.DeletedBy = null;
+                    s.DeletedDate = null;
+                    _context.ProjectDesignVariableValue.Add(s);
+                    _context.Save();
+
+                    var varialbeValueLanguages = _context.VariableValueLanguage.Where(q => q.ProjectDesignVariableValueId == varialbeValueId && q.DeletedDate == null).ToList();
+                    varialbeValueLanguages.ForEach(m =>
+                    {
+                        m.Id = 0;
+                        m.ProjectDesignVariableValueId = s.Id;
+                        m.ModifiedBy = null;
+                        m.ModifiedDate = null;
+                        m.DeletedBy = null;
+                        m.DeletedDate = null;
+                        _context.VariableValueLanguage.Add(m);
+                        _context.Save();
+                    });
+                });
+
+                var projectDesignVariableRemarks = _context.ProjectDesignVariableRemarks.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
+                projectDesignVariableRemarks.ForEach(s =>
+                {
+                    s.Id = 0;
+                    s.ProjectDesignVariableId = x.Id;
+                    s.ModifiedBy = null;
+                    s.ModifiedDate = null;
+                    s.DeletedBy = null;
+                    s.DeletedDate = null;
+                    _context.ProjectDesignVariableRemarks.Add(s);
+                    _context.Save();
+                });
+
+                var variableLanguages = _context.VariableLanguage.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
+                variableLanguages.ForEach(s =>
+                {
+                    s.Id = 0;
+                    s.ProjectDesignVariableId = x.Id;
+                    s.ModifiedBy = null;
+                    s.ModifiedDate = null;
+                    s.DeletedBy = null;
+                    s.DeletedDate = null;
+                    _context.VariableLanguage.Add(s);
+                    _context.Save();
+                });
+
+                var variableNoteLanguages = _context.VariableNoteLanguage.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
+                variableNoteLanguages.ForEach(s =>
+                {
+                    s.Id = 0;
+                    s.ProjectDesignVariableId = x.Id;
+                    s.ModifiedBy = null;
+                    s.ModifiedDate = null;
+                    s.DeletedBy = null;
+                    s.DeletedDate = null;
+                    _context.VariableNoteLanguage.Add(s);
+                    _context.Save();
+                });
+            });
+
+            return template.Id;
         }
         //---------------------Code End-------------------------
 

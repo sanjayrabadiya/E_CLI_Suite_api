@@ -425,11 +425,11 @@ namespace GSC.Api.Controllers.Project.Design
                                 var clone = cloneValue.VariableValueLanguage.Where(b => b.Display == x.Display).FirstOrDefault();
                                 x.Id = clone?.Id ?? 0;
                             }
-
-                            if (r.Id == 0)
-                                _variableValueLanguageRepository.Update(x);
+                            // Change by Tinku Mahato (14-04-2022)
+                            if (x.Id == 0)
+                                _variableValueLanguageRepository.Add(x);        
                             else
-                                _variableValueLanguageRepository.Add(x);
+                                _variableValueLanguageRepository.Update(x);
                         });
                     }
                 }
