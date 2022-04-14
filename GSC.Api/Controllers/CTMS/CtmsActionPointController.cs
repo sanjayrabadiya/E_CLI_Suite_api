@@ -106,5 +106,13 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(ctmsActionPoint.Id);
         }
 
+        [HttpGet]
+        [Route("GetActionPointForFollowUpList/{ProjectId}")]
+        public IActionResult GetActionPointForFollowUpList(int ProjectId)
+        {
+            if (ProjectId <= 0) return BadRequest();
+            var ctmsActionPoint = _ctmsActionPointRepository.GetActionPointForFollowUpList(ProjectId);
+            return Ok(ctmsActionPoint);
+        }
     }
 }

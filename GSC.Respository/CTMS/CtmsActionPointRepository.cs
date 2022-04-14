@@ -8,6 +8,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,12 @@ namespace GSC.Respository.CTMS
         public List<CtmsActionPointGridDto> GetActionPointList(int CtmsMonitoringId)
         {
             return All.Where(x => x.CtmsMonitoringId == CtmsMonitoringId).
+                   ProjectTo<CtmsActionPointGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        }
+
+        public List<CtmsActionPointGridDto> GetActionPointForFollowUpList(int ProjectId)
+        {
+            return All.Include(x => x.CtmsMonitoring).Where(x => x.CtmsMonitoring.ProjectId == ProjectId && x.Status == CtmsActionPointStatus.Open).
                    ProjectTo<CtmsActionPointGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
