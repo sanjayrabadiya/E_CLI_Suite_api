@@ -389,7 +389,7 @@ namespace GSC.Respository.EditCheckImpact
 
                 if (r.CollectionSource == CollectionSources.Date || r.CollectionSource == CollectionSources.DateTime || r.CollectionSource == CollectionSources.Time)
                 {
-                    if (!string.IsNullOrEmpty(r.InputValue))
+                    if (!string.IsNullOrEmpty(r.InputValue) && !(r.Operator == Operator.NotNull || r.Operator == Operator.Null))
                     {
                         DateTime createdDate;
                         var isSucess = DateTime.TryParse(r.InputValue, out createdDate);
