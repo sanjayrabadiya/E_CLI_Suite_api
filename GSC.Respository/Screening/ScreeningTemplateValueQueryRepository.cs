@@ -95,8 +95,7 @@ namespace GSC.Respository.Screening
                 ? QueryStatus.Resolved
                 : QueryStatus.Answered;
 
-            if (string.IsNullOrEmpty(value) && string.IsNullOrEmpty(screeningTemplateValueQueryDto.OldValue))
-                updateQueryStatus = QueryStatus.Answered;
+
 
             if (screeningTemplateValue.IsSystem)
             {
@@ -106,15 +105,27 @@ namespace GSC.Respository.Screening
 
 
             screeningTemplateValueQuery.IsSystem = false;
-            screeningTemplateValueQuery.QueryStatus = updateQueryStatus;
-            screeningTemplateValueQuery.Value = value;
-            screeningTemplateValueQuery.OldValue = screeningTemplateValueQueryDto.OldValue;
 
-            screeningTemplateValue.QueryStatus = updateQueryStatus;
             screeningTemplateValue.Value = screeningTemplateValueQueryDto.Value;
             screeningTemplateValue.IsNa = screeningTemplateValueQueryDto.IsNa;
 
             var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
+
+            QueryAudit(screeningTemplateValueQueryDto, screeningTemplateValue, updateQueryStatus.ToString(), value, screeningTemplateValueQuery);
+
+            if (screeningTemplateValueQueryDto.Children != null)
+            {
+                screeningTemplateValueQueryDto.OldValue = screeningTemplateValueQuery.OldValue;
+                value = screeningTemplateValueQuery.Value;
+                updateQueryStatus = screeningTemplateValueQuery.Value != screeningTemplateValueQuery.OldValue ? QueryStatus.Resolved : QueryStatus.Answered;
+            }
+
+            screeningTemplateValueQuery.QueryStatus = updateQueryStatus;
+            screeningTemplateValueQuery.Value = value;
+            screeningTemplateValueQuery.OldValue = screeningTemplateValueQueryDto.OldValue;
+
+
+            screeningTemplateValue.QueryStatus = updateQueryStatus;
 
             if (updateQueryStatus == QueryStatus.Answered || screeningTemplate.ReviewLevel == 1)
             {
@@ -137,7 +148,9 @@ namespace GSC.Respository.Screening
                     screeningTemplateValue.AcknowledgeLevel = screeningTemplate.ReviewLevel;
             }
 
-            QueryAudit(screeningTemplateValueQueryDto, screeningTemplateValue, updateQueryStatus.ToString(), value, screeningTemplateValueQuery);
+
+
+
 
             Save(screeningTemplateValueQuery);
 
@@ -254,6 +267,7 @@ namespace GSC.Respository.Screening
                                                        : " Query");
 
             ClosedSelfCorrection(screeningTemplateValue, screeningTemplateValue.ReviewLevel);
+            ClosedSelfCorrection(screeningTemplateValue, (short)screeningTemplate.ReviewLevel);
 
             if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
                 screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;

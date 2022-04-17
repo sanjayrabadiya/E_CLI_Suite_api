@@ -116,12 +116,20 @@ namespace GSC.Respository.EditCheckImpact
                         r.NumberScale = _impactService.CollectionValue(r.ScreeningTemplateValue);
                     else
                     {
-                        var projectVariable = projectDesignTemplateDto.Variables.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
-                        if (projectVariable != null)
+                        var values = projectDesignTemplateDto.Variables.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault()?.Values;
+                        if (!r.IsSameTemplate)
+                        {
+                            values = _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).Select(c => new ScreeningVariableValueDto
+                            {
+                                Id = c.Id,
+                                ValueName = c.ValueName
+                            }).ToList();
+                        }
+                        if (values != null)
                         {
                             int projectVariableValueId;
                             int.TryParse(r.ScreeningTemplateValue, out projectVariableValueId);
-                            var valueName = projectVariable.Values.Where(x => x.Id == projectVariableValueId).Select(t => t.ValueName).FirstOrDefault();
+                            var valueName = values.Where(x => x.Id == projectVariableValueId).Select(t => t.ValueName).FirstOrDefault();
                             int.TryParse(valueName, out projectVariableValueId);
                             r.NumberScale = projectVariableValueId;
 
@@ -771,13 +779,13 @@ namespace GSC.Respository.EditCheckImpact
 
                 if (!string.IsNullOrEmpty(oldValueName))
                 {
-                 
+
                     int.TryParse(oldValueName, out id);
                     if (id > 0)
                         oldValueName = _projectDesignVariableValueRepository.All.Where(x => x.Id == id).Select(t => t.ValueName).FirstOrDefault();
                 }
 
-                
+
 
             }
 

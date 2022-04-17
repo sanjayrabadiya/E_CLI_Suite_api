@@ -168,7 +168,7 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplate = _screeningTemplateRepository.Find(id);
 
-            screeningTemplate.Status = ScreeningTemplateStatus.Pending;
+            screeningTemplate.Status = ScreeningTemplateStatus.InProcess;
             screeningTemplate.ReviewLevel = null;
             screeningTemplate.StartLevel = null;
 
@@ -182,7 +182,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateRepository.Update(screeningTemplate);
             _uow.Save();
 
-            return Ok();
+            return Ok(screeningTemplate);
         }
 
         private void SubmittedTemplate(int id)
