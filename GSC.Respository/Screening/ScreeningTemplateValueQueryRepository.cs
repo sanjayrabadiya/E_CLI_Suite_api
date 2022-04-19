@@ -96,14 +96,6 @@ namespace GSC.Respository.Screening
                 : QueryStatus.Answered;
 
 
-
-            if (screeningTemplateValue.IsSystem)
-            {
-                screeningTemplateValue.AcknowledgeLevel = null;
-                updateQueryStatus = QueryStatus.Closed;
-            }
-
-
             screeningTemplateValueQuery.IsSystem = false;
 
             screeningTemplateValue.Value = screeningTemplateValueQueryDto.Value;
@@ -118,6 +110,12 @@ namespace GSC.Respository.Screening
                 screeningTemplateValueQueryDto.OldValue = screeningTemplateValueQuery.OldValue;
                 value = screeningTemplateValueQuery.Value;
                 updateQueryStatus = screeningTemplateValueQuery.Value != screeningTemplateValueQuery.OldValue ? QueryStatus.Resolved : QueryStatus.Answered;
+            }
+
+            if (screeningTemplateValue.IsSystem)
+            {
+                screeningTemplateValue.AcknowledgeLevel = null;
+                updateQueryStatus = QueryStatus.Closed;
             }
 
             screeningTemplateValueQuery.QueryStatus = updateQueryStatus;
@@ -269,7 +267,7 @@ namespace GSC.Respository.Screening
             ClosedSelfCorrection(screeningTemplateValue, screeningTemplateValue.ReviewLevel);
             ClosedSelfCorrection(screeningTemplateValue, (short)screeningTemplate.ReviewLevel);
 
-            if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
+            if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel > screeningTemplate.ReviewLevel)
                 screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
 
             Save(screeningTemplateValueQuery);
