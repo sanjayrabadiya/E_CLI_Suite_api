@@ -66,8 +66,13 @@ namespace GSC.Respository.Project.Workflow
                 && x.LevelNo > levelNo).Max(a => (short?)a.LevelNo) ?? 0;
 
             if (result == 0)
-                return _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
-                && x.DeletedDate == null).Max(a => (short?)a.LevelNo) ?? 0;
+            {
+                result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
+                 && x.DeletedDate == null).Max(a => (short?)a.LevelNo) ?? 0;
+
+                result += 1;
+            }
+
 
             return result;
 
@@ -152,7 +157,7 @@ namespace GSC.Respository.Project.Workflow
                 IsLock = false,
                 IsStartTemplate = true,
                 WorkFlowText = workFlowText,
-                IsWorkFlowBreak = false,
+                IsWorkFlowBreak = projectWorkflowLevel.Any(t => t.IsWorkFlowBreak),
                 LevelNo = levelNo,
                 SelfCorrection = false
             };
