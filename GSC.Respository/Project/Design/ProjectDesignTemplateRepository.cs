@@ -276,7 +276,7 @@ namespace GSC.Respository.Project.Design
             var checkVersion = CheckStudyVersion(projectDesignVisitId);
             var vistInActiveVersion = _projectDesignVisitRepository.All.Where(x => x.Id == projectDesignVisitId).Select(t => t.InActiveVersion).FirstOrDefault();
 
-            var result = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ProjectTo<ProjectDesignTemplateDto>(_mapper.ConfigurationProvider).ToList();
+            var result = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ProjectTo<ProjectDesignTemplateDto>(_mapper.ConfigurationProvider).OrderBy(t => t.DesignOrder).ToList();
             result.ForEach(x =>
             {
                 x.AllowActive = vistInActiveVersion != x.InActiveVersion && checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
