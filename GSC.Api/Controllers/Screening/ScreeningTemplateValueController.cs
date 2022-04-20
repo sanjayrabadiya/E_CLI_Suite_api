@@ -16,6 +16,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Master;
 using System.Linq;
 using GSC.Respository.Project.Design;
+using System.Collections.Generic;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -80,7 +81,7 @@ namespace GSC.Api.Controllers.Screening
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var projectDesignTemplateId=_projectDesignVariableRepository.All.Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).Select(t => t.ProjectDesignTemplateId).FirstOrDefault();
+            var projectDesignTemplateId = _projectDesignVariableRepository.All.Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).Select(t => t.ProjectDesignTemplateId).FirstOrDefault();
 
             if (projectDesignTemplateId != screeningTemplateValueDto.ProjectDesignTemplateId)
             {
@@ -222,7 +223,7 @@ namespace GSC.Api.Controllers.Screening
                 DocumentService.RemoveFile(documentPath, screeningTemplateValue.DocPath);
                 string subject = screningDetails.ScreeningNumber + "-" + screningDetails.Initial;
                 screeningTemplateValue.DocPath = DocumentService.SaveUploadDocument(screeningTemplateValueDto.FileModel,
-                      documentPath,_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(screningDetails.ProjectId), FolderType.DataEntry, subject);
+                      documentPath, _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(screningDetails.ProjectId), FolderType.DataEntry, subject);
 
                 screeningTemplateValue.MimeType = screeningTemplateValueDto.FileModel.Extension;
             }
@@ -261,6 +262,15 @@ namespace GSC.Api.Controllers.Screening
         public IActionResult GetQueryVariableDetail(int id, int screeningEntryId)
         {
             return Ok(_screeningTemplateValueRepository.GetQueryVariableDetail(id, screeningEntryId));
+        }
+
+        [HttpPost]
+        [Route("DeleteChild")]
+        public IActionResult DeleteChild([FromBody] List<int> Ids)
+        {
+            _screeningTemplateValueChildRepository.DeleteChild(Ids);
+            _uow.Save();
+            return Ok();
         }
     }
 }
