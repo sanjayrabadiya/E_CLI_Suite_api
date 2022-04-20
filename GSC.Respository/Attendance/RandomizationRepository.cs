@@ -832,21 +832,21 @@ namespace GSC.Respository.Attendance
             var screeningFilter = randomization.Where(y => y.ScreeningDate != null).ToList();
             if (screeningFilter.Count() > 0)
             {
-                var AveragePerMonthScreening = screeningFilter.Count() / (int)pro.Recruitment;
+                var AveragePerMonthScreening = screeningFilter.Count() / (pro.Recruitment == null ? 1 : (int)pro.Recruitment);
                 screeningCount = screeningFilter.GroupBy(x => x.ScreeningMonth)
                    .Select(g => new DashboardRecruitmentRateDto
                    {
                        ScreeningDataCount = g.Count(),
                        ScreeningAvgValue = AveragePerMonthScreening >= 1 ? (int?)Math.Round((decimal)(g.Count() * 100) / AveragePerMonthScreening, 2) : 0,
                        ScreeningMonth = DateTime.ParseExact(g.Key, "MMM yyyy", CultureInfo.CurrentCulture).Month,
-                       IsScreeningAchive = g.Count() >= (screeningFilter.Count() / (int)pro.Recruitment)
+                       IsScreeningAchive = g.Count() >= (screeningFilter.Count() / (pro.Recruitment == null ? 1 : (int)pro.Recruitment))
                    }).Where(x => x.ScreeningMonth == today.Month).FirstOrDefault();
             }
 
             var randomizationFilter = randomization.Where(y => y.RandomizationDate != null).ToList();
             if (randomizationFilter.Count() > 0)
             {
-                var AveragePerMonth = randomizationFilter.Count() / (int)pro.Recruitment;
+                var AveragePerMonth = randomizationFilter.Count() / (pro.Recruitment == null ? 1 : (int)pro.Recruitment);
 
                 randomizationCount = randomizationFilter.GroupBy(x => x.RandomizationMonth)
                .Select(g => new DashboardRecruitmentRateDto
@@ -854,13 +854,15 @@ namespace GSC.Respository.Attendance
                    RandomizationDataCount = g.Count(),
                    RandomizationAvgValue = AveragePerMonth >= 1 ? (int?)Math.Round((decimal)(g.Count() * 100) / AveragePerMonth, 2) : 0,
                    RandomizationMonth = DateTime.ParseExact(g.Key, "MMM yyyy", CultureInfo.CurrentCulture).Month,
-                   IsRandomizationAchive = g.Count() >= (randomizationFilter.Count() / (int)pro.Recruitment)
+                   IsRandomizationAchive = g.Count() >= (randomizationFilter.Count() / (pro.Recruitment == null ? 1 : (int)pro.Recruitment))
                }).Where(x => x.RandomizationMonth == today.Month).FirstOrDefault();
             }
 
             if (randomizationCount != null)
             {
-                screeningCount.RandomizationDataCount = randomizationCount?.RandomizationDataCount;
+                if (screeningCount == null)
+                    screeningCount = new DashboardRecruitmentRateDto();
+                screeningCount.RandomizationDataCount = randomizationCount.RandomizationDataCount;
                 screeningCount.RandomizationAvgValue = randomizationCount?.RandomizationAvgValue;
                 screeningCount.RandomizationMonth = randomizationCount?.RandomizationMonth;
                 screeningCount.IsRandomizationAchive = randomizationCount.IsRandomizationAchive;
