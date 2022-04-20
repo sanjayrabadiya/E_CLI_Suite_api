@@ -332,7 +332,6 @@ namespace GSC.Respository.Screening
 
         public IList<QueryManagementDto> GetQueryEntries(QuerySearchDto filters)
         {
-            //var ParentProject = _context.Project.FirstOrDefault(x => x.Id == filters.ProjectId).ParentProjectId;
             var sites = new List<int>();
             if (filters.SiteId != null)
             {
@@ -343,88 +342,112 @@ namespace GSC.Respository.Screening
                 sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
             }
 
-            var queryDtos = (from screening in _context.ScreeningEntry.Where(t =>
-                                (filters.SiteId != null ? t.ProjectId == filters.SiteId : sites.Contains(t.ProjectId))
-                                && t.ProjectDesignPeriod.DeletedDate == null
-                                && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
-                                && (filters.SubjectIds == null || filters.SubjectIds.Contains(t.Id)))
-                             join template in _context.ScreeningTemplate.Where(u => u.DeletedDate == null &&
-                                                (filters.TemplateIds == null || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
-                                                && (filters.VisitIds == null || filters.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId))
-                                                && u.ProjectDesignTemplate.DeletedDate == null)
-                             on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                             join value in _context.ScreeningTemplateValue.Where(val => val.DeletedDate == null
-                                          && val.ProjectDesignVariable.DeletedDate == null)
-                             on template.Id equals value.ScreeningTemplateId
-                             join query in _context.ScreeningTemplateValueQuery on value.Id equals query.ScreeningTemplateValueId
-                             join reasonTemp in _context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
-                             from reason in reasonDt.DefaultIfEmpty()
-                             join randomizationTemp in _context.Randomization on screening.RandomizationId equals randomizationTemp.Id into randomizationDto
-                             from randomization in randomizationDto.DefaultIfEmpty()
-                             join userTemp in _context.Users on value.CreatedBy equals userTemp.Id into userDto
-                             from user in userDto.DefaultIfEmpty()
-                             join roleTemp in _context.SecurityRole on value.UserRoleId equals roleTemp.Id into roleDto
-                             from role in roleDto.DefaultIfEmpty()
-                             select new QueryManagementDto
-                             {
-                                 Id = query.Id,
-                                 ProjectCode = screening.Project.ProjectCode,
-                                 ReasonName = reason.ReasonName,
-                                 ReasonOth = query.ReasonOth, // added by Neel
-                                 StatusName = query.QueryStatus.GetDescription(),
-                                 Value = query.Value,
-                                 QueryDescription = query.Note,
-                                 OldValue = query.OldValue,
-                                 QueryStatus = query.QueryStatus,
-                                 CreatedByName = query.UserName + " (" + query.UserRole + ")" +
-                                       Convert.ToString(query.IsSystem ? " - System" : ""),
-                                 CreatedDate = query.CreatedDate,
-                                 DataEntryByName = role == null || string.IsNullOrEmpty(role.RoleName)
-                                         ? user.UserName
-                                         : user.UserName + "(" + role.RoleName + ")",
-                                 ScreeningTemplateValue = template.RepeatSeqNo == null && template.ParentId == null ? template.ProjectDesignTemplate.DesignOrder + ". " + template.ProjectDesignTemplate.TemplateName
-                                            : template.ProjectDesignTemplate.DesignOrder + "." + template.RepeatSeqNo + " " + template.ProjectDesignTemplate.TemplateName,
-                                 Visit = template.ScreeningVisit.ProjectDesignVisit.DisplayName +
-                                         Convert.ToString(template.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + template.ScreeningVisit.RepeatedVisitNumber),
-                                 FieldName = value.ProjectDesignVariable.VariableName,
-                                 VolunteerName = screening.RandomizationId != null ? randomization.Initial : screening.Attendance.Volunteer.AliasName,
-                                 SubjectNo = screening.RandomizationId != null ? randomization.ScreeningNumber : screening.Attendance.Volunteer.VolunteerNo,
-                                 RandomizationNumber = screening.RandomizationId != null ? randomization.RandomizationNumber : "",
-                                 ScreeningTemplateValueId = query.ScreeningTemplateValueId,
-                                 CollectionSource = (int)value.ProjectDesignVariable.CollectionSource,
-                             }).OrderBy(x => x.Id).ToList();
+            var query = All.Where(x => (filters.SiteId != null ? x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == filters.SiteId : sites.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId))
+             && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Id))
+             && (filters.PeriodIds == null || filters.PeriodIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId))
+             && (filters.VisitIds == null || filters.VisitIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.ProjectDesignVisitId))
+             && (filters.TemplateIds == null || filters.TemplateIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplateId))
+             ).Select(t => new QueryManagementDto
+             {
+                 Id = t.Id,
+                 ScreeningTemplateValueId = t.ScreeningTemplateValueId,
+                 ProjectCode = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                 Value = t.Value,
+                 ReasonName = t.Reason.ReasonName,
+                 ReasonOth = t.ReasonOth,
+                 Note = string.IsNullOrEmpty(t.Note) ? t.ReasonOth : t.Note,
+                 CreatedDate = t.CreatedDate,
+                 CreatedByName = t.UserName + "(" + t.UserRole + ")" +
+                           Convert.ToString(t.IsSystem ? " - System" : ""),
+                 StatusName = t.QueryStatus.GetDescription(),
+                 QueryStatus = t.QueryStatus,
+                 OldValue = t.OldValue,
+                 QueryDescription = t.Note,
+                 ScreeningTemplateValue = t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo == null && t.ScreeningTemplateValue.ScreeningTemplate.ParentId == null ? t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName
+                                            : t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo + " " + t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
+                 Visit = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                                         Convert.ToString(t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
+                 FieldName = t.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
+                 CollectionSource = t.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource,
+                 VolunteerName = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial : t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                 SubjectNo = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber : t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
+                 RandomizationNumber = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber : "",
+                 QueryResponseTime = t.QueryParentId > 0 ? $"{(t.CreatedDate - t.QueryParent.CreatedDate).Value.Days} : {(t.CreatedDate - t.QueryParent.CreatedDate).Value.Hours} : {(t.CreatedDate - t.QueryParent.CreatedDate).Value.Minutes}" : "",
+                 QueryParentId = t.QueryParentId,
+                 DataEntryByName = t.ScreeningTemplateValue.SecurityRole == null || string.IsNullOrEmpty(t.ScreeningTemplateValue.SecurityRole.RoleName)
+                                         ? t.ScreeningTemplateValue.CreatedByUser.UserName
+                                         : t.ScreeningTemplateValue.CreatedByUser.UserName + "(" + t.ScreeningTemplateValue.SecurityRole.RoleShortName + ")",
+             }).OrderByDescending(a => a.Id).ToList();
 
-            var groupbytemp = queryDtos.GroupBy(x => x.ScreeningTemplateValueId).Select(y => new QueryManagementDto
+            var result = (from generate in query.Where(c => c.QueryStatus == QueryStatus.Open)
+                          join answeredTemp in _context.ScreeningTemplateValueQuery.Where(x => x.QueryStatus == QueryStatus.Answered || x.QueryStatus == QueryStatus.Resolved) on generate.Id equals answeredTemp.QueryParentId
+                          into answeredDto
+                          from answered in answeredDto.DefaultIfEmpty()
+                          select new QueryManagementDto
+                          {
+                              Id = generate.Id,
+                              ScreeningTemplateValueId = generate.ScreeningTemplateValueId,
+                              ProjectCode = generate.ProjectCode,
+                              Value = answered == null ? generate.Value : answered.Value,
+                              OldValue = answered == null ? generate.OldValue : answered.OldValue,
+                              ReasonName = generate.ReasonName,
+                              ReasonOth = generate.ReasonOth,
+                              Note = generate.Note,
+                              StatusName = generate.StatusName,
+                              QueryStatus = generate.QueryStatus,
+                              QueryDescription = generate.Note,
+                              ScreeningTemplateValue = generate.ScreeningTemplateValue,
+                              Visit = generate.Visit,
+                              FieldName = generate.FieldName,
+                              CollectionSource = generate.CollectionSource,
+                              VolunteerName = generate.VolunteerName,
+                              SubjectNo = generate.SubjectNo,
+                              RandomizationNumber = generate.RandomizationNumber,
+                              QueryParentId = generate.QueryParentId,
+                              CreatedByName = generate.CreatedByName,
+                              CreatedDate = generate.CreatedDate,
+                              ModifieedByName = answered == null ? null : answered.UserName + "(" + answered.UserRole + ")",
+                              ModifiedDate = answered?.CreatedDate,
+                              DataEntryByName = generate.DataEntryByName,
+                              GenerateToAns = answered == null ? null : $"{(answered.CreatedDate - generate.CreatedDate).Value.Days} : {(answered.CreatedDate - generate.CreatedDate).Value.Hours} : {(answered.CreatedDate - generate.CreatedDate).Value.Minutes}",
+                          }).Where(t => (filters.DataEntryBy == null || filters.DataEntryBy.Contains(t.DataEntryByName))
+                            && (filters.QueryGenerateBy == null || filters.QueryGenerateBy.Contains(t.CreatedByName)))
+                          .OrderBy(x => x.Id).ThenBy(v => v.SubjectNo).ToList();
+
+            result = result.Select(x => { return GetCloseData(query, x); }).ToList();
+
+            return result.Where(b => filters.Status == null || b.QueryStatus.GetDescription() == ((QueryStatus)filters.Status).GetDescription()).ToList();
+        }
+
+        public QueryManagementDto GetCloseData(List<QueryManagementDto> queryData, QueryManagementDto ParentData)
+        {
+            var QueryParentId = ParentData.Id;
+            var AnsweredData = new QueryManagementDto();
+
+            queryData = queryData.Where(x => x.ScreeningTemplateValueId == ParentData.ScreeningTemplateValueId).ToList();
+            for (int i = 0; i < queryData.Count; i++)
             {
-                Id = y.Last().Id,
-                ProjectCode = y.Last().ProjectCode,
-                ReasonName = y.Last().ReasonName,
-                ReasonOth = y.Last().ReasonOth,
-                StatusName = y.Last().StatusName,
-                QueryDescription = y.Last().QueryDescription,
-                QueryStatus = y.Last().QueryStatus,
-                OldValue = y.Last().OldValue,
-                ScreeningTemplateValue = y.Last().ScreeningTemplateValue,
-                Visit = y.Last().Visit,
-                FieldName = y.Last().FieldName,
-                VolunteerName = y.Last().VolunteerName,
-                SubjectNo = y.Last().SubjectNo,
-                RandomizationNumber = y.Last().RandomizationNumber,
-                ClosedByName = y.Where(a => a.QueryStatus == QueryStatus.Closed).LastOrDefault()?.CreatedByName,
-                Value = y.Last().Value,
-                CreatedByName = y.Where(a => a.QueryStatus == QueryStatus.Open).LastOrDefault()?.CreatedByName,
-                ModifieedByName = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedByName,
-                CollectionSource = y.Last().CollectionSource,
-                DataEntryByName = y.Last().DataEntryByName,
-                ClosedDate = y.Where(a => a.QueryStatus == QueryStatus.Closed).LastOrDefault()?.CreatedDate,
-                CreatedDate = y.Where(a => a.QueryStatus == QueryStatus.Open).LastOrDefault()?.CreatedDate,
-                ModifiedDate = y.Where(a => a.QueryStatus == QueryStatus.Resolved).LastOrDefault()?.CreatedDate,
-            }).Where(q => (filters.Status == null
-                || q.QueryStatus.GetDescription() == ((QueryStatus)filters.Status).GetDescription())
-                && (filters.QueryGenerateBy == null || filters.QueryGenerateBy.Contains(q.CreatedByName))
-                && (filters.DataEntryBy == null || filters.DataEntryBy.Contains(q.DataEntryByName))).ToList();
-
-            return groupbytemp.OrderBy(x => x.SubjectNo).ToList();
+                var child = queryData.Where(x => x.QueryParentId == QueryParentId).FirstOrDefault();
+                if (child != null)
+                {
+                    QueryParentId = child.Id;
+                    ParentData.QueryStatus = child.QueryStatus;
+                    ParentData.StatusName = child.QueryStatus.GetDescription();
+                    if (child.QueryStatus == QueryStatus.Closed)
+                    {
+                        ParentData.ClosedDate = child.CreatedDate;
+                        ParentData.ClosedByName = child.CreatedByName;
+                        ParentData.GenerateToClose = $"{(child.CreatedDate - ParentData.CreatedDate).Value.Days} : {(child.CreatedDate - ParentData.CreatedDate).Value.Hours} : {(child.CreatedDate - ParentData.CreatedDate).Value.Minutes}";
+                        ParentData.AnsToClose = AnsweredData.CreatedDate == null ? null : $"{(child.CreatedDate - AnsweredData.CreatedDate).Value.Days} : {(child.CreatedDate - AnsweredData.CreatedDate).Value.Hours} : {(child.CreatedDate - AnsweredData.CreatedDate).Value.Minutes}";
+                        return ParentData;
+                    }
+                    else if (child.QueryStatus == QueryStatus.Answered || child.QueryStatus == QueryStatus.Resolved)
+                    {
+                        AnsweredData = child;
+                    }
+                }
+            }
+            return ParentData;
         }
 
         public IList<QueryManagementDto> GetGenerateQueryBy(int projectId)
@@ -441,7 +464,7 @@ namespace GSC.Respository.Screening
                                  Id = query.Id,
                                  Value = query.UserRole == null || string.IsNullOrEmpty(query.UserRole)
                                      ? query.UserName
-                                     : query.UserName + " (" + query.UserRole + ")" +
+                                     : query.UserName + "(" + query.UserRole + ")" +
                                        Convert.ToString(query.IsSystem ? " - System" : "")
                              }).ToList();
 
@@ -456,39 +479,17 @@ namespace GSC.Respository.Screening
             var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
             var ProjectDesignId = _context.ProjectDesign.Where(x => x.ProjectId == projectId).FirstOrDefault().Id;
 
-            var dataEntryData = (from value in _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit)
-                                 .ThenInclude(x => x.ScreeningEntry)
-                                 .Where(t => ParentProject != null ? t.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId
+            var dataEntryBy = _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit)
+                              .ThenInclude(x => x.ScreeningEntry).Where(t => ParentProject != null ? t.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId
                                  : sites.Contains(t.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId))
-                                 join userTemp in _context.Users.Where(x => x.CreatedBy != null) on value.CreatedBy equals userTemp.Id into userDto
-                                 from user in userDto.DefaultIfEmpty()
-                                 join roleTemp in _context.SecurityRole on value.UserRoleId equals roleTemp.Id into roleDto
-                                 from role in roleDto.DefaultIfEmpty()
-                                 select new QueryManagementDto
-                                 {
-                                     Id = user.Id,
-                                     Value = role == null || string.IsNullOrEmpty(role.RoleName)
-                                         ? user.UserName
-                                         : user.UserName + "(" + role.RoleName + ")",
-                                     RoleId = role == null ? 0 : role.Id,
-                                     UserType = user.UserType
-                                 }).ToList();
+                              .Select(c => new DropDownDto
+                              {
+                                  Id = (int)c.CreatedBy,
+                                  Value = c.UserRoleId == null ? c.CreatedByUser.UserName
+                                        : c.CreatedByUser.UserName + "(" + c.SecurityRole.RoleShortName + ")"
+                              }).ToList();
 
-            var Workflow = (from workflow in _context.ProjectWorkflow.Where(t => t.ProjectDesignId == ProjectDesignId)
-                            join workflowlevelIndependent in _context.ProjectWorkflowIndependent.Where(x => x.DeletedDate == null
-                            && (x.IsStartTemplate == true || x.IsDataEntryUser == true))
-                            on workflow.Id equals workflowlevelIndependent.ProjectWorkflowId
-                            select new QueryManagementDto
-                            {
-                                Id = workflowlevelIndependent.Id,
-                                RoleId = workflowlevelIndependent.SecurityRoleId
-                            }).ToList();
-
-            dataEntryData = dataEntryData.Where(x => Workflow.Any(y => y.RoleId == x.RoleId) && x.UserType == UserMasterUserType.User).ToList();
-
-            var dataEntryBy = dataEntryData.GroupBy(item => new { item.Value, item.Id })
-                .Select(z => new DropDownDto { Id = z.Key.Id, Value = z.Key.Value }).ToList();
-            return dataEntryBy;
+            return dataEntryBy.GroupBy(c => c.Value).Select(z => new DropDownDto { Id = z.FirstOrDefault().Id, Value = z.Key }).ToList();
         }
 
         public WorkFlowLevelDto GetReviewLevel(int screeningTemplateId)

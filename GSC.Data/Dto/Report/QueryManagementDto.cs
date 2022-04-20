@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Screening;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
@@ -15,6 +17,7 @@ namespace GSC.Data.Dto.Report
         private DateTime? _createdDate;
 
         private DateTime? _modifiedDate;
+        private DateTime? _AnsweredDate;
         public int ScreeningTemplateValueId { get; set; }
         public int ScreeningTemplateId { get; set; }
         public int ScreeningEntryId { get; set; }
@@ -28,7 +31,7 @@ namespace GSC.Data.Dto.Report
         public string ReasonOth { get; set; }
         public bool IsSubmitted { get; set; }
         public string QueryDescription { get; set; }
-        public int CollectionSource { get; set; }
+        public CollectionSources CollectionSource { get; set; }
         public string ReasonName { get; set; }
         public QueryStatus? QueryStatus { get; set; }
         public string CreatedByName { get; set; }
@@ -51,6 +54,12 @@ namespace GSC.Data.Dto.Report
             set => _modifiedDate = value?.UtcDateTime();
         }
 
+        public DateTime? AnsweredDate
+        {
+            get => _AnsweredDate?.UtcDateTime();
+            set => _AnsweredDate = value?.UtcDateTime();
+        }
+
         public DateTime? ClosedDate
         {
             get => _closedDate?.UtcDateTime();
@@ -68,6 +77,15 @@ namespace GSC.Data.Dto.Report
         public string ProjectCode { get; set; }
         public int? RoleId { get; set; }
         public UserMasterUserType? UserType { get; set; }
+        public string GenerateToAns { get; set; }
+        public string AnsToClose { get; set; }
+        public string GenerateToClose { get; set; }
+        public string QueryResponseTime { get; set; }
+
+        public int? QueryParentId { get; set; }
+
+        [ForeignKey("QueryParentId")]
+        public ScreeningTemplateValueQuery QueryParent { get; set; }
     }
 
     public class QuerySearchDto : BaseDto
