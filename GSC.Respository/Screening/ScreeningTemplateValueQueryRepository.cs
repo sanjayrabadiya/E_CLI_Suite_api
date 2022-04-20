@@ -542,6 +542,10 @@ namespace GSC.Respository.Screening
                         .Select(t => t.ValueName).ToList());
 
                 _screeningTemplateValueRepository.UpdateChild(screeningTemplateValueQueryDto.Children.ToList());
+
+                if (QueryStatus.Answered.GetDescription() == status && queryValue != queryOldValue)
+                    status = QueryStatus.Resolved.GetDescription();
+
             }
             else
             {
