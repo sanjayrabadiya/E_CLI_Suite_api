@@ -427,7 +427,7 @@ namespace GSC.Api.Controllers.Project.Design
                             }
                             // Change by Tinku Mahato (14-04-2022)
                             if (x.Id == 0)
-                                _variableValueLanguageRepository.Add(x);        
+                                _variableValueLanguageRepository.Add(x);
                             else
                                 _variableValueLanguageRepository.Update(x);
                         });
@@ -443,6 +443,7 @@ namespace GSC.Api.Controllers.Project.Design
 
 
         [HttpDelete("{id}")]
+        [TransactionRequired()]
         public ActionResult Delete(int id)
         {
             var record = _projectDesignTemplateRepository.Find(id);
@@ -471,28 +472,24 @@ namespace GSC.Api.Controllers.Project.Design
                         x.InActiveVersion = checkVersion.VersionNumber;
                         _projectDesignVariableRepository.Update(x);
                     });
-
-                    _uow.Save();
                 }
                 else
                 {
                     _projectDesignTemplateRepository.Delete(record);
-                    _uow.Save();
-
-                    if (_projectDesignTemplateRepository.FindBy(t =>
-                        t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null).Any())
-                    {
-                        var minOrder = _projectDesignTemplateRepository
-                            .FindBy(t => t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null)
-                            .Min(t => t.DesignOrder);
-                        var firstId = _projectDesignTemplateRepository.FindBy(t =>
-                            t.ProjectDesignVisitId == record.ProjectDesignVisitId && t.DeletedDate == null &&
-                            t.DesignOrder == minOrder).First().Id;
-                        ChangeTemplateDesignOrder(firstId, 0);
-                    }
                 }
+                _uow.Save();
 
-
+                int i = 0;
+                var lists = _projectDesignTemplateRepository.All.Where(x => x.ProjectDesignVisitId == record.ProjectDesignVisitId && x.DeletedDate == null).OrderBy(r => r.DesignOrder).ToList();
+                lists.ForEach(r =>
+                {
+                    if (r.InActiveVersion != null)
+                        r.DesignOrder = i;
+                    else
+                        r.DesignOrder = ++i;
+                    _projectDesignTemplateRepository.Update(r);
+                });
+                _uow.Save();
                 return Ok();
             }
         }
@@ -601,6 +598,7 @@ namespace GSC.Api.Controllers.Project.Design
 
         [HttpPut]
         [Route("SetActiveFromInActive/{id}")]
+        [TransactionRequired]
         public IActionResult SetActiveFromInActive(int id)
         {
             if (id <= 0) return BadRequest();
@@ -620,6 +618,17 @@ namespace GSC.Api.Controllers.Project.Design
             template.InActiveVersion = null;
             _projectDesignTemplateRepository.Update(template);
 
+            _uow.Save();
+            int i = 0;
+            var lists = _projectDesignTemplateRepository.All.Where(x => x.ProjectDesignVisitId == template.ProjectDesignVisitId && x.DeletedDate == null).OrderBy(r => r.DesignOrder).ToList();
+            lists.ForEach(r =>
+            {
+                if (r.InActiveVersion != null)
+                    r.DesignOrder = i;
+                else
+                    r.DesignOrder = ++i;
+                _projectDesignTemplateRepository.Update(r);
+            });
             _uow.Save();
 
             return Ok();
