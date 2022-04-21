@@ -264,7 +264,7 @@ namespace GSC.Api.Controllers.Screening
 
             _uow.Save();
 
-            return Ok(id);
+            return Ok(screeningTemplate);
         }
 
 
