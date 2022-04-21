@@ -50,7 +50,7 @@ namespace GSC.Data.Dto.Project.EditCheck
         public int? FetchingProjectDesignTemplateId { get; set; }
         public int? FetchingProjectDesignVariableId { get; set; }
 
-        public int? FetchingProjectDesignVisitId { get; set; }
+       // public int? FetchingProjectDesignVisitId { get; set; }
     }
 
     public class EditCheckValidate
