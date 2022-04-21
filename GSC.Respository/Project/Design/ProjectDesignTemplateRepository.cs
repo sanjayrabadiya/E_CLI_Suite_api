@@ -294,5 +294,13 @@ namespace GSC.Respository.Project.Design
             return result;
         }
 
+        public bool GetAllTemplateIsLocked(int ProjectDesignId)
+        {
+            var projectDesignTemplate = All.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == ProjectDesignId).ToList();
+
+            var screeningTemplate = _context.ScreeningTemplate.Where(x => projectDesignTemplate.Select(y => y.Id).Contains(x.ProjectDesignTemplateId)).ToList();
+
+            return screeningTemplate.Count() != 0 && screeningTemplate.All(x => x.IsLocked == true);
+        }
     }
 }

@@ -329,8 +329,8 @@ namespace GSC.Respository.Attendance
             result.ForEach(x =>
             {
                 x.ParentProjectCode = projectCode;
-                //var screeningTemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
-                //x.IsLocked = screeningTemplate.Count() <= 0 || screeningTemplate.Any(y => y.IsLocked == false) ? false : true;
+                var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
+                x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
             });
 
             return result;

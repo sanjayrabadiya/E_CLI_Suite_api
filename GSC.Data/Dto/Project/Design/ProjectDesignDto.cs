@@ -21,5 +21,6 @@ namespace GSC.Data.Dto.Project.Design
         public string LiveVersion { get; set; }
         public ProjectDto Project { get; set; }
         public int? CompanyId { get; set; }
+        public bool LockedFullProject { get; set; }
     }
 }
