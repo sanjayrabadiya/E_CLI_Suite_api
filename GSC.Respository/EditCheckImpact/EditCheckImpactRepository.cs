@@ -398,7 +398,8 @@ namespace GSC.Respository.EditCheckImpact
                             {
                                 var refTemplate = _impactService.GetScreeningTemplate((int)r.FetchingProjectDesignTemplateId, screeningEntryId,
                                  r.ProjectDesignVisitId == r.ProjectDesignVisitId ? screeningVisitId : (int?)null);
-                                editCheckTarget.Value = _impactService.GetVariableValue(refTemplate.Id, r.FetchingProjectDesignVariableId ?? 0);
+                                if (refTemplate != null)
+                                    editCheckTarget.Value = _impactService.GetVariableValue(refTemplate.Id, r.FetchingProjectDesignVariableId ?? 0);
                             }
                             if (_templateScreeningVariableDtos != null)
                                 _templateScreeningVariableDtos.Add(new TemplateScreeningVariableDto
