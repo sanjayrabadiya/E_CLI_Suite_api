@@ -70,7 +70,6 @@ namespace GSC.Respository.Project.Workflow
                 result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
                  && x.DeletedDate == null).Max(a => (short?)a.LevelNo) ?? 0;
 
-                result += 1;
             }
 
 

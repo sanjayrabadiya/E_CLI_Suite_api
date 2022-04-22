@@ -143,7 +143,7 @@ namespace GSC.Respository.Screening
                     screeningTemplateValue.AcknowledgeLevel = 1;
 
                 if (screeningTemplateValue.AcknowledgeLevel > screeningTemplate.ReviewLevel)
-                    screeningTemplateValue.AcknowledgeLevel = screeningTemplate.ReviewLevel;
+                    screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
             }
 
 
@@ -268,7 +268,7 @@ namespace GSC.Respository.Screening
 
             ClosedSelfCorrection(screeningTemplateValue, (short)screeningTemplate.ReviewLevel);
 
-            if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel == screeningTemplate.ReviewLevel)
+            if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel > screeningTemplate.ReviewLevel)
                 screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
 
             Save(screeningTemplateValueQuery);
@@ -310,8 +310,8 @@ namespace GSC.Respository.Screening
                     screeningTemplateValue.QueryStatus = QueryStatus.Closed;
                     screeningTemplateValue.AcknowledgeLevel = null;
                 }
-
             }
+
 
             screeningTemplateValue.IsSystem = false;
             screeningTemplateValue.Value = screeningTemplateValueQueryDto.Value;
