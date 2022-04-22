@@ -137,7 +137,7 @@ namespace GSC.Respository.Screening
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
                 else if (workFlowLevel.IsWorkFlowBreak)
                 {
-                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetMaxLevelWorkBreak(workFlowLevel.ProjectDesignId);
                 }
                 else
                     screeningTemplateValue.AcknowledgeLevel = 1;
@@ -268,7 +268,7 @@ namespace GSC.Respository.Screening
 
             ClosedSelfCorrection(screeningTemplateValue, (short)screeningTemplate.ReviewLevel);
 
-            if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel > screeningTemplate.ReviewLevel)
+            if (screeningTemplateValue.QueryStatus != QueryStatus.Closed && screeningTemplateValue.AcknowledgeLevel >= screeningTemplate.ReviewLevel)
                 screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
 
             Save(screeningTemplateValueQuery);
@@ -299,7 +299,7 @@ namespace GSC.Respository.Screening
                 screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
 
                 if (workFlowLevel.IsWorkFlowBreak)
-                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetMaxLevelWorkBreak(workFlowLevel.ProjectDesignId);
                 else if (workFlowLevel.IsNoCRF)
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
                 else
