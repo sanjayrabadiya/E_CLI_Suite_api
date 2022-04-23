@@ -57,24 +57,6 @@ namespace GSC.Respository.Project.Workflow
 
         }
 
-        public short GetNextLevelWorkBreak(int projectDesignId, short levelNo)
-        {
-
-            var result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
-                && x.DeletedDate == null && x.IsWorkFlowBreak
-                && x.LevelNo > levelNo).Max(a => (short?)a.LevelNo) ?? 0;
-
-            if (result == 0)
-            {
-                result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
-                 && x.DeletedDate == null).Max(a => (short?)a.LevelNo) ?? 0;
-
-            }
-
-            return result;
-
-        }
-
 
         public short GetMaxLevelWorkBreak(int projectDesignId)
         {
