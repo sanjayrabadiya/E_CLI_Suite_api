@@ -299,7 +299,7 @@ namespace GSC.Respository.Screening
                 if (workFlowLevel.IsWorkFlowBreak)
                 {
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetMaxLevelWorkBreak(workFlowLevel.ProjectDesignId);
-                    if (screeningTemplateValue.AcknowledgeLevel < screeningTemplate.ReviewLevel)
+                    if (workFlowLevel.LevelNo > 0 && screeningTemplateValue.AcknowledgeLevel < screeningTemplate.ReviewLevel)
                         screeningTemplateValue.AcknowledgeLevel += 1;
                 }
 
