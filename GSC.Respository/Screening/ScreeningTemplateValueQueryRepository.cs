@@ -142,7 +142,7 @@ namespace GSC.Respository.Screening
                 else
                     screeningTemplateValue.AcknowledgeLevel = 1;
 
-                if (screeningTemplateValue.AcknowledgeLevel > screeningTemplate.ReviewLevel)
+                if (screeningTemplateValue.AcknowledgeLevel >= screeningTemplate.ReviewLevel)
                     screeningTemplateValue.AcknowledgeLevel = screeningTemplateValue.ReviewLevel;
             }
 
@@ -250,8 +250,6 @@ namespace GSC.Respository.Screening
 
             if (workFlowLevel.IsNoCRF)
                 screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
-            else if (workFlowLevel.IsWorkFlowBreak)
-                screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNextLevelWorkBreak(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
             else
                 screeningTemplateValue.AcknowledgeLevel = (short)(workFlowLevel.LevelNo + 1);
 
@@ -299,7 +297,12 @@ namespace GSC.Respository.Screening
                 screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
 
                 if (workFlowLevel.IsWorkFlowBreak)
+                {
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetMaxLevelWorkBreak(workFlowLevel.ProjectDesignId);
+                    if (screeningTemplateValue.AcknowledgeLevel < screeningTemplate.ReviewLevel)
+                        screeningTemplateValue.AcknowledgeLevel += 1;
+                }
+
                 else if (workFlowLevel.IsNoCRF)
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
                 else
