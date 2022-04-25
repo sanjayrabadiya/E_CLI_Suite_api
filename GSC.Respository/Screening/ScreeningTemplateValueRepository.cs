@@ -67,6 +67,7 @@ namespace GSC.Respository.Screening
             _uploadSettingRepository = uploadSettingRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
+            _projectRightRepository = projectRightRepository;
             _mapper = mapper;
         }
 
