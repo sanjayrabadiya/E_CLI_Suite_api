@@ -27,5 +27,9 @@ namespace GSC.Respository.Project.Design
         IList<ProjectDesignVariableBasicDto> GetVariabeBasic(int projectDesignTemplateId, CheckVersionDto checkVersion);
         IList<DropDownDto> GetVariabeDropDownForLabManagementMapping(int projectDesignTemplateId);
         IList<DropDownDto> GetVariabeDropDownForRelationMapping(int projectDesignTemplateId);
+
+        IList<DropDownVaribleDto> GetVariabeAnnotationDropDownforhardsoftfetch(int projectDesignTemplateId, int variableId);
+
+        
     }
 }

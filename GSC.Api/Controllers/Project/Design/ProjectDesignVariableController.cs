@@ -311,6 +311,13 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
+        [Route("GetVariabeAnnotationDropDownforhardsoftfetch/{projectDesignTemplateId}/{variableId}")]
+        public IActionResult GetVariabeAnnotationDropDownforhardsoftfetch(int projectDesignTemplateId, int variableId)
+        {
+            return Ok(_projectDesignVariableRepository.GetVariabeAnnotationDropDownforhardsoftfetch(projectDesignTemplateId, variableId));
+        }
+
+        [HttpGet]
         [Route("GetVariabeAnnotationByDomainDropDown/{domainId}/{projectId}")]
         public IActionResult GetVariabeAnnotationByDomainDropDown(int domainId, int projectId)
         {
@@ -480,5 +487,6 @@ namespace GSC.Api.Controllers.Project.Design
 
             return Ok(saveVarialbeId);
         }
+
     }
 }

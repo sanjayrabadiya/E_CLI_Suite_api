@@ -53,6 +53,39 @@ namespace GSC.Respository.Project.Design
 
         }
 
+        public IList<DropDownVaribleDto> GetVariabeAnnotationDropDownforhardsoftfetch(int projectDesignTemplateId, int variableId)
+        {
+            var result = All.Where(x => x.DeletedDate == null
+                                  && x.ProjectDesignTemplateId == projectDesignTemplateId);
+
+            var data = result.OrderBy(o => o.DesignOrder).Select(c => new DropDownVaribleDto
+            {
+                Id = c.Id,
+                Value = c.DesignOrder + ". " + c.VariableName +
+                                        Convert.ToString(string.IsNullOrEmpty(c.Annotation) ? "" : " [" + c.Annotation + "]"),
+                Code = c.Annotation,
+                DataType = c.DataType,
+                CollectionSources = c.CollectionSource,
+                ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList()),
+                InActive = c.InActiveVersion != null
+            }).Where(x => x.CollectionSources == CollectionSources.TextBox ||
+            x.CollectionSources == CollectionSources.MultilineTextBox ||
+            x.CollectionSources == CollectionSources.Date ||
+            x.CollectionSources == CollectionSources.DateTime
+            || x.CollectionSources == CollectionSources.Time).ToList();
+
+            if (variableId > 0)
+            {
+                var variable = _context.ProjectDesignVariable.Where(x => x.Id == variableId).FirstOrDefault();
+                if (variable != null)
+                {
+                    data = data.Where(x => x.Id != variableId && x.CollectionSources == variable.CollectionSource).ToList();
+                }
+            }
+            return data;
+
+        }
+
         public IList<DropDownVaribleAnnotationDto> GetVariabeAnnotationByDomainDropDown(int domainId, int projectId)
         {
             var result = All.Where(x => x.DeletedDate == null
@@ -282,7 +315,5 @@ namespace GSC.Respository.Project.Design
                     ExtraData = c.DesignOrder
                 }).OrderBy(o => o.ExtraData).ToList();
         }
-
-
     }
 }
