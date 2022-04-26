@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Entities.Project.Workflow;
 using GSC.Domain.Context;
@@ -58,22 +57,14 @@ namespace GSC.Respository.Project.Workflow
 
         }
 
-        public short GetNextLevelWorkBreak(int projectDesignId, short levelNo)
+
+        public short GetMaxLevelWorkBreak(int projectDesignId)
         {
 
             var result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
-                && x.DeletedDate == null && x.IsWorkFlowBreak
-                && x.LevelNo > levelNo).Max(a => (short?)a.LevelNo) ?? 0;
+                && x.DeletedDate == null && x.IsWorkFlowBreak).Max(a => (short?)a.LevelNo) ?? 0;
 
-            if (result == 0)
-            {
-                result = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == projectDesignId
-                 && x.DeletedDate == null).Max(a => (short?)a.LevelNo) ?? 0;
-
-                result += 1;
-            }
-
-
+       
             return result;
 
         }

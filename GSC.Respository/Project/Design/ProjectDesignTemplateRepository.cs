@@ -275,8 +275,8 @@ namespace GSC.Respository.Project.Design
         {
             var checkVersion = CheckStudyVersion(projectDesignVisitId);
             var vistInActiveVersion = _projectDesignVisitRepository.All.Where(x => x.Id == projectDesignVisitId).Select(t => t.InActiveVersion).FirstOrDefault();
-
-            var result = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ProjectTo<ProjectDesignTemplateDto>(_mapper.ConfigurationProvider).ToList();
+            var list = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ToList();
+            var result = _mapper.Map<List<ProjectDesignTemplateDto>>(list).OrderBy(t => t.DesignOrder).ToList();
             result.ForEach(x =>
             {
                 x.AllowActive = vistInActiveVersion != x.InActiveVersion && checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
@@ -294,5 +294,13 @@ namespace GSC.Respository.Project.Design
             return result;
         }
 
+        public bool GetAllTemplateIsLocked(int ProjectDesignId)
+        {
+            var projectDesignTemplate = All.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == ProjectDesignId).ToList();
+
+            var screeningTemplate = _context.ScreeningTemplate.Where(x => projectDesignTemplate.Select(y => y.Id).Contains(x.ProjectDesignTemplateId)).ToList();
+
+            return screeningTemplate.Count() != 0 && screeningTemplate.All(x => x.IsLocked == true);
+        }
     }
 }

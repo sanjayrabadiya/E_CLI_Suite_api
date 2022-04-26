@@ -201,16 +201,8 @@ namespace GSC.Api.Controllers.Screening
             var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(id);
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
 
-            if (workflowlevel.IsWorkFlowBreak)
-            {
-                screeningTemplate.ReviewLevel = Convert.ToInt16(workflowlevel.LevelNo + 1);
-                screeningTemplate.StartLevel = workflowlevel.LevelNo;
-            }
-            else
-            {
-                screeningTemplate.ReviewLevel = 1;
-                screeningTemplate.StartLevel = -1;
-            }
+            screeningTemplate.ReviewLevel = 1;
+            screeningTemplate.StartLevel = -1;
 
             var isNonCRF = _screeningTemplateRepository.All.Any(x => x.Id == id && x.ScreeningVisit.ProjectDesignVisit.IsNonCRF);
             if (isNonCRF)
@@ -264,7 +256,7 @@ namespace GSC.Api.Controllers.Screening
 
             _uow.Save();
 
-            return Ok(id);
+            return Ok(screeningTemplate);
         }
 
 

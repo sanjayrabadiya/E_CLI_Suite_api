@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GSC.Common.GenericRespository;
+﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Entities.Project.Workflow;
 
@@ -10,8 +9,8 @@ namespace GSC.Respository.Project.Workflow
         WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId);
         int GetMaxWorkFlowLevel(int projectDesignId);
         bool IsElectronicsSignatureComplete(int ProjectDesignId);
-
         short GetNoCRFLevel(int projectDesignId, short levelNo);
-        short GetNextLevelWorkBreak(int projectDesignId, short levelNo);
+        short GetMaxLevelWorkBreak(int projectDesignId);
+
     }
 }

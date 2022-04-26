@@ -633,8 +633,10 @@ namespace GSC.Respository.Project.Design
                         variableValue.InActiveVersion = checkVersion.VersionNumber;
                         Update(variableValue);
                     }
+
+                    // change by vipul
                     else if (x.Id > 0 && x.IsDeleted)
-                        Remove(variableValue);
+                        Delete(variableValue);
                     else if (x.Id > 0)
                     {
                         seqNo += 1;

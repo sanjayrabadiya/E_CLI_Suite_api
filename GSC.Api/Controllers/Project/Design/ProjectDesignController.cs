@@ -20,6 +20,7 @@ namespace GSC.Api.Controllers.Project.Design
 
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
+        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
@@ -29,7 +30,8 @@ namespace GSC.Api.Controllers.Project.Design
             IUnitOfWork uow, IMapper mapper,
             IGSCContext context,
             IStudyVersionRepository studyVersionRepository,
-            IUserRecentItemRepository userRecentItemRepository)
+            IUserRecentItemRepository userRecentItemRepository,
+            IProjectDesignTemplateRepository projectDesignTemplateRepository)
         {
             _projectDesignRepository = projectDesignRepository;
             _uow = uow;
@@ -37,6 +39,7 @@ namespace GSC.Api.Controllers.Project.Design
             _context = context;
             _studyVersionRepository = studyVersionRepository;
             _userRecentItemRepository = userRecentItemRepository;
+            _projectDesignTemplateRepository = projectDesignTemplateRepository;
         }
 
         [HttpGet("{id}")]
@@ -46,6 +49,7 @@ namespace GSC.Api.Controllers.Project.Design
             var projectDesign = _projectDesignRepository.FindByInclude(x => x.Id == id, x => x.Project)
                 .FirstOrDefault();
             var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
+            projectDesignDto.LockedFullProject = _projectDesignTemplateRepository.GetAllTemplateIsLocked(id);
             projectDesignDto.Locked = !_studyVersionRepository.IsOnTrialByProjectDesing(id);
             projectDesignDto.LiveVersion = _studyVersionRepository.All.Where(x => x.ProjectDesignId == id && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
             projectDesignDto.AnyLive = _studyVersionRepository.All.Any(x => x.ProjectDesignId == id && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive);

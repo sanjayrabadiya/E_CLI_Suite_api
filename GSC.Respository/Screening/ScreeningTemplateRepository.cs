@@ -287,6 +287,7 @@ namespace GSC.Respository.Screening
                                 ProjectDesignVariableValueId = x.FirstOrDefault().ProjectDesignVariableValueId,
                                 Value = x.FirstOrDefault().Value,
                                 LevelNo = x.FirstOrDefault().LevelNo,
+                                DeletedDate = x.FirstOrDefault().DeletedDate
                             }).ToList();
 
 
@@ -324,10 +325,11 @@ namespace GSC.Respository.Screening
                                 obj.ScreeningTemplateValueChildId = child.Id;
                                 obj.LevelNo = child.LevelNo;
                                 obj.ValueName = val.ValueName;
+                                obj.IsDeleted = child.DeletedDate == null ? false : true;
                                 ValuesList.Add(obj);
                             });
                         });
-                        variable.Values = ValuesList;
+                        variable.Values = ValuesList.Where(x => x.IsDeleted == false).ToList();
                     }
 
                     variable.IsSaved = variable.IsValid;

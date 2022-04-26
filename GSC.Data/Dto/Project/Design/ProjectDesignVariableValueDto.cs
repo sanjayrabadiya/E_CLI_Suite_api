@@ -39,6 +39,7 @@ namespace GSC.Data.Dto.Project.Design
         public double? StudyVersion { get; set; }
         public double? InActiveVersion { get; set; }
         public short? LevelNo { get; set; }
+        public bool IsDeleted { get; set; }
     }
 
    
