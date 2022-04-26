@@ -88,6 +88,12 @@ namespace GSC.Api.Controllers.Project.Design
             if (projectDesignVisitId <= 0) return BadRequest();
 
             var templates = _projectDesignTemplateRepository.GetTemplateByVisitId(projectDesignVisitId);
+            templates.ForEach(t =>
+            {
+                t.DomainName = _domainRepository.Find(t.DomainId)?.DomainName;
+
+            });
+
             return Ok(templates);
         }
 
