@@ -68,20 +68,23 @@ namespace GSC.Respository.Project.Design
                 CollectionSources = c.CollectionSource,
                 ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList()),
                 InActive = c.InActiveVersion != null
-            }).Where(x => x.CollectionSources == CollectionSources.TextBox ||
-            x.CollectionSources == CollectionSources.MultilineTextBox ||
-            x.CollectionSources == CollectionSources.Date ||
-            x.CollectionSources == CollectionSources.DateTime
-            || x.CollectionSources == CollectionSources.Time).ToList();
+            }).Where(x => x.Id != variableId).ToList();
+            //validation comment temperory - prakash
+            //    .Where(x => x.CollectionSources == CollectionSources.TextBox ||
+            //x.CollectionSources == CollectionSources.MultilineTextBox ||
+            //x.CollectionSources == CollectionSources.Date ||
+            //x.CollectionSources == CollectionSources.DateTime
+            //|| x.CollectionSources == CollectionSources.Time)
 
-            if (variableId > 0)
-            {
-                var variable = _context.ProjectDesignVariable.Where(x => x.Id == variableId).FirstOrDefault();
-                if (variable != null)
-                {
-                    data = data.Where(x => x.Id != variableId && x.CollectionSources == variable.CollectionSource).ToList();
-                }
-            }
+
+            //if (variableId > 0)
+            //{
+            //    var variable = _context.ProjectDesignVariable.Where(x => x.Id == variableId).FirstOrDefault();
+            //    if (variable != null)
+            //    {
+            //        data = data.Where(x => x.Id != variableId && x.CollectionSources == variable.CollectionSource).ToList();
+            //    }
+            //}
             return data;
 
         }
