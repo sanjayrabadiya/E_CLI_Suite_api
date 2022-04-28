@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.Etmf
         public string ItemName { get; set; }
         public ProjectWorkplace ProjectWorkplace { get; set; }
         public List<ProjectWorkPlaceZone> ProjectWorkPlaceZone { get; set; }
+        public List<EtmfUserPermission> EtmfUserPermission { get; set; }
 
     }
 }
