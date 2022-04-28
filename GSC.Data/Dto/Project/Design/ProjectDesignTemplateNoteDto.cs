@@ -11,6 +11,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignTemplateId { get; set; }
         public string Note { get; set; }
         public bool IsPreview { get; set; }
+        public bool? IsBottom { get; set; }
         public string ProjectDesignTemplateName { get; set; }
 
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
@@ -21,6 +22,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignTemplateId { get; set; }
         public string ProjectDesignTemplateName { get; set; }
         public string Note { get; set; }
+        public bool? IsBottom { get; set; }
         public bool IsPreview { get; set; }
 
     }

@@ -12,6 +12,7 @@ namespace GSC.Data.Entities.Project.Design
         public int ProjectDesignTemplateId { get; set; }
         public string Note { get; set; }
         public bool IsPreview { get; set; }
+        public bool? IsBottom { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public List<TemplateNoteLanguage> TemplateNoteLanguage { get; set; }
     }
