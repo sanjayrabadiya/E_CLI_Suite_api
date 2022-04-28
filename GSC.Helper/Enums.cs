@@ -751,6 +751,15 @@ namespace GSC.Helper
         [Description("Form Approved")] FormApproved = 5,
     }
 
+    public enum MonitoringSiteStatus : short
+    {
+        [Description("Approved")] Approved = 1,
+        [Description("Rejected")] Rejected = 2,
+        [Description("Terminated")] Terminated = 3,
+        [Description("On Hold")] OnHold = 4,
+        [Description("Close Out")] CloseOut = 5,
+    }
+
 
     public enum LabManagementUploadStatus : short
     {

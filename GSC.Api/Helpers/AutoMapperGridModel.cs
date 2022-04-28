@@ -511,6 +511,10 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.ResponseBy, a => a.MapFrom(m => m.User.UserName))
                 .ForMember(x => x.CloseBy, a => a.MapFrom(m => m.CloseUser.UserName))
                 .ReverseMap();
+
+            CreateMap<CtmsMonitoringStatus, CtmsMonitoringStatusGridDto>()
+                .ForMember(x => x.StatusName, a => a.MapFrom(m => m.Status.GetDescription()))
+                .ReverseMap();
         }
     }
 }

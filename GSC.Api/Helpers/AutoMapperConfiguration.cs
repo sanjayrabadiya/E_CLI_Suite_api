@@ -442,6 +442,7 @@ namespace GSC.Api.Helpers
             CreateMap<VariableRemarks, StudyLevelFormVariableRemarks>().ReverseMap();
 
             CreateMap<CtmsMonitoring, CtmsMonitoringDto>().ReverseMap();
+            CreateMap<CtmsMonitoringStatus, CtmsMonitoringStatusDto>().ReverseMap();
             CreateMap<CtmsActionPoint, CtmsActionPointDto>().ReverseMap();
             CreateMap<CtmsMonitoringReport, CtmsMonitoringReportDto>().ReverseMap();
             CreateMap<CtmsMonitoringReportReview, CtmsMonitoringReportReviewDto>().ReverseMap();

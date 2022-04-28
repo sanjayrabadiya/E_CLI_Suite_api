@@ -160,5 +160,10 @@ namespace GSC.Respository.CTMS
         {
             return All.Any(x => x.DeletedDate == null && x.CtmsMonitoringReportId == id);
         }
+
+        public bool GetReviewSendToAnyone(int CtmsMonitoringReportId)
+        {
+            return All.Any(x => x.DeletedDate == null && x.CtmsMonitoringReportId == CtmsMonitoringReportId && x.ApproveDate == null);
+        }
     }
 }

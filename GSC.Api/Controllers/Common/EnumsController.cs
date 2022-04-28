@@ -629,5 +629,17 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription(),
                 }).OrderBy(o => o.Id).ToList();
         }
+
+        [HttpGet]
+        [Route("GetMonitoringSiteStatus")]
+        public IList<DropDownEnum> GetMonitoringSiteStatus()
+        {
+            return Enum.GetValues(typeof(MonitoringSiteStatus))
+                .Cast<MonitoringSiteStatus>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription(),
+                }).OrderBy(o => o.Id).ToList();
+        }
     }
 }

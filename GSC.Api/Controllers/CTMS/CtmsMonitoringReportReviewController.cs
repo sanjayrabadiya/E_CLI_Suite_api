@@ -149,5 +149,13 @@ namespace GSC.Api.Controllers.CTMS
             var result = _ctmsMonitoringReportReviewRepository.isAnyReportReviewer(Id);
             return Ok(result);
         }
+
+        [Route("GetReviewSendToAnyone/{CtmsMonitoringReportId}")]
+        [HttpGet]
+        public IActionResult GetReviewSendToAnyone(int CtmsMonitoringReportId)
+        {
+            var result = _ctmsMonitoringReportReviewRepository.GetReviewSendToAnyone(CtmsMonitoringReportId);
+            return Ok(result);
+        }
     }
 }
