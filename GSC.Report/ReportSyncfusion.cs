@@ -63,6 +63,7 @@ namespace GSC.Report
         // private readonly PdfFont regularfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
         private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
         private readonly PdfFont regularfont;
+        private readonly PdfFont italicfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 10, PdfFontStyle.Italic);
         private readonly Stream fontStream;
         private readonly ISyncConfigurationMasterRepository _syncConfigurationMasterRepository;
 
@@ -234,7 +235,7 @@ namespace GSC.Report
             //graphics.DrawString(title, regularfont, PdfBrushes.Black, new PointF(point.X, point.Y));
 
             bookmarks.Destination = new PdfDestination(page.Page, new PointF(0, page.Bounds.Y));
-            // bookmarks.Destination = new PdfDestination(page.Page);
+            //bookmarks.Destination = new PdfDestination(page.Page);
             bookmarks.Destination.Location = new PointF(0, page.Bounds.Y);
 
             return bookmarks;
@@ -268,23 +269,46 @@ namespace GSC.Report
         }
         private PdfPageTemplateElement VisitTemplateHeader(PdfDocument doc, string projectcode, string vistName, string screeningNO, string subjectNo, string Initial, bool Isscreeningno, bool isSubjectNo, bool IsInitial, bool isSiteCode)
         {
-            RectangleF rect = new RectangleF(0, 80, doc.Pages[0].GetClientSize().Width, 120);
-            PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
-            PdfStringFormat stringFormat = new PdfStringFormat();
-            stringFormat.MeasureTrailingSpaces = true;
-            stringFormat.WordWrap = PdfWordWrapType.Character;
+            if (vistName.Length < 45)
+            {
+                RectangleF rect = new RectangleF(0, 80, doc.Pages[0].GetClientSize().Width, 120);
+                PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
+                PdfStringFormat stringFormat = new PdfStringFormat();
+                stringFormat.MeasureTrailingSpaces = true;
+                stringFormat.WordWrap = PdfWordWrapType.Character;
 
-            //Draw title
-            header.Graphics.DrawString($"Visit Name :- {vistName}", headerfont, PdfBrushes.Black, new RectangleF(0, 80, 340, header.Height), stringFormat);
-            if (Isscreeningno)
-                header.Graphics.DrawString($"Screening No.:- {screeningNO}", headerfont, PdfBrushes.Black, new RectangleF(0, 100, 340, header.Height), stringFormat);
-            if (isSubjectNo)
-                header.Graphics.DrawString($"Subject No :- {subjectNo}", headerfont, PdfBrushes.Black, new RectangleF(350, 80, header.Width, header.Height), stringFormat);
-            if (IsInitial)
-                header.Graphics.DrawString($"Initial :- {Initial}", headerfont, PdfBrushes.Black, new RectangleF(350, 100, header.Width, header.Height), stringFormat);
-            if (isSiteCode)
-                header.Graphics.DrawString($"SiteCode :- {projectcode}", headerfont, PdfBrushes.Black, new RectangleF(0, 120, header.Width, header.Height), stringFormat);
-            return header;
+                //Draw title
+                header.Graphics.DrawString($"Visit : {vistName}", headerfont, PdfBrushes.Black, new RectangleF(0, 80, 340, header.Height), stringFormat);
+                if (Isscreeningno)
+                    header.Graphics.DrawString($"Screening No.: {screeningNO}", headerfont, PdfBrushes.Black, new RectangleF(0, 100, 340, header.Height), stringFormat);
+                if (isSubjectNo)
+                    header.Graphics.DrawString($"Subject No : {subjectNo}", headerfont, PdfBrushes.Black, new RectangleF(350, 80, header.Width, header.Height), stringFormat);
+                if (IsInitial)
+                    header.Graphics.DrawString($"Initial : {Initial}", headerfont, PdfBrushes.Black, new RectangleF(350, 100, header.Width, header.Height), stringFormat);
+                if (isSiteCode)
+                    header.Graphics.DrawString($"SiteCode : {projectcode}", headerfont, PdfBrushes.Black, new RectangleF(0, 120, header.Width, header.Height), stringFormat);
+                return header;
+            }
+            else
+            {
+                RectangleF rect = new RectangleF(0, 90, doc.Pages[0].GetClientSize().Width, 150);
+                PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
+                PdfStringFormat stringFormat = new PdfStringFormat();
+                stringFormat.MeasureTrailingSpaces = true;
+                stringFormat.WordWrap = PdfWordWrapType.Word;
+
+                //Draw title
+                header.Graphics.DrawString($"Visit : {vistName}", headerfont, PdfBrushes.Black, new RectangleF(0, 80, 340, header.Height), stringFormat);
+                if (Isscreeningno)
+                    header.Graphics.DrawString($"Screening No.: {screeningNO}", headerfont, PdfBrushes.Black, new RectangleF(0, 110, 340, header.Height), stringFormat);
+                if (isSubjectNo)
+                    header.Graphics.DrawString($"Subject No : {subjectNo}", headerfont, PdfBrushes.Black, new RectangleF(350, 80, header.Width, header.Height), stringFormat);
+                if (IsInitial)
+                    header.Graphics.DrawString($"Initial : {Initial}", headerfont, PdfBrushes.Black, new RectangleF(350, 110, header.Width, header.Height), stringFormat);
+                if (isSiteCode)
+                    header.Graphics.DrawString($"SiteCode : {projectcode}", headerfont, PdfBrushes.Black, new RectangleF(0, 120, header.Width, header.Height), stringFormat);
+                return header;
+            }
         }
 
         public FileStreamResult GetProjectDesign(ReportSettingNew reportSetting)
@@ -589,10 +613,15 @@ namespace GSC.Report
             PdfBookmark bookmark = AddBookmark(result, $"{vistitName}", true);
             foreach (var designt in designtemplate.OrderBy(i => i.DesignOrder))
             {
+
                 string repeatSeqno = String.IsNullOrEmpty(designt.RepeatSeqNo.ToString()) ? " " : "." + designt.RepeatSeqNo.ToString();
                 AddSection(bookmark, result, $"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName}");
-                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat); result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                if (!reportSetting.IsSectionDisplay)
+                    result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                else
+                    result = AddString($"{repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 string notes = "";
                 for (int n = 0; n < designt.TemplateNotes.Count; n++)
                 {
@@ -600,7 +629,7 @@ namespace GSC.Report
                         notes += designt.TemplateNotes[n].Notes + "\n ";
                 }
                 if (!string.IsNullOrEmpty(notes))
-                    result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, italicfont, layoutFormat);
                 result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                 if (!reportSetting.IsSectionDisplay)
@@ -912,11 +941,11 @@ namespace GSC.Report
                             List<string> _points = new List<string>();
                             int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
                             int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
-                            //int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
+                            int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
                             //logic
                             for (int i = lowrangevalue; i <= highragnevalue; i++)
                             {
-                                if ((i % variable.LargeStep == 0 ? 1 : variable.LargeStep) == 0)
+                                if ((i % stepvalue) == 0)
                                     _points.Add(i.ToString());
                             }
                             float xPos = 300;
@@ -958,6 +987,23 @@ namespace GSC.Report
                     //data
                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                 }
+                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+
+
+                PdfPen pen1 = new PdfPen(Color.Gray, 1f);
+                result.Page.Graphics.DrawLine(pen1, 0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Bounds.Y + 20);
+                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+
+                string notesb = "";
+                for (int n = 0; n < designt.TemplateNotesBottom.Count; n++)
+                {
+                    if (designt.TemplateNotesBottom[n].IsPreview)
+                        notesb += designt.TemplateNotesBottom[n].Notes + "\n ";
+                }
+                if (!string.IsNullOrEmpty(notesb))
+                    result = AddString($"Notes:\n{notesb}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, italicfont, layoutFormat);
+
+
 
                 var workflowlevel = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == ProjectDesignId).Include(x => x.Levels).ToList();
                 foreach (var workflow in workflowlevel)
@@ -1057,7 +1103,7 @@ namespace GSC.Report
             parameterDto.SiteId = reportSetting.SitesId;
             parameterDto.ReportCode = reportSetting.ReportCode;
             string DocumentPath = _syncConfigurationMasterRepository.SaveArtifactDocument(DocumentName, parameterDto);
-            string fullPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), DocumentPath,DocumentName);
+            string fullPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), DocumentPath, DocumentName);
             Directory.CreateDirectory(Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), DocumentPath));
             using (System.IO.FileStream fs = new System.IO.FileStream(fullPath, System.IO.FileMode.Create))
             {

@@ -526,7 +526,9 @@ namespace GSC.Report.Common
                             TemplateName = n.TemplateName,
                             DesignOrder = n.DesignOrder,
                             Domain = new DomainReportDto { DomainCode = n.Domain.DomainCode, DomainName = n.Domain.DomainName },
-                            TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview }).ToList(),
+                            TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && (tn.IsBottom == false || tn.IsBottom == null)).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
+                            TemplateNotesBottom = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && tn.IsBottom == true).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
+
                             ProjectDesignVariable = n.Variables.Where(v => v.DeletedDate == null).Select(v => new ProjectDesignVariableReportDto
                             {
                                 Id = v.Id,
@@ -541,7 +543,7 @@ namespace GSC.Report.Common
                                 DefaultValue = v.DefaultValue,
                                 LowRangeValue = v.LowRangeValue,
                                 HighRangeValue = v.HighRangeValue,
-                                LargeStep=v.LargeStep,
+                                LargeStep = v.LargeStep,
                                 Unit = new UnitReportDto { UnitName = v.Unit.UnitName },
                                 Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList()
                             }).ToList()
@@ -563,11 +565,11 @@ namespace GSC.Report.Common
                   Initial = x.Randomization.Initial,
                   RandomizationNumber = x.Randomization.RandomizationNumber,
                   ProjectDetails = new ProjectDetails
-                  {                     
+                  {
                       ProjectCode = _context.Project.Where(p => p.Id == x.Project.ParentProjectId).FirstOrDefault().ProjectCode,
                       ProjectName = _context.Project.Where(p => p.Id == x.Project.ParentProjectId).FirstOrDefault().ProjectName,
                       ClientId = x.Project.ClientId,
-                      ProjectDesignId=x.ProjectDesignId
+                      ProjectDesignId = x.ProjectDesignId
                   },
                   Period = new List<ProjectDesignPeriodReportDto> {
           new ProjectDesignPeriodReportDto {

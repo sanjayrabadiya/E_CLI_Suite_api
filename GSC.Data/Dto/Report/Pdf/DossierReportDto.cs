@@ -46,6 +46,8 @@ namespace GSC.Data.Dto.Report.Pdf
         //public int ProjectDesignId { get; set; }
         public DomainReportDto Domain { get; set; }
         public List<ProjectDesignTemplateNoteReportDto> TemplateNotes { get; set; }
+
+        public List<ProjectDesignTemplateNoteReportDto> TemplateNotesBottom { get; set; }
         public List<ProjectDesignVariableReportDto> ProjectDesignVariable { get; set; }
 
         public List<ScreeningTemplateReviewReportDto> ScreeningTemplateReview { get; set; }
@@ -62,6 +64,8 @@ namespace GSC.Data.Dto.Report.Pdf
     {
         public bool IsPreview { get; set; }
         public string Notes { get; set; }
+
+        public bool? IsBottom { get; set; }
     }
 
 
