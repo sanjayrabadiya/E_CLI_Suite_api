@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -82,13 +83,17 @@ namespace GSC.Respository.Project.Design
                     ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
                     ActivityName = r.ActivityName,
                     Notes = (_jwtTokenAccesser.Language != 1) ? _context.TemplateNoteLanguage.Where(a => a.DeletedDate == null
-                    && a.ProjectDesignTemplateNote.ProjectDesignTemplateId == id && a.LanguageId == _jwtTokenAccesser.Language).Select(t => t.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
+                    && a.ProjectDesignTemplateNote.ProjectDesignTemplateId == id && a.LanguageId == _jwtTokenAccesser.Language).Select(t => t.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null && (c.IsBottom == null || c.IsBottom == false)).Select(a => a.Note).ToList(),
+                    NotesAlign = (_jwtTokenAccesser.Language != 1) ? _context.TemplateNoteLanguage.Where(a => a.DeletedDate == null
+                    && a.ProjectDesignTemplateNote.ProjectDesignTemplateId == id && a.LanguageId == _jwtTokenAccesser.Language).Select(t => t.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null && c.IsBottom == true).Select(a => a.Note).ToList(),
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,
-                    DesignOrder = r.DesignOrder,
+                    DesignOrder = r.IsTemplateSeqNo == true && r.IsVariableSeqNo == true ? r.DesignOrder.ToString() : "",
                     VariableTemplateId = r.VariableTemplateId,
-                    DomainName = r.Domain.DomainName
+                    DomainName = r.Domain.DomainName,
+                    IsTemplateSeqNo = r.IsTemplateSeqNo,
+                    IsVariableSeqNo = r.IsVariableSeqNo
                 }
             ).FirstOrDefault();
 
@@ -116,7 +121,7 @@ namespace GSC.Respository.Project.Design
                         PrintType = x.PrintType,
                         //Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
                         UnitName = x.Unit.UnitName,
-                        DesignOrder = x.DesignOrder,
+                        DesignOrder = x.ProjectDesignTemplate.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
                         IsDocument = x.IsDocument,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
@@ -301,6 +306,12 @@ namespace GSC.Respository.Project.Design
             var screeningTemplate = _context.ScreeningTemplate.Where(x => projectDesignTemplate.Select(y => y.Id).Contains(x.ProjectDesignTemplateId)).ToList();
 
             return screeningTemplate.Count() != 0 && screeningTemplate.All(x => x.IsLocked == true);
+        }
+
+        public ProjectDesignTemplate GetTemplateSetting(int templateId)
+        {
+            var result = All.Where(x => x.Id == templateId).FirstOrDefault();
+            return result;
         }
     }
 }

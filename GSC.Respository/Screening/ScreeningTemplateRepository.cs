@@ -516,12 +516,15 @@ namespace GSC.Respository.Screening
                 ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                 Status = t.Status,
                 ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                DesignOrder = t.RepeatSeqNo == null ? Convert.ToString(t.ProjectDesignTemplate.DesignOrder) : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString(),
+                DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? Convert.ToString(t.ProjectDesignTemplate.DesignOrder) : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                DesignOrderForOrderBy = t.RepeatSeqNo == null ? Convert.ToString(t.ProjectDesignTemplate.DesignOrder) : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString(),
                 Progress = t.Progress ?? 0,
                 ReviewLevel = t.ReviewLevel,
                 IsLocked = t.IsLocked,
                 MyReview = workFlowLevel.LevelNo == t.ReviewLevel,
                 ParentId = t.ParentId,
+                IsTemplateSeqNo = t.ProjectDesignTemplate.IsTemplateSeqNo,
+                IsVariableSeqNo = t.ProjectDesignTemplate.IsVariableSeqNo
             }).ToList();
 
             var templateValues = _screeningTemplateValueRepository.GetQueryStatusBySubject(screeningEntryId);
