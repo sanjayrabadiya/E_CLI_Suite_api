@@ -588,7 +588,10 @@ namespace GSC.Report.Common
                       },
                       TemplateNotes = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Select(n => new ProjectDesignTemplateNoteReportDto {
                         Notes = n.Note, IsPreview = n.IsPreview
-                      }).ToList(),
+                      }).Where(tn => tn.IsBottom == false || tn.IsBottom == null).ToList(),
+                      TemplateNotesBottom = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Select(n => new ProjectDesignTemplateNoteReportDto {
+                        Notes = n.Note, IsPreview = n.IsPreview
+                      }).Where(tn => tn.IsBottom == true).ToList(),
                       ProjectDesignVariable = a.ScreeningTemplateValues.Where(s => s.DeletedDate == null && s.ProjectDesignVariable.DeletedDate == null).Select(s => new ProjectDesignVariableReportDto {
                         Id = s.ProjectDesignVariable.Id,
                           VariableName = s.ProjectDesignVariable.VariableName,
