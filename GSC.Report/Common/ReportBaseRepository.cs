@@ -544,7 +544,11 @@ namespace GSC.Report.Common
                                 LowRangeValue = v.LowRangeValue,
                                 HighRangeValue = v.HighRangeValue,
                                 LargeStep = v.LargeStep,
-                                Unit = new UnitReportDto { UnitName = v.Unit.UnitName },
+                                Unit = new UnitReportDto
+                                {
+                                    UnitName = v.Unit.UnitName,
+                                    UnitAnnotation = v.UnitAnnotation
+                                },
                                 Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList()
                             }).ToList()
                         }).ToList()
@@ -587,10 +591,10 @@ namespace GSC.Report.Common
                         DomainCode = a.ProjectDesignTemplate.Domain.DomainCode, DomainName = a.ProjectDesignTemplate.Domain.DomainName
                       },
                       TemplateNotes = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Select(n => new ProjectDesignTemplateNoteReportDto {
-                        Notes = n.Note, IsPreview = n.IsPreview
+                        Notes = n.Note, IsPreview = n.IsPreview,IsBottom=n.IsBottom
                       }).Where(tn => tn.IsBottom == false || tn.IsBottom == null).ToList(),
                       TemplateNotesBottom = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Select(n => new ProjectDesignTemplateNoteReportDto {
-                        Notes = n.Note, IsPreview = n.IsPreview
+                        Notes = n.Note, IsPreview = n.IsPreview,IsBottom = n.IsBottom
                       }).Where(tn => tn.IsBottom == true).ToList(),
                       ProjectDesignVariable = a.ScreeningTemplateValues.Where(s => s.DeletedDate == null && s.ProjectDesignVariable.DeletedDate == null).Select(s => new ProjectDesignVariableReportDto {
                         Id = s.ProjectDesignVariable.Id,
@@ -603,7 +607,8 @@ namespace GSC.Report.Common
                           CollectionAnnotation=s.ProjectDesignVariable.CollectionAnnotation,
                           Note=s.ProjectDesignVariable.Note,
                           Unit = new UnitReportDto {
-                            UnitName = s.ProjectDesignVariable.Unit.UnitName
+                            UnitName = s.ProjectDesignVariable.Unit.UnitName,
+                            UnitAnnotation = s.ProjectDesignVariable.UnitAnnotation
                           },
                           Values = s.ProjectDesignVariable.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto {
                             Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label

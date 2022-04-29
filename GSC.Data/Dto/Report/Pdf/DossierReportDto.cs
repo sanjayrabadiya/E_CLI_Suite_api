@@ -97,6 +97,8 @@ namespace GSC.Data.Dto.Report.Pdf
     public class UnitReportDto
     {
         public string UnitName { get; set; }
+
+        public string UnitAnnotation { get; set; }
     }
 
     public class ProjectDesignVariableValueReportDto
