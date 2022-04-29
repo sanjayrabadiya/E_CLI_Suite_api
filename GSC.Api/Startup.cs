@@ -68,6 +68,8 @@ namespace GSC.Api
 
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NjI3MzgxQDMxMzkyZTMxMmUzMEtnSHlnTG9ZeG82SHlEV25hR1BhSXJkQ1VaN21sTzJEdlMrL1RPbkZnTDg9");
+
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseExceptionHandler(ErrorHandler.HttpExceptionHandling(env));
