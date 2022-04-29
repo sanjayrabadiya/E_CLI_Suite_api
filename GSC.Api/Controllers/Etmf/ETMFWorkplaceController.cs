@@ -39,6 +39,8 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IProjectWorkPlaceZoneRepository _projectWorkPlaceZoneRepository;
         private readonly IProjectWorkplaceSectionRepository _projectWorkplaceSectionRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
+
+
         private readonly IEtmfUserPermissionRepository _etmfUserPermissionRepository;
         public ETMFWorkplaceController(IProjectRepository projectRepository,
             IUnitOfWork uow,
@@ -53,7 +55,7 @@ namespace GSC.Api.Controllers.Etmf
             IProjectWorkPlaceZoneRepository projectWorkPlaceZoneRepository,
             IProjectWorkplaceSectionRepository projectWorkplaceSectionRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
-            IEtmfUserPermissionRepository etmfUserPermissionRepository
+            IEtmfUserPermissionRepository etmfUserPermissionRepository           
             )
         {
             _userRepository = userRepository;
@@ -70,6 +72,7 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceSectionRepository = projectWorkplaceSectionRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _etmfUserPermissionRepository = etmfUserPermissionRepository;
+           
         }
 
         [Route("Get")]
@@ -212,6 +215,21 @@ namespace GSC.Api.Controllers.Etmf
         {
             var projectworkplace = _eTMFWorkplaceRepository.GetChartReport(projectId, chartType);
             return Ok(projectworkplace);
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var record = _eTMFWorkplaceRepository.GetWorkplaceDetails(id);
+            if (record == null)
+                return NotFound();
+
+            _eTMFWorkplaceRepository.Delete(record.Id);
+
+            _eTMFWorkplaceRepository.DeleteAllTable(record);
+            
+            _uow.Save();
+            return Ok();
         }
     }
 }

@@ -17,5 +17,6 @@ namespace GSC.Respository.CTMS
         List<CtmsMonitoringReportReviewHistory> GetCtmsMonitoringReportReviewHistory(int id);
         CtmsMonitoringReportReviewDto GetCtmsMonitoringReportReview(int id);
         bool isAnyReportReviewer(int id);
+        bool GetReviewSendToAnyone(int CtmsMonitoringReportId);
     }
 }

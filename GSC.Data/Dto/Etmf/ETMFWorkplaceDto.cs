@@ -19,5 +19,6 @@ namespace GSC.Data.Dto.Etmf
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
         public int? NoofSite { get; set; }
+        public string Version { get; set; }
     }
 }

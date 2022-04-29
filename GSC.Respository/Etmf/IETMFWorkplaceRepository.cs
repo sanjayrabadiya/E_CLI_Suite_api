@@ -20,5 +20,7 @@ namespace GSC.Respository.Etmf
         byte[] CreateZipFileOfWorkplace(int Id);
         List<ChartReport> GetChartReport(int id, EtmfChartType? chartType);
         void CreateZipFileOfWorkplaceJobMonitoring(int Id);
+        ProjectWorkplace GetWorkplaceDetails(int id);
+        void DeleteAllTable(ProjectWorkplace projectWorkplace);
     }
 }

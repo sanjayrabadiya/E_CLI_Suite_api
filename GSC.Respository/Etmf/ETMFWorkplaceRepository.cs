@@ -34,13 +34,51 @@ namespace GSC.Respository.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IJobMonitoringRepository _jobMonitoringRepository;
+        private readonly IProjectWorkplaceDetailRepository _projectWorkplaceDetailRepository;
+        private readonly IProjectWorkPlaceZoneRepository _projectWorkPlaceZoneRepository;
+        private readonly IProjectWorkplaceSectionRepository _projectWorkplaceSectionRepository;
+        private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
+        private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
+        private readonly IProjectWorkplaceSubSectionRepository _projectWorkplaceSubSectionRepository;
+        private readonly IProjectWorkplaceSubSectionArtifactRepository _projectWorkplaceSubSectionArtifactRepository;
+        private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
+        private readonly IEtmfUserPermissionRepository _etmfUserPermissionRepository;
+
+        private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
+        private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
+        private readonly IProjectArtificateDocumentCommentRepository _projectArtificateDocumentCommentRepository;
+        private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
+
+        private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
+        private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApproverRepository;
+        private readonly IProjectSubSecArtificateDocumentCommentRepository _projectSubSecArtificateDocumentCommentRepository;
+        private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
+
         public string Workplace = "AAAAAA";
-        
+
         public ETMFWorkplaceRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser,
-           IMapper mapper, IUploadSettingRepository uploadSettingRepository,
-           IProjectRightRepository projectRightRepository,
-           IJobMonitoringRepository jobMonitoringRepository)
+            IJwtTokenAccesser jwtTokenAccesser,
+            IMapper mapper, IUploadSettingRepository uploadSettingRepository,
+            IProjectRightRepository projectRightRepository,
+            IJobMonitoringRepository jobMonitoringRepository,
+            IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository,
+            IProjectWorkPlaceZoneRepository projectWorkPlaceZoneRepository,
+            IProjectWorkplaceSectionRepository projectWorkplaceSectionRepository,
+            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
+            IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
+            IProjectWorkplaceSubSectionRepository projectWorkplaceSubSectionRepository,
+            IProjectWorkplaceSubSectionArtifactRepository projectWorkplaceSubSectionArtifactRepository,
+            IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
+            IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
+            IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
+            IProjectArtificateDocumentCommentRepository projectArtificateDocumentCommentRepository,
+            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
+            IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
+            IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository,
+            IProjectSubSecArtificateDocumentCommentRepository projectSubSecArtificateDocumentCommentRepository,
+            IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
+            IEtmfUserPermissionRepository etmfUserPermissionRepository
+            )
            : base(context)
         {
             _context = context;
@@ -49,6 +87,23 @@ namespace GSC.Respository.Etmf
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _jobMonitoringRepository = jobMonitoringRepository;
+            _projectWorkplaceDetailRepository = projectWorkplaceDetailRepository;
+            _projectWorkPlaceZoneRepository = projectWorkPlaceZoneRepository;
+            _projectWorkplaceSectionRepository = projectWorkplaceSectionRepository;
+            _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
+            _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
+            _projectWorkplaceSubSectionRepository = projectWorkplaceSubSectionRepository;
+            _projectWorkplaceSubSectionArtifactRepository = projectWorkplaceSubSectionArtifactRepository;
+            _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
+            _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
+            _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
+            _projectArtificateDocumentCommentRepository = projectArtificateDocumentCommentRepository;
+            _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
+            _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
+            _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
+            _projectSubSecArtificateDocumentCommentRepository = projectSubSecArtificateDocumentCommentRepository;
+            _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
+            _etmfUserPermissionRepository = etmfUserPermissionRepository;
         }
 
         public string Duplicate(int id)
@@ -122,7 +177,7 @@ namespace GSC.Respository.Etmf
             SiteFol.Level = 2;
             SiteFol.Icon = "las la-folder-open text-blue eicon";
             SiteFol.WorkPlaceFolderId = WorkPlaceFolder.Site;
-            SiteFol.ExpandData = string.Join(",", pvListObj.RandomId, SiteFol.RandomId );
+            SiteFol.ExpandData = string.Join(",", pvListObj.RandomId, SiteFol.RandomId);
 
             CountryFol.Item = new List<TreeValue>();
             SiteFol.Item = new List<TreeValue>();
@@ -578,7 +633,7 @@ namespace GSC.Respository.Etmf
                 projectWorkplace = new ProjectWorkplace();
                 ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
                 projectWorkplace.ProjectId = projectDetail.Id;
-                projectPath = System.IO.Path.Combine(docPath, _jwtTokenAccesser.CompanyId.ToString(), projectDetail.ProjectCode.Replace("/", ""),FolderType.Etmf.GetDescription());
+                projectPath = System.IO.Path.Combine(docPath, _jwtTokenAccesser.CompanyId.ToString(), projectDetail.ProjectCode.Replace("/", ""), FolderType.Etmf.GetDescription());
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
                 sitePath = Path.Combine(projectPath, WorkPlaceFolder.Site.GetDescription());
@@ -988,6 +1043,112 @@ namespace GSC.Respository.Etmf
             return result;
         }
 
+        public ProjectWorkplace GetWorkplaceDetails(int id)
+        {
+            var result = All.Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection)
+                        .ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceArtificatedocument)
+                        .ThenInclude(x => x.ProjectArtificateDocumentReview)
+                        .Include("ProjectWorkplaceDetail.EtmfUserPermission")
+                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceArtificate.ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentApprover")
+                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceArtificate.ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentComment")
+                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceArtificate.ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentHistory")
+                        .Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection)
+                        .ThenInclude(x => x.ProjectWorkplaceSubSection).ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
+                        .ThenInclude(x => x.ProjectWorkplaceSubSecArtificatedocument).ThenInclude(x => x.ProjectSubSecArtificateDocumentReview)
+                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceSubSection.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentApprover")
+                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceSubSection.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentComment")
+                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceSubSection.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentHistory")
+                        .Where(x => x.Id == id).FirstOrDefault();
+            return result;
+        }
+
+        public void DeleteAllTable(ProjectWorkplace projectWorkplace)
+        {
+            foreach (var workplaceDetail in projectWorkplace.ProjectWorkplaceDetail)
+            {
+                _projectWorkplaceDetailRepository.Delete(workplaceDetail.Id);
+
+                foreach (var userPermission in workplaceDetail.EtmfUserPermission)
+                {
+                    _etmfUserPermissionRepository.Delete(userPermission.Id);
+                }
+
+                foreach (var zone in workplaceDetail.ProjectWorkPlaceZone)
+                {
+                    _projectWorkPlaceZoneRepository.Delete(zone.Id);
+
+                    foreach (var section in zone.ProjectWorkplaceSection)
+                    {
+                        _projectWorkplaceSectionRepository.Delete(section.Id);
+
+                        foreach (var subsection in section.ProjectWorkplaceSubSection)
+                        {
+                            _projectWorkplaceSubSectionRepository.Delete(subsection.Id);
+
+                            foreach (var SubSectionArtifact in subsection.ProjectWorkplaceSubSectionArtifact)
+                            {
+                                _projectWorkplaceSubSectionArtifactRepository.Delete(SubSectionArtifact.Id);
+
+                                foreach (var SubSecArtificatedocument in SubSectionArtifact.ProjectWorkplaceSubSecArtificatedocument)
+                                {
+                                    _projectWorkplaceSubSecArtificatedocumentRepository.Delete(SubSecArtificatedocument.Id);
+
+                                    foreach (var subsecreview in SubSecArtificatedocument.ProjectSubSecArtificateDocumentReview)
+                                    {
+                                        _projectSubSecArtificateDocumentReviewRepository.Delete(subsecreview.Id);
+                                    }
+
+                                    foreach (var subsecapprover in SubSecArtificatedocument.ProjectSubSecArtificateDocumentApprover)
+                                    {
+                                        _projectSubSecArtificateDocumentApproverRepository.Delete(subsecapprover.Id);
+                                    }
+
+                                    foreach (var subseccomment in SubSecArtificatedocument.ProjectSubSecArtificateDocumentComment)
+                                    {
+                                        _projectSubSecArtificateDocumentCommentRepository.Delete(subseccomment.Id);
+                                    }
+
+                                    foreach (var subsechistory in SubSecArtificatedocument.ProjectSubSecArtificateDocumentHistory)
+                                    {
+                                        _projectSubSecArtificateDocumentHistoryRepository.Delete(subsechistory.Id);
+                                    }
+                                }
+                            }
+                        }
+                        foreach (var artificate in section.ProjectWorkplaceArtificate)
+                        {
+                            _projectWorkplaceArtificateRepository.Delete(artificate.Id);
+
+                            foreach (var document in artificate.ProjectWorkplaceArtificatedocument)
+                            {
+                                _projectWorkplaceArtificatedocumentRepository.Delete(document.Id);
+
+                                foreach (var review in document.ProjectArtificateDocumentReview)
+                                {
+                                    _projectWorkplaceArtificateDocumentReviewRepository.Delete(review.Id);
+                                }
+
+                                foreach (var approver in document.ProjectArtificateDocumentApprover)
+                                {
+                                    _projectArtificateDocumentApproverRepository.Delete(approver.Id);
+                                }
+
+                                foreach (var comment in document.ProjectArtificateDocumentComment)
+                                {
+                                    _projectArtificateDocumentCommentRepository.Delete(comment.Id);
+                                }
+
+                                foreach (var history in document.ProjectArtificateDocumentHistory)
+                                {
+                                    _projectArtificateDocumentHistoryRepository.Delete(history.Id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
     public class TreeValue
     {
