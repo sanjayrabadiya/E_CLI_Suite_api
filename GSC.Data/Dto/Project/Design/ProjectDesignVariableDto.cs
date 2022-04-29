@@ -93,7 +93,7 @@ namespace GSC.Data.Dto.Project.Design
         public IList<ScreeningVariableValueDto> Values { get; set; } = null;
 
         public string UnitName { get; set; }
-        public int DesignOrder { get; set; }
+        public string DesignOrder { get; set; }
         public bool? IsDocument { get; set; }
         public bool? IsEncrypt { get; set; }
         public string ScreeningValue { get; set; }

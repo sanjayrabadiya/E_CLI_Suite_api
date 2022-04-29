@@ -1187,7 +1187,7 @@ namespace GSC.Respository.Screening
                         RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
                         PrintType = x.PrintType,
                         UnitName = x.Unit.UnitName,
-                        DesignOrder = x.DesignOrder,
+                        DesignOrder = x.ProjectDesignTemplate.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
                         IsDocument = x.IsDocument,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",

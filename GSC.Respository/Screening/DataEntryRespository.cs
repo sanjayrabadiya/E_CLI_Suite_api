@@ -261,7 +261,8 @@ namespace GSC.Respository.Screening
                      ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                      Status = t.Status,
                      ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                     DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                     DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                     DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                      Progress = t.Progress ?? 0,
                      ReviewLevel = t.ReviewLevel,
                      IsLocked = t.IsLocked,
@@ -273,7 +274,7 @@ namespace GSC.Respository.Screening
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                 }).ToList().OrderBy(t => t.DesignOrder).ToList();
+                 }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -301,7 +302,8 @@ namespace GSC.Respository.Screening
                 ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                 Status = t.Status,
                 ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                 Progress = t.Progress ?? 0,
                 ReviewLevel = t.ReviewLevel,
                 IsLocked = t.IsLocked,
@@ -313,7 +315,7 @@ namespace GSC.Respository.Screening
                 SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-            }).ToList().OrderBy(t => t.DesignOrder).ToList();
+            }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -339,7 +341,8 @@ namespace GSC.Respository.Screening
                      ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                      Status = t.Status,
                      ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                     DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                     DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                     DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                      Progress = t.Progress ?? 0,
                      ReviewLevel = t.ReviewLevel,
                      IsLocked = t.IsLocked,
@@ -351,7 +354,7 @@ namespace GSC.Respository.Screening
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                 }).ToList().OrderBy(t => t.DesignOrder).ToList();
+                 }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -371,7 +374,8 @@ namespace GSC.Respository.Screening
                         ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                         Status = t.Status,
                         ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                        DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                        DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                        DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                         Progress = t.Progress ?? 0,
                         ReviewLevel = t.ReviewLevel,
                         IsLocked = t.IsLocked,
@@ -383,7 +387,7 @@ namespace GSC.Respository.Screening
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                    }).ToList().OrderBy(t => t.DesignOrder).ToList();
+                    }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -410,7 +414,8 @@ namespace GSC.Respository.Screening
                         ProjectDesignPeriodId = t.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId,
                         Status = t.Status,
                         ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                        DesignOrder = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
+                        DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                        DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                         Progress = t.Progress ?? 0,
                         ReviewLevel = t.ReviewLevel,
                         IsLocked = t.IsLocked,
@@ -422,7 +427,7 @@ namespace GSC.Respository.Screening
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                    }).ToList().OrderBy(t => t.DesignOrder).ToList();
+                    }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;

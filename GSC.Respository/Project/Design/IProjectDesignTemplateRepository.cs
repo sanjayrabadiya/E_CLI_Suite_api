@@ -31,5 +31,6 @@ namespace GSC.Respository.Project.Design
 
         CheckVersionDto CheckStudyVersionForTemplate(int projectDesignTemplateId);
         bool GetAllTemplateIsLocked(int ProjectDesignId);
+        ProjectDesignTemplate GetTemplateSetting(int templateId);
     }
 }

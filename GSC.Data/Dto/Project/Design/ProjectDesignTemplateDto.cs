@@ -37,6 +37,8 @@ namespace GSC.Data.Dto.Project.Design
         public int DomainId { get; set; }
         public bool IsRepeated { get; set; }
         public bool IsParticipantView { get; set; }
+        public bool? IsTemplateSeqNo { get; set; }
+        public bool? IsVariableSeqNo { get; set; }
         public VariableTemplateDto VariableTemplate { get; set; }
         public DomainDto Domain { get; set; }
         public IList<ProjectDesignVariableDto> Variables { get; set; }
@@ -55,7 +57,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignTemplateId { get; set; }
         public string TemplateName { get; set; }
         public string ProjectDesignVisitName { get; set; }
-        public int DesignOrder { get; set; }
+        public string DesignOrder { get; set; }
         public int? DomainId { get; set; }
         public string DomainName { get; set; }
         public bool IsRepeated { get; set; }
@@ -72,7 +74,10 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsWarning { get; set; }
         public bool IsLocked { get; set; }
         public List<string> Notes { get; set; }
+        public List<string> NotesAlign { get; set; }
         public int VariableTemplateId { get; set; }
+        public bool? IsTemplateSeqNo { get; set; }
+        public bool? IsVariableSeqNo { get; set; }
     }
 
     public class CloneTemplateDto

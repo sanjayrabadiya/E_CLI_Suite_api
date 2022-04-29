@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -138,6 +139,8 @@ namespace GSC.Api.Controllers.Project.Design
                 projectDesignTemplate.StudyVersion = checkVersion.VersionNumber;
                 projectDesignTemplate.VariableTemplateId = variableTemplateId;
                 projectDesignTemplate.DesignOrder = ++designOrder;
+                projectDesignTemplate.IsTemplateSeqNo = true;
+                projectDesignTemplate.IsVariableSeqNo = true;
                 projectDesignTemplate.Variables = new List<ProjectDesignVariable>();
                 projectDesignTemplate.ProjectDesignTemplateNote = new List<ProjectDesignTemplateNote>();
 
@@ -640,6 +643,24 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
+        [HttpGet]
+        [Route("GetTemplateSetting/{templateId}")]
+        public IActionResult GetTemplateSetting(int templateId)
+        {
+            var projectDesignTemplateSetting = _projectDesignTemplateRepository.GetTemplateSetting(templateId);
+            return Ok(projectDesignTemplateSetting);
+        }
 
+        [HttpPut("UpdateTemplateSetting")]
+        public IActionResult UpdateTemplateSetting([FromBody] ProjectDesignTemplateDto projectDesignTemplateDto)
+        {
+            if (projectDesignTemplateDto.Id <= 0) return BadRequest();
+
+            var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(projectDesignTemplateDto);
+            _projectDesignTemplateRepository.Update(projectDesignTemplate);
+
+            if (_uow.Save() <= 0) throw new Exception("setting Failed.");
+            return Ok();
+        }
     }
 }
