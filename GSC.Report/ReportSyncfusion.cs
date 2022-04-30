@@ -693,9 +693,9 @@ namespace GSC.Report
                         if (variable.Unit != null)
                         {
                             if (reportSetting.AnnotationType == true)
-                                AddString($"{variable.Unit.UnitName} \n {variable.Unit.UnitAnnotation}", result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                AddString($"{variable.Unit.UnitName} \n {variable.Unit.UnitAnnotation}", result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                             else
-                                AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
 
                         }
                         if (variable.IsNa)
@@ -902,8 +902,8 @@ namespace GSC.Report
                                 textBoxField.ReadOnly = true;
                                 document.Form.Fields.Add(textBoxField);
                             }
-                            AddString(GeneralSettings.DateFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            AddString(GeneralSettings.DateFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                         else if (variable.CollectionSource == CollectionSources.DateTime)
                         {
@@ -924,8 +924,8 @@ namespace GSC.Report
                                 document.Form.Fields.Add(textBoxField);
 
                             }
-                            AddString(GeneralSettings.DateFormat.ToUpper() + " " + GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            AddString(GeneralSettings.DateFormat.ToUpper() + " " + GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                         else if (variable.CollectionSource == CollectionSources.PartialDate)
                         {
