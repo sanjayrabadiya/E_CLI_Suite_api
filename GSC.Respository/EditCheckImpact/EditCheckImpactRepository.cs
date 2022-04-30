@@ -169,7 +169,7 @@ namespace GSC.Respository.EditCheckImpact
                 a.Key.EditCheckId,
                 SortBy = editCheckResult.Count(f => f.ProjectDesignVariableId == a.Key.ProjectDesignVariableId) > 1 &&
                     editCheckResult.Any(f => f.ProjectDesignVariableId == a.Key.ProjectDesignVariableId &&
-                    f.EditCheckId == a.Key.EditCheckId && f.IsTarget) ? 1 : 2
+                    f.EditCheckId == a.Key.EditCheckId && f.IsTarget) ? 1 : editCheckResult.Count() > 1 ? 2 : 3
             }).
             OrderBy(v => v.SortBy).Select(m => m.EditCheckId).Distinct().ToList();
 
