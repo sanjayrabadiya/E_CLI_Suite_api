@@ -27,5 +27,6 @@ namespace GSC.Respository.EditCheckImpact
         int CollectionValue(string id);
         string GetProjectDesignVariableId(int projectDesignVariableId, string collectionSource);
         int CheckVisitRefAndTarget(int projectDesignVisitId, List<int> startedProjectDesignVisitId);
+        string GetHardSoftValue(int screeningTemplateId, int projectDesignVariableId, int soruceProjectDesignVariableId, CollectionSources? collectionSource);
     }
 }

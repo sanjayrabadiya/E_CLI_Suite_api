@@ -207,6 +207,28 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
+        public string GetHardSoftValue(int screeningTemplateId, int projectDesignVariableId, int soruceProjectDesignVariableId, CollectionSources? collectionSource)
+        {
+            var value = GetVariableValue(screeningTemplateId, projectDesignVariableId);
+            if (IsNotDropDown(collectionSource))
+                return value;
+
+            int valueId;
+
+            int.TryParse(value, out valueId);
+            if (valueId > 0)
+            {
+                var valueName = _projectDesignVariableValueRepository.All.Where(x => x.Id == valueId).Select(t => t.ValueName).FirstOrDefault();
+                if (!string.IsNullOrEmpty(valueName))
+                {
+                    return _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == soruceProjectDesignVariableId && x.ValueName == valueName).Select(t => t.Id)?.FirstOrDefault().ToString();
+                }
+            }
+
+            return null;
+        }
+
+
         private string GetMultiCheckBox(int id)
         {
             if (id == 0) return "";
