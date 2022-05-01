@@ -68,10 +68,13 @@ namespace GSC.Respository.EditCheckImpact
         {
             string ruleStr = "";
             var result = new EditCheckResult();
+            DateTime? lastDate = null;
             try
             {
-                DateTime? lastDate = null;
+
+                TimeSpan t1 = TimeSpan.Parse("00:00");
                 string timeDiff = "";
+                Operator? lastOperator = Operator.Minus;
                 editCheck.Where(x => !x.IsTarget).ToList().ForEach(r =>
                 {
                     if (string.IsNullOrEmpty(r.InputValue))
@@ -82,10 +85,27 @@ namespace GSC.Respository.EditCheckImpact
                         DateTime dt = DateTime.ParseExact(r.InputValue, "MM/dd/yyyy HH:mm:ss", null);
                         if (lastDate != null && dt != null)
                         {
-                            TimeSpan duration = lastDate.Value - dt;
-                            timeDiff = duration.ToString(@"hh\:mm");
+                            if (r.Operator == Operator.Plus || lastOperator == Operator.Plus)
+                            {
+                                TimeSpan duration = t1.Add(TimeSpan.Parse(dt.ToString(@"HH\:mm")));
+                                if (duration.Days > 0)
+                                {
+                                    timeDiff = $"{duration.Hours + (24 * duration.Days)}:{duration.Minutes}";
+                                }
+                                else
+                                    timeDiff = $"{duration.Hours}:{duration.Minutes}";
+                            }
+                            else
+                            {
+
+                                TimeSpan duration = lastDate.Value - dt;
+                                timeDiff = duration.ToString(@"hh\:mm");
+                            }
+
                         }
                         lastDate = dt;
+                        lastOperator = r.Operator;
+                        t1 = TimeSpan.Parse(dt.ToString(@"HH\:mm"));
                     }
 
                     if (!string.IsNullOrEmpty(r.CollectionValue) && r.CollectionValue == "0")
@@ -123,6 +143,8 @@ namespace GSC.Respository.EditCheckImpact
             {
                 result.ErrorMessage = ex.Message;
                 result.IsValid = false;
+                if (lastDate != null)
+                    result.Result = "0";
             }
             result.SampleText = ruleStr;
             return result;
