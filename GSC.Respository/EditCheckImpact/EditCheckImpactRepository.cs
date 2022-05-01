@@ -396,8 +396,7 @@ namespace GSC.Respository.EditCheckImpact
                                 editCheckTarget.Value = _impactService.GetHardSoftValue(r.ScreeningTemplateId, r.FetchingProjectDesignVariableId ?? 0, r.ProjectDesignVariableId, r.CollectionSource);
                             else
                             {
-                                var refTemplate = _impactService.GetScreeningTemplate((int)r.FetchingProjectDesignTemplateId, screeningEntryId,
-                                 r.ProjectDesignVisitId == r.ProjectDesignVisitId ? screeningVisitId : (int?)null);
+                                var refTemplate = _impactService.GetScreeningTemplate((int)r.FetchingProjectDesignTemplateId, screeningEntryId, null);
                                 if (refTemplate != null)
                                     editCheckTarget.Value = _impactService.GetHardSoftValue(refTemplate.Id, r.FetchingProjectDesignVariableId ?? 0, r.ProjectDesignVariableId, r.CollectionSource);
                             }
