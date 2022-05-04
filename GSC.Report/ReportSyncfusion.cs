@@ -60,7 +60,7 @@ namespace GSC.Report
         private readonly PdfFont watermarkerfornt = new PdfStandardFont(PdfFontFamily.TimesRoman, 120, PdfFontStyle.Bold);
         private readonly PdfFont largeheaderfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
         private readonly PdfFont headerfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold);
-        // private readonly PdfFont regularfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
+        private readonly PdfFont categoryfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
         private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
         private readonly PdfFont regularfont;
         private readonly PdfFont italicfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 10, PdfFontStyle.Italic);
@@ -201,6 +201,31 @@ namespace GSC.Report
             stringFormat.MeasureTrailingSpaces = true;
             stringFormat.WordWrap = PdfWordWrapType.Word;
             richTextElement.StringFormat = stringFormat;
+
+            PdfLayoutResult result = richTextElement.Draw(page, position, pdfLayoutFormat);
+            return result;
+        }
+
+        private PdfLayoutResult AddStringCategory(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
+        {
+            
+
+            PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
+            //Draws String       
+            PdfStringFormat stringFormat = new PdfStringFormat();
+            stringFormat.MeasureTrailingSpaces = true;
+            stringFormat.WordWrap = PdfWordWrapType.Word;
+            stringFormat.Alignment = PdfTextAlignment.Center;
+            richTextElement.StringFormat = stringFormat;
+            PointF point = new PointF(0, 0);
+            page.Graphics.DrawString("", font, PdfBrushes.Black, point);
+            PdfSolidBrush brush1 = new PdfSolidBrush(Color.LightGray);
+            //RectangleF bounds = new RectangleF(0, 0, 300, 300);
+            page.Graphics.Save();
+            page.Graphics.SetTransparency(1, 1, PdfBlendMode.Multiply);
+
+            //Draw the rectangle on the PDF document
+            page.Graphics.DrawRectangle(brush1, position);
 
             PdfLayoutResult result = richTextElement.Draw(page, position, pdfLayoutFormat);
             return result;
@@ -504,54 +529,8 @@ namespace GSC.Report
                 {
                     SaveFile(reportSetting, fileInfo, memoryStream, item, ParentProctCode);
                 }
-                //fileInfo.ParentFolderName = projectdetails.Project.ProjectCode + "-" + projectdetails.Project.ProjectName + "_" + DateTime.Now.Ticks;                
-                //harshil     
-                //string filePath = "";
-                //if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                //{
-                //    fileInfo.ParentFolderName = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "_" + DateTime.Now.Ticks;
-                //    fileInfo.FileName = fileInfo.ParentFolderName.Replace("/", "") + ".pdf";
-                //    filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.FileName);
-                //}
-                //else
-                //{
-                //    fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
-                //    fileInfo.FileName = item.Initial.Replace("/", "") + ".pdf";
-                //    string fileName = fileInfo.FileName + ".pdf";
-                //    fileInfo.ChildFolderName = item.ProjectDetails.ProjectCode;
-                //    filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
-                //}
-                //bool exists = Directory.Exists(filePath);
-                //if (!exists)
-                //    if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                //        Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
-                //    else
-                //        Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName));
-
-                //using (System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
-                //{
-                //    memoryStream.WriteTo(fs);
-                //}
-                //// add job Monitor
-
             }
-            //if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-            //{
-            //jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
-            //jobMonitoring.JobStatus = JobStatusType.Completed;
-            //jobMonitoring.FolderPath = System.IO.Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType);
-            //jobMonitoring.FolderName = fileInfo.ParentFolderName + ".zip";
-            //var completeJobMonitoring = _reportBaseRepository.CompleteJobMonitoring(jobMonitoring);
 
-            //string Zipfilename = Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName);
-            //ZipFile.CreateFromDirectory(Zipfilename, Zipfilename + ".zip");
-            //Directory.Delete(Zipfilename, true);
-
-            //var user = _userRepository.Find(_jwtTokenAccesser.UserId);
-            //var ProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "-" + projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
-            //string asa = Path.Combine(documentUrl, fileInfo.ModuleName, fileInfo.FolderType, jobMonitoring.FolderName);
-            //var linkOfPdf = "<a href='" + asa + "'>Click Here</a>";
-            //_emailSenderRespository.SendPdfGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfPdf);
             if (!reportSetting.IsSync)
                 UpdateJobStatus(jobMonitoring, fileInfo, ParentProctCode, ParentProjectName, documentUrl);
 
@@ -656,7 +635,7 @@ namespace GSC.Report
                             notes += designt.TemplateNotes[n].Notes + "\n ";
                     }
                     if (!string.IsNullOrEmpty(notes))
-                        result = AddString($"Notes:\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, italicfont, layoutFormat);
+                        result = AddString($"Note(s):\n{notes}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, italicfont, layoutFormat);
                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                     if (!reportSetting.IsSectionDisplay)
@@ -670,355 +649,367 @@ namespace GSC.Report
                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                     //var variabledetails = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == designt.Id && x.DeletedDate == null).Include(x => x.Values).Include(x => x.Remarks).Include(x => x.Unit).ToList();
-
-
-                    foreach (var variable in designt.ProjectDesignVariable.OrderBy(i => i.DesignOrder))
+                    foreach (var item in designt.ProjectDesignVariable.OrderBy(i => i.DesignOrder).GroupBy(x => x.VariableCategoryName).Select(y => y.Key))
                     {
-                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                        var category = item;
+                        var variableList = designt.ProjectDesignVariable.Where(x => x.VariableCategoryName == item).OrderBy(i => i.DesignOrder).ToList();
 
-                        string Variablenotes = String.IsNullOrEmpty(variable.Note) ? "" : variable.Note;
-                        if (!string.IsNullOrEmpty(Variablenotes))
-                            Variablenotes = "Notes :" + Variablenotes;
-
-                        string annotation = String.IsNullOrEmpty(variable.Annotation) ? " " : $"[{variable.Annotation}]";
-                        string CollectionAnnotation = String.IsNullOrEmpty(variable.CollectionAnnotation) ? " " : $"({variable.CollectionAnnotation})";
-                        if (reportSetting.AnnotationType == true)
-                            result = AddString($"{variable.VariableName}\n {annotation}   {CollectionAnnotation} \n {Variablenotes} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        else
-                            result = AddString($"{variable.VariableName} \n {Variablenotes} \n", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        PdfLayoutResult secondresult = result;
-                        if (!reportSetting.IsSectionDisplay)
-                            AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-                        if (variable.Unit != null)
+                        if (!string.IsNullOrEmpty(category))
                         {
+                            // result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                            result = AddStringCategory($"{category}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, 400, 15), PdfBrushes.Black, categoryfont, layoutFormat);
+
+                        }
+                        foreach (var variable in variableList)
+                        {
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                            string Variablenotes = String.IsNullOrEmpty(variable.Note) ? "" : variable.Note;
+                            if (!string.IsNullOrEmpty(Variablenotes))
+                                Variablenotes = "Note(s): " + Variablenotes;
+
+                            string annotation = String.IsNullOrEmpty(variable.Annotation) ? " " : $"[{variable.Annotation}]";
+                            string CollectionAnnotation = String.IsNullOrEmpty(variable.CollectionAnnotation) ? " " : $"({variable.CollectionAnnotation})";
                             if (reportSetting.AnnotationType == true)
-                                AddString($"{variable.Unit.UnitName} \n {variable.Unit.UnitAnnotation}", result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                result = AddString($"{variable.VariableName}\n {annotation}   {CollectionAnnotation} \n {Variablenotes} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             else
-                                AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                result = AddString($"{variable.VariableName} \n {Variablenotes} \n", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 20, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            PdfLayoutResult secondresult = result;
+                            if (!reportSetting.IsSectionDisplay)
+                                AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
-                        }
-                        if (variable.IsNa)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                            if (variable.Unit != null)
                             {
-                                PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-                                checkField.Bounds = new RectangleF(410, result.Bounds.Y + 10, 10, 10);
-                                checkField.Style = PdfCheckBoxStyle.Check;
-                                document.Form.Fields.Add(checkField);
-                                AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                            }
-                            else
-                            {
-                                PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-                                checkField.Bounds = new RectangleF(410, result.Bounds.Y + 10, 10, 10);
-                                checkField.Style = PdfCheckBoxStyle.Check;
-                                if (variable.ScreeningIsNa)
-                                    checkField.Checked = true;
-                                checkField.ReadOnly = true;
-                                document.Form.Fields.Add(checkField);
-                                AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                if (reportSetting.AnnotationType == true)
+                                    AddString($"{variable.Unit.UnitName} \n {variable.Unit.UnitAnnotation}", result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                else
+                                    AddString(variable.Unit.UnitName, result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
 
                             }
-                        }
-                        if (variable.CollectionSource == CollectionSources.TextBox || variable.CollectionSource == CollectionSources.MultilineTextBox)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                            if (variable.IsNa)
                             {
-                                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
-                                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                textBoxField.BorderWidth = 1;
-                                textBoxField.BorderColor = new PdfColor(Color.Gray);
-                                textBoxField.Multiline = true;
-                                document.Form.Fields.Add(textBoxField);
-                            }
-                            else
-                            {
-                                PdfLayoutFormat multitextlayoutFormat = new PdfLayoutFormat();
-                                multitextlayoutFormat.Layout = PdfLayoutType.Paginate;
-                                multitextlayoutFormat.Break = PdfLayoutBreakType.FitColumnsToPage;
-                                result = AddString(variable.ScreeningValue == null ? " " : variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, multitextlayoutFormat);
-                            }
-                            // result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.ComboBox)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                            {
-                                PdfComboBoxField comboBox = new PdfComboBoxField(result.Page, variable.Id.ToString());
-                                comboBox.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                comboBox.BorderColor = new PdfColor(Color.Gray);
-                                string ValueName = "";
-                                foreach (var value in variable.Values)
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
                                 {
-                                    ValueName = value.ValueName;
-                                    comboBox.Items.Add(new PdfListFieldItem(value.ValueName, value.Id.ToString()));
-                                }
-                                document.Form.Fields.Add(comboBox);
-                                document.Form.SetDefaultAppearance(false);
-                            }
-                            else
-                            {
-                                int Id;
-                                bool isNumeric = int.TryParse(variable.ScreeningValue, out Id);
-                                string dropdownvalue = "";
-                                if (isNumeric)
-                                    dropdownvalue = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).FirstOrDefault();
-                                SizeF size = regularfont.MeasureString($"{dropdownvalue}");
-                                result = AddString($"{dropdownvalue}", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                            }
-
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.RadioButton || variable.CollectionSource == CollectionSources.NumericScale)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                            {
-                                foreach (var value in variable.Values.OrderBy(i => i.SeqNo))
-                                {
-                                    result = AddString($"{ value.ValueName} {value.Label}", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
-                                    PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueCode.ToString());
-                                    radioItem1.Bounds = new RectangleF(300, result.Bounds.Y, 13, 13);
-                                    radioList.Items.Add(radioItem1);
-                                    document.Form.Fields.Add(radioList);
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                }
-                            }
-                            else
-                            {
-                                int Id;
-                                bool isNumeric = int.TryParse(variable.ScreeningValue, out Id);
-                                string variblevaluename = "";
-                                if (isNumeric)
-                                    variblevaluename = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).SingleOrDefault();
-                                foreach (var value in variable.Values.OrderBy(x => x.SeqNo))
-                                {
-                                    result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
-                                    document.Form.Fields.Add(radioList);
-
-                                    PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueCode.ToString());
-                                    radioItem1.Bounds = new RectangleF(300, result.Bounds.Y, 13, 13);
-                                    radioList.Items.Add(radioItem1);
-                                    radioList.ReadOnly = true;
-                                    if (value.ValueName == variblevaluename)
-                                        radioList.SelectedIndex = 0;
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                }
-                            }
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.MultiCheckBox)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                            {
-                                foreach (var value in variable.Values.OrderBy(i => i.SeqNo))
-                                {
-                                    result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "UG");
-                                    checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
+                                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
+                                    checkField.Bounds = new RectangleF(410, result.Bounds.Y + 10, 10, 10);
                                     checkField.Style = PdfCheckBoxStyle.Check;
-                                    //checkField.Checked = true;
                                     document.Form.Fields.Add(checkField);
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
                                 }
-                            }
-                            else
-                            {
-                                var variablename = variable.ValueChild.Where(x => x.Value == "true").Select(x => x.ValueName).ToList();
-
-                                foreach (var value in variable.Values.OrderBy(i => i.SeqNo))
+                                else
                                 {
-                                    result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
-                                    checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
+                                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
+                                    checkField.Bounds = new RectangleF(410, result.Bounds.Y + 10, 10, 10);
                                     checkField.Style = PdfCheckBoxStyle.Check;
-                                    checkField.ReadOnly = true;
-                                    if (variablename.ToList().Contains(value.ValueName))
+                                    if (variable.ScreeningIsNa)
                                         checkField.Checked = true;
-                                    document.Form.Fields.Add(checkField);
-
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                }
-                            }
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.CheckBox)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                            {
-                                foreach (var value in variable.Values)
-                                {
-                                    result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-                                    checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
-                                    checkField.Style = PdfCheckBoxStyle.Check;
-                                    //checkField.ReadOnly = true;
-                                    document.Form.Fields.Add(checkField);
-                                }
-                            }
-                            else
-                            {
-                                foreach (var value in variable.Values)
-                                {
-                                    result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-                                    checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
-                                    checkField.Style = PdfCheckBoxStyle.Check;
-                                    if (!String.IsNullOrEmpty(variable.ScreeningValue))
-                                    {
-                                        if (variable.ScreeningValue == "true")
-                                        {
-                                            checkField.Checked = true;
-                                        }
-                                    }
                                     checkField.ReadOnly = true;
                                     document.Form.Fields.Add(checkField);
+                                    AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+
                                 }
                             }
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.Date)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                            if (variable.CollectionSource == CollectionSources.TextBox || variable.CollectionSource == CollectionSources.MultilineTextBox)
                             {
-                                PdfTextBoxField field = new PdfTextBoxField(result.Page, "datePick");
-                                field.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                //field.Actions.KeyPressed = new PdfJavaScriptAction("AFDate_KeystrokeEx(\"m/d/yy\")");
-                                //field.Actions.Format = new PdfJavaScriptAction("AFDate_FormatEx(\"m/d/yy\")");
-                                //field.Text = textvalue;
-                                document.Form.Fields.Add(field);
-                            }
-                            else
-                            {
-                                var dt = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat) : variable.ScreeningValue : "";
-
-                                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
-                                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                textBoxField.Text = dt;
-                                textBoxField.ReadOnly = true;
-                                document.Form.Fields.Add(textBoxField);
-                            }
-                            AddString(GeneralSettings.DateFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.DateTime)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                            {
-                                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
-                                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                document.Form.Fields.Add(textBoxField);
-                            }
-                            else
-                            {
-                                var dttime = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variable.ScreeningValue : "";
-
-                                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
-                                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                textBoxField.Text = dttime;
-                                textBoxField.ReadOnly = true;
-                                document.Form.Fields.Add(textBoxField);
-
-                            }
-                            AddString(GeneralSettings.DateFormat.ToUpper() + " " + GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.PartialDate)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                            {
-                                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "PartialDate");
-                                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                document.Form.Fields.Add(textBoxField);
-                            }
-                            else
-                            {
-                                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "PartialDate");
-                                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                textBoxField.Text = variable.ScreeningValue == null ? "" : variable.ScreeningValue;
-                                textBoxField.ReadOnly = true;
-                                document.Form.Fields.Add(textBoxField);
-                            }
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.Time)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                            {
-                                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
-                                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                document.Form.Fields.Add(textBoxField);
-                                result = AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                            }
-                            else
-                            {
-                                //var time = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
-
-                                PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
-                                textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
-                                textBoxField.Text = variable.ScreeningValue;
-                                textBoxField.ReadOnly = true;
-                                document.Form.Fields.Add(textBoxField);
-                                AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
-                            }
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else if (variable.CollectionSource == CollectionSources.HorizontalScale)
-                        {
-                            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                            {
-                                List<string> _points = new List<string>();
-                                int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
-                                int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
-                                int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
-                                //logic
-                                for (int i = lowrangevalue; i <= highragnevalue; i++)
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
                                 {
-                                    if ((i % stepvalue) == 0)
-                                        _points.Add(i.ToString());
+                                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
+                                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    textBoxField.BorderWidth = 1;
+                                    textBoxField.BorderColor = new PdfColor(Color.Gray);
+                                    textBoxField.Multiline = true;
+                                    document.Form.Fields.Add(textBoxField);
                                 }
-                                float xPos = 300;
-                                result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, result.Bounds.Y + 20), new PointF(xPos + 180, result.Bounds.Y + 20));
-                                float yPos = result.Bounds.Y + 10;
-                                float increment = (float)180 / (_points.Count - 1);
-                                float smallyPos = result.Bounds.Y + 5;
-                                for (int i = 0; i < _points.Count; i++)
+                                else
                                 {
-                                    //if ((i % 5) == 0)
-                                    //{
-                                    result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, yPos), new PointF(xPos, yPos + 20));
-                                    result.Page.Graphics.DrawString(_points[i], new PdfStandardFont(PdfFontFamily.TimesRoman, 8), PdfBrushes.Black, new PointF(xPos - 2, yPos + 25));
-                                    //}
-                                    //else
-                                    //{
-                                    //    result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, yPos), new PointF(xPos, smallyPos + 20));
-                                    //}
-                                    xPos = xPos + increment;
+                                    PdfLayoutFormat multitextlayoutFormat = new PdfLayoutFormat();
+                                    multitextlayoutFormat.Layout = PdfLayoutType.Paginate;
+                                    multitextlayoutFormat.Break = PdfLayoutBreakType.FitColumnsToPage;
+                                    result = AddString(variable.ScreeningValue == null ? " " : variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 150, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, multitextlayoutFormat);
                                 }
+                                // result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.ComboBox)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    PdfComboBoxField comboBox = new PdfComboBoxField(result.Page, variable.Id.ToString());
+                                    comboBox.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    comboBox.BorderColor = new PdfColor(Color.Gray);
+                                    string ValueName = "";
+                                    foreach (var value in variable.Values)
+                                    {
+                                        ValueName = value.ValueName;
+                                        comboBox.Items.Add(new PdfListFieldItem(value.ValueName, value.Id.ToString()));
+                                    }
+                                    document.Form.Fields.Add(comboBox);
+                                    document.Form.SetDefaultAppearance(false);
+                                }
+                                else
+                                {
+                                    int Id;
+                                    bool isNumeric = int.TryParse(variable.ScreeningValue, out Id);
+                                    string dropdownvalue = "";
+                                    if (isNumeric)
+                                        dropdownvalue = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).FirstOrDefault();
+                                    SizeF size = regularfont.MeasureString($"{dropdownvalue}");
+                                    result = AddString($"{dropdownvalue}", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                }
+
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.RadioButton || variable.CollectionSource == CollectionSources.NumericScale)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    foreach (var value in variable.Values.OrderBy(i => i.SeqNo))
+                                    {
+                                        result = AddString($"{ value.ValueName} {value.Label}", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
+                                        PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueCode.ToString());
+                                        radioItem1.Bounds = new RectangleF(300, result.Bounds.Y, 13, 13);
+                                        radioList.Items.Add(radioItem1);
+                                        document.Form.Fields.Add(radioList);
+                                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    }
+                                }
+                                else
+                                {
+                                    int Id;
+                                    bool isNumeric = int.TryParse(variable.ScreeningValue, out Id);
+                                    string variblevaluename = "";
+                                    if (isNumeric)
+                                        variblevaluename = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).SingleOrDefault();
+                                    foreach (var value in variable.Values.OrderBy(x => x.SeqNo))
+                                    {
+                                        result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
+                                        document.Form.Fields.Add(radioList);
+
+                                        PdfRadioButtonListItem radioItem1 = new PdfRadioButtonListItem(value.ValueCode.ToString());
+                                        radioItem1.Bounds = new RectangleF(300, result.Bounds.Y, 13, 13);
+                                        radioList.Items.Add(radioItem1);
+                                        radioList.ReadOnly = true;
+                                        if (value.ValueName == variblevaluename)
+                                            radioList.SelectedIndex = 0;
+                                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    }
+                                }
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.MultiCheckBox)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    foreach (var value in variable.Values.OrderBy(i => i.SeqNo))
+                                    {
+                                        result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "UG");
+                                        checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
+                                        checkField.Style = PdfCheckBoxStyle.Check;
+                                        //checkField.Checked = true;
+                                        document.Form.Fields.Add(checkField);
+                                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    }
+                                }
+                                else
+                                {
+                                    var variablename = variable.ValueChild.Where(x => x.Value == "true").Select(x => x.ValueName).ToList();
+
+                                    foreach (var value in variable.Values.OrderBy(i => i.SeqNo))
+                                    {
+                                        result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, value.ValueCode.ToString());
+                                        checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
+                                        checkField.Style = PdfCheckBoxStyle.Check;
+                                        checkField.ReadOnly = true;
+                                        if (variablename.ToList().Contains(value.ValueName))
+                                            checkField.Checked = true;
+                                        document.Form.Fields.Add(checkField);
+
+                                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    }
+                                }
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.CheckBox)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    foreach (var value in variable.Values)
+                                    {
+                                        result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
+                                        checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
+                                        checkField.Style = PdfCheckBoxStyle.Check;
+                                        //checkField.ReadOnly = true;
+                                        document.Form.Fields.Add(checkField);
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (var value in variable.Values)
+                                    {
+                                        result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(320, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
+                                        checkField.Bounds = new RectangleF(300, result.Bounds.Y, 15, 15);
+                                        checkField.Style = PdfCheckBoxStyle.Check;
+                                        if (!String.IsNullOrEmpty(variable.ScreeningValue))
+                                        {
+                                            if (variable.ScreeningValue == "true")
+                                            {
+                                                checkField.Checked = true;
+                                            }
+                                        }
+                                        checkField.ReadOnly = true;
+                                        document.Form.Fields.Add(checkField);
+                                    }
+                                }
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.Date)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    PdfTextBoxField field = new PdfTextBoxField(result.Page, "datePick");
+                                    field.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    //field.Actions.KeyPressed = new PdfJavaScriptAction("AFDate_KeystrokeEx(\"m/d/yy\")");
+                                    //field.Actions.Format = new PdfJavaScriptAction("AFDate_FormatEx(\"m/d/yy\")");
+                                    //field.Text = textvalue;
+                                    document.Form.Fields.Add(field);
+                                }
+                                else
+                                {
+                                    var dt = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat) : variable.ScreeningValue : "";
+
+                                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
+                                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    textBoxField.Text = dt;
+                                    textBoxField.ReadOnly = true;
+                                    document.Form.Fields.Add(textBoxField);
+                                }
+                                AddString(GeneralSettings.DateFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.DateTime)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
+                                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    document.Form.Fields.Add(textBoxField);
+                                }
+                                else
+                                {
+                                    var dttime = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variable.ScreeningValue : "";
+
+                                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
+                                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    textBoxField.Text = dttime;
+                                    textBoxField.ReadOnly = true;
+                                    document.Form.Fields.Add(textBoxField);
+
+                                }
+                                AddString(GeneralSettings.DateFormat.ToUpper() + " " + GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y - 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y - 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.PartialDate)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "PartialDate");
+                                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    document.Form.Fields.Add(textBoxField);
+                                }
+                                else
+                                {
+                                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "PartialDate");
+                                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    textBoxField.Text = variable.ScreeningValue == null ? "" : variable.ScreeningValue;
+                                    textBoxField.ReadOnly = true;
+                                    document.Form.Fields.Add(textBoxField);
+                                }
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.Time)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
+                                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    document.Form.Fields.Add(textBoxField);
+                                    result = AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                }
+                                else
+                                {
+                                    //var time = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+
+                                    PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
+                                    textBoxField.Bounds = new RectangleF(300, result.Bounds.Y, 100, 20);
+                                    textBoxField.Text = variable.ScreeningValue;
+                                    textBoxField.ReadOnly = true;
+                                    document.Form.Fields.Add(textBoxField);
+                                    AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(410, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                }
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.HorizontalScale)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    List<string> _points = new List<string>();
+                                    int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
+                                    int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
+                                    int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
+                                    //logic
+                                    for (int i = lowrangevalue; i <= highragnevalue; i++)
+                                    {
+                                        if ((i % stepvalue) == 0)
+                                            _points.Add(i.ToString());
+                                    }
+                                    float xPos = 300;
+                                    result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, result.Bounds.Y + 20), new PointF(xPos + 180, result.Bounds.Y + 20));
+                                    float yPos = result.Bounds.Y + 10;
+                                    float increment = (float)180 / (_points.Count - 1);
+                                    float smallyPos = result.Bounds.Y + 5;
+                                    for (int i = 0; i < _points.Count; i++)
+                                    {
+                                        //if ((i % 5) == 0)
+                                        //{
+                                        result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, yPos), new PointF(xPos, yPos + 20));
+                                        result.Page.Graphics.DrawString(_points[i], new PdfStandardFont(PdfFontFamily.TimesRoman, 8), PdfBrushes.Black, new PointF(xPos - 2, yPos + 25));
+                                        //}
+                                        //else
+                                        //{
+                                        //    result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, yPos), new PointF(xPos, smallyPos + 20));
+                                        //}
+                                        xPos = xPos + increment;
+                                    }
+                                }
+                                else
+                                {
+                                    result = AddString(variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                }
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             }
                             else
                             {
-                                result = AddString(variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             }
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        else
-                        {
-                            result = AddString(variable.CollectionSource.ToString(), result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        }
-                        //result = AddString("--last line ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                        PdfLayoutResult thirdresult = result;
-                        if (secondresult.Page == thirdresult.Page)
-                            if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
-                                if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
-                                    result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            //result = AddString("--last line ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            PdfLayoutResult thirdresult = result;
+                            if (secondresult.Page == thirdresult.Page)
+                                if (secondresult.Bounds.Bottom > thirdresult.Bounds.Bottom)
+                                    if (thirdresult.Bounds.Height < secondresult.Bounds.Height)
+                                        result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
-                        //data
-                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            //data
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                        }
+
                     }
                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 

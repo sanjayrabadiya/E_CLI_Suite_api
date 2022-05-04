@@ -549,7 +549,8 @@ namespace GSC.Report.Common
                                     UnitName = v.Unit.UnitName,
                                     UnitAnnotation = v.UnitAnnotation
                                 },
-                                Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList()
+                                Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList(),
+                                VariableCategoryName = v.VariableCategory.CategoryName
                             }).ToList()
                         }).ToList()
                     }).OrderBy(d => d.DesignOrder).ToList()
@@ -616,8 +617,8 @@ namespace GSC.Report.Common
                           ScreeningValue= s.Value,
                           ScreeningIsNa=s.IsNa,
                           ScreeningTemplateValueId=s.Id,
-                          ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{Value=c.Value,ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,ScreeningTemplateValueId=c.ScreeningTemplateValueId,ValueName=c.ProjectDesignVariableValue.ValueName }).ToList()
-
+                          ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{Value=c.Value,ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,ScreeningTemplateValueId=c.ScreeningTemplateValueId,ValueName=c.ProjectDesignVariableValue.ValueName }).ToList(),
+                          VariableCategoryName = s.ProjectDesignVariable.VariableCategory.CategoryName
                       }).ToList(),
                       ScreeningTemplateReview=a.ScreeningTemplateReview.Where(r=>r.DeletedDate==null).Select(r=>new ScreeningTemplateReviewReportDto{
                       ScreeningTemplateId=r.ScreeningTemplateId,

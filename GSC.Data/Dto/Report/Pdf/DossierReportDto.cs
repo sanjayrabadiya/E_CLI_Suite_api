@@ -49,7 +49,6 @@ namespace GSC.Data.Dto.Report.Pdf
 
         public List<ProjectDesignTemplateNoteReportDto> TemplateNotesBottom { get; set; }
         public List<ProjectDesignVariableReportDto> ProjectDesignVariable { get; set; }
-
         public List<ScreeningTemplateReviewReportDto> ScreeningTemplateReview { get; set; }
       
     }
@@ -92,6 +91,10 @@ namespace GSC.Data.Dto.Report.Pdf
         public string ScreeningValue { get; set; }
         public bool ScreeningIsNa { get; set; }
         public List<ScreeningTemplateValueChildReportDto> ValueChild { get; set; }
+
+        public string VariableCategoryName { get; set; }
+
+        
     }
 
     public class UnitReportDto
