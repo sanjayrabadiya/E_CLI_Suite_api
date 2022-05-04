@@ -44,9 +44,13 @@ namespace GSC.Respository.EditCheckImpact
                     if (round > 3)
                         round = round - 3;
 
-                    decimal value;
-                    decimal.TryParse(targetResult.Result, out value);
-                    targetResult.Result = Decimal.Round(value, round, MidpointRounding.AwayFromZero).ToString();
+                    if (r.DataType != DataType.Character)
+                    {
+                        decimal value;
+                        decimal.TryParse(targetResult.Result, out value);
+                        targetResult.Result = Decimal.Round(value, round, MidpointRounding.AwayFromZero).ToString();
+                    }
+
 
                     if (r.Operator == Operator.SquareRoot)
                         targetResult.ResultMessage = $"{targetResult.Result} {"->"}{"Sqrt("}{targetResult.ResultMessage}{")"}";
@@ -64,8 +68,13 @@ namespace GSC.Respository.EditCheckImpact
         {
             string ruleStr = "";
             var result = new EditCheckResult();
+            DateTime? lastDate = null;
             try
             {
+
+                TimeSpan t1 = TimeSpan.Parse("00:00");
+                string timeDiff = "";
+                Operator? lastOperator = Operator.Minus;
                 editCheck.Where(x => !x.IsTarget).ToList().ForEach(r =>
                 {
                     if (string.IsNullOrEmpty(r.InputValue))
@@ -74,8 +83,29 @@ namespace GSC.Respository.EditCheckImpact
                     if (r.CollectionSource == CollectionSources.Time && !string.IsNullOrEmpty(r.InputValue) && r.InputValue != "0" && r.InputValue != "1")
                     {
                         DateTime dt = DateTime.ParseExact(r.InputValue, "MM/dd/yyyy HH:mm:ss", null);
-                        var hrs = $"{dt.Hour}.{ Math.Round((dt.Minute * 100) / 60.0)}";
-                        r.InputValue = hrs.ToString();
+                        if (lastDate != null && dt != null)
+                        {
+                            if (r.Operator == Operator.Plus || lastOperator == Operator.Plus)
+                            {
+                                TimeSpan duration = t1.Add(TimeSpan.Parse(dt.ToString(@"HH\:mm")));
+                                if (duration.Days > 0)
+                                {
+                                    timeDiff = $"{duration.Hours + (24 * duration.Days)}:{duration.Minutes.ToString().PadLeft(2, '0')}";
+                                }
+                                else
+                                    timeDiff = $"{duration.Hours}:{duration.Minutes.ToString().PadLeft(2, '0')}";
+                            }
+                            else
+                            {
+
+                                TimeSpan duration = lastDate.Value - dt;
+                                timeDiff = duration.ToString(@"hh\:mm");
+                            }
+
+                        }
+                        lastDate = dt;
+                        lastOperator = r.Operator;
+                        t1 = TimeSpan.Parse(dt.ToString(@"HH\:mm"));
                     }
 
                     if (!string.IsNullOrEmpty(r.CollectionValue) && r.CollectionValue == "0")
@@ -97,16 +127,14 @@ namespace GSC.Respository.EditCheckImpact
                     return result;
                 }
 
-                double editCheckResult;
+
                 if (ruleStr.Contains("^") || ruleStr.Contains("sqrt"))
-                {
-                    editCheckResult = MathEvaluateExpression.EvaluateExpression(ruleStr);
-                }
+                    result.Result = MathEvaluateExpression.EvaluateExpression(ruleStr).ToString();
+                else if (!string.IsNullOrEmpty(timeDiff))
+                    result.Result = timeDiff;
                 else
-                    editCheckResult = Convert.ToDouble(new DataTable().Compute(ruleStr, null));
+                    result.Result = Convert.ToDouble(new DataTable().Compute(ruleStr, null)).ToString();
 
-
-                result.Result = editCheckResult.ToString();
                 result.IsValid = true;
                 result.ResultMessage = result.Result + " -> " + ruleStr;
                 result.ErrorMessage = "";
@@ -115,6 +143,8 @@ namespace GSC.Respository.EditCheckImpact
             {
                 result.ErrorMessage = ex.Message;
                 result.IsValid = false;
+                if (lastDate != null)
+                    result.Result = "0";
             }
             result.SampleText = ruleStr;
             return result;

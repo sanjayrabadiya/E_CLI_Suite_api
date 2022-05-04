@@ -157,7 +157,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (!isQueryRaise)
             {
-                var Ids = editCheckResult.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
+                var Ids = editCheckResult.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.IsOnlyTarget || x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
                 editCheckResult = editCheckResult.Where(t => Ids.Contains(t.EditCheckId)).ToList();
             }
 
@@ -169,7 +169,7 @@ namespace GSC.Respository.EditCheckImpact
                 a.Key.EditCheckId,
                 SortBy = editCheckResult.Count(f => f.ProjectDesignVariableId == a.Key.ProjectDesignVariableId) > 1 &&
                     editCheckResult.Any(f => f.ProjectDesignVariableId == a.Key.ProjectDesignVariableId &&
-                    f.EditCheckId == a.Key.EditCheckId && f.IsTarget) ? 1 : 2
+                    f.EditCheckId == a.Key.EditCheckId && f.IsTarget) ? 1 : editCheckResult.Count() > 1 ? 2 : 3
             }).
             OrderBy(v => v.SortBy).Select(m => m.EditCheckId).Distinct().ToList();
 
@@ -393,13 +393,12 @@ namespace GSC.Respository.EditCheckImpact
                         if (r.ValidateType == EditCheckValidateType.ReferenceVerifed || r.ValidateType == EditCheckValidateType.Passed)
                         {
                             if (r.ProjectDesignTemplateId == r.FetchingProjectDesignTemplateId)
-                                editCheckTarget.Value = _impactService.GetVariableValue(r.ScreeningTemplateId, r.FetchingProjectDesignVariableId ?? 0);
+                                editCheckTarget.Value = _impactService.GetHardSoftValue(r.ScreeningTemplateId, r.FetchingProjectDesignVariableId ?? 0, r.ProjectDesignVariableId, r.CollectionSource);
                             else
                             {
-                                var refTemplate = _impactService.GetScreeningTemplate((int)r.FetchingProjectDesignTemplateId, screeningEntryId,
-                                 r.ProjectDesignVisitId == r.ProjectDesignVisitId ? screeningVisitId : (int?)null);
+                                var refTemplate = _impactService.GetScreeningTemplate((int)r.FetchingProjectDesignTemplateId, screeningEntryId, null);
                                 if (refTemplate != null)
-                                    editCheckTarget.Value = _impactService.GetVariableValue(refTemplate.Id, r.FetchingProjectDesignVariableId ?? 0);
+                                    editCheckTarget.Value = _impactService.GetHardSoftValue(refTemplate.Id, r.FetchingProjectDesignVariableId ?? 0, r.ProjectDesignVariableId, r.CollectionSource);
                             }
                             if (_templateScreeningVariableDtos != null)
                                 _templateScreeningVariableDtos.Add(new TemplateScreeningVariableDto
