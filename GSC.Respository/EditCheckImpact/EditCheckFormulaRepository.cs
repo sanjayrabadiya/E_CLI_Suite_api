@@ -90,10 +90,10 @@ namespace GSC.Respository.EditCheckImpact
                                 TimeSpan duration = t1.Add(TimeSpan.Parse(dt.ToString(@"HH\:mm")));
                                 if (duration.Days > 0)
                                 {
-                                    timeDiff = $"{duration.Hours + (24 * duration.Days)}:{duration.Minutes}";
+                                    timeDiff = $"{duration.Hours + (24 * duration.Days)}:{duration.Minutes.ToString().PadLeft(2, '0')}";
                                 }
                                 else
-                                    timeDiff = $"{duration.Hours}:{duration.Minutes}";
+                                    timeDiff = $"{duration.Hours}:{duration.Minutes.ToString().PadLeft(2, '0')}";
                             }
                             else
                             {
