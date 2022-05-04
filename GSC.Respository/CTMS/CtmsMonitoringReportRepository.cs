@@ -116,10 +116,14 @@ namespace GSC.Respository.CTMS
                                 .Where(x => x.ProjectId == projectId && x.ActivityId == Activity.Id
                                 && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
-            var CtmsMonitoringReport = All.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
+            //var CtmsMonitoringReport = All.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
+            //                           && x.CtmsMonitoring.DeletedDate == null).ToList();
+
+            var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
                                        && x.CtmsMonitoring.DeletedDate == null).ToList();
-            if (!(CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.FormApproved)))
-                return "Please Complete Previous Form.";
+
+            if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
+                return "Please Approve Previous Site.";
 
             return "";
         }
