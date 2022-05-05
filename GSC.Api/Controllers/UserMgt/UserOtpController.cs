@@ -81,6 +81,11 @@ namespace GSC.Api.Controllers.UserMgt
                 return BadRequest(ModelState);
             }
 
+            var user = _userRepository.FindBy(x => x.UserName == userOtpDto.UserName && x.DeletedDate == null).FirstOrDefault();
+            user.IsFirstTime = false;
+            user.IsLogin = false;
+            _userRepository.Update(user);
+
             _uow.Save();
             return Ok(new { message = "OTP verified successfullly!", StatusCode = 200 });
         }
