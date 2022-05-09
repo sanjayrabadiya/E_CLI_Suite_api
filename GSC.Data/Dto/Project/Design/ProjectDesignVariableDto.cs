@@ -64,6 +64,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsNaValue { get; set; }
         public bool IsSystem { get; set; }
         public string Note { get; set; }
+        public string Label { get; set; }
         public EditCheckTargetValidation EditCheckValidation { get; set; }
         public Alignment? Alignment { get; set; }
         public IList<ProjectDesignVariableEncryptRoleDto> Roles { get; set; } = null;
@@ -89,11 +90,12 @@ namespace GSC.Data.Dto.Project.Design
         public string DefaultValue { get; set; }
         public string LowRangeValue { get; set; }
         public string HighRangeValue { get; set; }
-        public PrintType PrintType { get; set; }
+        public PrintType? PrintType { get; set; }
         public IList<ScreeningVariableValueDto> Values { get; set; } = null;
-
+        public string Label { get; set; }
         public string UnitName { get; set; }
         public string DesignOrder { get; set; }
+        public int DesignOrderForOrderBy { get; set; }
         public bool? IsDocument { get; set; }
         public bool? IsEncrypt { get; set; }
         public string ScreeningValue { get; set; }

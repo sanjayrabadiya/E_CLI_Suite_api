@@ -122,6 +122,7 @@ namespace GSC.Respository.Project.Design
                         //Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
                         UnitName = x.Unit.UnitName,
                         DesignOrder = x.ProjectDesignTemplate.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
+                        DesignOrderForOrderBy = x.DesignOrder,
                         IsDocument = x.IsDocument,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
@@ -134,8 +135,9 @@ namespace GSC.Respository.Project.Design
                         Note = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
-                        DisplayStepValue = x.DisplayStepValue
-                    }).OrderBy(r => r.DesignOrder).ToList();
+                        DisplayStepValue = x.DisplayStepValue,
+                        Label = x.Label
+                    }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.
                      Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null).Select(c => new ScreeningVariableValueDto

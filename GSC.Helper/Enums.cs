@@ -60,11 +60,8 @@ namespace GSC.Helper
 
     public enum PrintType : short
     {
-        [Description("Same Line")] SameLine = 1,
-        [Description("New Line")] NewLine = 2,
-        [Description("Two Column")] TwoColumn = 3,
-        [Description("Three Column")] ThreeColumn = 4,
-        [Description("Four Column")] FourColumn = 5
+        [Description("Horizontal")] Horizontal = 1,
+        [Description("Vertical")] Vertical = 2,
     }
 
     public enum DataType : short

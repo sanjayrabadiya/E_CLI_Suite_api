@@ -33,7 +33,7 @@ namespace GSC.Data.Entities.Project.Design
         public string HighRangeValue { get; set; }
         public int? UnitId { get; set; }
         public string UnitAnnotation { get; set; }
-        public PrintType PrintType { get; set; }
+        public PrintType? PrintType { get; set; }
         public bool IsDocument { get; set; }
         public bool IsEncrypt { get; set; }
         public double? InActiveVersion{ get; set; }
@@ -54,6 +54,7 @@ namespace GSC.Data.Entities.Project.Design
         public DateValidateType? DateValidate { get; set; }
         public Domain Domain { get; set; }
         public string Note { get; set; }
+        public string Label { get; set; }
         public List<VariableLanguage> VariableLanguage { get; set; }
         public List<VariableNoteLanguage> VariableNoteLanguage { get; set; }
         public Alignment? Alignment { get; set; }
