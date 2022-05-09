@@ -85,7 +85,7 @@ namespace GSC.Respository.EditCheckImpact
                         DateTime dt = DateTime.ParseExact(r.InputValue, "MM/dd/yyyy HH:mm:ss", null);
                         if (lastDate != null && dt != null)
                         {
-                            if (r.Operator == Operator.Plus || lastOperator == Operator.Plus)
+                            if (lastOperator == Operator.Plus)
                             {
                                 TimeSpan duration = t1.Add(TimeSpan.Parse(dt.ToString(@"HH\:mm")));
                                 if (duration.Days > 0)
@@ -98,14 +98,15 @@ namespace GSC.Respository.EditCheckImpact
                             else
                             {
 
-                                TimeSpan duration = lastDate.Value - dt;
+                                TimeSpan duration = t1 - TimeSpan.Parse(dt.ToString(@"HH\:mm"));
                                 timeDiff = duration.ToString(@"hh\:mm");
                             }
-
+                            t1 = TimeSpan.Parse(timeDiff);
                         }
                         lastDate = dt;
                         lastOperator = r.Operator;
-                        t1 = TimeSpan.Parse(dt.ToString(@"HH\:mm"));
+                        if (string.IsNullOrEmpty(timeDiff))
+                            t1 = TimeSpan.Parse(dt.ToString(@"HH\:mm"));
                     }
 
                     if (!string.IsNullOrEmpty(r.CollectionValue) && r.CollectionValue == "0")

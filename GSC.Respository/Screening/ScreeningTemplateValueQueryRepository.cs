@@ -304,7 +304,11 @@ namespace GSC.Respository.Screening
                 }
 
                 else if (workFlowLevel.IsNoCRF)
+                {
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
+                    if (workFlowLevel.LevelNo > 0 && screeningTemplateValue.AcknowledgeLevel < screeningTemplate.ReviewLevel)
+                        screeningTemplateValue.AcknowledgeLevel += 1;
+                }    
                 else
                     screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 2 : 1);
 
