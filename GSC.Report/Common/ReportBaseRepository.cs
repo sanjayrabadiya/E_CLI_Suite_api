@@ -516,11 +516,18 @@ namespace GSC.Report.Common
                 Period = x.ProjectDesignPeriods.Where(a => a.DeletedDate == null).Select(a => new ProjectDesignPeriodReportDto
                 {
                     DisplayName = a.DisplayName,
-                    Visit = a.VisitList.Where(b => b.DeletedDate == null).Select(b => new ProjectDesignVisitList
+                    Visit = a.VisitList.Where(b => b.DeletedDate == null
+                    && ((reportSetting.CRFType == CRFTypes.CRF && !b.IsNonCRF)
+                    || (reportSetting.CRFType == CRFTypes.NonCRF && b.IsNonCRF)
+                    || (reportSetting.CRFType == CRFTypes.Both && (b.IsNonCRF || !b.IsNonCRF))
+                    ) && (reportSetting.VisitIds == null || (reportSetting.VisitIds != null && reportSetting.VisitIds.Contains(b.Id)))
+                    ).Select(b => new ProjectDesignVisitList
                     {
                         DisplayName = b.DisplayName,
                         DesignOrder = b.DesignOrder,
-                        ProjectDesignTemplatelist = b.Templates.Where(n => n.DeletedDate == null && (reportSetting.NonCRF == true ? n.VariableTemplate.ActivityMode == ActivityMode.Generic || n.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : n.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific)).Select(n => new ProjectDesignTemplatelist
+                        ProjectDesignTemplatelist = b.Templates.Where(n => n.DeletedDate == null
+                        && (reportSetting.TemplateIds == null || (reportSetting.TemplateIds != null && reportSetting.TemplateIds.Contains(n.Id))
+                        )).Select(n => new ProjectDesignTemplatelist
                         {
                             TemplateCode = n.TemplateCode,
                             TemplateName = n.TemplateName,
@@ -579,11 +586,18 @@ namespace GSC.Report.Common
                   Period = new List<ProjectDesignPeriodReportDto> {
           new ProjectDesignPeriodReportDto {
             DisplayName = x.ProjectDesignPeriod.DisplayName,
-              Visit = x.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate==null).Select(x => new ProjectDesignVisitList {
+              Visit = x.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate==null
+                     && ((reportSetting.CRFType == CRFTypes.CRF && !x.ProjectDesignVisit.IsNonCRF)
+                    || (reportSetting.CRFType == CRFTypes.NonCRF && x.ProjectDesignVisit.IsNonCRF)
+                    || (reportSetting.CRFType == CRFTypes.Both && (x.ProjectDesignVisit.IsNonCRF || !x.ProjectDesignVisit.IsNonCRF))
+                    ) && (reportSetting.VisitIds == null || (reportSetting.VisitIds != null && reportSetting.VisitIds.Contains(x.ProjectDesignVisitId)))
+                    ).Select(x => new ProjectDesignVisitList {
                   DisplayName = x.RepeatedVisitNumber==null ?x.ProjectDesignVisit.DisplayName:x.ProjectDesignVisit.DisplayName+"_"+x.RepeatedVisitNumber,
                   DesignOrder = x.ProjectDesignVisit.DesignOrder,
                   ProjectDesignTemplatelist = x.ScreeningTemplates.Where(a => a.Status != ScreeningTemplateStatus.Pending &&
-                    a.DeletedDate == null  && a.ProjectDesignTemplate.DeletedDate == null && reportSetting.NonCRF == true ? a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.Generic || a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific : a.ProjectDesignTemplate.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific).Select(a => new ProjectDesignTemplatelist {
+                    a.DeletedDate == null  && a.ProjectDesignTemplate.DeletedDate == null
+                   && (reportSetting.TemplateIds == null || (reportSetting.TemplateIds != null && reportSetting.TemplateIds.Contains(a.ProjectDesignTemplateId))
+                        )).Select(a => new ProjectDesignTemplatelist {
                       TemplateCode = a.ProjectDesignTemplate.TemplateCode,
                       TemplateName = a.ProjectDesignTemplate.TemplateName,
                       DesignOrder = a.ProjectDesignTemplate.DesignOrder,

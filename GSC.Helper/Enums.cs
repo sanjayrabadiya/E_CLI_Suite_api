@@ -828,4 +828,10 @@ namespace GSC.Helper
         [Description("Country")] Country = 2,
         [Description("Site")] Site = 3
     }
+    public enum CRFTypes : short
+    {
+        [Description("ESource")] NonCRF = 1,
+        [Description("CRF")] CRF = 2,
+        [Description("Both")] Both = 3
+    }
 }

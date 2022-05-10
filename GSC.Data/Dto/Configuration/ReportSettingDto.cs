@@ -51,5 +51,11 @@ namespace GSC.Data.Dto.Configuration
         public string ReportCode { get; set; }
         public int SitesId { get; set; }
         public bool IsSync { get; set; }
+
+        public CRFTypes CRFType { get; set; }
+    }
+    public class ReportVisitsDto
+    {
+        public int[] VisitIds { get; set; }
     }
 }

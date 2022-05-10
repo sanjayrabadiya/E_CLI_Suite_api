@@ -3,8 +3,10 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Report;
+using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Report;
 using GSC.Respository.Project.Design;
@@ -27,6 +29,7 @@ namespace GSC.Api.Controllers.Report
         private readonly IGscReport _gscReport;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
         private readonly IProjectDesignReportSettingRepository _projectDesignReportSettingRepository;
         private readonly IJobMonitoringRepository _jobMonitoringRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
@@ -35,7 +38,7 @@ namespace GSC.Api.Controllers.Report
         public ReportController(IProjectDesignReportSettingRepository projectDesignReportSettingRepository, IGscReport gscReport
             , IUnitOfWork uow, IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository,
             IProjectDesignRepository projectDesignRepository,
-            IMapper mapper, IReportSyncfusion reportSuncfusion)
+            IMapper mapper, IReportSyncfusion reportSuncfusion, IGSCContext context)
         {
             _uow = uow;
             _gscReport = gscReport;
@@ -45,6 +48,7 @@ namespace GSC.Api.Controllers.Report
             _mapper = mapper;
             _projectDesignRepository = projectDesignRepository;
             _reportSuncfusion = reportSuncfusion;
+            _context = context;
         }
 
         [HttpGet]
@@ -120,6 +124,61 @@ namespace GSC.Api.Controllers.Report
             }
             return Ok();
         }
+        [HttpGet]
+        [Route("GetVisitsByCrfTypes/{CRFType?}/{projectId?}")]
+        public IActionResult GetVisitsByCrfTypes(int? CRFType, int? projectId)
+        {
+            if (projectId <= 0 || CRFType <= 0)
+            {
+                return null;
+            }
+            var Data = _context.ProjectDesignVisit.Where(a => a.DeletedDate == null
+                      && a.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+                     && (CRFType == 3 || ((CRFType == 1 && a.IsNonCRF) || (CRFType == 2 && !a.IsNonCRF))))
+                    .Select(x => new DropDownDto
+                    {
+                        Id = x.Id,
+                        Value = x.DisplayName
+                    }).Distinct().ToList();
 
+
+            return Ok(Data);
+        }
+        [HttpPost]
+        [Route("GetTemplatesByVisits")]
+        public IActionResult GetTemplatesByVisits([FromBody] ReportVisitsDto reportSetting)
+        {
+            if (reportSetting.VisitIds == null)
+            {
+                return null;
+            }
+            var Data = _context.ProjectDesignTemplate.Where(a => a.DeletedDate == null && reportSetting.VisitIds.Contains(a.ProjectDesignVisitId))
+                    .Select(x => new DropDownDto
+                    {
+                        Id = x.Id,
+                        Value = x.TemplateName
+                    }).Distinct().ToList();
+
+
+            return Ok(Data);
+        }
+        [HttpPost]
+        [Route("GetVersionDropdown")]
+        public IActionResult GetVersionDropdown([FromBody] ReportVisitsDto reportSetting)
+        {
+            if (reportSetting.VisitIds == null)
+            {
+                return null;
+            }
+            var Data = _context.ProjectDesignTemplate.Where(a => a.DeletedDate == null && reportSetting.VisitIds.Contains(a.ProjectDesignVisitId))
+                    .Select(x => new DropDownDto
+                    {
+                        Id = x.Id,
+                        Value = x.TemplateName
+                    }).Distinct().ToList();
+
+
+            return Ok(Data);
+        }
     }
 }

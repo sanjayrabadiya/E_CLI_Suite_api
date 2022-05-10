@@ -641,5 +641,17 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription(),
                 }).OrderBy(o => o.Id).ToList();
         }
+
+        [HttpGet]
+        [Route("CRFTypes")]
+        public IList<DropDownEnum> CRFTypes()
+        {
+            return Enum.GetValues(typeof(CRFTypes))
+                .Cast<CRFTypes>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }
