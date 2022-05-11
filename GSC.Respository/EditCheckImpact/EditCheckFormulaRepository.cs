@@ -44,7 +44,13 @@ namespace GSC.Respository.EditCheckImpact
                     if (round > 3)
                         round = round - 3;
 
-                    if (r.DataType != DataType.Character)
+                   
+
+                    if (r.CollectionSource == CollectionSources.Time && !string.IsNullOrEmpty(targetResult.Result) && targetResult.Result != "0")
+                    {
+                        targetResult.Result = Convert.ToDateTime(targetResult.Result).ToString("MM/dd/yyyy HH:mm:ss");
+                    }
+                    else if (r.DataType != DataType.Character)
                     {
                         decimal value;
                         decimal.TryParse(targetResult.Result, out value);

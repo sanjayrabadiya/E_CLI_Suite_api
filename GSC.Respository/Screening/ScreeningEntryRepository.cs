@@ -220,14 +220,14 @@ namespace GSC.Respository.Screening
             _screeningVisitRepository.PatientStatus(screeningEntry.Id);
 
             var screningVisit = screeningEntry.ScreeningVisit.Where(x => x.ProjectDesignVisitId == saveRandomizationDto.ProjectDesignVisitId).FirstOrDefault();
+            
+            _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
+            _context.Save();
+
             var isScheduleReference = _projectScheduleRepository.All.Any(x => x.ProjectDesignVisitId == screningVisit.ProjectDesignVisitId && x.DeletedDate == null);
             if (screningVisit != null && isScheduleReference)
             {
-                _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
-                _context.Save();
-
                 _screeningVisitRepository.ScheduleVisitUpdate(screeningEntry.Id);
-
             }
 
             return screeningEntry;
