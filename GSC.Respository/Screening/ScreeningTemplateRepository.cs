@@ -453,6 +453,8 @@ namespace GSC.Respository.Screening
             if (editCheckIds.Count > 0)
                 RecuranceEditCheck(editCheckValidateDtos, editCheckIds, ref editCheckIds, projectDesignTemplateId);
 
+            TargetVaribaleAndReferenceEditCheck(editCheckValidateDtos, editCheckIds, ref editCheckIds, projectDesignTemplateId);
+
             return editCheckIds.GroupBy(t => t).Select(r => new EditCheckIds { EditCheckId = r.Key }).ToList();
         }
 
@@ -464,6 +466,22 @@ namespace GSC.Respository.Screening
                 var subEditCheckIds = GetEditCheckIdTarget(editCheckValidateDtos, item, result, projectDesignTemplateId);
                 result.AddRange(subEditCheckIds);
                 RecuranceEditCheck(editCheckValidateDtos, subEditCheckIds, ref result, projectDesignTemplateId);
+            }
+        }
+
+        void TargetVaribaleAndReferenceEditCheck(List<EditCheckValidateDto> editCheckValidateDtos, List<int> editCheckIds, ref List<int> result, int projectDesignTemplateId)
+        {
+            var variable = editCheckValidateDtos.
+              Where(x => editCheckIds.Contains(x.EditCheckId) && x.IsTarget &&
+              (x.IsFormula || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+             Select(t => t.ProjectDesignVariableId).Distinct().ToList();
+
+            foreach (var item in variable)
+            {
+                var subEditCheckIds = editCheckValidateDtos.Where(x =>
+                (x.ProjectDesignVariableId == item || (x.FetchingProjectDesignVariableId == item) && !editCheckIds.Contains(x.EditCheckId) && x.IsTarget &&
+                (x.IsFormula || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch))).GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
+                result.AddRange(subEditCheckIds);
             }
         }
 
