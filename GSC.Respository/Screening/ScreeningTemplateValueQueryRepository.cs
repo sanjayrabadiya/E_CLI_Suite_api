@@ -296,19 +296,20 @@ namespace GSC.Respository.Screening
                 screeningTemplateValue.QueryStatus = QueryStatus.SelfCorrection;
                 screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
 
-                if (workFlowLevel.IsWorkFlowBreak)
+
+                if (workFlowLevel.IsNoCRF)
+                {
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
+                    if (workFlowLevel.LevelNo > 0 && screeningTemplateValue.AcknowledgeLevel < screeningTemplate.ReviewLevel)
+                        screeningTemplateValue.AcknowledgeLevel += 1;
+                }
+                else if (workFlowLevel.IsWorkFlowBreak)
                 {
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetMaxLevelWorkBreak(workFlowLevel.ProjectDesignId);
                     if (workFlowLevel.LevelNo > 0 && screeningTemplateValue.AcknowledgeLevel < screeningTemplate.ReviewLevel)
                         screeningTemplateValue.AcknowledgeLevel += 1;
                 }
 
-                else if (workFlowLevel.IsNoCRF)
-                {
-                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
-                    if (workFlowLevel.LevelNo > 0 && screeningTemplateValue.AcknowledgeLevel < screeningTemplate.ReviewLevel)
-                        screeningTemplateValue.AcknowledgeLevel += 1;
-                }    
                 else
                     screeningTemplateValue.AcknowledgeLevel = Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 2 : 1);
 
