@@ -131,6 +131,7 @@ namespace GSC.Respository.Screening
 
             designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
             designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
+            designTemplateDto.ParentId = screeningTemplateBasic.ParentId;
             designTemplateDto.IsLocked = screeningTemplateBasic.IsLocked;
             designTemplateDto.Status = screeningTemplateBasic.Status;
             designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic, workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
@@ -542,7 +543,8 @@ namespace GSC.Respository.Screening
                 MyReview = workFlowLevel.LevelNo == t.ReviewLevel,
                 ParentId = t.ParentId,
                 IsTemplateSeqNo = t.ProjectDesignTemplate.IsTemplateSeqNo,
-                IsVariableSeqNo = t.ProjectDesignTemplate.IsVariableSeqNo
+                IsVariableSeqNo = t.ProjectDesignTemplate.IsVariableSeqNo,
+                Label = t.ProjectDesignTemplate.Label
             }).ToList();
 
             var templateValues = _screeningTemplateValueRepository.GetQueryStatusBySubject(screeningEntryId);

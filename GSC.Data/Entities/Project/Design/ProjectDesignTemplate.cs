@@ -26,7 +26,7 @@ namespace GSC.Data.Entities.Project.Design
         public VariableTemplate VariableTemplate { get; set; }
         public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
-
+        public string Label { get; set; }
         public IList<ProjectDesignTemplateNote> ProjectDesignTemplateNote { get; set; }
         public List<TemplateLanguage> TemplateLanguage { get; set; }
         public List<ProjectDesingTemplateRestriction> ProjectDesingTemplateRestriction { get; set; }

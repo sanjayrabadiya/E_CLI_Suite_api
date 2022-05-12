@@ -45,6 +45,7 @@ namespace GSC.Data.Dto.Project.Design
         public int? ProductTypeId { get; set; }
         public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
+        public string Label { get; set; }
     }
 
 
@@ -68,6 +69,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsUnSubmittedButton { get; set; }
         public bool IsUnReviewedButton { get; set; }
         public int ScreeningTemplateId { get; set; }
+        public int? ParentId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public bool IsSchedule { get; set; }
         public string EditCheckMessage { get; set; }

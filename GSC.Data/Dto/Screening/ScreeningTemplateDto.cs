@@ -38,7 +38,7 @@ namespace GSC.Data.Dto.Screening
         public int TotalQueries { get; set; }
         public bool? IsTemplateSeqNo { get; set; }
         public bool? IsVariableSeqNo { get; set; }
-
+        public string Label { get; set; }
     }
 
 
