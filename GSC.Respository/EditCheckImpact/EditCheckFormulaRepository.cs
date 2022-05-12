@@ -44,7 +44,7 @@ namespace GSC.Respository.EditCheckImpact
                     if (round > 3)
                         round = round - 3;
 
-                   
+
 
                     if (r.CollectionSource == CollectionSources.Time && !string.IsNullOrEmpty(targetResult.Result) && targetResult.Result != "0")
                     {
@@ -81,10 +81,17 @@ namespace GSC.Respository.EditCheckImpact
                 TimeSpan t1 = TimeSpan.Parse("00:00");
                 string timeDiff = "";
                 Operator? lastOperator = Operator.Minus;
+                bool isMathAbs = false;
                 editCheck.Where(x => !x.IsTarget).ToList().ForEach(r =>
                 {
                     if (string.IsNullOrEmpty(r.InputValue))
                         r.InputValue = "0";
+
+                    if (!string.IsNullOrEmpty(r.CollectionValue2) && r.CollectionValue2.Contains("Abs", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isMathAbs = true;
+                        r.CollectionValue2 = r.CollectionValue2.Replace("Abs", "", StringComparison.OrdinalIgnoreCase);
+                    }
 
                     if (r.CollectionSource == CollectionSources.Time && !string.IsNullOrEmpty(r.InputValue) && r.InputValue != "0" && r.InputValue != "1")
                     {
@@ -140,7 +147,14 @@ namespace GSC.Respository.EditCheckImpact
                 else if (!string.IsNullOrEmpty(timeDiff))
                     result.Result = timeDiff;
                 else
-                    result.Result = Convert.ToDouble(new DataTable().Compute(ruleStr, null)).ToString();
+                {
+                    if (isMathAbs)
+                        result.Result = Math.Abs(Convert.ToDouble(new DataTable().Compute(ruleStr, null))).ToString();
+                    else
+                        result.Result = Convert.ToDouble(new DataTable().Compute(ruleStr, null)).ToString();
+
+                }
+
 
                 result.IsValid = true;
                 result.ResultMessage = result.Result + " -> " + ruleStr;
