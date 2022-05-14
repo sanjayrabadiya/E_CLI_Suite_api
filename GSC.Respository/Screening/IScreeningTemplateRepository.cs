@@ -33,5 +33,7 @@ namespace GSC.Respository.Screening
 
         bool CheckLockedProject(int ProjectId);
         IList<ScheduleDueReport> GetScheduleDueReport(ScheduleDueReportSearchDto filters);
+
+        void SendVariableEmail(ScreeningTemplateValueDto screeningTemplateValueDto, ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto);
     }
 }

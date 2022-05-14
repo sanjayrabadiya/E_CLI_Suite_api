@@ -15,6 +15,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.EditCheckImpact;
+using GSC.Respository.EmailSender;
 using GSC.Respository.LabManagement;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
@@ -39,6 +40,7 @@ namespace GSC.Respository.Screening
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+        private readonly IEmailSenderRespository _emailSenderRespository;
         public ScreeningTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository, IMapper mapper,
@@ -48,7 +50,8 @@ namespace GSC.Respository.Screening
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
             IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository,
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
-            IProjectDesignVariableValueRepository projectDesignVariableValueRepository)
+            IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+            IEmailSenderRespository emailSenderRespository)
             : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -63,6 +66,7 @@ namespace GSC.Respository.Screening
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
+            _emailSenderRespository = emailSenderRespository;
         }
 
         private ScreeningTemplateBasic GetScreeningTemplateBasic(int screeningTemplateId)
@@ -1298,6 +1302,57 @@ namespace GSC.Respository.Screening
                 scheduleDate = r.ScheduleDate,
                 scheduleDateExcel = Convert.ToDateTime(r.ScheduleDate).ToString(dateformat)
             }).OrderBy(x => x.screeningNo).ThenBy(x => x.visitName).ThenBy(x => x.templateName).ToList();
+        }
+        //for variable email .prakash chauhan 14-05-2022
+        public void SendVariableEmail(ScreeningTemplateValueDto screeningTemplateValueDto, ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto)
+        {
+            if (screeningTemplateValueDto == null)
+            {
+                screeningTemplateValueDto = new ScreeningTemplateValueDto();
+                if (screeningTemplateValueQueryDto != null)
+                {
+                    screeningTemplateValueDto.Value = screeningTemplateValueQueryDto.Value;
+                    screeningTemplateValueDto.CollectionSource = screeningTemplateValueQueryDto.CollectionSource;
+                    var data = _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit).Where(x => x.Id == screeningTemplateValueQueryDto.ScreeningTemplateValueId).FirstOrDefault();
+                    if (data != null)
+                    {
+                        screeningTemplateValueDto.ProjectDesignVariableId = data.ProjectDesignVariableId;
+                        if (data.ScreeningTemplate != null && data.ScreeningTemplate.ScreeningVisit != null)
+                        {
+                            screeningTemplateValueDto.ScreeningEntryId = data.ScreeningTemplate.ScreeningVisit.ScreeningEntryId;
+                        }
+                    }
+
+                }
+            }
+            if (screeningTemplateValueDto.CollectionSource == CollectionSources.RadioButton)
+            {
+                if (screeningTemplateValueDto.ProjectDesignVariableId > 0)
+                {
+                    var data = _context.SendEmailOnVariableChangeSetting.Where(x => x.ProjectDesignVariableId == screeningTemplateValueDto.ProjectDesignVariableId
+                    && x.CollectionValue.Contains(screeningTemplateValueDto.Value)).FirstOrDefault();
+                    if (data != null)
+                    {
+                        if (data.Email.Contains(","))
+                        {
+                            var list = data.Email.Split(',').ToList();
+                            if (list != null && list.Count > 0)
+                            {
+                                list.ForEach(x =>
+                                {
+                                    _emailSenderRespository.SendVariableValueEmail(screeningTemplateValueDto, x, data.EmailTemplate);
+                                });
+                            }
+                        }
+                        else
+                        {
+                            _emailSenderRespository.SendVariableValueEmail(screeningTemplateValueDto, data.Email, data.EmailTemplate);
+
+                        }
+                    }
+                }
+            }
+
         }
     }
 }

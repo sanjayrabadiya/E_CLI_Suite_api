@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Configuration;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
@@ -567,7 +568,7 @@ namespace GSC.Respository.EmailSender
             var emailMessage = ConfigureEmail("SendForVerification", "");
             emailMessage.SendTo = toMail;
             emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";//ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, email);
-            emailMessage.Subject ="Verification template received." ;//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
+            emailMessage.Subject = "Verification template received.";//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
             _emailService.SendMail(emailMessage);
         }
 
@@ -588,6 +589,69 @@ namespace GSC.Respository.EmailSender
             emailMessage.Subject = "Approved Verification By Approver.";//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
             _emailService.SendMail(emailMessage);
         }
+        //for variable email .prakash chauhan 14-05-2022
+        public void SendVariableValueEmail(ScreeningTemplateValueDto screeningTemplateValueDto, string toMail, string Template)
+        {
+            var emailMessage = ConfigureEmailForVariable();
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForVariableEmail(Template, screeningTemplateValueDto);
+            emailMessage.Subject = "SAE Notification";
+            _emailService.SendMail(emailMessage);
+        }
 
+        private string ReplaceBodyForVariableEmail(string body, ScreeningTemplateValueDto email)
+        {
+            var screeningdata = _context.ScreeningEntry.Include(x => x.Project).Where(x => x.Id == email.ScreeningEntryId).FirstOrDefault();
+            if (screeningdata != null)
+            {
+                body = Regex.Replace(body, "##ScreeningNo##", screeningdata.ScreeningNo, RegexOptions.IgnoreCase);
+
+                if (screeningdata.Project != null)
+                {
+                    var projectdata = _context.Project.Where(x => x.Id == screeningdata.Project.ParentProjectId).FirstOrDefault();
+                    if (projectdata != null)
+                    {
+                        body = Regex.Replace(body, "##StudyCode##", projectdata.ProjectCode, RegexOptions.IgnoreCase);
+
+                    }
+                }
+            }
+            var variable = _context.ProjectDesignVariable.Where(x => x.Id == email.ProjectDesignVariableId).FirstOrDefault();
+
+            if (variable != null)
+            {
+                body = Regex.Replace(body, "##VariableName##", variable.VariableName, RegexOptions.IgnoreCase);
+
+            }
+
+            return body;
+        }
+        //for variable email .prakash chauhan 14-05-2022
+        private EmailMessage ConfigureEmailForVariable()
+        {
+
+            var result = _context.EmailSetting.FirstOrDefault(x =>
+               x.DeletedDate == null);
+            var emailMessage = new EmailMessage();
+
+            if (result != null)
+            {
+                emailMessage.SendFrom = result.EmailFrom;
+                emailMessage.Subject = "";
+                emailMessage.MessageBody = "";
+                emailMessage.Cc = "";
+                emailMessage.Bcc = "";
+                emailMessage.IsBodyHtml = true;
+                emailMessage.Attachments = null;
+                emailMessage.EmailFrom = result.EmailFrom;
+                emailMessage.PortName = result.PortName;
+                emailMessage.DomainName = result.DomainName;
+                emailMessage.EmailPassword = result.EmailPassword;
+                emailMessage.MailSsl = result.MailSsl;
+                emailMessage.DLTTemplateId = "";
+            }
+
+            return emailMessage;
+        }
     }
 }

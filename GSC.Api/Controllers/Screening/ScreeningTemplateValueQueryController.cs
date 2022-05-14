@@ -109,6 +109,8 @@ namespace GSC.Api.Controllers.Screening
             if (screeningTemplateValue.QueryStatus == QueryStatus.Resolved)
                 _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
 
+            //for variable email .prakash chauhan 14-05-2022
+            _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
             _uow.Save();
 
             return Ok(screeningTemplateValueQuery.Id);
@@ -239,6 +241,9 @@ namespace GSC.Api.Controllers.Screening
             var result = _scheduleRuleRespository.VariableResultProcess(editResult, scheduleResult);
 
             _screeningVisitRepository.AutomaticStatusUpdate(screeningTemplate.Id);
+
+            //for variable email .prakash chauhan 14-05-2022
+            _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
 
             _uow.Save();
 

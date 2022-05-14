@@ -111,6 +111,8 @@ namespace GSC.Api.Controllers.Screening
             _uow.Save();
 
             var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
+            //for variable email .prakash chauhan 14-05-2022
+            _screeningTemplateRepository.SendVariableEmail(screeningTemplateValueDto, null);
 
             return Ok(result);
         }
@@ -194,6 +196,8 @@ namespace GSC.Api.Controllers.Screening
 
             var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
 
+            //for variable email .prakash chauhan 14-05-2022
+            _screeningTemplateRepository.SendVariableEmail(screeningTemplateValueDto, null);
             return Ok(result);
         }
 
