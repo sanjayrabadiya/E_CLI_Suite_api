@@ -547,6 +547,9 @@ namespace GSC.Audit
 
             //studyLevelForm
             _dictionaries.Add(new Dictionary { FieldName = "ActivityId", DisplayName = "Activity Name", SourceColumn = "ActivityName", TableName = "CtmsActivity", PkName = "Id" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "IsHide", DisplayName = "Is Visible" });
+
         }
 
 

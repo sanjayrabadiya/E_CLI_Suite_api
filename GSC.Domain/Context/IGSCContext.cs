@@ -358,5 +358,7 @@ namespace GSC.Domain.Context
 
         DbSet<PageConfiguration> PageConfiguration { get; set; }
         DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
+        DbSet<SendEmailOnVariableChangeSetting> SendEmailOnVariableChangeSetting { get; set; }
+        DbSet<SendEmailOnVariableValue> SendEmailOnVariableValue { get; set; }
     }
 }

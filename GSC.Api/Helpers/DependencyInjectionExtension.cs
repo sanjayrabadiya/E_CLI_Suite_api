@@ -380,6 +380,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPageConfigurationRepository, PageConfigurationRepository>();
             services.AddScoped<IPageConfigurationFieldsRepository, PageConfigurationFieldsRepository>();
             services.AddHttpClient<IProjectDataRemoveService, ProjectDataRemoveService>();
+            //services.AddHttpClient<IKitManagementRepository, KitManagementRepository>();
+            services.AddScoped<ISendEmailOnVariableChangeSettingRepository, SendEmailOnVariableChangeSettingRepository>();
         }
     }
 }

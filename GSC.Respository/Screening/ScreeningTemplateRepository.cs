@@ -126,8 +126,8 @@ namespace GSC.Respository.Screening
 
             if (workflowlevel.LevelNo >= 0 && designTemplateDto.IsRepeated)
                 designTemplateDto.IsRepeated = workflowlevel.IsStartTemplate;
-            if (screeningTemplateBasic.ParentId != null)
-                designTemplateDto.IsRepeated = false;
+            //if (screeningTemplateBasic.ParentId != null)
+            //    designTemplateDto.IsRepeated = false;
 
             designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
             designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;

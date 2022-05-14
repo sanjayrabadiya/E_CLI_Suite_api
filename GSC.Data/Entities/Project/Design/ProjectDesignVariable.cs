@@ -64,5 +64,6 @@ namespace GSC.Data.Entities.Project.Design
         public AnnotationType AnnotationType { get; set; }
 
         public bool? DisplayStepValue { get; set; }
+        public bool IsHide { get; set; }
     }
 }

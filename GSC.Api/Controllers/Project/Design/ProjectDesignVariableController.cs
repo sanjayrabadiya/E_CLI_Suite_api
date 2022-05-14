@@ -95,8 +95,8 @@ namespace GSC.Api.Controllers.Project.Design
             var variable = _mapper.Map<ProjectDesignVariable>(variableDto);
             variable.DesignOrder = 1;
 
-            if (_projectDesignVariableRepository.All.Any(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId && t.DeletedDate == null))
-                variable.DesignOrder = _projectDesignVariableRepository.FindBy(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId &&
+            if (_projectDesignVariableRepository.All.Any(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId && t.DeletedDate == null && !t.IsHide))
+                variable.DesignOrder = _projectDesignVariableRepository.FindBy(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId && !t.IsHide && 
                                            t.DeletedDate == null).Max(t => t.DesignOrder) + 1;
 
             var validate = _projectDesignVariableRepository.Duplicate(variable);
@@ -245,28 +245,29 @@ namespace GSC.Api.Controllers.Project.Design
         {
             var variable = _projectDesignVariableRepository.Find(id);
             var templateId = variable.ProjectDesignTemplateId;
-
-            var orderedList = _projectDesignVariableRepository
-                .FindBy(t => t.ProjectDesignTemplateId == templateId && t.DeletedDate == null)
-                .OrderBy(t => t.DesignOrder).ToList();
-            orderedList.Remove(orderedList.First(t => t.Id == id));
-
-            if (index != 0)
-                index--;
-            orderedList.Insert(index, variable);
-
-            var i = 0;
-            foreach (var item in orderedList)
+            if (!variable.IsHide)
             {
-                if (item.InActiveVersion != null)
-                    item.DesignOrder = i;
-                else
-                    item.DesignOrder = ++i;
-                _projectDesignVariableRepository.Update(item);
+                var orderedList = _projectDesignVariableRepository
+                    .FindBy(t => t.ProjectDesignTemplateId == templateId && t.DeletedDate == null)
+                    .OrderBy(t => t.DesignOrder).ToList();
+                orderedList.Remove(orderedList.First(t => t.Id == id));
+
+                if (index != 0)
+                    index--;
+                orderedList.Insert(index, variable);
+
+                var i = 0;
+                foreach (var item in orderedList)
+                {
+                    if (item.InActiveVersion != null)
+                        item.DesignOrder = i;
+                    else
+                        item.DesignOrder = ++i;
+                    _projectDesignVariableRepository.Update(item);
+                }
+
+                _uow.Save();
             }
-
-            _uow.Save();
-
             return Ok();
         }
 

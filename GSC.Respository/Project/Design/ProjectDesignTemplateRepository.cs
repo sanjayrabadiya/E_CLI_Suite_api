@@ -136,7 +136,8 @@ namespace GSC.Respository.Project.Design
                         x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
                         DisplayStepValue = x.DisplayStepValue,
-                        Label = x.Label
+                        Label = x.Label,
+                        IsHide = x.IsHide
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.

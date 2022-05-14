@@ -408,6 +408,9 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementUploadFileDetail> SupplyManagementUploadFileDetail { get; set; }
         public DbSet<PageConfiguration> PageConfiguration { get; set; }
         public DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
+
+        public DbSet<SendEmailOnVariableChangeSetting> SendEmailOnVariableChangeSetting { get; set; }
+        public DbSet<SendEmailOnVariableValue> SendEmailOnVariableValue { get; set; }
     }
 
 

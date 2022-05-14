@@ -20,6 +20,7 @@ using GSC.Data.Dto.Medra;
 using GSC.Data.Dto.Pharmacy;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.EditCheck;
+using GSC.Data.Dto.Project.Generalconfig;
 using GSC.Data.Dto.Project.GeneralConfig;
 using GSC.Data.Dto.Project.Schedule;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
@@ -462,6 +463,10 @@ namespace GSC.Api.Helpers
             CreateMap<PageConfiguration, PageConfigurationCommon>()
               .ForMember(x => x.ActualFieldName, a => a.MapFrom(m => m.PageConfigurationFields.FieldName)).ReverseMap();
             CreateMap<PageConfigurationFields, PageConfigurationFieldsDto>().ReverseMap();
+           // CreateMap<KitManagement, KitManagementDto>().ReverseMap();
+            CreateMap<SendEmailOnVariableChangeSetting, SendEmailOnVariableChangeSettingDto>().ReverseMap();
+
+            CreateMap<SendEmailOnVariableValue, SendEmailOnVariableValueDto>().ReverseMap();
         }
     }
 }
