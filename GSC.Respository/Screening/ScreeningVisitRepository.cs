@@ -152,7 +152,7 @@ namespace GSC.Respository.Screening
             {
                 var screeningVisit = Find(screeningVisitId);
                 var screeningTemplate = _screeningTemplateRepository.All.AsNoTracking().Where(x => x.ScreeningVisitId == screeningVisitId && x.ProjectDesignTemplateId == openVariable.ProjectDesignTemplateId && x.ParentId == null).FirstOrDefault();
-                if (screeningTemplate != null && SaveVariableValue(visitDate.ToString(), screeningTemplate, openVariable.Id, openVariable.ProjectDesignTemplateId, screeningEntryId, screeningVisit.ParentId == null))
+                if (screeningTemplate != null && SaveVariableValue(visitDate, screeningTemplate, openVariable.Id, openVariable.ProjectDesignTemplateId, screeningEntryId, screeningVisit.ParentId == null))
                 {
                     screeningVisit.Status = ScreeningVisitStatus.InProgress;
                     screeningTemplate.Status = ScreeningTemplateStatus.InProcess;
@@ -166,13 +166,17 @@ namespace GSC.Respository.Screening
             }
         }
 
-        private bool SaveVariableValue(string value, ScreeningTemplate screeningTemplate, int projectDesignVariableId, int projectDesignTemplateId, int screeningEntryId, bool isParentVisit)
+        private bool SaveVariableValue(DateTime value, ScreeningTemplate screeningTemplate, int projectDesignVariableId, int projectDesignTemplateId, int screeningEntryId, bool isParentVisit)
         {
 
             if (!_projectDesignVariableRepository.All.Any(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.Id == projectDesignVariableId))
                 return false;
 
+
+
             var screeningValue = _screeningTemplateValueRepository.All.Where(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ScreeningTemplateId == screeningTemplate.Id).FirstOrDefault();
+
+            var strValue = value.ToString("MM/dd/yyyy HH:mm:ss");
 
             if (screeningValue == null)
             {
@@ -180,13 +184,13 @@ namespace GSC.Respository.Screening
                 {
                     ScreeningTemplateId = screeningTemplate.Id,
                     ProjectDesignVariableId = projectDesignVariableId,
-                    Value = value
+                    Value = strValue
                 };
                 _screeningTemplateValueRepository.Add(screeningValue);
             }
             else
             {
-                screeningValue.Value = value;
+                screeningValue.Value = strValue;
                 _screeningTemplateValueRepository.Update(screeningValue);
             }
 
@@ -194,7 +198,7 @@ namespace GSC.Respository.Screening
             {
                 ScreeningTemplateValue = screeningValue,
                 ScreeningTemplateValueId = screeningValue.Id,
-                Value = value,
+                Value = strValue,
                 Note = "Save value from open visit"
             };
             _screeningTemplateValueAuditRepository.Save(audit);
@@ -202,7 +206,7 @@ namespace GSC.Respository.Screening
             _context.Save();
 
             if (screeningTemplate.ParentId == null && isParentVisit)
-                _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.ScreeningVisitId, value, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, true);
+                _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.ScreeningVisitId, strValue, screeningTemplate.ProjectDesignTemplateId, projectDesignVariableId, true);
 
             return true;
 
