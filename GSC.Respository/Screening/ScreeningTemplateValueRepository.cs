@@ -71,20 +71,16 @@ namespace GSC.Respository.Screening
             _mapper = mapper;
         }
 
-        public void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId,
-            List<int> projectDesignVariableId)
+        public void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId)
         {
-            var screeningVariable =
-                All.Where(x => x.ScreeningTemplateId == screeningTemplateId).AsNoTracking().ToList();
+            var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
 
-            var templateVariable = _projectDesignVariableRepository
-                .FindBy(t => t.ProjectDesignTemplateId == projectDesignTemplateId).ToList()
-                .Where(x => !screeningVariable.Any(a => a.ProjectDesignVariableId == x.Id)).ToList();
+            var templateVariable = _projectDesignVariableRepository.All.Where(t => t.ProjectDesignTemplateId == projectDesignTemplateId).ToList();
+
+            templateVariable = templateVariable.Where(r => !screeningDesignVariableId.Contains(r.Id)).ToList();
 
             foreach (var variable in templateVariable)
             {
-                if (projectDesignVariableId != null && projectDesignVariableId.Any(c => c == variable.Id))
-                    continue;
 
                 var screeningTemplateValue = new ScreeningTemplateValue
                 {
@@ -105,6 +101,38 @@ namespace GSC.Respository.Screening
                 };
                 _screeningTemplateValueAuditRepository.Save(audit);
             }
+        }
+
+        public void UpdateDefaultValue(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId)
+        {
+            var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
+            if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
+                return;
+
+            var templateVariable = variableList.Where(r => !screeningDesignVariableId.Contains(r.Id) && !string.IsNullOrEmpty(r.DefaultValue)).ToList();
+
+            foreach (var variable in templateVariable)
+            {
+                var screeningTemplateValue = new ScreeningTemplateValue
+                {
+                    ScreeningTemplateId = screeningTemplateId,
+                    ProjectDesignVariableId = variable.Id,
+                    Value = variable.DefaultValue,
+
+                };
+                Add(screeningTemplateValue);
+
+
+                var audit = new ScreeningTemplateValueAudit
+                {
+                    ScreeningTemplateValue = screeningTemplateValue,
+                    Value = string.IsNullOrEmpty(variable.DefaultValue) ? "" : variable.DefaultValue,
+                    OldValue = null,
+                    Note = "Submitted with default data"
+                };
+                _screeningTemplateValueAuditRepository.Save(audit);
+            }
+            _context.Save();
         }
 
         public int GetQueryStatusCount(int screeningTemplateId)

@@ -10,8 +10,7 @@ namespace GSC.Respository.Screening
 {
     public interface IScreeningTemplateValueRepository : IGenericRepository<ScreeningTemplateValue>
     {
-        void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId,
-            List<int> projectDesignVariableId);
+        void UpdateVariableOnSubmit(int projectDesignTemplateId, int screeningTemplateId);
 
         int GetQueryStatusCount(int screeningTemplateId);
 
@@ -29,5 +28,6 @@ namespace GSC.Respository.Screening
 
         List<ScreeningVariableValueDto> GetScreeningRelation(int projectDesignVariableId, int screeningEntryId);
         DesignScreeningVariableDto GetQueryVariableDetail(int id, int screeningEntryId);
+        void UpdateDefaultValue(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId);
     }
 }

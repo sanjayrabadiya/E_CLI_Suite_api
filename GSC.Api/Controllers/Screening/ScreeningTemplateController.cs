@@ -213,8 +213,7 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, 0);
 
-            _screeningTemplateValueRepository.UpdateVariableOnSubmit(screeningTemplate.ProjectDesignTemplateId,
-                screeningTemplate.Id, null);
+            _screeningTemplateValueRepository.UpdateVariableOnSubmit(screeningTemplate.ProjectDesignTemplateId, screeningTemplate.Id);
 
             CheckCompletedStatus(screeningTemplate, projectDesignId);
 

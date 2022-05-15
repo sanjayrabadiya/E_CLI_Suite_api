@@ -140,6 +140,9 @@ namespace GSC.Respository.Screening
             designTemplateDto.Status = screeningTemplateBasic.Status;
             designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic, workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
 
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
+                _screeningTemplateValueRepository.UpdateDefaultValue(designTemplateDto.Variables, screeningTemplateId);
+
             SetScreeningValue(designTemplateDto, screeningTemplateBasic, workflowlevel);
 
             if (designTemplateDto.Status == ScreeningTemplateStatus.Pending && designTemplateDto.IsSchedule &&
