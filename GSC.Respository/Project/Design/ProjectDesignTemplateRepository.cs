@@ -137,7 +137,8 @@ namespace GSC.Respository.Project.Design
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
                         DisplayStepValue = x.DisplayStepValue,
                         Label = x.Label,
-                        IsHide = x.IsHide
+                        IsHide = x.IsHide,
+                        IsLevelNo = x.IsLevelNo
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.

@@ -65,5 +65,6 @@ namespace GSC.Data.Entities.Project.Design
 
         public bool? DisplayStepValue { get; set; }
         public bool IsHide { get; set; }
+        public bool? IsLevelNo { get; set; }
     }
 }
