@@ -263,15 +263,22 @@ namespace GSC.Respository.EditCheckImpact
 
                 targetResult.ResultMessage = $"{startDate.ToString("dd-MMM-yyyy")} {"-"} {endDate.ToString("dd-MMM-yyyy")}";
                 var ruleResult = 0;
-                if (from.CollectionValue.ToUpper().Contains("M"))
+
+               if (from.CollectionValue.ToUpper().Contains("M", StringComparison.OrdinalIgnoreCase))
                 {
                     var ts = startDate - endDate;
                     ruleResult = Math.Abs(Convert.ToInt32(ts.TotalDays / 30));
                 }
-                else if (from.CollectionValue.ToUpper().Contains("D"))
+                else if (from.CollectionValue.ToUpper().Contains("D", StringComparison.OrdinalIgnoreCase))
                 {
                     var ts = startDate - endDate;
                     ruleResult = Math.Abs(Convert.ToInt32(ts.TotalDays));
+                }
+
+                else if (from.CollectionValue.ToUpper().Contains("H", StringComparison.OrdinalIgnoreCase))
+                {
+                    var ts = startDate - endDate;
+                    ruleResult = Math.Abs(Convert.ToInt32(ts.TotalHours));
                 }
                 else
                 {
