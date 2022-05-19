@@ -279,8 +279,9 @@ namespace GSC.Respository.EditCheckImpact
                 {
                     var ts = startDate - endDate;
                     var hr = Math.Abs(ts.Hours);
+
                     if (ts.Days != 0)
-                        hr = Math.Abs(ts.Hours) * Math.Abs(ts.Days);
+                        hr = Math.Abs(ts.Hours) + (Math.Abs(ts.Days) * 24);
 
                     if (targetEditCheck.DataType == DataType.Numeric1Decimal)
                         ruleResult = Math.Round(Convert.ToDecimal($"{hr}.{Math.Abs(ts.Minutes).ToString().PadLeft(2, '0')}"), 1);
