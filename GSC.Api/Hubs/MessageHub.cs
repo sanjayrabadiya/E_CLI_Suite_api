@@ -84,6 +84,8 @@ namespace GSC.Api.Hubs
         {
             try
             {
+                if (ConnectedUser.Ids == null) return;
+
                 var user = ConnectedUser.Ids.Where(x => x.connectionId == Context.ConnectionId).ToList().FirstOrDefault();
                 if (user != null)
                 {
