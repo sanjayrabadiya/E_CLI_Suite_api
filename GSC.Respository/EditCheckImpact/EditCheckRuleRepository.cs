@@ -262,9 +262,9 @@ namespace GSC.Respository.EditCheckImpact
                 }
 
                 targetResult.ResultMessage = $"{startDate.ToString("dd-MMM-yyyy")} {"-"} {endDate.ToString("dd-MMM-yyyy")}";
-                var ruleResult = 0;
+                decimal ruleResult = 0;
 
-               if (from.CollectionValue.ToUpper().Contains("M", StringComparison.OrdinalIgnoreCase))
+                if (from.CollectionValue.ToUpper().Contains("M", StringComparison.OrdinalIgnoreCase))
                 {
                     var ts = startDate - endDate;
                     ruleResult = Math.Abs(Convert.ToInt32(ts.TotalDays / 30));
@@ -278,7 +278,16 @@ namespace GSC.Respository.EditCheckImpact
                 else if (from.CollectionValue.ToUpper().Contains("H", StringComparison.OrdinalIgnoreCase))
                 {
                     var ts = startDate - endDate;
-                    ruleResult = Math.Abs(Convert.ToInt32(ts.TotalHours));
+                    var hr = Math.Abs(ts.Hours);
+                    if (ts.Days != 0)
+                        hr = Math.Abs(ts.Hours) * Math.Abs(ts.Days);
+
+                    if (targetEditCheck.DataType == DataType.Numeric1Decimal)
+                        ruleResult = Math.Round(Convert.ToDecimal($"{hr}.{Math.Abs(ts.Minutes).ToString().PadLeft(2, '0')}"), 1);
+                    else if (targetEditCheck.DataType == DataType.Numeric2Decimal)
+                        ruleResult = Convert.ToDecimal($"{hr}.{Math.Abs(ts.Minutes).ToString().PadLeft(2, '0')}");
+                    else
+                        ruleResult = Convert.ToDecimal(hr);
                 }
                 else
                 {
@@ -291,7 +300,7 @@ namespace GSC.Respository.EditCheckImpact
 
                 if (!string.IsNullOrEmpty(to.CollectionValue))
                 {
-                    ruleResult = Convert.ToInt32(new DataTable().Compute($"{ruleResult} {to.CollectionValue}", null));
+                    ruleResult = Convert.ToDecimal(new DataTable().Compute($"{ruleResult} {to.CollectionValue}", null));
                 }
 
                 targetResult.Result = ruleResult.ToString();
