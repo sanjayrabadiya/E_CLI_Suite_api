@@ -91,11 +91,8 @@ namespace GSC.Api.Hubs
                 {
                     ConnectedUser.Ids.Remove(user);
                     await Clients.All.SendAsync("UserLogOut", Convert.ToInt32(user.userId));
-                    if (ConnectedUser.Ids != null)
-                    {
-                        var isLogin = ConnectedUser.Ids.Any(x => x.userId == user.userId);
-                        _userRepository.UpdateIsLogin(user.userId, isLogin);
-                    }
+                    var isLogin = ConnectedUser.Ids.Any(x => x.userId == user.userId);
+                    _userRepository.UpdateIsLogin(user.userId, isLogin);
                 }
                 await base.OnDisconnectedAsync(exception);
             }
