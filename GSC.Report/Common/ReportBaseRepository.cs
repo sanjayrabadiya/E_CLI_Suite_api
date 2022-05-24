@@ -532,6 +532,7 @@ namespace GSC.Report.Common
                             TemplateCode = n.TemplateCode,
                             TemplateName = n.TemplateName,
                             DesignOrder = n.DesignOrder,
+                            Label = n.Label,
                             Domain = new DomainReportDto { DomainCode = n.Domain.DomainCode, DomainName = n.Domain.DomainName },
                             TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && (tn.IsBottom == false || tn.IsBottom == null)).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
                             TemplateNotesBottom = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && tn.IsBottom == true).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
@@ -557,7 +558,8 @@ namespace GSC.Report.Common
                                     UnitAnnotation = v.UnitAnnotation
                                 },
                                 Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList(),
-                                VariableCategoryName = v.VariableCategory.CategoryName
+                                VariableCategoryName = v.VariableCategory.CategoryName,
+                                Label = v.Label
                             }).ToList()
                         }).ToList()
                     }).OrderBy(d => d.DesignOrder).ToList()
@@ -601,6 +603,7 @@ namespace GSC.Report.Common
                       TemplateCode = a.ProjectDesignTemplate.TemplateCode,
                       TemplateName = a.ProjectDesignTemplate.TemplateName,
                       DesignOrder = a.ProjectDesignTemplate.DesignOrder,
+                      Label = a.ProjectDesignTemplate.Label,
                       RepeatSeqNo=a.RepeatSeqNo,
                       Domain = new DomainReportDto {
                         DomainCode = a.ProjectDesignTemplate.Domain.DomainCode, DomainName = a.ProjectDesignTemplate.Domain.DomainName
@@ -632,7 +635,8 @@ namespace GSC.Report.Common
                           ScreeningIsNa=s.IsNa,
                           ScreeningTemplateValueId=s.Id,
                           ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{Value=c.Value,ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,ScreeningTemplateValueId=c.ScreeningTemplateValueId,ValueName=c.ProjectDesignVariableValue.ValueName }).ToList(),
-                          VariableCategoryName = s.ProjectDesignVariable.VariableCategory.CategoryName
+                          VariableCategoryName = s.ProjectDesignVariable.VariableCategory.CategoryName,
+                          Label = s.ProjectDesignVariable.Label
                       }).ToList(),
                       ScreeningTemplateReview=a.ScreeningTemplateReview.Where(r=>r.DeletedDate==null).Select(r=>new ScreeningTemplateReviewReportDto{
                       ScreeningTemplateId=r.ScreeningTemplateId,

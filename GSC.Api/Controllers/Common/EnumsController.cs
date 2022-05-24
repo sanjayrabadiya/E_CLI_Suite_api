@@ -653,5 +653,17 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
         }
+
+        [HttpGet]
+        [Route("PDFLayoutList")]
+        public IList<DropDownEnum> PDFLayoutList()
+        {
+            return Enum.GetValues(typeof(PdfLayouts))
+                .Cast<PdfLayouts>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

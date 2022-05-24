@@ -305,15 +305,18 @@ namespace GSC.Respository.UserMgt
             if (_environmentSetting.Value.IsPremise)
             {
                 login = await _context.RefreshToken.Where(t =>
-               // t.Token == refreshToken && t.ExpiredOn > _jwtTokenAccesser.GetClientDate()).FirstOrDefaultAsync();
+                // t.Token == refreshToken && t.ExpiredOn > _jwtTokenAccesser.GetClientDate()).FirstOrDefaultAsync();
                 t.Token == refreshToken && t.ExpiredOn > DateTime.UtcNow).FirstOrDefaultAsync();
             }
             else
             {
-                RefreshTokenDto _refreshdto = new RefreshTokenDto();
-                _refreshdto.AccessToken = accessToken;
-                _refreshdto.RefreshToken = refreshToken;
-                login = await _centreUserService.RefreshToken(_refreshdto);
+                if (!string.IsNullOrEmpty(refreshToken))
+                {
+                    RefreshTokenDto _refreshdto = new RefreshTokenDto();
+                    _refreshdto.AccessToken = accessToken;
+                    _refreshdto.RefreshToken = refreshToken;
+                    login = await _centreUserService.RefreshToken(_refreshdto);
+                }
             }
             if (login == null)
             {

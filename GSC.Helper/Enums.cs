@@ -834,4 +834,11 @@ namespace GSC.Helper
         [Description("CRF")] CRF = 2,
         [Description("Both")] Both = 3
     }
+    public enum PdfLayouts : short
+    {
+        [Description("Layout 1")] Layout1 = 1,
+        [Description("Layout 2")] Layout2 = 2,
+        [Description("Layout 3")] Layout3 = 3
+
+    }
 }

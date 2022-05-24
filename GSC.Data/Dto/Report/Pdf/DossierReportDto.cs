@@ -44,6 +44,8 @@ namespace GSC.Data.Dto.Report.Pdf
         public int DesignOrder { get; set; }
         public int? RepeatSeqNo { get; set; }
         //public int ProjectDesignId { get; set; }
+
+        public string Label { get; set; }
         public DomainReportDto Domain { get; set; }
         public List<ProjectDesignTemplateNoteReportDto> TemplateNotes { get; set; }
 
@@ -70,6 +72,7 @@ namespace GSC.Data.Dto.Report.Pdf
 
     public class ProjectDesignVariableReportDto
     {
+        public string Label { get; set; }
         public int Id { get; set; }
         public string VariableName { get; set; }
         public string VariableCode { get; set; }

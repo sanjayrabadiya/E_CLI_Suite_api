@@ -307,7 +307,7 @@ namespace GSC.Api.Controllers.UserMgt
         {
             if (!_environmentSetting.Value.IsPremise)
             {
-                _centreUserService.Logout($"{ _environmentSetting.Value.CentralApi}Login/Logout/{userId}/{loginReportId}");
+                _centreUserService.Logout($"{_environmentSetting.Value.CentralApi}Login/Logout/{userId}/{loginReportId}");
                 //  return Ok();
             }
 

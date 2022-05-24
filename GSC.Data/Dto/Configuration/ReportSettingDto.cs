@@ -53,6 +53,8 @@ namespace GSC.Data.Dto.Configuration
         public bool IsSync { get; set; }
 
         public CRFTypes CRFType { get; set; }
+
+        public PdfLayouts PdfLayouts { get; set; }
     }
     public class ReportVisitsDto
     {
