@@ -42,25 +42,25 @@ namespace GSC.Respository.UserMgt
             {
                 string companyCode = $"CompanyId{result.CompanyId}";
                 _userLoginReportRepository.SetDbConnection(result.ConnectionString);
-                if (result.IsValid)
-                {
-                    await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{false}", "");
-                    _gSCCaching.Remove(companyCode);
-                    _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
-                }
-                else
-                {
-                    if (result.ConnectionString != null)
-                    {
-                        var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == result.CompanyId).FirstOrDefault();
-                        if (result.FailedLoginAttempts > company.MaxLoginAttempt)
-                        {
-                            result.ValidateMessage = "User is locked, Please contact your administrator";
-                            await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{true}", "");
-                        }
-                        _userLoginReportRepository.SaveLog(result.ValidateMessage, result.UserId, loginDto.UserName, loginDto.RoleId);
-                    }
-                }
+                //if (result.IsValid)
+                //{
+                //    await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{false}", "");
+                //    _gSCCaching.Remove(companyCode);
+                //    _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
+                //}
+                //else
+                //{
+                //    if (result.ConnectionString != null)
+                //    {
+                //        var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == result.CompanyId).FirstOrDefault();
+                //        if (result.FailedLoginAttempts > company.MaxLoginAttempt)
+                //        {
+                //            result.ValidateMessage = "User is locked, Please contact your administrator";
+                //            await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{true}", "");
+                //        }
+                //        _userLoginReportRepository.SaveLog(result.ValidateMessage, result.UserId, loginDto.UserName, loginDto.RoleId);
+                //    }
+                //}
             }
             return result;
         }
