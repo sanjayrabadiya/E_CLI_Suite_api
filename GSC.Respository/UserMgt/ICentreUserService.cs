@@ -33,5 +33,7 @@ namespace GSC.Respository.UserMgt
         Task SentConnectionString(int CompanyID, string clientUrl);
         Task<Companystudyconfig> Getnoofstudy(string clientUrl);
 
+        Task<UserViewModel> ValidateClientData(LoginDto loginDto);
+
     }
 }

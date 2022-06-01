@@ -37,31 +37,17 @@ namespace GSC.Respository.UserMgt
         public async Task<UserViewModel> ValidateClient(LoginDto loginDto)
         {
             var result = loginDto.CentralUserData;
-            //await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
-            if (result != null && result.CompanyId != null)
-            {
-                string companyCode = $"CompanyId{result.CompanyId}";
-                _userLoginReportRepository.SetDbConnection(result.ConnectionString);
-                //if (result.IsValid)
-                //{
-                //    await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{false}", "");
-                //    _gSCCaching.Remove(companyCode);
-                //    _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
-                //}
-                //else
-                //{
-                //    if (result.ConnectionString != null)
-                //    {
-                //        var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == result.CompanyId).FirstOrDefault();
-                //        if (result.FailedLoginAttempts > company.MaxLoginAttempt)
-                //        {
-                //            result.ValidateMessage = "User is locked, Please contact your administrator";
-                //            await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/LockStatus/{result.UserId}/{true}", "");
-                //        }
-                //        _userLoginReportRepository.SaveLog(result.ValidateMessage, result.UserId, loginDto.UserName, loginDto.RoleId);
-                //    }
-                //}
-            }
+            //var result = await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
+            //if (result != null && result.CompanyId != null)
+            //{
+            //    string companyCode = $"CompanyId{result.CompanyId}";
+            //    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
+            //    if (result.IsValid)
+            //    {
+            //        _gSCCaching.Remove(companyCode);
+            //        _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
+            //    }
+            //}
             return result;
         }
 
@@ -182,6 +168,12 @@ namespace GSC.Respository.UserMgt
         public async Task<Companystudyconfig> Getnoofstudy(string clientUrl)
         {
             var result = await HttpService.Get<Companystudyconfig>(_httpClient, clientUrl);
+            return result;
+        }
+        public async Task<UserViewModel> ValidateClientData(LoginDto loginDto)
+        {
+            var result = await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
+            
             return result;
         }
     }

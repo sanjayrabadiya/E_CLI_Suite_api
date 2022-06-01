@@ -68,35 +68,7 @@ namespace GSC.Api.Controllers.UserMgt
         {
             LoginDto dto = new LoginDto();
             _userLoginReportRepository.SetDbConnection(obj.ConnectionString);
-
-            if (!_environmentSetting.Value.IsPremise)
-            {
-                if (obj.CompanyId > 0)
-                {
-                    var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == obj.CompanyId).FirstOrDefault();
-                    if (obj.FailedLoginAttempts > company.MaxLoginAttempt)
-                    {
-                        var users = _userRepository.Find(obj.UserId);
-                        users.IsLocked = true;
-                        _userRepository.Update(users);
-                        _uow.Save();
-                        ModelState.AddModelError("UserName", "User is locked, Please contact your administrator");
-                        return BadRequest(ModelState);
-                    }
-                    else
-                    {
-                        var users = _userRepository.Find(obj.UserId);
-                        users.IsLocked = false;
-                        _userRepository.Update(users);
-                        _uow.Save();
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError("UserName", obj.ValidateMessage);
-                    return BadRequest(ModelState);
-                }
-            }
+           
             var roles = _userRoleRepository.GetRoleByUserId(obj.UserId);
 
             if (roles.Count <= 0)
@@ -133,6 +105,7 @@ namespace GSC.Api.Controllers.UserMgt
                 user = _userRepository.ValidateUser(dto.UserName, dto.Password);
             else
                 user = await _centreUserService.ValidateClient(dto);
+            
 
             var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
 
