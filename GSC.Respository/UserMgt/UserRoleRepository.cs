@@ -67,5 +67,14 @@ namespace GSC.Respository.UserMgt
                        && x.User.ValidTo.Value < DateTime.Now))
                 .Select(c => c.User.Email).ToList();
         }
+
+        public IList<DropDownDto> GetRoleByUserId(int Userid)
+        {
+            return All.Include(x => x.User).Include(x => x.SecurityRole).Where(x =>
+                       x.User.DeletedDate == null && x.User.Id == Userid && x.DeletedDate == null &&
+                       x.SecurityRole.DeletedDate == null)
+                .Select(c => new DropDownDto { Id = c.SecurityRole.Id, Value = c.SecurityRole.RoleName })
+                .OrderBy(o => o.Value).ToList();
+        }
     }
 }

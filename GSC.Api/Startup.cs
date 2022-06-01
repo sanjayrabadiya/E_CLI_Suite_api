@@ -63,7 +63,7 @@ namespace GSC.Api
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GSC API", Version = "v3.1" });
             });
             services.AddHttpContextAccessor();
-            services.AddSignalR();
+            //services.AddSignalR();
         }
 
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -78,7 +78,7 @@ namespace GSC.Api
            // app.UseCors("AllowCorsPolicy");
             app.UseCors(builder =>
             {
-                builder.WithOrigins(new[] { "http://localhost:4100", "http://localhost:4200", "https://dev2.clinvigilant.com", "https://demo1.clinvigilant.com", "https://sandbox.clinvigilant.com",
+                builder.WithOrigins(new[] { "http://localhost:4100", "http://localhost:4200", "http://localhost:63980", "https://dev2.clinvigilant.com", "https://demo1.clinvigilant.com", "https://sandbox.clinvigilant.com",
                 "https://dev.clinvigilant.com", "https://eclinical.clinvigilant.com"})
                 .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
             });
@@ -106,7 +106,7 @@ namespace GSC.Api
             app.UseEndpoints(e => 
             {
                 e.MapControllers();
-                e.MapHub<MessageHub>("/MessageHub");
+               // e.MapHub<MessageHub>("/MessageHub");
             });
             //app.UseSpa(spa => { spa.Options.SourcePath = "wwwroot"; });
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzgxNjc2QDMxMzgyZTM0MmUzMG9ETm5BR0xPZzdMbjN0dTcwbjJhUmw2SUtqNUxYaEc4WFNrNXcwUzZvdEk9");

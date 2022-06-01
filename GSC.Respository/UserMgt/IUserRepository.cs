@@ -24,5 +24,9 @@ namespace GSC.Respository.UserMgt
         LoginResponseDto BuildUserAuthObject(UserViewModel userViewModel, int roleId);
         void UpdateIsLogin(int id, bool isLogin);
         List<UserGridDto> GetPatients(PatientDto userDto);
+
+        User GetUserById(int id);
+
+       
     }
 }

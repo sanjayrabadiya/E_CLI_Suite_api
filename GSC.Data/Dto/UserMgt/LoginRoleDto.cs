@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GSC.Shared.Security;
+using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.UserMgt
 {
@@ -14,5 +15,8 @@ namespace GSC.Data.Dto.UserMgt
         public string Guid { get; set; }
 
         public int UserId { get; set; }
+
+        public UserViewModel CentralUserData { get; set; }
     }
+   
 }

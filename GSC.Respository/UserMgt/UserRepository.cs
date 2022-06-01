@@ -216,10 +216,10 @@ namespace GSC.Respository.UserMgt
             var login = new LoginResponseDto
             {
                 UserName = user.UserName,
-                Token = roleId == 0 ? null : BuildJwtToken(user, roleId),
-                RefreshToken = roleId == 0 ? null : GenerateRefreshToken(),
-                ExpiredAfter = DateTime.UtcNow.AddMinutes(_settings.Value.MinutesToExpiration),
-                MinutesToExpiration = _settings.Value.MinutesToExpiration, // Added By Neel for use in Mobile App 
+                Token = userViewModel.Token,
+                RefreshToken = userViewModel.RefreshToken,
+                ExpiredAfter = DateTime.UtcNow.AddMinutes(userViewModel.MinutesToExpiration),
+                MinutesToExpiration = userViewModel.MinutesToExpiration, // Added By Neel for use in Mobile App 
                 IsFirstTime = userViewModel.IsFirstTime,
                 UserId = user.Id,
                 RoleTokenId = roleTokenId,
@@ -251,6 +251,7 @@ namespace GSC.Respository.UserMgt
 
             user.FailedLoginAttempts = 0;
             user.RoleTokenId = roleTokenId;
+
             if (roleId > 0)
             {
                 user.IsLogin = true;
@@ -408,5 +409,11 @@ namespace GSC.Respository.UserMgt
                 _context.Save();
             }
         }
+        public User GetUserById(int id)
+        {
+            var user = Find(id);
+            return user;
+        }
+        
     }
 }

@@ -27,21 +27,21 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IUnitOfWork _uow;
         private readonly IEconsentChatRepository _econsentChatRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IHubContext<MessageHub> _hubcontext;
+       // private readonly IHubContext<MessageHub> _hubcontext;
         private readonly IUserRepository _userRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IMapper _mapper;
 
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
-                                        IHubContext<MessageHub> hubcontext,
+                                      //  IHubContext<MessageHub> hubcontext,
                                         IEconsentChatRepository econsentChatRepository, IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
                                         IMapper mapper)
         {
             _econsentChatRepository = econsentChatRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _hubcontext = hubcontext;
+            //_hubcontext = hubcontext;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
             _mapper = mapper;
@@ -144,7 +144,7 @@ namespace GSC.Api.Controllers.InformConcent
                     listData.Add(userlist[i].connectionId);
                 }
                 IReadOnlyList<string> readOnlyData = listData.AsReadOnly();
-                await _hubcontext.Clients.Clients(readOnlyData).SendAsync("AllMessageDelivered", receiverId);
+             //   await _hubcontext.Clients.Clients(readOnlyData).SendAsync("AllMessageDelivered", receiverId);
             }
             return Ok();
         }
@@ -159,7 +159,7 @@ namespace GSC.Api.Controllers.InformConcent
             if (connection != null)
             {
                 var connectionId = connection.connectionId;
-                await _hubcontext.Clients.Client(connectionId).SendAsync("AllMessageRead", _jwtTokenAccesser.UserId);
+              //  await _hubcontext.Clients.Client(connectionId).SendAsync("AllMessageRead", _jwtTokenAccesser.UserId);
             }
             return Ok();
         }

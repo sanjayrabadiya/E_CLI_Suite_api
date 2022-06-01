@@ -440,10 +440,11 @@ namespace GSC.Api.Controllers.Master
         [Route("validatenoofStudy")]
         public async Task<IActionResult> ValidatenoofStudy()
         {
-            bool IsAddmoreStudy = true;
+            bool IsAddmoreStudy = false;
 
             if (!_environmentSetting.Value.IsPremise)
             {
+
                 var noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Study/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
                 if (noofstudy != null && noofstudy.ValidTo.Value.Date < DateTime.Now.Date)
                 {
@@ -464,6 +465,11 @@ namespace GSC.Api.Controllers.Master
                     }
                 }
             }
+            else
+            {
+                IsAddmoreStudy = true;
+            }
+
 
             return Ok(IsAddmoreStudy);
         }

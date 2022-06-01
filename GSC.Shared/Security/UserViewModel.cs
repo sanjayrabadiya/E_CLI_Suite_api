@@ -13,6 +13,11 @@ namespace GSC.Shared.Security
         public bool IsFirstTime { get; set; }
         public int? Language { get; set; }
         public int FailedLoginAttempts { get; set; }
+        public string Token { get; set; }
+        public string RefreshToken { get; set; }
+        public int MinutesToExpiration { get; set; }
+
+        public string UserName { get; set; }
 
     }
 
