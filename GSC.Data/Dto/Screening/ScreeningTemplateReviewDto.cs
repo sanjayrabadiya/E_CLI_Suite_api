@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using GSC.Helper;
 using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Screening
@@ -19,5 +21,11 @@ namespace GSC.Data.Dto.Screening
 
         public bool IsRepeat { get; set; }
         public int ProjectDesignTemplateId { get; set; }
+    }
+
+    public class RollbackReviewTemplateDto
+    {
+        public List<int> ScreeningTemplateIds { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
     }
 }
