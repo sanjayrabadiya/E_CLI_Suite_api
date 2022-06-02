@@ -376,6 +376,45 @@ namespace GSC.Respository.UserMgt
             _refreshTokenRepository.Add(rereshToken);
         }
 
+        public LoginResponseDto GetLoginDetails()
+        {
+            var roleTokenId = new Guid().ToString();
+            var user = All.Where(x => x.Id == _jwtTokenAccesser.UserId).FirstOrDefault();
+
+            var login = new LoginResponseDto
+            {
+                UserName = user.UserName,
+                UserId = user.Id,
+                RoleTokenId = roleTokenId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                RoleId = _jwtTokenAccesser.RoleId,
+                Language = user.Language,
+                LanguageShortName = user.Language.ToString(),
+                UserType = user.UserType
+            };
+
+            var imageUrl = _uploadSettingRepository
+                .FindBy(x => x.CompanyId == user.CompanyId && x.DeletedDate == null).FirstOrDefault()?.ImageUrl;
+
+            var company = _companyRepository.Find((int)user.CompanyId);
+            if (company != null)
+            {
+                login.CompanyName = company.CompanyName;
+                login.CompanyLogo = imageUrl + company.Logo;
+                login.UserPicUrl = DocumentService.ConvertBase64Image(imageUrl + (user.ProfilePic ?? DocumentService.DefulatProfilePic));
+            }
+
+            login.GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(user.CompanyId);
+            login.Rights = _rolePermissionRepository.GetByUserId(user.Id, _jwtTokenAccesser.RoleId);
+            login.PatientRights = _rolePermissionRepository.GetPatientUserRights(user.Id);
+            login.Roles = _userRoleRepository.GetRoleByUserName(user.UserName);
+            login.RoleName = login.Roles.FirstOrDefault(t => t.Id == _jwtTokenAccesser.RoleId)?.Value;
+            login.LoginReportId =
+                     _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName, _jwtTokenAccesser.RoleId);
+            return login;
+        }
 
         private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
@@ -414,6 +453,6 @@ namespace GSC.Respository.UserMgt
             var user = Find(id);
             return user;
         }
-        
+
     }
 }

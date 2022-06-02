@@ -93,23 +93,13 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(dto);
         }
         [Route("GetLoginDetails")]
-        [HttpPost]
-        public async Task<IActionResult> GetLoginDetails([FromBody] LoginDto dto)
+        [HttpGet]
+        public async Task<IActionResult> GetLoginDetails()
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = new UserViewModel();
-
-            if (_environmentSetting.Value.IsPremise)
-                user = _userRepository.ValidateUser(dto.UserName, dto.Password);
-            else
-                user = dto.CentralUserData;
-
-
-            var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
-
-            _uow.Save();
+            var validatedUser = _userRepository.GetLoginDetails();
 
             return Ok(validatedUser);
         }
