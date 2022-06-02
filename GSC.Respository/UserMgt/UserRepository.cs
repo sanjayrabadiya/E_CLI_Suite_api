@@ -379,6 +379,8 @@ namespace GSC.Respository.UserMgt
         public LoginResponseDto GetLoginDetails()
         {
             var roleTokenId = new Guid().ToString();
+            Log.Error(_context.GetConnectionString());
+            Log.Error("UserId " + _jwtTokenAccesser.UserId);
             var user = All.Where(x => x.Id == _jwtTokenAccesser.UserId).FirstOrDefault();
 
             var login = new LoginResponseDto
