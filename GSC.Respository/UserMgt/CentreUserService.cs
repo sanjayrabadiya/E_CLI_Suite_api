@@ -36,13 +36,16 @@ namespace GSC.Respository.UserMgt
             _environmentSetting = environmentSetting;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
+
         public async Task<UserViewModelData> ValidateClient()
         {
-            string Message = string.Empty;
             var result = await HttpService.Get<UserViewModelData>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUserByCompanyId/" + _jwtTokenAccesser.CompanyId);
             if (result != null && !string.IsNullOrEmpty(result.ConnectionString))
             {
                 _userLoginReportRepository.SetDbConnection(result.ConnectionString);
+                var companyCode = $"CompanyId{_jwtTokenAccesser.CompanyId}";
+                _gSCCaching.Remove(companyCode);
+                _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
             }
            
             return result;
