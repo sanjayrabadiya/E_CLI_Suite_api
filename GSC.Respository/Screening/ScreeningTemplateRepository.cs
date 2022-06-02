@@ -722,7 +722,7 @@ namespace GSC.Respository.Screening
                 if (workflowlevel.LevelNo == screeningValue.AcknowledgeLevel && screeningValue.AcknowledgeLevel != screeningValue.ReviewLevel)
                     workFlowButton.Acknowledge = screeningValue.QueryStatus == QueryStatus.Resolved || screeningValue.QueryStatus == QueryStatus.SelfCorrection;
 
-                if (workflowlevel.LevelNo > 0 && templateBasic.IsNoCRF && !workflowlevel.IsNoCRF)
+                if (workflowlevel.LevelNo != -1 && templateBasic.IsNoCRF && !workflowlevel.IsNoCRF)
                 {
                     workFlowButton.Generate = false;
                     workFlowButton.SelfCorrection = false;
