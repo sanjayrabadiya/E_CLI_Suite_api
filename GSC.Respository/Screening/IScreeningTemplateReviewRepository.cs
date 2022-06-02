@@ -12,6 +12,7 @@ namespace GSC.Respository.Screening
         List<ScreeningTemplateReviewDto> GetTemplateReviewHistory(int id);
 
         IList<ReviewDto> GetReviewLevel(int projectId);
+        void RollbackReview(RollbackReviewTemplateDto rollbackReviewTemplateDto);
         void Save(int screeningTemplateId, ScreeningTemplateStatus status, short reviewLevel);
     }
 }

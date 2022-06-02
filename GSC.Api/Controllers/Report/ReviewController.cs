@@ -1,7 +1,10 @@
 ﻿using GSC.Api.Controllers.Common;
 using GSC.Data.Dto.Report;
+using GSC.Data.Dto.Screening;
+using GSC.Helper;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace GSC.Api.Controllers.Report
 {
@@ -38,6 +41,16 @@ namespace GSC.Api.Controllers.Report
             var auditsDto = _screeningTemplateReviewRepository.GetReviewLevel(projectId);
 
             return Ok(auditsDto);
+        }
+
+        [HttpPost]
+        [Route("RollbackReview")]
+        public IActionResult RollbackReview([FromBody] RollbackReviewTemplateDto rollbackReviewTemplateDto)
+        {
+
+            _screeningTemplateReviewRepository.RollbackReview(rollbackReviewTemplateDto);
+
+            return Ok();
         }
     }
 }

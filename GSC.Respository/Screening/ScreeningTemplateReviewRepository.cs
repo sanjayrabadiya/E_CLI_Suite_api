@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
@@ -67,6 +66,34 @@ namespace GSC.Respository.Screening
                              }).ToList();
 
             return reviewdto.OrderBy(x => x.ReviewLevel).ToList();
+        }
+
+
+        public void RollbackReview(RollbackReviewTemplateDto rollbackReviewTemplateDto)
+        {
+            var templates = All.Where(x => x.DeletedDate == null && rollbackReviewTemplateDto.ScreeningTemplateIds.Contains(x.ScreeningTemplateId) 
+            && x.Status >= rollbackReviewTemplateDto.Status).ToList();
+            templates.ForEach(x =>
+            {
+                x.IsRepeat = true;
+                Update(x);
+            });
+
+            var screeningTemplates = _context.ScreeningTemplate.Where(x => x.DeletedDate == null && rollbackReviewTemplateDto.ScreeningTemplateIds.Contains(x.Id) && x.Status >= rollbackReviewTemplateDto.Status).ToList();
+            screeningTemplates.ForEach(x =>
+            {
+                x.Status = rollbackReviewTemplateDto.Status;
+
+                if (rollbackReviewTemplateDto.Status == ScreeningTemplateStatus.InProcess || rollbackReviewTemplateDto.Status == ScreeningTemplateStatus.Pending)
+                    x.ReviewLevel = null;
+
+                if (rollbackReviewTemplateDto.Status == ScreeningTemplateStatus.Submitted || rollbackReviewTemplateDto.Status == ScreeningTemplateStatus.Reviewed)
+                    x.ReviewLevel = 1;
+
+                _context.ScreeningTemplate.Update(x);
+            });
+
+
         }
     }
 }
