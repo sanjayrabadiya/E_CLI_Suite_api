@@ -27,6 +27,8 @@ namespace GSC.Respository.UserMgt
 
         User GetUserById(int id);
 
-       
+        LoginResponseDto GetLoginDetails();
+
+
     }
 }
