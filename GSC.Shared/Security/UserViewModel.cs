@@ -26,4 +26,11 @@ namespace GSC.Shared.Security
         public int Id { get; set; }       
         public string Message { get; set; }
     }
+    public class UserViewModelData
+    {
+      
+        public string ConnectionString { get; set; }
+      
+
+    }
 }

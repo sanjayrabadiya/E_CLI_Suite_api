@@ -14,7 +14,6 @@ using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -63,13 +62,16 @@ namespace GSC.Api.Controllers.UserMgt
 
         [Route("GetRoles")]
         [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetRoles([FromBody] UserViewModel obj)
+        public async Task<IActionResult> GetRoles()
         {
             LoginDto dto = new LoginDto();
-            _userLoginReportRepository.SetDbConnection(obj.ConnectionString);
-           
-            var roles = _userRoleRepository.GetRoleByUserId(obj.UserId);
+            var user = await _centreUserService.ValidateClient();
+            if (user == null)
+            {
+                ModelState.AddModelError("UserName","User not valid");
+                return BadRequest(ModelState);
+            }
+            var roles = _userRoleRepository.GetRoleByUserId(_jwtTokenAccesser.UserId);
 
             if (roles.Count <= 0)
             {
@@ -88,13 +90,11 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             dto.Roles = roles;
-            dto.IsFirstTime = obj.IsFirstTime;
             return Ok(dto);
         }
         [Route("GetLoginDetails")]
         [HttpPost]
-        //[AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        public async Task<IActionResult> GetLoginDetails([FromBody] LoginDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -104,31 +104,14 @@ namespace GSC.Api.Controllers.UserMgt
             if (_environmentSetting.Value.IsPremise)
                 user = _userRepository.ValidateUser(dto.UserName, dto.Password);
             else
-                user = await _centreUserService.ValidateClient(dto);
-            
+                user = dto.CentralUserData;
+
 
             var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
 
             _uow.Save();
 
             return Ok(validatedUser);
-        }
-
-        void TokenProcess(int userId, string refreshToken)
-        {
-            if (_environmentSetting.Value.IsPremise)
-            {
-                _userRepository.UpdateRefreshToken(userId, refreshToken);
-            }
-            else
-            {
-                UpdateRefreshTokanDto _refreshtoken = new UpdateRefreshTokanDto();
-                _refreshtoken.UserID = userId;
-                _refreshtoken.RefreshToken = refreshToken;
-                _centreUserService.UpdateRefreshToken(_refreshtoken);
-            }
-
-            _uow.Save();
         }
 
         [Route("MobileLogIn")]
@@ -143,34 +126,12 @@ namespace GSC.Api.Controllers.UserMgt
             if (_environmentSetting.Value.IsPremise)
                 user = _userRepository.ValidateUser(dto.UserName, dto.Password);
             else
-                user = await _centreUserService.ValidateClient(dto);
-
-            var roles = _userRoleRepository.GetRoleByUserName(dto.UserName);
-
-            if (roles.Count <= 0)
-            {
-                ModelState.AddModelError("UserName",
-                    "You have not assigned any role, Please contact your administrator");
-                return BadRequest(ModelState);
-            }
-
-            if (roles.Count == 1)
-                dto.RoleId = roles.First().Id;
-
-            dto.AskToSelectRole = false;
-            if (dto.RoleId == 0)
-            {
-                dto.Roles = roles;
-                dto.AskToSelectRole = true;
-                dto.IsFirstTime = user.IsFirstTime;
-                return Ok(dto);
-            }
+                user = dto.CentralUserData;
 
             var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
             validatedUser.alreadyLoggedIn = false;
 
             _uow.Save();
-
             return Ok(validatedUser);
 
         }
@@ -359,7 +320,7 @@ namespace GSC.Api.Controllers.UserMgt
             if (_environmentSetting.Value.IsPremise)
                 user = _userRepository.ValidateUser(dto.UserName, dto.Password);
             else
-                user = await _centreUserService.ValidateClient(dto);
+               // user = await _centreUserService.ValidateClient();
             if (!user.IsValid)
             {
                 ModelState.AddModelError("UserName", user.ValidateMessage);

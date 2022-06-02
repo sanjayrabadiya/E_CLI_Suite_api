@@ -5,12 +5,11 @@ using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
 using GSC.Shared.Caching;
 using GSC.Shared.Configuration;
-using GSC.Shared.Extension;
 using GSC.Shared.Generic;
+using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.Extensions.Options;
 using System;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -23,31 +22,29 @@ namespace GSC.Respository.UserMgt
         private readonly IGSCCaching _gSCCaching;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public CentreUserService(ILoginPreferenceRepository loginPreferenceRepository,
             HttpClient httpClient,
             IGSCCaching gSCCaching, IUserLoginReportRespository userLoginReportRepository,
-            IOptions<EnvironmentSetting> environmentSetting)
+            IOptions<EnvironmentSetting> environmentSetting,
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _loginPreferenceRepository = loginPreferenceRepository;
             _httpClient = httpClient;
             _gSCCaching = gSCCaching;
             _userLoginReportRepository = userLoginReportRepository;
             _environmentSetting = environmentSetting;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
-        public async Task<UserViewModel> ValidateClient(LoginDto loginDto)
+        public async Task<UserViewModelData> ValidateClient()
         {
-            var result = loginDto.CentralUserData;
-            //var result = await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
-            //if (result != null && result.CompanyId != null)
-            //{
-            //    string companyCode = $"CompanyId{result.CompanyId}";
-            //    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
-            //    if (result.IsValid)
-            //    {
-            //        _gSCCaching.Remove(companyCode);
-            //        _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
-            //    }
-            //}
+            string Message = string.Empty;
+            var result = await HttpService.Get<UserViewModelData>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUserByCompanyId/" + _jwtTokenAccesser.CompanyId);
+            if (result != null && !string.IsNullOrEmpty(result.ConnectionString))
+            {
+                _userLoginReportRepository.SetDbConnection(result.ConnectionString);
+            }
+           
             return result;
         }
 
@@ -173,7 +170,7 @@ namespace GSC.Respository.UserMgt
         public async Task<UserViewModel> ValidateClientData(LoginDto loginDto)
         {
             var result = await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
-            
+
             return result;
         }
     }
