@@ -109,7 +109,9 @@ namespace GSC.Respository.Screening
             if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
                 return;
 
-            var templateVariable = variableList.Where(r => !screeningDesignVariableId.Contains(r.Id) && !string.IsNullOrEmpty(r.DefaultValue)).ToList();
+            var templateVariable = variableList.Where(r => !screeningDesignVariableId.Contains(r.Id)
+            && !string.IsNullOrEmpty(r.DefaultValue) && r.CollectionSource != CollectionSources.HorizontalScale
+            ).ToList();
 
             foreach (var variable in templateVariable)
             {
