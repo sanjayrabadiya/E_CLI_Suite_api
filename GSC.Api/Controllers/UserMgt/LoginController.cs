@@ -94,7 +94,7 @@ namespace GSC.Api.Controllers.UserMgt
         }
         [Route("GetLoginDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetLoginDetails()
+        public IActionResult GetLoginDetails()
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
