@@ -466,7 +466,9 @@ namespace GSC.Api.Helpers
            // CreateMap<KitManagement, KitManagementDto>().ReverseMap();
             CreateMap<SendEmailOnVariableChangeSetting, SendEmailOnVariableChangeSettingDto>().ReverseMap();
 
-            CreateMap<SendEmailOnVariableValue, SendEmailOnVariableValueDto>().ReverseMap();
+            CreateMap<SendEmailOnVariableValue, SendEmailOnVariableValueDto>().ReverseMap(); 
+           // CreateMap<DisplayMessageandLableSetting, DisplayMessageandLableSettingDto>().ReverseMap();
+            CreateMap<ScheduleTerminateDetails, ScheduleTerminateDetailsDto>().ReverseMap();
         }
     }
 }
