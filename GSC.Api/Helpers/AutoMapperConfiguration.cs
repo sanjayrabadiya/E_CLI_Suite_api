@@ -206,7 +206,8 @@ namespace GSC.Api.Helpers
             CreateMap<ScreeningEntry, ScreeningEntryDto>().ReverseMap();
             CreateMap<ScreeningTemplateValue, ScreeningTemplateValueDto>().ReverseMap();
             CreateMap<ScreeningTemplateValue, Data.Dto.Screening.ScreeningTemplateValueBasic>()
-               .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Comments.Any()));
+               .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Comments.Any()))
+               .ForMember(x => x.ScheduleDate, x => x.MapFrom(a => a.IsScheduleTerminate == true ? a.ScheduleDate : null));
 
             CreateMap<ScreeningTemplateValueAudit, ScreeningTemplateValueAuditDto>().ReverseMap();
             CreateMap<ScreeningTemplateValueComment, ScreeningTemplateValueCommentDto>().ReverseMap();
@@ -463,11 +464,11 @@ namespace GSC.Api.Helpers
             CreateMap<PageConfiguration, PageConfigurationCommon>()
               .ForMember(x => x.ActualFieldName, a => a.MapFrom(m => m.PageConfigurationFields.FieldName)).ReverseMap();
             CreateMap<PageConfigurationFields, PageConfigurationFieldsDto>().ReverseMap();
-           // CreateMap<KitManagement, KitManagementDto>().ReverseMap();
+            // CreateMap<KitManagement, KitManagementDto>().ReverseMap();
             CreateMap<SendEmailOnVariableChangeSetting, SendEmailOnVariableChangeSettingDto>().ReverseMap();
 
-            CreateMap<SendEmailOnVariableValue, SendEmailOnVariableValueDto>().ReverseMap(); 
-           // CreateMap<DisplayMessageandLableSetting, DisplayMessageandLableSettingDto>().ReverseMap();
+            CreateMap<SendEmailOnVariableValue, SendEmailOnVariableValueDto>().ReverseMap();
+            // CreateMap<DisplayMessageandLableSetting, DisplayMessageandLableSettingDto>().ReverseMap();
             CreateMap<ScheduleTerminateDetails, ScheduleTerminateDetailsDto>().ReverseMap();
         }
     }

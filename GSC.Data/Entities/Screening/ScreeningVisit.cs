@@ -31,6 +31,7 @@ namespace GSC.Data.Entities.Screening
         }
 
         public int? ParentId { get; set; }
+        public bool? IsScheduleTerminate { get; set; }
         public ScreeningEntry ScreeningEntry { get; set; }
         [ForeignKey("ParentId")]
         public ICollection<ScreeningVisit> Children { get; set; }

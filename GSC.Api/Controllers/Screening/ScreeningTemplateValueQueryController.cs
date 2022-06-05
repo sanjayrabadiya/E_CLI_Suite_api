@@ -30,6 +30,8 @@ namespace GSC.Api.Controllers.Screening
         private readonly IEditCheckImpactRepository _editCheckImpactRepository;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
+        private readonly IScheduleTerminate _scheduleTerminate;
+
         public ScreeningTemplateValueQueryController(
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
@@ -38,7 +40,8 @@ namespace GSC.Api.Controllers.Screening
             IEditCheckImpactRepository editCheckImpactRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IScreeningVisitRepository screeningVisitRepository,
-            IUnitOfWork uow, IMapper mapper, IGSCContext context)
+            IUnitOfWork uow, IMapper mapper, IGSCContext context,
+            IScheduleTerminate scheduleTerminate)
         {
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -50,6 +53,7 @@ namespace GSC.Api.Controllers.Screening
             _editCheckImpactRepository = editCheckImpactRepository;
             _screeningVisitRepository = screeningVisitRepository;
             _context = context;
+            _scheduleTerminate = scheduleTerminate;
         }
 
         [HttpGet("{screeningTemplateValueId}")]
@@ -246,6 +250,8 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
 
             _uow.Save();
+
+            _scheduleTerminate.TerminateScheduleTemplateVisit(screeningTemplate.ProjectDesignTemplateId, screeningEntryId, true);
 
             return Ok(result);
         }
