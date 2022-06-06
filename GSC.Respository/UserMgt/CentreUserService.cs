@@ -51,13 +51,6 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
-
-        public async Task<RefreshToken> RefreshToken(RefreshTokenDto tokenn)
-        {
-            var result = await HttpService.Post<RefreshToken>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/RefreshToken", tokenn);
-            return result;
-        }
-
         public async Task<CommonResponceView> SaveUser(UserDto userDto, string clientUrl)
         {
             var result = await HttpService.Post<CommonResponceView>(_httpClient, clientUrl + "User", userDto);
@@ -74,11 +67,7 @@ namespace GSC.Respository.UserMgt
         {
             await HttpService.Delete(_httpClient, clientUrl + "User/" + Id);
         }
-        public async Task<CommonResponceView> ChangePassword(ChangePasswordDto loginDto, string clientUrl)
-        {
-            var result = await HttpService.Post<CommonResponceView>(_httpClient, clientUrl + "User/ChangePassword", loginDto);
-            return result;
-        }
+      
 
         public async Task<CommonResponceView> ActiveUser(string clientUrl, int Id)
         {
@@ -98,42 +87,14 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
-        public async Task<UserViewModel> LogOutFromEveryWhere(string clientUrl)
-        {
-            var result = await HttpService.Get<UserViewModel>(_httpClient, clientUrl);
-            return result;
-        }
-        public async void UpdateRefreshToken(UpdateRefreshTokanDto refreshTokanDto)
-        {
-            await HttpService.Post(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/UpdateRefreshToken", refreshTokanDto);
-        }
-
-        public async Task<string> InsertOtpCenteral(string clientUrl)
-        {
-            string result = await HttpService.Get(_httpClient, clientUrl, null);
-            return result;
-        }
-
-        public async Task<string> VerifyOtpCenteral(string clientUrl, UserOtpDto userOtpDto)
-        {
-            string result = await HttpService.Post(_httpClient, clientUrl, userOtpDto);
-            return result;
-        }
-        public async Task<string> ChangePasswordByOtpCenteral(string clientUrl, UserOtpDto userOtpDto)
-        {
-            string result = await HttpService.Post(_httpClient, clientUrl, userOtpDto);
-            return result;
-        }
+       
         public async Task<UserOtp> GetUserOtpDetails(string clientUrl)
         {
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
             return result;
         }
 
-        public async Task Logout(string clientUrl)
-        {
-            var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
-        }
+        
 
         public async Task GetBlockedUser(string clientUrl)
         {
@@ -170,11 +131,6 @@ namespace GSC.Respository.UserMgt
             var result = await HttpService.Get<Companystudyconfig>(_httpClient, clientUrl);
             return result;
         }
-        public async Task<UserViewModel> ValidateClientData(LoginDto loginDto)
-        {
-            var result = await HttpService.Post<UserViewModel>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUser", loginDto);
-
-            return result;
-        }
+       
     }
 }

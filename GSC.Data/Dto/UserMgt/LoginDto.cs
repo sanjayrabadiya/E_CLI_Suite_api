@@ -24,5 +24,7 @@ namespace GSC.Data.Dto.UserMgt
         public bool IsSuperAdmin { get; set; }
 
         public UserViewModel CentralUserData { get; set; }
+
+        public string RoleName { get; set; }
     }
 }

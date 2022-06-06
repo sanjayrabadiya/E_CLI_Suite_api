@@ -286,55 +286,7 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok();
         }
 
-        [HttpPost]
-        [Route("ChangePassword")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto loginDto)
-        {
-
-
-            if (!_environmentSetting.Value.IsPremise)
-            {
-                CommonResponceView userdetails = await _centreUserService.ChangePassword(loginDto, _environmentSetting.Value.CentralApi);
-
-                if (userdetails != null)
-                {
-                    if (!string.IsNullOrEmpty(userdetails.Message))
-                    {
-                        ModelState.AddModelError("Message", userdetails.Message);
-                        return BadRequest(ModelState);
-                    }
-                }
-               var usersdetails = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{loginDto.UserName}");
-                _userLoginReportRepository.SetDbConnection(usersdetails.ConnectionString);
-                var user = _userRepository.FindBy(x => x.UserName == loginDto.UserName && x.DeletedDate == null).FirstOrDefault();
-                user.IsFirstTime = false;
-                user.IsLogin = false;
-                _userRepository.Update(user);
-                _uow.Save();
-                return Ok();
-            }
-            else
-            {
-                var user = _userRepository.FindByInclude(x => x.UserName == loginDto.UserName && x.DeletedDate == null,x=>x.Company)
-                    .FirstOrDefault();
-
-                if (user == null)
-                    return NotFound();
-                if (!string.IsNullOrEmpty(_userPasswordRepository.VaidatePassword(loginDto.OldPassword, user.Id)))
-                {
-                    ModelState.AddModelError("Message", "Current Password invalid!");
-                    return BadRequest(ModelState);
-                }
-                user.IsFirstTime = false;
-                user.IsLogin = false;
-                _userRepository.Update(user);
-                _uow.Save();
-                _userPasswordRepository.CreatePassword(loginDto.NewPassword, user.Id);
-                _emailSenderRespository.SendRegisterEMail(user.Email, loginDto.NewPassword, user.UserName,user.Company.CompanyName);
-                return Ok();
-            }
-        }
+        
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> Active(int id)

@@ -83,6 +83,7 @@ namespace GSC.Api.Controllers.UserMgt
             if (roles.Count == 1)
             {
                 dto.RoleId = roles.First().Id;
+                dto.RoleName = roles.First().Value;
             }
             if (roles.Count > 1)
             {
@@ -113,72 +114,16 @@ namespace GSC.Api.Controllers.UserMgt
                 return BadRequest(ModelState);
             var user = new UserViewModel();
 
-            if (_environmentSetting.Value.IsPremise)
-                user = _userRepository.ValidateUser(dto.UserName, dto.Password);
-            else
-                user = dto.CentralUserData;
-
-            var validatedUser = _userRepository.BuildUserAuthObject(user, dto.RoleId);
-            validatedUser.alreadyLoggedIn = false;
-
             _uow.Save();
-            return Ok(validatedUser);
+            return Ok(user);
 
-        }
-
-        [HttpPost]
-        [Route("role")]
-        public async Task<IActionResult> ValidateLoginWithRole([FromBody] LoginRoleDto loginDto)
-        {
-            Data.Entities.UserMgt.User user;
-            if (loginDto.UserId > 0)
-                user = _userRepository.Find(loginDto.UserId);
-            else
-                user = _userRepository.FindBy(x =>
-                        x.UserName == loginDto.UserName && x.RoleTokenId == loginDto.Guid && x.DeletedDate == null)
-                    .FirstOrDefault();
-
-            if (user == null)
-            {
-                ModelState.AddModelError("UserName",
-                    "You have not assigned any role, Please contact your administrator");
-                return BadRequest(ModelState);
-            }
-
-            var userViewModel = new UserViewModel();
-
-            userViewModel.UserId = user.Id;
-            userViewModel.Language = user.Language;
-            userViewModel.IsValid = true;
-            if (loginDto.CentralUserData != null)
-            {
-                userViewModel.Token = loginDto.CentralUserData.Token;
-                userViewModel.RefreshToken = loginDto.CentralUserData.RefreshToken;
-                userViewModel.MinutesToExpiration = loginDto.CentralUserData.MinutesToExpiration;
-                userViewModel.IsFirstTime = loginDto.CentralUserData.IsFirstTime;
-            }
-
-            var validatedUser = _userRepository.BuildUserAuthObject(userViewModel, loginDto.RoleId);
-            return Ok(validatedUser);
-        }
-
-        [HttpGet]
-        [Route("getRoleByUserName/{userName}")]
-        [AllowAnonymous]
-        public IActionResult GetRoleByUserName(string userName)
-        {
-            return Ok(_userRoleRepository.GetRoleByUserName(userName));
         }
 
         [HttpGet]
         [Route("MobileLogout/{userId}/{loginReportId}")]
         public IActionResult MobileLogout(int userId, int loginReportId)
         {
-            if (!_environmentSetting.Value.IsPremise)
-            {
-                _centreUserService.Logout($"{_environmentSetting.Value.CentralApi}Login/Logout/{userId}/{loginReportId}");
-                //  return Ok();
-            }
+
             var user = _userRepository.Find(userId);
             if (user == null)
                 return NotFound();
@@ -196,147 +141,6 @@ namespace GSC.Api.Controllers.UserMgt
             _uow.Save();
 
             return Ok("Your Session is expired");
-        }
-
-
-        [HttpGet]
-        [Route("logout/{userId}/{loginReportId}")]
-        public IActionResult Logout(int userId, int loginReportId)
-        {
-            if (!_environmentSetting.Value.IsPremise)
-            {
-                _centreUserService.Logout($"{_environmentSetting.Value.CentralApi}Login/Logout/{userId}/{loginReportId}");
-                //  return Ok();
-            }
-
-            var user = _userRepository.Find(userId);
-            if (user == null)
-                return NotFound();
-            var userLoginReport = _userLoginReportRepository.Find(loginReportId);
-
-            if (userLoginReport == null)
-                return NotFound();
-
-            user.IsLogin = false;
-            _userRepository.Update(user);
-
-            userLoginReport.LogoutTime = _jwtTokenAccesser.GetClientDate();
-            _userLoginReportRepository.Update(userLoginReport);
-
-            _uow.Save();
-
-            return Ok();
-
-        }
-
-
-        [HttpGet]
-        [Route("logOutFromEveryWhere/{userName}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> LogOutFromEveryWhere(string userName)
-        {
-            bool IsPremise = _environmentSetting.Value.IsPremise;
-            if (!IsPremise)
-            {
-                var result = new UserViewModel();
-                result = await _centreUserService.LogOutFromEveryWhere($"{_environmentSetting.Value.CentralApi}Login/LogOutFromEveryWhere/{userName}");
-                if (result != null)
-                {
-                    string companyCode = $"CompanyId{result.CompanyId}";
-                    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
-
-                    var userLoginReports = _userLoginReportRepository.FindBy(t => t.UserId == result.UserId && t.LogoutTime == null).ToList();
-                    userLoginReports.ForEach(t =>
-                    {
-                        t.LogoutTime = _jwtTokenAccesser.GetClientDate();
-                        _userLoginReportRepository.Update(t);
-                    });
-
-                    var user = _userRepository.All.Where(x => x.Id == result.UserId && x.DeletedDate == null).FirstOrDefault();
-                    user.IsLogin = false;
-                    _userRepository.Update(user);
-
-                    _uow.Save();
-
-                    //await _hubContext.Clients.All.SendAsync("logofffromeverywhere", user.Id);
-                    return Ok();
-                }
-                else
-                {
-                    return NotFound();
-                }
-            }
-            else
-            {
-                var users = _userRepository.All.FirstOrDefault(x => x.UserName == userName && x.DeletedDate == null);
-
-                if (users != null)
-                {
-                    //await _hubContext.Clients.All.SendAsync("logofffromeverywhere", users.Id);
-                    users.IsLogin = false;
-                    _userRepository.Update(users);
-                    _uow.Save();
-                }
-                else
-                {
-                    return NotFound();
-                }
-
-                return Ok();
-            }
-        }
-
-        private async Task<Data.Entities.UserMgt.User> CheckifAlreadyLogin(int userId)
-        {
-            return await _userRepository.FindAsync(userId);
-        }
-
-        [HttpPost]
-        [Route("Refresh")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto token)
-        {
-            return Ok(await _userRepository.Refresh(token.AccessToken, token.RefreshToken));
-        }
-
-
-        [HttpPost]
-        [Route("ValidateUserForSignature")]
-        public async Task<IActionResult> ValidateUserForSignature([FromBody] LoginDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var user = new UserViewModel();
-            if (_environmentSetting.Value.IsPremise)
-                user = _userRepository.ValidateUser(dto.UserName, dto.Password);
-            else
-               // user = await _centreUserService.ValidateClient();
-            if (!user.IsValid)
-            {
-                ModelState.AddModelError("UserName", user.ValidateMessage);
-                return BadRequest(ModelState);
-            }
-
-            return Ok(user);
-        }
-        [HttpGet]
-        [Route("GetLoginPreference/{UserId}/{CompanyID}/{FailedLoginAttempts}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetLoginPreference(int UserId, int CompanyID, int FailedLoginAttempts)
-        {
-            var user = _userRepository.GetUserById(UserId);
-            await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
-            var company = _loginPreferenceRepository.All.Where(x => x.CompanyId == CompanyID).FirstOrDefault();
-            if (company != null && FailedLoginAttempts > company.MaxLoginAttempt)
-            {
-                user.IsLocked = true;
-                _userRepository.Update(user);
-
-                string ValidateMessage = "User is locked, Please contact your administrator";
-                _userLoginReportRepository.SaveLog(ValidateMessage, user.Id, user.UserName, null);
-                _uow.Save();
-            }
-            return Ok(company != null ? company.MaxLoginAttempt : 0);
         }
 
     }

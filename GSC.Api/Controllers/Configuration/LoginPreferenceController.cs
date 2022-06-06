@@ -124,37 +124,5 @@ namespace GSC.Api.Controllers.Configuration
 
             return Ok();
         }
-
-
-        [HttpGet("GetLoginPreferencebyUsername/{username}")]
-        [AllowAnonymous]
-        public async System.Threading.Tasks.Task<IActionResult> GetLoginPreferencebyUsernameAsync(string username)
-        {
-            bool IsPremise = _environmentSetting.Value.IsPremise;
-            if (!IsPremise)
-            {
-                var result = new UserViewModel();
-                result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{username}");
-                if (result != null)
-                {
-                    string companyCode = $"CompanyId{result.CompanyId}";
-                    _userLoginReportRepository.SetDbConnection(result.ConnectionString);
-                }
-                var loginPreferences = _loginPreferenceRepository.All.Where(x => x.CompanyId == result.CompanyId).FirstOrDefault();
-                var loginPreferenceDto = _mapper.Map<LoginPreferenceDto>(loginPreferences);
-                return Ok(loginPreferenceDto);
-            }
-            else
-            {
-
-                var userFDetail = _userRepository.All.Where(x => x.UserName == username).FirstOrDefault();
-
-                var loginPreferences = _loginPreferenceRepository.All.Where(x =>
-                    x.CompanyId == userFDetail.CompanyId
-                ).FirstOrDefault();
-                var loginPreferenceDto = _mapper.Map<LoginPreferenceDto>(loginPreferences);
-                return Ok(loginPreferenceDto);
-            }
-        }
     }
 }
