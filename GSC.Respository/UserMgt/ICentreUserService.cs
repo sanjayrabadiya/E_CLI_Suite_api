@@ -22,7 +22,6 @@ namespace GSC.Respository.UserMgt
        
         
         Task<UserOtp> GetUserOtpDetails(string clientUrl);
-        Task Logout(string clientUrl);
         Task GetBlockedUser(string clientUrl);
         Task SentConnectionString(int CompanyID, string clientUrl);
         Task<Companystudyconfig> Getnoofstudy(string clientUrl);
