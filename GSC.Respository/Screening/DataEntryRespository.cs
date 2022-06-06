@@ -166,7 +166,7 @@ namespace GSC.Respository.Screening
                 PatientStatusId = x.RandomizationId != null ? x.Randomization.PatientStatusId : 0,
                 PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
-                Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
+                Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.IsScheduleTerminate == true || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
                 {
                     ScreeningVisitId = a.Id,
                     ProjectDesignVisitId = a.ProjectDesignVisitId,

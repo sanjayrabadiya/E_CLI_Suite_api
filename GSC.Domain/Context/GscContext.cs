@@ -411,6 +411,9 @@ namespace GSC.Domain.Context
 
         public DbSet<SendEmailOnVariableChangeSetting> SendEmailOnVariableChangeSetting { get; set; }
         public DbSet<SendEmailOnVariableValue> SendEmailOnVariableValue { get; set; }
+      //  public DbSet<KitManagement> KitManagement { get; set; }
+      //  public DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
+        public DbSet<ScheduleTerminateDetails> ScheduleTerminateDetails { get; set; }
     }
 
 

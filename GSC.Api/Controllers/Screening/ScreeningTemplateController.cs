@@ -7,6 +7,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
 using GSC.Respository.Attendance;
+using GSC.Respository.EditCheckImpact;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.Screening;
@@ -28,6 +29,8 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IUnitOfWork _uow;
         private readonly IScreeningProgress _screeningProgress;
+        private readonly IScheduleTerminate _scheduleTerminate;
+
         public ScreeningTemplateController(IScreeningTemplateRepository screeningTemplateRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
@@ -36,7 +39,8 @@ namespace GSC.Api.Controllers.Screening
             IProjectSubjectRepository projectSubjectRepository,
             IScreeningVisitRepository screeningVisitRepository,
             IScreeningProgress screeningProgress,
-            IJwtTokenAccesser jwtTokenAccesser, IUnitOfWork uow)
+            IJwtTokenAccesser jwtTokenAccesser, IUnitOfWork uow,
+           IScheduleTerminate scheduleTerminate)
         {
             _screeningTemplateRepository = screeningTemplateRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
@@ -48,6 +52,7 @@ namespace GSC.Api.Controllers.Screening
             _projectSubjectRepository = projectSubjectRepository;
             _screeningVisitRepository = screeningVisitRepository;
             _screeningProgress = screeningProgress;
+            _scheduleTerminate = scheduleTerminate;
         }
 
         [HttpPost("Repeat/{screeningTemplateId}")]
@@ -141,13 +146,19 @@ namespace GSC.Api.Controllers.Screening
 
             _uow.Save();
 
-            var screeningEntryId = _screeningTemplateRepository.All.Where(x => x.Id == id).Select(t => t.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
+            var tempValue = _screeningTemplateRepository.All.Where(x => x.Id == id).Select(t => new
+            {
+                t.ScreeningVisit.ScreeningEntryId,
+                t.ProjectDesignTemplateId
+            }).FirstOrDefault();
 
-            _screeningProgress.GetScreeningProgress(screeningEntryId, id);
+            _screeningProgress.GetScreeningProgress(tempValue.ScreeningEntryId, id);
 
             var result = _screeningVisitRepository.AutomaticStatusUpdate(id);
 
             _uow.Save();
+
+            _scheduleTerminate.TerminateScheduleTemplateVisit(tempValue.ProjectDesignTemplateId, tempValue.ScreeningEntryId, false);
 
             return Ok(result);
         }

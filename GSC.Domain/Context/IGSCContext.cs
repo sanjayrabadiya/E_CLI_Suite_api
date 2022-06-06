@@ -360,5 +360,8 @@ namespace GSC.Domain.Context
         DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
         DbSet<SendEmailOnVariableChangeSetting> SendEmailOnVariableChangeSetting { get; set; }
         DbSet<SendEmailOnVariableValue> SendEmailOnVariableValue { get; set; }
+      //  DbSet<KitManagement> KitManagement { get; set; }
+      //  DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
+        DbSet<ScheduleTerminateDetails> ScheduleTerminateDetails { get; set; }
     }
 }

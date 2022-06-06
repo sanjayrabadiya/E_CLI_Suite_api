@@ -345,7 +345,7 @@ namespace GSC.Respository.EditCheckImpact
             return false;
         }
 
-        EditCheckResult ValidateRuleReference(List<EditCheckValidate> editCheck, bool isFromValidate)
+        public EditCheckResult ValidateRuleReference(List<EditCheckValidate> editCheck, bool isFromValidate)
         {
             var dt = new DataTable();
             string ruleStr = "";

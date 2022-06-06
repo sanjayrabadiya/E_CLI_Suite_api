@@ -189,6 +189,7 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
             _context.Entry(screeningTemplateValue).Property("LabManagementUploadExcelDataId").IsModified = false;
+            _context.Entry(screeningTemplateValue).Property("IsScheduleTerminate").IsModified = false;
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
