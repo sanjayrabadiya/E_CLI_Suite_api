@@ -413,7 +413,7 @@ namespace GSC.Domain.Context
         public DbSet<SendEmailOnVariableValue> SendEmailOnVariableValue { get; set; }
       //  public DbSet<KitManagement> KitManagement { get; set; }
       //  public DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
-        public DbSet<ScheduleTerminateDetails> ScheduleTerminateDetails { get; set; }
+        public DbSet<ScheduleTerminateDetail> ScheduleTerminateDetail { get; set; }
     }
 
 
