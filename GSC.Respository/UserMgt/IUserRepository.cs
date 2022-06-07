@@ -20,7 +20,7 @@ namespace GSC.Respository.UserMgt
         List<UserGridDto> GetPatients(PatientDto userDto);
         User GetUserById(int id);
         LoginResponseDto GetLoginDetails();
-
+        int GetLoginAttempt(string username);
 
     }
 }

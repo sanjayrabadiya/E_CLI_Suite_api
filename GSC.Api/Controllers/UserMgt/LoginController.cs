@@ -143,5 +143,18 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok("Your Session is expired");
         }
 
+        //Add by Tinku Mahato for Login Attampt (10/05/2022)
+        [HttpGet("GetLoginAttempt/{username}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetLoginAttempt(string username)
+        {
+            if (_environmentSetting.Value.IsPremise)
+                return Ok(_userRepository.GetLoginAttempt(username));
+            else
+            {
+                var result = await _centreUserService.GetLoginAttempt(username);
+                return Ok(result);
+            }
+        }
     }
 }

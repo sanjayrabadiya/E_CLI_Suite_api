@@ -188,6 +188,18 @@ namespace GSC.Respository.UserMgt
             var user = Find(id);
             return user;
         }
-
+        //Add by Tinku Mahato for Login Attampt (10/05/2022)
+        public int GetLoginAttempt(string username)
+        {
+            var user = All.Where(x => x.UserName==username && x.DeletedDate == null).FirstOrDefault();
+            if (user!=null)
+            {
+                return user.FailedLoginAttempts;
+            }
+            else
+            {
+                return 0;
+            }
+        }
     }
 }

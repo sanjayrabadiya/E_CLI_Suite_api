@@ -47,7 +47,7 @@ namespace GSC.Respository.UserMgt
                 _gSCCaching.Remove(companyCode);
                 _gSCCaching.Add(companyCode, result.ConnectionString, DateTime.Now.AddDays(7));
             }
-           
+
             return result;
         }
 
@@ -67,7 +67,7 @@ namespace GSC.Respository.UserMgt
         {
             await HttpService.Delete(_httpClient, clientUrl + "User/" + Id);
         }
-      
+
 
         public async Task<CommonResponceView> ActiveUser(string clientUrl, int Id)
         {
@@ -87,14 +87,14 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
-       
+
         public async Task<UserOtp> GetUserOtpDetails(string clientUrl)
         {
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
             return result;
         }
 
-        
+
 
         public async Task GetBlockedUser(string clientUrl)
         {
@@ -131,6 +131,12 @@ namespace GSC.Respository.UserMgt
             var result = await HttpService.Get<Companystudyconfig>(_httpClient, clientUrl);
             return result;
         }
-       
+
+        //Add by Tinku Mahato for Login Attampt (10/05/2022)
+        public async Task<int> GetLoginAttempt(string username)
+        {
+            var result = await HttpService.Get<int>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/GetLoginAttempt/{username}");
+            return result;
+        }
     }
 }

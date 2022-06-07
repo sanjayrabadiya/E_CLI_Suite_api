@@ -25,7 +25,7 @@ namespace GSC.Respository.UserMgt
         Task GetBlockedUser(string clientUrl);
         Task SentConnectionString(int CompanyID, string clientUrl);
         Task<Companystudyconfig> Getnoofstudy(string clientUrl);
-      
 
+        Task<int> GetLoginAttempt(string username);
     }
 }
