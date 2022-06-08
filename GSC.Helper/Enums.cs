@@ -841,4 +841,12 @@ namespace GSC.Helper
         [Description("Layout 3")] Layout3 = 3
 
     }
+    public enum TableCollectionSource : short
+    {
+        [Description("TextBox")] TextBox = 1,
+        [Description("CheckBox")] CheckBox = 2,
+        [Description("DateTime")] DateTime = 3,
+        [Description("Date")] Date = 4,
+        [Description("Time")] Time = 5
+    }
 }

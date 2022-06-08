@@ -101,6 +101,7 @@ namespace GSC.Api.Controllers.Screening
                 ScreeningTemplateValue = screeningTemplateValue,
                 Value = screeningTemplateValueDto.IsNa ? "N/A" : value,
                 OldValue = screeningTemplateValueDto.OldValue,
+                ProjectDesignVariableValueId = screeningTemplateValue.Children.Count() == 0 ? null : screeningTemplateValue.Children[0]?.ProjectDesignVariableValueId,
             };
             _screeningTemplateValueAuditRepository.Save(aduit);
 

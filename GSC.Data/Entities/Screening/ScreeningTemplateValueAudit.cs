@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Data.Entities.Master;
+using GSC.Data.Entities.Project.Design;
 using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Screening
@@ -11,7 +12,7 @@ namespace GSC.Data.Entities.Screening
         [Key]
         public int Id { get; set; }
         public int ScreeningTemplateValueId { get; set; }
-      
+        public int? ProjectDesignVariableValueId { get; set; }
         public string Value { get; set; }
         public string Note { get; set; }
         public int? ReasonId { get; set; }
@@ -30,6 +31,7 @@ namespace GSC.Data.Entities.Screening
 
 
         public ScreeningTemplateValue ScreeningTemplateValue { get; set; }
+        public ProjectDesignVariableValue ProjectDesignVariableValue { get; set; }
         [ForeignKey("ReasonId")] public AuditReason AuditReason { get; set; }
     }
 }

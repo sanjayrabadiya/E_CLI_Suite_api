@@ -334,6 +334,7 @@ namespace GSC.Respository.Screening
                                 obj.LevelNo = child.LevelNo;
                                 obj.ValueName = val.ValueName;
                                 obj.IsDeleted = child.DeletedDate == null ? false : true;
+                                obj.TableCollectionSource = val.TableCollectionSource;
                                 ValuesList.Add(obj);
                             });
                         });

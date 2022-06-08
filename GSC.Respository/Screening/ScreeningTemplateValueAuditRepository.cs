@@ -72,6 +72,7 @@ namespace GSC.Respository.Screening
                 TimeZone = r.TimeZone,
                 User = r.UserName,
                 CollectionSource = r.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource,
+                TableCollectionSource = r.ProjectDesignVariableValue.TableCollectionSource,
                 Id = r.Id
             }).OrderByDescending(t => t.Id).ToList();
 
