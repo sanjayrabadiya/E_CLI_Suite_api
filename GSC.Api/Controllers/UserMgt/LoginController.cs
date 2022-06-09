@@ -14,6 +14,7 @@ using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -68,7 +69,7 @@ namespace GSC.Api.Controllers.UserMgt
             var user = await _centreUserService.ValidateClient();
             if (user == null)
             {
-                ModelState.AddModelError("UserName","User not valid");
+                ModelState.AddModelError("UserName", "User not valid");
                 return BadRequest(ModelState);
             }
             var roles = _userRoleRepository.GetRoleByUserId(_jwtTokenAccesser.UserId);
@@ -155,6 +156,21 @@ namespace GSC.Api.Controllers.UserMgt
                 var result = await _centreUserService.GetLoginAttempt(username);
                 return Ok(result);
             }
+        }
+        [HttpGet("UpdateLockStatus/{userid}/{CompanyID}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateLockStatus(int userid, int CompanyID)
+        {
+            await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
+
+            var user = await _userRepository.All.Where(x => x.Id == userid).FirstOrDefaultAsync();
+            if (user != null)
+            {
+                user.IsLocked = true;
+                _userRepository.Update(user);
+                _uow.Save();
+            }
+            return Ok();
         }
     }
 }
