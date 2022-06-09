@@ -24,6 +24,8 @@ namespace GSC.Data.Dto.Project.Design
         public string ScreeningValueOld { get; set; }
         public bool AllowActive { get; set; }
         public string DisplayVersion { get; set; }
+        public TableCollectionSource? TableCollectionSource { get; set; }
+        public string TableCollectionSourceName { get; set; }
     }
 
     public class ScreeningVariableValueDto
@@ -40,9 +42,10 @@ namespace GSC.Data.Dto.Project.Design
         public double? InActiveVersion { get; set; }
         public short? LevelNo { get; set; }
         public bool IsDeleted { get; set; }
+        public TableCollectionSource? TableCollectionSource { get; set; }
     }
 
-   
+
 
 
     public class ProjectDesignVariableValueDropDown

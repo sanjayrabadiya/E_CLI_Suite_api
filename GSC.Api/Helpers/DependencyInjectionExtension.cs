@@ -383,7 +383,7 @@ namespace GSC.Api.Helpers
          //   services.AddScoped<IKitManagementRepository, KitManagementRepository>();
             services.AddScoped<ISendEmailOnVariableChangeSettingRepository, SendEmailOnVariableChangeSettingRepository>();
            // services.AddScoped<IDisplayMessageandLableSettingRepository, DisplayMessageandLableSettingRepository>();
-            services.AddScoped<IScheduleTerminateDetailsRepository, ScheduleTerminateDetailsRepository>();
+            services.AddScoped<IScheduleTerminateDetailRepository, ScheduleTerminateDetailRepository>();
             services.AddScoped<IScheduleTerminate, ScheduleTerminateRepository>();
         }
     }

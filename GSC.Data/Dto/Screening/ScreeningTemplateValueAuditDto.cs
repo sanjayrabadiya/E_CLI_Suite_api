@@ -8,6 +8,7 @@ namespace GSC.Data.Dto.Screening
     {
         private DateTime? _createdDate;
         public int ScreeningTemplateValueId { get; set; }
+        public int? ProjectDesignVariableValueId { get; set; }
         public string Value { get; set; }
         public string Note { get; set; }
         public int? ReasonId { get; set; }

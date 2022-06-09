@@ -10,6 +10,7 @@ using GSC.Helper;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Shared.Extension;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Design
@@ -76,6 +77,7 @@ namespace GSC.Api.Controllers.Project.Design
                     x.AllowActive = checkVersion.VersionNumber == x.InActiveVersion && x.InActiveVersion != null;
                     x.DisplayVersion = x.StudyVersion != null || x.InActiveVersion != null ?
                     "( V : " + x.StudyVersion + (x.StudyVersion != null && x.InActiveVersion != null ? " - " : "") + x.InActiveVersion + ")" : "";
+                    x.TableCollectionSourceName = x.TableCollectionSource.GetDescription();
                 });
             }
 

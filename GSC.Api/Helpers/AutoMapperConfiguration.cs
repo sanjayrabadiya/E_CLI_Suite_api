@@ -469,7 +469,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<SendEmailOnVariableValue, SendEmailOnVariableValueDto>().ReverseMap();
             // CreateMap<DisplayMessageandLableSetting, DisplayMessageandLableSettingDto>().ReverseMap();
-            CreateMap<ScheduleTerminateDetails, ScheduleTerminateDetailsDto>().ReverseMap();
+            CreateMap<ScheduleTerminateDetail, ScheduleTerminateDetailDto>().ReverseMap();
         }
     }
 }

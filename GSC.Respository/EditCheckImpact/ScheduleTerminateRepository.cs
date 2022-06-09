@@ -14,20 +14,20 @@ namespace GSC.Respository.EditCheckImpact
     {
         private readonly IGSCContext _context;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IScheduleTerminateDetailsRepository _scheduleTerminateDetailsRepository;
+        private readonly IScheduleTerminateDetailRepository _scheduleTerminateDetailRepository;
         private readonly IEditCheckRuleRepository _editCheckRuleRepository;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
         public ScheduleTerminateRepository(IGSCContext context,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IScheduleTerminateDetailsRepository scheduleTerminateDetailsRepository,
+            IScheduleTerminateDetailRepository scheduleTerminateDetailRepository,
             IEditCheckRuleRepository editCheckRuleRepository,
             IScreeningVisitRepository screeningVisitRepository,
             IScheduleRuleRespository scheduleRuleRespository) : base(context)
         {
             _context = context;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
-            _scheduleTerminateDetailsRepository = scheduleTerminateDetailsRepository;
+            _scheduleTerminateDetailRepository = scheduleTerminateDetailRepository;
             _editCheckRuleRepository = editCheckRuleRepository;
             _screeningVisitRepository = screeningVisitRepository;
             _scheduleRuleRespository = scheduleRuleRespository;
@@ -36,7 +36,7 @@ namespace GSC.Respository.EditCheckImpact
 
         public void TerminateScheduleTemplateVisit(int projectDesignTemplateId, int screeningEntryId, bool isSelfCorrection)
         {
-            var scheduleTerminates = _scheduleTerminateDetailsRepository.All.Where(x => x.DeletedDate == null
+            var scheduleTerminates = _scheduleTerminateDetailRepository.All.Where(x => x.DeletedDate == null
             && x.ProjectDesignVariable.ProjectDesignTemplateId == projectDesignTemplateId).Select(r => new ScheduleTerminateDto
             {
                 Operator = r.Operator,

@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Schedule;
 using GSC.Data.Entities.Project.Schedule;
 using GSC.Respository.Project.Schedule;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,62 +14,65 @@ namespace GSC.Api.Controllers.Project.Schedule
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ScheduleTerminateDetailsController : BaseController
+    public class ScheduleTerminateDetailController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IScheduleTerminateDetailsRepository _scheduleTerminateDetailsRepository;
+        private readonly IScheduleTerminateDetailRepository _scheduleTerminateDetailRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        
 
-        public ScheduleTerminateDetailsController(IMapper mapper, IUnitOfWork uow, IScheduleTerminateDetailsRepository scheduleTerminateDetailsRepository)
+        public ScheduleTerminateDetailController(IMapper mapper, IUnitOfWork uow, IJwtTokenAccesser jwtTokenAccesser, IScheduleTerminateDetailRepository scheduleTerminateDetailRepository)
         {
             _mapper = mapper;
-            _scheduleTerminateDetailsRepository = scheduleTerminateDetailsRepository;
+            _scheduleTerminateDetailRepository = scheduleTerminateDetailRepository;
             _uow = uow;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("GetData/{id}")]
         public IActionResult GetData(int id)
         {
-            return Ok();
+            return Ok(_scheduleTerminateDetailRepository.GetDetailById(id));
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ScheduleTerminateDetailsDto terminateDto)
+        public IActionResult Post([FromBody] ScheduleTerminateDetailDto terminateDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             terminateDto.Id = 0;
-            var projectSchedule = _mapper.Map<ScheduleTerminateDetails>(terminateDto);
+            var terminate = _mapper.Map<ScheduleTerminateDetail>(terminateDto);
 
-            _scheduleTerminateDetailsRepository.Add(projectSchedule);
+            _scheduleTerminateDetailRepository.Add(terminate);
             if (_uow.Save() <= 0) throw new Exception("Creating Schedule Terminate Details failed on save.");
-            return Ok(projectSchedule.Id);
+            return Ok(terminate.Id);
         }
 
+
         [HttpPut]
-        public IActionResult Put([FromBody] ScheduleTerminateDetailsDto projectScheduleDto)
+        [TransactionRequired]
+        public IActionResult Put([FromBody] ScheduleTerminateDetailDto terminateDto)
         {
-            if (projectScheduleDto.Id <= 0) return BadRequest();
+            if (terminateDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            //var projectSchedule = _mapper.Map<ProjectSchedule>(projectScheduleDto);
-            //_projectScheduleTemplateRepository.UpdateTemplates(projectSchedule);
-            //_projectScheduleTemplateRepository.UpdateDesignTemplatesOrder(projectSchedule);
+            var terminate = _scheduleTerminateDetailRepository.Find(terminateDto.Id);
+            terminate.AuditReasonId = terminateDto.AuditReasonId;
+            terminate.ReasonOth = terminateDto.ReasonOth;
+            terminate.DeletedDate = _jwtTokenAccesser.GetClientDate();
+            terminate.DeletedBy = _jwtTokenAccesser.UserId;
+            _scheduleTerminateDetailRepository.Update(terminate);
+            if (_uow.Save() <= 0) throw new Exception("Updating Schedule Terminate Details failed on save.");
 
-            //_projectScheduleRepository.Update(projectSchedule);
-            //foreach (var item in projectSchedule.Templates)
-            //{
-            //    if (item.Id > 0)
-            //        _projectScheduleTemplateRepository.Update(item);
-            //    else
-            //        _projectScheduleTemplateRepository.Add(item);
-            //}
-            //_uow.Save();
+            var terminateAdd = _mapper.Map<ScheduleTerminateDetail>(terminateDto);
+            terminateAdd.Id = 0;
+            terminateAdd.AuditReasonId = null;
+            terminateAdd.ReasonOth = null;
+            _scheduleTerminateDetailRepository.Add(terminateAdd);
+            if (_uow.Save() <= 0) throw new Exception("Creating Schedule Terminate Details failed on save.");
 
-            //_projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(projectScheduleDto.ProjectDesignPeriodId);
-            //_uow.Save();
-
-            return Ok();
+            return Ok(terminateAdd.Id);
         }
 
 
