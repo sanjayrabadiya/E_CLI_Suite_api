@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -157,11 +158,12 @@ namespace GSC.Api.Controllers.UserMgt
                 return Ok(result);
             }
         }
-        [HttpGet("UpdateLockStatus/{userid}/{CompanyID}")]
+        [HttpGet("UpdateLockStatus/{userid}/{ConnectionString}")]
         [AllowAnonymous]
-        public async Task<IActionResult> UpdateLockStatus(int userid, int CompanyID)
+        public async Task<IActionResult> UpdateLockStatus(int userid, string ConnectionString)
         {
-            await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
+            Log.Error(ConnectionString);
+            _userLoginReportRepository.SetDbConnection(ConnectionString);
 
             var user = await _userRepository.All.Where(x => x.Id == userid).FirstOrDefaultAsync();
             if (user != null)
