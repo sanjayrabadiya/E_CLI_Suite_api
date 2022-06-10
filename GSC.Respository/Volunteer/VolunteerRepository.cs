@@ -150,6 +150,22 @@ namespace GSC.Respository.Volunteer
                     query = query.Where(x => x.IsBlocked == true);
                 if (search.IsBlocked.HasValue && search.IsBlocked == false)
                     query = query.Where(x => x.IsBlocked == null || x.IsBlocked == false);
+
+                if (search.FromRegistration.HasValue || search.ToRegistration.HasValue)
+                {
+                    if (search.FromRegistration.HasValue && search.ToRegistration.HasValue)
+                    {
+                        query = query.Where(x => x.RegisterDate >= search.FromRegistration && x.RegisterDate <= search.ToRegistration);
+                    }
+                    else if (search.FromRegistration.HasValue)
+                    {
+                        query = query.Where(x => x.RegisterDate >= search.FromRegistration);
+                    }
+                    else if (search.ToRegistration.HasValue)
+                    {
+                        query = query.Where(x => x.RegisterDate <= search.ToRegistration);
+                    }
+                }
             }
 
             var result = GetItems(query, true);
