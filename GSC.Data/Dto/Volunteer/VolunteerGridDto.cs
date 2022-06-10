@@ -1,6 +1,7 @@
 ﻿using System;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
+using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Volunteer
 {
@@ -93,6 +94,8 @@ namespace GSC.Data.Dto.Volunteer
         public int LastScreening { get; set; }
         public int PeriodNo { get; set; }
         public int ProjectDesignPeriodId { get; set; }
+        public DateTime? FromRegistration { get; set; }
+        public DateTime? ToRegistration { get; set; }
     }
 
     public class VolunteerAttendaceDto : BaseDto
