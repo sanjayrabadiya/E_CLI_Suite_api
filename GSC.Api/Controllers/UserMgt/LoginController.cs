@@ -158,21 +158,23 @@ namespace GSC.Api.Controllers.UserMgt
                 return Ok(result);
             }
         }
-        [HttpGet("UpdateLockStatus/{userid}/{ConnectionString}")]
+        [Route("UpdateLockStatus")]
+        [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> UpdateLockStatus(int userid, string ConnectionString)
+        public async Task<IActionResult> UpdateLockStatus([FromBody] UpdateUserLock obj)
         {
-            Log.Error(ConnectionString);
-            _userLoginReportRepository.SetDbConnection(ConnectionString);
+            bool issuccess = true;
+            Log.Error(obj.ConnectionString);
+            _userLoginReportRepository.SetDbConnection(obj.ConnectionString);
 
-            var user = await _userRepository.All.Where(x => x.Id == userid).FirstOrDefaultAsync();
+            var user = await _userRepository.All.Where(x => x.Id == obj.userid).FirstOrDefaultAsync();
             if (user != null)
             {
                 user.IsLocked = true;
                 _userRepository.Update(user);
                 _uow.Save();
             }
-            return Ok();
+            return Ok(issuccess);
         }
     }
 }

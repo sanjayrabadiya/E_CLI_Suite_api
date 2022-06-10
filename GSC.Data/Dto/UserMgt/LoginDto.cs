@@ -27,4 +27,10 @@ namespace GSC.Data.Dto.UserMgt
 
         public string RoleName { get; set; }
     }
+    public class UpdateUserLock
+    {
+        public int userid { get; set; }
+
+        public string ConnectionString { get; set; }
+    }
 }
