@@ -748,9 +748,9 @@ namespace GSC.Respository.EditCheckImpact
                 x.ScreeningTemplateId == screeningTemplateId).FirstOrDefault();
 
             if (screeningTemplateValue != null && screeningTemplateValue.Value == value)
-                return 0;
+                return screeningTemplateValue.Id;
             if (isSoftFetch && screeningTemplateValue != null && !string.IsNullOrEmpty(screeningTemplateValue.Value))
-                return 0;
+                return screeningTemplateValue.Id;
 
             if (screeningTemplateValue == null && string.IsNullOrEmpty(value))
                 return 0;
@@ -789,9 +789,10 @@ namespace GSC.Respository.EditCheckImpact
 
             }
 
-
-            if (screeningTemplateValue == null)
+            bool isInsert = false;
+            if (screeningTemplateValue == null && !string.IsNullOrEmpty(value))
             {
+                isInsert = true;
                 screeningTemplateValue = new ScreeningTemplateValue
                 {
                     ScreeningTemplateId = screeningTemplateId,
@@ -800,8 +801,9 @@ namespace GSC.Respository.EditCheckImpact
                 };
                 _screeningTemplateValueRepository.Add(screeningTemplateValue);
             }
-            else
+            else if (screeningTemplateValue != null && screeningTemplateValue.Value != value)
             {
+                isInsert = true;
                 screeningTemplateValue.Value = value;
 
                 if (isDisable && string.IsNullOrEmpty(value))
@@ -810,15 +812,21 @@ namespace GSC.Respository.EditCheckImpact
                 _screeningTemplateValueRepository.Update(screeningTemplateValue);
             }
 
-            var aduit = new ScreeningTemplateValueAudit
+
+            if (isInsert)
             {
-                ScreeningTemplateValue = screeningTemplateValue,
-                ScreeningTemplateValueId = screeningTemplateValue.Id,
-                Value = valueName,
-                OldValue = oldValueName,
-                Note = note
-            };
-            _screeningTemplateValueAuditRepository.Save(aduit);
+                var aduit = new ScreeningTemplateValueAudit
+                {
+                    ScreeningTemplateValue = screeningTemplateValue,
+                    ScreeningTemplateValueId = screeningTemplateValue.Id,
+                    Value = valueName,
+                    OldValue = oldValueName,
+                    Note = note
+                };
+                _screeningTemplateValueAuditRepository.Save(aduit);
+            }
+
+          
 
             _context.Save();
             _context.DetachAllEntities();
