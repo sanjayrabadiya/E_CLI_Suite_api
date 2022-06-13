@@ -72,5 +72,8 @@ namespace GSC.Data.Entities.Volunteer
         public bool IsScreening { get; set; }
         public VolunteerStatus Status { get; set; }
         public ICollection<Attendance.Attendance> Attendances { get; set; }
+        public decimal Height { get; set; }
+        public decimal Weight { get; set; }
+        public decimal BMI { get; set; }
     }
 }
