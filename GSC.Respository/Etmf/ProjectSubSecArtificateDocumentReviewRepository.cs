@@ -211,7 +211,8 @@ namespace GSC.Respository.Etmf
                     CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.Reviewed.GetDescription(),
-                    Level = 5.2
+                    Level = 5.2,
+                    ControlType=DashboardMyTaskType.ETMFSubSecSendData
                 }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
@@ -240,7 +241,8 @@ namespace GSC.Respository.Etmf
                     CreatedDate = s.CreatedDate,
                     CreatedByUser = _context.Users.Where(x => x.Id == s.UserId).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
-                    DataType = MyTaskMethodModule.SendBack.GetDescription()
+                    DataType = MyTaskMethodModule.SendBack.GetDescription(),
+                    ControlType=DashboardMyTaskType.ETMFSubSecSendBackData
                 }).OrderByDescending(x => x.CreatedDate).ToList();
 
             result.ForEach(s =>

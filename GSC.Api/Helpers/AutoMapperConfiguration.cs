@@ -160,6 +160,7 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectDesignPeriod, ProjectDesignPeriodDto>().ReverseMap();
             CreateMap<ProjectDesignVisit, ProjectDesignVisitDto>().ReverseMap();
             CreateMap<ProjectDesignTemplate, ProjectDesignTemplateDto>()
+                .ForMember(x => x.ProjectDesignVisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
                  .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName)).ReverseMap();
             CreateMap<ProjectDesignVariableValue, ScreeningVariableValueDto>().ReverseMap();
             CreateMap<ProjectDesignVariableRemarks, ScreeningVariableRemarksDto>().ReverseMap();

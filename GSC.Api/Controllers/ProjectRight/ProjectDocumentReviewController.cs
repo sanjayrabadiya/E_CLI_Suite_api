@@ -26,7 +26,7 @@ namespace GSC.Api.Controllers.ProjectRight
             IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-        IProjectRightRepository projectRightRepository,
+            IProjectRightRepository projectRightRepository,
             IUploadSettingRepository uploadSettingRepository)
         {
             _projectDocumentReviewRepository = projectDocumentReviewRepository;
@@ -143,5 +143,19 @@ namespace GSC.Api.Controllers.ProjectRight
         {
             return Ok(_projectDocumentReviewRepository.GetPendingProjectTrainingCount(id));
         }
+
+
+        [HttpGet("GetDashboardList")]
+        public IActionResult GetDashboardList()
+        {
+            return Ok(_projectDocumentReviewRepository.GetDashboardProjectList());
+        }
+
+        [HttpGet]
+        [Route("GetDashboardProjectTraining/{id}")]
+        public IActionResult GetDashboardProjectTraining(int id)
+        {
+            return Ok(_projectDocumentReviewRepository.GetDashboardTranningData(id));
+        }       
     }
 }

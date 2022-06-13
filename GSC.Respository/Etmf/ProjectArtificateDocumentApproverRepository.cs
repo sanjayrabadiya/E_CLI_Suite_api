@@ -127,7 +127,8 @@ namespace GSC.Respository.Etmf
                     CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.Approved.GetDescription(),
-                    Level = 6
+                    Level = 6,
+                    ControlType=DashboardMyTaskType.ETMFApproveData
                 }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;

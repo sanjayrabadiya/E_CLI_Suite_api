@@ -849,4 +849,19 @@ namespace GSC.Helper
         [Description("Date")] Date = 4,
         [Description("Time")] Time = 5
     }
+
+    public enum DashboardMyTaskType : short
+    {
+        [Description("ETMFApproveData")] ETMFApproveData = 1,
+        [Description("ETMFSubSecApproveData")] ETMFSubSecApproveData = 2,
+        [Description("ETMFSendData")] ETMFSendData = 3,
+        [Description("ETMFSubSecSendData")] ETMFSubSecSendData = 4,
+        [Description("EConsentData")] EConsentData = 5,
+        [Description("ETMFSendBackData")] ETMFSendBackData = 6,
+        [Description("ETMFSubSecSendBackData")] ETMFSubSecSendBackData = 7,
+        [Description("ManageMonitoringReportSendData")] ManageMonitoringReportSendData = 8,
+        [Description("ManageMonitoringReportSendBackData")] ManageMonitoringReportSendBackData = 9,
+        [Description("EAdverseEvent")] EAdverseEvent = 10,
+    }
+
 }

@@ -138,6 +138,7 @@ namespace GSC.Respository.AdverseEvent
                         TaskInformation = $"{x.Randomization.FirstName} {x.Randomization.LastName} - {x.Randomization.ScreeningNumber}",
                         ExtraData = new { Approved = x.IsApproved, ReviewDone = x.IsReviewedDone, createdByUser = x.CreatedByUser.UserName, CreatedDate = x.CreatedDate, Data = x.AEReportingValueValues },
                         Module = MyTaskModule.AdverseEvent.GetDescription(),
+                        ControlType=DashboardMyTaskType.EAdverseEvent
                     }).ToList();
                     return result;
                 }
