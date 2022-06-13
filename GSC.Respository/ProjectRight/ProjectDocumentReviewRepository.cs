@@ -679,5 +679,7 @@ namespace GSC.Respository.ProjectRight
 
             return countTraining;
         }
+
+
     }
 }

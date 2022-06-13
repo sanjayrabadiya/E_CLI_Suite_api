@@ -149,13 +149,6 @@ namespace GSC.Api.Controllers.ProjectRight
         public IActionResult GetDashboardList()
         {
             return Ok(_projectDocumentReviewRepository.GetDashboardProjectList());
-        }
-
-        [HttpGet]
-        [Route("GetDashboardProjectTraining/{id}")]
-        public IActionResult GetDashboardProjectTraining(int id)
-        {
-            return Ok(_projectDocumentReviewRepository.GetDashboardTranningData(id));
-        }       
+        }      
     }
 }
