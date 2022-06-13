@@ -18,6 +18,7 @@ using GSC.Shared.Extension;
 using GSC.Shared.Generic;
 using GSC.Report;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
 
 namespace GSC.Api.Controllers.Volunteer
 {
@@ -195,6 +196,42 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Deleted, record.Id,
                 null, null);
 
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("DeleteVolunteer")]
+        public IActionResult DeleteVolunteer([FromBody] List<int> Data)
+        {
+            foreach (var item in Data)
+            {
+                var record = _volunteerRepository.Find(item);
+
+                if (record == null)
+                    return NotFound();
+
+                _volunteerRepository.Delete(record);
+            }
+
+            _uow.Save();
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("ActiveVolunteer")]
+        public IActionResult ActiveVolunteer([FromBody] List<int> Data)
+        {
+            foreach (var item in Data)
+            {
+                var record = _volunteerRepository.Find(item);
+
+                if (record == null)
+                    return NotFound();
+
+                _volunteerRepository.Active(record);
+            }
+
+            _uow.Save();
             return Ok();
         }
 

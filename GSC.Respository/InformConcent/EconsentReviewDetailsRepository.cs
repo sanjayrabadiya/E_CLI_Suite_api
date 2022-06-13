@@ -274,6 +274,7 @@ namespace GSC.Respository.InformConcent
                         TaskInformation = x.EconsentSetup.DocumentName + " for " + x.Randomization.Initial + " " + x.Randomization.ScreeningNumber + " is Pending approve from your side",
                         ExtraData = x.Id,
                         Module = MyTaskModule.InformConsent.GetDescription(),
+                        ControlType=DashboardMyTaskType.EConsentData
                     }).ToList();
                 return result;
             }

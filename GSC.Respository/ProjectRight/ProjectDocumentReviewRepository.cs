@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Domain.Context;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,11 +20,13 @@ namespace GSC.Respository.ProjectRight
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
+        private readonly IMapper _mapper;
 
-        public ProjectDocumentReviewRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
+        public ProjectDocumentReviewRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
+            _mapper=mapper;
         }
 
         public void SaveByUserId(int projectId, int userId)
@@ -462,6 +467,219 @@ namespace GSC.Respository.ProjectRight
                                                               && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId && a.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
                                                               && x.ProjectId == id && x.DeletedDate == null).Count();
         }
+
+
+        //Add By Tinku Mahato for Dashboard Project List
+        public List<DashboardProject> GetDashboardProjectList()
+        {
+            var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == null
+                                             && _context.ProjectRight.Any(a => (a.project.ParentProjectId == x.ProjectId || a.ProjectId == x.ProjectId)
+                                                                              && a.UserId == _jwtTokenAccesser.UserId
+                                                                              && a.RoleId == _jwtTokenAccesser.RoleId
+                                                                              && a.DeletedDate == null
+                                                                              && a.RollbackReason == null)
+                                             && x.DeletedDate == null)
+                .Select(c => new DashboardProject
+                {
+                    ProjectId = c.ProjectId
+                }).ToList();
+
+            var childParentList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId != null
+                                           && _context.ProjectRight.Any(a => (a.project.ParentProjectId == x.ProjectId || a.ProjectId == x.ProjectId)
+                                                                            && a.UserId == _jwtTokenAccesser.UserId
+                                                                            && a.RoleId == _jwtTokenAccesser.RoleId
+                                                                            && a.DeletedDate == null
+                                                                            && a.RollbackReason == null) &&
+                                           x.DeletedDate == null)
+                .Select(c => new DashboardProject
+                {
+                    ProjectId = (int)c.Project.ParentProjectId
+                }).ToList();
+
+
+
+            projectList.AddRange(childParentList);
+
+            var projects = projectList.GroupBy(d => d.ProjectId).Select(c => new DashboardProject
+            {
+                ProjectId = c.FirstOrDefault().ProjectId
+            }).OrderBy(o => o.ProjectId).ToList();
+
+
+            projects.ForEach(item =>
+            {
+                var temCountries = new List<string>();
+
+                var countries = _context.Project
+               .Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
+               {
+                   Id = (int)r.ManageSite.City.State.CountryId,
+                   CountryName = r.ManageSite.City.State.Country.CountryName,
+                   CountryCode = r.ManageSite.City.State.Country.CountryCode
+               }).Distinct().OrderBy(o => o.CountryCode).ToList();
+
+                //var countries = _context.Project.Include(i => i.Country).Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null);
+
+                var project = _context.Project.Where(x => x.ParentProjectId == null && x.Id == item.ProjectId).
+                    ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
+                foreach (var country in countries)
+                {
+                    temCountries.Add(country.CountryName);
+                }
+
+                item.CountriesName=temCountries.Distinct().ToList();
+                item.CountCountry=temCountries.Distinct().Count();
+                item.Project =project;
+            });
+
+            return projects;
+        }
+
+        //Add By Tinku on 07/06/2022 for New Dasboard Tranning Data
+        public ProjectDashBoardDto GetNewDashboardTranningData(int projectId, int countryId, int siteId)
+        {
+            var projectDashBoardDto = new ProjectDashBoardDto();
+            var projectIds = new List<int>();
+
+            if (countryId==0 && siteId==0)
+            {
+                projectIds = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
+                                                           && _context.ProjectRight.Any(a => a.ProjectId == x.Id
+                                                           && a.UserId == _jwtTokenAccesser.UserId
+                                                           && a.RoleId == _jwtTokenAccesser.RoleId
+                                                           && a.DeletedDate == null)
+                                                           && x.DeletedDate == null).Select(s => s.Id).ToList();
+
+                projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
+                                                                 && _context.ProjectRight.Any(a =>
+                                                                   projectIds.Contains(a.ProjectId)
+                                                                    && a.UserId == _jwtTokenAccesser.UserId
+                                                                    && x.DeletedDate == null) &&
+                                                                x.DeletedDate == null).Select(c =>
+
+                   new ProjectDocumentReviewDto
+                   {
+                       Id = c.Id,
+                       ProjectDocumentId = c.ProjectDocumentId,
+                       ProjectId = c.ProjectId,
+                       IsReview = c.IsReview,
+                       UserId = c.UserId,
+                       ProjectName = c.Project.ProjectName,
+                       ProjectNumber = c.Project.ProjectCode,
+                       DocumentPath = c.ProjectDocument.PathName,
+                       FileName = c.ProjectDocument.FileName,
+                       MimeType = c.ProjectDocument.MimeType,
+                       ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
+                       ReviewDate = c.ReviewDate,
+                       TrainingTypeName= c.TrainingType==null ? "Not Applicable" : c.TrainingType.GetDescription(),
+                       TrainerName=c.TrainerId==null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id==c.TrainerId).UserName
+                   }).ToList();
+            }
+            else if (countryId>0 && siteId==0)
+            {
+
+                projectIds = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
+                                                           && _context.ProjectRight.Any(a => a.ProjectId == x.Id
+                                                           && a.UserId == _jwtTokenAccesser.UserId
+                                                           && a.RoleId == _jwtTokenAccesser.RoleId
+                                                           && a.DeletedDate == null)
+                                                           && x.ManageSite.City.State.CountryId==countryId
+                                                           && x.DeletedDate == null).Select(s => s.Id).ToList();
+
+                projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
+                                                                 && _context.ProjectRight.Any(a =>
+                                                                   projectIds.Contains(a.ProjectId)
+                                                                    && a.UserId == _jwtTokenAccesser.UserId
+                                                                    && x.DeletedDate == null) &&
+                                                                x.DeletedDate == null).Select(c =>
+
+                   new ProjectDocumentReviewDto
+                   {
+                       Id = c.Id,
+                       ProjectDocumentId = c.ProjectDocumentId,
+                       ProjectId = c.ProjectId,
+                       IsReview = c.IsReview,
+                       UserId = c.UserId,
+                       ProjectName = c.Project.ProjectName,
+                       ProjectNumber = c.Project.ProjectCode,
+                       DocumentPath = c.ProjectDocument.PathName,
+                       FileName = c.ProjectDocument.FileName,
+                       MimeType = c.ProjectDocument.MimeType,
+                       ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
+                       ReviewDate = c.ReviewDate,
+                       TrainingTypeName= c.TrainingType==null ? "Not Applicable" : c.TrainingType.GetDescription(),
+                       TrainerName=c.TrainerId==null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id==c.TrainerId).UserName
+                   }).ToList();
+
+            }
+            else
+            {
+                projectIds = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
+                                                         && _context.ProjectRight.Any(a => a.ProjectId == x.Id
+                                                         && a.UserId == _jwtTokenAccesser.UserId
+                                                         && a.RoleId == _jwtTokenAccesser.RoleId
+                                                         && a.DeletedDate == null)
+                                                         && x.ManageSite.City.State.CountryId==countryId
+                                                         && x.Id==siteId
+                                                         && x.DeletedDate == null).Select(s => s.Id).ToList();
+
+                projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
+                                                                && _context.ProjectRight.Any(a =>
+                                                                  projectIds.Contains(a.ProjectId)
+                                                                   && a.UserId == _jwtTokenAccesser.UserId
+                                                                   && x.DeletedDate == null) &&
+                                                               x.DeletedDate == null).Select(c =>
+
+                  new ProjectDocumentReviewDto
+                  {
+                      Id = c.Id,
+                      ProjectDocumentId = c.ProjectDocumentId,
+                      ProjectId = c.ProjectId,
+                      IsReview = c.IsReview,
+                      UserId = c.UserId,
+                      ProjectName = c.Project.ProjectName,
+                      ProjectNumber = c.Project.ProjectCode,
+                      DocumentPath = c.ProjectDocument.PathName,
+                      FileName = c.ProjectDocument.FileName,
+                      MimeType = c.ProjectDocument.MimeType,
+                      ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
+                      ReviewDate = c.ReviewDate,
+                      TrainingTypeName= c.TrainingType==null ? "Not Applicable" : c.TrainingType.GetDescription(),
+                      TrainerName=c.TrainerId==null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id==c.TrainerId).UserName
+                  }).ToList();
+            }
+
+            projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
+            {
+                var projectRight = _context.ProjectRight.Where(a =>
+                    a.ProjectId == projectDocumentReview.ProjectId
+                    && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
+                if (projectRight != null)
+                {
+                    projectDocumentReview.AssignedDate = projectRight.CreatedDate;
+                    var createdByUser = _context.Users.Where(user => user.Id == projectRight.CreatedBy).FirstOrDefault();
+                    if (createdByUser != null) projectDocumentReview.AssignedBy = createdByUser.UserName;
+                }
+            });
+
+            projectDashBoardDto.ProjectList = projectDashBoardDto.ProjectList.Where(x => projectIds.Contains(x.ProjectId)).Distinct().ToList();
+            return projectDashBoardDto;
+        }
+
+        public int CountTranningNotification()
+        {
+           
+            var countTraining = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
+                                                                 && !x.IsReview && _context.ProjectRight.Any(a =>
+                                                                     a.ProjectId == x.ProjectId
+                                                                     && a.UserId == _jwtTokenAccesser.UserId &&
+                                                                     a.RoleId == _jwtTokenAccesser.RoleId
+                                                                     && x.DeletedDate == null) &&
+                                                                 x.DeletedDate == null).Distinct().Count();
+
+            return countTraining;
+        }
+
 
     }
 }

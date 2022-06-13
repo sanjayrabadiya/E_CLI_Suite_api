@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Entities.Attendance;
 using GSC.Helper;
@@ -63,6 +64,9 @@ namespace GSC.Data.Dto.ProjectRight
         public DateTime? CreatedDate { get; set; }
         public string CreatedByName { get; set; }
         public int? ProjectCreatedBy { get; set; }
+
+        public string TrainingTypeName { get; set; }
+        public string TrainerName { get; set; }
     }
 
     public class ProjectDocumentHistory
@@ -171,5 +175,13 @@ namespace GSC.Data.Dto.ProjectRight
         public int? RandomizationMonth { get; set; }
         public bool IsScreeningAchive { get; set; }
         public bool IsRandomizationAchive { get; set; }
+    }
+
+    public class DashboardProject
+    {
+        public int ProjectId { get; set; }
+        public ProjectGridDto Project { get; set; }
+        public List<string> CountriesName { get; set; }
+        public int? CountCountry { get; set; }
     }
 }

@@ -158,6 +158,7 @@ namespace GSC.Respository.CTMS
                             DataType = MyTaskMethodModule.Reviewed.GetDescription(),
                             Level = 6,
                             VariableTemplateId = s.ManageMonitoringReport.VariableTemplateId,
+                            ControlType=DashboardMyTaskType.ManageMonitoringReportSendData
                         }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
@@ -181,6 +182,7 @@ namespace GSC.Respository.CTMS
                             DataType = MyTaskMethodModule.SendBack.GetDescription(),
                             Level = 6,
                             VariableTemplateId = s.ManageMonitoringReport.VariableTemplateId,
+                            ControlType=DashboardMyTaskType.ManageMonitoringReportSendBackData
                         }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
