@@ -16,11 +16,8 @@ namespace GSC.Respository.UserMgt
         List<DropDownDto> GetUserName();
         List<UserGridDto> GetUsers(bool isDeleted);
         List<DropDownDto> GetUserNameDropdown();
-        void UpdateIsLogin(int id, bool isLogin);
         List<UserGridDto> GetPatients(PatientDto userDto);
-        User GetUserById(int id);
         LoginResponseDto GetLoginDetails();
-        int GetLoginAttempt(string username);
 
     }
 }

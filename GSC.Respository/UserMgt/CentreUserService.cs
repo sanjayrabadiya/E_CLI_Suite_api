@@ -39,6 +39,8 @@ namespace GSC.Respository.UserMgt
 
         public async Task<UserViewModelData> ValidateClient()
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
             var result = await HttpService.Get<UserViewModelData>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/ValidateUserByCompanyId/" + _jwtTokenAccesser.CompanyId);
             if (result != null && !string.IsNullOrEmpty(result.ConnectionString))
             {
@@ -53,36 +55,47 @@ namespace GSC.Respository.UserMgt
 
         public async Task<CommonResponceView> SaveUser(UserDto userDto, string clientUrl)
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
             var result = await HttpService.Post<CommonResponceView>(_httpClient, clientUrl + "User", userDto);
             return result;
         }
 
         public async Task<CommonResponceView> UpdateUser(UserDto userDto, string clientUrl)
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
             var result = await HttpService.Put<CommonResponceView>(_httpClient, clientUrl + "User", userDto);
             return result;
         }
 
         public async void DeleteUser(string clientUrl, int Id)
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
             await HttpService.Delete(_httpClient, clientUrl + "User/" + Id);
         }
 
 
         public async Task<CommonResponceView> ActiveUser(string clientUrl, int Id)
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
             var result = await HttpService.Get<CommonResponceView>(_httpClient, clientUrl + "User/Active/" + Id);
             return result;
         }
 
         public async Task<UserViewModel> GetUserDetails(string clientUrl)
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
             var result = await HttpService.Get<UserViewModel>(_httpClient, clientUrl);
             return result;
         }
 
         public async Task<User> GetUserData(string clientUrl)
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
             var result = await HttpService.Get<User>(_httpClient, clientUrl);
             return result;
         }
@@ -90,6 +103,8 @@ namespace GSC.Respository.UserMgt
 
         public async Task<UserOtp> GetUserOtpDetails(string clientUrl)
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
             return result;
         }
@@ -98,6 +113,8 @@ namespace GSC.Respository.UserMgt
 
         public async Task GetBlockedUser(string clientUrl)
         {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
             var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
         }
 
@@ -128,14 +145,9 @@ namespace GSC.Respository.UserMgt
 
         public async Task<Companystudyconfig> Getnoofstudy(string clientUrl)
         {
-            var result = await HttpService.Get<Companystudyconfig>(_httpClient, clientUrl);
-            return result;
-        }
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
 
-        //Add by Tinku Mahato for Login Attampt (10/05/2022)
-        public async Task<int> GetLoginAttempt(string username)
-        {
-            var result = await HttpService.Get<int>(_httpClient, $"{_environmentSetting.Value.CentralApi}Login/GetLoginAttempt/{username}");
+            var result = await HttpService.Get<Companystudyconfig>(_httpClient, clientUrl);
             return result;
         }
     }

@@ -24,7 +24,6 @@ namespace GSC.Api.Controllers.UserMgt
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult Get()
         {
             var favoriteScreens = _reportFavouriteScreenRepository.GetFavoriteByUserId();

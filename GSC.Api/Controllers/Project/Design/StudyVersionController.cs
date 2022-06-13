@@ -163,7 +163,6 @@ namespace GSC.Api.Controllers.Project.Design
 
         [HttpGet]
         [Route("GoLiveT")]
-        [AllowAnonymous]
         public IActionResult GoLiveT()
         {
             _versionEffectRepository.ApplyNewVersion(210, true, 1.2);

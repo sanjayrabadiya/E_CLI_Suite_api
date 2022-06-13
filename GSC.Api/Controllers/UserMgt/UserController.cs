@@ -113,30 +113,6 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(userDto);
         }
 
-        [HttpGet("GetBlockedUser/{id}")]
-        public IActionResult GetBlockedUser(int id)
-        {
-            if (!_environmentSetting.Value.IsPremise)
-            {
-                _centreUserService.GetBlockedUser($"{_environmentSetting.Value.CentralApi}User/GetBlockedUser/{id}");
-            }
-            if (id <= 0) return BadRequest();
-
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var user = _userRepository.FindBy(i => i.Id == id).FirstOrDefault();
-            if (user != null && user.IsLocked)
-            {
-                user.FailedLoginAttempts = 0;
-                user.IsLocked = false;
-            }
-
-            _userRepository.Update(user);
-
-            if (_uow.Save() <= 0) throw new Exception("User not unblocked.");
-            return Ok(id);
-        }
-
-
         [HttpGet("GetUserNameByRoleId/{roleId}")]
         public IActionResult GetUserNameByRoleId(int roleId)
         {

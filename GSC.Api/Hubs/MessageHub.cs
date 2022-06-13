@@ -12,7 +12,7 @@ using System.Web.Http;
 
 namespace GSC.Api.Hubs
 {
-    [AllowAnonymous]
+    
     public class MessageHub : Hub
     {
         private readonly IUserRepository _userRepository;
@@ -71,7 +71,7 @@ namespace GSC.Api.Hubs
                     await base.OnConnectedAsync();
                     await Clients.All.SendAsync("UserLogIn", Convert.ToInt32(value));
                     var isLogin = ConnectedUser.Ids.Any(x => x.userId == signalRUser.userId);
-                    _userRepository.UpdateIsLogin(signalRUser.userId, isLogin);
+                   // _userRepository.UpdateIsLogin(signalRUser.userId, isLogin);
                 }
             }
             catch (Exception ex)
@@ -92,7 +92,7 @@ namespace GSC.Api.Hubs
                     ConnectedUser.Ids.Remove(user);
                     await Clients.All.SendAsync("UserLogOut", Convert.ToInt32(user.userId));
                     var isLogin = ConnectedUser.Ids.Any(x => x.userId == user.userId);
-                    _userRepository.UpdateIsLogin(user.userId, isLogin);
+                    //_userRepository.UpdateIsLogin(user.userId, isLogin);
                 }
                 await base.OnDisconnectedAsync(exception);
             }

@@ -32,20 +32,5 @@ namespace GSC.Respository.UserMgt
             Add(userPassword);
              _context.Save();
         }
-
-        public string VaidatePassword(string password, int userId)
-        {
-            var userPassword = FindBy
-                    (x => x.UserId == userId)
-                .OrderByDescending(x => x.Id).FirstOrDefault();
-            if (userPassword != null)
-            {
-            }
-      
-
-            if (userPassword != null && !string.Equals(userPassword.Password, Cryptography.CreatePasswordHash(password, userPassword.Salt),
-                    StringComparison.Ordinal)) return "Invalid Password";
-            return "";
-        }
     }
 }

@@ -43,113 +43,7 @@ namespace GSC.Api.Controllers.UserMgt
             _centreUserService = centreUserService;
         }
 
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("VerifyingUser/{userName}")]
-        public async Task<IActionResult> VerifyingUser(string userName)
-        {
-            var userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
-            if (userExists == null)
-            {
-                ModelState.AddModelError("Message", "UserName not valid");
-                return BadRequest(ModelState);
-            }
-
-            var userDto = _mapper.Map<UserDto>(userExists);
-            if (userDto.Language == null)
-                userDto.LanguageShortName = null;
-            else
-                userDto.LanguageShortName = userDto.Language.ToString();
-
-            if (userExists.IsFirstTime)
-            {
-                var validateMessage = await _userOtpRepository.InsertOtp(userName);
-
-                if (!string.IsNullOrEmpty(validateMessage))
-                {
-                    ModelState.AddModelError("Message", validateMessage);
-                    return BadRequest(ModelState);
-                }
-                _uow.Save();
-                return Ok(userDto);
-            }
-            else
-                return Ok(userDto);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("VerifyingMobileUser/{userName}")]
-        public async Task<IActionResult> VerifyingMobileUser(string userName)
-        {
-            User userExists = new User();
-            if (!_environmentSetting.Value.IsPremise)
-            {
-                userExists = await _centreUserService.GetUserData($"{_environmentSetting.Value.CentralApi}Login/GetUserData/{userName}");//_userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
-            }
-            else
-            {
-                userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
-            }
-
-            if (userExists == null)
-            {
-                ModelState.AddModelError("Message", "UserName not valid");
-                return BadRequest(ModelState);
-            }
-
-            var userDto = _mapper.Map<UserMobileDto>(userExists);
-
-            if (Convert.ToBoolean(userDto.IsLocked) == true)
-            {
-                userDto.IsLocked = "User is locked, Please contact your administrator";
-            }
-            else
-            {
-                userDto.IsLocked = "false";
-            }
-
-            if (userExists.ValidFrom.HasValue && userExists.ValidFrom.Value > DateTime.Now ||
-            userExists.ValidTo.HasValue && userExists.ValidTo.Value < DateTime.Now)
-            {
-                userDto.IsActive = "User not active, Please contact your administrator";
-            }
-            else
-            {
-                userDto.IsActive = "false";
-            }
-
-            if (userExists.DeletedDate == null)
-            {
-                userDto.IsDeleted = "false";
-            }
-            else
-            {
-                userDto.IsDeleted = "User is deleted, Please contact your administrator";
-            }
-            if (userDto.Language == null)
-                userDto.LanguageShortName = null;
-            else
-                userDto.LanguageShortName = userDto.Language.ToString();
-
-            if (userExists.IsFirstTime)
-            {
-                var validateMessage = await _userOtpRepository.InsertOtp(userName);
-
-                if (!string.IsNullOrEmpty(validateMessage))
-                {
-                    ModelState.AddModelError("Message", validateMessage);
-                    return BadRequest(ModelState);
-                }
-                _uow.Save();
-                return Ok(userDto);
-            }
-            else
-                return Ok(userDto);
-        }
-
         [HttpPut]
-        [AllowAnonymous]
         [Route("UserDeleteTempForMobile/{userName}")]
         public IActionResult UserDeleteTempForMobile(string userName)
         {
@@ -161,8 +55,7 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userExists);
-            user.IsFirstTime = true;
-
+          
             _userRepository.Update(user);
             if (_uow.Save() <= 0)
             {

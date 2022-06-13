@@ -150,7 +150,6 @@ namespace GSC.Api.Controllers.SupplyManagement
 
         [HttpGet]
         [Route("GetProductVerificationSummary/{ProductReceiptId}")]
-        [AllowAnonymous]
         public IActionResult GetProductVerificationSummary(int ProductReceiptId)
         {
             ReportSettingNew reportSetting = new ReportSettingNew();

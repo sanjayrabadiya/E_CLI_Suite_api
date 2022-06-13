@@ -16,7 +16,6 @@ namespace GSC.Api.Controllers.Common
 
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult GetGetRecentItemByUser()
         {
             return Ok(_userRecentItemRepository.GetRecentItemByUser());

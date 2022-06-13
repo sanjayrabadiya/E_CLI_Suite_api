@@ -32,7 +32,6 @@ namespace GSC.Api.Controllers.Project.Design
 
         [HttpGet]
         [Route("GetByProjectId/{projectDesignId}")]
-        [AllowAnonymous]
         public IActionResult GetByProjectId(int projectDesignId)
         {
             if (projectDesignId <= 0)

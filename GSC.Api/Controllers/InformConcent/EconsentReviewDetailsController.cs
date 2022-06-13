@@ -88,7 +88,7 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(sectionsHeaders);
         }
 
-        [AllowAnonymous]
+       
         [HttpPost]
         [Route("ImportSectionData/{id}/{sectionno}")]
         public string ImportSectionData(int id, int sectionno)

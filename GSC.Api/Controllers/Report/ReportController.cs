@@ -53,7 +53,6 @@ namespace GSC.Api.Controllers.Report
 
         [HttpGet]
         [Route("GetProjectDesign/{projectDesignId}")]
-        [AllowAnonymous]
         public IActionResult GetProjectDesign(int projectDesignId)
         {
             //var abc = _gscReport.GetProjectDesign(projectDesignId);
@@ -74,15 +73,6 @@ namespace GSC.Api.Controllers.Report
             var abc = _reportSuncfusion.GetProjectDesign(reportSetting);
             return abc;
         }
-
-        //[HttpGet]
-        //[Route("GetProjectDesignWithFliter/{projectDesignId}/{periodId}/{visitId}/{templateId}/{annotation}/{pdfType}/{pdfStatus}/{reportSetting}")]
-        //[AllowAnonymous]
-        //public IActionResult GetProjectDesignWithFliter(int projectDesignId, int[] periodId, int[] visitId, int[] templateId, bool annotation, int pdfType, int pdfStatus, [FromRoute]ReportSettingDto reportSetting)
-        //{
-        //    var abc = _gscReport.GetProjectDesignWithFliter(projectDesignId, periodId, visitId, templateId, null, annotation, pdfType, pdfStatus);
-        //    return abc;
-        //}
 
         [TransactionRequired]
         [HttpPost]

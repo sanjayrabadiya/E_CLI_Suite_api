@@ -130,10 +130,6 @@ namespace GSC.Respository.UserMgt
                 .ToList();
             return result;
         }
-
-
-       
-
         public LoginResponseDto GetLoginDetails()
         {
             var roleTokenId = new Guid().ToString();
@@ -172,34 +168,6 @@ namespace GSC.Respository.UserMgt
             login.LoginReportId =
                      _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName, _jwtTokenAccesser.RoleId);
             return login;
-        }
-        public void UpdateIsLogin(int id, bool isLogin)
-        {
-            var user = Find(id);
-            if (user != null)
-            {
-                user.IsLogin = isLogin;
-                Update(user);
-                _context.Save();
-            }
-        }
-        public User GetUserById(int id)
-        {
-            var user = Find(id);
-            return user;
-        }
-        //Add by Tinku Mahato for Login Attampt (10/05/2022)
-        public int GetLoginAttempt(string username)
-        {
-            var user = All.Where(x => x.UserName==username && x.DeletedDate == null).FirstOrDefault();
-            if (user!=null)
-            {
-                return user.FailedLoginAttempts;
-            }
-            else
-            {
-                return 0;
-            }
         }
     }
 }

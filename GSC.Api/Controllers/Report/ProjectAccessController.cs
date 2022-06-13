@@ -43,7 +43,6 @@ namespace GSC.Api.Controllers.Report
 
         [HttpGet]
         [Route("ProjectRoleDetails/{projectId}")]
-        [AllowAnonymous]
         public IActionResult ProjectRoleDetails(int ProjectId)
         {
             if (ProjectId <= 0)
@@ -55,7 +54,6 @@ namespace GSC.Api.Controllers.Report
 
         [HttpGet]
         [Route("ProjectUserDetails/{projectId}")]
-        [AllowAnonymous]
         public IActionResult ProjectUserDetails(int ProjectId)
         {
             if (ProjectId <= 0)

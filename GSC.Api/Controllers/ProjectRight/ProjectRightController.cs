@@ -94,7 +94,6 @@ namespace GSC.Api.Controllers.ProjectRight
 
         [HttpGet]
         [Route("ProjectReviewDetails/{projectId}")]
-        [AllowAnonymous]
         public IActionResult ProjectReviewDetails(int projectId)
         {
             if (projectId <= 0) return BadRequest();
@@ -103,7 +102,6 @@ namespace GSC.Api.Controllers.ProjectRight
 
         [HttpGet]
         [Route("ProjectReviewHistory/{projectId}/{userId}/{roleId}")]
-        [AllowAnonymous]
         public IActionResult ProjectReviewHistory(int projectId, int userId, int roleId)
         {
             if (projectId <= 0 || userId <= 0) return BadRequest();
@@ -112,7 +110,6 @@ namespace GSC.Api.Controllers.ProjectRight
 
         [HttpGet]
         [Route("EtmfUserDropDown/{projectId}/{userId}")]
-        [AllowAnonymous]
         public IActionResult EtmfUserDropDown(int projectId, int? userId)
         {
             if (projectId <= 0) return BadRequest();

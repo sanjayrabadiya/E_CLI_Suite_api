@@ -473,17 +473,7 @@ namespace GSC.Api.Controllers.Master
 
             return Ok(IsAddmoreStudy);
         }
-
-        [HttpGet]
-        [Route("GetStudyCount/{CompanyID}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetStudyCount(int CompanyID)
-        {
-            await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
-            int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null && x.DeletedDate == null).Count();
-            return Ok(studycount);
-        }
-
+       
         [HttpGet]
         [Route("GetParentProjectDropDownStudyReport")]
         public IActionResult GetParentProjectDropDownStudyReport()

@@ -61,7 +61,7 @@ namespace GSC.Api.Controllers.Configuration
             return Ok(loginPreferencesDto);
         }
 
-        [AllowAnonymous]
+      
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
