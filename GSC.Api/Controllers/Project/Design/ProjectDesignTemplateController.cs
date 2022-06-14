@@ -139,8 +139,6 @@ namespace GSC.Api.Controllers.Project.Design
                 projectDesignTemplate.StudyVersion = checkVersion.VersionNumber;
                 projectDesignTemplate.VariableTemplateId = variableTemplateId;
                 projectDesignTemplate.DesignOrder = ++designOrder;
-                projectDesignTemplate.IsTemplateSeqNo = true;
-                projectDesignTemplate.IsVariableSeqNo = true;
                 projectDesignTemplate.Variables = new List<ProjectDesignVariable>();
                 projectDesignTemplate.ProjectDesignTemplateNote = new List<ProjectDesignTemplateNote>();
 

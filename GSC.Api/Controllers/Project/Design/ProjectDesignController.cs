@@ -21,6 +21,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
+        private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
@@ -31,7 +32,8 @@ namespace GSC.Api.Controllers.Project.Design
             IGSCContext context,
             IStudyVersionRepository studyVersionRepository,
             IUserRecentItemRepository userRecentItemRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository)
+            IProjectDesignTemplateRepository projectDesignTemplateRepository,
+            ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository)
         {
             _projectDesignRepository = projectDesignRepository;
             _uow = uow;
@@ -40,6 +42,7 @@ namespace GSC.Api.Controllers.Project.Design
             _studyVersionRepository = studyVersionRepository;
             _userRecentItemRepository = userRecentItemRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
+            _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
         }
 
         [HttpGet("{id}")]
@@ -91,6 +94,13 @@ namespace GSC.Api.Controllers.Project.Design
             studyVersion.ProjectId = projectDesign.ProjectId;
             studyVersion.IsMinor = false;
             _studyVersionRepository.Add(studyVersion);
+
+            var settings = new TemplateVariableSequenceNoSetting();
+            settings.ProjectDesign = projectDesign;
+            settings.IsTemplateSeqNo = true;
+            settings.IsVariableSeqNo = true;
+            _templateVariableSequenceNoSettingRepository.Add(settings);
+
             _projectDesignRepository.Add(projectDesign);
 
             _uow.Save();

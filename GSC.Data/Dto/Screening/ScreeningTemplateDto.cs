@@ -39,6 +39,7 @@ namespace GSC.Data.Dto.Screening
         public bool? IsTemplateSeqNo { get; set; }
         public bool? IsVariableSeqNo { get; set; }
         public string Label { get; set; }
+        public string PreLabel { get; set; }
     }
 
 

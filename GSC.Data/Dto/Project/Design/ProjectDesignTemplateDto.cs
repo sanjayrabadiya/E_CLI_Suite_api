@@ -37,8 +37,6 @@ namespace GSC.Data.Dto.Project.Design
         public int DomainId { get; set; }
         public bool IsRepeated { get; set; }
         public bool IsParticipantView { get; set; }
-        public bool? IsTemplateSeqNo { get; set; }
-        public bool? IsVariableSeqNo { get; set; }
         public VariableTemplateDto VariableTemplate { get; set; }
         public DomainDto Domain { get; set; }
         public IList<ProjectDesignVariableDto> Variables { get; set; }
@@ -46,6 +44,7 @@ namespace GSC.Data.Dto.Project.Design
         public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
         public string Label { get; set; }
+        public string PreLabel { get; set; }
     }
 
 

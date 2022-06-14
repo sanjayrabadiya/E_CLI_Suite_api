@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.Project.Design
         public bool IsNonCRF { get; set; }
         public bool? IsSchedule { get; set; }
         public int? DesignOrder { get; set; }
+        public string PreLabel { get; set; }
         public IList<ProjectDesignTemplate> Templates { get; set; }
         public List<VisitLanguage> VisitLanguage { get; set; }
         public double? InActiveVersion{ get; set; }

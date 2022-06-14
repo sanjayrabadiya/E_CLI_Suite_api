@@ -81,8 +81,7 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            /* Added by darshil for effective Date on 17-08-2020 */
-            _visitStatusRepository.AddOrUpdate(visitStatus);
+            _visitStatusRepository.Update(visitStatus);
 
             if (_uow.Save() <= 0) throw new Exception("Updating visit Status failed on save.");
             return Ok(visitStatus.Id);

@@ -125,6 +125,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsLocked { get; set; }
         public string SubjectNo { get; set; }
         public string RandomizationNumber { get; set; }
+        public string PreLabel { get; set; }
     }
 
 }

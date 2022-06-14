@@ -40,6 +40,7 @@ namespace GSC.Respository.Screening
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+        private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         public ScreeningTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
@@ -51,6 +52,7 @@ namespace GSC.Respository.Screening
             IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository,
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+             ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
             IEmailSenderRespository emailSenderRespository)
             : base(context)
         {
@@ -66,6 +68,7 @@ namespace GSC.Respository.Screening
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
+            _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _emailSenderRespository = emailSenderRespository;
         }
 
@@ -534,6 +537,8 @@ namespace GSC.Respository.Screening
 
         public List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, WorkFlowLevelDto workFlowLevel)
         {
+            var projectDesignId = _context.ScreeningEntry.Find(screeningEntryId).ProjectDesignId;
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
 
             var result = All.Where(s => s.ScreeningVisit.ScreeningEntryId == screeningEntryId && s.DeletedDate == null
             && s.ScreeningVisit.Status >= ScreeningVisitStatus.Open).Select(t => new ScreeningTemplateTree
@@ -543,16 +548,17 @@ namespace GSC.Respository.Screening
                 ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                 Status = t.Status,
                 ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? Convert.ToString(t.ProjectDesignTemplate.DesignOrder) : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? Convert.ToString(t.ProjectDesignTemplate.DesignOrder) : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                 DesignOrderForOrderBy = t.RepeatSeqNo == null ? Convert.ToString(t.ProjectDesignTemplate.DesignOrder) : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString(),
                 Progress = t.Progress ?? 0,
                 ReviewLevel = t.ReviewLevel,
                 IsLocked = t.IsLocked,
                 MyReview = workFlowLevel.LevelNo == t.ReviewLevel,
                 ParentId = t.ParentId,
-                IsTemplateSeqNo = t.ProjectDesignTemplate.IsTemplateSeqNo,
-                IsVariableSeqNo = t.ProjectDesignTemplate.IsVariableSeqNo,
-                Label = t.ProjectDesignTemplate.Label
+                IsTemplateSeqNo = sequenseDeatils.IsTemplateSeqNo,
+                IsVariableSeqNo = sequenseDeatils.IsVariableSeqNo,
+                Label = t.ProjectDesignTemplate.Label,
+                PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
             }).ToList();
 
             var templateValues = _screeningTemplateValueRepository.GetQueryStatusBySubject(screeningEntryId);
@@ -1357,6 +1363,26 @@ namespace GSC.Respository.Screening
                 }
             }
 
+        }
+
+        public static string PreLabelSetting(ScreeningTemplate t, ProjectDesignTemplate pt, TemplateVariableSequenceNoSetting seq)
+        {
+            string str = "";
+            if (!String.IsNullOrEmpty(pt.PreLabel))
+                str = pt.PreLabel;
+            if (t.RepeatSeqNo != null)
+            {
+                if (!String.IsNullOrEmpty(seq.RepeatPrefix))
+                    str += " " + seq.RepeatPrefix;
+                if (seq.RepeatSeqNo != null)
+                {
+                    if (seq.RepeatSubSeqNo == null)
+                        str += seq.SeparateSign + (seq.RepeatSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                    else
+                        str += seq.SeparateSign + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                }
+            }
+            return str;
         }
     }
 }

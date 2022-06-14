@@ -471,6 +471,7 @@ namespace GSC.Api.Helpers
             CreateMap<SendEmailOnVariableValue, SendEmailOnVariableValueDto>().ReverseMap();
             // CreateMap<DisplayMessageandLableSetting, DisplayMessageandLableSettingDto>().ReverseMap();
             CreateMap<ScheduleTerminateDetail, ScheduleTerminateDetailDto>().ReverseMap();
+            CreateMap<TemplateVariableSequenceNoSetting, TemplateVariableSequenceNoSettingDto>().ReverseMap();
         }
     }
 }
