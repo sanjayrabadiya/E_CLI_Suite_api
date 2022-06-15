@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -28,6 +29,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
+        private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
@@ -38,6 +40,7 @@ namespace GSC.Respository.Screening
             IRandomizationRepository randomizationRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
+            ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
             IScreeningEntryRepository screeningEntryRepository,
             IProjectDesignRepository projectDesignRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository
@@ -51,6 +54,7 @@ namespace GSC.Respository.Screening
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
             _screeningEntryRepository = screeningEntryRepository;
+            _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _projectDesignRepository = projectDesignRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -252,6 +256,9 @@ namespace GSC.Respository.Screening
 
         public List<DataEntryTemplateCountDisplayTree> GetTemplateForVisit(int screeningVisitId, ScreeningTemplateStatus templateStatus)
         {
+            var details = _context.ScreeningVisit.Where(s => s.Id == screeningVisitId).Include(d => d.ScreeningEntry).FirstOrDefault();
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == details.ScreeningEntry.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
+
             var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.Status == templateStatus)
                  .Select(t => new DataEntryTemplateCountDisplayTree
                  {
@@ -261,7 +268,7 @@ namespace GSC.Respository.Screening
                      ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                      Status = t.Status,
                      ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                     DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                     DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                      DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                      Progress = t.Progress ?? 0,
                      ReviewLevel = t.ReviewLevel,
@@ -273,7 +280,8 @@ namespace GSC.Respository.Screening
                      VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                     PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
                  }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
@@ -294,6 +302,8 @@ namespace GSC.Respository.Screening
             else
                 tempResult = tempResult.Where(s => s.ScreeningTemplateValues.Any(r => r.QueryStatus == queryStatus && r.DeletedDate == null));
 
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == tempResult.FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
+
             var result = tempResult.Select(t => new DataEntryTemplateCountDisplayTree
             {
                 Id = t.Id,
@@ -302,7 +312,7 @@ namespace GSC.Respository.Screening
                 ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                 Status = t.Status,
                 ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                 DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                 Progress = t.Progress ?? 0,
                 ReviewLevel = t.ReviewLevel,
@@ -314,7 +324,8 @@ namespace GSC.Respository.Screening
                 VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
                 SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
             }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
@@ -325,7 +336,7 @@ namespace GSC.Respository.Screening
         public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitMyQuery(int screeningVisitId, int parentProjectId)
         {
             var projectDesignId = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId).Select(t => t.Id).FirstOrDefault();
-
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
 
             var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null
@@ -341,7 +352,7 @@ namespace GSC.Respository.Screening
                      ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                      Status = t.Status,
                      ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                     DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                     DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                      DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                      Progress = t.Progress ?? 0,
                      ReviewLevel = t.ReviewLevel,
@@ -353,7 +364,8 @@ namespace GSC.Respository.Screening
                      VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                                         : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                     PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
                  }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
@@ -365,6 +377,9 @@ namespace GSC.Respository.Screening
 
         public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel)
         {
+            var details = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null).FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId;
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == details && x.DeletedDate == null).FirstOrDefault();
+
             var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.ReviewLevel == reviewLevel)
                     .Select(t => new DataEntryTemplateCountDisplayTree
                     {
@@ -374,7 +389,7 @@ namespace GSC.Respository.Screening
                         ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                         Status = t.Status,
                         ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                        DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                        DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                         DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                         Progress = t.Progress ?? 0,
                         ReviewLevel = t.ReviewLevel,
@@ -386,7 +401,8 @@ namespace GSC.Respository.Screening
                         VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
-                                            : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
+                                            : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                        PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
                     }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
@@ -399,6 +415,7 @@ namespace GSC.Respository.Screening
         public List<DataEntryTemplateCountDisplayTree> GetMyTemplateView(int parentProjectId, int projectId)
         {
             var projectDesignId = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId).Select(t => t.Id).FirstOrDefault();
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
 
@@ -414,7 +431,7 @@ namespace GSC.Respository.Screening
                         ProjectDesignPeriodId = t.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId,
                         Status = t.Status,
                         ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
-                        DesignOrder = t.ProjectDesignTemplate.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
+                        DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                         DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                         Progress = t.Progress ?? 0,
                         ReviewLevel = t.ReviewLevel,
@@ -449,6 +466,26 @@ namespace GSC.Respository.Screening
                   Total = g.Key.Id
               }).OrderBy(g => g.Total).ToList();
             return result;
+        }
+
+        public static string PreLabelSetting(ScreeningTemplate t, ProjectDesignTemplate pt, TemplateVariableSequenceNoSetting seq)
+        {
+            string str = "";
+            if (!String.IsNullOrEmpty(pt.PreLabel))
+                str = pt.PreLabel;
+            if (t.RepeatSeqNo != null)
+            {
+                if (!String.IsNullOrEmpty(seq.RepeatPrefix))
+                    str += " " + seq.RepeatPrefix;
+                if (seq.RepeatSeqNo != null)
+                {
+                    if (seq.RepeatSubSeqNo == null)
+                        str += seq.SeparateSign + (seq.RepeatSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                    else
+                        str += seq.SeparateSign + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                }
+            }
+            return str;
         }
     }
 }

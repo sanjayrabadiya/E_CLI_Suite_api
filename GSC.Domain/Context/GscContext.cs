@@ -414,6 +414,7 @@ namespace GSC.Domain.Context
       //  public DbSet<KitManagement> KitManagement { get; set; }
       //  public DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
         public DbSet<ScheduleTerminateDetail> ScheduleTerminateDetail { get; set; }
+        public DbSet<TemplateVariableSequenceNoSetting> TemplateVariableSequenceNoSetting { get; set; }
     }
 
 

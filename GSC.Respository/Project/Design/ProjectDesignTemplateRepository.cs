@@ -22,13 +22,15 @@ namespace GSC.Respository.Project.Design
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
+        private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
         public ProjectDesignTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
-            IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+            ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
+        IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IStudyVersionRepository studyVersionRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository) : base(context)
         {
@@ -37,6 +39,7 @@ namespace GSC.Respository.Project.Design
             _context = context;
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
+            _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _studyVersionRepository = studyVersionRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
         }
@@ -72,6 +75,9 @@ namespace GSC.Respository.Project.Design
 
         public DesignScreeningTemplateDto GetTemplate(int id)
         {
+            var projectDesignTemplate = All.Where(x=>x.Id==id).Include(d=>d.ProjectDesignVisit).ThenInclude(d => d.ProjectDesignPeriod).FirstOrDefault();            
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
+            
             var result = All.Where(t => t.Id == id).
                 Select(r => new DesignScreeningTemplateDto
                 {
@@ -89,11 +95,11 @@ namespace GSC.Respository.Project.Design
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,
-                    DesignOrder = r.IsTemplateSeqNo == true && r.IsVariableSeqNo == true ? r.DesignOrder.ToString() : "",
+                    DesignOrder = sequenseDeatils.IsTemplateSeqNo == true && sequenseDeatils.IsVariableSeqNo == true ? r.DesignOrder.ToString() : "",
                     VariableTemplateId = r.VariableTemplateId,
                     DomainName = r.Domain.DomainName,
-                    IsTemplateSeqNo = r.IsTemplateSeqNo,
-                    IsVariableSeqNo = r.IsVariableSeqNo
+                    IsTemplateSeqNo = sequenseDeatils.IsTemplateSeqNo,
+                    IsVariableSeqNo = sequenseDeatils.IsVariableSeqNo
                 }
             ).FirstOrDefault();
 
@@ -121,7 +127,7 @@ namespace GSC.Respository.Project.Design
                         PrintType = x.PrintType,
                         //Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
                         UnitName = x.Unit.UnitName,
-                        DesignOrder = x.ProjectDesignTemplate.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
+                        DesignOrder = sequenseDeatils.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
                         DesignOrderForOrderBy = x.DesignOrder,
                         IsDocument = x.IsDocument,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
@@ -138,7 +144,8 @@ namespace GSC.Respository.Project.Design
                         DisplayStepValue = x.DisplayStepValue,
                         Label = x.Label,
                         IsHide = x.IsHide,
-                        IsLevelNo = x.IsLevelNo
+                        IsLevelNo = x.IsLevelNo,
+                        PreLabel = x.PreLabel == null ? "" : x.PreLabel
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.
@@ -318,5 +325,6 @@ namespace GSC.Respository.Project.Design
             var result = All.Where(x => x.Id == templateId).FirstOrDefault();
             return result;
         }
+
     }
 }

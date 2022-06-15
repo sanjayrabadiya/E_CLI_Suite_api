@@ -550,6 +550,17 @@ namespace GSC.Audit
 
             _dictionaries.Add(new Dictionary { FieldName = "IsHide", DisplayName = "Is Visible" });
 
+            //DisplayMessageandLableSetting
+            _dictionaries.Add(new Dictionary { FieldName = "DefaultDisplay", DisplayName = "Default Display" });
+            _dictionaries.Add(new Dictionary { FieldName = "Required", DisplayName = "Required" });
+            _dictionaries.Add(new Dictionary { FieldName = "PreLabel", DisplayName = "Manual Sequence No" });
+            _dictionaries.Add(new Dictionary { FieldName = "RepeatPrefix", DisplayName = "Repeat Prefix" });
+            _dictionaries.Add(new Dictionary { FieldName = "RepeatSeqNo", DisplayName = "Repeat Sequence No" });
+            _dictionaries.Add(new Dictionary { FieldName = "RepeatSubSeqNo", DisplayName = "Repeat Sub-Sequence No" });
+            _dictionaries.Add(new Dictionary { FieldName = "SeparateSign", DisplayName = "Separate Sign" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsTemplateSeqNo", DisplayName = "Is Template Sequence No. Enabled?" }); 
+            _dictionaries.Add(new Dictionary { FieldName = "IsVariableSeqNo", DisplayName = "Is variable Sequence No. Enabled?" });
+
         }
 
 

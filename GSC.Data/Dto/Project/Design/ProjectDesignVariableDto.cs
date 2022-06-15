@@ -75,6 +75,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool? DisplayStepValue { get; set; }
         public bool IsHide { get; set; }
         public bool? IsLevelNo { get; set; }
+        public string PreLabel { get; set; }
     }
 
     public class DesignScreeningVariableDto
@@ -137,7 +138,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool? DisplayStepValue { get; set; }
         public bool IsHide { get; set; }
         public bool? IsLevelNo { get; set; }
-
+        public string PreLabel { get; set; }
     }
 
   

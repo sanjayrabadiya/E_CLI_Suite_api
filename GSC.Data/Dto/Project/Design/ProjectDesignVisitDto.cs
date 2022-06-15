@@ -21,6 +21,7 @@ namespace GSC.Data.Dto.Project.Design
         public double? InActiveVersion { get; set; }
         public string DisplayVersion { get; set; }
         public double? StudyVersion { get; set; }
+        public string PreLabel { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
     }
 

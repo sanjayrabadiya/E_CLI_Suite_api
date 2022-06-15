@@ -385,6 +385,7 @@ namespace GSC.Api.Helpers
            // services.AddScoped<IDisplayMessageandLableSettingRepository, DisplayMessageandLableSettingRepository>();
             services.AddScoped<IScheduleTerminateDetailRepository, ScheduleTerminateDetailRepository>();
             services.AddScoped<IScheduleTerminate, ScheduleTerminateRepository>();
+            services.AddScoped<ITemplateVariableSequenceNoSettingRepository, TemplateVariableSequenceNoSettingRepository>();
         }
     }
 }

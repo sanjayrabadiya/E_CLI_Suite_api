@@ -44,6 +44,7 @@ namespace GSC.Respository.Screening
         private readonly IUserRepository _userRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
+        private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IMapper _mapper;
         private readonly IProjectRightRepository _projectRightRepository;
@@ -53,7 +54,8 @@ namespace GSC.Respository.Screening
             IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
-            IProjectWorkflowRepository projectWorkflowRepository, IMapper mapper,
+            ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
+        IProjectWorkflowRepository projectWorkflowRepository, IMapper mapper,
             IProjectRightRepository projectRightRepository)
             : base(context)
         {
@@ -66,6 +68,7 @@ namespace GSC.Respository.Screening
             _userRepository = userRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
+            _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
             _projectRightRepository = projectRightRepository;
             _mapper = mapper;
@@ -1175,6 +1178,10 @@ namespace GSC.Respository.Screening
         {
             DesignScreeningVariableDto variableDetail = null;
 
+            var projectDesignId = _context.ScreeningEntry.Find(screeningEntryId).ProjectDesignId;
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
+
+
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
 
             var screeningValue = All.AsNoTracking().Where(t => t.Id == id)
@@ -1201,7 +1208,7 @@ namespace GSC.Respository.Screening
                         RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
                         PrintType = x.PrintType,
                         UnitName = x.Unit.UnitName,
-                        DesignOrder = x.ProjectDesignTemplate.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
+                        DesignOrder = sequenseDeatils.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
                         IsDocument = x.IsDocument,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
                         x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
