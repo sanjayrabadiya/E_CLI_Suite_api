@@ -442,38 +442,29 @@ namespace GSC.Api.Controllers.Master
         {
             bool IsAddmoreStudy = false;
 
-            if (!_environmentSetting.Value.IsPremise)
+            var noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Study/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
+            if (noofstudy != null && noofstudy.ValidTo.Value.Date < DateTime.Now.Date)
             {
-
-                var noofstudy = await _centreUserService.Getnoofstudy($"{_environmentSetting.Value.CentralApi}Study/Getnoofstudy/{_jwtTokenAccesser.CompanyId}");
-                if (noofstudy != null && noofstudy.ValidTo.Value.Date < DateTime.Now.Date)
-                {
-                    IsAddmoreStudy = false;
-                }
-                else if (noofstudy != null && noofstudy.ValidFrom.Value.Date > DateTime.Now.Date)
-                {
-                    IsAddmoreStudy = false;
-                }
-                else
-                {
-                    if (noofstudy != null)
-                    {
-                        int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null
-                        && x.CreatedDate.Value.Date >= noofstudy.ValidFrom && x.CreatedDate.Value.Date <= noofstudy.ValidTo && x.DeletedDate == null).Count();
-                        if (studycount < noofstudy.NoofStudy)
-                            IsAddmoreStudy = true;
-                    }
-                }
+                IsAddmoreStudy = false;
+            }
+            else if (noofstudy != null && noofstudy.ValidFrom.Value.Date > DateTime.Now.Date)
+            {
+                IsAddmoreStudy = false;
             }
             else
             {
-                IsAddmoreStudy = true;
+                if (noofstudy != null)
+                {
+                    int studycount = _projectRepository.FindBy(x => x.ParentProjectId == null
+                    && x.CreatedDate.Value.Date >= noofstudy.ValidFrom && x.CreatedDate.Value.Date <= noofstudy.ValidTo && x.DeletedDate == null).Count();
+                    if (studycount < noofstudy.NoofStudy)
+                        IsAddmoreStudy = true;
+                }
             }
-
 
             return Ok(IsAddmoreStudy);
         }
-       
+
         [HttpGet]
         [Route("GetParentProjectDropDownStudyReport")]
         public IActionResult GetParentProjectDropDownStudyReport()

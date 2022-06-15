@@ -10,6 +10,7 @@ using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -148,6 +149,13 @@ namespace GSC.Respository.UserMgt
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
 
             var result = await HttpService.Get<Companystudyconfig>(_httpClient, clientUrl);
+            return result;
+        }
+        public async Task<UserLockedGridDto> GetLockedUsers(string clientUrl)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Get<UserLockedGridDto>(_httpClient, clientUrl);
             return result;
         }
     }

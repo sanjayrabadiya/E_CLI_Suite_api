@@ -55,8 +55,7 @@ namespace GSC.Data.Entities.UserMgt
             set => _ValidTo = value?.UtcDate();
         }
 
-        public int FailedLoginAttempts { get; set; }
-        public bool IsLocked { get; set; }
+        
         public DateTime? LastLoginDate
         {
             get => _LastLoginDate?.UtcDate();
@@ -72,7 +71,7 @@ namespace GSC.Data.Entities.UserMgt
 
         public bool IsFirstTime { get; set; }
 
-        public bool IsLogin { get; set; }
+       
 
         public List<UserRole> UserRoles { get; set; } = null;
 

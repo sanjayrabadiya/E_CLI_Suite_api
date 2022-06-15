@@ -2,6 +2,7 @@
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.UserMgt;
 using GSC.Shared.Security;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace GSC.Respository.UserMgt
@@ -25,5 +26,6 @@ namespace GSC.Respository.UserMgt
         Task GetBlockedUser(string clientUrl);
         Task SentConnectionString(int CompanyID, string clientUrl);
         Task<Companystudyconfig> Getnoofstudy(string clientUrl);
+        Task<UserLockedGridDto> GetLockedUsers(string clientUrl);
     }
 }

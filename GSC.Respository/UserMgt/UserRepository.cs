@@ -87,7 +87,7 @@ namespace GSC.Respository.UserMgt
 
         public List<UserGridDto> GetUsers(bool isDeleted)
         {
-           
+
             return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.UserType != UserMasterUserType.Patient).
                    ProjectTo<UserGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
@@ -100,7 +100,7 @@ namespace GSC.Respository.UserMgt
                    ProjectTo<UserGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
-       
+
 
         public string DuplicateUserName(User objSave)
         {
@@ -146,7 +146,8 @@ namespace GSC.Respository.UserMgt
                 RoleId = _jwtTokenAccesser.RoleId,
                 Language = user.Language,
                 LanguageShortName = user.Language.ToString(),
-                UserType = user.UserType
+                UserType = user.UserType,
+                IsFirstTime = user.IsFirstTime
             };
 
             var imageUrl = _uploadSettingRepository
@@ -167,7 +168,20 @@ namespace GSC.Respository.UserMgt
             login.RoleName = login.Roles.FirstOrDefault(t => t.Id == _jwtTokenAccesser.RoleId)?.Value;
             login.LoginReportId =
                      _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName, _jwtTokenAccesser.RoleId);
+
+            if (user != null)
+            {
+                user.IsFirstTime = false;
+                _context.Users.Update(user);
+                _context.Save();
+            }
             return login;
         }
+        public async Task<UserLockedGridDto> GetLockedUsers()
+        {
+            var result = await _centreUserService.GetLockedUsers($"{_environmentSetting.Value.CentralApi}User/GetLockedUsers/{_jwtTokenAccesser.CompanyId}");
+            return result;
+        }
+
     }
 }

@@ -62,7 +62,7 @@ namespace GSC.Respository.InformConcent
             {
                 var projectId = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.UserId != null).Select(x => x.ProjectId).FirstOrDefault();
                 var medicalteam = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null).Select(x => x.UserId).ToList();
-                users = _userRepository.FindBy(x => medicalteam.Contains(x.Id) && x.DeletedDate == null && x.IsLocked == false && x.UserType != Shared.Generic.UserMasterUserType.Patient).ToList();
+                users = _userRepository.FindBy(x => medicalteam.Contains(x.Id) && x.DeletedDate == null && x.UserType != Shared.Generic.UserMasterUserType.Patient).ToList();
 
 
             }
@@ -70,7 +70,7 @@ namespace GSC.Respository.InformConcent
             {
                 var projectlist = _context.ProjectRight.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).Select(t => t.ProjectId).ToList();
                 var patientlist = _context.Randomization.Where(r => projectlist.Contains(r.ProjectId) && r.UserId != null && r.DeletedDate == null).Select(x => (int)x.UserId).ToList();
-                users = _userRepository.FindBy(x => x.Id != _jwtTokenAccesser.UserId && x.DeletedDate == null && patientlist.Contains(x.Id) && x.IsLocked == false && x.UserType == Shared.Generic.UserMasterUserType.Patient).ToList();
+                users = _userRepository.FindBy(x => x.Id != _jwtTokenAccesser.UserId && x.DeletedDate == null && patientlist.Contains(x.Id) && x.UserType == Shared.Generic.UserMasterUserType.Patient).ToList();
             }
             var userschat = _mapper.Map<List<EConsentUserChatDto>>(users);
             var userintlist = users.Select(x => x.Id).ToList();

@@ -18,6 +18,7 @@ namespace GSC.Respository.UserMgt
         List<DropDownDto> GetUserNameDropdown();
         List<UserGridDto> GetPatients(PatientDto userDto);
         LoginResponseDto GetLoginDetails();
+        Task<UserLockedGridDto> GetLockedUsers();
 
     }
 }

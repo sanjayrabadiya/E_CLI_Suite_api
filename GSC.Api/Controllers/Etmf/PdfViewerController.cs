@@ -22,21 +22,20 @@ namespace GSC.Api.Controllers.Etmf
     public class PdfViewerController : BaseController
     {
         public IMemoryCache _cache;
-        private IHostingEnvironment _hostingEnvironment;
+        
         private IPdfViewerRepository _pdfViewerRepository;
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
-        private readonly IGSCContext _context;
-        public PdfViewerController(IMemoryCache cache, IHostingEnvironment hostingEnvironment,
-            IPdfViewerRepository pdfViewerRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting,
-            IGSCContext context)
+       
+        public PdfViewerController(IMemoryCache cache,
+            IPdfViewerRepository pdfViewerRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting
+            )
         {
             _cache = cache;
-            _hostingEnvironment = hostingEnvironment;
             _pdfViewerRepository = pdfViewerRepository;
             _centreUserService = centreUserService;
             _environmentSetting = environmentSetting;
-            _context = context;
+            
         }
 
 
@@ -61,7 +60,7 @@ namespace GSC.Api.Controllers.Etmf
             return Content(JsonConvert.SerializeObject(jsonResult));
         }
 
-        [AllowAnonymous]
+       
         [HttpPost]
         [Route("Download")]
         //Post action for downloading the PDF documents
@@ -73,7 +72,7 @@ namespace GSC.Api.Controllers.Etmf
             return Content(documentBase);
         }
 
-        [AllowAnonymous]
+      
         [HttpPost]
         [Route("RenderThumbnailImages")]
         //Post action for rendering the ThumbnailImages
@@ -85,7 +84,7 @@ namespace GSC.Api.Controllers.Etmf
             return Content(JsonConvert.SerializeObject(result));
         }
 
-        [AllowAnonymous]
+       
         [HttpPost]
         [Route("Bookmarks")]
         //Post action for processing the bookmarks from the PDF documents
@@ -177,18 +176,7 @@ namespace GSC.Api.Controllers.Etmf
             return Content(jsonResult);
         }
 
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("ExportAnnotations")]
-        //Post action to export annotations
-        public IActionResult ExportAnnotations([FromBody] Dictionary<string, string> jsonObject)
-        {
-            //PdfRenderer pdfvieweraa = new PdfRenderer(_cache);
-            //string jsonResult = pdfvieweraa.GetAnnotations(jsonObject);
-            //return Content(jsonResult);
-            return Ok();
-        }
-
+       
         [AllowAnonymous]
         [HttpPost]
         [Route("SaveDocument")]

@@ -25,6 +25,8 @@ using System.Threading.Tasks;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Extension;
 using GSC.Respository.LogReport;
+using System.Linq.Dynamic.Core;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -96,6 +98,28 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(usersDto);
         }
 
+        [Route("GetLockedUsers")]
+        [HttpGet]
+        public IActionResult GetLockedUsers()
+        {
+            var data = _userRepository.GetLockedUsers();
+            var imageUrl = _uploadSettingRepository.GetWebImageUrl();
+            if (data != null && data.Result != null && data.Result.Data != null)
+            {
+                foreach (var item in data.Result.Data)
+                {
+                    var user = _context.Users.Include(x => x.UserRoles).ThenInclude(x => x.SecurityRole).Where(x => x.Id == item.Id).FirstOrDefault();
+                    if (user != null && user.UserRoles != null)
+                    {
+                        item.Role = string.Join(", ", user.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList());
+                        item.ProfilePicPath = imageUrl + (user.ProfilePic ?? DocumentService.DefulatProfilePic);
+                    }
+                }
+                return Ok(data.Result.Data);
+            }
+            return Ok(null);
+        }
+
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -109,7 +133,7 @@ namespace GSC.Api.Controllers.UserMgt
             var userDto = _mapper.Map<UserDto>(user);
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
             userDto.ProfilePicPath = imageUrl + (userDto.ProfilePic ?? DocumentService.DefulatProfilePic);
-            //userDto.ProfilePicPath = DocumentService.ConvertBase64Image(imageUrl + (userDto.ProfilePic ?? DocumentService.DefulatProfilePic));
+
             return Ok(userDto);
         }
 
@@ -130,30 +154,18 @@ namespace GSC.Api.Controllers.UserMgt
                     _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.User, FolderType.Logo.GetDescription());
 
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
-            user.IsLocked = false;
             user.IsFirstTime = true;
             user.UserType = UserMasterUserType.User;
-            bool IsPremise = _environmentSetting.Value.IsPremise;
-            if (!IsPremise)
+
+            userDto.UserType = UserMasterUserType.User;
+            CommonResponceView userdetails = await _centreUserService.SaveUser(userDto, _environmentSetting.Value.CentralApi);
+            if (!string.IsNullOrEmpty(userdetails.Message))
             {
-                userDto.UserType = UserMasterUserType.User;
-                CommonResponceView userdetails = await _centreUserService.SaveUser(userDto, _environmentSetting.Value.CentralApi);
-                if (!string.IsNullOrEmpty(userdetails.Message))
-                {
-                    ModelState.AddModelError("Message", userdetails.Message);
-                    return BadRequest(ModelState);
-                }
-                user.Id = Convert.ToInt32(userdetails.Id);
+                ModelState.AddModelError("Message", userdetails.Message);
+                return BadRequest(ModelState);
             }
-            else
-            {
-                var validate = _userRepository.DuplicateUserName(user);
-                if (!string.IsNullOrEmpty(validate))
-                {
-                    ModelState.AddModelError("Message", validate);
-                    return BadRequest(ModelState);
-                }
-            }
+            user.Id = Convert.ToInt32(userdetails.Id);
+
             _userRepository.Add(user);
             user.UserRoles.ForEach(x =>
             {
@@ -161,13 +173,6 @@ namespace GSC.Api.Controllers.UserMgt
             });
             if (_uow.Save() <= 0) throw new Exception("Creating a User  failed on save.");
 
-            if (IsPremise)
-            {
-                var password = RandomPassword.CreateRandomPassword(6);
-                _userPasswordRepository.CreatePassword(password, user.Id);
-                var company=_context.Company.Where(x => x.Id == user.CompanyId).Select(x => x.CompanyName).FirstOrDefault();
-                _emailSenderRespository.SendRegisterEMail(user.Email, password, user.UserName, company);
-            }
             return Ok(user.Id);
         }
 
@@ -187,28 +192,16 @@ namespace GSC.Api.Controllers.UserMgt
             }
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.IsFirstTime = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsFirstTime ?? false;
-            user.IsLocked = _userRepository.FindBy(i => i.Id == userDto.Id).FirstOrDefault()?.IsLocked ?? false;
+
             user.UserType = UserMasterUserType.User;
-            bool IsPremise = _environmentSetting.Value.IsPremise;
-            if (!IsPremise)
+            userDto.UserType = UserMasterUserType.User;
+            CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
+            if (!string.IsNullOrEmpty(userdetails.Message))
             {
-                userDto.UserType = UserMasterUserType.User;
-                CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
-                if (!string.IsNullOrEmpty(userdetails.Message))
-                {
-                    ModelState.AddModelError("Message", userdetails.Message);
-                    return BadRequest(ModelState);
-                }
+                ModelState.AddModelError("Message", userdetails.Message);
+                return BadRequest(ModelState);
             }
-            else
-            {
-                var validate = _userRepository.DuplicateUserName(user);
-                if (!string.IsNullOrEmpty(validate))
-                {
-                    ModelState.AddModelError("Message", validate);
-                    return BadRequest(ModelState);
-                }
-            }
+
             UpdateRole(user);
             _userRepository.Update(user);
             if (_uow.Save() <= 0) throw new Exception("Updating user failed on save.");
@@ -251,10 +244,7 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            if (!_environmentSetting.Value.IsPremise)
-            {
-                _centreUserService.DeleteUser(_environmentSetting.Value.CentralApi, id);
-            }
+            _centreUserService.DeleteUser(_environmentSetting.Value.CentralApi, id);
             var user = _userRepository.Find(id);
             _userRepository.Delete(user);
             _uow.Save();
@@ -262,7 +252,7 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok();
         }
 
-        
+
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> Active(int id)
@@ -271,24 +261,14 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (record == null)
                 return NotFound();
-            if (!_environmentSetting.Value.IsPremise)
+
+            CommonResponceView userdetails = await _centreUserService.ActiveUser(_environmentSetting.Value.CentralApi, id);
+            if (!string.IsNullOrEmpty(userdetails.Message))
             {
-                CommonResponceView userdetails = await _centreUserService.ActiveUser(_environmentSetting.Value.CentralApi, id);
-                if (!string.IsNullOrEmpty(userdetails.Message))
-                {
-                    ModelState.AddModelError("Message", userdetails.Message);
-                    return BadRequest(ModelState);
-                }
+                ModelState.AddModelError("Message", userdetails.Message);
+                return BadRequest(ModelState);
             }
-            else
-            {
-                var validate = _userRepository.DuplicateUserName(record);
-                if (!string.IsNullOrEmpty(validate))
-                {
-                    ModelState.AddModelError("Message", validate);
-                    return BadRequest(ModelState);
-                }
-            }
+
             _userRepository.Active(record);
             _uow.Save();
             return Ok();

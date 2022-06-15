@@ -62,7 +62,7 @@ namespace GSC.Respository.UserMgt
         public IList<string> GetUserEmailByRole(int roleId)
         {
             return All.Include(x => x.User).Include(x => x.SecurityRole).Where(x => x.SecurityRole.Id == roleId &&
-                       x.User.DeletedDate == null && x.DeletedDate == null && !x.User.IsLocked && 
+                       x.User.DeletedDate == null && x.DeletedDate == null  && 
                        !(x.User.ValidFrom.HasValue && x.User.ValidFrom.Value > DateTime.Now || x.User.ValidTo.HasValue 
                        && x.User.ValidTo.Value < DateTime.Now))
                 .Select(c => c.User.Email).ToList();

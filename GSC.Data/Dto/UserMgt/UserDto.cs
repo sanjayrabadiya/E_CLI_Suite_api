@@ -110,4 +110,8 @@ namespace GSC.Data.Dto.UserMgt
         public string RandomizationNumber { get; set; }
         public DateTime? DateOfRandomization { get; set; }
     }
+    public class UserLockedGridDto
+    {
+        public List<UserGridDto> Data { get; set; }
+    }
 }

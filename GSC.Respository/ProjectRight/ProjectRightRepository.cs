@@ -680,10 +680,10 @@ namespace GSC.Respository.ProjectRight
         }
         public IList<UserReportDto> GetUserReportList(UserReportSearchDto filters)
         {
-            var results = (from user in _context.Users.Where(t => (filters.UserId == 2 && (t.DeletedBy != null || t.IsLocked == true || (t.ValidFrom.HasValue && t.ValidFrom.Value > DateTime.Now
+            var results = (from user in _context.Users.Where(t => (filters.UserId == 2 && (t.DeletedBy != null  || (t.ValidFrom.HasValue && t.ValidFrom.Value > DateTime.Now
                             || t.ValidTo.HasValue && t.ValidTo.Value < DateTime.Now)))
                             || (t.DeletedBy == null && filters.UserId == 3)
-                            || (t.IsLogin == true && filters.UserId == 1))
+                            || (filters.UserId == 1))
                            select new UserReportDto
                            {
                                Id = user.Id,

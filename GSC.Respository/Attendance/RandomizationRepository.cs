@@ -438,19 +438,18 @@ namespace GSC.Respository.Attendance
                 Update(randomization);
                 if (patientStatus == ScreeningPatientStatus.ScreeningFailure || patientStatus == ScreeningPatientStatus.Withdrawal)
                 {
-                    if (!_environmentSetting.Value.IsPremise)
-                    {
-                        int userId = (int)randomization.UserId;
-                        User user = new User();
-                        user = _userRepository.Find(userId);
-                        user.ValidTo = DateTime.Today.AddDays(-1);
-                        _userRepository.Update(user);
 
-                        user = await _centreUserService.GetUserData($"{_environmentSetting.Value.CentralApi}Login/GetUserData/{user.UserName}");
-                        user.ValidTo = DateTime.Today.AddDays(-1);
-                        var userDto = _mapper.Map<UserDto>(user);
-                        CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
-                    }
+                    int userId = (int)randomization.UserId;
+                    User user = new User();
+                    user = _userRepository.Find(userId);
+                    user.ValidTo = DateTime.Today.AddDays(-1);
+                    _userRepository.Update(user);
+
+                    user = await _centreUserService.GetUserData($"{_environmentSetting.Value.CentralApi}Login/GetUserData/{user.UserName}");
+                    user.ValidTo = DateTime.Today.AddDays(-1);
+                    var userDto = _mapper.Map<UserDto>(user);
+                    CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
+
                 }
             }
 
@@ -873,7 +872,7 @@ namespace GSC.Respository.Attendance
 
 
         // Dashboard chart for target status
-        public List<DashboardPatientStatusDto> GetDashboardBoxData(int projectId,int countryId,int siteId)
+        public List<DashboardPatientStatusDto> GetDashboardBoxData(int projectId, int countryId, int siteId)
         {
             var pro = _context.Project.Where(x => x.Id == projectId).FirstOrDefault();
             var project = new List<Data.Entities.Master.Project>();
