@@ -42,4 +42,12 @@ namespace GSC.Data.Dto.Volunteer
         public bool? ShowRespondButton { get; set; }
 
     }
+
+    public class VolunteerQuerySearchDto
+    {
+        public int Id { get; set; }
+        public DateTime? FromRegistration { get; set; }
+        public DateTime? ToRegistration { get; set; }
+        public CommentStatus? Status { get; set; }
+    }
 }

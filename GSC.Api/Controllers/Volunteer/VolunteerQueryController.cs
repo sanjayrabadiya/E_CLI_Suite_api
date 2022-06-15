@@ -48,14 +48,14 @@ namespace GSC.Api.Controllers.Volunteer
             return Ok(volunteers);
         }
 
-        [HttpGet("VolunteerQuerySearch")]
-        public IActionResult VolunteerQuerySearch()
+        [HttpPost]
+        [Route("QuerySearch")]
+        public IActionResult QuerySearch([FromBody] VolunteerQuerySearchDto search)
         {
-            var volunteers = _volunteerQueryRepository.VolunteerQuerySearch();
+            var volunteers = _volunteerQueryRepository.VolunteerQuerySearch(search);
             return Ok(volunteers);
         }
 
-        
 
         [HttpGet("AutoCompleteSearch")]
         public IActionResult AutoCompleteSearch(string searchText)

@@ -138,26 +138,23 @@ namespace GSC.Respository.Volunteer
             return queryDtos;
         }
 
-        public IList<VolunteerQueryDto> VolunteerQuerySearch()
+        public IList<VolunteerQueryDto> VolunteerQuerySearch(VolunteerQuerySearchDto search)
         {
             var queryz = (from p in _context.VolunteerQuery
                          group p by new
                          {
                              p.VolunteerId,
                              p.FieldName
-                             //p.CreatedDate
                          } into g
                          select new {
                              VolunteerId = g.Key.VolunteerId,
                              FieldName = g.Key.FieldName,
-                             //CreatedDate = DateTime.ParseExact(g.Key.CreatedDate, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None),
                              Id = g.Select(m => m.Id).Max() }).ToList();
 
             HashSet<int> QueryIDs = new HashSet<int>(queryz.Select(s => s.Id));
 
             var query1 =
                 (from query in _context.VolunteerQuery
-                 //join s in queryz on query.Id equals s.Id 
                  join volunteers in _context.Volunteer on query.VolunteerId equals volunteers.Id into volDt
                  from vol in volDt.DefaultIfEmpty()
                  join reasonTemp in _context.AuditReason on query.ReasonId equals reasonTemp.Id into reasonDt
@@ -167,7 +164,6 @@ namespace GSC.Respository.Volunteer
                  join roleTemp in _context.SecurityRole on query.UserRole equals roleTemp.Id into roleDto
                  from role in roleDto.DefaultIfEmpty()
                  where QueryIDs.Contains(query.Id)
-                 //where query.Id == s.Id
                  select new VolunteerQueryDto
                  {
                      Id = query.Id,
@@ -185,6 +181,25 @@ namespace GSC.Respository.Volunteer
                      QueryStatus = query.QueryStatus,
                      VolunteerNo = vol.VolunteerNo
                  }).OrderByDescending(x => x.Id).ToList();
+
+            if (search.Status.HasValue)
+                query1 = query1.Where(x => x.QueryStatus == search.Status).ToList();
+
+            if (search.FromRegistration.HasValue || search.ToRegistration.HasValue)
+            {
+                if (search.FromRegistration.HasValue && search.ToRegistration.HasValue)
+                {
+                    query1 = query1.Where(x => x.CreatedDate >= search.FromRegistration && x.CreatedDate <= search.ToRegistration).ToList();
+                }
+                else if (search.FromRegistration.HasValue)
+                {
+                    query1 = query1.Where(x => x.CreatedDate >= search.FromRegistration).ToList();
+                }
+                else if (search.ToRegistration.HasValue)
+                {
+                    query1 = query1.Where(x => x.CreatedDate <= search.ToRegistration).ToList();
+                }
+            }
 
             return query1;
         }
