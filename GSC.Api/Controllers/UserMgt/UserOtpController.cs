@@ -42,27 +42,6 @@ namespace GSC.Api.Controllers.UserMgt
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
         }
-
-        [HttpPut]
-        [Route("UserDeleteTempForMobile/{userName}")]
-        public IActionResult UserDeleteTempForMobile(string userName)
-        {
-            var userExists = _userRepository.All.Where(x => x.UserName == userName || x.Phone == userName).FirstOrDefault();
-            if (userExists == null)
-            {
-                ModelState.AddModelError("Message", "UserName not valid");
-                return BadRequest(ModelState);
-            }
-
-            var user = _mapper.Map<Data.Entities.UserMgt.User>(userExists);
-          
-            _userRepository.Update(user);
-            if (_uow.Save() <= 0)
-            {
-                ModelState.AddModelError("Message", "User not deleted");
-                return BadRequest(ModelState);
-            }
-            return Ok(new { message = "User deleted successfullly!", StatusCode = 200 });
-        }
+        
     }
 }
