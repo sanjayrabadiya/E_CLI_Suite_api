@@ -815,6 +815,9 @@ namespace GSC.Respository.EditCheckImpact
 
             if (isInsert)
             {
+                if (value == "0" && (collectionSource == CollectionSources.Date || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time))
+                    value = null;
+
                 var aduit = new ScreeningTemplateValueAudit
                 {
                     ScreeningTemplateValue = screeningTemplateValue,
