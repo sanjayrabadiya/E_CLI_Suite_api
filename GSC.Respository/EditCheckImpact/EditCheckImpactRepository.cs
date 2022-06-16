@@ -815,8 +815,8 @@ namespace GSC.Respository.EditCheckImpact
 
             if (isInsert)
             {
-                if (value == "0" && (collectionSource == CollectionSources.Date || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time))
-                    value = null;
+                if (valueName == "0" && (collectionSource == CollectionSources.Date || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time))
+                    valueName = null;
 
                 if (oldValueName == "0" && (collectionSource == CollectionSources.Date || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time))
                     oldValueName = null;
