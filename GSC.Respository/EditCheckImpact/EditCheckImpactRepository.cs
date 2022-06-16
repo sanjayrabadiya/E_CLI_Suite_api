@@ -790,7 +790,7 @@ namespace GSC.Respository.EditCheckImpact
             }
 
             bool isInsert = false;
-            if (screeningTemplateValue == null && !string.IsNullOrEmpty(value))
+            if (screeningTemplateValue == null && !string.IsNullOrEmpty(value) && value != "0")
             {
                 isInsert = true;
                 screeningTemplateValue = new ScreeningTemplateValue
@@ -826,7 +826,7 @@ namespace GSC.Respository.EditCheckImpact
                 _screeningTemplateValueAuditRepository.Save(aduit);
             }
 
-          
+
 
             _context.Save();
             _context.DetachAllEntities();
