@@ -818,7 +818,7 @@ namespace GSC.Respository.EditCheckImpact
                 if (value == "0" && (collectionSource == CollectionSources.Date || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time))
                     value = null;
 
-                if(oldValueName == "0" && (collectionSource == CollectionSources.Date || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time))
+                if (oldValueName == "0" && (collectionSource == CollectionSources.Date || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time))
                     oldValueName = null;
 
                 var aduit = new ScreeningTemplateValueAudit
@@ -837,7 +837,7 @@ namespace GSC.Respository.EditCheckImpact
             _context.Save();
             _context.DetachAllEntities();
 
-            return screeningTemplateValue.Id;
+            return screeningTemplateValue != null ? screeningTemplateValue.Id : 0;
         }
 
         bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message)
