@@ -5,6 +5,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Project.Schedule;
 using GSC.Respository.Screening;
 using GSC.Shared.Extension;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -37,7 +38,8 @@ namespace GSC.Respository.EditCheckImpact
         public void TerminateScheduleTemplateVisit(int projectDesignTemplateId, int screeningEntryId, bool isSelfCorrection)
         {
             var scheduleTerminates = _scheduleTerminateDetailRepository.All.Where(x => x.DeletedDate == null
-            && x.ProjectDesignVariable.ProjectDesignTemplateId == projectDesignTemplateId).Select(r => new ScheduleTerminateDto
+            && x.ProjectDesignVariable.ProjectDesignTemplateId == projectDesignTemplateId && x.ProjectScheduleTemplate.DeletedDate == null
+            && x.ProjectScheduleTemplate.ProjectSchedule == null).Select(r => new ScheduleTerminateDto
             {
                 Operator = r.Operator,
                 Value = r.Value,
@@ -52,9 +54,7 @@ namespace GSC.Respository.EditCheckImpact
 
             var isValid = false;
 
-
-
-            var templateValues = _screeningTemplateValueRepository.All.Where(x => x.DeletedDate == null
+            var templateValues = _screeningTemplateValueRepository.All.AsNoTracking().Where(x => x.DeletedDate == null
             && x.ScreeningTemplate.ProjectDesignTemplateId == projectDesignTemplateId
             && x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId
             && x.ScreeningTemplate.ParentId == null).ToList();
@@ -104,6 +104,7 @@ namespace GSC.Respository.EditCheckImpact
                     Update(template);
                 });
                 _context.Save();
+                _context.DetachAllEntities();
                 var visitIds = scheduleTerminates.Select(r => r.TargetProjectDesignVisitId).Distinct().ToList();
 
                 var screeningVisists = _screeningVisitRepository.All.Where(x => x.DeletedDate == null && x.ScreeningEntryId == screeningEntryId &&
@@ -118,7 +119,7 @@ namespace GSC.Respository.EditCheckImpact
                     {
                         e.Status = Helper.ScreeningVisitStatus.NotStarted;
                     }
-                    else if (e.IsScheduleTerminate != true && e.Status == Helper.ScreeningVisitStatus.NotStarted && e.ScheduleDate!=null)
+                    else if (e.IsScheduleTerminate != true && e.Status == Helper.ScreeningVisitStatus.NotStarted && e.ScheduleDate != null)
                     {
                         e.Status = Helper.ScreeningVisitStatus.Scheduled;
                     }
