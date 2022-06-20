@@ -665,6 +665,7 @@ namespace GSC.Respository.EditCheckImpact
                         OldValue = oldValue,
                         Value = "",
                         ScreeningTemplateValueId = x.Id,
+                        UserName= "System",
                         Note = $"{editCheckValidateDto.AutoNumber} {editCheckValidateDto.Message}"
                     };
 
@@ -827,7 +828,8 @@ namespace GSC.Respository.EditCheckImpact
                     ScreeningTemplateValueId = screeningTemplateValue.Id,
                     Value = valueName,
                     OldValue = oldValueName,
-                    Note = note
+                    Note = note,
+                    UserName = "System",
                 };
                 _screeningTemplateValueAuditRepository.Save(aduit);
             }
@@ -866,7 +868,9 @@ namespace GSC.Respository.EditCheckImpact
                     return false;
 
                 string note = $"{"Reference by "} {autoNumber} {message}";
+
                 screeningTemplateValue.IsSystem = true;
+
                 _screeningTemplateValueQueryRepository.GenerateQuery(
                     new ScreeningTemplateValueQueryDto
                     {
