@@ -70,8 +70,17 @@ namespace GSC.Respository.Screening
         public void Save(ScreeningTemplateValueQuery screeningTemplateValueQuery)
         {
             screeningTemplateValueQuery.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
-            screeningTemplateValueQuery.UserName = _jwtTokenAccesser.UserName;
-            screeningTemplateValueQuery.UserRole = _jwtTokenAccesser.RoleName;
+
+            if (screeningTemplateValueQuery.IsSystem)
+            {
+                screeningTemplateValueQuery.UserName = "System";
+            }
+            else
+            {
+                screeningTemplateValueQuery.UserName = _jwtTokenAccesser.UserName;
+                screeningTemplateValueQuery.UserRole = _jwtTokenAccesser.RoleName;
+            }
+            
 
             if (screeningTemplateValueQuery.QueryStatus != QueryStatus.Open && screeningTemplateValueQuery.QueryStatus != QueryStatus.SelfCorrection)
             {
