@@ -39,7 +39,7 @@ namespace GSC.Respository.EditCheckImpact
         {
             var scheduleTerminates = _scheduleTerminateDetailRepository.All.Where(x => x.DeletedDate == null
             && x.ProjectDesignVariable.ProjectDesignTemplateId == projectDesignTemplateId && x.ProjectScheduleTemplate.DeletedDate == null
-            && x.ProjectScheduleTemplate.ProjectSchedule == null).Select(r => new ScheduleTerminateDto
+            && x.ProjectScheduleTemplate.ProjectSchedule.DeletedDate == null).Select(r => new ScheduleTerminateDto
             {
                 Operator = r.Operator,
                 Value = r.Value,
