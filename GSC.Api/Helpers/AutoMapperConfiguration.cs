@@ -199,7 +199,6 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.IsOnlyTarget, x => x.MapFrom(a => a.EditCheck.IsOnlyTarget))
                 .ForMember(x => x.IsFormula, x => x.MapFrom(a => a.EditCheck.IsFormula));
 
-
             CreateMap<ProjectScheduleTemplate, ProjectScheduleTemplateDto>().ReverseMap();
 
             CreateMap<VariableTemplateNote, VariableTemplateNoteDto>().ReverseMap();
@@ -208,7 +207,7 @@ namespace GSC.Api.Helpers
             CreateMap<ScreeningTemplateValue, ScreeningTemplateValueDto>().ReverseMap();
             CreateMap<ScreeningTemplateValue, Data.Dto.Screening.ScreeningTemplateValueBasic>()
                .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Comments.Any()))
-               .ForMember(x => x.ScheduleDate, x => x.MapFrom(a => a.IsScheduleTerminate == true ? a.ScheduleDate : null));
+               .ForMember(x => x.ScheduleDate, x => x.MapFrom(a => a.IsScheduleTerminate == true ? null : a.ScheduleDate));
 
             CreateMap<ScreeningTemplateValueAudit, ScreeningTemplateValueAuditDto>().ReverseMap();
             CreateMap<ScreeningTemplateValueComment, ScreeningTemplateValueCommentDto>().ReverseMap();
