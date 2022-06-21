@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
 using GSC.Helper;
 using GSC.Respository.Volunteer;
-using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
 
 namespace GSC.Api.Controllers.Volunteer
 {
@@ -68,14 +65,14 @@ namespace GSC.Api.Controllers.Volunteer
         public IActionResult AddQuery([FromBody] VolunteerQueryDto volunteerQueryCommentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var volunteerQueryValue = _volunteerQueryRepository.GetLatest(volunteerQueryCommentDto.VolunteerId,volunteerQueryCommentDto.FieldName);
+            var volunteerQueryValue = _volunteerQueryRepository.GetLatest(volunteerQueryCommentDto.VolunteerId, volunteerQueryCommentDto.FieldName);
 
             if (volunteerQueryValue == null)
                 volunteerQueryCommentDto.QueryStatus = CommentStatus.Open;
             else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryCommentDto.ReasonId == 0)
                 return BadRequest("Query already open for this field.");
 
-            
+
             else
             {
                 if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole == _jwtTokenAccesser.RoleId)
@@ -94,7 +91,7 @@ namespace GSC.Api.Controllers.Volunteer
             var volunteerQueryComment = _mapper.Map<VolunteerQuery>(volunteerQueryCommentDto);
             volunteerQueryComment.UserRole = _jwtTokenAccesser.RoleId;
             _volunteerQueryRepository.Add(volunteerQueryComment);
-            
+
             if (_uow.Save() <= 0)
                 throw new Exception("Creating Value Query failed on save.");
 
@@ -108,6 +105,14 @@ namespace GSC.Api.Controllers.Volunteer
         {
             var comments = _volunteerQueryRepository.GetData(VolunteerId);
             return Ok(comments);
+        }
+
+        [HttpGet]
+        [Route("GetDetailsByVolunteerId/{VolunteerId}")]
+        public IActionResult GetDetailsByVolunteerId(int VolunteerId)
+        {
+            var queries = _volunteerQueryRepository.GetDetailsByVolunteerId(VolunteerId);
+            return Ok(queries);
         }
 
     }

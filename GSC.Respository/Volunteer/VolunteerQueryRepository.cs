@@ -80,7 +80,7 @@ namespace GSC.Respository.Volunteer
                 }
                 else
                 {
-                    if(item.Id == commentLatest.Id)
+                    if (item.Id == commentLatest.Id)
                     {
                         if (commentLatest.QueryStatus == CommentStatus.Open && item.QueryStatus == CommentStatus.Open)
                         {
@@ -95,8 +95,8 @@ namespace GSC.Respository.Volunteer
                             {
                                 button.ShowEditButton = false;
                                 button.ShowRespondButton = false;
-                            } 
-                            else if(_jwtTokenAccesser.RoleId == commentLatestQuery.UserRole)
+                            }
+                            else if (_jwtTokenAccesser.RoleId == commentLatestQuery.UserRole)
                             {
                                 button.ShowEditButton = false;
                                 button.ShowRespondButton = true;
@@ -141,15 +141,17 @@ namespace GSC.Respository.Volunteer
         public IList<VolunteerQueryDto> VolunteerQuerySearch(VolunteerQuerySearchDto search)
         {
             var queryz = (from p in _context.VolunteerQuery
-                         group p by new
-                         {
-                             p.VolunteerId,
-                             p.FieldName
-                         } into g
-                         select new {
-                             VolunteerId = g.Key.VolunteerId,
-                             FieldName = g.Key.FieldName,
-                             Id = g.Select(m => m.Id).Max() }).ToList();
+                          group p by new
+                          {
+                              p.VolunteerId,
+                              p.FieldName
+                          } into g
+                          select new
+                          {
+                              VolunteerId = g.Key.VolunteerId,
+                              FieldName = g.Key.FieldName,
+                              Id = g.Select(m => m.Id).Max()
+                          }).ToList();
 
             HashSet<int> QueryIDs = new HashSet<int>(queryz.Select(s => s.Id));
 
@@ -204,5 +206,19 @@ namespace GSC.Respository.Volunteer
             return query1;
         }
 
+        public List<VolunteerQuery> GetDetailsByVolunteerId(int VolunteerId)
+        {
+            var queries = All.Where(x => x.VolunteerId == VolunteerId)
+                .GroupBy(x => new { x.FieldName, x.VolunteerId })
+                .Select(y => new VolunteerQueryDto
+                {
+                    VolunteerId = y.Key.VolunteerId,
+                    FieldName = y.Key.FieldName,
+                    Id = y.Select(m => m.Id).Max()
+                });
+
+            var result = All.Where(x => x.VolunteerId == VolunteerId && queries.Select(y => y.Id).Contains(x.Id) && x.QueryStatus == CommentStatus.Open).ToList();
+            return result;
+        }
     }
 }

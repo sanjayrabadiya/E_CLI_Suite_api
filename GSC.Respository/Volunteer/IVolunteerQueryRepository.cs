@@ -12,5 +12,6 @@ namespace GSC.Respository.Volunteer
         VolunteerQuery GetLatest(int VolunteerId, string FiledName);
         IList<VolunteerQueryDto> GetData(int volunteerid);
         IList<VolunteerQueryDto> VolunteerQuerySearch(VolunteerQuerySearchDto search);
+        List<VolunteerQuery> GetDetailsByVolunteerId(int VolunteerId);
     }
 }
