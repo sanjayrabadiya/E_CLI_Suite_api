@@ -165,8 +165,6 @@ namespace GSC.Api.Controllers.Screening
             var result = _screeningEntryRepository.GetScreeningList(searchParam);
             return Ok(result);
         }
-
-
         [HttpGet("GetProjectStatusAndLevelDropDown/{parentProjectId}")]
         public IActionResult GetProjectStatusAndLevelDropDown(int parentProjectId)
         {
@@ -201,6 +199,16 @@ namespace GSC.Api.Controllers.Screening
         public IActionResult GetVisitByLockedDropDown([FromQuery] LockUnlockDDDto lockUnlockDDDto)
         {
             return Ok(_screeningVisitRepository.GetVisitByLockedDropDown(lockUnlockDDDto));
+        }
+
+
+        //Add by Tinku Mahato for Screening Edit visit list on 21-06-2022
+        [HttpGet]
+        [Route("GetVisitListByEntryId/{screeningEntryId}")]
+        public IActionResult GetVisitListByEntryId(int screeningEntryId)
+        {
+            var visitList = _screeningVisitRepository.GetScreeningVisitList(screeningEntryId);
+            return Ok(visitList);
         }
     }
 }

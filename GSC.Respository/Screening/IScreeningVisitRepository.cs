@@ -30,5 +30,8 @@ namespace GSC.Respository.Screening
 
         // Dashboard chart for Visit Status
         List<DashboardQueryStatusDto> GetVisitStatus(int projectId);
+        
+        //Add by Tinku Mahato by screening visit list on 21-06-2022
+        List<int> GetScreeningVisitList(int screeningEntryId);
     }
 }

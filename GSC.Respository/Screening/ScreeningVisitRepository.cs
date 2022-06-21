@@ -121,13 +121,13 @@ namespace GSC.Respository.Screening
                 r.Templates.Where(b => (b.StudyVersion == null || b.StudyVersion <= studyVersion)
                 && (b.InActiveVersion == null || b.InActiveVersion > studyVersion)).ToList().ForEach(t =>
                 {
-                   var screeningTemplate = new ScreeningTemplate
-                   {
-                       ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                       Status = ScreeningTemplateStatus.Pending
-                   };
-                   _screeningTemplateRepository.Add(screeningTemplate);
-                   screeningVisit.ScreeningTemplates.Add(screeningTemplate);
+                    var screeningTemplate = new ScreeningTemplate
+                    {
+                        ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+                        Status = ScreeningTemplateStatus.Pending
+                    };
+                    _screeningTemplateRepository.Add(screeningTemplate);
+                    screeningVisit.ScreeningTemplates.Add(screeningTemplate);
 
                 });
 
@@ -516,6 +516,12 @@ namespace GSC.Respository.Screening
                    Total = g.Count()
                }).ToList();
             return result;
+        }
+
+        //Add by Tinku Mahato for voleenter screening on 21-06-2022
+        public List<int> GetScreeningVisitList(int screeningEntryId)
+        {
+            return All.Where(q => q.ScreeningEntryId==screeningEntryId && q.Status== ScreeningVisitStatus.NotStarted).Select(s => s.Id).ToList();
         }
     }
 }
