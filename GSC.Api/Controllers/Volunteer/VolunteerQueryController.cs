@@ -67,6 +67,13 @@ namespace GSC.Api.Controllers.Volunteer
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var volunteerQueryValue = _volunteerQueryRepository.GetLatest(volunteerQueryCommentDto.VolunteerId, volunteerQueryCommentDto.FieldName);
 
+            if (volunteerQueryValue != null) {
+                if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsDriect == true)
+                {
+                    return BadRequest("Role is different, you can't close query.");
+                }
+            }
+
             if (volunteerQueryValue == null)
                 volunteerQueryCommentDto.QueryStatus = CommentStatus.Open;
             else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryCommentDto.ReasonId == 0)

@@ -30,7 +30,7 @@ namespace GSC.Respository.Master
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) &&
                     x.DocumentTypeId == documentId)
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.Name}).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.Name, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
         public string Duplicate(DocumentName objSave)
