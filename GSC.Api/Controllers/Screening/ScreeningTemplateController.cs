@@ -142,7 +142,7 @@ namespace GSC.Api.Controllers.Screening
 
             _uow.Save();
 
-            _screeningTemplateRepository.SubmitReviewTemplate(id, false);
+            _screeningTemplateRepository.SubmitReviewTemplate(id);
 
             _uow.Save();
 
@@ -274,7 +274,7 @@ namespace GSC.Api.Controllers.Screening
         [Route("ReviewedTemplate/{id}")]
         public IActionResult ReviewedTemplate(int id)
         {
-            _screeningTemplateRepository.SubmitReviewTemplate(id, false);
+            _screeningTemplateRepository.SubmitReviewTemplate(id);
 
             _uow.Save();
 
@@ -358,7 +358,7 @@ namespace GSC.Api.Controllers.Screening
 
             if (_uow.Save() <= 0) throw new Exception("Submit Attendance Template failed.");
 
-            _screeningTemplateRepository.SubmitReviewTemplate(id, false);
+            _screeningTemplateRepository.SubmitReviewTemplate(id);
 
             _uow.Save();
 

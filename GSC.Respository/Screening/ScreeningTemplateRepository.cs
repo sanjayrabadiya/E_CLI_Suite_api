@@ -514,15 +514,20 @@ namespace GSC.Respository.Screening
              GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
         }
 
-        public void SubmitReviewTemplate(int screeningTemplateId, bool isLockUnLock)
+        public void SubmitReviewTemplate(int screeningTemplateId)
         {
             _context.DetachAllEntities();
+
             var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
+
+            if (screeningTemplateBasic.Status < ScreeningTemplateStatus.Submitted)
+                return;
+
             var values = GetScreeningValues(screeningTemplateBasic.Id);
             var result = _editCheckImpactRepository.CheckValidation(null, values, screeningTemplateBasic, true);
             _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, true, true);
-            if (!isLockUnLock && screeningTemplateBasic.ParentId == null)
-                _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, true);
+            _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, true);
+
         }
 
         public int GetProjectDesignId(int screeningTemplateId)

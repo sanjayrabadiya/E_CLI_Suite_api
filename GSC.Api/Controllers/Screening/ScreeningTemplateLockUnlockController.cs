@@ -106,13 +106,13 @@ namespace GSC.Api.Controllers.Screening
                 if (!item.IsLocked)
                     CheckEditCheck(item.ScreeningTemplateId);
             }
-         
+
             return Ok();
         }
 
         void CheckEditCheck(int id)
         {
-            _screeningTemplateRepository.SubmitReviewTemplate(id, false);
+            _screeningTemplateRepository.SubmitReviewTemplate(id);
             _uow.Save();
         }
 

@@ -95,6 +95,7 @@ namespace GSC.Respository.EditCheckImpact
                     {
                         r.ScreeningTemplateId = refTemplate.Id;
                         r.Status = refTemplate.Status;
+                        r.IsSkip = refTemplate.Status < ScreeningTemplateStatus.Submitted;
                         var statusId = (int)refTemplate.Status;
                         if (statusId > 1)
                         {
