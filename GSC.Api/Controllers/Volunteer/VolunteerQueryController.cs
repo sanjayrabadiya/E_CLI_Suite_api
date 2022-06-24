@@ -84,6 +84,8 @@ namespace GSC.Api.Controllers.Volunteer
             {
                 if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole == _jwtTokenAccesser.RoleId)
                     volunteerQueryCommentDto.QueryStatus = CommentStatus.Closed;
+                else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsAnswered == true)
+                    volunteerQueryCommentDto.QueryStatus = CommentStatus.Answered;
                 else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsDriect == true)
                     volunteerQueryCommentDto.QueryStatus = CommentStatus.Answered;
                 else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId)

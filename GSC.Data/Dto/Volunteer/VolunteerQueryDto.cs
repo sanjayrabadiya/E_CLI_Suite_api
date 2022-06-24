@@ -23,6 +23,7 @@ namespace GSC.Data.Dto.Volunteer
         public string LatestFieldName { get; set; }
         public string VolunteerNo { get; set; }
         public bool IsDriect { get; set; }
+        public bool IsAnswered { get; set; }
 
         private DateTime? _createdDate;
 
