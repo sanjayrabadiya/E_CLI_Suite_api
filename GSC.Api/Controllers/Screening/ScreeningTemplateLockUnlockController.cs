@@ -104,7 +104,7 @@ namespace GSC.Api.Controllers.Screening
                 _uow.Save();
 
                 if (!item.IsLocked)
-                    CheckEditCheck(item.ScreeningTemplateId);
+                    CheckEditCheck(screeningTemplate.Id);
             }
 
             return Ok();
@@ -112,7 +112,7 @@ namespace GSC.Api.Controllers.Screening
 
         void CheckEditCheck(int id)
         {
-            _screeningTemplateRepository.SubmitReviewTemplate(id);
+            _screeningTemplateRepository.SubmitReviewTemplate(id, true);
             _uow.Save();
         }
 

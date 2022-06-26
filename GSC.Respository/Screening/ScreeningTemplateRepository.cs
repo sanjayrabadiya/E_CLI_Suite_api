@@ -514,7 +514,7 @@ namespace GSC.Respository.Screening
              GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
         }
 
-        public void SubmitReviewTemplate(int screeningTemplateId)
+        public void SubmitReviewTemplate(int screeningTemplateId, bool isFromLockUnLock)
         {
             _context.DetachAllEntities();
 
@@ -524,7 +524,7 @@ namespace GSC.Respository.Screening
                 return;
 
             var values = GetScreeningValues(screeningTemplateBasic.Id);
-            var result = _editCheckImpactRepository.CheckValidation(null, values, screeningTemplateBasic, true);
+            var result = _editCheckImpactRepository.CheckValidation(null, values, screeningTemplateBasic, !isFromLockUnLock);
             _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, true, true);
             _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, true);
 
