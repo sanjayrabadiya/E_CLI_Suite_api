@@ -59,7 +59,7 @@ namespace GSC.Respository.SupplyManagement
         public List<SupplyManagementUploadFileGridDto> GetSupplyManagementUploadFileList(bool isDeleted, int ProjectId)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectId == ProjectId).
-                   ProjectTo<SupplyManagementUploadFileGridDto>(_mapper.ConfigurationProvider).OrderBy(x => x.Id).ToList();
+                   ProjectTo<SupplyManagementUploadFileGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
 
@@ -84,7 +84,10 @@ namespace GSC.Respository.SupplyManagement
 
             // convert excel to dataset
             DataSet results = reader.AsDataSet();
-
+            if (results != null && results.Tables.Count > 0 && results.Tables[0].Rows.Count == 0)
+            {
+                return "File is not Compatible";
+            }
             // validate excel file
             var isValid = validateExcel(results, supplyManagementUploadFile);
 

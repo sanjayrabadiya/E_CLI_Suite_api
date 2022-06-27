@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Helper;
+using GSC.Shared.Extension;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,7 +35,6 @@ namespace GSC.Data.Dto.SupplyManagement
         public string CourierName { get; set; }
         public DateTime? CourierDate { get; set; }
         public string CourierTrackingNo { get; set; }
-
         public string Description { get; set; }
         public string ApproveRejectBy { get; set; }
 

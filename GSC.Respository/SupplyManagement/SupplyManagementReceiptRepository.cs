@@ -42,7 +42,7 @@ namespace GSC.Respository.SupplyManagement
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     t.StudyProjectCode = study != null ? study.ProjectCode : "";
                 }
-               
+
             });
 
 
@@ -58,6 +58,7 @@ namespace GSC.Respository.SupplyManagement
                 obj.WithIssue = null;
                 obj.CreatedByUser = null;
                 obj.CreatedDate = null;
+                obj.ApproveRejectDateTime = t.CreatedDate;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
@@ -66,7 +67,7 @@ namespace GSC.Respository.SupplyManagement
                 }
                 data.Add(obj);
             });
-            return data.OrderByDescending(x => x.CreatedDate).ToList();
+            return data.OrderByDescending(x => x.ApproveRejectDateTime).ToList();
         }
     }
 }

@@ -54,13 +54,15 @@ namespace GSC.Respository.SupplyManagement
                     variable.VariableValueOld = t.IsNa ? "N/A" : t.Value;
                     variable.VerificationApprovalTemplateValueId = t.Id;
                     variable.IsNaValue = t.IsNa;
-
+                    if (!string.IsNullOrWhiteSpace(variable.VariableValue) || variable.IsNaValue)
+                        variable.IsValid = true;
                     if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
                         variable.Values.ToList().ForEach(val =>
                         {
                             var childValue = t.Children.FirstOrDefault(v => v.StudyLevelFormVariableValueId == val.Id);
                             if (childValue != null)
                             {
+                                variable.IsValid = true;
                                 val.VariableValue = childValue.Value;
                                 val.VariableValueOld = childValue.Value;
                                 val.VerificationApprovalTemplateValueChildId = childValue.Id;

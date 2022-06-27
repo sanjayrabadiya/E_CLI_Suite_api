@@ -36,7 +36,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 var child = verificationApprovalTemplateValueDto.Children.First();
 
-                var variableValue = _context.VariableValue.Find(child.StudyLevelFormVariableValueId);
+                var variableValue = _context.StudyLevelFormVariableValue.Find(child.StudyLevelFormVariableValueId);
                 if (variableValue != null)
                 {
                     var valueChild = _context.VerificationApprovalTemplateValueChild.AsNoTracking()

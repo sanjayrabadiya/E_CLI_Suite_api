@@ -209,126 +209,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             return Ok(verificationApprovalTemplate.Id);
         }
 
-        //[HttpPut]
-        //[TransactionRequired]
-        //[Route("SendByApprover")]
-        //public IActionResult SendByApprover([FromBody] VerificationApprovalTemplateDto verificationApprovalTemplateDto)
-        //{
-        //    if (verificationApprovalTemplateDto.Id <= 0) return BadRequest();
-
-        //    if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-        //    var verification = _verificationApprovalTemplateRepository.Find(verificationApprovalTemplateDto.Id);
-        //    verification.IsApprove = verificationApprovalTemplateDto.IsApprove;
-        //    verification.ApproveOn = null;
-        //    if (verificationApprovalTemplateDto.IsApprove)
-        //        verification.ApproveOn = _jwtTokenAccesser.GetClientDate();
-
-        //    var verificationApprovalTemplate = _mapper.Map<VerificationApprovalTemplate>(verification);
-
-        //    VerificationApprovalTemplateHistory history = new VerificationApprovalTemplateHistory();
-        //    if (!verificationApprovalTemplateDto.IsApprove)
-        //    {
-        //        var detail = _verificationApprovalTemplateHistoryRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id).OrderByDescending(x => x.Id).LastOrDefault();
-        //        history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
-        //        history.IsSendBack = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.IsSendBack;
-        //        history.AuditReasonId = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.AuditReasonId;
-        //        history.ReasonOth = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.ReasonOth;
-        //        history.Status = Helper.ProductVerificationStatus.Rejected;
-        //        history.SendBy = _jwtTokenAccesser.UserId;
-        //        history.SendOn = _jwtTokenAccesser.GetClientDate();
-        //        history.SecurityRoleId = _jwtTokenAccesser.RoleId;
-        //        _verificationApprovalTemplateHistoryRepository.Add(history);
-        //    }
-        //    else
-        //    {
-        //        var detail = _verificationApprovalTemplateHistoryRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id).OrderByDescending(x => x.Id).LastOrDefault();
-        //        history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
-        //        history.IsSendBack = false;
-        //        history.AuditReasonId = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.AuditReasonId;
-        //        history.ReasonOth = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.ReasonOth;
-        //        history.Status = Helper.ProductVerificationStatus.Approved;
-        //        history.SendBy = _jwtTokenAccesser.UserId;
-        //        history.SendOn = _jwtTokenAccesser.GetClientDate();
-        //        history.SecurityRoleId = _jwtTokenAccesser.RoleId;
-        //        _verificationApprovalTemplateHistoryRepository.Add(history);
-        //    }
-        //    _verificationApprovalTemplateRepository.Update(verificationApprovalTemplate);
-
-        //    //_uow.Save();
-        //    //_context.DetachAllEntities();
-
-        //    // Set status Send for Approval
-        //    var verificationDetail = _productVerificationDetail.Find(verificationApprovalTemplate.ProductVerificationDetailId);
-        //    var receipt = _productReceiptRepository.Find(verificationDetail.ProductReceiptId);
-        //    if (receipt != null)
-        //    {
-        //        var email = _context.Users.Find(verification.CreatedBy).Email;
-        //        if (verificationApprovalTemplateDto.IsApprove)
-        //        {
-        //            receipt.Status = Helper.ProductVerificationStatus.Approved;
-        //            //for email
-        //            //if (email != null)
-        //            //    _emailSenderRespository.ApproveByApproverVerificationEmail(email);
-        //        }
-        //        else
-        //        {
-        //            receipt.Status = Helper.ProductVerificationStatus.Rejected;
-        //            //for email
-        //            //if (email != null)
-        //            //    _emailSenderRespository.RejectByApproverVerificationEmail(email);
-        //        }
-        //        _productReceiptRepository.Update(receipt);
-        //    }
-
-        //    // Verification template value save
-        //    if (verificationApprovalTemplateDto.VerificationApprovalTemplateValueList != null)
-        //    {
-        //        foreach (var item in verificationApprovalTemplateDto.VerificationApprovalTemplateValueList)
-        //        {
-        //            var value = _verificationApprovalTemplateValueRepository.GetValueForAudit(item);
-        //            var verificationApproveTemplateValue = _mapper.Map<VerificationApprovalTemplateValue>(item);
-
-        //            verificationApproveTemplateValue.VerificationApprovalTemplateId = verificationApprovalTemplateDto.Id;
-        //            var Exists = _verificationApprovalTemplateValueRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id && x.StudyLevelFormVariableId == item.StudyLevelFormVariableId).FirstOrDefault();
-
-        //            VerificationApprovalTemplateValueAudit audit = new VerificationApprovalTemplateValueAudit();
-
-        //            if (Exists == null)
-        //            {
-        //                verificationApproveTemplateValue.Id = 0;
-        //                _verificationApprovalTemplateValueRepository.Add(verificationApproveTemplateValue);
-
-        //                var aduit = new VerificationApprovalTemplateValueAudit
-        //                {
-        //                    VerificationApprovalTemplateValue = verificationApproveTemplateValue,
-        //                    Value = item.IsNa ? "N/A" : value,
-        //                    OldValue = item.OldValue,
-        //                };
-        //                _verificationApprovalTemplateValueAuditRepository.Save(aduit);
-        //                _verificationApprovalTemplateValueChildRepository.Save(verificationApproveTemplateValue);
-        //            }
-        //            else
-        //            {
-        //                var aduit = new VerificationApprovalTemplateValueAudit
-        //                {
-        //                    VerificationApprovalTemplateValueId = Exists.Id,
-        //                    Value = item.IsNa ? "N/A" : value,
-        //                    OldValue = item.OldValue,
-        //                };
-        //                _verificationApprovalTemplateValueAuditRepository.Save(aduit);
-        //                if (item.IsDeleted)
-        //                    _verificationApprovalTemplateValueRepository.DeleteChild(Exists.Id);
-
-        //                _verificationApprovalTemplateValueChildRepository.Save(verificationApproveTemplateValue);
-        //              //  if (verificationApproveTemplateValue.Id > 0)
-        //                    _verificationApprovalTemplateValueRepository.Update(verificationApproveTemplateValue);
-        //            }
-        //        }
-        //    }
-
-        //    if (_uow.Save() <= 0) throw new Exception("Updating Verification Approval Template failed on save.");
-        //    return Ok(verificationApprovalTemplate.Id);
-        //}
+       
 
         /// Save Variable value
         [HttpPut]
@@ -441,10 +322,6 @@ namespace GSC.Api.Controllers.SupplyManagement
                         _verificationApprovalTemplateValueRepository.Update(verificationApprovalTemplateValue);
                     }
                 }
-
-                //var verificationApproveTemplate = _verificationApprovalTemplateRepository.Find(verificationApprovalTemplateDto.VerificationApprovalTemplateValueList[0].VerificationApprovalTemplateId);
-                //_verificationApprovalTemplateRepository.Update(verificationApproveTemplate);
-
             }
             if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
             return Ok(verificationApprovalTemplateDto.VerificationApprovalTemplateValueList[0].Id);

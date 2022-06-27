@@ -46,6 +46,7 @@ namespace GSC.Respository.SupplyManagement
                 obj.Id = 0;
                 obj.CreatedByUser = null;
                 obj.CreatedDate = null;
+                obj.RequestDate = t.CreatedDate;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
@@ -55,7 +56,7 @@ namespace GSC.Respository.SupplyManagement
                 FinalData.Add(obj);
 
             });
-            return FinalData.OrderByDescending(x => x.CreatedDate).ToList();
+            return FinalData.OrderByDescending(x => x.RequestDate).ToList();
         }
 
         public string GenerateShipmentNo()

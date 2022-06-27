@@ -169,7 +169,7 @@ namespace GSC.Respository.UserMgt
             login.LoginReportId =
                      _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName, _jwtTokenAccesser.RoleId);
 
-            if (user != null)
+            if (user != null && user.IsFirstTime)
             {
                 user.IsFirstTime = false;
                 _context.Users.Update(user);
