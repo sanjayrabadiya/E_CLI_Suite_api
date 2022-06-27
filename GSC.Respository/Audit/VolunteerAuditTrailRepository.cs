@@ -147,7 +147,7 @@ namespace GSC.Respository.Audit
                 CreatedDate = x.CreatedDate,
                 ModuleName = x.ModuleId.GetDescription(),
                 TableName = x.TableId.GetDescription(),
-                ActionName = x.Action.GetDescription(),
+                ActionName = x.Action == AuditAction.Deleted ? "In Activated" : x.Action.GetDescription(),
                 ReasonName = x.Reason.ReasonName,
                 UserName = x.User.UserName,
                 UserRoleName = _context.SecurityRole.First(t => t.Id == x.UserRoleId).RoleName,
@@ -155,7 +155,7 @@ namespace GSC.Respository.Audit
                 TimeZone = x.TimeZone,
                 VolunteerName = _context.Volunteer
                     .Where(c => c.Id == x.RecordId && x.TableId == AuditTable.Volunteer || c.Id == x.ParentRecordId)
-                    .Select(a => a.VolunteerNo + " - " + a.FirstName + " " + a.MiddleName + " " + a.LastName).FirstOrDefault()
+                    .Select(a => (string.IsNullOrWhiteSpace(a.VolunteerNo) ? a.VolunteerNo : a.VolunteerNo + " - " ) + a.FirstName + " " + a.MiddleName + " " + a.LastName).FirstOrDefault()
             }).OrderByDescending(x => x.Id).ToList();
         }
     }

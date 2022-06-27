@@ -124,5 +124,20 @@ namespace GSC.Api.Controllers.Volunteer
             return Ok(queries);
         }
 
+        [HttpGet]
+        [Route("GetUsers")]
+        public IActionResult GetUsers()
+        {
+            var users = _volunteerQueryRepository.GetUsers();
+            return Ok(users);
+        }
+
+        [HttpGet]
+        [Route("GetRoles")]
+        public IActionResult GetRoles()
+        {
+            var users = _volunteerQueryRepository.GetRoles();
+            return Ok(users);
+        }
     }
 }

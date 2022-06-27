@@ -181,11 +181,19 @@ namespace GSC.Respository.Volunteer
                                                                 : user.UserName + "(" + role.RoleName + ")",
                      StatusName = query.QueryStatus.GetDescription(),
                      QueryStatus = query.QueryStatus,
-                     VolunteerNo = vol.VolunteerNo
+                     VolunteerNo = vol.VolunteerNo,
+                     CreatedBy = (int)query.CreatedBy,
+                     UserRole = query.UserRole
                  }).OrderByDescending(x => x.Id).ToList();
 
             if (search.Status.HasValue)
                 query1 = query1.Where(x => x.QueryStatus == search.Status).ToList();
+
+            if(search.User.HasValue)
+                query1 = query1.Where(x => x.CreatedBy == search.User).ToList();
+
+            if (search.Role.HasValue)
+                query1 = query1.Where(x => x.UserRole == search.Role).ToList();
 
             if (search.FromRegistration.HasValue || search.ToRegistration.HasValue)
             {
@@ -218,6 +226,42 @@ namespace GSC.Respository.Volunteer
                 });
 
             var result = All.Where(x => x.VolunteerId == VolunteerId && queries.Select(y => y.Id).Contains(x.Id) && x.QueryStatus == CommentStatus.Open).ToList();
+            return result;
+        }
+
+        public List<DropDownDto> GetUsers()
+        {
+            var queries = All.GroupBy(x => x.CreatedBy).Select(y => new DropDownDto
+            {
+                Id = y.Select(m => m.Id).Max(),
+                ExtraData = y.Key
+            }).ToList();
+
+            var result = All.Where(x => queries.Select(y => y.Id).Contains(x.Id))
+                        .Select(y => new DropDownDto
+                        {
+                            Id = (int)y.CreatedBy,
+                            Value = y.CreatedByUser.UserName
+                        }).ToList();
+            return result;
+        }
+
+        public List<DropDownDto> GetRoles()
+        {
+            var queries = All.GroupBy(x => x.UserRole).Select(y => new DropDownDto
+            {
+                Id = y.Select(m => m.Id).Max(),
+                ExtraData = y.Key
+            }).ToList();
+
+            var result = (from query in _context.VolunteerQuery.Where(t => queries.Select(y => y.Id).Contains(t.Id))
+                          join roleTemp in _context.SecurityRole on query.UserRole equals roleTemp.Id into roleDto
+                          from role in roleDto.DefaultIfEmpty()
+                          select new DropDownDto
+                          {
+                              Id = query.UserRole,
+                              Value = role.RoleShortName
+                          }).ToList();
             return result;
         }
     }

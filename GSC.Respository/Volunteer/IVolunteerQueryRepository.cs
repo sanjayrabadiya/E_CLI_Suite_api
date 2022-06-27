@@ -1,4 +1,5 @@
 ﻿using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
 using System;
@@ -13,5 +14,7 @@ namespace GSC.Respository.Volunteer
         IList<VolunteerQueryDto> GetData(int volunteerid);
         IList<VolunteerQueryDto> VolunteerQuerySearch(VolunteerQuerySearchDto search);
         List<VolunteerQuery> GetDetailsByVolunteerId(int VolunteerId);
+        List<DropDownDto> GetUsers();
+        List<DropDownDto> GetRoles();
     }
 }

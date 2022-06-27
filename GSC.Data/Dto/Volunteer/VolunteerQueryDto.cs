@@ -24,7 +24,7 @@ namespace GSC.Data.Dto.Volunteer
         public string VolunteerNo { get; set; }
         public bool IsDriect { get; set; }
         public bool IsAnswered { get; set; }
-
+        public int CreatedBy { get; set; }
         private DateTime? _createdDate;
 
         public DateTime? CreatedDate
@@ -50,5 +50,7 @@ namespace GSC.Data.Dto.Volunteer
         public DateTime? FromRegistration { get; set; }
         public DateTime? ToRegistration { get; set; }
         public CommentStatus? Status { get; set; }
+        public int? User { get; set; }
+        public int? Role { get; set; }
     }
 }
