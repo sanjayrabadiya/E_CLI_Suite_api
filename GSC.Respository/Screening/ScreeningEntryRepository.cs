@@ -220,7 +220,7 @@ namespace GSC.Respository.Screening
             _screeningVisitRepository.PatientStatus(screeningEntry.Id);
 
             var screningVisit = screeningEntry.ScreeningVisit.Where(x => x.ProjectDesignVisitId == saveRandomizationDto.ProjectDesignVisitId).FirstOrDefault();
-            
+
             _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
             _context.Save();
 
@@ -399,14 +399,14 @@ namespace GSC.Respository.Screening
 
         }
 
-        public IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock)
+        public IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock, bool isParent)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
+            //var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
             var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
 
             var subject = All.Include(a => a.Randomization).Include(a => a.Attendance).Include(a => a.ScreeningVisit)
                 .ThenInclude(x => x.ScreeningTemplates).
-                Where(a => a.DeletedDate == null && ParentProject != null ? a.ProjectId == projectId : sites.Contains(a.ProjectId)
+                Where(a => a.DeletedDate == null && !isParent ? a.ProjectId == projectId : sites.Contains(a.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                ).ToList();
 
             subject = subject.Where(x => x.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == !isLock).Count() > 0 && z.ScreeningTemplates != null).Count() > 0
@@ -431,11 +431,11 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetPeriodByProjectIdIsLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ChildProjectId).ToList().Select(x => x.Id).ToList();
+            // var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).ToList().Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
 
             var Period = All.Include(a => a.ProjectDesignPeriod).Include(a => a.ScreeningVisit).ThenInclude(a => a.ScreeningTemplates)
-                .Where(a => a.DeletedDate == null && ParentProject != null ? a.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ProjectId)
+                 .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId>0 ? a.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 && (lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(a.Id))).ToList();
 
             Period = Period.Where(a => a.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == !lockUnlockDDDto.IsLock).Count() > 0
@@ -447,6 +447,18 @@ namespace GSC.Respository.Screening
                 Id = x.Key,
                 Value = x.FirstOrDefault().ProjectDesignPeriod.DisplayName
             }).Distinct().ToList();
+        }
+
+
+        // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+        public List<ProjectDropDown> GetSiteByLockUnlock(int parentProjectId, bool isLock)
+        {
+            var sites = _projectRepository.GetChildProjectDropDown(parentProjectId).Select(s => s.Id).ToList();
+            var siteIds = _context.ScreeningTemplate.Where(q => sites.Contains(q.ScreeningVisit.ScreeningEntry.ProjectId) && q.IsLocked==(!isLock))
+                .Select(s => s.ScreeningVisit.ScreeningEntry.ProjectId).Distinct().ToList();
+
+            var resultSites = _projectRepository.GetChildProjectDropDown(parentProjectId).Where(q => siteIds.Contains(q.Id)).ToList();
+            return resultSites;
         }
     }
 }

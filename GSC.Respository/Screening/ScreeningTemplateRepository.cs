@@ -782,7 +782,7 @@ namespace GSC.Respository.Screening
 
             var screeningEntry = _context.ScreeningEntry.Where(r => r.ProjectDesignId == ProjectDesignId);
 
-            if (lockUnlockParams.ParentProjectId != lockUnlockParams.ProjectId)
+            if (lockUnlockParams.ProjectId!=null) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 screeningEntry = screeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId);
 
             if (lockUnlockParams.SubjectIds != null && lockUnlockParams.SubjectIds.Length > 0)
@@ -904,12 +904,12 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ChildProjectId).ToList().Select(x => x.Id).ToList();
+            //var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).ToList().Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
 
             var Templates = All.Include(a => a.ProjectDesignTemplate).Include(a => a.ScreeningVisit)
                 .ThenInclude(a => a.ScreeningEntry)
-                .Where(a => a.DeletedDate == null && ParentProject != null ? a.ScreeningVisit.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningVisit.ScreeningEntry.ProjectId)
+                .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId>0 ? a.ScreeningVisit.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningVisit.ScreeningEntry.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 ).ToList();
 
             if (lockUnlockDDDto.SubjectIds != null)

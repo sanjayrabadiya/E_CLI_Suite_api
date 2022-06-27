@@ -32,7 +32,7 @@ namespace GSC.Data.Dto.Screening
     public class LockUnlockSearchDto
     {
         public int ParentProjectId { get; set; }
-        public int ProjectId { get; set; }
+        public int? ProjectId { get; set; } // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
         public int?[] PeriodIds { get; set; }
         public int?[] SubjectIds { get; set; }
         public int?[] VisitIds { get; set; }

@@ -481,12 +481,12 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetVisitByLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ChildProjectId).ToList().Select(x => x.Id).ToList();
+            //var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).ToList().Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
 
             var Visit = _context.ScreeningVisit.Include(a => a.ScreeningEntry).Include(a => a.ProjectDesignVisit)
                 .Include(a => a.ScreeningTemplates)
-                .Where(a => a.DeletedDate == null && ParentProject != null ? a.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningEntry.ProjectId)
+                .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId>0 ? a.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningEntry.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 ).ToList();
 
             if (lockUnlockDDDto.SubjectIds != null)
