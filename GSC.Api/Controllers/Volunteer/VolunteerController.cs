@@ -277,7 +277,6 @@ namespace GSC.Api.Controllers.Volunteer
 
         [HttpGet]
         [Route("GetVolunteerSummary/{volunteerId}")]
-        [AllowAnonymous]
         public IActionResult GetVolunteerSummary(int volunteerId)
         {
             var response = _volunteerSummaryReport.GetVolunteerSummaryDesign(volunteerId);
