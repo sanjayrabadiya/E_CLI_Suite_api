@@ -32,6 +32,7 @@ namespace GSC.Data.Dto.Attendance
         public string ScreeningNo { get; set; }
         public string Note { get; set; }
         public string VolunteerNumber { get; set; }
+        public string AliasName { get; set; }
         public string VolunteerName { get; set; }
         public string ProjectName { get; set; }
         public string ProjectCode { get; set; }

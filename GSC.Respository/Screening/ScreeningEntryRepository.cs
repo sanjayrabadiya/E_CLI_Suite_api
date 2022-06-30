@@ -297,7 +297,7 @@ namespace GSC.Respository.Screening
             {
                 ScreeningEntryId = x.Id,
                 VolunteerId = x.Attendance.VolunteerId,
-                VolunteerName = x.Attendance.Volunteer.FullName,
+                VolunteerName =string.IsNullOrEmpty(x.Attendance.Volunteer.FullName) ? $"{ x.Attendance.Volunteer.FirstName} {x.Attendance.Volunteer.MiddleName } {x.Attendance.Volunteer.LastName }" : x.Attendance.Volunteer.FullName, // Change by Tinku Mahato for null full name (28/06/2022)
                 ProjectDesignId = x.ProjectDesignId,
                 ScreeningNo = x.ScreeningNo,
                 VolunteerNumber = x.Attendance.Volunteer.VolunteerNo,

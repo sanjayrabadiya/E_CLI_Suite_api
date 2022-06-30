@@ -136,6 +136,7 @@ namespace GSC.Respository.Attendance
                 AttendanceId = x.Id,
                 VolunteerId = x.VolunteerId,
                 ProjectDesignId = x.ProjectDesignPeriod.ProjectDesignId,
+                AliasName=x.Volunteer.AliasName,
                 VolunteerName = x.Volunteer.FirstName + " " + x.Volunteer.MiddleName + " " + x.Volunteer.LastName,
                 VolunteerNumber = x.Volunteer.VolunteerNo,
                 Gender = x.Volunteer == null || x.Volunteer.GenderId == null ? "" : x.Volunteer.GenderId.ToString(),

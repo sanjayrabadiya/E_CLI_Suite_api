@@ -18,9 +18,9 @@ namespace GSC.Data.Dto.Screening
         public int ProjectDesignPeriodId { get; set; }
         public int ProjectDesignId { get; set; }
         public string ScreeningNo { get; set; }
-        private DateTime _screeningDate { get; set; }
+        private DateTime? _screeningDate { get; set; }
 
-        public DateTime ScreeningDate
+        public DateTime? ScreeningDate
         {
             get => _screeningDate.UtcDate();
             set => _screeningDate = value == DateTime.MinValue ? value : value.UtcDate();
