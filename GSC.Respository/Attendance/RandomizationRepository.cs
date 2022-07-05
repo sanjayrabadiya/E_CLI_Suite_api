@@ -552,7 +552,7 @@ namespace GSC.Respository.Attendance
 
         public List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId)
         {
-            var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Include(x => x.ScreeningVisit).Where(x => x.ScreeningVisitId == screeningVisitId && x.ProjectDesignTemplate.IsParticipantView == true).
+            var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Include(x => x.ScreeningVisit).Where(x => x.ScreeningVisitId == screeningVisitId && x.DeletedDate == null && x.ProjectDesignTemplate.IsParticipantView == true).
                         Select(r => new ProjectDesignTemplateMobileDto
                         {
                             ScreeningTemplateId = r.Id,
