@@ -14,6 +14,7 @@ namespace GSC.Data.Dto.Master
         public int SeqNo { get; set; }
         public string Label { get; set; }
         public bool IsDefault { get; set; }
+        public string Style { get; set; }
     }
 
     public class VerificationApprovalVariableValueDto
@@ -26,5 +27,6 @@ namespace GSC.Data.Dto.Master
         public string VerificationApprovalValueOld { get; set; }
         public string Label { get; set; }
         public int SeqNo { get; set; }
+        public string Style { get; set; }
     }
 }

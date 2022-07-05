@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Shared.Extension;
@@ -76,6 +77,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsHide { get; set; }
         public bool? IsLevelNo { get; set; }
         public string PreLabel { get; set; }
+        public ScaleType? ScaleType { get; set; }
     }
 
     public class DesignScreeningVariableDto
@@ -139,6 +141,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsHide { get; set; }
         public bool? IsLevelNo { get; set; }
         public string PreLabel { get; set; }
+        public ScaleType? ScaleType { get; set; }
     }
 
   
@@ -153,4 +156,21 @@ namespace GSC.Data.Dto.Project.Design
         public bool SelfCorrection { get; set; }
         public bool DeleteQuery { get; set; }
     }
+
+    public class ScreeningGridView
+    {
+        public string ScreeningTemplateId { get; set; }
+        public string TemplateName { get; set; }
+        public IList<ScreeningGridViewVaraible> variables { get; set; }
+    }
+
+    public class ScreeningGridViewVaraible
+    {
+
+        public int ProjectDesignVariableId { get; set; }
+        public string ProjectDesignVariableName { get; set; }
+        public IList<ScreeningTemplateValueBasic> ScreeningValues { get; set; }
+
+    }
+
 }

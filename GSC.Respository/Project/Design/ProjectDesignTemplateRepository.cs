@@ -145,7 +145,8 @@ namespace GSC.Respository.Project.Design
                         Label = x.Label,
                         IsHide = x.IsHide,
                         IsLevelNo = x.IsLevelNo,
-                        PreLabel = x.PreLabel == null ? "" : x.PreLabel
+                        PreLabel = x.PreLabel == null ? "" : x.PreLabel,
+                        ScaleType=x.ScaleType
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.
@@ -158,7 +159,8 @@ namespace GSC.Respository.Project.Design
                          StudyVersion = c.StudyVersion,
                          InActiveVersion = c.InActiveVersion,
                          Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
-                         TableCollectionSource = c.TableCollectionSource
+                         TableCollectionSource = c.TableCollectionSource,
+                         Style=c.Style
                      }).ToList();
 
 

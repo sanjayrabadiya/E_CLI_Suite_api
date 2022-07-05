@@ -12,5 +12,7 @@ namespace GSC.Data.Entities.Master
         public string Label { get; set; }
         public bool IsDefault { get; set; }
         public Variable Variable { get; set; }
+
+        public string Style { get; set; }
     }
 }

@@ -26,6 +26,7 @@ namespace GSC.Data.Dto.Project.Design
         public string DisplayVersion { get; set; }
         public TableCollectionSource? TableCollectionSource { get; set; }
         public string TableCollectionSourceName { get; set; }
+        public string Style { get; set; }
     }
 
     public class ScreeningVariableValueDto
@@ -43,6 +44,7 @@ namespace GSC.Data.Dto.Project.Design
         public short? LevelNo { get; set; }
         public bool IsDeleted { get; set; }
         public TableCollectionSource? TableCollectionSource { get; set; }
+        public string Style { get; set; }
     }
 
 

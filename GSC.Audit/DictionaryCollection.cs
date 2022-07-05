@@ -395,6 +395,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "SeqNo", DisplayName = "Seq No" });
             _dictionaries.Add(new Dictionary { FieldName = "Range", DisplayName = "Range" });
             _dictionaries.Add(new Dictionary { FieldName = "Remarks", DisplayName = "Remarks" });
+            _dictionaries.Add(new Dictionary { FieldName = "Style", DisplayName = "color/emoji" });
 
             //_dictionaries.Add(new Dictionary { FieldName = "LargeStep", DisplayName = "Large Step" });
 
@@ -561,6 +562,15 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsTemplateSeqNo", DisplayName = "Is Template Sequence No. Enabled?" }); 
             _dictionaries.Add(new Dictionary { FieldName = "IsVariableSeqNo", DisplayName = "Is variable Sequence No. Enabled?" });
 
+            _dictionaries.Add(new Dictionary { FieldName = "ScaleType", DisplayName = "Scale Type" });
+
+            //schedule column
+            _dictionaries.Add(new Dictionary { FieldName = "PositiveDeviation", DisplayName = "Positive Deviation (Days/Min)" });
+            _dictionaries.Add(new Dictionary { FieldName = "NegativeDeviation", DisplayName = "Negative Deviation (Days/Min)" });
+            _dictionaries.Add(new Dictionary { FieldName = "HH", DisplayName = "Ref Time Interval(HH)" });
+            _dictionaries.Add(new Dictionary { FieldName = "MM", DisplayName = "Ref Time Interval(MM)" });
+            _dictionaries.Add(new Dictionary { FieldName = "NoOfDay", DisplayName = "Ref Time Interval(In No of Day)" });
+            _dictionaries.Add(new Dictionary { FieldName = "Operator", DisplayName = "Operator" });
         }
 
 

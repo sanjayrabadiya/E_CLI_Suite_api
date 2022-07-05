@@ -864,4 +864,11 @@ namespace GSC.Helper
         [Description("EAdverseEvent")] EAdverseEvent = 10,
     }
 
+    public enum ScaleType : short
+    {
+        [Description("Normal")] Normal = 1,
+        [Description("Color Range")] ColorRange = 2,
+        [Description("Smiley")] Smiley = 3
+    }
+
 }

@@ -677,5 +677,17 @@ namespace GSC.Api.Controllers.Common
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
         }
+
+        [HttpGet]
+        [Route("GetScaleType")]
+        public IList<DropDownEnum> GetScaleType()
+        {
+            return Enum.GetValues(typeof(ScaleType))
+                .Cast<ScaleType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

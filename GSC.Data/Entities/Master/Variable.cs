@@ -43,6 +43,7 @@ namespace GSC.Data.Entities.Master
         public int? LargeStep { get; set; }
         public VariableTemplateDetail VariableTemplateDetail { get; set; }
         public VariableCategory VariableCategory { get; set; }
+        public ScaleType? ScaleType { get; set; }
 
     }
 }

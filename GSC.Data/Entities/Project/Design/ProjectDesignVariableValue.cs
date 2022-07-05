@@ -18,5 +18,6 @@ namespace GSC.Data.Entities.Project.Design
         public TableCollectionSource? TableCollectionSource { get; set; }
         public ProjectDesignVariable ProjectDesignVariable { get; set; }
         public List<VariableValueLanguage> VariableValueLanguage { get; set; }
+        public string Style { get; set; }
     }
 }
