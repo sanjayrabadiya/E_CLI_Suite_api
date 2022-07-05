@@ -574,7 +574,8 @@ namespace GSC.Report
 
             PdfCompositeField compositeField = new PdfCompositeField(font, brush, "Page {0} of {1}", pageNumber, count);
             compositeField.Bounds = footer.Bounds;
-            string prientedby = "Printed By : " + _jwtTokenAccesser.UserName + " (" + DateTime.Now.ToString("dd-MM-yyyy h:mm tt") + ")";
+            //string prientedby = "Printed By : " + _jwtTokenAccesser.UserName + " (" + DateTime.Now.ToString("dd-MM-yyyy h:mm tt") + ")";
+            string prientedby = ""; 
             PdfCompositeField compositeFieldprintedby = new PdfCompositeField(font, brush, prientedby);
             compositeFieldprintedby.Bounds = footer.Bounds;
 
