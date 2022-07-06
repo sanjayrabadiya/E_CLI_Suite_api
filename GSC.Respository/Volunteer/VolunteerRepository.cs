@@ -235,11 +235,11 @@ namespace GSC.Respository.Volunteer
                 inComplete = true;
             }
 
-            if (!_context.VolunteerDocument.Where(t => t.VolunteerId == id).Any())
-            {
-                message += "#Document";
-                inComplete = true;
-            }
+            //if (!_context.VolunteerDocument.Where(t => t.VolunteerId == id).Any())
+            //{
+            //    message += "#Document";
+            //    inComplete = true;
+            //}
 
             if (!inComplete)
             {
