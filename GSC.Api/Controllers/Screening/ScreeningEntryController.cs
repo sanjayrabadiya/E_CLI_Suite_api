@@ -26,6 +26,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IUnitOfWork _uow;
         private readonly IScreeningProgress _screeningProgress;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
+        private readonly IScreeningHistoryRepository _screeningHistoryRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public ScreeningEntryController(IScreeningEntryRepository screeningEntryRepository,
@@ -35,6 +36,7 @@ namespace GSC.Api.Controllers.Screening
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IScreeningProgress screeningProgress,
             IScreeningVisitRepository screeningVisitRepository,
+            IScreeningHistoryRepository screeningHistoryRepository,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _screeningEntryRepository = screeningEntryRepository;
@@ -44,6 +46,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningProgress = screeningProgress;
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _screeningVisitRepository = screeningVisitRepository;
+            _screeningHistoryRepository = screeningHistoryRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
@@ -78,6 +81,10 @@ namespace GSC.Api.Controllers.Screening
             var screeningEntry = _mapper.Map<ScreeningEntry>(screeningEntryDto);
             _screeningEntryRepository.SaveScreeningAttendance(screeningEntry, screeningEntryDto.ProjectAttendanceTemplateIds);
 
+            _uow.Save();
+
+            screeningEntry.ScreeningHistory.ScreeningEntryId = screeningEntry.Id;
+            _screeningHistoryRepository.Add(screeningEntry.ScreeningHistory);
             _uow.Save();
 
             return Ok(screeningEntry.Id);

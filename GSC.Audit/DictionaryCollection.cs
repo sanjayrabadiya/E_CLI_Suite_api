@@ -571,6 +571,12 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "MM", DisplayName = "Ref Time Interval(MM)" });
             _dictionaries.Add(new Dictionary { FieldName = "NoOfDay", DisplayName = "Ref Time Interval(In No of Day)" });
             _dictionaries.Add(new Dictionary { FieldName = "Operator", DisplayName = "Operator" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "XrayDate", DisplayName = "Xray Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "NextXrayDueDate", DisplayName = "Next Xray Due Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "LastPkSampleDate", DisplayName = "Last Pk Sample Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "NextEligibleDate", DisplayName = "Next Eligible Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "Enrolled", DisplayName = "Enrolled" });
         }
 
 

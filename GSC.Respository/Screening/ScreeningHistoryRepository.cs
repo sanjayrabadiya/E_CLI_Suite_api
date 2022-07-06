@@ -45,7 +45,7 @@ namespace GSC.Respository.Screening
                 Reason = x.Reason,
                 ScreeningDate = x.ScreeningEntry.ScreeningDate,
                 VolunteerNumber = x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
-                VolunteerName = x.ScreeningEntry.Attendance.Volunteer.FullName
+                VolunteerName = x.ScreeningEntry.Attendance.Volunteer.AliasName
             }).OrderByDescending(x => x.Id).ToList();
 
             return finalResult;
