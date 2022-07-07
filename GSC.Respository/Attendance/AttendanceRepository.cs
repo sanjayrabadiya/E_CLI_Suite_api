@@ -72,7 +72,7 @@ namespace GSC.Respository.Attendance
         {
             attendance.RoleId = _jwtTokenAccesser.RoleId;
             attendance.UserId = _jwtTokenAccesser.UserId;
-            attendance.AttendanceDate = _jwtTokenAccesser.GetClientDate();
+            //attendance.AttendanceDate = _jwtTokenAccesser.GetClientDate(); //Comment this line because attendance date get from client clender (Tinku Mahato 04/07/2022)
             attendance.IsTesting = _context.Project.Any(x =>
                 x.IsTestSite && x.Id == attendance.ProjectId);
             attendance.AttendanceHistory =
@@ -348,7 +348,7 @@ namespace GSC.Respository.Attendance
                 if (All.Any(x =>
                     x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == DataEntryType.Screening &&
                     //Convert.ToDateTime(x.AttendanceDate).ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString()  &&
-                    x.AttendanceDate.Date == _jwtTokenAccesser.GetClientDate().Date &&
+                    x.AttendanceDate.Day.CompareTo(attendanceDto.AttendanceDate.Day)==0 && //_jwtTokenAccesser.GetClientDate().Date &&
                     //x.AttendanceDate.ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString() &&
                     x.DeletedDate == null))
                     return "Volunteer already present today";
