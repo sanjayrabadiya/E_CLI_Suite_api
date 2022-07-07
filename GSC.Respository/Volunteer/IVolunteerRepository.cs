@@ -17,6 +17,7 @@ namespace GSC.Respository.Volunteer
         string DuplicateOldReference(VolunteerDto objSave);
 
         //IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock);
+        List<DropDownDto> GetPopulationTypeDropDownList(); //Add function to get used population type dropdown by Tinku Mahato (07/07/2022)
 
     }
 }

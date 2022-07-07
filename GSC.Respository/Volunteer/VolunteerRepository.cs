@@ -422,5 +422,14 @@ namespace GSC.Respository.Volunteer
             return "";
         }
 
+
+        //Add function to get used population type dropdown by Tinku Mahato (07/07/2022)
+        public List<DropDownDto> GetPopulationTypeDropDownList()
+        {
+            return All.Where(x =>
+                   (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate==null && x.PopulationTypeId!=null)
+               .Select(c => new DropDownDto { Id = c.PopulationTypeId.Value, Value = c.PopulationType.PopulationName, IsDeleted = c.DeletedDate != null }).Distinct().OrderBy(o => o.Value).ToList();
+        }
+
     }
 }

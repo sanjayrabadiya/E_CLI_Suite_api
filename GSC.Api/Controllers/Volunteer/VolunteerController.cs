@@ -298,5 +298,13 @@ namespace GSC.Api.Controllers.Volunteer
             var response = _volunteerSummaryReport.GetVolunteerSearchDesign(volunteers);
             return response;
         }
+
+        //Add action to get used population type dropdown by Tinku Mahato (07/07/2022)
+        [HttpGet]
+        [Route("GetPopulationTypeDropDown")]
+        public IActionResult GetPopulationTypeDropDown()
+        {
+            return Ok(_volunteerRepository.GetPopulationTypeDropDownList());
+        }
     }
 }
