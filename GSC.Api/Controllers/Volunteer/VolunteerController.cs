@@ -211,6 +211,9 @@ namespace GSC.Api.Controllers.Volunteer
                     return NotFound();
 
                 _volunteerRepository.Delete(record);
+
+                _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Deleted, record.Id,
+                null, null);
             }
 
             _uow.Save();
@@ -229,6 +232,9 @@ namespace GSC.Api.Controllers.Volunteer
                     return NotFound();
 
                 _volunteerRepository.Active(record);
+
+                _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Activated, record.Id,
+               null, null);
             }
 
             _uow.Save();
