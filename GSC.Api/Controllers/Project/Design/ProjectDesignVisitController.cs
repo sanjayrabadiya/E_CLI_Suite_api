@@ -6,8 +6,10 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
+using GSC.Helper;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.Project.Design;
+using GSC.Shared.Extension;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.Design
@@ -121,6 +123,13 @@ namespace GSC.Api.Controllers.Project.Design
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var lastForm = _projectDesignVisitRepository.Find(projectDesignVisitDto.Id);
+            if (lastForm.Description == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't edit visit!");
+                return BadRequest(ModelState);
+            }
+
             var projectDesignVisit = _mapper.Map<ProjectDesignVisit>(projectDesignVisitDto);
 
             var validateMessage = _projectDesignVisitRepository.Duplicate(projectDesignVisit);
@@ -145,6 +154,11 @@ namespace GSC.Api.Controllers.Project.Design
 
             if (visit == null) return NotFound();
 
+            if (visit.DisplayName == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't delete visit!");
+                return BadRequest(ModelState);
+            }
 
             var checkVersion = _projectDesignVisitRepository.CheckStudyVersion(visit.ProjectDesignPeriodId);
 

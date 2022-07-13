@@ -76,6 +76,9 @@ namespace GSC.Api.Controllers.Screening
             if (screeningEntryDto.AttendanceId == 0 || screeningEntryDto.AttendanceId == null)
                 throw new Exception("Not found Attendance");
 
+            var attendance = _attendanceRepository.Find((int)screeningEntryDto.AttendanceId);
+
+            screeningEntryDto.StudyVersion = attendance.StudyVersion;
             screeningEntryDto.ScreeningDate=screeningEntryDto.ScreeningDate==null ? DateTime.Now : screeningEntryDto.ScreeningDate;
 
             var screeningEntry = _mapper.Map<ScreeningEntry>(screeningEntryDto);

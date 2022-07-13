@@ -7,9 +7,11 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -92,6 +94,13 @@ namespace GSC.Api.Controllers.Master
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var lastDomainClass = _domainClassRepository.Find(domainClassDto.Id);
+            if (lastDomainClass.DomainClassCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't edit record!");
+                return BadRequest(ModelState);
+            }
+
             var domainClass = _mapper.Map<DomainClass>(domainClassDto);
             domainClass.Id = domainClassDto.Id;
 
@@ -117,6 +126,12 @@ namespace GSC.Api.Controllers.Master
 
             if (record == null)
                 return NotFound();
+
+            if (record.DomainClassCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't delete record!");
+                return BadRequest(ModelState);
+            }
 
             _domainClassRepository.Delete(record);
 

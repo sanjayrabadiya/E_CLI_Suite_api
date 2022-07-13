@@ -27,7 +27,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
-
+        private readonly IDomainRepository _domainRepository;
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IVariabeLanguageRepository _variabeLanguageRepository;
@@ -39,6 +39,7 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             IUnitOfWork uow, IMapper mapper,
             IVariableRepository variableRepository,
+            IDomainRepository domainRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
             IVariabeValueLanguageRepository variableValueLanguageRepository,
@@ -57,6 +58,7 @@ namespace GSC.Api.Controllers.Project.Design
             _variableNoteLanguageRepository = variableNoteLanguageRepository;
             _variableValueLanguageRepository = variableValueLanguageRepository;
             _variabeLanguageRepository = variabeLanguageRepository;
+            _domainRepository = domainRepository;
         }
 
         [HttpGet("{id}")]
@@ -90,6 +92,13 @@ namespace GSC.Api.Controllers.Project.Design
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             variableDto.Id = 0;
+
+            var DomainCode = _domainRepository.Find((int)variableDto.DomainId).DomainCode;
+            if (DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't add record!");
+                return BadRequest(ModelState);
+            }
 
             if (variableDto.Values != null)
                 variableDto.Values = variableDto.Values.Where(x => !x.IsDeleted).ToList();
@@ -142,6 +151,14 @@ namespace GSC.Api.Controllers.Project.Design
 
             var variable = _mapper.Map<ProjectDesignVariable>(variableDto);
 
+            var lastvariable = _projectDesignVariableRepository.Find(variableDto.Id);
+            var DomainCode = _domainRepository.Find((int)lastvariable.DomainId).DomainCode;
+            if (DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't edit record!");
+                return BadRequest(ModelState);
+            }
+
             var validate = _projectDesignVariableRepository.Duplicate(variable);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -180,6 +197,13 @@ namespace GSC.Api.Controllers.Project.Design
 
             if (record == null)
                 return NotFound();
+
+            record.Domain = _domainRepository.Find((int)record.DomainId);
+            if (record.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't delete record!");
+                return BadRequest(ModelState);
+            }
 
             if (record.VariableId != null)
             {

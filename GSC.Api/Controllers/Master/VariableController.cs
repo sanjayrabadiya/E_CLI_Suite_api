@@ -8,9 +8,11 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +33,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
         private readonly IGSCContext _context;
+        private readonly IDomainRepository _domainRepository;
 
         public VariableController(IVariableRepository variableRepository,
             IVariableValueRepository variableValueRepository,
@@ -40,6 +43,7 @@ namespace GSC.Api.Controllers.Master
             IJwtTokenAccesser jwtTokenAccesser,
             //  IVariableRemarksRepository variableRemarksRepository,
             IVariableTemplateRepository variableTemplateRepository,
+            IDomainRepository domainRepository,
             IVariableTemplateDetailRepository variableTemplateDetailRepository)
         {
             _variableTemplateRepository = variableTemplateRepository;
@@ -53,6 +57,7 @@ namespace GSC.Api.Controllers.Master
             _jwtTokenAccesser = jwtTokenAccesser;
             _variableTemplateDetailRepository = variableTemplateDetailRepository;
             _context = context;
+            _domainRepository = domainRepository;
         }
 
         // GET: api/<controller>
@@ -75,6 +80,7 @@ namespace GSC.Api.Controllers.Master
             //    variable.Values = variable.Values.Where(x => x.DeletedDate == null).ToList();
 
             var variableDto = _mapper.Map<VariableDto>(variable);
+            
             return Ok(variableDto);
         }
 
@@ -116,6 +122,14 @@ namespace GSC.Api.Controllers.Master
             if (variableDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var lastVariable = _variableRepository.Find(variableDto.Id);
+            var DomainCode = _domainRepository.Find((int)lastVariable.DomainId).DomainCode;
+            if (DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't edit record!");
+                return BadRequest(ModelState);
+            }
 
             variableDto.Values.Where(s => s.VariableId == null || s.VariableId == 0)
                 .Select(s =>
@@ -195,6 +209,13 @@ namespace GSC.Api.Controllers.Master
 
             if (record == null)
                 return NotFound();
+
+            record.Domain = _domainRepository.Find((int)record.DomainId);
+            if (record.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't delete record!");
+                return BadRequest(ModelState);
+            }
 
             if (record.SystemType != null)
             {

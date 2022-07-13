@@ -40,5 +40,6 @@ namespace GSC.Data.Entities.Attendance
         public AttendaceStatus? Status { get; set; }
         public AttendanceHistory AttendanceHistory { get; set; }
         public virtual ScreeningEntry ScreeningEntry { get; set; }
+        public double? StudyVersion { get; set; }
     }
 }
