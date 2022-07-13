@@ -534,6 +534,13 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.Email, a => a.MapFrom(m => m.Email))
                .ForMember(x => x.EmailTemplate, a => a.MapFrom(m => m.EmailTemplate))
                .ReverseMap();
+
+            CreateMap<SupplyManagementAllocation, SupplyManagementAllocationGridDto>()
+             .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
+             .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+             .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
+             .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
+             .ReverseMap();
         }
     }
 }

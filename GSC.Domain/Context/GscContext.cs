@@ -415,6 +415,8 @@ namespace GSC.Domain.Context
       //  public DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
         public DbSet<ScheduleTerminateDetail> ScheduleTerminateDetail { get; set; }
         public DbSet<TemplateVariableSequenceNoSetting> TemplateVariableSequenceNoSetting { get; set; }
+
+        public DbSet<SupplyManagementAllocation> SupplyManagementAllocation { get; set; }
     }
 
 

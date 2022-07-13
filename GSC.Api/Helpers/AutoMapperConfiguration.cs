@@ -471,6 +471,8 @@ namespace GSC.Api.Helpers
             // CreateMap<DisplayMessageandLableSetting, DisplayMessageandLableSettingDto>().ReverseMap();
             CreateMap<ScheduleTerminateDetail, ScheduleTerminateDetailDto>().ReverseMap();
             CreateMap<TemplateVariableSequenceNoSetting, TemplateVariableSequenceNoSettingDto>().ReverseMap();
+            CreateMap<SupplyManagementAllocation, SupplyManagementAllocationDto>().ReverseMap();
+
         }
     }
 }
