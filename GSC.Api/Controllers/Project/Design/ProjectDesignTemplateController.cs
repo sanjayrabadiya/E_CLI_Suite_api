@@ -13,6 +13,7 @@ using GSC.Respository.LanguageSetup;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Schedule;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -104,6 +105,14 @@ namespace GSC.Api.Controllers.Project.Design
             if (projectDesignTemplateDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var lastForm = _projectDesignTemplateRepository.Find(projectDesignTemplateDto.Id);
+            var DomainCode = _domainRepository.Find((int)lastForm.DomainId).DomainCode;
+            if (DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't edit record!");
+                return BadRequest(ModelState);
+            }
 
             var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(projectDesignTemplateDto);
 
@@ -457,6 +466,14 @@ namespace GSC.Api.Controllers.Project.Design
 
             if (record == null)
                 return NotFound();
+
+            record.Domain = _domainRepository.Find((int)record.DomainId);
+            if (record.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't delete record!");
+                return BadRequest(ModelState);
+            }
+
             // added by vipul validation if template variable use in visit status than it's not deleted on 24092020
             var Exists = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null).Any();
             if (Exists)

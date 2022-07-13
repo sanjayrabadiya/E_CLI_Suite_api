@@ -12,6 +12,7 @@ using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,6 +30,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IVariableTemplateNoteRepository _variableTemplateNoteRepository;
         private readonly IGSCContext _context;
+        private readonly IDomainRepository _domainRepository;
 
         public VariableTemplateController(IVariableTemplateRepository variableTemplateRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -37,6 +39,7 @@ namespace GSC.Api.Controllers.Master
             IJwtTokenAccesser jwtTokenAccesser,
             IVariableTemplateDetailRepository variableTemplateDetailRepository,
             IVariableTemplateNoteRepository variableTemplateNoteRepository,
+            IDomainRepository domainRepository,
             IGSCContext context)
         {
             _variableTemplateRepository = variableTemplateRepository;
@@ -47,6 +50,7 @@ namespace GSC.Api.Controllers.Master
             _jwtTokenAccesser = jwtTokenAccesser;
             _variableTemplateDetailRepository = variableTemplateDetailRepository;
             _variableTemplateNoteRepository = variableTemplateNoteRepository;
+            _domainRepository = domainRepository;
             _context = context;
         }
 
@@ -125,6 +129,14 @@ namespace GSC.Api.Controllers.Master
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var lastForm = _variableTemplateRepository.Find(variableTemplateDto.Id);
+            var DomainCode = _domainRepository.Find(lastForm.DomainId).DomainCode;
+            if (DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't edit record!");
+                return BadRequest(ModelState);
+            }
+
             var variableTemplate = _mapper.Map<VariableTemplate>(variableTemplateDto);
             var validate = _variableTemplateRepository.Duplicate(variableTemplate);
             if (!string.IsNullOrEmpty(validate))
@@ -199,6 +211,13 @@ namespace GSC.Api.Controllers.Master
 
             if (record == null)
                 return NotFound();
+
+            record.Domain = _domainRepository.Find((int)record.DomainId);
+            if (record.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                ModelState.AddModelError("Message", "Can't delete record!");
+                return BadRequest(ModelState);
+            }
 
             _variableTemplateRepository.Delete(record);
             _uow.Save();

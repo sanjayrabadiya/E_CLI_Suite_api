@@ -6,6 +6,7 @@ using GSC.Helper;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.Screening
@@ -140,5 +141,25 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_dataEntryRespository.GetMyTemplateView(parentProjectId, projectId));
         }
 
+
+        //Add by Tinku Mahato to open multiple visit
+        [HttpPut]
+        [TransactionRequired]
+        [Route("OpenVisits")]
+        public IActionResult OpenVisits([FromBody] List<ScreeningVisitDto> screeningVisitDtos)
+        {
+            foreach (var screeningVisitDto in screeningVisitDtos)
+            {
+                if (_screeningVisitRepository.IsPatientScreeningFailure(screeningVisitDto.ScreeningVisitId))
+                {
+                    ModelState.AddModelError("Message", "You can't change visit status!");
+                    return BadRequest(ModelState);
+                }
+
+                _screeningVisitRepository.OpenVisit(screeningVisitDto);
+            }
+            _uow.Save();
+            return Ok();
+        }
     }
 }

@@ -26,6 +26,7 @@ namespace GSC.Data.Dto.Master
         public List<VariableTemplateDetailDto> VariableTemplateDetails { get; set; }
         public IList<VariableTemplateNoteDto> Notes { get; set; }
         public int? CompanyId { get; set; }
+        public string DomainCode { get; set; }
         //public Activity Activity { get; set; }
         // public bool SystemType { get; set; }
     }

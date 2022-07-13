@@ -36,6 +36,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IImpactService _impactService;
         private readonly IGSCContext _context;
         private readonly IProjectRepository _projectRepository;
+        private readonly IScreeningEntryRepository _screeningEntrytRepository;
         public ScreeningTemplateValueController(IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
             IUploadSettingRepository uploadSettingRepository,
@@ -47,7 +48,8 @@ namespace GSC.Api.Controllers.Screening
             IImpactService impactService,
             IGSCContext context,
             IProjectRepository projectRepository,
-            IProjectDesignVariableRepository projectDesignVariableRepository)
+            IProjectDesignVariableRepository projectDesignVariableRepository,
+            IScreeningEntryRepository screeningEntrytRepository)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
@@ -62,6 +64,7 @@ namespace GSC.Api.Controllers.Screening
             _context = context;
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _projectRepository = projectRepository;
+            _screeningEntrytRepository = screeningEntrytRepository;
         }
 
         [HttpGet("{id}")]
@@ -108,6 +111,8 @@ namespace GSC.Api.Controllers.Screening
             _screeningTemplateValueChildRepository.Save(screeningTemplateValue);
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
+
+            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValueDto);
 
             _uow.Save();
 
@@ -193,6 +198,8 @@ namespace GSC.Api.Controllers.Screening
             _context.Entry(screeningTemplateValue).Property("IsScheduleTerminate").IsModified = false;
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
+
+            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValueDto);
 
             _uow.Save();
 

@@ -64,6 +64,7 @@ namespace GSC.Data.Dto.Master
         public Alignment? Alignment { get; set; }
         public bool CollectionValueDisable { get; set; }
         public ScaleType? ScaleType { get; set; }
+        public string DomainCode { get; set; }
     }
 
     public class VariableGridDto : BaseAuditDto

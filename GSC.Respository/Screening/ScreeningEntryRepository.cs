@@ -159,7 +159,7 @@ namespace GSC.Respository.Screening
             screeningEntry.EntryType = attendace.AttendanceType;
             screeningEntry.ProjectDesignPeriodId = attendace.ProjectDesignPeriodId;
 
-            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId, 0, _jwtTokenAccesser.GetClientDate(), null);
+            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, attendace.ProjectDesignPeriodId, 0, _jwtTokenAccesser.GetClientDate(), attendace.StudyVersion);
 
             attendace.IsProcessed = true;
             _attendanceRepository.Update(attendace);
@@ -297,7 +297,7 @@ namespace GSC.Respository.Screening
             {
                 ScreeningEntryId = x.Id,
                 VolunteerId = x.Attendance.VolunteerId,
-                VolunteerName =string.IsNullOrEmpty(x.Attendance.Volunteer.FullName) ? $"{ x.Attendance.Volunteer.FirstName} {x.Attendance.Volunteer.MiddleName } {x.Attendance.Volunteer.LastName }" : x.Attendance.Volunteer.FullName, // Change by Tinku Mahato for null full name (28/06/2022)
+                VolunteerName = string.IsNullOrEmpty(x.Attendance.Volunteer.FullName) ? $"{ x.Attendance.Volunteer.FirstName} {x.Attendance.Volunteer.MiddleName } {x.Attendance.Volunteer.LastName }" : x.Attendance.Volunteer.FullName, // Change by Tinku Mahato for null full name (28/06/2022)
                 ProjectDesignId = x.ProjectDesignId,
                 ScreeningNo = x.ScreeningNo,
                 VolunteerNumber = x.Attendance.Volunteer.VolunteerNo,
@@ -435,7 +435,7 @@ namespace GSC.Respository.Screening
             var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).ToList().Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
 
             var Period = All.Include(a => a.ProjectDesignPeriod).Include(a => a.ScreeningVisit).ThenInclude(a => a.ScreeningTemplates)
-                 .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId>0 ? a.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+                 .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId > 0 ? a.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 && (lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(a.Id))).ToList();
 
             Period = Period.Where(a => a.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == !lockUnlockDDDto.IsLock).Count() > 0
@@ -454,11 +454,51 @@ namespace GSC.Respository.Screening
         public List<ProjectDropDown> GetSiteByLockUnlock(int parentProjectId, bool isLock)
         {
             var sites = _projectRepository.GetChildProjectDropDown(parentProjectId).Select(s => s.Id).ToList();
-            var siteIds = _context.ScreeningTemplate.Where(q => sites.Contains(q.ScreeningVisit.ScreeningEntry.ProjectId) && q.IsLocked==(!isLock))
+            var siteIds = _context.ScreeningTemplate.Where(q => sites.Contains(q.ScreeningVisit.ScreeningEntry.ProjectId) && q.IsLocked == (!isLock))
                 .Select(s => s.ScreeningVisit.ScreeningEntry.ProjectId).Distinct().ToList();
 
             var resultSites = _projectRepository.GetChildProjectDropDown(parentProjectId).Where(q => siteIds.Contains(q.Id)).ToList();
             return resultSites;
+        }
+
+        public void SetFitnessValue(ScreeningTemplateValueDto screeningTemplateValueDto)
+        {
+            var screeningEntry = All.Where(x => x.Id == screeningTemplateValueDto.ScreeningEntryId).FirstOrDefault();
+
+            var projectDesignVariable = _context.ProjectDesignVariable.Include(x => x.Domain).Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).FirstOrDefault();
+
+            if (projectDesignVariable.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            {
+                if (projectDesignVariable.DesignOrder == 3 || projectDesignVariable.DesignOrder == 4 || projectDesignVariable.DesignOrder == 5)
+                {
+                    if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Note.GetDescription())
+                    {
+                        screeningEntry.FitnessNotes = screeningTemplateValueDto.Value;
+                    }
+                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.ProjectNumber.GetDescription())
+                    {
+                        screeningEntry.ProjectNo = screeningTemplateValueDto.Value;
+                    }
+                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Reason.GetDescription())
+                    {
+                        screeningEntry.FitnessReason = screeningTemplateValueDto.Value;
+                    }
+                }
+
+                if (projectDesignVariable.DesignOrder == 1 || projectDesignVariable.DesignOrder == 2)
+                {
+                    if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.FitnessFit.GetDescription())
+                    {
+                        screeningEntry.IsFitnessFit = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
+                    }
+                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Enrolled.GetDescription())
+                    {
+                        screeningEntry.IsEnrolled = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
+                    }
+                }
+
+                Update(screeningEntry);
+            }
         }
     }
 }

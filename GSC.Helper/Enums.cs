@@ -871,4 +871,18 @@ namespace GSC.Helper
         [Description("Smiley")] Smiley = 3
     }
 
+    public enum ScreeningFitnessFit : short
+    {
+        [Description("FitnessFit")] FitnessFit = 1
+    }
+
+    public enum ScreeningFitnessFitVariable : short
+    {
+        [Description("FF001")] FitnessFit = 1,
+        [Description("FF002")] Enrolled = 2,
+        [Description("FF003")] ProjectNumber = 3,
+        [Description("FF004")] Reason = 4,
+        [Description("FF005")] Note = 5,
+    }
+
 }

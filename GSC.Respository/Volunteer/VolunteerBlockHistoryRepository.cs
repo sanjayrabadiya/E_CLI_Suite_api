@@ -29,5 +29,11 @@ namespace GSC.Respository.Volunteer
             return All.Where(x => x.DeletedDate == null && x.VolunteerId == volunteerId)
                 .ProjectTo<VolunteerBlockHistoryGridDto>(_mapper.ConfigurationProvider).OrderByDescending(t => t.Id).ToList();
         }
+
+        public IList<VolunteerBlockHistoryGridDto> GetTemporaryVolunteer()
+        {
+            return All.Where(x => x.DeletedDate == null && x.ToDate != null && x.ToDate <= System.DateTime.Now)
+                .ProjectTo<VolunteerBlockHistoryGridDto>(_mapper.ConfigurationProvider).OrderByDescending(t => t.Id).ToList();
+        }
     }
 }
