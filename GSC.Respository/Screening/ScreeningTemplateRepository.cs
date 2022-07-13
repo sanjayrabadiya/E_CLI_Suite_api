@@ -782,7 +782,7 @@ namespace GSC.Respository.Screening
 
             var screeningEntry = _context.ScreeningEntry.Where(r => r.ProjectDesignId == ProjectDesignId);
 
-            if (lockUnlockParams.ProjectId!=null) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+            if (lockUnlockParams.ProjectId != null) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 screeningEntry = screeningEntry.Where(r => r.ProjectId == lockUnlockParams.ProjectId);
 
             if (lockUnlockParams.SubjectIds != null && lockUnlockParams.SubjectIds.Length > 0)
@@ -909,7 +909,7 @@ namespace GSC.Respository.Screening
 
             var Templates = All.Include(a => a.ProjectDesignTemplate).Include(a => a.ScreeningVisit)
                 .ThenInclude(a => a.ScreeningEntry)
-                .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId>0 ? a.ScreeningVisit.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningVisit.ScreeningEntry.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+                .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId > 0 ? a.ScreeningVisit.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningVisit.ScreeningEntry.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 ).ToList();
 
             if (lockUnlockDDDto.SubjectIds != null)
@@ -1388,6 +1388,62 @@ namespace GSC.Respository.Screening
                 }
             }
             return str;
+        }
+
+        // Screening Grid View
+        public IList<DesignScreeningTemplateDto> GetScreeningGridView(DesignScreeningTemplateDto designTemplateDto, int ScreeningTemplateId)
+        {
+            var results = new List<DesignScreeningTemplateDto>();
+            var screeningTemplates = All.Where(x => x.Id == ScreeningTemplateId || x.ParentId == ScreeningTemplateId).ToList();
+            foreach (var item in screeningTemplates)
+            {
+
+                var repatTemplate = designTemplateDto.DeepCopy();
+
+                var values = GetScreeningValues(item.Id);
+                values.ForEach(t =>
+                {
+                    var ScreeningTemplateValueChild = GetScreeningTemplateValueChild(t.Id);
+                    var variable = repatTemplate.Variables.FirstOrDefault(v => v.ProjectDesignVariableId == t.ProjectDesignVariableId);
+                    if (variable != null)
+                    {
+                        variable.Id = t.Id;
+                        variable.ScreeningValue = t.Value;
+                        variable.ScreeningTemplateValueId = t.Id;
+
+                        if (variable.Values != null && t.Value != "" && t.Value != null && (variable.CollectionSource == CollectionSources.RadioButton || variable.CollectionSource == CollectionSources.ComboBox
+                       || variable.CollectionSource == CollectionSources.NumericScale))
+                        {
+                            if (variable.CollectionSource == CollectionSources.NumericScale)
+                            {
+                                if (t.Value == "0")
+                                    variable.ScreeningValue = "";
+                                else
+                                    variable.ScreeningValue = variable.Values.Where(x => x.Id == Convert.ToInt32(t.Value)).FirstOrDefault().ValueName.ToString();
+                            }
+                            else
+                                variable.ScreeningValue = variable.Values.Where(x => x.Id == Convert.ToInt32(t.Value)).FirstOrDefault().ValueName.ToString();
+                        }
+                        if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
+                        {
+                            if (variable.CollectionSource == CollectionSources.CheckBox)
+                            {
+                                if (t.Value == "true")
+                                    variable.ScreeningValue = _context.ProjectDesignVariableValue.FirstOrDefault(x => x.ProjectDesignVariable.Id == t.ProjectDesignVariableId && x.DeletedDate == null).ValueName;
+                                else
+                                    variable.ScreeningValue = String.Empty;
+                            }
+                            else
+                            {
+                                var childValue = t.Children.Where(v => v.Value == "true").Select(x => x.ProjectDesignVariableValueId).ToList();
+                                variable.ScreeningValue = string.Join(",", _context.ProjectDesignVariableValue.Where(x => childValue.Contains(x.Id)).Select(s => s.ValueName));
+                            }
+                        }
+                    }
+                });
+                results.Add(repatTemplate);
+            }
+            return results;
         }
     }
 }

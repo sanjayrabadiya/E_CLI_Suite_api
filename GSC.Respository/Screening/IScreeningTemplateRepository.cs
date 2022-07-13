@@ -35,5 +35,7 @@ namespace GSC.Respository.Screening
         IList<ScheduleDueReport> GetScheduleDueReport(ScheduleDueReportSearchDto filters);
 
         void SendVariableEmail(ScreeningTemplateValueDto screeningTemplateValueDto, ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto);
+        //Screening Grid view
+        IList<DesignScreeningTemplateDto> GetScreeningGridView(DesignScreeningTemplateDto designTemplateDto, int ScreeningTemplateId);
     }
 }

@@ -79,6 +79,12 @@ namespace GSC.Shared.Extension
             return JsonConvert.DeserializeObject<T>(jsonData);
         }
 
+        public static T DeepCopy<T>(this T self)
+        {
+            var serialized = JsonConvert.SerializeObject(self);
+            return JsonConvert.DeserializeObject<T>(serialized);
+        }
+
         public static string GetDescription(this Enum value)
         {
             if (value == null) return "";
