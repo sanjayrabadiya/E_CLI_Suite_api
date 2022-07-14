@@ -58,7 +58,7 @@ namespace GSC.Data.Dto.Volunteer
         public bool IsDeleteRole { get; set; }
         public bool IsScreening { get; set; }
 
-     
+        public string ContactNo { get; set; }
         public int? CompanyId { get; set; }
 
     }

@@ -464,6 +464,7 @@ namespace GSC.Respository.Screening
         public void SetFitnessValue(ScreeningTemplateValueDto screeningTemplateValueDto)
         {
             var screeningEntry = All.Where(x => x.Id == screeningTemplateValueDto.ScreeningEntryId).FirstOrDefault();
+            var ScreeningHistory = _context.ScreeningHistory.Where(x => x.ScreeningEntryId == screeningTemplateValueDto.ScreeningEntryId).FirstOrDefault();
 
             var projectDesignVariable = _context.ProjectDesignVariable.Include(x => x.Domain).Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).FirstOrDefault();
 
@@ -478,10 +479,12 @@ namespace GSC.Respository.Screening
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.ProjectNumber.GetDescription())
                     {
                         screeningEntry.ProjectNo = screeningTemplateValueDto.Value;
+                        ScreeningHistory.ProjectNumber = screeningTemplateValueDto.Value;
                     }
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Reason.GetDescription())
                     {
                         screeningEntry.FitnessReason = screeningTemplateValueDto.Value;
+                        ScreeningHistory.Reason = screeningTemplateValueDto.Value;
                     }
                 }
 
@@ -494,10 +497,12 @@ namespace GSC.Respository.Screening
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Enrolled.GetDescription())
                     {
                         screeningEntry.IsEnrolled = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
+                        ScreeningHistory.Enrolled = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
                     }
                 }
 
                 Update(screeningEntry);
+                _context.ScreeningHistory.Update(ScreeningHistory);
             }
         }
     }
