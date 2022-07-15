@@ -69,7 +69,7 @@ namespace GSC.Data.Dto.Project.Design
         public EditCheckTargetValidation EditCheckValidation { get; set; }
         public Alignment? Alignment { get; set; }
         public IList<ProjectDesignVariableEncryptRoleDto> Roles { get; set; } = null;
-        public int? LargeStep { get; set; }
+        public double? LargeStep { get; set; }
         public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
         public bool CollectionValueDisable { get; set; }
@@ -133,7 +133,7 @@ namespace GSC.Data.Dto.Project.Design
         public Alignment? Alignment { get; set; }
 
         public int? RelationProjectDesignVariableId { get; set; }
-        public int? LargeStep { get; set; }
+        public double? LargeStep { get; set; }
         public double? StudyVersion { get; set; }
         public double? InActiveVersion { get; set; }
         public int? LabManagementUploadExcelDataId { get; set; }

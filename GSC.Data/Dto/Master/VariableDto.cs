@@ -59,7 +59,7 @@ namespace GSC.Data.Dto.Master
         public DateValidateType? DateValidate { get; set; }
 
         public int? CompanyId { get; set; }
-        public int? LargeStep { get; set; }
+        public double? LargeStep { get; set; }
         //   public IList<VariableRemarks> Remarks { get; set; } = null;
         public Alignment? Alignment { get; set; }
         public bool CollectionValueDisable { get; set; }
@@ -91,7 +91,7 @@ namespace GSC.Data.Dto.Master
         public string LowRangeValue { get; set; }
         public string HighRangeValue { get; set; }
         public string CollectionValue { get; set; }
-        public int? LargeStep { get; set; }
+        public double? LargeStep { get; set; }
         public VariableCategoryType? SystemType { get; set; }
     }
 
@@ -163,7 +163,7 @@ namespace GSC.Data.Dto.Master
         public string Note { get; set; }
         public string ValidationMessage { get; set; }
         public Alignment? Alignment { get; set; }
-        public int? LargeStep { get; set; }
+        public double? LargeStep { get; set; }
         public bool HasComments { get; set; }
         public bool IsReviewPerson { get; set; }
         public CtmsCommentStatus QueryStatus { get; set; }
