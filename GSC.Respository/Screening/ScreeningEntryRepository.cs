@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;
@@ -43,6 +45,7 @@ namespace GSC.Respository.Screening
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IAttendanceBarcodeGenerateRepository _attendanceBarcodeGenerateRepository;
+        private readonly IAppSettingRepository _appSettingRepository;
         public ScreeningEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
@@ -56,7 +59,8 @@ namespace GSC.Respository.Screening
             INumberFormatRepository numberFormatRepository,
             IRolePermissionRepository rolePermissionRepository,
              IProjectScheduleRepository projectScheduleRepository,
-             IAttendanceBarcodeGenerateRepository attendanceBarcodeGenerateRepository)
+             IAttendanceBarcodeGenerateRepository attendanceBarcodeGenerateRepository,
+             IAppSettingRepository appSettingRepository)
             : base(context)
         {
             _volunteerRepository = volunteerRepository;
@@ -74,6 +78,7 @@ namespace GSC.Respository.Screening
             _context = context;
             _projectScheduleRepository = projectScheduleRepository;
             _attendanceBarcodeGenerateRepository = attendanceBarcodeGenerateRepository;
+            _appSettingRepository = appSettingRepository;
         }
 
         public ScreeningEntryDto GetDetails(int id)
@@ -109,6 +114,25 @@ namespace GSC.Respository.Screening
 
             bool myReview = false;
             screeningEntryDto.ScreeningVisits = VisitTemplateProcess(screeningEntryDto.Id, workflowlevel, ref myReview);
+
+            if (screeningEntryDto.AttendanceId != null)
+            {
+                var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+                GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
+
+                var attendance = _attendanceRepository.Find((int)screeningEntryDto.AttendanceId);
+
+                var attendanceListByVolunteer = _attendanceRepository.All.Where(x => x.VolunteerId == (int)attendance.VolunteerId && x.DeletedDate == null).ToList();
+
+                screeningEntryDto.AttendanceList = All.Where(x => attendanceListByVolunteer.Select(y => y.Id).ToList().Contains((int)x.AttendanceId))
+                    .Select(z => new VolunteerAttendanceDto
+                    {
+                        ScreeningEntryId = z.Id,
+                        AttendanceId = (int)z.AttendanceId,
+                        ScreeningNo = z.ScreeningNo,
+                        ScreeningDate = DateTime.Parse(z.ScreeningDate.ToString()).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture)
+                    }).ToList();
+            }
 
             screeningEntryDto.IsElectronicSignature = workflowlevel.IsElectricSignature;
 
