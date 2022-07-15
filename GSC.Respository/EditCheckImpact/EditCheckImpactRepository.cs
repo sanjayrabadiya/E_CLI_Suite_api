@@ -141,7 +141,7 @@ namespace GSC.Respository.EditCheckImpact
 
             });
 
-            result = result.Where(x => (x.Status > ScreeningTemplateStatus.Pending && x.IsTarget) || !x.IsTarget).ToList();
+            result = result.Where(x => (x.Status > ScreeningTemplateStatus.Pending && x.IsTarget) || x.ScreeningTemplateId == screeningTemplateBasic.Id || !x.IsTarget).ToList();
 
             return TargetValidateProcess(result);
         }

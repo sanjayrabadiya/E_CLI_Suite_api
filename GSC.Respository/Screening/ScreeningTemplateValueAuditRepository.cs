@@ -385,8 +385,8 @@ namespace GSC.Respository.Screening
                             worksheet.Row(j).Cell(10).SetValue(d.NewValue);
                         }
                         #endregion old value
-                       // worksheet.Row(j).Cell(9).SetValue(d.OldValue);
-                       // worksheet.Row(j).Cell(10).SetValue(d.NewValue);
+                        // worksheet.Row(j).Cell(9).SetValue(d.OldValue);
+                        // worksheet.Row(j).Cell(10).SetValue(d.NewValue);
                         worksheet.Row(j).Cell(11).SetValue(d.User);
                         worksheet.Row(j).Cell(12).SetValue(d.Role);
                         worksheet.Row(j).Cell(13).SetValue(d.Reason);
@@ -445,7 +445,7 @@ namespace GSC.Respository.Screening
             audit.IpAddress = _jwtTokenAccesser.IpAddress;
             audit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
 
-            if (String.IsNullOrEmpty(audit.UserName) || audit.UserName.ToLower() !="system".ToLower())
+            if (String.IsNullOrEmpty(audit.UserName) || audit.UserName.ToLower() != "system".ToLower())
             {
                 audit.UserName = _jwtTokenAccesser.UserName;
                 audit.UserRole = _jwtTokenAccesser.RoleName;
