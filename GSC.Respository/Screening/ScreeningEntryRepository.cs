@@ -306,8 +306,8 @@ namespace GSC.Respository.Screening
                 //if (status > 0)
                 //    screeningEntries = screeningEntries.Where(x => x.Status == searchParam.ScreeningStatus);
 
-                if (searchParam.IsFitnessFit.HasValue)
-                    screeningEntries = screeningEntries.Where(x => x.IsFitnessFit == searchParam.IsFitnessFit);
+                //if (searchParam.IsFitnessFit.HasValue)
+                //    screeningEntries = screeningEntries.Where(x => x.IsFitnessFit == searchParam.IsFitnessFit);
             }
 
             var role = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_underTesting");
@@ -332,7 +332,7 @@ namespace GSC.Respository.Screening
                 ScreeningDate = x.ScreeningDate,
                 AttendanceDate = x.Attendance.AttendanceDate,
                 AttendedBy = x.Attendance.User.UserName,
-                IsFitnessFit = x.IsFitnessFit == null ? "" : x.IsFitnessFit == true ? "Yes" : "No"
+                IsFitnessFit = x.IsFitnessFit == null ? "No" : x.IsFitnessFit == true ? "Yes" : "No"
             }).ToList();
 
             if (searchParam.Id > 0)
@@ -341,6 +341,10 @@ namespace GSC.Respository.Screening
             }
 
             items.AddRange(attendanceResult);
+
+            if (searchParam.IsFitnessFit.HasValue)
+                items = items.Where(x => x.IsFitnessFit == (searchParam.IsFitnessFit == true && searchParam.IsFitnessFit != null  ? "Yes" : "No")).ToList();
+
             return items.OrderByDescending(x => x.ScreeningDate).ToList();
         }
 
