@@ -335,6 +335,11 @@ namespace GSC.Respository.Screening
                 IsFitnessFit = x.IsFitnessFit == null ? "" : x.IsFitnessFit == true ? "Yes" : "No"
             }).ToList();
 
+            if (searchParam.Id > 0)
+            {
+                items = items.Where(x => x.VolunteerId == searchParam.Id).ToList();
+            }
+
             items.AddRange(attendanceResult);
             return items.OrderByDescending(x => x.ScreeningDate).ToList();
         }
@@ -372,6 +377,24 @@ namespace GSC.Respository.Screening
             if (attendanceIds == null || attendanceIds.Count == 0) return new List<DropDownDto>();
 
             return attendanceIds;
+        }
+
+        public IList<DropDownDto> VolunteerSearch(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText)) return new List<DropDownDto>();
+            searchText = searchText.Trim();
+            var volunterIds = _volunteerRepository.AutoCompleteSearch(searchText, true);
+            if (volunterIds == null || volunterIds.Count == 0) return new List<DropDownDto>();
+
+            var query = _context.Volunteer.Where(x => volunterIds.Select(z => z.Id).Contains(x.Id)
+                        && x.Attendances.Any(t => t.DeletedDate == null && t.AttendanceType == DataEntryType.Screening))
+                        .Select(t => new DropDownDto
+                        {
+                            Id = t.Id,
+                            Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
+                        }).ToList();
+
+            return query;
         }
 
 
