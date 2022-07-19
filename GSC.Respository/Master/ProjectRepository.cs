@@ -739,6 +739,7 @@ namespace GSC.Respository.Master
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                     && x.DeletedDate == null
                     && x.IsStatic == isStatic
+                    && x.ParentProjectId == null
                     && projectList.Any(c => c == x.Id))
                 .Select(c => new ProjectDropDown
                 {

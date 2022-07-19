@@ -294,14 +294,14 @@ namespace GSC.Respository.Screening
                     screeningEntries = screeningEntries.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
                 }
 
-                if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
-                    screeningEntries = screeningEntries.Where(x =>
-                        x.ScreeningDate.Date >= searchParam.FromDate.Value.Date &&
-                        x.ScreeningDate.Date <= searchParam.ToDate.Value.Date);
+                //if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
+                //    screeningEntries = screeningEntries.Where(x =>
+                //        x.ScreeningDate.Date >= searchParam.FromDate.Value.Date &&
+                //        x.ScreeningDate.Date <= searchParam.ToDate.Value.Date);
 
-                if (searchParam.FromDate.HasValue && searchParam.ToDate == null)
-                    screeningEntries =
-                        screeningEntries.Where(x => x.ScreeningDate.Date == searchParam.FromDate.Value.Date);
+                //if (searchParam.FromDate.HasValue && searchParam.ToDate == null)
+                //    screeningEntries =
+                //        screeningEntries.Where(x => x.ScreeningDate.Date == searchParam.FromDate.Value.Date);
 
                 //if (status > 0)
                 //    screeningEntries = screeningEntries.Where(x => x.Status == searchParam.ScreeningStatus);
@@ -343,7 +343,17 @@ namespace GSC.Respository.Screening
             items.AddRange(attendanceResult);
 
             if (searchParam.IsFitnessFit.HasValue)
-                items = items.Where(x => x.IsFitnessFit == (searchParam.IsFitnessFit == true && searchParam.IsFitnessFit != null  ? "Yes" : "No")).ToList();
+                items = items.Where(x => x.IsFitnessFit == (searchParam.IsFitnessFit == true && searchParam.IsFitnessFit != null ? "Yes" : "No")).ToList();
+
+            if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
+                items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date >= searchParam.FromDate.Value.Date &&
+                    x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
+
+            if (searchParam.FromDate.HasValue && searchParam.ToDate == null)
+                items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date >= searchParam.FromDate.Value.Date).ToList();
+
+            if (searchParam.ToDate.HasValue && searchParam.FromDate == null)
+                items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
 
             return items.OrderByDescending(x => x.ScreeningDate).ToList();
         }

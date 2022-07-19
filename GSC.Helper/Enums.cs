@@ -189,7 +189,8 @@ namespace GSC.Helper
         VolunteerAddress = 2,
         VolunteerContact = 3,
         VolunteerDocument = 4,
-        VolunteerLanguage = 5
+        VolunteerLanguage = 5,
+        VolunteerScreening = 6,
     }
 
     public enum ActivityMode : short
