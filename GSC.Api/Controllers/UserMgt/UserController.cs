@@ -113,6 +113,9 @@ namespace GSC.Api.Controllers.UserMgt
                     {
                         item.Role = string.Join(", ", user.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList());
                         item.ProfilePicPath = imageUrl + (user.ProfilePic ?? DocumentService.DefulatProfilePic);
+                        item.CreatedByUser= _context.Users.FirstOrDefault(q => q.Id==(user.CreatedBy!=null ? user.CreatedBy.Value : 0))?.UserName;
+                        item.ModifiedByUser= _context.Users.FirstOrDefault(q => q.Id==(user.ModifiedBy!=null ? user.ModifiedBy.Value : 0))?.UserName;
+                        item.DeletedByUser= _context.Users.FirstOrDefault(q => q.Id==(user.DeletedBy!=null ? user.DeletedBy.Value : 0))?.UserName;
                     }
                 }
                 return Ok(data.Result.Data);
