@@ -275,8 +275,7 @@ namespace GSC.Respository.Screening
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<AttendanceScreeningGridDto>();
 
-            var screeningEntries = All.Where(t => t.DeletedDate == null
-                                                  && projectList.Any(c => c == t.ProjectId))
+            var screeningEntries = All.Where(t => t.DeletedDate == null && projectList.Any(c => c == t.ProjectId))
                 .AsQueryable();
 
             if (searchParam.Id > 0)
@@ -355,7 +354,7 @@ namespace GSC.Respository.Screening
             if (searchParam.ToDate.HasValue && searchParam.FromDate == null)
                 items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
 
-            return items.OrderByDescending(x => x.ScreeningDate).ToList();
+            return items.OrderByDescending(x => x.ScreeningDate ?? DateTime.MaxValue).ToList();
         }
 
 
