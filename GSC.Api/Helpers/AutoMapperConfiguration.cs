@@ -472,7 +472,7 @@ namespace GSC.Api.Helpers
             CreateMap<ScheduleTerminateDetail, ScheduleTerminateDetailDto>().ReverseMap();
             CreateMap<TemplateVariableSequenceNoSetting, TemplateVariableSequenceNoSettingDto>().ReverseMap();
             CreateMap<SupplyManagementAllocation, SupplyManagementAllocationDto>().ReverseMap();
-
+            CreateMap<SupplyManagementKIT, SupplyManagementKITDto>().ReverseMap();
         }
     }
 }

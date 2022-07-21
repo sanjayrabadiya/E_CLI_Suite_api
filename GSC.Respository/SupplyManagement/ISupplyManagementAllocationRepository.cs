@@ -20,5 +20,7 @@ namespace GSC.Respository.SupplyManagement
         object GetProductTypeByVisit(int visitId);
 
         string CheckDuplicate(SupplyManagementAllocation obj);
+
+        List<DropDownDto> GetPharmacyStudyProductTypeDropDown(int ProjectId);
     }
 }

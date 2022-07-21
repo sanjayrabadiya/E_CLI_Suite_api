@@ -64,6 +64,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+           
             _supplyManagementAllocationRepository.Add(centralDepot);
             if (_uow.Save() <= 0) throw new Exception("Creating central depot failed on save.");
             return Ok(centralDepot.Id);
@@ -152,6 +153,12 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult GetProductTypeByVisit(int visitId)
         {
             return Ok(_supplyManagementAllocationRepository.GetProductTypeByVisit(visitId));
+        }
+        [HttpGet]
+        [Route("GetPharmacyStudyProductTypeDropDown/{projectId}")]
+        public IActionResult GetPharmacyStudyProductTypeDropDown(int projectId)
+        {
+            return Ok(_supplyManagementAllocationRepository.GetPharmacyStudyProductTypeDropDown(projectId));
         }
     }
 }

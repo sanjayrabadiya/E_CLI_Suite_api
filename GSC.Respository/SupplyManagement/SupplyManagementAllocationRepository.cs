@@ -45,12 +45,6 @@ namespace GSC.Respository.SupplyManagement
                     Id = x.Id,
                     Value = x.DisplayName,
                 }).Distinct().ToList();
-            //var randomuploddata = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null)
-            //   .Select(x => x.ProjectId).ToList();
-            //if (randomuploddata != null && randomuploddata.Count() > 0)
-            //{
-            //    return data.Where(x => randomuploddata.Contains(x.Id)).ToList();
-            //}
             return visits;
         }
 
@@ -95,13 +89,13 @@ namespace GSC.Respository.SupplyManagement
                 ExtraData = c.FirstOrDefault().ExtraData
             }).OrderBy(o => o.Id).ToList();
 
-            var randomuploddata = _context.SupplyManagementUploadFile.Where(x => x.DeletedDate == null && x.Status == LabManagementUploadStatus.Approve)
-                .Select(x => x.ProjectId).ToList();
-            if (randomuploddata != null && randomuploddata.Count() > 0)
-            {
-                return data.Where(x => randomuploddata.Contains(x.Id)).ToList();
-            }
-            return null;
+            //var randomuploddata = _context.SupplyManagementUploadFile.Where(x => x.DeletedDate == null && x.Status == LabManagementUploadStatus.Approve)
+            //    .Select(x => x.ProjectId).ToList();
+            //if (randomuploddata != null && randomuploddata.Count() > 0)
+            //{
+            //    return data.Where(x => randomuploddata.Contains(x.Id)).ToList();
+            //}
+            return data;
         }
         public IList<DropDownDto> GetTemplateDropDownByVisitId(int visitId)
         {
@@ -154,6 +148,13 @@ namespace GSC.Respository.SupplyManagement
                 }
             }
             return "";
+        }
+
+        public List<DropDownDto> GetPharmacyStudyProductTypeDropDown(int ProjectId)
+        {
+            return _context.ProductReceipt.Where(c => c.ProjectId == ProjectId && c.DeletedDate == null
+            && c.Status != ProductVerificationStatus.Rejected).Select(c => new DropDownDto { Id = c.PharmacyStudyProductType.Id, Value = c.PharmacyStudyProductType.ProductType.ProductTypeCode + "-" + c.PharmacyStudyProductType.ProductType.ProductTypeName })
+                .OrderBy(o => o.Value).Distinct().ToList();
         }
     }
 }

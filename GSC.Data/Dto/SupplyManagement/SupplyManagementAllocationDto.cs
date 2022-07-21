@@ -12,7 +12,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public int ProjectDesignVisitId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public int ProjectDesignVariableId { get; set; }
-        public string Value { get; set; }
+        public int PharmacyStudyProductTypeId { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
 
@@ -23,7 +23,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public int ProjectDesignVisitId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public int ProjectDesignVariableId { get; set; }
-        public string Value { get; set; }
+        public string ProductTypeName { get; set; }
 
         public string ProjectCode { get; set; }
 

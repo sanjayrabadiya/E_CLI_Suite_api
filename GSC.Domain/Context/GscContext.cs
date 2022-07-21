@@ -417,6 +417,8 @@ namespace GSC.Domain.Context
         public DbSet<TemplateVariableSequenceNoSetting> TemplateVariableSequenceNoSetting { get; set; }
 
         public DbSet<SupplyManagementAllocation> SupplyManagementAllocation { get; set; }
+
+        public DbSet<SupplyManagementKIT> SupplyManagementKIT { get; set; }
     }
 
 

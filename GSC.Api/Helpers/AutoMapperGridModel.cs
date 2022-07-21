@@ -518,13 +518,6 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.StatusName, a => a.MapFrom(m => m.Status.GetDescription()))
                 .ReverseMap();
 
-            //CreateMap<KitManagement, KitManagementGridDto>()
-            //    .ForMember(x => x.ParentProject, a => a.MapFrom(m => m.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
-            //    .ForMember(x => x.Project, a => a.MapFrom(m => m.Project.ProjectCode))
-            //    .ForMember(x => x.ProjectDesignVisit, a => a.MapFrom(m => m.ProjectDesignVisit.DisplayName))
-            //    .ForMember(x => x.PharmacyStudyProductType, a => a.MapFrom(m => m.PharmacyStudyProductType.ProductType.ProductTypeCode))
-            //    .ReverseMap();
-
             CreateMap<SendEmailOnVariableChangeSetting, SendEmailOnVariableChangeSettingGridDto>()
                .ForMember(x => x.ProjectCode, a => a.MapFrom(m => m.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
                .ForMember(x => x.ProjectDesignVisit, a => a.MapFrom(m => m.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
@@ -539,8 +532,16 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
              .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
+             .ForMember(x => x.ProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeCode))
              .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
              .ReverseMap();
+
+            CreateMap<SupplyManagementKIT, SupplyManagementKITGridDto>()
+               .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
+               .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Site.ProjectCode))
+               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+               .ForMember(x => x.ProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeCode))
+               .ForMember(x => x.Reason, x => x.MapFrom(a => a.AuditReason.ReasonName)).ReverseMap();
         }
     }
 }
