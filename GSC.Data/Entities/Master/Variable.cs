@@ -40,7 +40,7 @@ namespace GSC.Data.Entities.Master
         public DateValidateType? DateValidate { get; set; }
         //public IList<VariableRemarks> Remarks { get; set; } = null;
         public Alignment? Alignment { get; set; }
-        public int? LargeStep { get; set; }
+        public double? LargeStep { get; set; }
         public VariableTemplateDetail VariableTemplateDetail { get; set; }
         public VariableCategory VariableCategory { get; set; }
         public ScaleType? ScaleType { get; set; }

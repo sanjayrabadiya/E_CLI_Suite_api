@@ -414,5 +414,13 @@ namespace GSC.Api.Controllers.Screening
 
             return Ok(auditsDto);
         }
+
+        [HttpGet]
+        [Route("GetProjectDesignVariableListForGridView/{id}/{projectDesignTemplateId}")]
+        public IActionResult GetProjectDesignVariableListForGridView([FromRoute] int id, int projectDesignTemplateId)
+        {
+            var designTemplate = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
+            return Ok(_screeningTemplateRepository.GetScreeningGridView(designTemplate, id));
+        }
     }
 }

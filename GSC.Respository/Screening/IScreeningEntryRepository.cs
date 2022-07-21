@@ -19,6 +19,7 @@ namespace GSC.Respository.Screening
         IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock, bool isParent); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
         IList<DropDownDto> GetPeriodByProjectIdIsLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
         IList<DropDownDto> BarcodeSearch(string searchText);
+        IList<DropDownDto> VolunteerSearch(string searchText);
         List<ProjectDropDown> GetSiteByLockUnlock(int parentProjectId, bool isLock); // Add by Tinku for add separate dropdown for parent project (24/06/2022) 
         void SetFitnessValue(ScreeningTemplateValueDto screeningTemplateValueDto);
     }

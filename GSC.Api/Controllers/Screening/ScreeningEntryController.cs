@@ -169,6 +169,13 @@ namespace GSC.Api.Controllers.Screening
             return Ok(result);
         }
 
+        [HttpGet("VolunteerSearch")]
+        public IActionResult VolunteerSearch(string searchText)
+        {
+            var result = _screeningEntryRepository.VolunteerSearch(searchText);
+            return Ok(result);
+        }
+
         [HttpPost]
         [Route("GetScreeningList")]
         public IActionResult GetScreeningList([FromBody] ScreeningSearhParamDto searchParam)

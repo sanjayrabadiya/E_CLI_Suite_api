@@ -7,6 +7,7 @@ using GSC.Data.Dto.Medra;
 using GSC.Data.Dto.Screening;
 using GSC.Domain.Context;
 using GSC.Respository.Attendance;
+using GSC.Respository.Project.Design;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Attendance
@@ -17,20 +18,22 @@ namespace GSC.Api.Controllers.Attendance
         private readonly IAttendanceHistoryRepository _attendanceHistoryRepository;
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IMapper _mapper;
-
+        private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IProjectSubjectRepository _projectSubjectRepository;
         private readonly IUnitOfWork _uow;
 
         public AttendanceController(IAttendanceRepository attendanceRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectSubjectRepository projectSubjectRepository,
-            IAttendanceHistoryRepository attendanceHistoryRepository)
+            IAttendanceHistoryRepository attendanceHistoryRepository,
+            IStudyVersionRepository studyVersionRepository)
         {
             _attendanceRepository = attendanceRepository;
             _uow = uow;
             _mapper = mapper;
             _projectSubjectRepository = projectSubjectRepository;
             _attendanceHistoryRepository = attendanceHistoryRepository;
+            _studyVersionRepository = studyVersionRepository;
         }
 
         [HttpPost]
@@ -70,6 +73,7 @@ namespace GSC.Api.Controllers.Attendance
             }
 
             attendanceDto.Id = 0;
+            attendanceDto.StudyVersion = _studyVersionRepository.GetStudyVersionForLive(attendanceDto.ProjectId);
             var attendance = _mapper.Map<Data.Entities.Attendance.Attendance>(attendanceDto);
             _attendanceRepository.SaveAttendance(attendance);
             if (_uow.Save() <= 0) throw new Exception("Creating attendance failed on save.");

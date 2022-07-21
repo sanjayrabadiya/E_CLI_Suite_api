@@ -60,7 +60,7 @@ namespace GSC.Data.Entities.Project.Design
         public Alignment? Alignment { get; set; }
 
         public IList<ProjectDesignVariableEncryptRole> Roles { get; set; } = null;
-        public int? LargeStep { get; set; }
+        public double? LargeStep { get; set; }
         public AnnotationType AnnotationType { get; set; }
 
         public bool? DisplayStepValue { get; set; }

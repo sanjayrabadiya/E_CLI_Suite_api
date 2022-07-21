@@ -375,6 +375,7 @@ namespace GSC.Respository.Volunteer
                 CreatedByUser = x.CreatedByUser.UserName,
                 ModifiedByUser = x.ModifiedByUser.UserName,
                 DeletedByUser = x.DeletedByUser.UserName,
+                ContactNo = _context.VolunteerContact.Where(c => c.VolunteerId == x.Id && c.IsDefault == true).FirstOrDefault().ContactNo
             }).OrderByDescending(x => x.Id).ToList();
 
             return result;
@@ -427,7 +428,7 @@ namespace GSC.Respository.Volunteer
         public List<DropDownDto> GetPopulationTypeDropDownList()
         {
             return All.Where(x =>
-                   (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate==null && x.PopulationTypeId!=null)
+                   (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && x.PopulationTypeId != null)
                .Select(c => new DropDownDto { Id = c.PopulationTypeId.Value, Value = c.PopulationType.PopulationName, IsDeleted = c.DeletedDate != null }).Distinct().OrderBy(o => o.Value).ToList();
         }
 

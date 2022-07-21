@@ -251,7 +251,7 @@ namespace GSC.Respository.EditCheckImpact
                     Select(a => a.ValueName).ToList());
         }
 
-        public int CollectionValue(string id)
+        public decimal NumericCollectionValue(string id)
         {
             int projectDesignVariableValueId;
 
@@ -260,9 +260,9 @@ namespace GSC.Respository.EditCheckImpact
             var result = _projectDesignVariableValueRepository.All.
                 Where(x => x.Id == projectDesignVariableValueId).Select(t => t.ValueName).FirstOrDefault();
 
-            int value;
+            decimal value;
 
-            int.TryParse(result, out value);
+            decimal.TryParse(result, out value);
 
             return value;
         }

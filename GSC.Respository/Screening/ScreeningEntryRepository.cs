@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Screening;
@@ -43,6 +45,7 @@ namespace GSC.Respository.Screening
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IAttendanceBarcodeGenerateRepository _attendanceBarcodeGenerateRepository;
+        private readonly IAppSettingRepository _appSettingRepository;
         public ScreeningEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
@@ -56,7 +59,8 @@ namespace GSC.Respository.Screening
             INumberFormatRepository numberFormatRepository,
             IRolePermissionRepository rolePermissionRepository,
              IProjectScheduleRepository projectScheduleRepository,
-             IAttendanceBarcodeGenerateRepository attendanceBarcodeGenerateRepository)
+             IAttendanceBarcodeGenerateRepository attendanceBarcodeGenerateRepository,
+             IAppSettingRepository appSettingRepository)
             : base(context)
         {
             _volunteerRepository = volunteerRepository;
@@ -74,6 +78,7 @@ namespace GSC.Respository.Screening
             _context = context;
             _projectScheduleRepository = projectScheduleRepository;
             _attendanceBarcodeGenerateRepository = attendanceBarcodeGenerateRepository;
+            _appSettingRepository = appSettingRepository;
         }
 
         public ScreeningEntryDto GetDetails(int id)
@@ -109,6 +114,25 @@ namespace GSC.Respository.Screening
 
             bool myReview = false;
             screeningEntryDto.ScreeningVisits = VisitTemplateProcess(screeningEntryDto.Id, workflowlevel, ref myReview);
+
+            if (screeningEntryDto.AttendanceId != null)
+            {
+                var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+                GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
+
+                var attendance = _attendanceRepository.Find((int)screeningEntryDto.AttendanceId);
+
+                var attendanceListByVolunteer = _attendanceRepository.All.Where(x => x.VolunteerId == (int)attendance.VolunteerId && x.DeletedDate == null).ToList();
+
+                screeningEntryDto.AttendanceList = All.Where(x => attendanceListByVolunteer.Select(y => y.Id).ToList().Contains((int)x.AttendanceId))
+                    .Select(z => new VolunteerAttendanceDto
+                    {
+                        ScreeningEntryId = z.Id,
+                        AttendanceId = (int)z.AttendanceId,
+                        ScreeningNo = z.ScreeningNo,
+                        ScreeningDate = DateTime.Parse(z.ScreeningDate.ToString()).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture)
+                    }).ToList();
+            }
 
             screeningEntryDto.IsElectronicSignature = workflowlevel.IsElectricSignature;
 
@@ -251,8 +275,7 @@ namespace GSC.Respository.Screening
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return new List<AttendanceScreeningGridDto>();
 
-            var screeningEntries = All.Where(t => t.DeletedDate == null
-                                                  && projectList.Any(c => c == t.ProjectId))
+            var screeningEntries = All.Where(t => t.DeletedDate == null && projectList.Any(c => c == t.ProjectId))
                 .AsQueryable();
 
             if (searchParam.Id > 0)
@@ -270,20 +293,20 @@ namespace GSC.Respository.Screening
                     screeningEntries = screeningEntries.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
                 }
 
-                if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
-                    screeningEntries = screeningEntries.Where(x =>
-                        x.ScreeningDate.Date >= searchParam.FromDate.Value.Date &&
-                        x.ScreeningDate.Date <= searchParam.ToDate.Value.Date);
+                //if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
+                //    screeningEntries = screeningEntries.Where(x =>
+                //        x.ScreeningDate.Date >= searchParam.FromDate.Value.Date &&
+                //        x.ScreeningDate.Date <= searchParam.ToDate.Value.Date);
 
-                if (searchParam.FromDate.HasValue && searchParam.ToDate == null)
-                    screeningEntries =
-                        screeningEntries.Where(x => x.ScreeningDate.Date == searchParam.FromDate.Value.Date);
+                //if (searchParam.FromDate.HasValue && searchParam.ToDate == null)
+                //    screeningEntries =
+                //        screeningEntries.Where(x => x.ScreeningDate.Date == searchParam.FromDate.Value.Date);
 
                 //if (status > 0)
                 //    screeningEntries = screeningEntries.Where(x => x.Status == searchParam.ScreeningStatus);
 
-                if (searchParam.IsFitnessFit.HasValue)
-                    screeningEntries = screeningEntries.Where(x => x.IsFitnessFit == searchParam.IsFitnessFit);
+                //if (searchParam.IsFitnessFit.HasValue)
+                //    screeningEntries = screeningEntries.Where(x => x.IsFitnessFit == searchParam.IsFitnessFit);
             }
 
             var role = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_underTesting");
@@ -308,11 +331,30 @@ namespace GSC.Respository.Screening
                 ScreeningDate = x.ScreeningDate,
                 AttendanceDate = x.Attendance.AttendanceDate,
                 AttendedBy = x.Attendance.User.UserName,
-                IsFitnessFit = x.IsFitnessFit == null ? "" : x.IsFitnessFit == true ? "Yes" : "No"
+                IsFitnessFit = x.IsFitnessFit == null ? "No" : x.IsFitnessFit == true ? "Yes" : "No"
             }).ToList();
 
+            if (searchParam.Id > 0)
+            {
+                items = items.Where(x => x.VolunteerId == searchParam.Id).ToList();
+            }
+
             items.AddRange(attendanceResult);
-            return items.OrderByDescending(x => x.ScreeningDate).ToList();
+
+            if (searchParam.IsFitnessFit.HasValue)
+                items = items.Where(x => x.IsFitnessFit == (searchParam.IsFitnessFit == true && searchParam.IsFitnessFit != null ? "Yes" : "No")).ToList();
+
+            if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
+                items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date >= searchParam.FromDate.Value.Date &&
+                    x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
+
+            if (searchParam.FromDate.HasValue && searchParam.ToDate == null)
+                items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date >= searchParam.FromDate.Value.Date).ToList();
+
+            if (searchParam.ToDate.HasValue && searchParam.FromDate == null)
+                items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
+
+            return items.OrderByDescending(x => x.ScreeningDate ?? DateTime.MaxValue).ToList();
         }
 
 
@@ -348,6 +390,24 @@ namespace GSC.Respository.Screening
             if (attendanceIds == null || attendanceIds.Count == 0) return new List<DropDownDto>();
 
             return attendanceIds;
+        }
+
+        public IList<DropDownDto> VolunteerSearch(string searchText)
+        {
+            if (string.IsNullOrWhiteSpace(searchText)) return new List<DropDownDto>();
+            searchText = searchText.Trim();
+            var volunterIds = _volunteerRepository.AutoCompleteSearch(searchText, true);
+            if (volunterIds == null || volunterIds.Count == 0) return new List<DropDownDto>();
+
+            var query = _context.Volunteer.Where(x => volunterIds.Select(z => z.Id).Contains(x.Id)
+                        && x.Attendances.Any(t => t.DeletedDate == null && t.AttendanceType == DataEntryType.Screening))
+                        .Select(t => new DropDownDto
+                        {
+                            Id = t.Id,
+                            Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
+                        }).ToList();
+
+            return query;
         }
 
 
@@ -464,6 +524,7 @@ namespace GSC.Respository.Screening
         public void SetFitnessValue(ScreeningTemplateValueDto screeningTemplateValueDto)
         {
             var screeningEntry = All.Where(x => x.Id == screeningTemplateValueDto.ScreeningEntryId).FirstOrDefault();
+            var ScreeningHistory = _context.ScreeningHistory.Where(x => x.ScreeningEntryId == screeningTemplateValueDto.ScreeningEntryId).FirstOrDefault();
 
             var projectDesignVariable = _context.ProjectDesignVariable.Include(x => x.Domain).Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).FirstOrDefault();
 
@@ -478,10 +539,12 @@ namespace GSC.Respository.Screening
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.ProjectNumber.GetDescription())
                     {
                         screeningEntry.ProjectNo = screeningTemplateValueDto.Value;
+                        ScreeningHistory.ProjectNumber = screeningTemplateValueDto.Value;
                     }
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Reason.GetDescription())
                     {
                         screeningEntry.FitnessReason = screeningTemplateValueDto.Value;
+                        ScreeningHistory.Reason = screeningTemplateValueDto.Value;
                     }
                 }
 
@@ -494,10 +557,12 @@ namespace GSC.Respository.Screening
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Enrolled.GetDescription())
                     {
                         screeningEntry.IsEnrolled = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
+                        ScreeningHistory.Enrolled = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
                     }
                 }
 
                 Update(screeningEntry);
+                _context.ScreeningHistory.Update(ScreeningHistory);
             }
         }
     }

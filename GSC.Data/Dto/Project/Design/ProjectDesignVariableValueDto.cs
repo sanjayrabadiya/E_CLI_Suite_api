@@ -98,7 +98,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool? IsEncrypt { get; set; }
         public string EncryptRole { get; set; }
         public string CollectionValue { get; set; }
-        public int? DisplayValue { get; set; }
+        public double? DisplayValue { get; set; }
         public string AnnotationType { get; set; }
     }
 

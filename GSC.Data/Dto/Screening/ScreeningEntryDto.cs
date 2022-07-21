@@ -36,6 +36,7 @@ namespace GSC.Data.Dto.Screening
         public string FitnessNotes { get; set; }
         public int Progress { get; set; }
         public List<ScreeningVisitTree> ScreeningVisits { get; set; }
+        public List<VolunteerAttendanceDto> AttendanceList { get; set; }
         public string VolunteerName { get; set; }
         public string PatientStatusName { get; set; }
         public ScreeningPatientStatus? PatientStatusId { get; set; }
@@ -46,6 +47,14 @@ namespace GSC.Data.Dto.Screening
         public List<int> ProjectAttendanceTemplateIds { get; set; }
         public bool IsElectronicSignature { get; set; }
         public double? StudyVersion { get; set; }
+    }
+
+    public class VolunteerAttendanceDto 
+    {
+        public int AttendanceId { get; set; }
+        public int ScreeningEntryId { get; set; }
+        public string ScreeningNo { get; set; }
+        public string ScreeningDate { get; set; }
     }
 
     public class ScreeningAuditDto

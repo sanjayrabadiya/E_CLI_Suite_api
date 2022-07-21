@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Common;
 using GSC.Shared.Extension;
 
@@ -26,6 +28,8 @@ namespace GSC.Data.Dto.Screening
 
         public string VolunteerNumber { get; set; }
         public string VolunteerName { get; set; }
+        public int VolunteerId { get; set; }
         public string ScreeningStatus { get; set; }
+        public List<VolunteerAuditTrail> Changes { get; set; }
     }
 }
