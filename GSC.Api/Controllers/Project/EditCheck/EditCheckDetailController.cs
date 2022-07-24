@@ -75,12 +75,6 @@ namespace GSC.Api.Controllers.Project.EditCheck
                     editCheckDetailDto.ProjectDesignVariableId = editCheckDetailDto.VariableIds[i];
                     editCheckDetail = _mapper.Map<EditCheckDetail>(editCheckDetailDto);
 
-                    var validateMsg = _editCheckDetailRepository.Validate(editCheckDetail);
-                    if (!string.IsNullOrEmpty(validateMsg))
-                    {
-                        return BadRequest(validateMsg);
-                    }
-
                     if (editCheckDetailDto.VariableIds.Length > 1 && i > 0)
                         editCheckDetail.StartParens = null;
 
@@ -131,11 +125,6 @@ namespace GSC.Api.Controllers.Project.EditCheck
             {
                 editCheckDetail.StartParens = "";
                 editCheckDetail.EndParens = "";
-            }
-            var validateMsg = _editCheckDetailRepository.Validate(editCheckDetail);
-            if (!string.IsNullOrEmpty(validateMsg))
-            {
-                return BadRequest(validateMsg);
             }
 
             _editCheckDetailRepository.Update(editCheckDetail);
