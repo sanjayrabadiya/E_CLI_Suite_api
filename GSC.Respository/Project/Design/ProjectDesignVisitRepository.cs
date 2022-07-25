@@ -91,6 +91,23 @@ namespace GSC.Respository.Project.Design
             return visits;
         }
 
+        public IList<DropDownDto> GetVisitDropDownByProjectId(int ProjectId)
+        {
+            var visits = All.Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.ProjectId == ProjectId)
+                .OrderBy(t => t.DesignOrder)
+                .Select(t => new DropDownDto
+                {
+                    Id = t.Id,
+                    Value = t.DisplayName,
+                    Code = t.StudyVersion != null || t.InActiveVersion != null ?
+                    "( V : " + t.StudyVersion + (t.StudyVersion != null && t.InActiveVersion != null ? " - " : "" + t.InActiveVersion) + ")" : "",
+                    ExtraData = t.IsNonCRF,
+                    InActive = t.InActiveVersion != null
+                }).ToList();
+
+            return visits;
+        }
+
 
         public IList<ProjectDesignVisitDto> GetVisitList(int projectDesignPeriodId)
         {

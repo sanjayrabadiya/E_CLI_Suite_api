@@ -180,9 +180,10 @@ namespace GSC.Api.Controllers.Screening
         [Route("GetScreeningList")]
         public IActionResult GetScreeningList([FromBody] ScreeningSearhParamDto searchParam)
         {
-            var result = _screeningEntryRepository.GetScreeningList(searchParam);
+            var result = _screeningEntryRepository.GetScreeningDataList(searchParam);
             return Ok(result);
         }
+
         [HttpGet("GetProjectStatusAndLevelDropDown/{parentProjectId}")]
         public IActionResult GetProjectStatusAndLevelDropDown(int parentProjectId)
         {

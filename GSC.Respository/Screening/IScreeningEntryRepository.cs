@@ -14,6 +14,7 @@ namespace GSC.Respository.Screening
         ScreeningEntry SaveScreeningRandomization(SaveRandomizationDto saveRandomizationDto);
         IList<DropDownDto> AutoCompleteSearch(string searchText);
         List<AttendanceScreeningGridDto> GetScreeningList(ScreeningSearhParamDto searchParam);
+        ScreeningGridDto GetScreeningDataList(ScreeningSearhParamDto searchParam);
         List<DropDownDto> GetProjectStatusAndLevelDropDown(int parentProjectId);
         IList<DropDownDto> GetSubjectByProjecId(int projectId);
         IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock, bool isParent); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
