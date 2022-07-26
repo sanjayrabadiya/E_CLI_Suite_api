@@ -562,6 +562,8 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsTemplateSeqNo", DisplayName = "Is Template Sequence No. Enabled?" }); 
             _dictionaries.Add(new Dictionary { FieldName = "IsVariableSeqNo", DisplayName = "Is variable Sequence No. Enabled?" });
 
+            _dictionaries.Add(new Dictionary { FieldName = "ResourceName", DisplayName = "Resource Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "ResourceCode", DisplayName = "Resource Code" });
             _dictionaries.Add(new Dictionary { FieldName = "ScaleType", DisplayName = "Scale Type" });
 
             //schedule column
