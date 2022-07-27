@@ -28,15 +28,15 @@ namespace GSC.Respository.EditCheckImpact
             var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
             if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
-                if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case")))
+                if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
                 {
                     EditCheckResult result = null;
                     var newCase = editCheck.Where(x => x.IsTarget).ToList();
                     foreach (var x in editCheck.Where(x => !x.IsTarget).ToList())
                     {
-                        if (!string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case"))
+                        if (!string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase))
                         {
-                            x.CollectionValue = x.CollectionValue.Replace("End Case", "");
+                            x.CollectionValue = x.CollectionValue.Replace("End Case", "", StringComparison.OrdinalIgnoreCase);
                             newCase.Add(x);
                             result = ValidateRule(newCase.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), true);
                             result.ResultSkip = true;
@@ -53,7 +53,7 @@ namespace GSC.Respository.EditCheckImpact
                         {
                             newCase.Add(x);
                         }
-                       
+
                     }
                     return result;
                 }
@@ -81,16 +81,16 @@ namespace GSC.Respository.EditCheckImpact
             var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
             if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
-                if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case")))
+                if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
                 {
                     EditCheckResult result = null;
                     var message = "";
                     var newCase = editCheck.Where(x => x.IsTarget).ToList();
                     foreach (var x in editCheck.Where(x => !x.IsTarget).ToList())
                     {
-                        if (!string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case"))
+                        if (!string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase))
                         {
-                            x.CollectionValue = x.CollectionValue.Replace("End Case", "");
+                            x.CollectionValue = x.CollectionValue.Replace("End Case", "", StringComparison.OrdinalIgnoreCase);
                             newCase.Add(x);
                             result = ValidateRule(newCase.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), false);
                             result.ResultSkip = true;
