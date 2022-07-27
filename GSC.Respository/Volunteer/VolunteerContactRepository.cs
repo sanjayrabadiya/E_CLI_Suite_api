@@ -29,6 +29,7 @@ namespace GSC.Respository.Volunteer
                     VolunteerId = c.VolunteerId,
                     ContactName = c.ContactName,
                     ContactNo = c.ContactNo,
+                    ContactNoTwo = c.ContactNoTwo,
                     IsDefault = c.IsDefault,
                     IsEmergency = c.IsEmergency,
                     ContactTypeName = c.ContactType.TypeName,

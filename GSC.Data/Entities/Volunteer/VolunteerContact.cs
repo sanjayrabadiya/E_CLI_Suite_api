@@ -13,6 +13,7 @@ namespace GSC.Data.Entities.Volunteer
         public ContactType ContactType { get; set; }
 
         public string ContactNo { get; set; }
+        public string ContactNoTwo { get; set; }
 
         public string ContactName { get; set; }
 

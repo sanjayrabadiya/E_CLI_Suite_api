@@ -451,7 +451,7 @@ namespace GSC.Respository.Screening
 
             if (searchParam.AttendanceDate.HasValue)
             {
-                items = items.Where(x => x.ScreeningDate == null && x.AttendanceDate.Date == searchParam.AttendanceDate.Value.Date).ToList();
+                items = items.Where(x => x.AttendanceDate.Date == searchParam.AttendanceDate.Value.Date).ToList();
             }
 
             //if (searchParam.ToDate.HasValue && searchParam.FromDate == null)

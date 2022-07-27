@@ -132,16 +132,9 @@ namespace GSC.Report
             PdfTextElement indexheader = new PdfTextElement();
 
             tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement(volunteer[0].FullName, headerfont, PdfBrushes.Black);
+            indexheader = new PdfTextElement(volunteer[0].FullName + " (" + volunteer[0].VolunteerNo + ")", headerfont, PdfBrushes.Black);
             indexheader.StringFormat = tocformat;
             tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-
-            tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement(volunteer[0].VolunteerNo, headerfont, PdfBrushes.Black);
-            indexheader.StringFormat = tocformat;
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(tocresult.Bounds.X, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
 
             tocformat = new PdfStringFormat(PdfTextAlignment.Right, PdfVerticalAlignment.Top);
             indexheader = new PdfTextElement(volunteer[0].AliasName, headerfont, PdfBrushes.Black);
@@ -489,7 +482,7 @@ namespace GSC.Report
             tocresult = pdfGrid.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), pdfLayoutFormat);
         }
 
-        private PdfPageTemplateElement AddHeader(PdfDocument doc, bool isClientLogo, bool isCompanyLogo, int ClientId,string ProfilePic)
+        private PdfPageTemplateElement AddHeader(PdfDocument doc, bool isClientLogo, bool isCompanyLogo, int ClientId, string ProfilePic)
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
@@ -520,7 +513,7 @@ namespace GSC.Report
                     header.Graphics.DrawImage(img, imageLocation, imageSize);
                 }
             }
-            if(ProfilePic != "")
+            if (ProfilePic != "")
             {
                 imageSize = new SizeF(65f, 65f);
                 if (File.Exists($"{imagePath}/{ProfilePic}"))
@@ -572,7 +565,7 @@ namespace GSC.Report
             PdfCompositeField compositeField = new PdfCompositeField(font, brush, "Page {0} of {1}", pageNumber, count);
             compositeField.Bounds = footer.Bounds;
             //string prientedby = "Printed By : " + _jwtTokenAccesser.UserName + " (" + DateTime.Now.ToString("dd-MM-yyyy h:mm tt") + ")";
-            string prientedby = ""; 
+            string prientedby = "";
             PdfCompositeField compositeFieldprintedby = new PdfCompositeField(font, brush, prientedby);
             compositeFieldprintedby.Bounds = footer.Bounds;
 

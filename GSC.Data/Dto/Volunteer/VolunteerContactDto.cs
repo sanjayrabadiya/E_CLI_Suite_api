@@ -14,6 +14,7 @@ namespace GSC.Data.Dto.Volunteer
 
         [Required(ErrorMessage = "Contact Number is required.")]
         public string ContactNo { get; set; }
+        public string ContactNoTwo { get; set; }
 
         public string ContactName { get; set; }
 

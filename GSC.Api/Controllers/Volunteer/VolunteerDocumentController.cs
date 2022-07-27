@@ -41,14 +41,14 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerAuditTrailRepository = volunteerAuditTrailRepository;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{id}/{isDeleted:bool?}")]
+        public IActionResult Get(int id, bool isDeleted)
         {
             if (id <= 0) return BadRequest();
 
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var volunteerDocument = _volunteerDocumentRepository
-                .FindByInclude(t => t.VolunteerId == id && t.DeletedDate == null, t => t.DocumentType,
+                .FindByInclude(t => t.VolunteerId == id && (isDeleted ? t.DeletedDate != null : t.DeletedDate == null), t => t.DocumentType,
                     t => t.DocumentName).OrderByDescending(x => x.Id).ToList();
             volunteerDocument.ForEach(t => t.PathName = documentUrl + t.PathName);
             return Ok(volunteerDocument);
