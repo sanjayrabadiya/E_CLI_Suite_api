@@ -14,6 +14,7 @@ namespace GSC.Data.Dto.Volunteer
         public string FieldName { get; set; }
         public string Comment { get; set; }
         public CommentStatus QueryStatus { get; set; }
+        public QueryTypes QueryType { get; set; }
         public int ReasonId { get; set; }
         public string ReasonOth { get; set; }
         public int UserRole { get; set; }
@@ -33,7 +34,7 @@ namespace GSC.Data.Dto.Volunteer
             set => _createdDate = value?.UtcDateTime();
         }
         public string CreatedByName { get; set; }
-
+        public string QueryTypeName { get; set; }
         public ButtonQueryShow ShowButton { get; set; }
     }
 

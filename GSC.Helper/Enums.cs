@@ -886,4 +886,11 @@ namespace GSC.Helper
         [Description("FF005")] Note = 5,
     }
 
+    public enum QueryTypes : short
+    {
+        [Description("Critical")] Critical = 1,
+        [Description("Major")] Major = 2,
+        [Description("Minor")] Minor = 3,
+    }
+
 }
