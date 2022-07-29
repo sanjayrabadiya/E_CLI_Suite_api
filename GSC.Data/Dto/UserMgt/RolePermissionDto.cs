@@ -40,4 +40,19 @@ namespace GSC.Data.Dto.UserMgt
         public bool CanAll { get; set; }
         public bool hasChild { get; set; }
     }
+    public class SidebarMenuRolePermissionDto
+    {
+        public int UserRoleId { get; set; }
+
+        public int AppScreenId { get; set; }
+
+        public string ScreenCode { get; set; }
+
+        public string ScreenName { get; set; }
+
+        public int? ParentAppScreenId { get; set; }
+        public int? RolePermissionId { get; set; }
+
+        public bool hasChild { get; set; }
+    }
 }
