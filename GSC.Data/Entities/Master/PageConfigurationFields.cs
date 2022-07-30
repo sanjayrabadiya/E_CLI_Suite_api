@@ -11,6 +11,7 @@ namespace GSC.Data.Entities.Master
     public class PageConfigurationFields : BaseEntity, ICommonAduit
     {
         public int AppScreenId { get; set; }
+        public string ActualFieldName { get; set; }
         public string FieldName { get; set; }
         public string DisplayLable { get; set; }
         public bool Dependent { get; set; }

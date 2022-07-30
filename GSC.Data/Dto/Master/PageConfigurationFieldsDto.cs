@@ -9,6 +9,7 @@ namespace GSC.Data.Dto.Master
     public class PageConfigurationFieldsDto : BaseDto
     {
         public int AppScreenId { get; set; }
+        public string ActualFieldName { get; set; }
         public string FieldName { get; set; }
         public string DisplayLable { get; set; }
         public bool Dependent { get; set; }
@@ -18,6 +19,7 @@ namespace GSC.Data.Dto.Master
     {
         public int AppScreenId { get; set; }
         public string FieldName { get; set; }
+        public string ActualFieldName { get; set; }
         public string DisplayLable { get; set; }
         public string AppScreen { get; set; }
         public bool Dependent { get; set; }
