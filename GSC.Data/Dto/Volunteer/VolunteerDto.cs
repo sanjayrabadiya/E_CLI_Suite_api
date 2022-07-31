@@ -78,9 +78,9 @@ namespace GSC.Data.Dto.Volunteer
         public bool? IsBlocked { get; set; }
         public bool IsBlockDisplay { get; set; }
         public bool IsScreening { get; set; }
-        public decimal Height { get; set; }
-        public decimal Weight { get; set; }
-        public decimal BMI { get; set; }
+        public decimal? Height { get; set; }
+        public decimal? Weight { get; set; }
+        public decimal? BMI { get; set; }
     }
 
     public class VolunteerStatusCheck
