@@ -196,7 +196,7 @@ namespace GSC.Api.Controllers.Common
 
         [HttpGet]
         [Route("EditCheckValidations")]
-        
+
 
         [HttpGet]
         [Route("ComparisonList")]
@@ -700,6 +700,19 @@ namespace GSC.Api.Controllers.Common
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()
                 }).OrderBy(o => o.Value).ToList();
+        }
+        [HttpGet]
+        [Route("GetShipmentType")]
+        public IActionResult GetShipmentType()
+        {
+            var refrencetype = Enum.GetValues(typeof(ShipmentType))
+                .Cast<ShipmentType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
         }
     }
 }
