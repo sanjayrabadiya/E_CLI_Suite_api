@@ -9,7 +9,7 @@ namespace GSC.Data.Entities.Volunteer
     {
         public int VolunteerId { get; set; }
 
-        public int ContactTypeId { get; set; }
+        public int? ContactTypeId { get; set; }
         public ContactType ContactType { get; set; }
 
         public string ContactNo { get; set; }

@@ -32,7 +32,7 @@ namespace GSC.Respository.Volunteer
                     ContactNoTwo = c.ContactNoTwo,
                     IsDefault = c.IsDefault,
                     IsEmergency = c.IsEmergency,
-                    ContactTypeName = c.ContactType.TypeName,
+                    ContactTypeName = c.ContactType?.TypeName,
                     ContactTypeId = c.ContactTypeId
                 }).OrderByDescending(t => t.Id).ToList();
         }

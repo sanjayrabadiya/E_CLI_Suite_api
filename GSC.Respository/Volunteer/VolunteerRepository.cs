@@ -199,18 +199,18 @@ namespace GSC.Respository.Volunteer
 
             var inComplete = false;
             var message = "";
-            foreach (var propName in propsToCheck)
-            {
-                var prop = volunteer.GetType().GetProperty(propName);
-                var value = Convert.ToString(prop?.GetValue(volunteer));
-                if (value.Trim().Length == 0)
-                {
-                    //return new VolunteerStatusCheck { Id = id, Status = VolunteerStatus.InCompleted, isNew = true };
-                    message = "#Profile ";
-                    inComplete = true;
-                    break;
-                }
-            }
+            //foreach (var propName in propsToCheck)
+            //{
+            //    var prop = volunteer.GetType().GetProperty(propName);
+            //    var value = Convert.ToString(prop?.GetValue(volunteer));
+            //    if (value.Trim().Length == 0)
+            //    {
+            //        //return new VolunteerStatusCheck { Id = id, Status = VolunteerStatus.InCompleted, isNew = true };
+            //        message = "#Profile ";
+            //        inComplete = true;
+            //        break;
+            //    }
+            //}
             if (!_context.VolunteerAddress.Where(t => t.VolunteerId == id).Any())
             {
                 message += "#Address ";
