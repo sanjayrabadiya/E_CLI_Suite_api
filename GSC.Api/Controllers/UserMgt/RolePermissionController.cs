@@ -88,5 +88,13 @@ namespace GSC.Api.Controllers.UserMgt
             
             return Ok(result);
         }
+        //Code by mayur to fetch sidebar menu
+        [HttpGet("GetSidebarMenu")]
+        public IActionResult GetSidebarMenu()
+        {
+            var permissionDtos = _rolePermissionRepository.GetSidebarMenuByRoleId();
+
+            return Ok(permissionDtos);
+        }
     }
 }

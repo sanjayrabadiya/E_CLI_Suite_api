@@ -13,5 +13,6 @@ namespace GSC.Respository.UserMgt
         List<AppScreen> GetByUserId(int userId, int roleId);
         RolePermission GetRolePermissionByScreenCode(string screenCode);
         List<AppScreenPatient> GetPatientUserRights(int userId);
+        List<SidebarMenuRolePermissionDto> GetSidebarMenuByRoleId();
     }
 }

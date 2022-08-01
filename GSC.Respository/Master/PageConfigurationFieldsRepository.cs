@@ -27,7 +27,7 @@ namespace GSC.Respository.Master
 
         public string Duplicate(PageConfigurationFields objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.FieldName == objSave.FieldName && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.FieldName == objSave.FieldName && x.AppScreenId==objSave.AppScreenId && x.DeletedDate == null))
                 return "Duplicate Actual Field : " + objSave.FieldName;
             return "";
         }
@@ -41,7 +41,7 @@ namespace GSC.Respository.Master
         {
             return All.Include(x => x.AppScreens).Where(x => x.AppScreens.Id == screenId &&
                       (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.DisplayLable, Code = c.DisplayLable, IsDeleted = c.DeletedDate != null, ExtraData = c.Dependent }).OrderBy(o => o.Value)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.ActualFieldName, Code = c.DisplayLable, IsDeleted = c.DeletedDate != null, ExtraData = c.Dependent }).OrderBy(o => o.Value)
                 .ToList();
         }
     }

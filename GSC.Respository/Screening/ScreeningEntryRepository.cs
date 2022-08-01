@@ -331,7 +331,7 @@ namespace GSC.Respository.Screening
                 ScreeningDate = x.ScreeningDate,
                 AttendanceDate = x.Attendance.AttendanceDate,
                 AttendedBy = x.Attendance.User.UserName,
-                IsFitnessFit = x.IsFitnessFit == null ? "No" : x.IsFitnessFit == true ? "Yes" : "No"
+                IsFitnessFit = x.IsFitnessFit == null ? "No" : x.IsFitnessFit == true ? "Yes" : "No",
             }).ToList();
 
             if (searchParam.Id > 0)
@@ -339,7 +339,14 @@ namespace GSC.Respository.Screening
                 items = items.Where(x => x.VolunteerId == searchParam.Id).ToList();
             }
 
+            //items.ForEach(data =>
+            //{
+            //    data.TemplateList = _screeningTemplateRepository.GetTemplateData(data.ScreeningEntryId, );
+            //});
+
             items.AddRange(attendanceResult);
+
+
 
             if (searchParam.IsFitnessFit.HasValue)
                 items = items.Where(x => x.IsFitnessFit == (searchParam.IsFitnessFit == true && searchParam.IsFitnessFit != null ? "Yes" : "No")).ToList();
@@ -354,7 +361,116 @@ namespace GSC.Respository.Screening
             if (searchParam.ToDate.HasValue && searchParam.FromDate == null)
                 items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
 
+            if (searchParam.ProjectId > 0)
+                items = items.Where(x => x.ProjectId == searchParam.ProjectId).ToList();
+
+            //if (searchParam.VisitId > 0)
+            //    items = items.Where(x => x.ProjectId == searchParam.VisitId).ToList();
+
             return items.OrderByDescending(x => x.ScreeningDate ?? DateTime.MaxValue).ToList();
+        }
+
+
+        public ScreeningGridDto GetScreeningDataList(ScreeningSearhParamDto searchParam)
+        {
+            var result = new ScreeningGridDto();
+            var status = 0;
+            if (searchParam.ScreeningStatus != null) status = (int)searchParam.ScreeningStatus;
+
+            var attendanceResult = new List<AttendanceScreeningGridDto>();
+            if (searchParam.ScreeningStatus == ScreeningTemplateStatus.Pending || status == 0)
+            {
+                searchParam.AttendanceType = DataEntryType.Screening;
+                searchParam.IsFromScreening = true;
+                attendanceResult.AddRange(_attendanceRepository.GetAttendaceList(searchParam));
+            }
+
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return new ScreeningGridDto();
+
+            var screeningEntries = All.Where(t => t.DeletedDate == null && projectList.Any(c => c == t.ProjectId))
+                .AsQueryable();
+
+            if (searchParam.Id > 0)
+            {
+                attendanceResult = attendanceResult.Where(x => x.Id == searchParam.Id).ToList();
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(searchParam.TextSearch))
+                {
+                    var volunterIds = BarcodeSearch(searchParam.TextSearch.Trim());
+                    screeningEntries = screeningEntries.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
+                }
+
+            }
+
+            var role = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_underTesting");
+
+            if (!role.IsView)
+                screeningEntries = screeningEntries.Where(x => !x.IsTesting);
+
+            screeningEntries = screeningEntries.Where(x => x.EntryType == DataEntryType.Screening);
+
+            var items = screeningEntries.Select(x => new AttendanceScreeningGridDto
+            {
+                ScreeningEntryId = x.Id,
+                VolunteerId = x.Attendance.VolunteerId,
+                VolunteerName = string.IsNullOrEmpty(x.Attendance.Volunteer.FullName) ? $"{ x.Attendance.Volunteer.FirstName} {x.Attendance.Volunteer.MiddleName } {x.Attendance.Volunteer.LastName }" : x.Attendance.Volunteer.FullName, // Change by Tinku Mahato for null full name (28/06/2022)
+                ProjectDesignId = x.ProjectDesignId,
+                ScreeningNo = x.ScreeningNo,
+                VolunteerNumber = x.Attendance.Volunteer.VolunteerNo,
+                Gender = x.Attendance.Volunteer.GenderId.ToString(),
+                ProjectCode = x.Project.ProjectCode,
+                ProjectId = x.ProjectId,
+                ProjectName = x.Project.ProjectName,
+                ScreeningDate = x.ScreeningDate,
+                AttendanceDate = x.Attendance.AttendanceDate,
+                AttendedBy = x.Attendance.User.UserName,
+                IsFitnessFit = x.IsFitnessFit == null ? "No" : x.IsFitnessFit == true ? "Yes" : "No",
+            }).ToList();
+
+            if (searchParam.Id > 0)
+            {
+                items = items.Where(x => x.VolunteerId == searchParam.Id).ToList();
+            }
+            items.AddRange(attendanceResult);
+
+
+            if (searchParam.IsFitnessFit.HasValue)
+                items = items.Where(x => x.IsFitnessFit == (searchParam.IsFitnessFit == true && searchParam.IsFitnessFit != null ? "Yes" : "No")).ToList();
+
+            //if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
+            //    items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date >= searchParam.FromDate.Value.Date &&
+            //        x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
+
+            if (searchParam.FromDate.HasValue)
+            {
+                items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date == searchParam.FromDate.Value.Date).ToList();
+            }
+
+            if (searchParam.AttendanceDate.HasValue)
+            {
+                items = items.Where(x => x.AttendanceDate.Date == searchParam.AttendanceDate.Value.Date).ToList();
+            }
+
+            //if (searchParam.ToDate.HasValue && searchParam.FromDate == null)
+            //    items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
+
+            if (searchParam.ProjectId > 0)
+                items = items.Where(x => x.ProjectId == searchParam.ProjectId).ToList();
+
+            items.ForEach(data =>
+            {
+                if (data.ScreeningEntryId > 0)
+                    data.TemplateStatusList = _screeningTemplateRepository.GetTemplateStatus(searchParam.ProjectId, searchParam.VisitId, data.ScreeningEntryId);
+            });
+
+            items = items.OrderByDescending(x => x.ScreeningDate ?? DateTime.MaxValue).ToList();
+
+            result.TemplateText = _screeningTemplateRepository.GetTemplateData(searchParam.ProjectId, searchParam.VisitId);
+            result.Data = items;
+            return result;
         }
 
 

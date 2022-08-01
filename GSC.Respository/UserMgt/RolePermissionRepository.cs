@@ -160,5 +160,20 @@ namespace GSC.Respository.UserMgt
                 return rolePermission;
             return new RolePermission();
         }
+        //Code by Mayur to fetch Sidebar
+        public List<SidebarMenuRolePermissionDto> GetSidebarMenuByRoleId()
+        {
+            var permissions = _context.AppScreen.Where(t => t.IsPermission && t.DeletedDate == null && (t.IsTab == null || t.IsTab == false)).Select(t =>
+                 new SidebarMenuRolePermissionDto
+                 {
+                     AppScreenId = t.Id,
+                     ScreenCode = t.ScreenCode,
+                     ScreenName = t.ScreenName,
+                     ParentAppScreenId = t.ParentAppScreenId,
+                     hasChild = _context.AppScreen.Any(x => x.ParentAppScreenId == t.Id && x.DeletedDate == null && (x.IsTab == null || x.IsTab == false)) ? true : false
+                 }).OrderBy(x => x.ScreenName).ToList();
+
+            return permissions;
+        }
     }
 }

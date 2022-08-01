@@ -9,11 +9,12 @@ namespace GSC.Data.Dto.Volunteer
     {
         public int VolunteerId { get; set; }
 
-        [Required(ErrorMessage = "Contact Type is required.")]
-        public int ContactTypeId { get; set; }
+        //[Required(ErrorMessage = "Contact Type is required.")]
+        public int? ContactTypeId { get; set; }
 
-        [Required(ErrorMessage = "Contact Number is required.")]
+        //[Required(ErrorMessage = "Contact Number is required.")]
         public string ContactNo { get; set; }
+        public string ContactNoTwo { get; set; }
 
         public string ContactName { get; set; }
 

@@ -13,6 +13,7 @@ namespace GSC.Data.Entities.Volunteer
         public string FieldName { get; set; }
         public string Comment { get; set; }
         public CommentStatus QueryStatus { get; set; }
+        public QueryTypes QueryType { get; set; }
         public int ReasonId { get; set; }
         public string ReasonOth { get; set; }
         public int UserRole { get; set; }

@@ -64,6 +64,7 @@ namespace GSC.Respository.Volunteer
                                : user.UserName + "(" + role.RoleName + ")",
                            StatusName = query.QueryStatus.GetDescription(),
                            QueryStatus = query.QueryStatus,
+                           QueryTypeName = query.QueryType.GetDescription()
                        }).OrderByDescending(o => o.Id).ToList();
 
 

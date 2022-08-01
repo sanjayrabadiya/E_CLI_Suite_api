@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Shared.Extension;
@@ -7,27 +9,13 @@ namespace GSC.Data.Dto.Attendance
 {
     public class AttendanceScreeningGridDto : BaseAuditDto
     {
-        private DateTime _AttendanceDate;
-        private DateTime? _ScreeningDate;
         public int Id { get; set; }
         public int ScreeningEntryId { get; set; }
         public int AttendanceId { get; set; }
         public int ProjectId { get; set; }
-
         public int? VolunteerId { get; set; }
-
-        public DateTime AttendanceDate
-        {
-            get => _AttendanceDate.UtcDate();
-            set => _AttendanceDate = value.UtcDate();
-        }
-
-        public DateTime? ScreeningDate
-        {
-            get => _ScreeningDate.UtcDate();
-            set => _ScreeningDate = value.UtcDate();
-        }
-
+        public DateTime AttendanceDate { get; set; }
+        public DateTime? ScreeningDate { get; set; }
         public bool IsFingerPrint { get; set; }
         public string ScreeningNo { get; set; }
         public string Note { get; set; }
@@ -57,5 +45,30 @@ namespace GSC.Data.Dto.Attendance
         public bool IsLocked { get; set; }
         public bool IsBarcodeGenerated { get; set; }
         public int? AttendanceBarcodeGenerateId { get; set; }
+        public List<TemplateText> TemplateList { get; set; }
+        public List<TemplateStatusList> TemplateStatusList { get; set; }
+    }
+
+    public class ScreeningGridDto
+    {
+        public List<TemplateText> TemplateText { get; set; }
+        public List<AttendanceScreeningGridDto> Data { get; set; }
+    }
+
+    public class TemplateText
+    {
+        public int ProjectDesignTemplateId { get; set; }
+        public string ProjectDesignTemplateName { get; set; }
+        public int DesignOrder { get; set; }
+    }
+
+    public class TemplateStatusList
+    {
+        public int ScreeningEntryId { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public string Status { get; set; }
+        public int StatusId { get; set; }
+        public int DesignOrder { get; set; }
     }
 }

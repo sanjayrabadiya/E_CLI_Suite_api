@@ -4,6 +4,7 @@ using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
@@ -538,6 +539,54 @@ namespace GSC.Respository.Screening
         public int GeScreeningEntryId(int screeningTemplateId)
         {
             return All.Where(x => x.Id == screeningTemplateId).Select(r => r.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
+        }
+
+        public List<TemplateText> GetTemplateData(int ProjectId, int VisitId)
+        {
+            var Templates = All.Where(s => s.ScreeningVisit.ScreeningEntry.ProjectId == ProjectId
+            && s.ScreeningVisit.ProjectDesignVisit.Id == VisitId && s.DeletedDate == null
+            && s.ScreeningVisit.Status >= ScreeningVisitStatus.Open)
+            .GroupBy(x => new { x.ProjectDesignTemplateId, x.ProjectDesignTemplate.TemplateName })
+            .Select(t => new TemplateText
+            {
+                ProjectDesignTemplateId = t.Key.ProjectDesignTemplateId,
+                ProjectDesignTemplateName = t.Key.TemplateName,
+            }).OrderBy(c => c.ProjectDesignTemplateId).ToList();
+
+
+            var result = _context.ProjectDesignTemplate.Where(z => Templates.Select(x => x.ProjectDesignTemplateId).Contains(z.Id))
+                .Select(t => new TemplateText
+                {
+                    ProjectDesignTemplateId = t.Id,
+                    ProjectDesignTemplateName = t.TemplateName,
+                    DesignOrder = t.DesignOrder
+                }).OrderBy(x => x.DesignOrder).ToList();
+
+            return result;
+        }
+
+        public List<TemplateStatusList> GetTemplateStatus(int ProjectId, int VisitId, int ScreeningEntryId)
+        {
+            var Templates = All.Where(s => s.ScreeningVisit.ScreeningEntry.ProjectId == ProjectId
+            && s.ScreeningVisit.ScreeningEntryId == ScreeningEntryId
+            && s.ScreeningVisit.ProjectDesignVisit.Id == VisitId && s.DeletedDate == null)
+            .Select(t => new TemplateStatusList
+            {
+                ScreeningEntryId = t.ScreeningVisit.ScreeningEntryId,
+                ScreeningTemplateId = t.Id,
+                ProjectDesignTemplateId = t.ProjectDesignTemplateId,
+            }).OrderBy(c => c.ProjectDesignTemplateId).ToList();
+
+            var result = All.Where(z => Templates.Select(x => x.ScreeningTemplateId).Contains(z.Id))
+                .Select(t => new TemplateStatusList
+                {
+                    ProjectDesignTemplateId = t.Id,
+                    DesignOrder = t.ProjectDesignTemplate.DesignOrder,
+                    Status = t.Status.GetDescription(),
+                    StatusId = (int)t.Status
+                }).OrderBy(x => x.DesignOrder).ToList();
+
+            return result;
         }
 
         public List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, WorkFlowLevelDto workFlowLevel)

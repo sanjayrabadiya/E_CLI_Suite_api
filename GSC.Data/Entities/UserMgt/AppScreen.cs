@@ -36,5 +36,6 @@ namespace GSC.Data.Entities.UserMgt
 
         public bool? IsMaster { get; set; }
         public string TableName { get; set; }
+        public bool? IsTab { get; set; }
     }
 }

@@ -28,13 +28,46 @@ namespace GSC.Respository.EditCheckImpact
             var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
             if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
-                var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), true);
-                result.ResultSkip = true;
-                result.SampleText = "Rule not verifed";
-                if (result.IsValid)
-                    return _editCheckFormulaRepository.ValidateFormula(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
-                else
+                if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
+                {
+                    EditCheckResult result = null;
+                    var newCase = editCheck.Where(x => x.IsTarget).ToList();
+                    foreach (var x in editCheck.Where(x => !x.IsTarget).ToList())
+                    {
+                        if (!string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase))
+                        {
+                            x.CollectionValue = x.CollectionValue.Replace("End Case", "", StringComparison.OrdinalIgnoreCase);
+                            newCase.Add(x);
+                            result = ValidateRule(newCase.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), true);
+                            result.ResultSkip = true;
+                            if (result.IsValid)
+                            {
+                                result = _editCheckFormulaRepository.ValidateFormula(newCase.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
+                                if (result.IsValid)
+                                    return result;
+                            }
+
+                            newCase = editCheck.Where(x => x.IsTarget).ToList();
+                        }
+                        else
+                        {
+                            newCase.Add(x);
+                        }
+
+                    }
                     return result;
+                }
+                else
+                {
+                    var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), true);
+                    result.ResultSkip = true;
+                    result.SampleText = "Rule not verifed";
+                    if (result.IsValid)
+                        return _editCheckFormulaRepository.ValidateFormula(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
+                    else
+                        return result;
+                }
+
             }
             else if (!dateDiff && editCheck.Any(x => x.IsFormula))
                 return _editCheckFormulaRepository.ValidateFormula(editCheck);
@@ -48,12 +81,49 @@ namespace GSC.Respository.EditCheckImpact
             var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
             if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
-                var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), false);
-                result.ResultSkip = true;
-                if (result.IsValid)
-                    return _editCheckFormulaRepository.ValidateFormula(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
-                else
+                if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
+                {
+                    EditCheckResult result = null;
+                    var message = "";
+                    var newCase = editCheck.Where(x => x.IsTarget).ToList();
+                    foreach (var x in editCheck.Where(x => !x.IsTarget).ToList())
+                    {
+                        if (!string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase))
+                        {
+                            x.CollectionValue = x.CollectionValue.Replace("End Case", "", StringComparison.OrdinalIgnoreCase);
+                            newCase.Add(x);
+                            result = ValidateRule(newCase.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), false);
+                            result.ResultSkip = true;
+                            if (result.IsValid)
+                            {
+                                result = _editCheckFormulaRepository.ValidateFormula(newCase.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
+                                if (!result.IsValid)
+                                    return result;
+                            }
+                            else
+                                return result;
+
+                            message = $"{message} {result.SampleText} End Case";
+                            newCase = editCheck.Where(x => x.IsTarget).ToList();
+                        }
+                        else
+                        {
+                            newCase.Add(x);
+                        }
+                    }
+                    result.SampleText = message;
                     return result;
+                }
+                else
+                {
+                    var result = ValidateRule(editCheck.Where(x => x.CheckBy == EditCheckRuleBy.ByVariableRule).ToList(), false);
+                    result.ResultSkip = true;
+                    if (result.IsValid)
+                        return _editCheckFormulaRepository.ValidateFormula(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
+                    else
+                        return result;
+                }
+
             }
             else if (!dateDiff && editCheck.Any(x => x.IsFormula))
                 return _editCheckFormulaRepository.ValidateFormulaReference(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());

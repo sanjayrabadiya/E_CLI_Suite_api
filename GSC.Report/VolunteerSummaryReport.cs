@@ -19,6 +19,7 @@ using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
 using System.Linq;
 using GSC.Respository.Client;
+using GSC.Respository.Master;
 
 namespace GSC.Report
 {
@@ -38,6 +39,7 @@ namespace GSC.Report
         private readonly IMapper _mapper;
         private readonly ICompanyRepository _companyRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IPageConfigurationRepository _pageConfigurationRepository;
 
         private readonly PdfFont watermarkerfornt = new PdfStandardFont(PdfFontFamily.TimesRoman, 120, PdfFontStyle.Bold);
         private readonly PdfFont extralargeheaderfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 20, PdfFontStyle.Bold);
@@ -66,7 +68,8 @@ namespace GSC.Report
         IUploadSettingRepository uploadSettingRepository,
         ICompanyRepository companyRepository,
         IClientRepository clientRepository,
-            IMapper mapper
+            IMapper mapper,
+            IPageConfigurationRepository pageConfigurationRepository
         )
         {
             _hostingEnvironment = hostingEnvironment;
@@ -82,6 +85,7 @@ namespace GSC.Report
             _uploadSettingRepository = uploadSettingRepository;
             _companyRepository = companyRepository;
             _clientRepository = clientRepository;
+            _pageConfigurationRepository = pageConfigurationRepository;
             _mapper = mapper;
             fontStream = FilePathConvert();
             regularfont = new PdfTrueTypeFont(fontStream, 12);
@@ -97,6 +101,7 @@ namespace GSC.Report
 
         public FileStreamResult GetVolunteerSummaryDesign(int VolunteerID)
         {
+            var volunteerPage = _pageConfigurationRepository.GetPageConfigurationByAppScreen("mnu_volunteerdetail");
 
             VolunteerSearchDto search = new VolunteerSearchDto();
             var volunteer = _volunteerRepository.GetVolunteerDetail(false, VolunteerID);
@@ -132,16 +137,9 @@ namespace GSC.Report
             PdfTextElement indexheader = new PdfTextElement();
 
             tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement(volunteer[0].FullName, headerfont, PdfBrushes.Black);
+            indexheader = new PdfTextElement(volunteer[0].FullName + " (" + volunteer[0].VolunteerNo + ")", headerfont, PdfBrushes.Black);
             indexheader.StringFormat = tocformat;
             tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-
-            tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement(volunteer[0].VolunteerNo, headerfont, PdfBrushes.Black);
-            indexheader.StringFormat = tocformat;
-            tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(tocresult.Bounds.X, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
 
             tocformat = new PdfStringFormat(PdfTextAlignment.Right, PdfVerticalAlignment.Top);
             indexheader = new PdfTextElement(volunteer[0].AliasName, headerfont, PdfBrushes.Black);
@@ -149,41 +147,84 @@ namespace GSC.Report
             tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(tocresult.Bounds.X, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
 
             //Profile Details
-            tocresult = AddString("Old Reference Number", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].RefNo, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
-            tocresult = AddString("Registration Date", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(Convert.ToDateTime(volunteer[0].RegisterDate).ToString("dd-MM-yyyy"), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "refNo").IsVisible)
+            {
+                tocresult = AddString("Old Reference Number", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].RefNo, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Date Of Birth", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(Convert.ToDateTime(volunteer[0].DateOfBirth).ToString("dd-MM-yyyy"), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "registerDate").IsVisible)
+            {
+                tocresult = AddString("Registration Date", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].RegisterDate != null ? Convert.ToDateTime(volunteer[0].RegisterDate).ToString("dd-MM-yyyy") : "", tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Age", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].FromAge.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "dateOfBirth").IsVisible)
+            {
+                tocresult = AddString("Date Of Birth", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].DateOfBirth != null ? Convert.ToDateTime(volunteer[0].DateOfBirth).ToString("dd-MM-yyyy") : "", tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Religion", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].Religion, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "fromAge").IsVisible)
+            {
+                tocresult = AddString("Age", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].FromAge.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Occupation", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].Occupation, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "religionId").IsVisible)
+            {
+                tocresult = AddString("Religion", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].Religion, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Educaiton Qualification", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].Education, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "occupationId").IsVisible)
+            {
+                tocresult = AddString("Occupation", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].Occupation, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Race", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].Race, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "maritalStatusId").IsVisible)
+            {
+                tocresult = AddString("Marital Status", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].MaritalStatus, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Type Of Population", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].PopulationType, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "education").IsVisible)
+            {
+                tocresult = AddString("Education Qualification", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].Education, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Gender", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].Gender, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "raceId").IsVisible)
+            {
+                tocresult = AddString("Race", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].Race, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Annual Income", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].AnnualIncome.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "populationTypeId").IsVisible)
+            {
+                tocresult = AddString("Type Of Population", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].PopulationType, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
-            tocresult = AddString("Food Type", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(volunteer[0].FoodType, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "genderId").IsVisible)
+            {
+                tocresult = AddString("Gender", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].Gender, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "annualIncome").IsVisible)
+            {
+                tocresult = AddString("Annual Income", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].AnnualIncome.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "foodTypeId").IsVisible)
+            {
+                tocresult = AddString("Food Type", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].FoodType, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
 
             pageTOC.Graphics.Save();
             pageTOC.Graphics.SetTransparency(1, 1, PdfBlendMode.Multiply);
@@ -212,10 +253,20 @@ namespace GSC.Report
 
             DesginVoluteerAddress(VolunteerID, header, headerStyle, layoutFormat);
 
-            /* Contact Detail Grid */
-            tocresult = AddString("Contact Details", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, (tocresult.Bounds.Bottom + 10) > 605 ? (tocresult.Page.GetClientSize().Height + 10) : (tocresult.Bounds.Bottom + 10), tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactName").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactNo").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible)
+            {
+                /* Contact Detail Grid */
+                tocresult = AddString("Contact Details", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, (tocresult.Bounds.Bottom + 10) > 605 ? (tocresult.Page.GetClientSize().Height + 10) : (tocresult.Bounds.Bottom + 10), tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
 
-            DesginVoluteerContact(VolunteerID, header, headerStyle, layoutFormat);
+                DesginVoluteerContact(VolunteerID, header, headerStyle, layoutFormat);
+            }
 
             /* Language Detail Grid */
             tocresult = AddString("Language Details", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, (tocresult.Bounds.Bottom + 10) > 605 ? (tocresult.Page.GetClientSize().Height + 10) : (tocresult.Bounds.Bottom + 10), tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
@@ -240,19 +291,31 @@ namespace GSC.Report
         private void DesginVoluteerAddress(int VolunteerID, PdfGridRow header, PdfGridCellStyle headerStyle, PdfLayoutFormat pdfLayoutFormat)
         {
             var volunteerAddress = _volunteerAddressRepository.GetAddresses(VolunteerID);
-
+            var volunteerPage = _pageConfigurationRepository.GetPageConfigurationByAppScreen("mnu_volunteerdetail");
 
             //Creates the datasource for the table
             DataTable addressDetails = new DataTable();
 
-            addressDetails.Columns.Add("Address");
-            addressDetails.Columns.Add("Country");
-            addressDetails.Columns.Add("State");
-            addressDetails.Columns.Add("City");
-            addressDetails.Columns.Add("City Area");
-            addressDetails.Columns.Add("Zip/Post Code");
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "address").IsVisible)
+                addressDetails.Columns.Add("Address");
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "countryId").IsVisible)
+                addressDetails.Columns.Add("Country");
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "stateId").IsVisible)
+                addressDetails.Columns.Add("State");
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "cityId").IsVisible)
+                addressDetails.Columns.Add("City");
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "cityAreaId").IsVisible)
+                addressDetails.Columns.Add("City Area");
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "zip").IsVisible)
+                addressDetails.Columns.Add("Zip/Post Code");
+
             addressDetails.Columns.Add("Current Address?");
-            addressDetails.Columns.Add("Parmenent Address?");
+            addressDetails.Columns.Add("Parmanent Address?");
 
 
             if (volunteerAddress.Count > 0)
@@ -260,16 +323,40 @@ namespace GSC.Report
                 foreach (var address in volunteerAddress)
                 {
 
-                    addressDetails.Rows.Add(new object[] {
-                                                      address.Location.Address
-                                                      , address.Location.CountryName
-                                                      , address.Location.StateName
-                                                    , address.Location.CityName
-                                                    , address.Location.CityAreaName
-                                                    , address.Location.Zip
-                                                    , address.IsCurrent ? "YES" : "NO"
-                                                    , address.IsPermanent ? "YES":"NO"
-                                                });
+                    //addressDetails.Rows.Add(new object[] {
+                    //                                  address.Location.Address
+                    //                                  , address.Location.CountryName
+                    //                                  , address.Location.StateName
+                    //                                , address.Location.CityName
+                    //                                , address.Location.CityAreaName
+                    //                                , address.Location.Zip
+                    //                                , address.IsCurrent ? "YES" : "NO"
+                    //                                , address.IsPermanent ? "YES":"NO"
+                    //                            });
+
+                    var dataRow = addressDetails.NewRow();
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "address").IsVisible)
+                        dataRow["Address"] = address.Location.Address;
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "countryId").IsVisible)
+                        dataRow["Country"] = address.Location.CountryName;
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "stateId").IsVisible)
+                        dataRow["State"] = address.Location.StateName;
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "cityId").IsVisible)
+                        dataRow["City"] = address.Location.CityName;
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "cityAreaId").IsVisible)
+                        dataRow["City Area"] = address.Location.CityAreaName;
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "zip").IsVisible)
+                        dataRow["Zip/Post Code"] = address.Location.Zip;
+
+                    dataRow["Current Address?"] = address.IsCurrent ? "YES" : "NO";
+                    dataRow["Parmanent Address?"] = address.IsPermanent ? "YES" : "NO";
+                    addressDetails.Rows.Add(dataRow);
                 }
             }
             else
@@ -312,15 +399,31 @@ namespace GSC.Report
         {
             var volunteercontact = _volunteerContactRepository.GetContactTypeList(VolunteerID);
 
+            var volunteerPage = _pageConfigurationRepository.GetPageConfigurationByAppScreen("mnu_volunteerdetail");
 
             //Creates the datasource for the table
             DataTable contactDetails = new DataTable();
 
-            contactDetails.Columns.Add("Contact");
-            contactDetails.Columns.Add("Contact No.");
-            contactDetails.Columns.Add("Contact Name");
-            contactDetails.Columns.Add("Default Contact?");
-            contactDetails.Columns.Add("Emergency Contact?");
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+                contactDetails.Columns.Add("Contact");
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible)
+                contactDetails.Columns.Add("Contact No.");
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible)
+                contactDetails.Columns.Add("Contact No. 2");
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible)
+                contactDetails.Columns.Add("Contact Name");
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
+                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+                contactDetails.Columns.Add("Default Contact?");
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactNo").IsVisible
+               || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
+               || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactName").IsVisible)
+                contactDetails.Columns.Add("Emergency Contact?");
 
 
             if (volunteercontact.Count > 0)
@@ -328,13 +431,41 @@ namespace GSC.Report
                 foreach (var contact in volunteercontact)
                 {
 
-                    contactDetails.Rows.Add(new object[] {
-                                                      contact.ContactTypeName
-                                                    , contact.ContactNo
-                                                    , contact.ContactName
-                                                    , contact.IsDefault ? "YES" : "NO"
-                                                    , contact.IsEmergency ? "YES":"NO"
-                                                });
+                    //contactDetails.Rows.Add(new object[] {
+                    //                                  contact.ContactTypeName
+                    //                                , contact.ContactNo
+                    //                                , contact.ContactName
+                    //                                , contact.IsDefault ? "YES" : "NO"
+                    //                                , contact.IsEmergency ? "YES":"NO"
+                    //                            });
+
+                    var dataRow = contactDetails.NewRow();
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+                        dataRow["Contact"] = contact.ContactTypeName;
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible)
+                        dataRow["Contact No."] = contact.ContactNo;
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible)
+                        dataRow["Contact No. 2"] = contact.ContactNoTwo;
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible)
+                        dataRow["Contact Name"] = contact.ContactName;
+
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible
+                        || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible
+                        || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
+                        || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+                        dataRow["Default Contact?"] = contact.IsDefault ? "YES" : "NO";
+
+                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactNo").IsVisible
+                       || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
+                       || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactName").IsVisible)
+                        dataRow["Emergency Contact?"] = contact.IsEmergency ? "YES" : "NO";
+
+                    contactDetails.Rows.Add(dataRow);
                 }
             }
             else
@@ -489,7 +620,7 @@ namespace GSC.Report
             tocresult = pdfGrid.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), pdfLayoutFormat);
         }
 
-        private PdfPageTemplateElement AddHeader(PdfDocument doc, bool isClientLogo, bool isCompanyLogo, int ClientId,string ProfilePic)
+        private PdfPageTemplateElement AddHeader(PdfDocument doc, bool isClientLogo, bool isCompanyLogo, int ClientId, string ProfilePic)
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
@@ -520,7 +651,7 @@ namespace GSC.Report
                     header.Graphics.DrawImage(img, imageLocation, imageSize);
                 }
             }
-            if(ProfilePic != "")
+            if (ProfilePic != "")
             {
                 imageSize = new SizeF(65f, 65f);
                 if (File.Exists($"{imagePath}/{ProfilePic}"))
@@ -572,7 +703,7 @@ namespace GSC.Report
             PdfCompositeField compositeField = new PdfCompositeField(font, brush, "Page {0} of {1}", pageNumber, count);
             compositeField.Bounds = footer.Bounds;
             //string prientedby = "Printed By : " + _jwtTokenAccesser.UserName + " (" + DateTime.Now.ToString("dd-MM-yyyy h:mm tt") + ")";
-            string prientedby = ""; 
+            string prientedby = "";
             PdfCompositeField compositeFieldprintedby = new PdfCompositeField(font, brush, prientedby);
             compositeFieldprintedby.Bounds = footer.Bounds;
 

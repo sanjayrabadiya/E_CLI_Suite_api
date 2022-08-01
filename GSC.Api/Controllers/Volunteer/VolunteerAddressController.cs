@@ -51,7 +51,13 @@ namespace GSC.Api.Controllers.Volunteer
             volunteerAddressDto.Id = 0;
             var volunteerAddress = _mapper.Map<VolunteerAddress>(volunteerAddressDto);
             volunteerAddress.Location = _locationRepository.SaveLocation(volunteerAddress.Location);
-            _locationRepository.Add(volunteerAddress.Location);
+            //_locationRepository.Add(volunteerAddress.Location);
+
+            if (volunteerAddress.Location.Id > 0)
+                _locationRepository.Update(volunteerAddress.Location);
+            else
+                _locationRepository.Add(volunteerAddress.Location);
+
             _volunteerAddressRepository.Add(volunteerAddress);
             if (_uow.Save() <= 0) throw new Exception("Creating volunteer address failed on save.");
 

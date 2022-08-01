@@ -884,6 +884,15 @@ namespace GSC.Helper
         [Description("FF003")] ProjectNumber = 3,
         [Description("FF004")] Reason = 4,
         [Description("FF005")] Note = 5,
+        [Description("FF006")] NameOfPI = 6,
+        [Description("FF007")] DateTimeOfFitnessFit = 7,
+    }
+
+    public enum QueryTypes : short
+    {
+        [Description("Critical")] Critical = 1,
+        [Description("Major")] Major = 2,
+        [Description("Minor")] Minor = 3,
     }
     public enum ShipmentType : short
     {

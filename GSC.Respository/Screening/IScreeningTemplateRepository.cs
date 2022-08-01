@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
@@ -16,11 +17,13 @@ namespace GSC.Respository.Screening
         List<MyReviewDto> GetScreeningTemplateReview();
         ScreeningTemplate TemplateRepeat(int id);
         List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, WorkFlowLevelDto workFlowLevel);
+        List<TemplateText> GetTemplateData(int ProjectId, int VisitId);
+
         DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto,
             int screeningTemplateId);
         IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters);
         List<LockUnlockListDto> GetLockUnlockList(LockUnlockSearchDto lockUnlockParams);
-
+        
         ScreeningTemplateValueSaveBasics ValidateVariableValue(ScreeningTemplateValue screeningTemplateValue, List<EditCheckIds> EditCheckIds, CollectionSources? collectionSource);
 
         void SubmitReviewTemplate(int screeningTemplateId, bool isFromLockUnLock);
@@ -37,5 +40,7 @@ namespace GSC.Respository.Screening
         void SendVariableEmail(ScreeningTemplateValueDto screeningTemplateValueDto, ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto);
         //Screening Grid view
         IList<DesignScreeningTemplateDto> GetScreeningGridView(DesignScreeningTemplateDto designTemplateDto, int ScreeningTemplateId);
+
+        List<TemplateStatusList> GetTemplateStatus(int ProjectId, int VisitId, int ScreeningEntryId);
     }
 }

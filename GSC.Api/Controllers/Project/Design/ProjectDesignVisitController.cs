@@ -244,6 +244,13 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpGet]
+        [Route("GetVisitDropDownByProjectId/{ProjectId}")]
+        public IActionResult GetVisitDropDownByProjectId(int ProjectId)
+        {
+            return Ok(_projectDesignVisitRepository.GetVisitDropDownByProjectId(ProjectId));
+        }
+
+        [HttpGet]
         [Route("GetVisitsByProjectDesignId/{projectDesignId}")]
         public IActionResult GetVisitsByProjectDesignId(int projectDesignId)
         {
