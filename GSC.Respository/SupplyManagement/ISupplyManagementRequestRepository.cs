@@ -16,6 +16,11 @@ namespace GSC.Respository.SupplyManagement
 
         bool CheckAvailableRemainingQty(int reqQty, int ProjectId, int PharmacyStudyProductTypeId);
 
-       int GetAvailableRemainingQty(int ProjectId, int PharmacyStudyProductTypeId);
+        int GetAvailableRemainingQty(int ProjectId, int PharmacyStudyProductTypeId);
+
+        List<KitListApprove> GetAvailableKit(int SupplyManagementRequestId);
+
+        int GetAvailableRemainingKit(int SupplyManagementRequestId);
+        
     }
 }

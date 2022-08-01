@@ -36,7 +36,11 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult Post([FromBody] SupplyManagementReceiptDto supplyManagementshipmentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
+            if (supplyManagementshipmentDto.WithIssue && string.IsNullOrEmpty(supplyManagementshipmentDto.Description))
+            {
+                ModelState.AddModelError("Message", "Description is mandatory!");
+                return BadRequest(ModelState);
+            }
             supplyManagementshipmentDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementReceipt>(supplyManagementshipmentDto);
 

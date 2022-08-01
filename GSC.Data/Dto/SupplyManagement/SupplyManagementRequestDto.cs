@@ -13,10 +13,11 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ToProjectId { get; set; }
         public int StudyProductTypeId { get; set; }
         public int RequestQty { get; set; }
+        public int? VisitId { get; set; }
     }
     public class SupplyManagementRequestGridDto : BaseAuditDto
     {
-      
+
         public bool IsSiteRequest { get; set; }
         public int? FromProjectId { get; set; }
         public int? ToProjectId { get; set; }
@@ -47,7 +48,9 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string ReasonOth { get; set; }
 
-        
+        public string siteRequest { get; set; }
+
+        public string VisitName { get; set; }
     }
 
 }

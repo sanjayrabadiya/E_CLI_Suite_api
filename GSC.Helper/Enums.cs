@@ -885,5 +885,16 @@ namespace GSC.Helper
         [Description("FF004")] Reason = 4,
         [Description("FF005")] Note = 5,
     }
+    public enum ShipmentType : short
+    {
+        [Description("Site to Site")] SiteToSite = 1,
+        [Description("Site to Study")] SiteToStudy = 2
+    }
+    public enum KitStatus : int
+    {
+        [Description("Allocation Pending")] AllocationPending = 1,
+        [Description("Allocated")] Allocated = 2,
+        [Description("Returned")] Returned = 3
+    }
 
 }

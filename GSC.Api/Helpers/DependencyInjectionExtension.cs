@@ -389,7 +389,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IDashboardRepository, DashboardRepository>();
             services.AddScoped<ISupplyManagementAllocationRepository, SupplyManagementAllocationRepository>();
             services.AddScoped<ISupplyManagementKITRepository, SupplyManagementKITRepository>();
-
+            services.AddScoped<ISupplyManagementKITDetailRepository, SupplyManagementKITDetailRepository>();
         }
     }
 }

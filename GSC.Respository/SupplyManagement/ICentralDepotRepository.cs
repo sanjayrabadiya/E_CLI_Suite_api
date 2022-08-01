@@ -16,5 +16,7 @@ namespace GSC.Respository.SupplyManagement
         string ExistsInReceipt(int Id);
         string StudyUseInReceipt(CentralDepot objSave);
         List<DropDownDto> GetStorageAreaByIdDropDown(int Id);
+
+        List<DropDownDto> GetStorageAreaByProjectDropDown(int? ProjectId, int? CountryId);
     }
 }

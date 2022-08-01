@@ -14,12 +14,12 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ProjectDesignVisitId { get; set; }
         public int NoOfImp { get; set; }
         public int NoofPatient { get; set; }
-        public int NoOfKits { get; set; }
-        public int TotalUnits { get; set; }
+        //public int NoOfKits { get; set; }
+        //public int TotalUnits { get; set; }
         public int PharmacyStudyProductTypeId { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
-       
+
 
     }
 
@@ -33,15 +33,33 @@ namespace GSC.Data.Dto.SupplyManagement
         public string VisitName { get; set; }
         public int NoOfImp { get; set; }
         public int NoofPatient { get; set; }
-        public int NoOfKits { get; set; }
-        public int TotalUnits { get; set; }
+        //public int NoOfKits { get; set; }
+        //public int TotalUnits { get; set; }
         public string ProductTypeName { get; set; }
         public int ProjectId { get; set; }
         public int? CountryId { get; set; }
         public int? SiteId { get; set; }
 
-        public int PharmacyStudyProductTypeId { get; set; }
+        public int SupplyManagementKITId { get; set; }
+
+        public int? SupplyManagementShipmentId { get; set; }
+        public int? PharmacyStudyProductTypeId { get; set; }
         public int? ProjectDesignVisitId { get; set; }
-       
+
+        public string Status { get; set; }
+
+
+    }
+
+    public class DeleteKitDto
+    {
+        public List<int> list { get; set; }
+    }
+    public class KitListApprove
+    {
+        public int Id { get; set; }
+        public int KitNo { get; set; }
+        public string VisitName { get; set; }
+        public string SiteCode { get; set; }
     }
 }

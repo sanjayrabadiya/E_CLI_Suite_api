@@ -25,6 +25,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string MimeType { get; set; }
         public DepotType? DepotType { get; set; }
         public ProductVerificationStatus? Status { get; set; }
+        public int? CountryId { get; set; }
     }
 
     public class ProductReceiptGridDto : BaseAuditDto
@@ -44,5 +45,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string PathName { get; set; }
         public string MimeType { get; set; }
         public int CentralDepotId { get; set; }
+
+        public int? CountryId { get; set; }
+        public int? ProductVerificationDetaild { get; set; }
+
+        public string CountryName { get; set; }
     }
 }

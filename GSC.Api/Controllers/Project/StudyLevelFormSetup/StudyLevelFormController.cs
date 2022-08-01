@@ -143,6 +143,12 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 return BadRequest(ModelState);
             }
 
+            var approval = _studyLevelFormRepository.CheckVerificationApproval(studyLevelForm);
+            if (!string.IsNullOrEmpty(approval))
+            {
+                ModelState.AddModelError("Message", approval);
+                return BadRequest(ModelState);
+            }
             _studyLevelFormRepository.Update(studyLevelForm);
 
             if (_uow.Save() <= 0) throw new Exception("Update setup form failed on save.");
@@ -163,7 +169,12 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+            var approval = _studyLevelFormRepository.CheckVerificationApproval(record);
+            if (!string.IsNullOrEmpty(approval))
+            {
+                ModelState.AddModelError("Message", approval);
+                return BadRequest(ModelState);
+            }
             _studyLevelFormRepository.Delete(record);
 
             var studyLevelFormVariable = _studyLevelFormVariableRepository.FindByInclude(x => x.StudyLevelFormId == record.Id).ToList();

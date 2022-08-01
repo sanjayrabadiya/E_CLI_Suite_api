@@ -106,5 +106,22 @@ namespace GSC.Respository.SupplyManagement
             else
                 return GetStorageAreaByDepoDropDown();
         }
+        public List<DropDownDto> GetStorageAreaByProjectDropDown(int? ProjectId, int? CountryId)
+        {
+            if (ProjectId > 0)
+            {
+                return All.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectId == ProjectId && x.CountryId == CountryId)
+                    .Select(c => new DropDownDto { Id = c.Id, Value = c.StorageArea, IsDeleted = c.DeletedDate != null })
+                    .OrderBy(o => o.Value).ToList();
+            }
+            else
+            {
+                return All.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.CountryId == CountryId)
+                    .Select(c => new DropDownDto { Id = c.Id, Value = c.StorageArea, IsDeleted = c.DeletedDate != null })
+                    .OrderBy(o => o.Value).ToList();
+            }
+        }
     }
 }

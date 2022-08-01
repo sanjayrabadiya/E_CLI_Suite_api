@@ -10,6 +10,7 @@ using GSC.Helper;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Respository.SupplyManagement;
 using GSC.Shared.Extension;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,7 +32,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IVariabeLanguageRepository _variabeLanguageRepository;
-
+        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
         public ProjectDesignVariableController(IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
@@ -43,7 +44,8 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
             IVariabeValueLanguageRepository variableValueLanguageRepository,
-            IVariabeLanguageRepository variabeLanguageRepository
+            IVariabeLanguageRepository variabeLanguageRepository,
+            ISupplyManagementAllocationRepository supplyManagementAllocationRepository
             )
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
@@ -59,6 +61,7 @@ namespace GSC.Api.Controllers.Project.Design
             _variableValueLanguageRepository = variableValueLanguageRepository;
             _variabeLanguageRepository = variabeLanguageRepository;
             _domainRepository = domainRepository;
+            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
         }
 
         [HttpGet("{id}")]
@@ -202,6 +205,11 @@ namespace GSC.Api.Controllers.Project.Design
             if (record.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
             {
                 ModelState.AddModelError("Message", "Can't delete record!");
+                return BadRequest(ModelState);
+            }
+            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVariableId == id))
+            {
+                ModelState.AddModelError("Message", "Can't delete record, Already used in Allocation!");
                 return BadRequest(ModelState);
             }
 

@@ -17,5 +17,6 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
         CtmsMonitoringReportFormDto GetReportFormVariable(int id);
         StudyLevelForm GetTemplateForVerification(int ProjectId);
         DesignVerificationApprovalTemplateDto GetReportFormVariableForVerification(int id);
+        string CheckVerificationApproval(StudyLevelForm objSave);
     }
 }

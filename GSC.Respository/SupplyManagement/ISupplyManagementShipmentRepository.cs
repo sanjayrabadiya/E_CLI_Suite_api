@@ -11,5 +11,11 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(bool isDeleted);
 
         string GenerateShipmentNo();
+
+        string ApprovalValidation(SupplyManagementShipmentDto supplyManagementshipmentDto);
+
+        string GetShipmentNo();
+
+        void Assignkits(SupplyManagementRequest shipmentdata, SupplyManagementShipmentDto supplyManagementshipmentDto);
     }
 }

@@ -133,7 +133,8 @@ namespace GSC.Respository.SupplyManagement
         {
             if (obj.Id > 0)
             {
-                var data = All.Where(x => x.Id != obj.Id && x.DeletedDate == null && x.ProjectDesignVariableId == obj.ProjectDesignVariableId).FirstOrDefault();
+                var data = All.Where(x => x.Id != obj.Id && x.DeletedDate == null
+                && x.PharmacyStudyProductTypeId == obj.PharmacyStudyProductTypeId && x.ProjectDesignVariableId == obj.ProjectDesignVariableId).FirstOrDefault();
                 if (data != null)
                 {
                     return "Record already exist!";
@@ -141,7 +142,7 @@ namespace GSC.Respository.SupplyManagement
             }
             else
             {
-                var data = All.Where(x => x.DeletedDate == null && x.ProjectDesignVariableId == obj.ProjectDesignVariableId).FirstOrDefault();
+                var data = All.Where(x => x.DeletedDate == null && x.PharmacyStudyProductTypeId == obj.PharmacyStudyProductTypeId && x.ProjectDesignVariableId == obj.ProjectDesignVariableId).FirstOrDefault();
                 if (data != null)
                 {
                     return "Record already exist!";

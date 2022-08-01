@@ -8,6 +8,7 @@ using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,65 +45,32 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 return BadRequest();
             }
-
-            var shipmentData = _context.SupplyManagementRequest.Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementRequestId).FirstOrDefault();
-            if (shipmentData == null)
+            var shipmentdata = _supplyManagementRequestRepository.All.Include(x => x.PharmacyStudyProductType).Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementRequestId).FirstOrDefault();
+            if (shipmentdata == null)
             {
-                ModelState.AddModelError("Message", "Request data not found!");
+                ModelState.AddModelError("Message", "Shipment request is not available!");
                 return BadRequest(ModelState);
             }
-            var project = _context.Project.Where(x => x.Id == shipmentData.FromProjectId).FirstOrDefault();
-            if (project == null)
+            var message = _supplyManagementShipmentRepository.ApprovalValidation(supplyManagementshipmentDto);
+            if (!string.IsNullOrEmpty(message))
             {
-                ModelState.AddModelError("Message", "From project code not found!");
+                ModelState.AddModelError("Message", message);
                 return BadRequest(ModelState);
-            }
-            var productreciept = _context.ProductReceipt.Where(x => x.ProjectId == project.ParentProjectId
-                                && x.Status == Helper.ProductVerificationStatus.Approved).FirstOrDefault();
-            if (productreciept == null)
-            {
-                ModelState.AddModelError("Message", "Product receipt is pending!");
-                return BadRequest(ModelState);
-            }
-            var productVerificationDetail = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == project.ParentProjectId
-                                && x.ProductReceipt.Status == Helper.ProductVerificationStatus.Approved).FirstOrDefault();
-            if (productVerificationDetail == null)
-            {
-                ModelState.AddModelError("Message", "Product verification is pending!");
-                return BadRequest(ModelState);
-            }
-            if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
-            {
-                if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, shipmentData.StudyProductTypeId))
-                {
-                    ModelState.AddModelError("Message", "Approve Qauntity is greater than remaining Qauntity!");
-                    return BadRequest(ModelState);
-                }
             }
 
             supplyManagementshipmentDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementShipment>(supplyManagementshipmentDto);
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                bool isnotexist = false;
-                while (!isnotexist)
-                {
-                    var str = _supplyManagementShipmentRepository.GenerateShipmentNo();
-                    if (!string.IsNullOrEmpty(str))
-                    {
-                        var data = _supplyManagementShipmentRepository.All.Where(x => x.ShipmentNo == str).FirstOrDefault();
-                        if (data == null)
-                        {
-                            isnotexist = true;
-                            supplyManagementRequest.ShipmentNo = str;
-                            break;
-                        }
-                    }
-
-                }
+                supplyManagementRequest.ShipmentNo = _supplyManagementShipmentRepository.GetShipmentNo();
             }
             _supplyManagementShipmentRepository.Add(supplyManagementRequest);
             if (_uow.Save() <= 0) throw new Exception("Creating shipment failed on save.");
+
+            //assign kit
+            supplyManagementshipmentDto.Id = supplyManagementRequest.Id;
+            _supplyManagementShipmentRepository.Assignkits(shipmentdata, supplyManagementshipmentDto);
+
             return Ok(supplyManagementRequest.Id);
         }
         [HttpGet("{isDeleted:bool?}")]
@@ -115,14 +83,25 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("GetRemainingQty/{SupplyManagementRequestId}")]
         public IActionResult GetRemainingQty(int SupplyManagementRequestId)
         {
-            var shipmentData = _context.SupplyManagementRequest.Where(x => x.Id == SupplyManagementRequestId).FirstOrDefault();
+            var shipmentData = _context.SupplyManagementRequest.Include(x => x.PharmacyStudyProductType).Include(x => x.FromProject).Where(x => x.Id == SupplyManagementRequestId).FirstOrDefault();
             if (shipmentData == null)
             {
                 ModelState.AddModelError("Message", "Request data not found!");
                 return BadRequest(ModelState);
             }
-            int getParentProjectId = (int)_context.Project.Where(x => x.Id == shipmentData.FromProjectId).FirstOrDefault().ParentProjectId;
-            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty(getParentProjectId, shipmentData.StudyProductTypeId));
+
+            if (shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
+            {
+                return Ok(_supplyManagementRequestRepository.GetAvailableRemainingKit(SupplyManagementRequestId));
+            }
+            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty((int)shipmentData.FromProject.ParentProjectId, shipmentData.StudyProductTypeId));
+        }
+
+        [HttpGet]
+        [Route("GetAvailableKit/{SupplyManagementRequestId}")]
+        public IActionResult GetAvailableKit(int SupplyManagementRequestId)
+        {
+            return Ok(_supplyManagementRequestRepository.GetAvailableKit(SupplyManagementRequestId));
         }
     }
 }

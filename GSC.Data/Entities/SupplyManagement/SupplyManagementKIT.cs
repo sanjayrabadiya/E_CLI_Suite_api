@@ -17,10 +17,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? ProjectDesignVisitId { get; set; }
         public int NoOfImp { get; set; }
         public int NoofPatient { get; set; }
-        public int NoOfKits { get; set; }
-        public int TotalUnits { get; set; }
+        public int? NoOfKits { get; set; }
+        public int? TotalUnits { get; set; }
         public int PharmacyStudyProductTypeId { get; set; }
-        public int KitNo { get; set; }
         public Entities.Master.Project Project { get; set; }
 
         [ForeignKey("SiteId")]
@@ -30,5 +29,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public string ReasonOth { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public PharmacyStudyProductType PharmacyStudyProductType { get; set; }
+
+       
     }
 }

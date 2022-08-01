@@ -17,13 +17,15 @@ namespace GSC.Data.Dto.SupplyManagement
         public string CourierTrackingNo { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+
+        public List<KitListApprove> Kits { get; set; }
     }
     public class SupplyManagementShipmentGridDto : BaseAuditDto
     {
 
         public bool IsSiteRequest { get; set; }
         public int? FromProjectId { get; set; }
-        public int? ToProjectId { get; set; }    
+        public int? ToProjectId { get; set; }
         public int? RequestQty { get; set; }
 
         public int? ApprovedQty { get; set; }
@@ -32,14 +34,14 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string StatusName { get; set; }
 
-    
+
         public string StudyProjectCode { get; set; }
 
         public string FromProjectCode { get; set; }
 
         public string ToProjectCode { get; set; }
 
-    
+
         public string AuditReason { get; set; }
         public string ReasonOth { get; set; }
         public string ShipmentNo { get; set; }
@@ -57,6 +59,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string StudyProductTypeName { get; set; }
 
         public string StudyProductTypeUnitName { get; set; }
+
+        public ProductUnitType ProductUnitType { get; set; }
+
+        public string SiteRequest { get; set; }
     }
 
 }

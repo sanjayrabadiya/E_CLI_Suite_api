@@ -13,6 +13,7 @@ using GSC.Respository.LanguageSetup;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Schedule;
+using GSC.Respository.SupplyManagement;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +43,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         private readonly IProjectDesingTemplateRestrictionRepository _templatePermissioRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IVariableTemplateRepository variableTemplateRepository,
@@ -60,7 +62,8 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             IProjectDesingTemplateRestrictionRepository templatePermissioRepository,
         IUnitOfWork uow, IMapper mapper,
-         IJwtTokenAccesser jwtTokenAccesser)
+         IJwtTokenAccesser jwtTokenAccesser,
+         ISupplyManagementAllocationRepository supplyManagementAllocationRepository)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -82,6 +85,7 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
             _templatePermissioRepository = templatePermissioRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
         }
 
         [HttpGet("{projectDesignVisitId}")]
@@ -471,6 +475,11 @@ namespace GSC.Api.Controllers.Project.Design
             if (record.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
             {
                 ModelState.AddModelError("Message", "Can't delete record!");
+                return BadRequest(ModelState);
+            }
+            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignTemplateId == id))
+            {
+                ModelState.AddModelError("Message", "Can't delete record, Already used in Allocation!");
                 return BadRequest(ModelState);
             }
 

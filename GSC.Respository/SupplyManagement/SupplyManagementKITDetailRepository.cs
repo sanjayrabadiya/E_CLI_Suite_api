@@ -22,7 +22,7 @@ using System.Linq;
 
 namespace GSC.Respository.SupplyManagement
 {
-    public class SupplyManagementKITRepository : GenericRespository<SupplyManagementKIT>, ISupplyManagementKITRepository
+    public class SupplyManagementKITDetailRepository : GenericRespository<SupplyManagementKITDetail>, ISupplyManagementKITDetailRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ namespace GSC.Respository.SupplyManagement
         private readonly ICountryRepository _countryRepository;
         private readonly IGSCContext _context;
 
-        public SupplyManagementKITRepository(IGSCContext context,
+        public SupplyManagementKITDetailRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
         IProjectDesignVisitRepository projectDesignVisitRepository,
              IProjectRepository projectRepository,
@@ -46,25 +46,6 @@ namespace GSC.Respository.SupplyManagement
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
-        }
-
-        public List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId)
-        {
-            return _context.SupplyManagementKITDetail.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.SupplyManagementKIT.ProjectId == ProjectId).
-                   ProjectTo<SupplyManagementKITGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-        }
-
-        public IList<DropDownDto> GetVisitDropDownByAllocation(int projectId)
-        {
-            var visits = _context.SupplyManagementAllocation.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
-             && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
-             && x.DeletedDate == null)
-                .Select(x => new DropDownDto
-                {
-                    Id = x.ProjectDesignVisit.Id,
-                    Value = x.ProjectDesignVisit.DisplayName,
-                }).Distinct().ToList();
-            return visits;
         }
     }
 }

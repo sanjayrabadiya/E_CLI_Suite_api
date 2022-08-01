@@ -360,13 +360,14 @@ namespace GSC.Domain.Context
         DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
         DbSet<SendEmailOnVariableChangeSetting> SendEmailOnVariableChangeSetting { get; set; }
         DbSet<SendEmailOnVariableValue> SendEmailOnVariableValue { get; set; }
-      //  DbSet<KitManagement> KitManagement { get; set; }
-      //  DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
+        //  DbSet<KitManagement> KitManagement { get; set; }
+        //  DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
         DbSet<ScheduleTerminateDetail> ScheduleTerminateDetail { get; set; }
         DbSet<TemplateVariableSequenceNoSetting> TemplateVariableSequenceNoSetting { get; set; }
 
         DbSet<SupplyManagementAllocation> SupplyManagementAllocation { get; set; }
 
         DbSet<SupplyManagementKIT> SupplyManagementKIT { get; set; }
+        DbSet<SupplyManagementKITDetail> SupplyManagementKITDetail { get; set; }
     }
 }

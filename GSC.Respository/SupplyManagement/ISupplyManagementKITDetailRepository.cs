@@ -7,10 +7,8 @@ using System.Collections.Generic;
 
 namespace GSC.Respository.SupplyManagement
 {
-    public interface ISupplyManagementKITRepository : IGenericRepository<SupplyManagementKIT>
+    public interface ISupplyManagementKITDetailRepository : IGenericRepository<SupplyManagementKITDetail>
     {
-        List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId);
-
-        IList<DropDownDto> GetVisitDropDownByAllocation(int projectId);
+        
     }
 }

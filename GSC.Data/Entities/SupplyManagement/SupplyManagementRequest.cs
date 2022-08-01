@@ -2,6 +2,7 @@
 using GSC.Common.Common;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
+using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? ToProjectId { get; set; }
         public int StudyProductTypeId { get; set; }
         public int RequestQty { get; set; }
+        public int? VisitId { get; set; }
 
         [ForeignKey("FromProjectId")]
         public GSC.Data.Entities.Master.Project FromProject { get; set; }
@@ -27,6 +29,9 @@ namespace GSC.Data.Entities.SupplyManagement
 
         [ForeignKey("StudyProductTypeId")]
         public PharmacyStudyProductType PharmacyStudyProductType { get; set; }
+
+        [ForeignKey("VisitId")]
+        public ProjectDesignVisit ProjectDesignVisit { get; set; }
 
     }   
 }

@@ -419,6 +419,8 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementAllocation> SupplyManagementAllocation { get; set; }
 
         public DbSet<SupplyManagementKIT> SupplyManagementKIT { get; set; }
+
+        public DbSet<SupplyManagementKITDetail> SupplyManagementKITDetail { get; set; }
     }
 
 

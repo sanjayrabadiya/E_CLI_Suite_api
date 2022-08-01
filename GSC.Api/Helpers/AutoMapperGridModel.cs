@@ -351,6 +351,7 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.PharmacyStudyProductType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
               .ForMember(x => x.StorageArea, x => x.MapFrom(a => a.CentralDepot.StorageArea))
               .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription()))
+              .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
               .ReverseMap();
 
             CreateMap<ProductVerification, ProductVerificationGridDto>().ReverseMap();
@@ -430,6 +431,7 @@ namespace GSC.Api.Helpers
                   .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.ToProject.ProjectCode))
                   .ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
                   .ForMember(x => x.StudyProductTypeUnitName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType.GetDescription()))
+                  .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
                   .ReverseMap();
             CreateMap<SupplyManagementShipment, SupplyManagementShipmentGridDto>()
                   .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyManagementRequest.FromProject.ProjectCode))
@@ -475,6 +477,8 @@ namespace GSC.Api.Helpers
                   .ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
                   .ForMember(x => x.StudyProductTypeUnitName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType.GetDescription()))
                   .ForMember(x => x.RequestBy, x => x.MapFrom(a => a.CreatedByUser.UserName))
+                  .ForMember(x => x.RequestDate, x => x.MapFrom(a => a.CreatedDate))
+                  .ForMember(x => x.ProductUnitType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType))
                   .ForMember(x => x.RequestDate, x => x.MapFrom(a => a.CreatedDate))
                   .ReverseMap();
 
@@ -536,12 +540,16 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
              .ReverseMap();
 
-            CreateMap<SupplyManagementKIT, SupplyManagementKITGridDto>()
-               .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
-               .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Site.ProjectCode))
-               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
-               .ForMember(x => x.ProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeCode))
-               .ForMember(x => x.Reason, x => x.MapFrom(a => a.AuditReason.ReasonName)).ReverseMap();
+            CreateMap<SupplyManagementKITDetail, SupplyManagementKITGridDto>()
+               .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.SupplyManagementKIT.Project.ProjectCode))
+               .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.SupplyManagementKIT.Site.ProjectCode))
+               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.SupplyManagementKIT.ProjectDesignVisit.DisplayName))
+               .ForMember(x => x.ProductTypeName, x => x.MapFrom(a => a.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode))
+               .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription()))
+               .ForMember(x => x.NoOfImp, x => x.MapFrom(a => a.SupplyManagementKIT.NoOfImp))
+               .ForMember(x => x.NoofPatient, x => x.MapFrom(a => a.SupplyManagementKIT.NoofPatient))
+               .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.SupplyManagementKIT.ProjectId))
+               .ForMember(x => x.Reason, x => x.MapFrom(a => a.SupplyManagementKIT.AuditReason.ReasonName)).ReverseMap();
         }
     }
 }

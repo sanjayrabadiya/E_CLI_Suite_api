@@ -9,6 +9,7 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
 using GSC.Respository.LanguageSetup;
 using GSC.Respository.Project.Design;
+using GSC.Respository.SupplyManagement;
 using GSC.Shared.Extension;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +34,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
+        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
         public ProjectDesignVisitController(IProjectDesignVisitRepository projectDesignVisitRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
@@ -47,7 +49,8 @@ namespace GSC.Api.Controllers.Project.Design
             IVariabeLanguageRepository variableLanguageRepository,
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
             IVariabeValueLanguageRepository variableValueLanguageRepository,
-            IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository)
+            IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
+            ISupplyManagementAllocationRepository supplyManagementAllocationRepository)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _uow = uow;
@@ -65,6 +68,7 @@ namespace GSC.Api.Controllers.Project.Design
             _variableNoteLanguageRepository = variableNoteLanguageRepository;
             _variableValueLanguageRepository = variableValueLanguageRepository;
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
+            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
         }
 
         [HttpGet("{id}/{projectDesignPeriodId}")]
@@ -157,6 +161,11 @@ namespace GSC.Api.Controllers.Project.Design
             if (visit.DisplayName == ScreeningFitnessFit.FitnessFit.GetDescription())
             {
                 ModelState.AddModelError("Message", "Can't delete visit!");
+                return BadRequest(ModelState);
+            }
+            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVisitId == id))
+            {
+                ModelState.AddModelError("Message", "Can't delete visit Already used in Allocation!");
                 return BadRequest(ModelState);
             }
 

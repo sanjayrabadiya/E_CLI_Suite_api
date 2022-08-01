@@ -15,6 +15,7 @@ using GSC.Shared.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GSC.Api.Controllers.SupplyManagement
@@ -26,17 +27,19 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
+        private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         public SupplyManagementKITController(ISupplyManagementKITRepository supplyManagementKITRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context)
+            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository)
         {
             _supplyManagementKITRepository = supplyManagementKITRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
+            _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
         }
 
         [HttpGet("{id}")]
@@ -59,52 +62,75 @@ namespace GSC.Api.Controllers.SupplyManagement
         [TransactionRequired]
         public IActionResult Post([FromBody] SupplyManagementKITDto supplyManagementUploadFileDto)
         {
+            List<SupplyManagementKITDetail> list = new List<SupplyManagementKITDetail>();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementUploadFileDto.Id = 0;
 
             var supplyManagementUploadFile = _mapper.Map<SupplyManagementKIT>(supplyManagementUploadFileDto);
-            supplyManagementUploadFile.TotalUnits = (supplyManagementUploadFileDto.NoOfImp * supplyManagementUploadFileDto.NoofPatient * supplyManagementUploadFileDto.NoOfKits);
+            supplyManagementUploadFile.TotalUnits = (supplyManagementUploadFileDto.NoOfImp * supplyManagementUploadFileDto.NoofPatient);
             _supplyManagementKITRepository.Add(supplyManagementUploadFile);
-           
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
-           
-          
-            supplyManagementUploadFile.KitNo = supplyManagementUploadFileDto.Id;
-            _context.Entry(supplyManagementUploadFile).State = EntityState.Detached;
-            _supplyManagementKITRepository.Update(supplyManagementUploadFile);
-            if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
+            var kitno = _supplyManagementKITDetailRepository.All.OrderByDescending(x => x.KitNo).Select(x => x.KitNo).FirstOrDefault();
+
+            for (int i = 0; i < supplyManagementUploadFileDto.NoofPatient; i++)
+            {
+                SupplyManagementKITDetail obj = new SupplyManagementKITDetail();
+                obj.KitNo = ++kitno;
+                obj.SupplyManagementKITId = supplyManagementUploadFile.Id;
+                obj.Status = KitStatus.AllocationPending;
+                _supplyManagementKITDetailRepository.Add(obj);
+                _uow.Save();
+            }
 
             return Ok(supplyManagementUploadFile.Id);
 
         }
 
-        [HttpPut]
-        public IActionResult Put([FromBody] SupplyManagementKITDto supplyManagementUploadFileDto)
-        {
-            if (supplyManagementUploadFileDto.Id <= 0) return BadRequest();
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            var supplyManagementUploadFile = _mapper.Map<SupplyManagementKIT>(supplyManagementUploadFileDto);
-            supplyManagementUploadFile.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
-            supplyManagementUploadFile.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
-            supplyManagementUploadFile.TotalUnits = (supplyManagementUploadFileDto.NoOfImp * supplyManagementUploadFileDto.NoofPatient * supplyManagementUploadFileDto.NoOfKits);
-            _supplyManagementKITRepository.Update(supplyManagementUploadFile);
-
-            if (_uow.Save() <= 0) throw new Exception("Updating Kit Creation failed on action.");
-            return Ok(supplyManagementUploadFile.Id);
-        }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var record = _supplyManagementKITRepository.Find(id);
+            var record = _supplyManagementKITDetailRepository.Find(id);
 
             if (record == null)
                 return NotFound();
 
-            _supplyManagementKITRepository.Delete(record);
+            _supplyManagementKITDetailRepository.Delete(record);
             _uow.Save();
 
+            record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+            record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+
+            _supplyManagementKITDetailRepository.Update(record);
+            _uow.Save();
+            return Ok();
+        }
+        [HttpPost("DeleteKits")]
+        [TransactionRequired]
+        public IActionResult DeleteKits([FromBody] DeleteKitDto deleteKitDto)
+        {
+            if (deleteKitDto.list.Count == 0)
+            {
+                ModelState.AddModelError("Message", "please select atleast one kit!");
+                return BadRequest(ModelState);
+            }
+            foreach (var item in deleteKitDto.list)
+            {
+                var record = _supplyManagementKITDetailRepository.Find(item);
+
+                if (record == null)
+                    return NotFound();
+
+                _supplyManagementKITDetailRepository.Delete(record);
+                _uow.Save();
+
+                record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+                record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+
+                _supplyManagementKITDetailRepository.Update(record);
+                _uow.Save();
+            }
+            
             return Ok();
         }
 
@@ -121,5 +147,14 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetVisitDropDownByAllocation/{projectId}")]
+        public IActionResult GetVisitDropDownByAllocation(int projectId)
+        {
+            return Ok(_supplyManagementKITRepository.GetVisitDropDownByAllocation(projectId));
+        }
+
+
     }
 }

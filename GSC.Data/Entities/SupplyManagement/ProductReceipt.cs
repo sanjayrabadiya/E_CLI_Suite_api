@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Location;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public int ProjectId { get; set; }
         public int CentralDepotId { get; set; }
         public int PharmacyStudyProductTypeId { get; set; }
+        public int? CountryId { get; set; }
         public string ProductName { get; set; }
         public string ReceivedFromLocation { get; set; }
         public DateTime ReceiptDate { get; set; }
@@ -26,5 +28,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public CentralDepot CentralDepot { get; set; }
         public PharmacyStudyProductType PharmacyStudyProductType { get; set; }
         public ProductVerificationStatus? Status { get; set; }
+
+        public Country Country { get; set; }
     }
 }
