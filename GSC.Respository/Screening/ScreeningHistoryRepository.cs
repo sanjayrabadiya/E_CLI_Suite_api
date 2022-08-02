@@ -46,7 +46,8 @@ namespace GSC.Respository.Screening
                 ScreeningDate = x.ScreeningEntry.ScreeningDate,
                 VolunteerNumber = x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
                 VolunteerName = x.ScreeningEntry.Attendance.Volunteer.AliasName,
-                IsFitnessFit = x.ScreeningEntry.IsFitnessFit
+                IsFitnessFit = x.ScreeningEntry.IsFitnessFit,
+                Notes = x.ScreeningEntry.FitnessNotes
             }).OrderByDescending(x => x.Id).ToList();
 
             return finalResult;

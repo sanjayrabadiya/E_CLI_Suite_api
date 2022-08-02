@@ -637,10 +637,13 @@ namespace GSC.Respository.Screening
             return resultSites;
         }
 
-        public void SetFitnessValue(ScreeningTemplateValueDto screeningTemplateValueDto)
+        public void SetFitnessValue(ScreeningTemplateValue screeningTemplateValueDto)
         {
-            var screeningEntry = All.Where(x => x.Id == screeningTemplateValueDto.ScreeningEntryId).FirstOrDefault();
-            var ScreeningHistory = _context.ScreeningHistory.Where(x => x.ScreeningEntryId == screeningTemplateValueDto.ScreeningEntryId).FirstOrDefault();
+            var ScreeningTemplate = _screeningTemplateRepository.Find(screeningTemplateValueDto.ScreeningTemplateId);
+            var ScreeningVisit = _screeningVisitRepository.Find(ScreeningTemplate.ScreeningVisitId);
+
+            var screeningEntry = All.Where(x => x.Id == ScreeningVisit.ScreeningEntryId).FirstOrDefault();
+            var ScreeningHistory = _context.ScreeningHistory.Where(x => x.ScreeningEntryId == ScreeningVisit.ScreeningEntryId).FirstOrDefault();
 
             var projectDesignVariable = _context.ProjectDesignVariable.Include(x => x.Domain).Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).FirstOrDefault();
 
@@ -660,20 +663,21 @@ namespace GSC.Respository.Screening
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Reason.GetDescription())
                     {
                         screeningEntry.FitnessReason = screeningTemplateValueDto.Value;
-                        ScreeningHistory.Reason = screeningTemplateValueDto.Value;
+                        //ScreeningHistory.Reason = screeningTemplateValueDto.Value;
                     }
                 }
 
                 if (projectDesignVariable.DesignOrder == 1 || projectDesignVariable.DesignOrder == 2)
                 {
+                    var ProjectDesignVariableValue = _context.ProjectDesignVariableValue.Where(x => x.Id == Convert.ToInt32(screeningTemplateValueDto.Value)).FirstOrDefault();
                     if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.FitnessFit.GetDescription())
                     {
-                        screeningEntry.IsFitnessFit = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
+                        screeningEntry.IsFitnessFit = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
                     }
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Enrolled.GetDescription())
                     {
-                        screeningEntry.IsEnrolled = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
-                        ScreeningHistory.Enrolled = screeningTemplateValueDto.ValueName == "Yes" ? true : false;
+                        screeningEntry.IsEnrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                        ScreeningHistory.Enrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
                     }
                 }
 

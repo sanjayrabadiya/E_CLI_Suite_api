@@ -112,7 +112,7 @@ namespace GSC.Api.Controllers.Screening
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
-            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValueDto);
+            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValue);
 
             _uow.Save();
 
@@ -199,7 +199,7 @@ namespace GSC.Api.Controllers.Screening
 
             ScreeningTemplateStatus(screeningTemplateValueDto, screeningTemplateValue.ScreeningTemplateId);
 
-            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValueDto);
+            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValue);
 
             _uow.Save();
 

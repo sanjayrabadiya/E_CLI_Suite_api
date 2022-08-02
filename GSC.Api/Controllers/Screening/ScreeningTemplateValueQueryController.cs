@@ -31,6 +31,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IScheduleTerminate _scheduleTerminate;
+        private readonly IScreeningEntryRepository _screeningEntrytRepository;
 
         public ScreeningTemplateValueQueryController(
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
@@ -41,7 +42,8 @@ namespace GSC.Api.Controllers.Screening
             IScreeningTemplateRepository screeningTemplateRepository,
             IScreeningVisitRepository screeningVisitRepository,
             IUnitOfWork uow, IMapper mapper, IGSCContext context,
-            IScheduleTerminate scheduleTerminate)
+            IScheduleTerminate scheduleTerminate,
+            IScreeningEntryRepository screeningEntrytRepository)
         {
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -54,6 +56,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningVisitRepository = screeningVisitRepository;
             _context = context;
             _scheduleTerminate = scheduleTerminate;
+            _screeningEntrytRepository = screeningEntrytRepository;
         }
 
         [HttpGet("{screeningTemplateValueId}")]
@@ -112,6 +115,8 @@ namespace GSC.Api.Controllers.Screening
 
             if (screeningTemplateValue.QueryStatus == QueryStatus.Resolved)
                 _meddraCodingRepository.UpdateSelfCorrection(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
+
+            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValue);
 
             //for variable email .prakash chauhan 14-05-2022
             _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
@@ -248,7 +253,7 @@ namespace GSC.Api.Controllers.Screening
 
             //for variable email .prakash chauhan 14-05-2022
             _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
-
+            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValue);
             _uow.Save();
 
             _scheduleTerminate.TerminateScheduleTemplateVisit(screeningTemplate.ProjectDesignTemplateId, screeningEntryId, true);

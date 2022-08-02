@@ -23,6 +23,7 @@ namespace GSC.Data.Dto.Screening
         public string VolunteerName { get; set; }
         public int VolunteerId { get; set; }
         public string ScreeningStatus { get; set; }
+        public string Notes { get; set; }
         public List<VolunteerAuditTrail> Changes { get; set; }
     }
 }
