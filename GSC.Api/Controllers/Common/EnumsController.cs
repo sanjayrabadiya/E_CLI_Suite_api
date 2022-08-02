@@ -714,5 +714,18 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+        [HttpGet]
+        [Route("GetKitsStatusTypeDropdown")]
+        public IActionResult GetKitsStatusTypeDropdown()
+        {
+            var refrencetype = Enum.GetValues(typeof(KitStatus))
+                .Cast<KitStatus>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).Where(x => x.Id == 4 || x.Id == 5).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }

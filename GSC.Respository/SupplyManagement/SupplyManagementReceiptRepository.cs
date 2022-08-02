@@ -41,8 +41,9 @@ namespace GSC.Respository.SupplyManagement
                 {
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     t.StudyProjectCode = study != null ? study.ProjectCode : "";
+                  
                 }
-
+                t.WithIssueName = t.WithIssue == true ? "Yes" : "No";
             });
 
 
@@ -55,10 +56,10 @@ namespace GSC.Respository.SupplyManagement
                 SupplyManagementReceiptGridDto obj = new SupplyManagementReceiptGridDto();
                 obj = t;
                 obj.Id = 0;
-                obj.WithIssue = null;
+                obj.ApproveRejectDateTime = t.CreatedDate;
+                obj.WithIssueName = "";
                 obj.CreatedByUser = null;
                 obj.CreatedDate = null;
-                obj.ApproveRejectDateTime = t.CreatedDate;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {

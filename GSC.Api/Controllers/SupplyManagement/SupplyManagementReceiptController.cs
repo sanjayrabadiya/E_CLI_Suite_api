@@ -22,15 +22,16 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly ISupplyManagementReceiptRepository _supplyManagementReceiptRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
         public SupplyManagementReceiptController(ISupplyManagementReceiptRepository supplyManagementReceiptRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository)
         {
             _supplyManagementReceiptRepository = supplyManagementReceiptRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
         }
         [HttpPost]
         public IActionResult Post([FromBody] SupplyManagementReceiptDto supplyManagementshipmentDto)
@@ -45,6 +46,26 @@ namespace GSC.Api.Controllers.SupplyManagement
             var supplyManagementRequest = _mapper.Map<SupplyManagementReceipt>(supplyManagementshipmentDto);
 
             _supplyManagementReceiptRepository.Add(supplyManagementRequest);
+            if (supplyManagementshipmentDto.Kits != null)
+            {
+
+                foreach (var item in supplyManagementshipmentDto.Kits.Where(x => x.Status != null))
+                {
+                    if (string.IsNullOrEmpty(item.Comments))
+                    {
+                        ModelState.AddModelError("Message", "Please enter comments!");
+                        return BadRequest(ModelState);
+                    }
+                    var data = _supplyManagementKITDetailRepository.All.Where(x => x.Id == item.Id).FirstOrDefault();
+                    if (data != null)
+                    {
+                        data.Status = item.Status;
+                        data.Comments = item.Comments;
+                        _supplyManagementKITDetailRepository.Update(data);
+                        //_uow.Save();
+                    }
+                }
+            }
             if (_uow.Save() <= 0) throw new Exception("Creating shipment receipt failed on save.");
             return Ok(supplyManagementRequest.Id);
         }

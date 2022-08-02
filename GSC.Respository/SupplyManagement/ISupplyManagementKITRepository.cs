@@ -12,5 +12,7 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId);
 
         IList<DropDownDto> GetVisitDropDownByAllocation(int projectId);
+
+        List<KitListApproved> getApprovedKit(int id);
     }
 }

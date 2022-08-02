@@ -155,6 +155,11 @@ namespace GSC.Api.Controllers.SupplyManagement
             return Ok(_supplyManagementKITRepository.GetVisitDropDownByAllocation(projectId));
         }
 
-
+        [HttpGet]
+        [Route("getApprovedKit/{id}")]
+        public IActionResult getApprovedKit(int id)
+        {
+            return Ok(_supplyManagementKITRepository.getApprovedKit(id));
+        }
     }
 }

@@ -8,9 +8,11 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +67,39 @@ namespace GSC.Respository.SupplyManagement
                     Value = x.ProjectDesignVisit.DisplayName,
                 }).Distinct().ToList();
             return visits;
+        }
+
+        public List<KitListApproved> getApprovedKit(int id)
+        {
+            var obj = _context.SupplyManagementShipment.Where(x => x.Id == id).FirstOrDefault();
+            if (obj == null)
+                return new List<KitListApproved>();
+            var data = new List<KitListApproved>();
+
+            data = _context.SupplyManagementKITDetail.Where(x =>
+                    x.SupplyManagementShipmentId == id
+                    && x.Status == Helper.KitStatus.Allocated
+                    && x.DeletedDate == null).Select(x => new KitListApproved
+                    {
+                        Id = x.Id,
+                        KitNo = x.KitNo,
+                        VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
+                        SiteCode = x.SupplyManagementKIT.Site.ProjectCode
+                        
+                    }).OrderByDescending(x => x.KitNo).ToList();
+            foreach (var item in data)
+            {
+              
+                var refrencetype = Enum.GetValues(typeof(KitStatus))
+                                    .Cast<KitStatus>().Select(e => new DropDownEnum
+                                    {
+                                        Id = Convert.ToInt16(e),
+                                        Value = e.GetDescription()
+                                    }).Where(x => x.Id == 4 || x.Id == 5).ToList();
+                item.StatusList = refrencetype;
+            }
+
+            return data;
         }
     }
 }

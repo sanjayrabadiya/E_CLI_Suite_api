@@ -14,6 +14,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public string Description { get; set; }
+
+        public List<KitListApproved> Kits { get; set; }
     }
     public class SupplyManagementReceiptGridDto : BaseAuditDto
     {
@@ -21,16 +23,16 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ToProjectId { get; set; }
 
         public int SupplyManagementShipmentId { get; set; }
-        public bool? WithIssue { get; set; }        
-        public string ReasonOth { get; set; }         
-        public int? ApprovedQty { get; set; }      
+        public bool? WithIssue { get; set; }
+        public string ReasonOth { get; set; }
+        public int? ApprovedQty { get; set; }
         public string StatusName { get; set; }
         public SupplyMangementShipmentStatus Status { get; set; }
         public string StudyProjectCode { get; set; }
         public string FromProjectCode { get; set; }
         public string ToProjectCode { get; set; }
         public DateTime? ApproveRejectDateTime { get; set; }
-        public string AuditReason { get; set; }       
+        public string AuditReason { get; set; }
         public string ShipmentNo { get; set; }
         public string CourierName { get; set; }
         public DateTime? CourierDate { get; set; }
@@ -45,6 +47,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ShipmentReason { get; set; }
 
         public string ShipmentReasonOth { get; set; }
+
+        public ProductUnitType? ProductUnitType { get; set; }
+
+        public string WithIssueName { get; set; }
     }
 
 }

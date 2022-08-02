@@ -466,7 +466,8 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.CourierDate, x => x.MapFrom(a => a.SupplyManagementShipment.CourierDate))
                  .ForMember(x => x.CourierTrackingNo, x => x.MapFrom(a => a.SupplyManagementShipment.CourierTrackingNo))
                  .ForMember(x => x.ApproveRejectBy, x => x.MapFrom(a => a.SupplyManagementShipment.CreatedByUser.UserName))
-                  .ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName))
+                 .ForMember(x => x.ProductUnitType, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductUnitType))
+                 .ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName))
                  .ForMember(x => x.StudyProductTypeUnitName, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductUnitType.GetDescription()))
                  .ReverseMap();
 
@@ -499,6 +500,7 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.CourierDate, x => x.MapFrom(a => a.CourierDate))
                  .ForMember(x => x.CourierTrackingNo, x => x.MapFrom(a => a.CourierTrackingNo))
                  .ForMember(x => x.SupplyManagementShipmentId, x => x.MapFrom(a => a.Id))
+                 .ForMember(x => x.ProductUnitType, x => x.MapFrom(a => a.SupplyManagementRequest.PharmacyStudyProductType.ProductUnitType))
                  .ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName))
                  .ForMember(x => x.StudyProductTypeUnitName, x => x.MapFrom(a => a.SupplyManagementRequest.PharmacyStudyProductType.ProductUnitType.GetDescription()))
                  .ReverseMap();

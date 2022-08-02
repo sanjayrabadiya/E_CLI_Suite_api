@@ -25,5 +25,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public SupplyManagementShipment SupplyManagementShipment { get; set; }
 
         public KitStatus? Status { get; set; }
+
+        public string Comments { get; set; }
     }
 }

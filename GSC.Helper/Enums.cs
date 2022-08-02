@@ -903,7 +903,9 @@ namespace GSC.Helper
     {
         [Description("Allocation Pending")] AllocationPending = 1,
         [Description("Allocated")] Allocated = 2,
-        [Description("Returned")] Returned = 3
+        [Description("Returned")] Returned = 3,
+        [Description("Missing")] Missing = 4,
+        [Description("Damaged")] Damaged = 5,
     }
 
 }

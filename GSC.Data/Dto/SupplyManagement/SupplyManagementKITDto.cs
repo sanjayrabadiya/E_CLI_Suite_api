@@ -1,4 +1,5 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Data.Dto.Master;
+using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
@@ -61,5 +62,19 @@ namespace GSC.Data.Dto.SupplyManagement
         public int KitNo { get; set; }
         public string VisitName { get; set; }
         public string SiteCode { get; set; }
+    }
+
+    public class KitListApproved
+    {
+        public int Id { get; set; }
+        public int KitNo { get; set; }
+        public string VisitName { get; set; }
+        public string SiteCode { get; set; }
+
+        public string Comments { get; set; }
+
+        public KitStatus? Status { get; set; }
+
+        public List<DropDownEnum> StatusList { get; set; }
     }
 }
