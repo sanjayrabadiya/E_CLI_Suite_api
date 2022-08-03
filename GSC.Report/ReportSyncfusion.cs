@@ -702,7 +702,7 @@ namespace GSC.Report
                         foreach (var item in designt.ProjectDesignVariable.OrderBy(i => i.DesignOrder).GroupBy(x => x.VariableCategoryName).Select(y => y.Key))
                         {
                             var category = item;
-                            var variableList = designt.ProjectDesignVariable.Where(x => x.VariableCategoryName == item).OrderBy(i => i.DesignOrder).ToList();
+                            var variableList = designt.ProjectDesignVariable.Where(x => x.VariableCategoryName == item && x.Id == 36812).OrderBy(i => i.DesignOrder).ToList();
 
                             if (!string.IsNullOrEmpty(category))
                             {
@@ -1025,7 +1025,7 @@ namespace GSC.Report
                                         List<string> _points = new List<string>();
                                         int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
                                         int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
-                                        int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
+                                        double stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1.0 : Convert.ToDouble(variable.DefaultValue);
                                         //logic
                                         for (int i = lowrangevalue; i <= highragnevalue; i++)
                                         {
@@ -1442,7 +1442,7 @@ namespace GSC.Report
                                         List<string> _points = new List<string>();
                                         int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
                                         int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
-                                        int stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1 : Convert.ToInt32(variable.DefaultValue);
+                                        double stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1.0 : Convert.ToDouble(variable.DefaultValue);
                                         //logic
                                         for (int i = lowrangevalue; i <= highragnevalue; i++)
                                         {
