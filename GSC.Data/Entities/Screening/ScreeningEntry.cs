@@ -37,8 +37,11 @@ namespace GSC.Data.Entities.Screening
         public string FitnessReason { get; set; }
         public string FitnessNotes { get; set; }
         public int Progress { get; set; }
+        public int? StudyId { get; set; }
         public ICollection<ScreeningVisit> ScreeningVisit { get; set; }
         public Master.Project Project { get; set; }
+
+        [ForeignKey("StudyId")] public Master.Project Study { get; set; }
         public ScreeningHistory ScreeningHistory { get; set; }
 
         [ForeignKey("AttendanceId")] public Attendance.Attendance Attendance { get; set; }

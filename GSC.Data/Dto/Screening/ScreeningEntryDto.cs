@@ -28,6 +28,7 @@ namespace GSC.Data.Dto.Screening
 
         public ScreeningTemplateStatus Status { get; set; }
         public int ProjectId { get; set; }
+        public int? StudyId { get; set; }
         public bool IsTesting { get; set; }
         public bool? IsFitnessFit { get; set; }
         public bool? IsEnrolled { get; set; }
