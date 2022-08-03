@@ -702,7 +702,7 @@ namespace GSC.Report
                         foreach (var item in designt.ProjectDesignVariable.OrderBy(i => i.DesignOrder).GroupBy(x => x.VariableCategoryName).Select(y => y.Key))
                         {
                             var category = item;
-                            var variableList = designt.ProjectDesignVariable.Where(x => x.VariableCategoryName == item && x.Id == 36812).OrderBy(i => i.DesignOrder).ToList();
+                            var variableList = designt.ProjectDesignVariable.Where(x => x.VariableCategoryName == item).OrderBy(i => i.DesignOrder).ToList();
 
                             if (!string.IsNullOrEmpty(category))
                             {
