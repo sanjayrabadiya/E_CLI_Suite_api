@@ -404,15 +404,16 @@ namespace GSC.Report
             //Creates the datasource for the table
             DataTable contactDetails = new DataTable();
 
-
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
-                contactDetails.Columns.Add("Contact");
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible)
+                contactDetails.Columns.Add("Contact Name");
             if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible)
                 contactDetails.Columns.Add("Contact No.");
             if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible)
                 contactDetails.Columns.Add("Contact No. 2");
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible)
-                contactDetails.Columns.Add("Contact Name");
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+                contactDetails.Columns.Add("Contact");
+            
+            
 
             if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible
                 || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible
@@ -507,7 +508,7 @@ namespace GSC.Report
             DataTable languageDetails = new DataTable();
 
             languageDetails.Columns.Add("Language Name");
-            languageDetails.Columns.Add("Note");
+            //languageDetails.Columns.Add("Note");   //Hide this column by Tinku (told by Urvi 03/08/2022)
             languageDetails.Columns.Add("Read?");
             languageDetails.Columns.Add("Write?");
             languageDetails.Columns.Add("Speak?");
@@ -519,7 +520,7 @@ namespace GSC.Report
 
                     languageDetails.Rows.Add(new object[] {
                                                       language.LanguageName
-                                                    , language.Note
+                                                    //, language.Note
                                                     , language.IsRead ? "YES" : "NO"
                                                     , language.IsWrite ? "YES":"NO"
                                                     , language.IsSpeak ? "YES":"NO"
