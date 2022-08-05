@@ -693,13 +693,15 @@ namespace GSC.Respository.Screening
         {
             var data = _context.ScreeningEntryStudyHistory.Where(x => x.ScreeningEntryId == ScreeningEntryId).Select(x => new ScreeningEntryStudyHistoryDto
             {
+                Id = x.Id,
                 VolunteerNo = x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
                 ProjectNo = x.Study.ProjectCode,
                 Notes = x.Notes,
                 CreatedDate = x.CreatedDate,
                 RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault() != null ?
-                 _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName : ""
-            }).ToList();
+                 _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName : "",
+                CreatedByName = x.CreatedByUser.UserName
+            }).OrderByDescending(x => x.Id).ToList();
             return data;
         }
     }

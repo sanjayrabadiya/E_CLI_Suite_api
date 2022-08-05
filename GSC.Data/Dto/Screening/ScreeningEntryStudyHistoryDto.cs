@@ -11,10 +11,13 @@ namespace GSC.Data.Dto.Screening
 {
     public class ScreeningEntryStudyHistoryDto
     {
+        public int Id { get; set; }
         public string VolunteerNo { get; set; }
         public string ProjectNo { get; set; }
         public string Notes { get; set; }
         public string RoleName { get; set; }
         public DateTime? CreatedDate { get; set; }
+
+        public string CreatedByName { get; set; }
     }
 }
