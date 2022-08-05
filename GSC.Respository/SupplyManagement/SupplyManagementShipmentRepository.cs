@@ -104,8 +104,11 @@ namespace GSC.Respository.SupplyManagement
                 {
                     if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKit(supplyManagementshipmentDto.SupplyManagementRequestId))
                     {
-
-                        return "Approve qty should not greater than remaining qty!";
+                        return "Entered quantity is higher than available quantity!";
+                    }
+                    if (supplyManagementshipmentDto.Kits.Count > supplyManagementshipmentDto.ApprovedQty)
+                    {
+                        return "Selected quantity is higher than available quantity!";
                     }
                     if (supplyManagementshipmentDto.Kits.Count == 0)
                     {
