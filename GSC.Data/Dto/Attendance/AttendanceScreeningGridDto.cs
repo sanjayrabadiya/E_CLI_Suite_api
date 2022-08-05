@@ -47,6 +47,12 @@ namespace GSC.Data.Dto.Attendance
         public int? AttendanceBarcodeGenerateId { get; set; }
         public List<TemplateText> TemplateList { get; set; }
         public List<TemplateStatusList> TemplateStatusList { get; set; }
+
+        public int? StudyId { get; set; }
+
+        public string StudyCode { get; set; }
+
+        public string Notes { get; set; }
     }
 
     public class ScreeningGridDto

@@ -411,8 +411,8 @@ namespace GSC.Domain.Context
 
         public DbSet<SendEmailOnVariableChangeSetting> SendEmailOnVariableChangeSetting { get; set; }
         public DbSet<SendEmailOnVariableValue> SendEmailOnVariableValue { get; set; }
-      //  public DbSet<KitManagement> KitManagement { get; set; }
-      //  public DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
+        //  public DbSet<KitManagement> KitManagement { get; set; }
+        //  public DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
         public DbSet<ScheduleTerminateDetail> ScheduleTerminateDetail { get; set; }
         public DbSet<TemplateVariableSequenceNoSetting> TemplateVariableSequenceNoSetting { get; set; }
 
@@ -421,6 +421,8 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementKIT> SupplyManagementKIT { get; set; }
 
         public DbSet<SupplyManagementKITDetail> SupplyManagementKITDetail { get; set; }
+
+        public DbSet<ScreeningEntryStudyHistory> ScreeningEntryStudyHistory { get; set; }
     }
 
 

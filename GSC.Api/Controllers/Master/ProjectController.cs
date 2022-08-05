@@ -586,5 +586,11 @@ namespace GSC.Api.Controllers.Master
 
             return Ok(project);
         }
+        [HttpGet]
+        [Route("GetParentProjectDropDownForAddProjectNo")]
+        public IActionResult GetParentProjectDropDownForAddProjectNo()
+        {
+            return Ok(_projectRepository.GetParentProjectDropDownForAddProjectNo());
+        }
     }
 }

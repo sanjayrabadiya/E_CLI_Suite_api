@@ -1001,5 +1001,25 @@ namespace GSC.Respository.Master
         {
             return All.Where(x => x.Id == ProjectId).Select(x => x.ProjectCode).FirstOrDefault();
         }
+
+        public List<ProjectDropDown> GetParentProjectDropDownForAddProjectNo()
+        {
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ProjectCode != null && !x.IsStatic
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).Distinct().OrderBy(o => o.Value).ToList();
+        }
     }
 }

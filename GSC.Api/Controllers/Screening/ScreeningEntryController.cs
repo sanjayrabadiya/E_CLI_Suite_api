@@ -6,6 +6,7 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
+using GSC.Domain.Context;
 using GSC.Respository.Attendance;
 using GSC.Respository.Common;
 using GSC.Respository.Project.Design;
@@ -28,7 +29,7 @@ namespace GSC.Api.Controllers.Screening
         private readonly IScreeningVisitRepository _screeningVisitRepository;
         private readonly IScreeningHistoryRepository _screeningHistoryRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
+        private readonly IGSCContext _context;
         public ScreeningEntryController(IScreeningEntryRepository screeningEntryRepository,
             IUnitOfWork uow, IMapper mapper,
             IVolunteerRepository volunteerRepository,
@@ -37,7 +38,7 @@ namespace GSC.Api.Controllers.Screening
             IScreeningProgress screeningProgress,
             IScreeningVisitRepository screeningVisitRepository,
             IScreeningHistoryRepository screeningHistoryRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context)
         {
             _screeningEntryRepository = screeningEntryRepository;
             _uow = uow;
@@ -48,6 +49,7 @@ namespace GSC.Api.Controllers.Screening
             _screeningVisitRepository = screeningVisitRepository;
             _screeningHistoryRepository = screeningHistoryRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         [HttpGet("{id}")]
@@ -79,7 +81,7 @@ namespace GSC.Api.Controllers.Screening
             var attendance = _attendanceRepository.Find((int)screeningEntryDto.AttendanceId);
 
             screeningEntryDto.StudyVersion = attendance.StudyVersion;
-            screeningEntryDto.ScreeningDate=screeningEntryDto.ScreeningDate==null ? DateTime.Now : screeningEntryDto.ScreeningDate;
+            screeningEntryDto.ScreeningDate = screeningEntryDto.ScreeningDate == null ? DateTime.Now : screeningEntryDto.ScreeningDate;
 
             var screeningEntry = _mapper.Map<ScreeningEntry>(screeningEntryDto);
             _screeningEntryRepository.SaveScreeningAttendance(screeningEntry, screeningEntryDto.ProjectAttendanceTemplateIds);
@@ -236,6 +238,40 @@ namespace GSC.Api.Controllers.Screening
         public IActionResult GetSitesByLockUnlock(int parentProjectId, bool isLock)
         {
             var sites = _screeningEntryRepository.GetSiteByLockUnlock(parentProjectId, isLock);
+            return Ok(sites);
+        }
+
+        [HttpPost]
+        [Route("SaveVolunteerProject")]
+        public IActionResult SaveVolunteerProject([FromBody] VolunteerProject volunteerProject)
+        {
+            var data = _screeningEntryRepository.All.Where(x => x.Id == volunteerProject.ScreeningEntryId).FirstOrDefault();
+            if (data == null)
+            {
+                ModelState.AddModelError("Message", "Screening not started!");
+                return BadRequest(ModelState);
+            }
+
+            data.StudyId = volunteerProject.ProjectId;
+            data.Notes = volunteerProject.Notes;
+            _screeningEntryRepository.Update(data);
+
+            var screeninghistory = new ScreeningEntryStudyHistory
+            {
+                StudyId = volunteerProject.ProjectId,
+                ScreeningEntryId = volunteerProject.ScreeningEntryId,
+                Notes = volunteerProject.Notes,
+                RoleId = _jwtTokenAccesser.RoleId
+            };
+            _context.ScreeningEntryStudyHistory.Add(screeninghistory);
+            _uow.Save();
+            return Ok(screeninghistory.Id);
+        }
+        [HttpGet]
+        [Route("GetVolunteerProjectHistory/{ScreeningEntryId}")]
+        public IActionResult GetVolunteerProjectHistory(int ScreeningEntryId)
+        {
+            var sites = _screeningEntryRepository.GetVolunteerProjectHistory(ScreeningEntryId);
             return Ok(sites);
         }
     }

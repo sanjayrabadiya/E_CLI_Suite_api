@@ -151,4 +151,11 @@ namespace GSC.Data.Dto.Screening
         public string DataEntryStatus { get; set; }
         public int VisitId { get; set; }
     }
+    public class VolunteerProject
+    {
+        public int ScreeningEntryId { get; set; }
+        public int ProjectId { get; set; }
+
+        public string Notes { get; set; }
+    }
 }

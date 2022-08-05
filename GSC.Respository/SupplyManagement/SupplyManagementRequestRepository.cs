@@ -170,7 +170,7 @@ namespace GSC.Respository.SupplyManagement
                             KitNo = x.KitNo,
                             VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                             SiteCode = x.SupplyManagementKIT.Site.ProjectCode
-                        }).OrderByDescending(x => x.KitNo).Take(obj.RequestQty).ToList();
+                        }).OrderBy(x => x.KitNo).Take(obj.RequestQty).ToList();
             }
             else
             {
@@ -187,7 +187,7 @@ namespace GSC.Respository.SupplyManagement
                                      KitNo = x.KitNo,
                                      VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                                      SiteCode = x.SupplyManagementKIT.Site.ProjectCode
-                                 }).OrderByDescending(x => x.KitNo).Take(obj.RequestQty).ToList();
+                                 }).OrderBy(x => x.KitNo).Take(obj.RequestQty).ToList();
             }
 
             return data;

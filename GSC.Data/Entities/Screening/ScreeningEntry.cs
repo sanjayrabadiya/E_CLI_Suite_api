@@ -38,6 +38,7 @@ namespace GSC.Data.Entities.Screening
         public string FitnessNotes { get; set; }
         public int Progress { get; set; }
         public int? StudyId { get; set; }
+        public string Notes { get; set; }
         public ICollection<ScreeningVisit> ScreeningVisit { get; set; }
         public Master.Project Project { get; set; }
 

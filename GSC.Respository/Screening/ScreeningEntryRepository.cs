@@ -428,6 +428,9 @@ namespace GSC.Respository.Screening
                 AttendanceDate = x.Attendance.AttendanceDate,
                 AttendedBy = x.Attendance.User.UserName,
                 IsFitnessFit = x.IsFitnessFit == null ? "No" : x.IsFitnessFit == true ? "Yes" : "No",
+                StudyId = x.StudyId,
+                StudyCode = x.Study.ProjectCode,
+                Notes = x.Notes
             }).ToList();
 
             if (searchParam.Id > 0)
@@ -684,6 +687,20 @@ namespace GSC.Respository.Screening
                 Update(screeningEntry);
                 _context.ScreeningHistory.Update(ScreeningHistory);
             }
+
+        }
+        public List<ScreeningEntryStudyHistoryDto> GetVolunteerProjectHistory(int ScreeningEntryId)
+        {
+            var data = _context.ScreeningEntryStudyHistory.Where(x => x.ScreeningEntryId == ScreeningEntryId).Select(x => new ScreeningEntryStudyHistoryDto
+            {
+                VolunteerNo = x.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
+                ProjectNo = x.Study.ProjectCode,
+                Notes = x.Notes,
+                CreatedDate = x.CreatedDate,
+                RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault() != null ?
+                 _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName : ""
+            }).ToList();
+            return data;
         }
     }
 }
