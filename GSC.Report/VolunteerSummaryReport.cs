@@ -292,7 +292,6 @@ namespace GSC.Report
         {
             var volunteerAddress = _volunteerAddressRepository.GetAddresses(VolunteerID);
             var volunteerPage = _pageConfigurationRepository.GetPageConfigurationByAppScreen("mnu_volunteerdetail");
-
             //Creates the datasource for the table
             DataTable addressDetails = new DataTable();
 
@@ -315,7 +314,7 @@ namespace GSC.Report
                 addressDetails.Columns.Add("Zip/Post Code");
 
             addressDetails.Columns.Add("Current Address?");
-            addressDetails.Columns.Add("Parmanent Address?");
+            addressDetails.Columns.Add("Permanent Address?");
 
 
             if (volunteerAddress.Count > 0)
@@ -355,7 +354,7 @@ namespace GSC.Report
                         dataRow["Zip/Post Code"] = address.Location.Zip;
 
                     dataRow["Current Address?"] = address.IsCurrent ? "YES" : "NO";
-                    dataRow["Parmanent Address?"] = address.IsPermanent ? "YES" : "NO";
+                    dataRow["Permanent Address?"] = address.IsPermanent ? "YES" : "NO";
                     addressDetails.Rows.Add(dataRow);
                 }
             }
@@ -377,7 +376,7 @@ namespace GSC.Report
                 PdfGridCell Addresscell = pdfGrid.Rows[0].Cells[0];
                 if (Addresscell.Value.ToString() == "No Record Found")
                 {
-                    Addresscell.ColumnSpan = 8;
+                    Addresscell.ColumnSpan = pdfGrid.Columns.Count;
                     Addresscell.Value = "No Record Found.";
                     Addresscell.StringFormat.Alignment = PdfTextAlignment.Justify;
                 }
@@ -412,8 +411,8 @@ namespace GSC.Report
                 contactDetails.Columns.Add("Contact No. 2");
             if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
                 contactDetails.Columns.Add("Contact");
-            
-            
+
+
 
             if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible
                 || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible
@@ -485,7 +484,7 @@ namespace GSC.Report
                 PdfGridCell Contactcell = pdfGrid.Rows[0].Cells[0];
                 if (Contactcell.Value.ToString() == "No Record Found")
                 {
-                    Contactcell.ColumnSpan = 5;
+                    Contactcell.ColumnSpan = pdfGrid.Columns.Count;
                     Contactcell.Value = "No Record Found.";
                     Contactcell.StringFormat.Alignment = PdfTextAlignment.Justify;
                 }
@@ -544,7 +543,7 @@ namespace GSC.Report
                 PdfGridCell Languagecell = pdfGrid.Rows[0].Cells[0];
                 if (Languagecell.Value.ToString() == "No Record Found")
                 {
-                    Languagecell.ColumnSpan = 5;
+                    Languagecell.ColumnSpan = pdfGrid.Columns.Count;
                     Languagecell.Value = "No Record Found.";
                     Languagecell.StringFormat.Alignment = PdfTextAlignment.Justify;
                 }

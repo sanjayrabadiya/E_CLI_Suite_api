@@ -18,5 +18,7 @@ namespace GSC.Data.Entities.Volunteer
         public string ReasonOth { get; set; }
         public int UserRole { get; set; }
         public int? CompanyId { get; set; }
+        public string OldValue { get; set; }
+        public string NewValue { get; set; }
     }
 }

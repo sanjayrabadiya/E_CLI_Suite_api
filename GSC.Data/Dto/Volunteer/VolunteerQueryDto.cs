@@ -27,7 +27,8 @@ namespace GSC.Data.Dto.Volunteer
         public bool IsAnswered { get; set; }
         public int CreatedBy { get; set; }
         private DateTime? _createdDate;
-
+        public string OldValue { get; set; }
+        public string NewValue { get; set; }
         public DateTime? CreatedDate
         {
             get => _createdDate?.UtcDateTime();
