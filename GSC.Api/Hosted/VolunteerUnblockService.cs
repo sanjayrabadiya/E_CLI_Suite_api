@@ -24,8 +24,15 @@ namespace GSC.Api.Hosted
         }
         private static int MilliSecondsUntilMidnight()
         {
-            var time = (int)(DateTime.Now.AddHours(6.0) - DateTime.Now).TotalMilliseconds;
-            return time;
+            //var time = (int)(DateTime.Now.AddHours(6.0) - DateTime.Now).TotalMilliseconds;
+
+            DateTime nowTime = DateTime.Now;
+            DateTime oneAmTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, 14, 0, 0, 0);
+            if (nowTime > oneAmTime)
+                oneAmTime = oneAmTime.AddDays(1);
+
+            int tickTime = (int)(oneAmTime - nowTime).TotalMilliseconds;
+            return tickTime;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
