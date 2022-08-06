@@ -7,6 +7,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -188,7 +189,10 @@ namespace GSC.Respository.Volunteer
                      CreatedBy = (int)query.CreatedBy,
                      UserRole = query.UserRole,
                      OldValue = query.OldValue,
-                     NewValue = query.NewValue
+                     NewValue = query.NewValue,
+                     ScreeningHistory = _context.ScreeningHistory.Include(b => b.ScreeningEntry).Where(c => c.ScreeningEntry.Attendance.VolunteerId == query.VolunteerId
+                                          && c.ScreeningEntry.EntryType == DataEntryType.Screening
+                                          && c.DeletedDate == null).ToList()
                  }).OrderByDescending(x => x.Id).ToList();
 
             if (search.Status.HasValue)
@@ -215,6 +219,9 @@ namespace GSC.Respository.Volunteer
                     query1 = query1.Where(x => x.CreatedDate <= search.ToRegistration).ToList();
                 }
             }
+
+            if (search.StudyId.HasValue)
+                query1 = query1.Where(x => x.ScreeningHistory.Any(y => y.ScreeningEntry.StudyId == search.StudyId)).ToList();
 
             return query1;
         }

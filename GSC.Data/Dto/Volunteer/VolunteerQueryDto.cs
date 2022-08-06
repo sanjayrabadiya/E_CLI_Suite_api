@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Screening;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using System;
@@ -37,6 +38,7 @@ namespace GSC.Data.Dto.Volunteer
         public string CreatedByName { get; set; }
         public string QueryTypeName { get; set; }
         public ButtonQueryShow ShowButton { get; set; }
+        public List<ScreeningHistory> ScreeningHistory { get; set; }
     }
 
     public class ButtonQueryShow
@@ -54,5 +56,6 @@ namespace GSC.Data.Dto.Volunteer
         public CommentStatus? Status { get; set; }
         public int? User { get; set; }
         public int? Role { get; set; }
+        public int? StudyId { get; set; }
     }
 }

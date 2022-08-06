@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Screening;
 using GSC.Helper;
 using GSC.Shared.Extension;
 
@@ -60,6 +62,10 @@ namespace GSC.Data.Dto.Volunteer
 
         public string ContactNo { get; set; }
         public int? CompanyId { get; set; }
+        public List<ScreeningHistory> ScreeningHistory { get; set; }
+        public decimal? Height { get; set; }
+        public decimal? Weight { get; set; }
+        public decimal? BMI { get; set; }
 
     }
 
@@ -96,6 +102,7 @@ namespace GSC.Data.Dto.Volunteer
         public int ProjectDesignPeriodId { get; set; }
         public DateTime? FromRegistration { get; set; }
         public DateTime? ToRegistration { get; set; }
+        public int? StudyId { get; set; }
     }
 
     public class VolunteerAttendaceDto : BaseDto

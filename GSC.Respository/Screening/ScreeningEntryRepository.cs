@@ -463,6 +463,9 @@ namespace GSC.Respository.Screening
             if (searchParam.ProjectId > 0)
                 items = items.Where(x => x.ProjectId == searchParam.ProjectId).ToList();
 
+            if (searchParam.StudyId > 0)
+                items = items.Where(x => x.StudyId != null && x.StudyId == searchParam.StudyId).ToList();
+
             items.ForEach(data =>
             {
                 if (data.ScreeningEntryId > 0)
