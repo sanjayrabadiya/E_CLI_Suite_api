@@ -154,7 +154,7 @@ namespace GSC.Respository.SupplyManagement
         public List<DropDownDto> GetPharmacyStudyProductTypeDropDown(int ProjectId)
         {
             return _context.ProductReceipt.Where(c => c.ProjectId == ProjectId && c.DeletedDate == null
-            && c.Status != ProductVerificationStatus.Rejected).Select(c => new DropDownDto { Id = c.PharmacyStudyProductType.Id, Value = c.PharmacyStudyProductType.ProductType.ProductTypeCode + "-" + c.PharmacyStudyProductType.ProductType.ProductTypeName })
+            && c.Status == ProductVerificationStatus.Approved).Select(c => new DropDownDto { Id = c.PharmacyStudyProductType.Id, Value = c.PharmacyStudyProductType.ProductType.ProductTypeCode + "-" + c.PharmacyStudyProductType.ProductType.ProductTypeName })
                 .OrderBy(o => o.Value).Distinct().ToList();
         }
     }
