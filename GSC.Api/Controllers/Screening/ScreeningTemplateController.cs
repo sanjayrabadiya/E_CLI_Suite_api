@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
@@ -422,5 +424,34 @@ namespace GSC.Api.Controllers.Screening
             var designTemplate = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
             return Ok(_screeningTemplateRepository.GetScreeningGridView(designTemplate, id));
         }
+
+        [HttpPut]
+        [Route("DeleteRepeatTemplate/{id}")]
+        [TransactionRequired]
+        public IActionResult DeleteRepeatTemplate(int id)
+        {
+            _screeningTemplateValueRepository.DeleteRepeatTemplateValue(id);
+            var record = _screeningTemplateRepository.Find(id);
+            _screeningTemplateRepository.Delete(record);
+            _uow.Save();
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route("DeleteRepeatVisit/{id}")]
+        [TransactionRequired]
+        public IActionResult DeleteRepeatVisit(int id)
+        {
+            _screeningTemplateRepository.DeleteRepeatVisitTemplate(id);
+            var visit = _screeningVisitRepository.Find(id);
+
+            if (visit == null)
+                return NotFound();
+
+            _screeningVisitRepository.Delete(visit);
+            _uow.Save();
+            return Ok();
+        }
+
     }
 }

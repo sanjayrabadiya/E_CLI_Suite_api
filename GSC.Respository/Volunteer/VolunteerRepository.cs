@@ -170,6 +170,9 @@ namespace GSC.Respository.Volunteer
 
             var result = GetItems(query, true);
 
+            if (search.StudyId.HasValue)
+                result = result.Where(x => x.ScreeningHistory.Any(y => y.ScreeningEntry.StudyId == search.StudyId)).ToList();
+
             return result;
         }
 
@@ -375,7 +378,10 @@ namespace GSC.Respository.Volunteer
                 CreatedByUser = x.CreatedByUser.UserName,
                 ModifiedByUser = x.ModifiedByUser.UserName,
                 DeletedByUser = x.DeletedByUser.UserName,
-                ContactNo = _context.VolunteerContact.Where(c => c.VolunteerId == x.Id && c.IsDefault == true).FirstOrDefault().ContactNo
+                ContactNo = _context.VolunteerContact.Where(c => c.VolunteerId == x.Id && c.IsDefault == true).FirstOrDefault().ContactNo,
+                ScreeningHistory = _context.ScreeningHistory.Include(b => b.ScreeningEntry).Where(c => c.ScreeningEntry.Attendance.VolunteerId == x.Id
+                                          && c.ScreeningEntry.EntryType == DataEntryType.Screening
+                                          && c.DeletedDate == null).ToList()
             }).OrderByDescending(x => x.Id).ToList();
 
             return result;

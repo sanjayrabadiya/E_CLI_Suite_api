@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using ClosedXML.Excel;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
@@ -22,6 +26,7 @@ using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
@@ -37,6 +42,7 @@ namespace GSC.Respository.Screening
         private readonly IEditCheckImpactRepository _editCheckImpactRepository;
         private readonly IMapper _mapper;
         private readonly IScheduleRuleRespository _scheduleRuleRespository;
+        private readonly IAppSettingRepository _appSettingRepository;
         private readonly IGSCContext _context;
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
@@ -53,6 +59,7 @@ namespace GSC.Respository.Screening
             IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository,
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
+            IAppSettingRepository appSettingRepository,
              ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
             IEmailSenderRespository emailSenderRespository)
             : base(context)
@@ -66,6 +73,7 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
             _editCheckImpactRepository = editCheckImpactRepository;
             _context = context;
+            _appSettingRepository = appSettingRepository;
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
@@ -1424,18 +1432,24 @@ namespace GSC.Respository.Screening
             string str = "";
             if (!String.IsNullOrEmpty(pt.PreLabel))
                 str = pt.PreLabel;
-            if (t.RepeatSeqNo != null)
+
+            if (!seq.IsTemplateSeqNo)
             {
-                if (!String.IsNullOrEmpty(seq.RepeatPrefix))
-                    str += " " + seq.RepeatPrefix;
-                if (seq.RepeatSeqNo != null)
+                if (t.RepeatSeqNo != null)
                 {
-                    if (seq.RepeatSubSeqNo == null)
-                        str += seq.SeparateSign + (seq.RepeatSeqNo + t.RepeatSeqNo.Value - 1).ToString();
-                    else
-                        str += seq.SeparateSign + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                    if (!String.IsNullOrEmpty(seq.RepeatPrefix))
+                        str += ((!String.IsNullOrEmpty(pt.PreLabel)) ? seq.SeparateSign : "") + seq.RepeatPrefix;
+
+                    if (seq.RepeatSeqNo != null)
+                    {
+                        if (seq.RepeatSubSeqNo == null)
+                            str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + (seq.RepeatSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                        else
+                            str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                    }
                 }
             }
+
             return str;
         }
 
@@ -1443,7 +1457,11 @@ namespace GSC.Respository.Screening
         public IList<DesignScreeningTemplateDto> GetScreeningGridView(DesignScreeningTemplateDto designTemplateDto, int ScreeningTemplateId)
         {
             var results = new List<DesignScreeningTemplateDto>();
-            var screeningTemplates = All.Where(x => x.Id == ScreeningTemplateId || x.ParentId == ScreeningTemplateId).ToList();
+            var screeningTemplates = All.Where(x => (x.Id == ScreeningTemplateId || x.ParentId == ScreeningTemplateId) && x.DeletedDate==null).ToList();
+
+            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+            GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
+
             foreach (var item in screeningTemplates)
             {
 
@@ -1488,12 +1506,46 @@ namespace GSC.Respository.Screening
                                 variable.ScreeningValue = string.Join(",", _context.ProjectDesignVariableValue.Where(x => childValue.Contains(x.Id)).Select(s => s.ValueName));
                             }
                         }
+
+                        if (variable.Values != null && t.Value != "" && t.Value != null && variable.CollectionSource == CollectionSources.DateTime)
+                        {
+                            DateTime dDate;
+                            var dt = !string.IsNullOrEmpty(t.Value) ? DateTime.TryParse(t.Value, out dDate) ? DateTime.Parse(t.Value).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : t.Value : "";
+                            variable.ScreeningValue = dt;
+                        }
+                        else if (variable.Values != null && t.Value != "" && t.Value != null && variable.CollectionSource == CollectionSources.Date)
+                        {
+                            DateTime dDate;
+                            string dt = !string.IsNullOrEmpty(t.Value) ? DateTime.TryParse(t.Value, out dDate) ? DateTime.Parse(t.Value).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : t.Value : "";
+                            variable.ScreeningValue = dt;
+                        }
+                        else if (variable.Values != null && t.Value != "" && t.Value != null && variable.CollectionSource == CollectionSources.Time)
+                        {
+                            var dt = !string.IsNullOrEmpty(t.Value) ? DateTime.Parse(t.Value).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                            variable.ScreeningValue = dt;
+                        }
+
                     }
                 });
                 results.Add(repatTemplate);
             }
             return results;
         }
+
+        public void DeleteRepeatVisitTemplate(int Id)
+        {
+            var templates = All.Where(t => t.ScreeningVisitId == Id).ToList();
+            if (templates != null)
+            {
+                templates.ForEach(x =>
+                {
+                    _screeningTemplateValueRepository.DeleteRepeatTemplateValue(x.Id);
+                    var record = Find(x.Id);
+                    Delete(record);
+                });
+            }
+        }
+
     }
 }
 

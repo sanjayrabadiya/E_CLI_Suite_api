@@ -7,6 +7,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -64,7 +65,9 @@ namespace GSC.Respository.Volunteer
                                : user.UserName + "(" + role.RoleName + ")",
                            StatusName = query.QueryStatus.GetDescription(),
                            QueryStatus = query.QueryStatus,
-                           QueryTypeName = query.QueryType.GetDescription()
+                           QueryTypeName = query.QueryType.GetDescription(),
+                           OldValue = query.OldValue,
+                           NewValue = query.NewValue
                        }).OrderByDescending(o => o.Id).ToList();
 
 
@@ -184,13 +187,18 @@ namespace GSC.Respository.Volunteer
                      QueryStatus = query.QueryStatus,
                      VolunteerNo = vol.VolunteerNo,
                      CreatedBy = (int)query.CreatedBy,
-                     UserRole = query.UserRole
+                     UserRole = query.UserRole,
+                     OldValue = query.OldValue,
+                     NewValue = query.NewValue,
+                     ScreeningHistory = _context.ScreeningHistory.Include(b => b.ScreeningEntry).Where(c => c.ScreeningEntry.Attendance.VolunteerId == query.VolunteerId
+                                          && c.ScreeningEntry.EntryType == DataEntryType.Screening
+                                          && c.DeletedDate == null).ToList()
                  }).OrderByDescending(x => x.Id).ToList();
 
             if (search.Status.HasValue)
                 query1 = query1.Where(x => x.QueryStatus == search.Status).ToList();
 
-            if(search.User.HasValue)
+            if (search.User.HasValue)
                 query1 = query1.Where(x => x.CreatedBy == search.User).ToList();
 
             if (search.Role.HasValue)
@@ -211,6 +219,9 @@ namespace GSC.Respository.Volunteer
                     query1 = query1.Where(x => x.CreatedDate <= search.ToRegistration).ToList();
                 }
             }
+
+            if (search.StudyId.HasValue)
+                query1 = query1.Where(x => x.ScreeningHistory.Any(y => y.ScreeningEntry.StudyId == search.StudyId)).ToList();
 
             return query1;
         }

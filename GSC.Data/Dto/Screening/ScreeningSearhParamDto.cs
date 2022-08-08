@@ -19,6 +19,7 @@ namespace GSC.Data.Dto.Screening
         public DataEntryType AttendanceType { get; set; }
         public bool IsFromScreening { get; set; }
         public int ProjectId { get; set; }
+        public int? StudyId { get; set; }
         public int VisitId { get; set; }
 
         public int PeriodNo { get; set; }

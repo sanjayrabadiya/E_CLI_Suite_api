@@ -95,7 +95,7 @@ namespace GSC.Respository.Screening
                  PatientStatusId = t.PatientStatusId,
                  PatientStatusName = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
-                 StudyVersion = t.StudyVersion,
+                 StudyVersion = t.StudyVersion ?? 1,
                  TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                  {
                      LevelNo = x.LevelNo
@@ -170,6 +170,7 @@ namespace GSC.Respository.Screening
                 PatientStatusId = x.RandomizationId != null ? x.Randomization.PatientStatusId : 0,
                 PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
+                StudyVersion = x.Randomization.StudyVersion ?? 1,
                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.IsScheduleTerminate == true || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
                 {
                     ScreeningVisitId = a.Id,
@@ -181,10 +182,11 @@ namespace GSC.Respository.Screening
                     ScheduleDate = a.ScheduleDate,
                     IsSchedule = a.IsSchedule,
                     DesignOrder = a.ProjectDesignVisit.DesignOrder,
-                    IsLocked = a.ScreeningTemplates.All(x => x.IsLocked == true) ? true : false
+                    IsLocked = a.ScreeningTemplates.All(x => x.IsLocked == true) ? true : false,
+                    StudyVersion = a.ProjectDesignVisit.StudyVersion
                 }).OrderBy(b => b.DesignOrder).ToList()
-
-            }).ToListAsync();
+                
+        }).ToListAsync();
 
             //await Task.WhenAll(projectDesignVisitTask, randomizationDataTask, templateTask, queryTask, screeningDataTask);
 
@@ -194,12 +196,15 @@ namespace GSC.Respository.Screening
             //var queries = await queryTask;
             //var screeningData = await screeningDataTask;
 
-
-            randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) &&
-            (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
+            randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
 
             screeningData.ForEach(r =>
             {
+                //added by vipul for check locked status
+
+                var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntryId == r.ScreeningEntryId && y.DeletedDate == null).ToList();
+                r.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
+
                 r.Visit.ForEach(v =>
                 {
                     if (v.VisitStatusId > 3)
@@ -473,16 +478,20 @@ namespace GSC.Respository.Screening
             string str = "";
             if (!String.IsNullOrEmpty(pt.PreLabel))
                 str = pt.PreLabel;
-            if (t.RepeatSeqNo != null)
+
+            if (!seq.IsTemplateSeqNo)
             {
-                if (!String.IsNullOrEmpty(seq.RepeatPrefix))
-                    str += " " + seq.RepeatPrefix;
-                if (seq.RepeatSeqNo != null)
+                if (t.RepeatSeqNo != null)
                 {
-                    if (seq.RepeatSubSeqNo == null)
-                        str += seq.SeparateSign + (seq.RepeatSeqNo + t.RepeatSeqNo.Value - 1).ToString();
-                    else
-                        str += seq.SeparateSign + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                    if (!String.IsNullOrEmpty(seq.RepeatPrefix))
+                        str += ((!String.IsNullOrEmpty(pt.PreLabel)) ? seq.SeparateSign : "") + seq.RepeatPrefix;
+                    if (seq.RepeatSeqNo != null)
+                    {
+                        if (seq.RepeatSubSeqNo == null)
+                            str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + (seq.RepeatSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                        else
+                            str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                    }
                 }
             }
             return str;

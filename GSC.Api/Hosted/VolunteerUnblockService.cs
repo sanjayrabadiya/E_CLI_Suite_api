@@ -24,15 +24,22 @@ namespace GSC.Api.Hosted
         }
         private static int MilliSecondsUntilMidnight()
         {
-            var time = (int)(DateTime.Now.AddHours(6.0) - DateTime.Now).TotalMilliseconds;
-            return time;
+            //var time = (int)(DateTime.Now.AddHours(6.0) - DateTime.Now).TotalMilliseconds;
+
+            DateTime nowTime = DateTime.Now;
+            DateTime oneAmTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, 17, 0, 0, 0);
+            if (nowTime > oneAmTime)
+                oneAmTime = oneAmTime.AddDays(1);
+
+            int tickTime = (int)(oneAmTime - nowTime).TotalMilliseconds;
+            return tickTime;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            FileName = "volunteer_" + DateTime.Now.ToString("dd-MM-yyyy") + "_" + DateTime.Now.Ticks;
-            LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Logs", FileName + ".txt");
-            WriteToFile(DateTime.Now + "------Start Method" + Environment.NewLine, LogPath);
+            //FileName = "volunteer_" + DateTime.Now.ToString("dd-MM-yyyy") + "_" + DateTime.Now.Ticks;
+            //LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Logs", FileName + ".txt");
+            ////WriteToFile(DateTime.Now + "------Start Method" + Environment.NewLine, LogPath);
 
             // set up a timer to be non-reentrant
             _t = new Timer(async _ => await OnTimerFiredAsync(cancellationToken),
@@ -41,7 +48,7 @@ namespace GSC.Api.Hosted
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            WriteToFile(DateTime.Now + "------Stop Method" + Environment.NewLine, LogPath);
+            //WriteToFile(DateTime.Now + "------Stop Method" + Environment.NewLine, LogPath);
             _t?.Dispose();
             return Task.CompletedTask;
         }
@@ -51,7 +58,7 @@ namespace GSC.Api.Hosted
             try
             {
                 // do your work here
-                WriteToFile(DateTime.Now + "------Main Method" + Environment.NewLine, LogPath);
+                //WriteToFile(DateTime.Now + "------Main Method" + Environment.NewLine, LogPath);
                 using var scope = _scopeFactory.CreateScope();
 
                 var context = scope.ServiceProvider.GetRequiredService<GscContext>();
@@ -75,7 +82,7 @@ namespace GSC.Api.Hosted
                 {
                     var item = x;
 
-                    WriteToFile(DateTime.Now + "------UnBlock: " + x.VolunteerId + Environment.NewLine, LogPath);
+                    //WriteToFile(DateTime.Now + "------UnBlock: " + x.VolunteerId + Environment.NewLine, LogPath);
 
                     var volunteerToBlock = Volunteer.Where(z => z.Id == x.VolunteerId).FirstOrDefault();
                     volunteerToBlock.IsBlocked = false;
@@ -96,11 +103,11 @@ namespace GSC.Api.Hosted
             }
             catch (Exception ex)
             {
-                WriteToFile(DateTime.Now + "------Error" + ex.Message.ToString() + " & " + ex.InnerException.ToString() + Environment.NewLine, LogPath);
+                //WriteToFile(DateTime.Now + "------Error" + ex.Message.ToString() + " & " + ex.InnerException.ToString() + Environment.NewLine, LogPath);
             }
             finally
             {
-                WriteToFile(DateTime.Now + "------Finally" + Environment.NewLine, LogPath);
+                //WriteToFile(DateTime.Now + "------Finally" + Environment.NewLine, LogPath);
                 // set timer to fire off again
                 _t?.Change(MilliSecondsUntilMidnight(), Timeout.Infinite);
             }

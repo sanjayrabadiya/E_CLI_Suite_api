@@ -36,6 +36,9 @@ namespace GSC.Data.Dto.Attendance
         public string RandomizationNumber { get; set; }
         public double? StudyVersion { get; set; }
         public List<DataEntryVisitTemplateDto> Visit { get; set; }
+        public bool IsLocked { get; set; }
+
+
     }
 
     public class DataEntryTemplateQueryStatus
