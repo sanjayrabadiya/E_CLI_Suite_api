@@ -85,17 +85,17 @@ namespace GSC.Respository.SupplyManagement
                         KitNo = x.KitNo,
                         VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                         SiteCode = x.SupplyManagementKIT.Site.ProjectCode
-                        
+
                     }).OrderByDescending(x => x.KitNo).ToList();
             foreach (var item in data)
             {
-              
+
                 var refrencetype = Enum.GetValues(typeof(KitStatus))
                                     .Cast<KitStatus>().Select(e => new DropDownEnum
                                     {
                                         Id = Convert.ToInt16(e),
                                         Value = e.GetDescription()
-                                    }).Where(x => x.Id == 4 || x.Id == 5).ToList();
+                                    }).Where(x => x.Id == 4 || x.Id == 5 || x.Id == 6 || x.Id == 7).ToList();
                 item.StatusList = refrencetype;
             }
 

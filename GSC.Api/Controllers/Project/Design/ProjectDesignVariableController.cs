@@ -110,7 +110,7 @@ namespace GSC.Api.Controllers.Project.Design
             variable.DesignOrder = 1;
 
             if (_projectDesignVariableRepository.All.Any(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId && t.DeletedDate == null && !t.IsHide))
-                variable.DesignOrder = _projectDesignVariableRepository.FindBy(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId && !t.IsHide && 
+                variable.DesignOrder = _projectDesignVariableRepository.FindBy(t => t.ProjectDesignTemplateId == variable.ProjectDesignTemplateId && !t.IsHide &&
                                            t.DeletedDate == null).Max(t => t.DesignOrder) + 1;
 
             var validate = _projectDesignVariableRepository.Duplicate(variable);
@@ -159,6 +159,11 @@ namespace GSC.Api.Controllers.Project.Design
             if (DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
             {
                 ModelState.AddModelError("Message", "Can't edit record!");
+                return BadRequest(ModelState);
+            }
+            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVariableId == variableDto.Id))
+            {
+                ModelState.AddModelError("Message", "Can't edit record, Already used in Allocation!");
                 return BadRequest(ModelState);
             }
 

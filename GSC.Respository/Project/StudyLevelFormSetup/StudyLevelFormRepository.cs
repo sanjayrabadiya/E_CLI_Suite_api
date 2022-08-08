@@ -213,9 +213,9 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
             }
             return result;
         }
-        public string CheckVerificationApproval(StudyLevelForm objSave)
+        public string CheckVerificationApproval(int id)
         {
-            var VariableTemplate = _context.VerificationApprovalTemplate.Where(x => x.StudyLevelFormId == objSave.Id
+            var VariableTemplate = _context.VerificationApprovalTemplate.Where(x => x.StudyLevelFormId == id
             && x.IsApprove == true).FirstOrDefault();
             if (VariableTemplate != null)
                 return "Study Level Form is in use. Cannot edit or delete!";

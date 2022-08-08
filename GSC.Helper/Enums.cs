@@ -906,6 +906,8 @@ namespace GSC.Helper
         [Description("Returned")] Returned = 3,
         [Description("Missing")] Missing = 4,
         [Description("Damaged")] Damaged = 5,
+        [Description("Receipt With Issues")] WithIssue = 6,
+        [Description("Receipt Without Issues")] WithoutIssue = 7
     }
 
 }

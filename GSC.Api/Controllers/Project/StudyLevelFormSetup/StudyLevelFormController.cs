@@ -143,7 +143,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 return BadRequest(ModelState);
             }
 
-            var approval = _studyLevelFormRepository.CheckVerificationApproval(studyLevelForm);
+            var approval = _studyLevelFormRepository.CheckVerificationApproval(studyLevelFormDto.Id);
             if (!string.IsNullOrEmpty(approval))
             {
                 ModelState.AddModelError("Message", approval);
@@ -169,7 +169,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            var approval = _studyLevelFormRepository.CheckVerificationApproval(record);
+            var approval = _studyLevelFormRepository.CheckVerificationApproval(id);
             if (!string.IsNullOrEmpty(approval))
             {
                 ModelState.AddModelError("Message", approval);

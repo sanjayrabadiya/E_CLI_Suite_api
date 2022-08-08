@@ -133,6 +133,11 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't edit visit!");
                 return BadRequest(ModelState);
             }
+            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVisitId == projectDesignVisitDto.Id))
+            {
+                ModelState.AddModelError("Message", "Can't edit record, Already used in Allocation!");
+                return BadRequest(ModelState);
+            }
 
             var projectDesignVisit = _mapper.Map<ProjectDesignVisit>(projectDesignVisitDto);
 

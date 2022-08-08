@@ -59,7 +59,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             var variable = _studyLevelFormVariableRepository.
                 FindByInclude(t => t.Id == id, t => t.Values.Where(x => x.DeletedDate == null).OrderBy(x => x.SeqNo)).FirstOrDefault();
             var variableDto = _mapper.Map<StudyLevelFormVariableDto>(variable);
-            
+
             return Ok(variableDto);
         }
 
@@ -117,6 +117,12 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            var approval = _studyLevelFormRepository.CheckVerificationApproval(variableDto.StudyLevelFormId);
+            if (!string.IsNullOrEmpty(approval))
+            {
+                ModelState.AddModelError("Message", approval);
+                return BadRequest(ModelState);
+            }
 
             _studyLevelFormVariableRepository.Add(variable);
 
@@ -142,7 +148,12 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                 ModelState.AddModelError("Message", validatemsg);
                 return BadRequest(ModelState);
             }
-
+            var approval = _studyLevelFormRepository.CheckVerificationApproval(variableDto.StudyLevelFormId);
+            if (!string.IsNullOrEmpty(approval))
+            {
+                ModelState.AddModelError("Message", approval);
+                return BadRequest(ModelState);
+            }
             var variable = _mapper.Map<StudyLevelFormVariable>(variableDto);
 
             var validate = _studyLevelFormVariableRepository.Duplicate(variable);
@@ -173,6 +184,12 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             if (!string.IsNullOrEmpty(validatemsg))
             {
                 ModelState.AddModelError("Message", validatemsg);
+                return BadRequest(ModelState);
+            }
+            var approval = _studyLevelFormRepository.CheckVerificationApproval(record.StudyLevelFormId);
+            if (!string.IsNullOrEmpty(approval))
+            {
+                ModelState.AddModelError("Message", approval);
                 return BadRequest(ModelState);
             }
 
