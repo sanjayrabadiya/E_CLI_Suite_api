@@ -1266,5 +1266,18 @@ namespace GSC.Respository.Screening
 
             return variableDetail;
         }
+
+        public void DeleteRepeatTemplateValue(int Id)
+        {
+            var values = All.Where(t => t.ScreeningTemplateId == Id).ToList();
+            if (values != null)
+            {
+                values.ForEach(x =>
+                {
+                    var record = Find(x.Id);
+                    Delete(record);
+                });
+            }
+        }
     }
 }

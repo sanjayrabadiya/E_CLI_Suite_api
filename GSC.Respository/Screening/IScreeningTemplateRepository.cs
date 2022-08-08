@@ -9,6 +9,7 @@ using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Respository.Screening
 {
@@ -42,5 +43,8 @@ namespace GSC.Respository.Screening
         IList<DesignScreeningTemplateDto> GetScreeningGridView(DesignScreeningTemplateDto designTemplateDto, int ScreeningTemplateId);
 
         List<TemplateStatusList> GetTemplateStatus(int ProjectId, int VisitId, int ScreeningEntryId);
+
+        void DeleteRepeatVisitTemplate(int Id);
+
     }
 }
