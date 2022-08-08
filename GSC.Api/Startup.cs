@@ -63,7 +63,7 @@ namespace GSC.Api
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GSC API", Version = "v3.1" });
             });
             services.AddHttpContextAccessor();
-            services.AddHostedService<VolunteerUnblockService>();
+            //services.AddHostedService<VolunteerUnblockService>();
             //services.AddSignalR();
         }
 
