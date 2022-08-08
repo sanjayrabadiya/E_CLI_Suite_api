@@ -226,6 +226,23 @@ namespace GSC.Report
                 tocresult = AddString(volunteer[0].FoodType, tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             }
 
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "height").IsVisible)
+            {
+                tocresult = AddString("Height (Cm.)", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].Height.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "weight").IsVisible)
+            {
+                tocresult = AddString("Weight (Kg.)", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].Weight.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+
+            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "bmi").IsVisible)
+            {
+                tocresult = AddString("BMI (Kg./Meter*Meter)", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                tocresult = AddString(volunteer[0].BMI.ToString(), tocresult.Page, new Syncfusion.Drawing.RectangleF(165, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+
             pageTOC.Graphics.Save();
             pageTOC.Graphics.SetTransparency(1, 1, PdfBlendMode.Multiply);
 
