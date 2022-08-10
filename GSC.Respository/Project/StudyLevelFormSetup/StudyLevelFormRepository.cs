@@ -48,7 +48,7 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
         {
             var VariableTemplate = _context.VariableTemplate.Where(x => x.Id == objSave.VariableTemplateId).FirstOrDefault();
             if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.AppScreenId == objSave.AppScreenId
-            && x.ActivityId == objSave.ActivityId && x.VariableTemplateId == objSave.VariableTemplateId && x.DeletedDate == null))
+            && x.ActivityId == objSave.ActivityId && x.DeletedDate == null))
                 return "Duplicate Form  : " + VariableTemplate.TemplateName;
 
             return "";
