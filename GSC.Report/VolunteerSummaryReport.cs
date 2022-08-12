@@ -530,7 +530,7 @@ namespace GSC.Report
 
             languageDetails.Columns.Add("Language Name");
             //languageDetails.Columns.Add("Note");   //Hide this column by Tinku (told by Urvi 03/08/2022)
-            languageDetails.Columns.Add("Read?");
+            languageDetails.Columns.Add("Read & Understood?");
             languageDetails.Columns.Add("Write?");
             languageDetails.Columns.Add("Speak?");
 
