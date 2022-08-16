@@ -209,7 +209,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             return Ok(verificationApprovalTemplate.Id);
         }
 
-       
+
 
         /// Save Variable value
         [HttpPut]
@@ -218,7 +218,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult SaveVariableValue([FromBody] VerificationApprovalTemplateDto verificationApprovalTemplateDto)
         {
             if (verificationApprovalTemplateDto.Id <= 0) return BadRequest();
-
+            verificationApprovalTemplateDto.SecurityRoleId = Convert.ToInt32(_jwtTokenAccesser.GetHeader("RoleId"));
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var verification = _verificationApprovalTemplateRepository.Find(verificationApprovalTemplateDto.Id);
             verification.IsApprove = verificationApprovalTemplateDto.IsApprove;

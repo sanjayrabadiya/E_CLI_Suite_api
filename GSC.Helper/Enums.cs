@@ -819,8 +819,8 @@ namespace GSC.Helper
     }
     public enum SupplyMangementShipmentStatus : short
     {
-        [Description("Approve")] Approved = 1,
-        [Description("Reject")] Rejected = 2
+        [Description("Approved")] Approved = 1,
+        [Description("Rejected")] Rejected = 2
     }
 
     public enum SupplyManagementUploadFileLevel : short

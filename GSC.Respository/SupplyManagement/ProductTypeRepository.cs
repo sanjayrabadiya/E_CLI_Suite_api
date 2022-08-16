@@ -31,20 +31,24 @@ namespace GSC.Respository.SupplyManagement
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.ProductTypeName, Code = c.ProductTypeCode, IsDeleted = c.DeletedDate != null })
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.ProductTypeName, Code = c.ProductTypeCode, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
 
         public string Duplicate(ProductType objSave)
         {
-            if (All.Any(
-                x => x.Id != objSave.Id && x.ProductTypeCode == objSave.ProductTypeCode.Trim() && x.DeletedDate == null))
-                return "Duplicate ProductType code : " + objSave.ProductTypeCode;
-
-            if (All.Any(
-                x => x.Id != objSave.Id && x.ProductTypeName == objSave.ProductTypeName.Trim() && x.DeletedDate == null))
-                return "Duplicate ProductType name : " + objSave.ProductTypeName;
-
+            if (objSave.Id > 0)
+            {
+                if (All.Any(
+                    x => x.Id != objSave.Id && x.ProductTypeCode == objSave.ProductTypeCode.Trim() && x.DeletedDate == null))
+                    return "Duplicate ProductType code : " + objSave.ProductTypeCode;
+            }
+            else
+            {
+                if (All.Any(
+                   x => x.ProductTypeCode == objSave.ProductTypeCode.Trim() && x.DeletedDate == null))
+                    return "Duplicate ProductType code : " + objSave.ProductTypeCode;
+            }
 
             return "";
         }

@@ -35,10 +35,11 @@ namespace GSC.Api.Controllers.SupplyManagement
             _context = context;
         }
 
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        [HttpGet]
+        [Route("GetShipmentRequestList/{parentProjectId}/{siteId}/{isDeleted}")]
+        public IActionResult GetShipmentRequestList(int parentProjectId, int siteId, bool isDeleted)
         {
-            var productTypes = _supplyManagementRequestRepository.GetShipmentRequestList(isDeleted);
+            var productTypes = _supplyManagementRequestRepository.GetShipmentRequestList(parentProjectId, siteId, isDeleted);
             return Ok(productTypes);
         }
 
@@ -52,7 +53,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "From site not found");
                 return BadRequest(ModelState);
             }
-            
+
             supplyManagementRequestDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementRequest>(supplyManagementRequestDto);
 

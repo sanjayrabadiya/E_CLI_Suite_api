@@ -70,5 +70,13 @@ namespace GSC.Data.Dto.SupplyManagement
         public string Status { get; set; }
         public int CentralDepotId { get; set; }
         public int ProductVerificationDetailId { get; set; }
+
+        public string RecieptPath { get; set; }
+
+        public string RecieptMimeType { get; set; }
+
+        public string VerificationPath { get; set; }
+
+        public string VerificationMimeType { get; set; }
     }
 }

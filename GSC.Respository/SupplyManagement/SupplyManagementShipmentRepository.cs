@@ -37,10 +37,10 @@ namespace GSC.Respository.SupplyManagement
             _supplyManagementRequestRepository = supplyManagementRequestRepository;
             _uow = uow;
         }
-        public List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(bool isDeleted)
+        public List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(int parentProjectId, int SiteId, bool isDeleted)
         {
             List<SupplyManagementShipmentGridDto> FinalData = new List<SupplyManagementShipmentGridDto>();
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.SupplyManagementRequest.FromProjectId == SiteId).
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null

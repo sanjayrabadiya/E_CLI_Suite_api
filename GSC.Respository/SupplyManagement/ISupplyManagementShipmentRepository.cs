@@ -8,7 +8,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface ISupplyManagementShipmentRepository : IGenericRepository<SupplyManagementShipment>
     {
-        List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(bool isDeleted);
+        List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(int parentProjectId, int SiteId, bool isDeleted);
 
         string GenerateShipmentNo();
 

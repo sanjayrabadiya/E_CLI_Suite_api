@@ -69,10 +69,28 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (_uow.Save() <= 0) throw new Exception("Creating shipment receipt failed on save.");
             return Ok(supplyManagementRequest.Id);
         }
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+
+        [HttpGet]
+        [Route("GetSupplyShipmentReceiptList/{parentProjectId}/{siteId}/{isDeleted}")]
+        public IActionResult Get(int parentProjectId, int siteId, bool isDeleted)
         {
-            var data = _supplyManagementReceiptRepository.GetSupplyShipmentReceiptList(isDeleted);
+            var data = _supplyManagementReceiptRepository.GetSupplyShipmentReceiptList(parentProjectId, siteId, isDeleted);
+            return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("GetSupplyShipmentReceiptHistory/{id}")]
+        public IActionResult GetSupplyShipmentReceiptHistory(int id)
+        {
+            var data = _supplyManagementReceiptRepository.GetSupplyShipmentReceiptHistory(id);
+            return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("GetKitAllocatedList/{id}/{type}")]
+        public IActionResult GetKitAllocatedList(int id, string type)
+        {
+            var data = _supplyManagementReceiptRepository.GetKitAllocatedList(id, type);
             return Ok(data);
         }
     }

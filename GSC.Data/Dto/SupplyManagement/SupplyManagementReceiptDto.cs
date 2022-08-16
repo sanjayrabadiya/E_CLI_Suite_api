@@ -53,4 +53,40 @@ namespace GSC.Data.Dto.SupplyManagement
         public string WithIssueName { get; set; }
     }
 
+    public class SupplyManagementReceiptHistoryGridDto : BaseAuditDto
+    {
+        public int RequestQty { get; set; }
+        public string Status { get; set; }
+
+        public string RequestType { get; set; }
+
+        public string ProductTypeName { get; set; }
+
+        public string  StudyProductTypeUnitName { get; set; }
+
+        public string StudyProjectCode { get; set; }
+
+        public string FromProjectCode { get; set; }
+
+        public string ToProjectCode { get; set; }
+
+        public string VisitName { get; set; }
+
+        public string ActivityBy { get; set; }
+
+        public DateTime? ActivityDate { get; set; }
+    }
+    public class KitAllocatedList
+    {
+        public int Id { get; set; }
+        public int KitNo { get; set; }
+        public string VisitName { get; set; }
+        public string SiteCode { get; set; }
+
+        public string Comments { get; set; }
+
+        public string Status { get; set; }
+
+       
+    }
 }

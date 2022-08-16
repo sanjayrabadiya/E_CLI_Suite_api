@@ -12,7 +12,7 @@ namespace GSC.Respository.SupplyManagement
         List<DropDownDto> GetSiteDropdownforShipmentRequest(int ProjectId, int ParenrProjectId);
         ProductUnitType GetPharmacyStudyProductUnitType(int id);
 
-        List<SupplyManagementRequestGridDto> GetShipmentRequestList(bool isDeleted);
+        List<SupplyManagementRequestGridDto> GetShipmentRequestList(int parentProjectId, int SiteId, bool isDeleted);
 
         bool CheckAvailableRemainingQty(int reqQty, int ProjectId, int PharmacyStudyProductTypeId);
 

@@ -4,6 +4,7 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
+using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -19,15 +20,17 @@ namespace GSC.Respository.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         public ProductVerificationRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper)
+            IMapper mapper,
+            IUploadSettingRepository uploadSettingRepository)
             : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public ProductVerificationDto GetProductVerificationList(int productReceiptId)
@@ -61,6 +64,7 @@ namespace GSC.Respository.SupplyManagement
 
         public List<ProductVerificationGridDto> GetProductVerification(int ProjectId, bool isDeleted)
         {
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var dtolist = (from productverification in _context.ProductVerification.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
                            join productReceipt in _context.ProductReceipt.Where(t => t.DeletedDate == null && t.ProjectId == ProjectId) on productverification.ProductReceiptId equals productReceipt.Id
                            join productverificationDetail in _context.ProductVerificationDetail.Where(t => t.DeletedDate == null) on productverification.ProductReceiptId equals productverificationDetail.ProductReceiptId// productverification.Id equals productverificationDetail.ProductVerificationId
@@ -106,7 +110,11 @@ namespace GSC.Respository.SupplyManagement
                                IsConditionProduct = productverificationDetail.IsConditionProduct,
                                VerificationApprovalTemplate = verificationApprovalTemplate,
                                VerificationApprovalTemplateHistory = _context.VerificationApprovalTemplateHistory.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplate.Id).OrderBy(x => x.Id).LastOrDefault(),
-                               ProductVerificationDetailId = productverificationDetail.Id
+                               ProductVerificationDetailId = productverificationDetail.Id,
+                               RecieptPath = productReceipt.PathName == null ? "" : documentUrl + productReceipt.PathName,
+                               RecieptMimeType = productReceipt.MimeType,
+                               VerificationPath = productverification.PathName == null ? "" : documentUrl + productverification.PathName,
+                               VerificationMimeType = productverification.MimeType
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;

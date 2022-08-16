@@ -12,8 +12,8 @@ namespace GSC.Data.Dto.SupplyManagement
     {
         public int StudyLevelFormId { get; set; }
         public int? ProjectId { get; set; }
-        public int SecurityRoleId { get; set; }
-        public int ProductVerificationDetailId { get; set; }
+        public int? SecurityRoleId { get; set; }
+        public int? ProductVerificationDetailId { get; set; }
         public DateTime? ApproveOn { get; set; }
         public bool IsApprove { get; set; }
         public StudyLevelForm StudyLevelForm { get; set; }

@@ -8,6 +8,10 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface ISupplyManagementReceiptRepository : IGenericRepository<SupplyManagementReceipt>
     {
-        List<SupplyManagementReceiptGridDto> GetSupplyShipmentReceiptList(bool isDeleted);
+        List<SupplyManagementReceiptGridDto> GetSupplyShipmentReceiptList(int parentProjectId, int SiteId, bool isDeleted);
+
+        List<SupplyManagementReceiptHistoryGridDto> GetSupplyShipmentReceiptHistory(int id);
+
+        List<KitAllocatedList> GetKitAllocatedList(int id, string Type);
     }
 }

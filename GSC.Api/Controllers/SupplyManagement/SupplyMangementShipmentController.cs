@@ -73,10 +73,11 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             return Ok(supplyManagementRequest.Id);
         }
-        [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        [HttpGet]
+        [Route("GetSupplyShipmentList/{parentProjectId}/{siteId}/{isDeleted}")]
+        public IActionResult Get(int parentProjectId, int siteId, bool isDeleted)
         {
-            var data = _supplyManagementShipmentRepository.GetSupplyShipmentList(isDeleted);
+            var data = _supplyManagementShipmentRepository.GetSupplyShipmentList(parentProjectId, siteId, isDeleted);
             return Ok(data);
         }
         [HttpGet]
