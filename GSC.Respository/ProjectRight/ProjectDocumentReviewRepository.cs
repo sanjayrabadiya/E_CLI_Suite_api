@@ -26,7 +26,7 @@ namespace GSC.Respository.ProjectRight
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
-            _mapper=mapper;
+            _mapper = mapper;
         }
 
         public void SaveByUserId(int projectId, int userId)
@@ -527,9 +527,9 @@ namespace GSC.Respository.ProjectRight
                     temCountries.Add(country.CountryName);
                 }
 
-                item.CountriesName=temCountries.Distinct().ToList();
-                item.CountCountry=temCountries.Distinct().Count();
-                item.Project =project;
+                item.CountriesName = temCountries.Distinct().ToList();
+                item.CountCountry = temCountries.Distinct().Count();
+                item.Project = project;
             });
 
             return projects;
@@ -541,7 +541,7 @@ namespace GSC.Respository.ProjectRight
             var projectDashBoardDto = new ProjectDashBoardDto();
             var projectIds = new List<int>();
 
-            if (countryId==0 && siteId==0)
+            if (countryId == 0 && siteId == 0)
             {
                 projectIds = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
                                                            && _context.ProjectRight.Any(a => a.ProjectId == x.Id
@@ -571,11 +571,11 @@ namespace GSC.Respository.ProjectRight
                        MimeType = c.ProjectDocument.MimeType,
                        ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
                        ReviewDate = c.ReviewDate,
-                       TrainingTypeName= c.TrainingType==null ? "Not Applicable" : c.TrainingType.GetDescription(),
-                       TrainerName=c.TrainerId==null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id==c.TrainerId).UserName
+                       TrainingTypeName = c.TrainingType == null ? !c.IsReview ? "" : "Not Applicable" : c.TrainingType.GetDescription(),
+                       TrainerName = c.TrainerId == null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id == c.TrainerId).UserName
                    }).ToList();
             }
-            else if (countryId>0 && siteId==0)
+            else if (countryId > 0 && siteId == 0)
             {
 
                 projectIds = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
@@ -583,7 +583,7 @@ namespace GSC.Respository.ProjectRight
                                                            && a.UserId == _jwtTokenAccesser.UserId
                                                            && a.RoleId == _jwtTokenAccesser.RoleId
                                                            && a.DeletedDate == null)
-                                                           && x.ManageSite.City.State.CountryId==countryId
+                                                           && x.ManageSite.City.State.CountryId == countryId
                                                            && x.DeletedDate == null).Select(s => s.Id).ToList();
 
                 projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
@@ -607,8 +607,8 @@ namespace GSC.Respository.ProjectRight
                        MimeType = c.ProjectDocument.MimeType,
                        ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
                        ReviewDate = c.ReviewDate,
-                       TrainingTypeName= c.TrainingType==null ? "Not Applicable" : c.TrainingType.GetDescription(),
-                       TrainerName=c.TrainerId==null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id==c.TrainerId).UserName
+                       TrainingTypeName = c.TrainingType == null ? !c.IsReview ? "" : "Not Applicable" : c.TrainingType.GetDescription(),
+                       TrainerName = c.TrainerId == null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id == c.TrainerId).UserName
                    }).ToList();
 
             }
@@ -619,8 +619,8 @@ namespace GSC.Respository.ProjectRight
                                                          && a.UserId == _jwtTokenAccesser.UserId
                                                          && a.RoleId == _jwtTokenAccesser.RoleId
                                                          && a.DeletedDate == null)
-                                                         && x.ManageSite.City.State.CountryId==countryId
-                                                         && x.Id==siteId
+                                                         && x.ManageSite.City.State.CountryId == countryId
+                                                         && x.Id == siteId
                                                          && x.DeletedDate == null).Select(s => s.Id).ToList();
 
                 projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
@@ -644,8 +644,8 @@ namespace GSC.Respository.ProjectRight
                       MimeType = c.ProjectDocument.MimeType,
                       ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
                       ReviewDate = c.ReviewDate,
-                      TrainingTypeName= c.TrainingType==null ? "Not Applicable" : c.TrainingType.GetDescription(),
-                      TrainerName=c.TrainerId==null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id==c.TrainerId).UserName
+                      TrainingTypeName = c.TrainingType == null ? !c.IsReview ? "" : "Not Applicable" : c.TrainingType.GetDescription(),
+                      TrainerName = c.TrainerId == null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id == c.TrainerId).UserName
                   }).ToList();
             }
 
@@ -668,7 +668,7 @@ namespace GSC.Respository.ProjectRight
 
         public int CountTranningNotification()
         {
-           
+
             var countTraining = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
                                                                  && !x.IsReview && _context.ProjectRight.Any(a =>
                                                                      a.ProjectId == x.ProjectId
