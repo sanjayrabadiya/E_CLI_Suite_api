@@ -33,6 +33,17 @@ namespace GSC.Api.Controllers.Report
         }
 
         [HttpGet]
+        [Route("GetScreeningReviewReport")]
+        public IActionResult GetScreeningReviewReport([FromQuery] ScreeningQuerySearchDto filters)
+        {
+            if (filters.ProjectId <= 0) return BadRequest();
+
+            var auditsDto = _screeningTemplateRepository.GetScreeningReviewReportList(filters);
+
+            return Ok(auditsDto);
+        }
+
+        [HttpGet]
         [Route("GetReviewLevel/{projectId}")]
         public IActionResult GetReviewLevel(int projectId)
         {

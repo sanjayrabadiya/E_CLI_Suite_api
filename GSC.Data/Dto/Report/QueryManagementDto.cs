@@ -101,6 +101,13 @@ namespace GSC.Data.Dto.Report
         public int? Status { get; set; }
     }
 
+    public class ScreeningQuerySearchDto : BaseDto
+    {
+        public ScreeningReport ReportTypeId { get; set; }
+        public int ProjectId { get; set; }
+        public int? StudyId { get; set; }
+    }
+
     public class ScreeningQueryDto
     {
         public int ScreeningTemplateValueId { get; set; }

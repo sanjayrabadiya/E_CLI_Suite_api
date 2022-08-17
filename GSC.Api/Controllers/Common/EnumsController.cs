@@ -727,5 +727,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+
+        [HttpGet]
+        [Route("GetScreeningReportType")]
+        public IActionResult GetScreeningReportType()
+        {
+            var refrencetype = Enum.GetValues(typeof(ScreeningReport))
+                .Cast<ScreeningReport>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }

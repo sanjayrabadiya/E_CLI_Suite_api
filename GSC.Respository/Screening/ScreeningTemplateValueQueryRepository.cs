@@ -80,7 +80,7 @@ namespace GSC.Respository.Screening
                 screeningTemplateValueQuery.UserName = _jwtTokenAccesser.UserName;
                 screeningTemplateValueQuery.UserRole = _jwtTokenAccesser.RoleName;
             }
-            
+
 
             if (screeningTemplateValueQuery.QueryStatus != QueryStatus.Open && screeningTemplateValueQuery.QueryStatus != QueryStatus.SelfCorrection)
             {
@@ -434,6 +434,81 @@ namespace GSC.Respository.Screening
             result = result.Select(x => { return GetCloseData(query, x); }).ToList();
 
             return result.Where(b => filters.Status == null || b.QueryStatus.GetDescription() == ((QueryStatus)filters.Status).GetDescription()).ToList();
+        }
+
+        public IList<QueryManagementDto> GetScreeningQueryEntries(ScreeningQuerySearchDto filters)
+        {
+
+            var query = All.Where(x => (x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == filters.ProjectId)
+                 && (x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.StudyId == filters.StudyId))
+                .Select(t => new QueryManagementDto
+                {
+                    Id = t.Id,
+                    ScreeningTemplateValueId = t.ScreeningTemplateValueId,
+                    ProjectCode = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                    Value = t.Value,
+                    ReasonName = t.Reason.ReasonName,
+                    ReasonOth = t.ReasonOth,
+                    Note = string.IsNullOrEmpty(t.Note) ? t.ReasonOth : t.Note,
+                    CreatedDate = t.CreatedDate,
+                    CreatedByName = t.UserName + "(" + t.UserRole + ")" +
+                             Convert.ToString(t.IsSystem ? " - System" : ""),
+                    StatusName = t.QueryStatus.GetDescription(),
+                    QueryStatus = t.QueryStatus,
+                    OldValue = t.OldValue,
+                    QueryDescription = t.Note,
+                    ScreeningTemplateValue = t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo == null && t.ScreeningTemplateValue.ScreeningTemplate.ParentId == null ? t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName
+                                              : t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo + " " + t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
+                    Visit = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                                           Convert.ToString(t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
+                    FieldName = t.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
+                    CollectionSource = t.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource,
+                    VolunteerName = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial : t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                    SubjectNo = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber : t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
+                    RandomizationNumber = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber : "",
+                    QueryResponseTime = t.QueryParentId > 0 ? $"{(t.CreatedDate - t.QueryParent.CreatedDate).Value.Days} : {(t.CreatedDate - t.QueryParent.CreatedDate).Value.Hours} : {(t.CreatedDate - t.QueryParent.CreatedDate).Value.Minutes}" : "",
+                    QueryParentId = t.QueryParentId,
+                    DataEntryByName = t.ScreeningTemplateValue.SecurityRole == null || string.IsNullOrEmpty(t.ScreeningTemplateValue.SecurityRole.RoleName)
+                                           ? t.ScreeningTemplateValue.CreatedByUser.UserName
+                                           : t.ScreeningTemplateValue.CreatedByUser.UserName + "(" + t.ScreeningTemplateValue.SecurityRole.RoleShortName + ")",
+                }).OrderByDescending(a => a.Id).ToList();
+
+            var result = (from generate in query.Where(c => c.QueryStatus == QueryStatus.Open)
+                          join answeredTemp in _context.ScreeningTemplateValueQuery.Where(x => x.QueryStatus == QueryStatus.Answered || x.QueryStatus == QueryStatus.Resolved) on generate.Id equals answeredTemp.QueryParentId
+                          into answeredDto
+                          from answered in answeredDto.DefaultIfEmpty()
+                          select new QueryManagementDto
+                          {
+                              Id = generate.Id,
+                              ScreeningTemplateValueId = generate.ScreeningTemplateValueId,
+                              ProjectCode = generate.ProjectCode,
+                              Value = answered == null ? generate.Value : answered.Value,
+                              OldValue = answered == null ? generate.OldValue : answered.OldValue,
+                              ReasonName = generate.ReasonName,
+                              ReasonOth = generate.ReasonOth,
+                              Note = generate.Note,
+                              StatusName = generate.StatusName,
+                              QueryStatus = generate.QueryStatus,
+                              QueryDescription = generate.Note,
+                              ScreeningTemplateValue = generate.ScreeningTemplateValue,
+                              Visit = generate.Visit,
+                              FieldName = generate.FieldName,
+                              CollectionSource = generate.CollectionSource,
+                              VolunteerName = generate.VolunteerName,
+                              SubjectNo = generate.SubjectNo,
+                              RandomizationNumber = generate.RandomizationNumber,
+                              QueryParentId = generate.QueryParentId,
+                              CreatedByName = generate.CreatedByName,
+                              CreatedDate = generate.CreatedDate,
+                              ModifieedByName = answered == null ? null : answered.UserName + "(" + answered.UserRole + ")",
+                              ModifiedDate = answered?.CreatedDate,
+                              DataEntryByName = generate.DataEntryByName,
+                              GenerateToAns = answered == null ? null : $"{(answered.CreatedDate - generate.CreatedDate).Value.Days} : {(answered.CreatedDate - generate.CreatedDate).Value.Hours} : {(answered.CreatedDate - generate.CreatedDate).Value.Minutes}",
+                          }).OrderBy(x => x.Id).ThenBy(v => v.SubjectNo).ToList();
+
+            result = result.Select(x => { return GetCloseData(query, x); }).ToList();
+
+            return result;
         }
 
         public QueryManagementDto GetCloseData(List<QueryManagementDto> queryData, QueryManagementDto ParentData)
