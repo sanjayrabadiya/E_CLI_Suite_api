@@ -58,15 +58,25 @@ namespace GSC.Respository.SupplyManagement
 
         public IList<DropDownDto> GetVisitDropDownByAllocation(int projectId)
         {
-            var visits = _context.SupplyManagementAllocation.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
-             && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
-             && x.DeletedDate == null)
-                .Select(x => new DropDownDto
-                {
-                    Id = x.ProjectDesignVisit.Id,
-                    Value = x.ProjectDesignVisit.DisplayName,
-                }).Distinct().ToList();
+            //var visits = _context.SupplyManagementAllocation.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+            // && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
+            // && x.DeletedDate == null)
+            //    .Select(x => new DropDownDto
+            //    {
+            //        Id = x.ProjectDesignVisit.Id,
+            //        Value = x.ProjectDesignVisit.DisplayName,
+            //    }).Distinct().ToList();
+            //return visits;
+
+            var visits = _context.SupplyManagementUploadFileVisit.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
+                         && x.DeletedDate == null)
+                    .Select(x => new DropDownDto
+                    {
+                        Id = x.ProjectDesignVisit.Id,
+                        Value = x.ProjectDesignVisit.DisplayName,
+                    }).Distinct().ToList();
             return visits;
+
         }
 
         public List<KitListApproved> getApprovedKit(int id)

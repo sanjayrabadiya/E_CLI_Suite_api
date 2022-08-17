@@ -27,7 +27,7 @@ namespace GSC.Respository.SupplyManagement
         public List<SupplyManagementUploadFileDetailDto> GetSupplyManagementUploadFileDetailList(int SupplyManagementUploadFileId)
         {
             var details= All.Where(x => x.SupplyManagementUploadFileId == SupplyManagementUploadFileId).
-                   ProjectTo<SupplyManagementUploadFileDetailDto>(_mapper.ConfigurationProvider).OrderBy(x => x.Id).ToList();
+                   ProjectTo<SupplyManagementUploadFileDetailDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             return details;
         }
