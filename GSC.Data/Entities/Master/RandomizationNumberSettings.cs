@@ -17,5 +17,9 @@ namespace GSC.Data.Entities.Master
         public int RandomizationNoseries { get; set; }
         public int? RandomNoStartsWith { get; set; }
         public string PrefixRandomNo { get; set; }
+
+        public bool IsIWRS { get; set; }
+
+        public bool IsIGT { get; set; }
     }
 }

@@ -81,13 +81,15 @@ namespace GSC.Api.Controllers.Master
                     }
                 }
             }
-
-            if (randomizationNumberSettingsDto.IsManualRandomNo == false && randomizationNumberSettingsDto.IsSiteDependentRandomNo == false)
+            if (randomizationNumberSettingsDto.IsIGT == false)
             {
-                if (randomizationNumberSettingsDto.RandomNoStartsWith == null)
+                if (randomizationNumberSettingsDto.IsManualRandomNo == false && randomizationNumberSettingsDto.IsSiteDependentRandomNo == false)
                 {
-                    ModelState.AddModelError("Message", "Please add valid Starts with number");
-                    return BadRequest(ModelState);
+                    if (randomizationNumberSettingsDto.RandomNoStartsWith == null)
+                    {
+                        ModelState.AddModelError("Message", "Please add valid Starts with number");
+                        return BadRequest(ModelState);
+                    }
                 }
             }
 
@@ -97,8 +99,9 @@ namespace GSC.Api.Controllers.Master
             randomizationNumberSettings.IsAlphaNumRandomNo = randomizationNumberSettingsDto.IsAlphaNumRandomNo;
             randomizationNumberSettings.RandomNoStartsWith = randomizationNumberSettingsDto.RandomNoStartsWith;
             randomizationNumberSettings.IsSiteDependentRandomNo = randomizationNumberSettingsDto.IsSiteDependentRandomNo;
-
-            if (randomizationNumberSettings.IsManualRandomNo == false)
+            randomizationNumberSettings.IsIGT = randomizationNumberSettingsDto.IsIGT;
+            randomizationNumberSettings.IsIWRS = randomizationNumberSettingsDto.IsIWRS;
+            if (randomizationNumberSettings.IsManualRandomNo == false && randomizationNumberSettingsDto.IsIGT == false)
             {
                 if (randomizationNumberSettings.IsSiteDependentRandomNo == true)
                 {

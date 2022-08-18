@@ -17,6 +17,10 @@ namespace GSC.Data.Dto.Master
         public int? RandomNoStartsWith { get; set; }
         public string PrefixRandomNo { get; set; }
         public bool DisableRow { get; set; }
+
+        public bool IsIWRS { get; set; }
+
+        public bool IsIGT { get; set; }
         public List<RandomizationNumberSettingsDto> RandomizationNumberSettingsSites { get; set; }
     }
 }
