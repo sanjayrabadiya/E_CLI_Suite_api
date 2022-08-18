@@ -43,5 +43,7 @@ namespace GSC.Respository.Screening
         void AcknowledgeAllQuery(UpdateAllQueryStatus updateAllQueryStatus);
 
         void Save(ScreeningTemplateValueQuery screeningTemplateValueQuery);
+
+        IList<QueryManagementDto> GetScreeningQueryEntries(ScreeningQuerySearchDto filters);
     }
 }

@@ -747,6 +747,37 @@ namespace GSC.Respository.Screening
             }).ToList();
         }
 
+        public IList<ReviewDto> GetScreeningReviewReportList(ScreeningQuerySearchDto filters)
+        {
+            var result = All.Where(x => x.DeletedDate == null && x.ScreeningVisit.Status != ScreeningVisitStatus.NotStarted);
+            
+            if (filters.ProjectId != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.ProjectId);
+            if (filters.StudyId != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.StudyId == filters.StudyId);
+
+            result = result.Where(x => x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.DeletedDate == null);
+
+            return result.Select(r => new ReviewDto
+            {
+                Id = r.Id,
+                SiteName = string.IsNullOrEmpty(r.ScreeningVisit.ScreeningEntry.Project.SiteName) ? r.ScreeningVisit.ScreeningEntry.Project.ProjectName : r.ScreeningVisit.ScreeningEntry.Project.SiteName,
+                SiteCode = r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                ScreeningEntryId = r.ScreeningVisit.ScreeningEntryId,
+                ScreeningNo = r.ScreeningVisit.ScreeningEntry.ScreeningNo,
+                ReviewLevel = r.ReviewLevel,
+                StatusName = r.Status.GetDescription(),
+                ScreeningTemplateId = r.Id,
+                ProjectCode = r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                ScreeningTemplateValue = r.ProjectDesignTemplate.TemplateName,
+                Visit = r.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                VolunteerName = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName : r.ScreeningVisit.ScreeningEntry.Randomization.Initial,
+                SubjectNo = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
+                RandomizationNumber = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
+                ReviewLevelName = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignId
+                && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault()
+
+            }).ToList();
+        }
+
         private WorkFlowButton SetWorkFlowButton(ScreeningTemplateValueBasic screeningValue,
             WorkFlowLevelDto workflowlevel, DesignScreeningTemplateDto designTemplateDto,
             ScreeningTemplateBasic templateBasic)

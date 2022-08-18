@@ -45,6 +45,6 @@ namespace GSC.Respository.Screening
         List<TemplateStatusList> GetTemplateStatus(int ProjectId, int VisitId, int ScreeningEntryId);
 
         void DeleteRepeatVisitTemplate(int Id);
-
+        IList<ReviewDto> GetScreeningReviewReportList(ScreeningQuerySearchDto filters);
     }
 }

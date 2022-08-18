@@ -910,4 +910,10 @@ namespace GSC.Helper
         [Description("Receipt Without Issues")] WithoutIssue = 7
     }
 
+    public enum ScreeningReport : short
+    {
+        [Description("Query Report")] QueryReport = 1,
+        [Description("Review Report")] ReviewReport = 2,
+        [Description("PDF")] PDF = 3,
+    }
 }

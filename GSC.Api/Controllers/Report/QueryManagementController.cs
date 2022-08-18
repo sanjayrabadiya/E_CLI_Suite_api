@@ -27,6 +27,17 @@ namespace GSC.Api.Controllers.Report
         }
 
         [HttpGet]
+        [Route("GetScreeningQueryEntries")]
+        public IActionResult GetScreeningQueryEntries([FromQuery] ScreeningQuerySearchDto filters)
+        {
+            if (filters.ProjectId <= 0) return BadRequest();
+
+            var auditsDto = _screeningTemplateValueQueryRepository.GetScreeningQueryEntries(filters);
+
+            return Ok(auditsDto);
+        }
+
+        [HttpGet]
         [Route("GetGenerateQueryBy/{projectId}")]
         public IActionResult GetGenerateQueryBy(int projectId)
         {
