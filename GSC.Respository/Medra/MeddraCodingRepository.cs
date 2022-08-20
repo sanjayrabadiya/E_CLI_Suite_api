@@ -1,10 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Medra;
-using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Medra;
-using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.ProjectRight;
@@ -15,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Respository.Medra
 {
@@ -47,38 +43,31 @@ namespace GSC.Respository.Medra
 
         public List<MeddraCodingVariableDto> SearchMain(MeddraCodingSearchDto meddraCodingSearchDto)
         {
-            //var ParentProjectId = _context.ProjectDesign.Find(meddraCodingSearchDto.ProjectDesignId).ProjectId;
 
-            List<MeddraCodingVariableDto> objList = new List<MeddraCodingVariableDto>();
-            var variable = _context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectId == meddraCodingSearchDto.ProjectDesignId)
-            .Include(d => d.ProjectDesignVariable)
-            .ThenInclude(d => d.ProjectDesignTemplate)
-            .ThenInclude(d => d.ProjectDesignVisit)
-            .ThenInclude(d => d.ProjectDesignPeriod)
-            .AsNoTracking().ToList();
+            var variable = _context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectId == meddraCodingSearchDto.ProjectDesignId).
+                Select(r => new MeddraCodingVariableDto
+                {
+                    MeddraConfigId = r.MedraConfigId,
+                    ProjectDesignTemplateId = r.ProjectDesignVariable.ProjectDesignTemplateId,
+                    VariableName = r.ProjectDesignVariable.VariableName,
+                    ProjectDesignVariableId = r.ProjectDesignVariableId,
+                    VariableCode = r.ProjectDesignVariable.VariableCode,
+                    VariableAlias = r.ProjectDesignVariable.VariableAlias,
+                    TemplateName = r.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
+                    VisitName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+                    PeriodName = r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName
+                }).ToList();
 
-            foreach (var item in variable)
-            {
-                MeddraCodingVariableDto obj = new MeddraCodingVariableDto();
-                obj.MeddraConfigId = item.MedraConfigId;
-                obj.ProjectDesignTemplateId = item.ProjectDesignVariable.ProjectDesignTemplateId;
-                obj.VariableName = item.ProjectDesignVariable.VariableName;
-                obj.ProjectDesignVariableId = item.ProjectDesignVariableId;
-                obj.VariableCode = item.ProjectDesignVariable.VariableCode;
-                obj.VariableAlias = item.ProjectDesignVariable.VariableAlias;
-                obj.TemplateName = item.ProjectDesignVariable.ProjectDesignTemplate.TemplateName;
-                obj.VisitName = item.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName;
-                obj.PeriodName = item.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName;
-                objList.Add(obj);
-            }
-            return objList;
+            return variable;
         }
 
         public MeddraCodingMainDto GetVariableCount(MeddraCodingSearchDto meddraCodingDto)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
 
-            var Exists = All.Where(x => x.ScreeningTemplateValue.ProjectDesignVariableId == meddraCodingDto.ProjectDesignVariableId && projectList.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) && x.DeletedDate == null && x.MeddraSocTermId != null);
+            var Exists = All.Where(x => x.ScreeningTemplateValue.
+            ProjectDesignVariableId == meddraCodingDto.ProjectDesignVariableId &&
+            projectList.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) && x.DeletedDate == null && x.MeddraSocTermId != null);
 
             if (meddraCodingDto.ProjectId != 0)
             {
@@ -158,57 +147,18 @@ namespace GSC.Respository.Medra
             return objList;
         }
 
-        public List<MeddraCodingVariableDto> SearchCodingDetails(MeddraCodingSearchDto filters)
-        {
-            List<MeddraCodingVariableDto> objList = new List<MeddraCodingVariableDto>();
-            var variable = _context.StudyScoping.Where(t => t.ProjectId == filters.ProjectId)
-            .Include(d => d.ProjectDesignVariable)
-            .ThenInclude(d => d.ProjectDesignTemplate)
-            .ThenInclude(d => d.ProjectDesignVisit)
-            .ThenInclude(d => d.ProjectDesignPeriod)
-            .AsNoTracking().ToList();
-
-            foreach (var item in variable)
-            {
-                MeddraCodingVariableDto obj = new MeddraCodingVariableDto();
-                obj.ProjectDesignTemplateId = item.ProjectDesignVariable.ProjectDesignTemplateId;
-                obj.VariableName = item.ProjectDesignVariable.VariableName;
-                obj.ProjectDesignVariableId = item.ProjectDesignVariableId;
-                obj.VariableCode = item.ProjectDesignVariable.VariableCode;
-                obj.VariableAlias = item.ProjectDesignVariable.VariableAlias;
-                obj.TemplateName = item.ProjectDesignVariable.ProjectDesignTemplate.TemplateName;
-                obj.VisitName = item.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName;
-                obj.PeriodName = item.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName;
-                objList.Add(obj);
-            }
-            return objList;
-        }
+        
 
         public List<DropDownDto> MeddraCodingVariableDropDown(int ProjectId)
         {
-            //var ParentProjectId = _context.ProjectDesign.Find(ProjectId).ProjectId;
-            List<DropDownDto> objList = new List<DropDownDto>();
-            var variable = _context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectId == ProjectId)
-            .Include(d => d.MedraConfig)
-            .ThenInclude(d => d.Language)
-            .Include(d => d.MedraConfig)
-            .ThenInclude(d => d.MedraVersion)
-            .ThenInclude(d => d.Dictionary)
-            .Include(d => d.ProjectDesignVariable)
-            .ThenInclude(d => d.ProjectDesignTemplate)
-            .ThenInclude(d => d.ProjectDesignVisit)
-            .ThenInclude(d => d.ProjectDesignPeriod)
-            .AsNoTracking().ToList();
-
-            foreach (var item in variable)
+            var variable = _context.StudyScoping.Where(t => t.DeletedDate == null && t.ProjectId == ProjectId).Select(r => new DropDownDto
             {
-                DropDownDto obj = new DropDownDto();
-                obj.Id = item.ProjectDesignVariableId;
-                obj.Value = item.ProjectDesignVariable.Annotation + "-" + item.MedraConfig.MedraVersion.Dictionary.DictionaryName + "-" + item.MedraConfig.MedraVersion.Version + "-" + item.MedraConfig.Language.LanguageName;
-                obj.ExtraData = item.MedraConfigId;
-                objList.Add(obj);
-            }
-            return objList;
+                Id = r.ProjectDesignVariableId,
+                Value = r.ProjectDesignVariable.Annotation + "-" + r.MedraConfig.MedraVersion.Dictionary.DictionaryName + "-" + r.MedraConfig.MedraVersion.Version + "-" + r.MedraConfig.Language.LanguageName,
+                ExtraData = r.MedraConfigId
+            }).ToList();
+
+            return variable;
         }
 
         public IList<MeddraCodingSearchDetails> GetMedDRACodingDetails(MeddraCodingSearchDto filters)
@@ -327,10 +277,7 @@ namespace GSC.Respository.Medra
                 result = result.Where(x => filters.SubjectIds.Contains(x.RandomizationId)).ToList();
             }
 
-            //if (filters.TemplateStatus != null && filters.ExtraData == false)
-            //{
-            //    result = result.Where(x => filters.TemplateStatus == 5).ToList();
-            //}
+
 
             return result.ToList();
         }
@@ -342,7 +289,7 @@ namespace GSC.Respository.Medra
             && x.DeletedDate == null).ToList();
 
 
-            var projectList = meddraCodingSearchDto.ProjectId == 0 ? _projectRightRepository.GetProjectRightIdList() :  new List<int> { (int)meddraCodingSearchDto.ProjectId };
+            var projectList = meddraCodingSearchDto.ProjectId == 0 ? _projectRightRepository.GetProjectRightIdList() : new List<int> { (int)meddraCodingSearchDto.ProjectId };
             MeddraCodingSearchDetails objList = new MeddraCodingSearchDetails();
             var dataEntries = new List<MeddraCodingSearchDetails>();
 
