@@ -721,41 +721,29 @@ namespace GSC.Respository.Attendance
             if (projectList == null || projectList.Count == 0)
                 return new List<DropDownDto>();
 
-            var Isstatic = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().IsStatic;
+            var Isstatic = _context.Project.Where(x => x.Id == ProjectId).Select(r => r.IsStatic).FirstOrDefault();
 
             if (Isstatic)
             {
                 return All.Where(t => (t.CompanyId == null
                                || t.CompanyId == _jwtTokenAccesser.CompanyId)
                               && projectList.Any(c => c == t.ProjectId)
-                               // && t.Randomization.RandomizationNumber != null
                                ).Select(r => new DropDownDto
                                {
                                    Id = r.Id,
                                    Value = r.ScreeningNumber + "-" + r.Initial + "-" + r.RandomizationNumber
                                }).ToList();
             }
-            //else
-            //{
-            //    return All.Where(t => (t.CompanyId == null
-            //                   || t.CompanyId == _jwtTokenAccesser.CompanyId)
-            //                  && projectList.Any(c => c == t.ProjectId)
-            //                  && t.VolunteerId != null
-            //                  && t.ProjectSubject.Number != null
-            //                   ).Select(r => new DropDownDto
-            //                   {
-            //                       Id = r.Id,
-            //                       Value = r.Volunteer.VolunteerNo + "-" + r.Volunteer.AliasName + "-" + r.ProjectSubject.Number
-            //                   }).ToList();
-            //}
+
 
             return null;
         }
 
-        public List<int> GetProjectList(int ProjectId)
+        private List<int> GetProjectList(int ProjectId)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
-            return _context.Project.Where(c => c.DeletedDate == null && (c.Id == ProjectId || c.ParentProjectId == ProjectId) && projectList.Any(t => t == c.Id)).Select(x => x.Id).ToList();
+            return _context.Project.Where(c => c.DeletedDate == null &&
+            (c.Id == ProjectId || c.ParentProjectId == ProjectId) && projectList.Any(t => t == c.Id)).Select(x => x.Id).ToList();
         }
 
         // Dashboard chart for target status
