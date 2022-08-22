@@ -53,9 +53,11 @@ namespace GSC.Data.Dto.Screening
     public class VolunteerAttendanceDto 
     {
         public int AttendanceId { get; set; }
+        public int? VolunteerId { get; set; }
         public int ScreeningEntryId { get; set; }
         public string ScreeningNo { get; set; }
         public string ScreeningDate { get; set; }
+        public string VolunteerNo { get; set; }
     }
 
     public class ScreeningAuditDto

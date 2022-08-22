@@ -35,6 +35,7 @@ namespace GSC.Data.Dto.Report
         public string SiteName { get; set; }
         public string SiteCode { get; set; }
         public string AttendanceDate { get; set; }
+        public string ScreeningDate { get; set; }
     }
 
     public class ReviewSearchDto : BaseDto

@@ -707,5 +707,35 @@ namespace GSC.Respository.Screening
             }).OrderByDescending(x => x.Id).ToList();
             return data;
         }
+
+        public List<VolunteerAttendanceDto> GetVolunteerByProjectId(int projectId)
+        {
+            var data = All.Include(z => z.Attendance).ThenInclude(x => x.Volunteer).Where(x => x.Attendance.ProjectId == projectId)
+                .GroupBy(x => new { x.Attendance.VolunteerId, x.Attendance.Volunteer.VolunteerNo })
+                .Select(z => new VolunteerAttendanceDto
+                {
+                    VolunteerId = z.Key.VolunteerId,
+                    VolunteerNo = z.Key.VolunteerNo
+                }).ToList();
+            return data;
+        }
+
+        public List<VolunteerAttendanceDto> GetVolunteerScreeningList(int projectId, int volunteerId)
+        {
+            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+
+            var data = All.Include(z => z.Attendance).ThenInclude(x => x.Volunteer)
+                .Where(x => x.Attendance.ProjectId == projectId && x.Attendance.VolunteerId == volunteerId)
+                .Select(z => new VolunteerAttendanceDto
+                {
+                    ScreeningEntryId = z.Id,
+                    AttendanceId = (int)z.AttendanceId,
+                    ScreeningNo = z.ScreeningNo,
+                    VolunteerId = z.Attendance.VolunteerId,
+                    VolunteerNo = z.Attendance.Volunteer.VolunteerNo,
+                    ScreeningDate = DateTime.Parse(z.ScreeningDate.ToString()).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture)
+                }).ToList();
+            return data;
+        }
     }
 }

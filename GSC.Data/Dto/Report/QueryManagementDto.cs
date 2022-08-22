@@ -72,6 +72,7 @@ namespace GSC.Data.Dto.Report
         public short QueryLevel { get; set; }
         public string VolunteerName { get; set; }
         public string AttendanceDate { get; set; }
+        public string ScreeningDate { get; set; }
         public string SubjectNo { get; set; }
         public string RandomizationNumber { get; set; }
         public int projectId { get; set; }
@@ -107,6 +108,8 @@ namespace GSC.Data.Dto.Report
         public ScreeningReport ReportTypeId { get; set; }
         public int ProjectId { get; set; }
         public int? StudyId { get; set; }
+        public int? VolunteerId { get; set; }
+        public string ScreeningDate { get; set; }
     }
 
     public class ScreeningQueryDto
