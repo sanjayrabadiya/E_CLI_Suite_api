@@ -102,7 +102,8 @@ namespace GSC.Respository.Attendance
         {
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
             randomizationNumberDto = GenerateRandomizationNumber(randomization.Id);
-            if (randomizationNumberDto.IsManualRandomNo == true)
+
+            if (randomizationNumberDto.IsManualRandomNo == true && !randomizationNumberDto.IsIGT)
                 randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
             else
                 randomization.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
@@ -111,7 +112,7 @@ namespace GSC.Respository.Attendance
             randomization.StudyVersion = randomizationDto.StudyVersion;
 
             Update(randomization);
-            if (!randomizationNumberDto.IsTestSite)
+            if (!randomizationNumberDto.IsTestSite && !randomizationNumberDto.IsIGT)
             {
 
                 if (randomizationNumberDto.IsManualRandomNo == false)
@@ -207,8 +208,12 @@ namespace GSC.Respository.Attendance
             randomizationNumberDto.IsManualRandomNo = studydata.IsManualRandomNo;
             randomizationNumberDto.IsSiteDependentRandomNo = studydata.IsSiteDependentRandomNo;
             randomizationNumberDto.RandomNoLength = studydata.RandomNoLength;
+            randomizationNumberDto.IsIWRS = studydata.IsIWRS;
+            randomizationNumberDto.IsIGT = studydata.IsIGT;
             //randomizationNumberDto.PrefixRandomNo = studydata.PrefixRandomNo;
 
+            //if (!studydata.IsIGT)
+            //{
             if (studydata.IsManualRandomNo == true)
             {
                 randomizationNumberDto.RandomizationNumber = "";
@@ -239,7 +244,60 @@ namespace GSC.Respository.Attendance
                 randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.RandomNoLength, '0');
                 return randomizationNumberDto;
             }
+            //}
+            //else
+            //{
+            //    randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.CountryId);
+            //}
             return randomizationNumberDto;
+        }
+        public string GetRandNoIWRS(int projectid, int siteId, int countryId)
+        {
+            string randno = string.Empty;
+
+            var data = _context.SupplyManagementUploadFileDetail
+                                        .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
+                                        && x.RandomizationId == null
+                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+            if (data != null)
+            {
+                randno = Convert.ToString(data.RandomizationNo);
+                return randno;
+            }
+            var datacountry = _context.SupplyManagementUploadFileDetail
+                                        .Where(x => x.SupplyManagementUploadFile.CountryId == countryId
+                                        && x.RandomizationId == null
+                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+            if (datacountry != null)
+            {
+                randno = Convert.ToString(datacountry.RandomizationNo);
+                return randno;
+            }
+            var datastudy = _context.SupplyManagementUploadFileDetail
+                                        .Where(x => x.SupplyManagementUploadFile.ProjectId == projectid
+                                        && x.RandomizationId == null
+                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+            if (datastudy != null)
+            {
+                randno = Convert.ToString(datastudy.RandomizationNo);
+                return randno;
+            }
+            return randno;
+
+        }
+        public void UpdateRandomizationIdForIWRS(RandomizationDto obj)
+        {
+            string randno = string.Empty;
+
+            var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+            && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
+
+            if (data != null)
+            {
+                data.RandomizationId = obj.Id;
+                _context.SupplyManagementUploadFileDetail.Update(data);
+                _context.Save();
+            }
         }
 
         public bool IsScreeningFormatSetInStudy(int id)
@@ -433,7 +491,7 @@ namespace GSC.Respository.Attendance
         {
             var randomization = All.AsNoTracking().Where(x => x.ScreeningEntry.Id == screeningEntryId).FirstOrDefault();
             // Change for Volunteer screening by Tinku Mahato in 21-06-2022
-            if (randomization!=null)
+            if (randomization != null)
             {
                 if (randomization.PatientStatusId != patientStatus)
                 {

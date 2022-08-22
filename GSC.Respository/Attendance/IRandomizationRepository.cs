@@ -46,5 +46,7 @@ namespace GSC.Respository.Attendance
         List<DashboardPatientStatusDto> GetDashboardPatientStatus(int projectId);
         List<DashboardRecruitmentStatusDisplayDto> GetDashboardRecruitmentStatus(int projectId);
         DashboardRecruitmentRateDto GetDashboardRecruitmentRate(int projectId);
+
+        void UpdateRandomizationIdForIWRS(RandomizationDto obj);
     }
 }

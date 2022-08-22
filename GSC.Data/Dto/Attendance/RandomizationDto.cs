@@ -135,6 +135,9 @@ namespace GSC.Data.Dto.Attendance
         public int ProjectId { get; set; }
         public int ParentProjectId { get; set; }
         public bool IsTestSite { get; set; }
+        public bool IsIWRS { get; set; }
+        public bool IsIGT { get; set; }
+
 
     }
 }

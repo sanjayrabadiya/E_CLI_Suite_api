@@ -322,6 +322,8 @@ namespace GSC.Api.Controllers.Attendance
 
             _randomizationRepository.SaveRandomizationNumber(randomization, randomizationDto);
 
+            //_randomizationRepository.UpdateRandomizationIdForIWRS(randomizationDto);
+
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
             return Ok(randomization.Id);

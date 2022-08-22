@@ -10,6 +10,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public int SupplyManagementUploadFileId { get; set; }
         public int RandomizationNo { get; set; }
         public string TreatmentType { get; set; }
+
+        public int? RandomizationId { get; set; }
         public IList<SupplyManagementUploadFileVisit> Visits { get; set; } = null;
         public SupplyManagementUploadFile SupplyManagementUploadFile { get; set; }
     }
