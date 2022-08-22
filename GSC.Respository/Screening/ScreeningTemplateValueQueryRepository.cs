@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
@@ -10,6 +11,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
@@ -27,6 +29,7 @@ namespace GSC.Respository.Screening
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private WorkFlowLevelDto _workFlowLevelDto;
         private readonly IGSCContext _context;
+        private readonly IAppSettingRepository _appSettingRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IScreeningTemplateValueChildRepository _screeningTemplateValueChildRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
@@ -35,7 +38,8 @@ namespace GSC.Respository.Screening
             IProjectWorkflowRepository projectWorkflowRepository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
-            IProjectDesignRepository projectDesignRepository)
+            IProjectDesignRepository projectDesignRepository,
+            IAppSettingRepository appSettingRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -45,6 +49,7 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _screeningTemplateValueChildRepository = screeningTemplateValueChildRepository;
             _projectDesignRepository = projectDesignRepository;
+            _appSettingRepository = appSettingRepository;
         }
 
         public IList<ScreeningTemplateValueQueryGridDto> GetQueries(int screeningTemplateValueId)
@@ -438,6 +443,7 @@ namespace GSC.Respository.Screening
 
         public IList<QueryManagementDto> GetScreeningQueryEntries(ScreeningQuerySearchDto filters)
         {
+            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
 
             var query = All.Where(x => (x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == filters.ProjectId)
                  && (x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.StudyId == filters.StudyId))
@@ -464,6 +470,7 @@ namespace GSC.Respository.Screening
                     FieldName = t.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
                     CollectionSource = t.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource,
                     VolunteerName = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial : t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                    AttendanceDate = DateTime.Parse(t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.AttendanceDate.ToString()).ToString(GeneralSettings.DateFormat),
                     SubjectNo = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber : t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
                     RandomizationNumber = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber : "",
                     QueryResponseTime = t.QueryParentId > 0 ? $"{(t.CreatedDate - t.QueryParent.CreatedDate).Value.Days} : {(t.CreatedDate - t.QueryParent.CreatedDate).Value.Hours} : {(t.CreatedDate - t.QueryParent.CreatedDate).Value.Minutes}" : "",
@@ -495,6 +502,7 @@ namespace GSC.Respository.Screening
                               FieldName = generate.FieldName,
                               CollectionSource = generate.CollectionSource,
                               VolunteerName = generate.VolunteerName,
+                              AttendanceDate = generate.AttendanceDate,
                               SubjectNo = generate.SubjectNo,
                               RandomizationNumber = generate.RandomizationNumber,
                               QueryParentId = generate.QueryParentId,

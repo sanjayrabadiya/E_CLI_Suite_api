@@ -749,6 +749,7 @@ namespace GSC.Respository.Screening
 
         public IList<ReviewDto> GetScreeningReviewReportList(ScreeningQuerySearchDto filters)
         {
+            var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             var result = All.Where(x => x.DeletedDate == null && x.ScreeningVisit.Status != ScreeningVisitStatus.NotStarted);
             
             if (filters.ProjectId != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.ProjectId);
@@ -773,8 +774,8 @@ namespace GSC.Respository.Screening
                 SubjectNo = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 RandomizationNumber = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
                 ReviewLevelName = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignId
-                && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault()
-
+                && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault(),
+                AttendanceDate = DateTime.Parse(r.ScreeningVisit.ScreeningEntry.Attendance.AttendanceDate.ToString()).ToString(GeneralSettings.DateFormat)
             }).ToList();
         }
 

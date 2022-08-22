@@ -71,6 +71,7 @@ namespace GSC.Data.Dto.Report
         public string StatusName { get; set; }
         public short QueryLevel { get; set; }
         public string VolunteerName { get; set; }
+        public string AttendanceDate { get; set; }
         public string SubjectNo { get; set; }
         public string RandomizationNumber { get; set; }
         public int projectId { get; set; }
