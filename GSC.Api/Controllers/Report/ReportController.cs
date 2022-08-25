@@ -76,6 +76,48 @@ namespace GSC.Api.Controllers.Report
 
         [TransactionRequired]
         [HttpPost]
+        [Route("GetScreeningWithFliter")]
+        public async Task<IActionResult> GetScreeningWithFliter([FromBody] ScreeningReportSetting reportSetting)
+        {
+            #region Report Setting Save
+            //var reportSettingForm = _projectDesignReportSettingRepository.All.Where(x => x.ProjectDesignId == reportSetting.ProjectId && x.CompanyId == reportSetting.CompanyId && x.DeletedBy == null).FirstOrDefault();
+            //var objNew = _mapper.Map<ProjectDesignReportSetting>(reportSetting);
+            //if (reportSettingForm == null)
+            //{
+            //    _projectDesignReportSettingRepository.Add(objNew);
+            //}
+            //else
+            //{
+            //    objNew.Id = reportSettingForm.Id;
+            //    _projectDesignReportSettingRepository.Update(objNew);
+            //}
+            #endregion
+
+            JobMonitoringDto jobMonitoringDto = new JobMonitoringDto();
+            jobMonitoringDto.JobName = JobNameType.ScreeningReport;
+            jobMonitoringDto.JobDescription = reportSetting.ProjectId;
+            jobMonitoringDto.JobType = JobTypeEnum.Report;
+            jobMonitoringDto.JobStatus = JobStatusType.InProcess;
+            jobMonitoringDto.SubmittedBy = _jwtTokenAccesser.UserId;
+            jobMonitoringDto.SubmittedTime = _jwtTokenAccesser.GetClientDate();
+            jobMonitoringDto.JobDetails = reportSetting.PdfStatus == DossierPdfStatus.Blank ? DossierPdfStatus.Blank : DossierPdfStatus.Subject;
+            var jobMonitoring = _mapper.Map<JobMonitoring>(jobMonitoringDto);
+
+            _jobMonitoringRepository.Add(jobMonitoring);
+
+            if (_uow.Save() <= 0) throw new Exception("Creating Job Monitoring failed on save.");
+            string message = _reportSuncfusion.ScreeningPdfReportGenerate(reportSetting, jobMonitoring);
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                ModelState.AddModelError("Message", message);
+                return BadRequest(ModelState);
+            }
+            return Ok();
+        }
+
+        [TransactionRequired]
+        [HttpPost]
         [Route("GetProjectDesignWithFliter")]
         public async Task<IActionResult> GetProjectDesignWithFliter([FromBody] ReportSettingNew reportSetting)
         {
@@ -114,6 +156,8 @@ namespace GSC.Api.Controllers.Report
             }
             return Ok();
         }
+
+
         [HttpGet]
         [Route("GetVisitsByCrfTypes/{CRFType?}/{projectId?}")]
         public IActionResult GetVisitsByCrfTypes(int? CRFType, int? projectId)
@@ -134,6 +178,7 @@ namespace GSC.Api.Controllers.Report
 
             return Ok(Data);
         }
+
         [HttpPost]
         [Route("GetTemplatesByVisits")]
         public IActionResult GetTemplatesByVisits([FromBody] ReportVisitsDto reportSetting)
@@ -152,6 +197,7 @@ namespace GSC.Api.Controllers.Report
 
             return Ok(Data);
         }
+
         [HttpPost]
         [Route("GetVersionDropdown")]
         public IActionResult GetVersionDropdown([FromBody] ReportVisitsDto reportSetting)

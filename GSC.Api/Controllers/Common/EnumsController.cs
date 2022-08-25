@@ -369,6 +369,18 @@ namespace GSC.Api.Controllers.Common
         }
 
         [HttpGet]
+        [Route("ScreeningPdfStatus")]
+        public IList<DropDownEnum> ScreeningPdfStatus()
+        {
+            return Enum.GetValues(typeof(ScreeningPdfStatus))
+                .Cast<ScreeningPdfStatus>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+        }
+
+        [HttpGet]
         [Route("CodedType")]
         public IList<DropDownEnum> CodedType()
         {

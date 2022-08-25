@@ -13,6 +13,6 @@ namespace GSC.Report
         //string DataGenerateReport(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
         FileStreamResult GetProjectDesign(ReportSettingNew reportSetting);
         string DossierPdfReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
-
+        string ScreeningPdfReportGenerate(ScreeningReportSetting reportSetting, JobMonitoring jobMonitoring);
     }
 }

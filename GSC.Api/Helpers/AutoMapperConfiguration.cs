@@ -369,6 +369,9 @@ namespace GSC.Api.Helpers
             CreateMap<ReportSettingNew, ProjectDesignReportSetting>()
                .ForMember(x => x.ProjectDesignId, y => y.MapFrom(a => a.ProjectId))
                .ReverseMap();
+            CreateMap<ScreeningReportSetting, ProjectDesignReportSetting>()
+               .ForMember(x => x.ProjectDesignId, y => y.MapFrom(a => a.ProjectId))
+               .ReverseMap();
             CreateMap<SupplyLocation, SupplyLocationDto>().ReverseMap();
             CreateMap<CentralDepot, CentralDepotDto>().ReverseMap();
             CreateMap<StudyVersion, StudyVersionDto>().ReverseMap();
