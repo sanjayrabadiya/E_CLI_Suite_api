@@ -25,5 +25,7 @@ namespace GSC.Respository.Screening
         void SetFitnessValue(ScreeningTemplateValue screeningTemplateValueDto);
 
         List<ScreeningEntryStudyHistoryDto> GetVolunteerProjectHistory(int ScreeningEntryId);
+        List<VolunteerAttendanceDto> GetVolunteerByProjectId(int projectId);
+        List<VolunteerAttendanceDto> GetVolunteerScreeningList(int projectId, int volunteerId);
     }
 }

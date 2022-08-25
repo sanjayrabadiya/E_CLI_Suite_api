@@ -274,5 +274,21 @@ namespace GSC.Api.Controllers.Screening
             var sites = _screeningEntryRepository.GetVolunteerProjectHistory(ScreeningEntryId);
             return Ok(sites);
         }
+
+        [HttpGet]
+        [Route("GetVolunteerByProjectId/{projectId}")]
+        public IActionResult GetVolunteerByProjectId(int projectId)
+        {
+            var volunteerList = _screeningEntryRepository.GetVolunteerByProjectId(projectId);
+            return Ok(volunteerList);
+        }
+
+        [HttpGet]
+        [Route("GetVolunteerScreeningList/{projectId}/{volunteerId}")]
+        public IActionResult GetVolunteerScreeningList(int projectId, int volunteerId)
+        {
+            var volunteerList = _screeningEntryRepository.GetVolunteerScreeningList(projectId, volunteerId);
+            return Ok(volunteerList);
+        }
     }
 }
