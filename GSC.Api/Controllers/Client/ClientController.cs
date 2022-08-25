@@ -30,6 +30,8 @@ namespace GSC.Api.Controllers.Client
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IClientAddressRepository _clientAddressRepository;
+        private readonly IClientContactRepository _clientContactRepository;
 
         public ClientController(IClientRepository clientRepository,
             IClientTypeRepository clientTypeRepository,
@@ -38,7 +40,9 @@ namespace GSC.Api.Controllers.Client
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IUploadSettingRepository uploadSettingRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+             IClientAddressRepository clientAddressRepository,
+         IClientContactRepository clientContactRepository,
+        IJwtTokenAccesser jwtTokenAccesser)
         {
             _clientTypeRepository = clientTypeRepository;
             _securityRoleRepository = securityRoleRepository;
@@ -49,6 +53,8 @@ namespace GSC.Api.Controllers.Client
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _clientAddressRepository = clientAddressRepository;
+            _clientContactRepository = clientContactRepository;
         }
 
         // GET: api/<controller>
@@ -56,12 +62,12 @@ namespace GSC.Api.Controllers.Client
         public IActionResult Get(bool isDeleted)
         {
             var clients = _clientRepository.GetClientList(isDeleted);
-            
+
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
             clients.ForEach(b =>
             {
                 b.LogoPath = imageUrl + (b.Logo ?? DocumentService.DefulatLogo);
-                b.FirstName = _userRepository.Find((int)b.UserId).FirstName +" "+ _userRepository.Find((int)b.UserId).LastName;
+                b.FirstName = _userRepository.Find((int)b.UserId).FirstName + " " + _userRepository.Find((int)b.UserId).LastName;
                 b.LastName = _userRepository.Find((int)b.UserId).LastName;
                 b.RoleName = _securityRoleRepository.Find((int)b.RoleId).RoleName;
                 b.ClientTypeName = _clientTypeRepository.Find(b.ClientTypeId).ClientTypeName;
@@ -88,7 +94,7 @@ namespace GSC.Api.Controllers.Client
 
             if (clientDto.FileModel?.Base64?.Length > 0)
                 clientDto.Logo = new ImageService().ImageSave(clientDto.FileModel,
-                    _uploadSettingRepository.GetImagePath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.Client,FolderType.Logo.GetDescription());
+                    _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Client, FolderType.Logo.GetDescription());
 
 
             var client = _mapper.Map<Data.Entities.Client.Client>(clientDto);
@@ -128,11 +134,31 @@ namespace GSC.Api.Controllers.Client
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            var clientAdreess = _clientAddressRepository.FindByInclude(x => x.ClientId == clientDto.Id, x=>x.Location).ToList();
+            var clientContact = _clientContactRepository.All.Where(x => x.ClientId == clientDto.Id).ToList();
+
+
 
             /* Added by swati for effective Date on 02-06-2019 */
             _clientRepository.AddOrUpdate(client);
 
             if (_uow.Save() <= 0) throw new Exception("Updating client failed on save.");
+
+            foreach (var item in clientAdreess)
+            {
+                item.Id = 0;
+                item.ClientId = client.Id;
+                _clientAddressRepository.Add(item);
+            }
+
+            foreach (var item in clientContact)
+            {
+                item.Id = 0;
+                item.ClientId = client.Id;
+                _clientContactRepository.Add(item);
+
+            }
+            _uow.Save();
 
             return Ok(client.Id);
         }
@@ -147,7 +173,7 @@ namespace GSC.Api.Controllers.Client
 
             _clientRepository.Delete(record);
             _uow.Save();
-            
+
             return Ok();
         }
 

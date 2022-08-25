@@ -139,9 +139,9 @@ namespace GSC.Audit
 
             _dictionaries.Add(new Dictionary { FieldName = "ClientName", DisplayName = "Client Name" });
             _dictionaries.Add(new Dictionary { FieldName = "ClientCode", DisplayName = "Client Code" });
-            //_dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role", SourceColumn = "RoleShortName", TableName = "SecurityRole", PkName = "Id" });
-            //_dictionaries.Add(new Dictionary { FieldName = "ClientTypeId", DisplayName = "Client Type", SourceColumn = "ClientTypeName", TableName = "ClientType", PkName = "Id" });
-            //_dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "Project Manager", SourceColumn = "UserName", TableName = "Users", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role", SourceColumn = "RoleShortName", TableName = "SecurityRole", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "ClientTypeId", DisplayName = "Client Type", SourceColumn = "ClientTypeName", TableName = "ClientType", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "Project Manager", SourceColumn = "UserName", TableName = "Users", PkName = "Id" });
 
             // usermanagement audit change
 
