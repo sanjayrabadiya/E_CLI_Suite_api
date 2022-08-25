@@ -11,5 +11,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public int RandomizationNo { get; set; }
         public string TreatmentType { get; set; }
         public IList<SupplyManagementUploadFileVisitDto> Visits { get; set; } = null;
+
+        public string ScreeningNumber { get; set; }
+
+        public string SiteName { get; set; }
     }
 }

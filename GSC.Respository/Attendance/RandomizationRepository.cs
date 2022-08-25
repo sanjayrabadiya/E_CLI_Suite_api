@@ -212,43 +212,43 @@ namespace GSC.Respository.Attendance
             randomizationNumberDto.IsIGT = studydata.IsIGT;
             //randomizationNumberDto.PrefixRandomNo = studydata.PrefixRandomNo;
 
-            //if (!studydata.IsIGT)
-            //{
-            if (studydata.IsManualRandomNo == true)
+            if (!studydata.IsIGT)
             {
-                randomizationNumberDto.RandomizationNumber = "";
-            }
-            else
-            {
-                int latestno;
-                if (studydata.IsSiteDependentRandomNo == true)
+                if (studydata.IsManualRandomNo == true)
                 {
-                    latestno = sitedata.RandomizationNoseries;
-                    randomizationNumberDto.RandomizationNoseries = sitedata.RandomizationNoseries;
-                    if (string.IsNullOrEmpty(sitedata.PrefixRandomNo))
-                        randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
-                    else
-                        randomizationNumberDto.RandomizationNumber = sitedata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                    randomizationNumberDto.RandomizationNumber = "";
                 }
                 else
                 {
-                    latestno = studydata.RandomizationNoseries;
-                    randomizationNumberDto.RandomizationNoseries = studydata.RandomizationNoseries;
-                    randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                    int latestno;
+                    if (studydata.IsSiteDependentRandomNo == true)
+                    {
+                        latestno = sitedata.RandomizationNoseries;
+                        randomizationNumberDto.RandomizationNoseries = sitedata.RandomizationNoseries;
+                        if (string.IsNullOrEmpty(sitedata.PrefixRandomNo))
+                            randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                        else
+                            randomizationNumberDto.RandomizationNumber = sitedata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                    }
+                    else
+                    {
+                        latestno = studydata.RandomizationNoseries;
+                        randomizationNumberDto.RandomizationNoseries = studydata.RandomizationNoseries;
+                        randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                    }
+                }
+                randomizationNumberDto.IsTestSite = site.IsTestSite;
+                if (site.IsTestSite)
+                {
+                    var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.RandomizationNumber != null).Count() + 1;
+                    randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                    return randomizationNumberDto;
                 }
             }
-            randomizationNumberDto.IsTestSite = site.IsTestSite;
-            if (site.IsTestSite)
+            else
             {
-                var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.RandomizationNumber != null).Count() + 1;
-                randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.RandomNoLength, '0');
-                return randomizationNumberDto;
+                randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.CountryId);
             }
-            //}
-            //else
-            //{
-            //    randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.CountryId);
-            //}
             return randomizationNumberDto;
         }
         public string GetRandNoIWRS(int projectid, int siteId, int countryId)
@@ -296,7 +296,7 @@ namespace GSC.Respository.Attendance
             {
                 data.RandomizationId = obj.Id;
                 _context.SupplyManagementUploadFileDetail.Update(data);
-                _context.Save();
+                //_context.Save();
             }
         }
 
@@ -317,7 +317,7 @@ namespace GSC.Respository.Attendance
             var sitedata = _projectRepository.Find(randomization.ProjectId);
             //var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
             var studydata = _context.RandomizationNumberSettings.Where(x => x.ProjectId == (int)sitedata.ParentProjectId).FirstOrDefault();
-            if (studydata.RandomNoLength <= 0)
+            if (studydata.RandomNoLength <= 0 && !studydata.IsIGT)
                 return false;
             return true;
         }

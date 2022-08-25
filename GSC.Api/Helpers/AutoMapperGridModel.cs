@@ -552,6 +552,11 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.NoofPatient, x => x.MapFrom(a => a.SupplyManagementKIT.NoofPatient))
                .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.SupplyManagementKIT.ProjectId))
                .ForMember(x => x.Reason, x => x.MapFrom(a => a.SupplyManagementKIT.AuditReason.ReasonName)).ReverseMap();
+
+            CreateMap<SupplyManagementUploadFileDetail, SupplyManagementUploadFileDetailDto>()
+             .ForMember(x => x.SiteName, x => x.MapFrom(a => a.Randomization.Project.ProjectCode))
+             .ForMember(x => x.ScreeningNumber, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
+             .ReverseMap();
         }
     }
 }

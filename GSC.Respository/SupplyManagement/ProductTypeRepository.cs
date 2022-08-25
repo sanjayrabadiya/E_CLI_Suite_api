@@ -40,13 +40,13 @@ namespace GSC.Respository.SupplyManagement
             if (objSave.Id > 0)
             {
                 if (All.Any(
-                    x => x.Id != objSave.Id && x.ProductTypeCode == objSave.ProductTypeCode && x.ProductTypeName == objSave.ProductTypeName && x.DeletedDate == null))
+                    x => x.Id != objSave.Id && x.ProductTypeCode == objSave.ProductTypeCode && x.DeletedDate == null))
                     return "Duplicate ProductType code : " + objSave.ProductTypeCode;
             }
             else
             {
                 if (All.Any(
-                   x => x.ProductTypeCode == objSave.ProductTypeCode && x.ProductTypeName == objSave.ProductTypeName && x.DeletedDate == null))
+                   x => x.ProductTypeCode == objSave.ProductTypeCode && x.DeletedDate == null))
                     return "Duplicate ProductType code : " + objSave.ProductTypeCode;
             }
 

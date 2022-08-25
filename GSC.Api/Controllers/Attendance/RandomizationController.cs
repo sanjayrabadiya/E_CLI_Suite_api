@@ -322,7 +322,7 @@ namespace GSC.Api.Controllers.Attendance
 
             _randomizationRepository.SaveRandomizationNumber(randomization, randomizationDto);
 
-            //_randomizationRepository.UpdateRandomizationIdForIWRS(randomizationDto);
+            _randomizationRepository.UpdateRandomizationIdForIWRS(randomizationDto);
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
@@ -397,6 +397,11 @@ namespace GSC.Api.Controllers.Attendance
             if (isvalid == true)
             {
                 var data = _randomizationRepository.GetRandomizationNumber(id);
+                if (data.IsIGT && string.IsNullOrEmpty(data.RandomizationNumber))
+                {
+                    ModelState.AddModelError("Message", "Please upload randomization sheet");
+                    return BadRequest(ModelState);
+                }
                 return Ok(data);
             }
             else
