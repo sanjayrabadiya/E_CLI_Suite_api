@@ -481,7 +481,8 @@ namespace GSC.Respository.ProjectRight
                                              && x.DeletedDate == null)
                 .Select(c => new DashboardProject
                 {
-                    ProjectId = c.ProjectId
+                    ProjectId = c.ProjectId,
+                    CreatedDate = c.CreatedDate.Value
                 }).ToList();
 
             var childParentList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId != null
@@ -493,7 +494,8 @@ namespace GSC.Respository.ProjectRight
                                            x.DeletedDate == null)
                 .Select(c => new DashboardProject
                 {
-                    ProjectId = (int)c.Project.ParentProjectId
+                    ProjectId = (int)c.Project.ParentProjectId,
+                    CreatedDate = c.CreatedDate.Value
                 }).ToList();
 
 
@@ -502,7 +504,8 @@ namespace GSC.Respository.ProjectRight
 
             var projects = projectList.GroupBy(d => d.ProjectId).Select(c => new DashboardProject
             {
-                ProjectId = c.FirstOrDefault().ProjectId
+                ProjectId = c.FirstOrDefault().ProjectId,
+                CreatedDate = c.FirstOrDefault().CreatedDate
             }).OrderBy(o => o.ProjectId).ToList();
 
 
@@ -529,6 +532,7 @@ namespace GSC.Respository.ProjectRight
 
                 item.CountriesName = temCountries.Distinct().ToList();
                 item.CountCountry = temCountries.Distinct().Count();
+                item.projectCode = project.ProjectCode;
                 item.Project = project;
             });
 
@@ -536,7 +540,7 @@ namespace GSC.Respository.ProjectRight
         }
 
         //Add By Tinku on 07/06/2022 for New Dasboard Tranning Data
-        public ProjectDashBoardDto GetNewDashboardTranningData(int projectId, int countryId, int siteId)
+       public ProjectDashBoardDto GetNewDashboardTranningData(int projectId, int countryId, int siteId)
         {
             var projectDashBoardDto = new ProjectDashBoardDto();
             var projectIds = new List<int>();
@@ -665,6 +669,7 @@ namespace GSC.Respository.ProjectRight
             projectDashBoardDto.ProjectList = projectDashBoardDto.ProjectList.Where(x => projectIds.Contains(x.ProjectId)).Distinct().ToList();
             return projectDashBoardDto;
         }
+
 
         public int CountTranningNotification()
         {

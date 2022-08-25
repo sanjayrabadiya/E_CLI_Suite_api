@@ -769,9 +769,9 @@ namespace GSC.Respository.Attendance
                 var data = new DashboardPatientStatusDto();
                 data.ProjectId = t.Id;
                 data.ProjectName = t.ProjectCode;
-                data.Target = t.AttendanceLimit;
+                data.Target = 0;
                 data.IsParentProject = pro.ParentProjectId == null ? true : false;
-                data.ParentProjectTarget = pro.AttendanceLimit;
+                data.ParentProjectTarget = t.AttendanceLimit;
                 data.StatusList = new List<DashboardPatientStatusDisplayDto>();
                 result.Add(data);
             });
@@ -803,10 +803,12 @@ namespace GSC.Respository.Attendance
                     status.ProjectName = x.ProjectName;
                     status.Avg = randomization != null ? randomization.Avg : 0;
                 });
+                x.Target = All.Where(q => q.ProjectId == x.ProjectId && q.DeletedDate == null).Count();
             });
 
             return result;
         }
+
 
         public List<DashboardRecruitmentStatusDisplayDto> GetDashboardRecruitmentStatus(int projectId)
         {
