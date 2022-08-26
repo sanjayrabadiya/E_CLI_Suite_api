@@ -410,8 +410,8 @@ namespace GSC.Helper
 
     public enum DossierPdfStatus : short
     {
-        Blank = 1,
-        Subject = 2,
+        [Description("Blank")] Blank = 1,
+        [Description("Subject/Volunteer")] Subject = 2,
     }
 
     public enum ScreeningPdfStatus : short
