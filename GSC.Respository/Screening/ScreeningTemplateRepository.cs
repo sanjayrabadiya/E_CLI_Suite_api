@@ -1492,7 +1492,7 @@ namespace GSC.Respository.Screening
         public IList<DesignScreeningTemplateDto> GetScreeningGridView(DesignScreeningTemplateDto designTemplateDto, int ScreeningTemplateId)
         {
             var results = new List<DesignScreeningTemplateDto>();
-            var screeningTemplates = All.Where(x => (x.Id == ScreeningTemplateId || x.ParentId == ScreeningTemplateId) && x.DeletedDate==null).ToList();
+            var screeningTemplates = All.Where(x => (x.Id == ScreeningTemplateId || x.ParentId == ScreeningTemplateId) && x.DeletedDate == null).ToList();
 
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
@@ -1501,6 +1501,7 @@ namespace GSC.Respository.Screening
             {
 
                 var repatTemplate = designTemplateDto.DeepCopy();
+                repatTemplate.DesignOrder = item.RepeatSeqNo.ToString();
 
                 var values = GetScreeningValues(item.Id);
                 values.ForEach(t =>
