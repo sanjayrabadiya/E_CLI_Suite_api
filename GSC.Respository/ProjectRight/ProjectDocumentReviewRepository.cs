@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Domain.Context;
+using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +24,14 @@ namespace GSC.Respository.ProjectRight
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
 
-        public ProjectDocumentReviewRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public ProjectDocumentReviewRepository(IGSCContext context, IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _mapper = mapper;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public void SaveByUserId(int projectId, int userId)
@@ -540,25 +545,33 @@ namespace GSC.Respository.ProjectRight
         }
 
         //Add By Tinku on 07/06/2022 for New Dasboard Tranning Data
-       public ProjectDashBoardDto GetNewDashboardTranningData(int projectId, int countryId, int siteId)
+        public ProjectDashBoardDto GetNewDashboardTranningData(int projectId, int countryId, int siteId)
         {
             var projectDashBoardDto = new ProjectDashBoardDto();
-            var projectIds = new List<int>();
-
-            if (countryId == 0 && siteId == 0)
+            var projectIds = new List<int>()
             {
-                projectIds = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
-                                                           && _context.ProjectRight.Any(a => a.ProjectId == x.Id
-                                                           && a.UserId == _jwtTokenAccesser.UserId
-                                                           && a.RoleId == _jwtTokenAccesser.RoleId
-                                                           && a.DeletedDate == null)
-                                                           && x.DeletedDate == null).Select(s => s.Id).ToList();
+                projectId,
+                siteId
+            };
 
-                projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
+
+            var ids = _context.Project.Include(x => x.ManageSite).Where(x => projectIds.Contains(x.ParentProjectId.Value)
+                                                          && _context.ProjectRight.Any(a => a.ProjectId == x.Id
+                                                          && a.UserId == _jwtTokenAccesser.UserId
+                                                          && a.RoleId == _jwtTokenAccesser.RoleId
+                                                          && a.DeletedDate == null)
+                                                          && x.DeletedDate == null).Select(s => s.Id).ToList();
+            projectIds.AddRange(ids);
+            projectIds = projectIds.Distinct().ToList();
+
+            projectDashBoardDto.ProjectList = All.Include(x => x.Project)
+                .Include(x => x.Project.ManageSite).Where(x => x.UserId == _jwtTokenAccesser.UserId
                                                                  && _context.ProjectRight.Any(a =>
                                                                    projectIds.Contains(a.ProjectId)
                                                                     && a.UserId == _jwtTokenAccesser.UserId
                                                                     && x.DeletedDate == null) &&
+                                                                    (siteId > 0 ? x.ProjectId == siteId : projectIds.Contains(x.ProjectId)) &&
+                                                                    (countryId > 0 ? x.Project.ManageSite.City.State.CountryId == countryId : true) &&
                                                                 x.DeletedDate == null).Select(c =>
 
                    new ProjectDocumentReviewDto
@@ -577,81 +590,8 @@ namespace GSC.Respository.ProjectRight
                        ReviewDate = c.ReviewDate,
                        TrainingTypeName = c.TrainingType == null ? !c.IsReview ? "" : "Not Applicable" : c.TrainingType.GetDescription(),
                        TrainerName = c.TrainerId == null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id == c.TrainerId).UserName
-                   }).ToList();
-            }
-            else if (countryId > 0 && siteId == 0)
-            {
+                   }).Distinct().ToList();
 
-                projectIds = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
-                                                           && _context.ProjectRight.Any(a => a.ProjectId == x.Id
-                                                           && a.UserId == _jwtTokenAccesser.UserId
-                                                           && a.RoleId == _jwtTokenAccesser.RoleId
-                                                           && a.DeletedDate == null)
-                                                           && x.ManageSite.City.State.CountryId == countryId
-                                                           && x.DeletedDate == null).Select(s => s.Id).ToList();
-
-                projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
-                                                                 && _context.ProjectRight.Any(a =>
-                                                                   projectIds.Contains(a.ProjectId)
-                                                                    && a.UserId == _jwtTokenAccesser.UserId
-                                                                    && x.DeletedDate == null) &&
-                                                                x.DeletedDate == null).Select(c =>
-
-                   new ProjectDocumentReviewDto
-                   {
-                       Id = c.Id,
-                       ProjectDocumentId = c.ProjectDocumentId,
-                       ProjectId = c.ProjectId,
-                       IsReview = c.IsReview,
-                       UserId = c.UserId,
-                       ProjectName = c.Project.ProjectName,
-                       ProjectNumber = c.Project.ProjectCode,
-                       DocumentPath = c.ProjectDocument.PathName,
-                       FileName = c.ProjectDocument.FileName,
-                       MimeType = c.ProjectDocument.MimeType,
-                       ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
-                       ReviewDate = c.ReviewDate,
-                       TrainingTypeName = c.TrainingType == null ? !c.IsReview ? "" : "Not Applicable" : c.TrainingType.GetDescription(),
-                       TrainerName = c.TrainerId == null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id == c.TrainerId).UserName
-                   }).ToList();
-
-            }
-            else
-            {
-                projectIds = _context.Project.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
-                                                         && _context.ProjectRight.Any(a => a.ProjectId == x.Id
-                                                         && a.UserId == _jwtTokenAccesser.UserId
-                                                         && a.RoleId == _jwtTokenAccesser.RoleId
-                                                         && a.DeletedDate == null)
-                                                         && x.ManageSite.City.State.CountryId == countryId
-                                                         && x.Id == siteId
-                                                         && x.DeletedDate == null).Select(s => s.Id).ToList();
-
-                projectDashBoardDto.ProjectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId
-                                                                && _context.ProjectRight.Any(a =>
-                                                                  projectIds.Contains(a.ProjectId)
-                                                                   && a.UserId == _jwtTokenAccesser.UserId
-                                                                   && x.DeletedDate == null) &&
-                                                               x.DeletedDate == null).Select(c =>
-
-                  new ProjectDocumentReviewDto
-                  {
-                      Id = c.Id,
-                      ProjectDocumentId = c.ProjectDocumentId,
-                      ProjectId = c.ProjectId,
-                      IsReview = c.IsReview,
-                      UserId = c.UserId,
-                      ProjectName = c.Project.ProjectName,
-                      ProjectNumber = c.Project.ProjectCode,
-                      DocumentPath = c.ProjectDocument.PathName,
-                      FileName = c.ProjectDocument.FileName,
-                      MimeType = c.ProjectDocument.MimeType,
-                      ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
-                      ReviewDate = c.ReviewDate,
-                      TrainingTypeName = c.TrainingType == null ? !c.IsReview ? "" : "Not Applicable" : c.TrainingType.GetDescription(),
-                      TrainerName = c.TrainerId == null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id == c.TrainerId).UserName
-                  }).ToList();
-            }
 
             projectDashBoardDto.ProjectList.ForEach(projectDocumentReview =>
             {
@@ -664,9 +604,14 @@ namespace GSC.Respository.ProjectRight
                     var createdByUser = _context.Users.Where(user => user.Id == projectRight.CreatedBy).FirstOrDefault();
                     if (createdByUser != null) projectDocumentReview.AssignedBy = createdByUser.UserName;
                 }
+
+                if (!projectDocumentReview.IsReview)
+                {
+                    var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+                    projectDocumentReview.DocumentPath = documentUrl + projectDocumentReview.DocumentPath;
+                }
             });
 
-            projectDashBoardDto.ProjectList = projectDashBoardDto.ProjectList.Where(x => projectIds.Contains(x.ProjectId)).Distinct().ToList();
             return projectDashBoardDto;
         }
 
