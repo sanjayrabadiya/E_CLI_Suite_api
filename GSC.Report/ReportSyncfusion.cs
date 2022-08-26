@@ -19,6 +19,7 @@ using GSC.Respository.Etmf;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
+using GSC.Respository.Volunteer;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Hosting;
@@ -55,6 +56,7 @@ namespace GSC.Report
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUserRepository _userRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
+        public readonly IVolunteerDocumentRepository _volunteerDocumentRepository;
 
 
         private readonly PdfFont watermarkerfornt = new PdfStandardFont(PdfFontFamily.TimesRoman, 120, PdfFontStyle.Bold);
@@ -77,6 +79,7 @@ namespace GSC.Report
         IUploadSettingRepository uploadSettingRepository, IReportBaseRepository reportBaseRepository, ICompanyRepository companyRepository,
         IClientRepository clientRepository, IGSCContext context, IAppSettingRepository appSettingRepository, IJwtTokenAccesser jwtTokenAccesser,
         IUserRepository userRepository, IEmailSenderRespository emailSenderRespository, ISyncConfigurationMasterRepository syncConfigurationMasterRepository
+            , IVolunteerDocumentRepository volunteerDocumentRepository
         )
         {
             _hostingEnvironment = hostingEnvironment;
@@ -92,6 +95,7 @@ namespace GSC.Report
             fontStream = FilePathConvert();
             regularfont = new PdfTrueTypeFont(fontStream, 12);
             _syncConfigurationMasterRepository = syncConfigurationMasterRepository;
+            _volunteerDocumentRepository = volunteerDocumentRepository;
         }
 
         private Stream FilePathConvert()
@@ -1714,6 +1718,13 @@ namespace GSC.Report
                         ScreeningIndexCreate(subbookmark, true);
                     }
                 }
+
+                if (reportSetting.PdfStatus == DossierPdfStatus.Subject)
+                {
+                    DesignVoluteerDocumentShow(item.VolunteerId, document);
+                    DesignVoluteerDocumentShowPdf(item.VolunteerId, document);
+                }
+
                 ScreeningSetPageNumber();
                 MemoryStream memoryStream = new MemoryStream();
                 document.Save(memoryStream);
@@ -2294,7 +2305,7 @@ namespace GSC.Report
                     }
                     if (!string.IsNullOrEmpty(notesb))
                         result = AddString($"{notesb}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, italicfont, layoutFormat);
-                    
+
                 }
             }
             catch (Exception ex)
@@ -2333,7 +2344,67 @@ namespace GSC.Report
             }
         }
 
+        private void DesignVoluteerDocumentShow(int VolunteerID, PdfDocument document)
+        {
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            var volunteerDocument = _volunteerDocumentRepository
+                .FindByInclude(t => t.VolunteerId == VolunteerID && t.DeletedDate == null, t => t.DocumentType,
+                    t => t.DocumentName).OrderByDescending(x => x.Id).ToList();
+            volunteerDocument.ForEach(t => t.PathName = documentUrl + t.PathName);
 
+            if (volunteerDocument.Count > 0)
+            {
+                foreach (var data in volunteerDocument.Where(x => x.MimeType == "jpeg" || x.MimeType == "jpg" || x.MimeType == "png"))
+                {
+                    PdfPage page = document.Pages.Add();
+                    int endIndex = document.Pages.Count - 1;
+                    PdfBitmap image = new PdfBitmap(GetStreamFromUrl(data.PathName));
+
+                    PdfLayoutFormat format = new PdfLayoutFormat();
+                    format.Break = PdfLayoutBreakType.FitPage;
+                    format.Layout = PdfLayoutType.OnePage;
+                    RectangleF imageBounds = new RectangleF(0, 0, 500, 600);
+
+                    //image.Draw(page, imageBounds, format);
+                    page.Graphics.DrawImage(image, 0, 10, 500, 500);
+                }
+
+                foreach (var data in volunteerDocument.Where(x => x.MimeType == "pdf"))
+                {
+
+                }
+            }
+        }
+
+        private void DesignVoluteerDocumentShowPdf(int VolunteerID, PdfDocument document)
+        {
+            var documentPath = _uploadSettingRepository.GetDocumentPath();
+            var volunteerDocument = _volunteerDocumentRepository
+                .FindByInclude(t => t.VolunteerId == VolunteerID && t.MimeType == "pdf" && t.DeletedDate == null, t => t.DocumentType,
+                    t => t.DocumentName).OrderByDescending(x => x.Id).ToList();
+
+            PdfMergeOptions mergeOptions = new PdfMergeOptions();
+            List<Stream> pdfStreams = new List<Stream>();
+            foreach (var item in volunteerDocument)
+            {
+                var PathName = documentPath + item.PathName;
+                Stream stream2 = File.OpenRead(PathName);
+                pdfStreams.Add(stream2);
+            }
+            mergeOptions.OptimizeResources = true;
+            mergeOptions.ExtendMargin = true;
+            PdfDocumentBase.Merge(document, mergeOptions, pdfStreams.Cast<object>().ToArray());
+        }
+
+        private static Stream GetStreamFromUrl(string url)
+        {
+            byte[] imageData = null;
+
+            using (var wc = new System.Net.WebClient())
+                imageData = wc.DownloadData(url);
+
+            return new MemoryStream(imageData);
+        }
 
     }
 

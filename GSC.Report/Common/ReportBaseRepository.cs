@@ -727,6 +727,7 @@ namespace GSC.Report.Common
                   ScreeningNumber = x.ScreeningNo,
                   Initial = x.Attendance.Volunteer.AliasName,
                   VolunteerNumber = x.Attendance.Volunteer.VolunteerNo,
+                  VolunteerId = x.Attendance.Volunteer.Id,
                   ScreeningDate = x.ScreeningDate,
                   ProjectDetails = new ProjectDetails
                   {

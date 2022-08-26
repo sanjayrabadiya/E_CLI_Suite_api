@@ -103,6 +103,7 @@ namespace GSC.Data.Dto.Configuration
         public string ScreeningNumber { get; set; }
         public string Initial { get; set; }
         public string VolunteerNumber { get; set; }
+        public int VolunteerId { get; set; }
         public DateTime ScreeningDate { get; set; }
         public ProjectDetails ProjectDetails { get; set; }
         public List<ProjectDesignPeriodReportDto> Period { get; set; }
