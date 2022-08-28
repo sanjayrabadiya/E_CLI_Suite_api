@@ -372,10 +372,6 @@ namespace GSC.Respository.EditCheckImpact
                         editCheckTarget.OriginalValidationType = ValidationType.None;
                         editCheckTarget.EditCheckDisable = true;
                     }
-                    else if (r.Operator == Operator.NotNull && r.IsOnlyTarget)
-                    {
-                        editCheckTarget.OriginalValidationType = ValidationType.Required;
-                    }
                     else if (r.Operator == Operator.SoftFetch)
                     {
                         editCheckTarget.InfoType = EditCheckInfoType.Info;
@@ -667,7 +663,7 @@ namespace GSC.Respository.EditCheckImpact
                         OldValue = oldValue,
                         Value = "",
                         ScreeningTemplateValueId = x.Id,
-                        UserName= "System",
+                        UserName = "System",
                         Note = $"{editCheckValidateDto.AutoNumber} {editCheckValidateDto.Message}"
                     };
 
