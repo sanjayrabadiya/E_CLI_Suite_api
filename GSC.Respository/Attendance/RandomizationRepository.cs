@@ -172,7 +172,8 @@ namespace GSC.Respository.Attendance
                 if (randomizationNumberDto.IsManualScreeningNo == true)
                 {
                     if (randomizationNumberDto.ScreeningNumber.Length != randomizationNumberDto.ScreeningLength)
-                        return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
+                        return "Please enter the number as length of " + randomizationNumberDto.ScreeningLength.ToString();
+                        //return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
                 }
                 return "";
             }
