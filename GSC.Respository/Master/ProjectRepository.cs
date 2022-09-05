@@ -32,7 +32,7 @@ namespace GSC.Respository.Master
         private readonly IDesignTrialRepository _designTrialRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly INumberFormatRepository _numberFormatRepository;
-        private readonly ICtmsSettingsRepository _ctmsSettingsRepository;
+        private readonly IProjectSettingsRepository _projectSettingsRepository;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IAttendanceRepository _attendanceRepository;
         private readonly IVolunteerRepository _volunteerRepository;
@@ -45,7 +45,7 @@ namespace GSC.Respository.Master
             ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             INumberFormatRepository numberFormatRepository,
-            ICtmsSettingsRepository ctmsSettingsRepository,
+            IProjectSettingsRepository projectSettingsRepository,
             ICountryRepository countryRepository,
             IDesignTrialRepository designTrialRepository,
             IProjectRightRepository projectRightRepository,
@@ -56,7 +56,7 @@ namespace GSC.Respository.Master
             : base(context)
         {
             _numberFormatRepository = numberFormatRepository;
-            _ctmsSettingsRepository = ctmsSettingsRepository;
+            _projectSettingsRepository = projectSettingsRepository;
             _companyRepository = companyRepository;
             _userRepository = userRepository;
             _countryRepository = countryRepository;
@@ -98,9 +98,9 @@ namespace GSC.Respository.Master
             else
             {
                 var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).FirstOrDefault();
-                var ctmsSettings = _ctmsSettingsRepository.All.Where(x => x.ProjectId == project.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
+                var projectSettings = _projectSettingsRepository.All.Where(x => x.ProjectId == project.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
 
-                if (ctmsSettings != null && ctmsSettings.IsCtms)
+                if (projectSettings != null && projectSettings.IsCtms)
                 {
                     project.ProjectCode = null;
                 }

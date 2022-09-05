@@ -264,9 +264,9 @@ namespace GSC.Respository.Master
                         _context.StudyLevelForm.RemoveRange(studylevelform);
                 }
 
-                var CtmsSettings = _context.CtmsSettings.Where(x => x.ProjectId == obj.ProjectId).ToList();
-                if (CtmsSettings.Count > 0)
-                    _context.CtmsSettings.RemoveRange(CtmsSettings);
+                var ProjectSettings = _context.ProjectSettings.Where(x => x.ProjectId == obj.ProjectId).ToList();
+                if (ProjectSettings.Count > 0)
+                    _context.ProjectSettings.RemoveRange(ProjectSettings);
 
                 var HolidayMaster = _context.HolidayMaster.Where(x => x.ProjectId == obj.ProjectId || x.Project.ParentProjectId == obj.ProjectId).ToList();
                 if (HolidayMaster.Count > 0)
