@@ -636,16 +636,36 @@ namespace GSC.Respository.Attendance
                     var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null);
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
                     var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
-                    var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
-                    var maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
-                    if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
-                        x.IsTemplateRestricted = false;
+                   
+                    if (noofday == null) {
+                        var mindate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.NegativeDeviation * -1);
+                        var maxdate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.PositiveDeviation);
+
+                        if (System.DateTime.Now >= mindate && System.DateTime.Now <= maxdate)
+                            x.IsTemplateRestricted = false;
+                        else
+                        {
+                            x.IsTemplateRestricted = true;
+                            if (DateTime.Now > maxdate)
+                                x.IsPastTemplate = true;
+                        }
+                    }
                     else
                     {
-                        x.IsTemplateRestricted = true;
-                        if (DateTime.Today > maxdate)
-                            x.IsPastTemplate = true;
+                        var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
+                        var maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
+
+                        if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
+                            x.IsTemplateRestricted = false;
+                        else
+                        {
+                            x.IsTemplateRestricted = true;
+                            if (DateTime.Today > maxdate)
+                                x.IsPastTemplate = true;
+                        }
                     }
+
+
                 }
             });
             return data;
