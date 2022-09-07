@@ -383,7 +383,7 @@ namespace GSC.Domain.Context
         public DbSet<LabManagementSendEmailUser> LabManagementSendEmailUser { get; set; }
 
         public DbSet<CtmsActivity> CtmsActivity { get; set; }
-        public DbSet<CtmsSettings> CtmsSettings { get; set; }
+        public DbSet<ProjectSettings> ProjectSettings { get; set; }
         public DbSet<StudyLevelForm> StudyLevelForm { get; set; }
         public DbSet<StudyLevelFormVariable> StudyLevelFormVariable { get; set; }
         public DbSet<StudyLevelFormVariableValue> StudyLevelFormVariableValue { get; set; }
@@ -423,6 +423,7 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementKITDetail> SupplyManagementKITDetail { get; set; }
 
         public DbSet<ScreeningEntryStudyHistory> ScreeningEntryStudyHistory { get; set; }
+        //public DbSet<EconsentGlossary> EconsentGlossary { get; set; }
     }
 
 

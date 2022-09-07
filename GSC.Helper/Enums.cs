@@ -410,8 +410,14 @@ namespace GSC.Helper
 
     public enum DossierPdfStatus : short
     {
+        [Description("Blank")] Blank = 1,
+        [Description("Subject/Volunteer")] Subject = 2,
+    }
+
+    public enum ScreeningPdfStatus : short
+    {
         Blank = 1,
-        Subject = 2,
+        Volunteer = 2,
     }
 
     public enum CodedType : short
@@ -485,6 +491,7 @@ namespace GSC.Helper
         [Description("Project Design Audit")] ProjectDesignAudit = 5,
         [Description("ICF Detail Report")] ICFDetailReport = 6,
         [Description("ETMF")] ETMF = 7,
+        [Description("Screening Report")] ScreeningReport = 8,
     }
 
     public enum JobTypeEnum : short

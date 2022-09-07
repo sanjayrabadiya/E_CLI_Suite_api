@@ -46,18 +46,18 @@ namespace GSC.Respository.Master
             IProjectRightRepository projectRightRepository,
             IProjectDocumentReviewRepository projectDocumentReviewRepository)
         {
-            _screeningVisitRepository=screeningVisitRepository;
-            _randomizationRepository=randomizationRepository;
-            _screeningTemplateRepository=screeningTemplateRepository;
-            _screeningTemplateValueRepository=screeningTemplateValueRepository;
+            _screeningVisitRepository = screeningVisitRepository;
+            _randomizationRepository = randomizationRepository;
+            _screeningTemplateRepository = screeningTemplateRepository;
+            _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _projectWorkflowRepository = projectWorkflowRepository;
-            _screeningEntryRepository=screeningEntryRepository;
-            _projectDocumentReviewRepository= projectDocumentReviewRepository;
-            _projectDesignVisitRepository=projectDesignVisitRepository;
-            _projectDesignRepository=projectDesignRepository;
-            _projectRepository=projectRepository;
-            _projectRightRepository=projectRightRepository;
+            _screeningEntryRepository = screeningEntryRepository;
+            _projectDocumentReviewRepository = projectDocumentReviewRepository;
+            _projectDesignVisitRepository = projectDesignVisitRepository;
+            _projectDesignRepository = projectDesignRepository;
+            _projectRepository = projectRepository;
+            _projectRightRepository = projectRightRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
@@ -71,11 +71,11 @@ namespace GSC.Respository.Master
                 .Include(x => x.ProjectDesignVisit).Include(i => i.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningEntry.ProjectId) && (!x.ScreeningEntry.Project.IsTestSite) && x.DeletedDate == null).ToList()
                 .GroupBy(g => g.ProjectDesignVisitId).Select(s => new
                 {
-                    Name = _projectDesignVisitRepository.All.FirstOrDefault(m => m.Id==s.Key).DisplayName,
-                    NotStarted = s.Where(q => q.Status==ScreeningVisitStatus.NotStarted).Count(),
-                    Missed = s.Where(q => q.Status==ScreeningVisitStatus.Missed).Count(),
-                    OnHold = s.Where(q => q.Status==ScreeningVisitStatus.OnHold).Count(),
-                    Completed = s.Where(q => q.Status==ScreeningVisitStatus.Completed).Count(),
+                    Name = _projectDesignVisitRepository.All.FirstOrDefault(m => m.Id == s.Key).DisplayName,
+                    NotStarted = s.Where(q => q.Status == ScreeningVisitStatus.NotStarted).Count(),
+                    Missed = s.Where(q => q.Status == ScreeningVisitStatus.Missed).Count(),
+                    OnHold = s.Where(q => q.Status == ScreeningVisitStatus.OnHold).Count(),
+                    Completed = s.Where(q => q.Status == ScreeningVisitStatus.Completed).Count(),
                 });
 
             return screeningVisits;
@@ -89,7 +89,7 @@ namespace GSC.Respository.Master
 
             foreach (var project in projectList)
             {
-                var randomizes = _randomizationRepository.All.Where(q => q.ProjectId==project.Id && q.DeletedDate==null && q.DateOfRandomization!=null && q.DateOfScreening!=null).ToList()
+                var randomizes = _randomizationRepository.All.Where(q => q.ProjectId == project.Id && q.DeletedDate == null && q.DateOfRandomization != null && q.DateOfScreening != null).ToList()
                     .Select(s => new
                     {
                         DayDiff = s.DateOfRandomization.Value.Subtract(s.DateOfScreening.Value).Days,
@@ -97,8 +97,8 @@ namespace GSC.Respository.Master
                     }).ToList().GroupBy(g => g.ProjectId)
                     .Select(m => new DashboardDaysScreenedToRandomized
                     {
-                        AvgDayDiff = m.Sum(s => s.DayDiff)/m.Count(),
-                        SiteName=project.ProjectCode,
+                        AvgDayDiff = m.Sum(s => s.DayDiff) / m.Count(),
+                        SiteName = project.ProjectCode,
                         SiteId = m.Key
                     });
 
@@ -114,26 +114,26 @@ namespace GSC.Respository.Master
             var progresses = new List<RandomizedProgress>();
             foreach (var project in projectList)
             {
-                var randomizesSubject = _randomizationRepository.All.Where(q => q.ProjectId==project.Id && q.DeletedDate==null && q.DateOfRandomization!=null).Count();
-                var totalSubject = _randomizationRepository.All.Where(q => q.ProjectId==project.Id && q.DeletedDate==null).Count();
-                if (totalSubject>0)
+                var randomizesSubject = _randomizationRepository.All.Where(q => q.ProjectId == project.Id && q.DeletedDate == null && q.DateOfRandomization != null).Count();
+                var totalSubject = _randomizationRepository.All.Where(q => q.ProjectId == project.Id && q.DeletedDate == null).Count();
+                if (totalSubject > 0)
                 {
-                    var percentage = randomizesSubject*100/totalSubject;
+                    var percentage = randomizesSubject * 100 / totalSubject;
 
                     progresses.Add(new RandomizedProgress()
                     {
-                        Progress=percentage,
-                        SiteId=project.Id,
-                        SiteName=project.ProjectCode
+                        Progress = percentage,
+                        SiteId = project.Id,
+                        SiteName = project.ProjectCode
                     });
                 }
                 else
                 {
                     progresses.Add(new RandomizedProgress()
                     {
-                        Progress=0,
-                        SiteId=project.Id,
-                        SiteName=project.ProjectCode
+                        Progress = 0,
+                        SiteId = project.Id,
+                        SiteName = project.ProjectCode
                     });
                 }
             }
@@ -165,12 +165,15 @@ namespace GSC.Respository.Master
             queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x => x.Status).ToList().ForEach(x => x.Total = closeQueries);
 
 
-            if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
-                queries.Add(new DashboardQueryStatusDto
-                {
-                    DisplayName = QueryStatus.Closed.GetDescription(),
-                    Total = closeQueries
-                });
+            if (closeQueries > 0)
+            {
+                if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
+                    queries.Add(new DashboardQueryStatusDto
+                    {
+                        DisplayName = QueryStatus.Closed.GetDescription(),
+                        Total = closeQueries
+                    });
+            }
 
             var list = new List<string>() { "Open", "Resolved", "Answered", "Closed" };
 
@@ -186,16 +189,16 @@ namespace GSC.Respository.Master
 
             foreach (var project in projectList)
             {
-                var randomizeCount = _randomizationRepository.All.Where(x => x.DateOfRandomization!=null && x.DeletedDate==null && x.ProjectId==project.Id).Count();
-                var screeningCount = _randomizationRepository.All.Where(x => x.DateOfScreening!=null && x.DeletedDate==null && x.ProjectId==project.Id).Count();
+                var randomizeCount = _randomizationRepository.All.Where(x => x.DateOfRandomization != null && x.DeletedDate == null && x.ProjectId == project.Id).Count();
+                var screeningCount = _randomizationRepository.All.Where(x => x.DateOfScreening != null && x.DeletedDate == null && x.ProjectId == project.Id).Count();
 
                 labelGraphs.Add(new LabelGraph()
                 {
-                    RandomizedCount=randomizeCount,
-                    ScreeningCount =screeningCount,
-                    TargetCount=project.AttendanceLimit.Value,
-                    SiteId=project.Id,
-                    SiteName=project.ProjectCode
+                    RandomizedCount = randomizeCount,
+                    ScreeningCount = screeningCount,
+                    TargetCount = project.AttendanceLimit.Value,
+                    SiteId = project.Id,
+                    SiteName = project.ProjectCode
                 });
             }
             return labelGraphs;
@@ -204,12 +207,12 @@ namespace GSC.Respository.Master
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-            var projectDesign = _projectDesignRepository.All.FirstOrDefault(x => x.ProjectId==projectId && x.DeletedDate==null);
+            var projectDesign = _projectDesignRepository.All.FirstOrDefault(x => x.ProjectId == projectId && x.DeletedDate == null);
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesign.Id);
 
             var screnningTemplates = _screeningTemplateRepository.All.Include(x => x.ScreeningVisit)
-                .Include(x => x.ScreeningVisit.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) && x.DeletedDate == null && x.ScreeningVisit.DeletedDate==null);
+                .Include(x => x.ScreeningVisit.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) && x.DeletedDate == null && x.ScreeningVisit.DeletedDate == null);
 
             var formGrpah = new List<FormsGraphModel>();
 
@@ -217,8 +220,8 @@ namespace GSC.Respository.Master
             {
                 var level = new FormsGraphModel()
                 {
-                    StatusName=item.RoleName,
-                    RecordCount=screnningTemplates.Where(s => s.ReviewLevel==item.LevelNo).Count()
+                    StatusName = item.RoleName,
+                    RecordCount = screnningTemplates.Where(s => s.ReviewLevel == item.LevelNo).Count()
                 };
 
                 formGrpah.Add(level);
@@ -227,20 +230,20 @@ namespace GSC.Respository.Master
             formGrpah.Add(
                 new FormsGraphModel()
                 {
-                    StatusName="Submitted",
-                    RecordCount=screnningTemplates.Where(s => s.Status== ScreeningTemplateStatus.Submitted).Count()
+                    StatusName = "Submitted",
+                    RecordCount = screnningTemplates.Where(s => s.Status == ScreeningTemplateStatus.Submitted).Count()
                 });
             formGrpah.Add(
                 new FormsGraphModel()
                 {
-                    StatusName="In Progress",
-                    RecordCount=screnningTemplates.Where(s => s.Status== ScreeningTemplateStatus.InProcess).Count()
+                    StatusName = "In Progress",
+                    RecordCount = screnningTemplates.Where(s => s.Status == ScreeningTemplateStatus.InProcess).Count()
                 });
             formGrpah.Add(
                 new FormsGraphModel()
                 {
-                    StatusName="Not Started",
-                    RecordCount=screnningTemplates.Where(s => s.Status== ScreeningTemplateStatus.Pending).Count()
+                    StatusName = "Not Started",
+                    RecordCount = screnningTemplates.Where(s => s.Status == ScreeningTemplateStatus.Pending).Count()
                 });
             return formGrpah;
         }
@@ -250,7 +253,7 @@ namespace GSC.Respository.Master
         {
             var projectIds = new List<Data.Entities.Master.Project>();
 
-            if (countryId==0 && siteId==0)
+            if (countryId == 0 && siteId == 0)
             {
                 projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
                                                            && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
@@ -260,7 +263,7 @@ namespace GSC.Respository.Master
                                                            && a.RollbackReason == null)
                                                            && x.DeletedDate == null).ToList();
             }
-            else if (countryId>0 && siteId==0)
+            else if (countryId > 0 && siteId == 0)
             {
                 projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
                                                           && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
@@ -268,7 +271,7 @@ namespace GSC.Respository.Master
                                                           && a.RoleId == _jwtTokenAccesser.RoleId
                                                           && a.DeletedDate == null
                                                           && a.RollbackReason == null)
-                                                          && x.ManageSite.City.State.CountryId==countryId
+                                                          && x.ManageSite.City.State.CountryId == countryId
                                                           && x.DeletedDate == null).ToList();
             }
             else
@@ -279,8 +282,8 @@ namespace GSC.Respository.Master
                                                          && a.RoleId == _jwtTokenAccesser.RoleId
                                                          && a.DeletedDate == null
                                                          && a.RollbackReason == null)
-                                                         && x.ManageSite.City.State.CountryId==countryId
-                                                         && x.Id==siteId
+                                                         && x.ManageSite.City.State.CountryId == countryId
+                                                         && x.Id == siteId
                                                          && x.DeletedDate == null).ToList();
             }
 
@@ -335,15 +338,15 @@ namespace GSC.Respository.Master
                     Query = s
                 }).AsEnumerable().GroupBy(g => g.VisitId).Select(s => new
                 {
-                    VisitName = s.FirstOrDefault(q => q.VisitId==s.Key).VisitName,
+                    VisitName = s.FirstOrDefault(q => q.VisitId == s.Key).VisitName,
                     VisitId = s.Key,
-                    Open = s.Where(q => q.Query.QueryStatus== QueryStatus.Open).Count(),
-                    Answered = s.Where(q => q.Query.QueryStatus== QueryStatus.Answered).Count(),
-                    Resolved = s.Where(q => q.Query.QueryStatus== QueryStatus.Resolved).Count(),
-                    Reopened = s.Where(q => q.Query.QueryStatus== QueryStatus.Reopened).Count(),
-                    Closed = s.Where(q => q.Query.QueryStatus== QueryStatus.Closed).Count(),
-                    SelfCorrection = s.Where(q => q.Query.QueryStatus== QueryStatus.SelfCorrection).Count(),
-                    Acknowledge = s.Where(q => q.Query.QueryStatus== QueryStatus.Acknowledge).Count(),
+                    Open = s.Where(q => q.Query.QueryStatus == QueryStatus.Open).Count(),
+                    Answered = s.Where(q => q.Query.QueryStatus == QueryStatus.Answered).Count(),
+                    Resolved = s.Where(q => q.Query.QueryStatus == QueryStatus.Resolved).Count(),
+                    Reopened = s.Where(q => q.Query.QueryStatus == QueryStatus.Reopened).Count(),
+                    Closed = s.Where(q => q.Query.QueryStatus == QueryStatus.Closed).Count(),
+                    SelfCorrection = s.Where(q => q.Query.QueryStatus == QueryStatus.SelfCorrection).Count(),
+                    Acknowledge = s.Where(q => q.Query.QueryStatus == QueryStatus.Acknowledge).Count(),
                 });
 
 

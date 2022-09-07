@@ -183,5 +183,7 @@ namespace GSC.Data.Dto.ProjectRight
         public ProjectGridDto Project { get; set; }
         public List<string> CountriesName { get; set; }
         public int? CountCountry { get; set; }
+        public string projectCode { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }

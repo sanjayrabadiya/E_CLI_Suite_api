@@ -172,7 +172,8 @@ namespace GSC.Respository.Attendance
                 if (randomizationNumberDto.IsManualScreeningNo == true)
                 {
                     if (randomizationNumberDto.ScreeningNumber.Length != randomizationNumberDto.ScreeningLength)
-                        return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
+                        return "Please enter the number as length of " + randomizationNumberDto.ScreeningLength.ToString();
+                        //return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
                 }
                 return "";
             }
@@ -652,16 +653,36 @@ namespace GSC.Respository.Attendance
                     var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null);
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
                     var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
-                    var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
-                    var maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
-                    if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
-                        x.IsTemplateRestricted = false;
+                   
+                    if (noofday == null) {
+                        var mindate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.NegativeDeviation * -1);
+                        var maxdate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.PositiveDeviation);
+
+                        if (System.DateTime.Now >= mindate && System.DateTime.Now <= maxdate)
+                            x.IsTemplateRestricted = false;
+                        else
+                        {
+                            x.IsTemplateRestricted = true;
+                            if (DateTime.Now > maxdate)
+                                x.IsPastTemplate = true;
+                        }
+                    }
                     else
                     {
-                        x.IsTemplateRestricted = true;
-                        if (DateTime.Today > maxdate)
-                            x.IsPastTemplate = true;
+                        var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
+                        var maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
+
+                        if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
+                            x.IsTemplateRestricted = false;
+                        else
+                        {
+                            x.IsTemplateRestricted = true;
+                            if (DateTime.Today > maxdate)
+                                x.IsPastTemplate = true;
+                        }
                     }
+
+
                 }
             });
             return data;
@@ -786,9 +807,9 @@ namespace GSC.Respository.Attendance
                 var data = new DashboardPatientStatusDto();
                 data.ProjectId = t.Id;
                 data.ProjectName = t.ProjectCode;
-                data.Target = t.AttendanceLimit;
+                data.Target = 0;
                 data.IsParentProject = pro.ParentProjectId == null ? true : false;
-                data.ParentProjectTarget = pro.AttendanceLimit;
+                data.ParentProjectTarget = t.AttendanceLimit;
                 data.StatusList = new List<DashboardPatientStatusDisplayDto>();
                 result.Add(data);
             });
@@ -820,10 +841,12 @@ namespace GSC.Respository.Attendance
                     status.ProjectName = x.ProjectName;
                     status.Avg = randomization != null ? randomization.Avg : 0;
                 });
+                x.Target = All.Where(q => q.ProjectId == x.ProjectId && q.DeletedDate == null).Count();
             });
 
             return result;
         }
+
 
         public List<DashboardRecruitmentStatusDisplayDto> GetDashboardRecruitmentStatus(int projectId)
         {

@@ -357,7 +357,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementUploadFileRepository, SupplyManagementUploadFileRepository>();
             services.AddScoped<ILabManagementSendEmailUserRepository, LabManagementSendEmailUserRepository>();
             services.AddScoped<ICtmsActivityRepository, CtmsActivityRepository>();
-            services.AddScoped<ICtmsSettingsRepository, CtmsSettingsRepository>();
+            services.AddScoped<IProjectSettingsRepository, ProjectSettingsRepository>();
             services.AddScoped<IStudyLevelFormRepository, StudyLevelFormRepository>();
             services.AddScoped<IStudyLevelFormVariableRepository, StudyLevelFormVariableRepository>();
             services.AddScoped<IStudyLevelFormVariableValueRepository, StudyLevelFormVariableValueRepository>();
@@ -390,6 +390,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementAllocationRepository, SupplyManagementAllocationRepository>();
             services.AddScoped<ISupplyManagementKITRepository, SupplyManagementKITRepository>();
             services.AddScoped<ISupplyManagementKITDetailRepository, SupplyManagementKITDetailRepository>();
+
+            //services.AddScoped<IEconsentGlossaryRepository, EconsentGlossaryRepository>();
+
         }
     }
 }

@@ -29,6 +29,7 @@ namespace GSC.Data.Dto.Medra
         public MedraVersion MedraVersion { get; set; }
         public MedraLanguage Language { get; set; }
         public SummaryDto Summary { get; set; }
+        public DateTime? DeletedDate { get; set; }
     }
 
     public class SummaryDto

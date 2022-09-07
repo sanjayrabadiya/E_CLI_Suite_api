@@ -135,7 +135,7 @@ namespace GSC.Api.Controllers.UserMgt
             var users = _userRoleRepository.FindBy(x => x.UserRoleId == id).ToList();
             if (users.Count > 0)
             {
-                ModelState.AddModelError("Message", "Role is assigned to user so delete not allow");
+                ModelState.AddModelError("Message", "You can't delete Role, Role is already assigned!");
                 return BadRequest(ModelState);
             }
 

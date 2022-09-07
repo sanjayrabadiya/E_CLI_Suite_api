@@ -369,6 +369,9 @@ namespace GSC.Api.Helpers
             CreateMap<ReportSettingNew, ProjectDesignReportSetting>()
                .ForMember(x => x.ProjectDesignId, y => y.MapFrom(a => a.ProjectId))
                .ReverseMap();
+            CreateMap<ScreeningReportSetting, ProjectDesignReportSetting>()
+               .ForMember(x => x.ProjectDesignId, y => y.MapFrom(a => a.ProjectId))
+               .ReverseMap();
             CreateMap<SupplyLocation, SupplyLocationDto>().ReverseMap();
             CreateMap<CentralDepot, CentralDepotDto>().ReverseMap();
             CreateMap<StudyVersion, StudyVersionDto>().ReverseMap();
@@ -393,6 +396,7 @@ namespace GSC.Api.Helpers
             CreateMap<EconsentReviewDetails, EconsentDocumentDetailsDto>()
                  .ForMember(x => x.EconsentDocumentName, y => y.MapFrom(a => a.EconsentSetup.DocumentName))
                  .ReverseMap();
+            //CreateMap<EconsentGlossary, EconsentGlossaryDto>().ReverseMap();
             CreateMap<VolunteerQuery, VolunteerQueryDto>().ReverseMap();
             CreateMap<PharmacyStudyProductType, PharmacyStudyProductTypeDto>().ReverseMap();
             CreateMap<ProductReceipt, ProductReceiptDto>().ReverseMap();
@@ -434,7 +438,7 @@ namespace GSC.Api.Helpers
             CreateMap<FileSizeConfiguration, FileSizeConfigurationDto>().ReverseMap();
             CreateMap<SupplyManagementUploadFile, SupplyManagementUploadFileDto>().ReverseMap();
             CreateMap<CtmsActivity, CtmsActivityDto>().ReverseMap();
-            CreateMap<CtmsSettings, CtmsSettingsDto>().ReverseMap();
+            CreateMap<ProjectSettings, ProjectSettingsDto>().ReverseMap();
             CreateMap<StudyLevelForm, StudyLevelFormDto>().ReverseMap();
             CreateMap<StudyLevelFormVariable, StudyLevelFormVariableDto>().ReverseMap();
             CreateMap<StudyLevelFormVariableValue, StudyLevelFormVariableValueDto>().ReverseMap();

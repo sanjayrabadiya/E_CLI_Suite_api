@@ -19,5 +19,7 @@ namespace GSC.Report.Common
         void WriteLog(string log, string path, JobMonitoring jobMonitoring);
         List<DossierReportDto> GetBlankPdfData(ReportSettingNew reportSetting);
         List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting);
+        List<ScreeningPdfReportDto> GetScreeningDataPdfReport(ScreeningReportSetting reportSetting);
+        List<ScreeningPdfReportDto> GetScreeningBlankPdfData(ScreeningReportSetting reportSetting);
     }
 }
