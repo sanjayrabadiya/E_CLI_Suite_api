@@ -289,14 +289,18 @@ namespace GSC.Respository.Attendance
         {
             string randno = string.Empty;
 
-            var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-            && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
-
-            if (data != null)
+            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId).FirstOrDefault();
+            if (numerformate != null && numerformate.IsIGT)
             {
-                data.RandomizationId = obj.Id;
-                _context.SupplyManagementUploadFileDetail.Update(data);
-                //_context.Save();
+                var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
+
+                if (data != null)
+                {
+                    data.RandomizationId = obj.Id;
+                    _context.SupplyManagementUploadFileDetail.Update(data);
+                   
+                }
             }
         }
 

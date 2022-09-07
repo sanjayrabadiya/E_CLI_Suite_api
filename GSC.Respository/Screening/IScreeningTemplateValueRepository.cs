@@ -29,5 +29,6 @@ namespace GSC.Respository.Screening
         DesignScreeningVariableDto GetQueryVariableDetail(int id, int screeningEntryId);
         void UpdateDefaultValue(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId);
         void DeleteRepeatTemplateValue(int Id);
+        void UpdateTemplateConfigurationIWRSValue(DesignScreeningTemplateDto designScreeningTemplateDto, int screeningTemplateId);
     }
 }

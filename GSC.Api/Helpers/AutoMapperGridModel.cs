@@ -538,7 +538,7 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
              .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
-             .ForMember(x => x.ProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeCode))
+             .ForMember(x => x.TypeName, x => x.MapFrom(a => a.Type.GetDescription()))
              .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
              .ReverseMap();
 

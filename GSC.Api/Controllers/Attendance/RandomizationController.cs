@@ -393,10 +393,16 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("GetRandomizationNumber/{id}")]
         public IActionResult GetRandomizationNumber(int id)
         {
+            var randdata = _randomizationRepository.All.Where(x => x.Id == id).FirstOrDefault();
             var isvalid = _randomizationRepository.IsRandomFormatSetInStudy(id);
             if (isvalid == true)
             {
                 var data = _randomizationRepository.GetRandomizationNumber(id);
+                if (data.IsIGT && randdata.PatientStatusId != ScreeningPatientStatus.Screening && randdata.PatientStatusId != ScreeningPatientStatus.OnTrial)
+                {
+                    ModelState.AddModelError("Message", "Patient status is not eligible for randomization");
+                    return BadRequest(ModelState);
+                }
                 if (data.IsIGT && string.IsNullOrEmpty(data.RandomizationNumber))
                 {
                     ModelState.AddModelError("Message", "Please upload randomization sheet");

@@ -15,8 +15,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public int ProjectDesignVisitId { get; set; }
         public int ProjectDesignTemplateId { get; set; }
         public int ProjectDesignVariableId { get; set; }
-        public int PharmacyStudyProductTypeId { get; set; }
-
+        public int? PharmacyStudyProductTypeId { get; set; }
+        public SupplyManagementAllocationType? Type { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public PharmacyStudyProductType PharmacyStudyProductType { get; set; }
