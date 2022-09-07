@@ -155,8 +155,8 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
                 _screeningTemplateValueRepository.UpdateDefaultValue(designTemplateDto.Variables, screeningTemplateId);
 
-            //if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
-            //    _screeningTemplateValueRepository.UpdateTemplateConfigurationIWRSValue(designTemplateDto, screeningTemplateId);
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
+                _screeningTemplateValueRepository.UpdateTemplateConfigurationUploadRandomizationValue(designTemplateDto, screeningTemplateId);
 
             SetScreeningValue(designTemplateDto, screeningTemplateBasic, workflowlevel);
 

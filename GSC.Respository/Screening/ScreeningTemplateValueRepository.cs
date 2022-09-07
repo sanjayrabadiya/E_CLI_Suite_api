@@ -140,7 +140,7 @@ namespace GSC.Respository.Screening
             _context.Save();
         }
 
-        public void UpdateTemplateConfigurationIWRSValue(DesignScreeningTemplateDto designScreeningTemplateDto, int screeningTemplateId)
+        public void UpdateTemplateConfigurationUploadRandomizationValue(DesignScreeningTemplateDto designScreeningTemplateDto, int screeningTemplateId)
         {
             var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
             if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
@@ -177,10 +177,12 @@ namespace GSC.Respository.Screening
             {
                 foreach (var variable in templateVariable)
                 {
+                  
                     string value = string.Empty;
                     var allocationsetting = _context.SupplyManagementAllocation.Where(x => x.DeletedDate == null && x.ProjectDesignVariableId == variable.Id).FirstOrDefault();
                     if (allocationsetting != null)
                     {
+                        variable.IsDisabled = true;
                         if (allocationsetting.Type == SupplyManagementAllocationType.RandomizationNo)
                         {
                             value = Convert.ToString(verifyuploadsheetdata.RandomizationNo);

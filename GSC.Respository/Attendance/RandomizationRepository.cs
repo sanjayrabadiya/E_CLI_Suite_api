@@ -292,14 +292,27 @@ namespace GSC.Respository.Attendance
             var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId).FirstOrDefault();
             if (numerformate != null && numerformate.IsIGT)
             {
-                var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
                 && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
 
                 if (data != null)
                 {
                     data.RandomizationId = obj.Id;
                     _context.SupplyManagementUploadFileDetail.Update(data);
-                   
+
+                }
+                else
+                {
+
+                    var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                   && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
+
+                    if (data1 != null)
+                    {
+                        data1.RandomizationId = obj.Id;
+                        _context.SupplyManagementUploadFileDetail.Update(data);
+
+                    }
                 }
             }
         }
