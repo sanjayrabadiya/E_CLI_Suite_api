@@ -652,13 +652,17 @@ namespace GSC.Respository.Attendance
                 {
                     var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null);
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
+                    var noofHH = ProjectScheduleTemplates.Min(t => t.HH);
+                    var noofMM = ProjectScheduleTemplates.Min(t => t.MM);
                     var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
-                   
-                    if (noofday == null) {
+
+                    if ((noofday == null) && (noofHH != null || noofMM != null))
+                    {
                         var mindate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.NegativeDeviation * -1);
                         var maxdate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.PositiveDeviation);
+                        var clientDate = DateTime.Now.AddHours(4).AddMinutes(30);
 
-                        if (System.DateTime.Now >= mindate && System.DateTime.Now <= maxdate)
+                        if (clientDate >= mindate && clientDate <= maxdate)
                             x.IsTemplateRestricted = false;
                         else
                         {
