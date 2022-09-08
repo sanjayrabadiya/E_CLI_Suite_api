@@ -401,10 +401,14 @@ namespace GSC.Respository.Attendance
                 x.IsShowEconsentIcon = (rolelist.Contains(_jwtTokenAccesser.RoleId) && projectright != null);
             });
 
-            var projectCode = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId).ProjectCode;
+            var project = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId);
+            var ProjectSettings = _context.ProjectSettings.Where(x => x.ProjectId == project.Id && x.DeletedDate == null).FirstOrDefault();
+
             result.ForEach(x =>
             {
-                x.ParentProjectCode = projectCode;
+                x.IsEicf = ProjectSettings != null ? ProjectSettings.IsEicf : false;
+                x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).Count() > 0 ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient == true) : false;
+                x.ParentProjectCode = project.ProjectCode;
                 var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
                 x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
             });
@@ -471,7 +475,7 @@ namespace GSC.Respository.Attendance
                     EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
                     audit.EconsentReviewDetailsId = data.Id;
                     audit.Activity = ICFAction.Screened;
-                    audit.PateientStatus = data.Randomization.PatientStatusId;
+                    audit.PateientStatus = data.Randomization?.PatientStatusId;
                     _econsentReviewDetailsAuditRepository.Add(audit);
                 }
                 string documentname = string.Join(",", documentDetails.Select(x => x.DocumentName).ToArray());
