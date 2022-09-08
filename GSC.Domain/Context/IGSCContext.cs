@@ -371,6 +371,6 @@ namespace GSC.Domain.Context
         DbSet<SupplyManagementKITDetail> SupplyManagementKITDetail { get; set; }
 
         DbSet<ScreeningEntryStudyHistory> ScreeningEntryStudyHistory { get; set; }
-        //DbSet<EconsentGlossary> EconsentGlossary { get; set; }
+        DbSet<EconsentGlossary> EconsentGlossary { get; set; }
     }
 }

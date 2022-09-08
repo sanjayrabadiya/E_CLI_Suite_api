@@ -423,7 +423,7 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementKITDetail> SupplyManagementKITDetail { get; set; }
 
         public DbSet<ScreeningEntryStudyHistory> ScreeningEntryStudyHistory { get; set; }
-        //public DbSet<EconsentGlossary> EconsentGlossary { get; set; }
+        public DbSet<EconsentGlossary> EconsentGlossary { get; set; }
     }
 
 

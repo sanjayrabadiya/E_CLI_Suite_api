@@ -557,6 +557,11 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.SiteName, x => x.MapFrom(a => a.Randomization.Project.ProjectCode))
              .ForMember(x => x.ScreeningNumber, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
              .ReverseMap();
+
+            CreateMap<EconsentGlossary, EconsentGlossaryGridDto>()
+                .ForMember(x => x.Project, x => x.MapFrom(a => a.EconsentSetup.Project.ProjectCode))
+                .ForMember(x => x.Document, x => x.MapFrom(a => a.EconsentSetup.DocumentName))
+                .ReverseMap();
         }
     }
 }
