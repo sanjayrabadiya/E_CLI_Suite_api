@@ -579,6 +579,10 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "LastPkSampleDate", DisplayName = "Last Pk Sample Date" });
             _dictionaries.Add(new Dictionary { FieldName = "NextEligibleDate", DisplayName = "Next Eligible Date" });
             _dictionaries.Add(new Dictionary { FieldName = "Enrolled", DisplayName = "Enrolled" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "Word", DisplayName = "Word" });
+            _dictionaries.Add(new Dictionary { FieldName = "WordMeaning", DisplayName = "Word Meaning" });
+
         }
 
 

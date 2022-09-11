@@ -923,4 +923,12 @@ namespace GSC.Helper
         [Description("Review Report")] ReviewReport = 2,
         [Description("PDF")] PDF = 3,
     }
+
+    public enum SupplyManagementAllocationType : int
+    {
+        [Description("Randomization No")] RandomizationNo = 1,
+        [Description("Kit No")] KitNo = 2,
+        [Description("Product Code")] ProductCode = 3,
+        [Description("Product Name")] ProductName = 4
+    }
 }

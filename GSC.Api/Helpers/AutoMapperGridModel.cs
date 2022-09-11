@@ -538,7 +538,7 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
              .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
-             .ForMember(x => x.ProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeCode))
+             .ForMember(x => x.TypeName, x => x.MapFrom(a => a.Type.GetDescription()))
              .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
              .ReverseMap();
 
@@ -557,6 +557,11 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.SiteName, x => x.MapFrom(a => a.Randomization.Project.ProjectCode))
              .ForMember(x => x.ScreeningNumber, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
              .ReverseMap();
+
+            CreateMap<EconsentGlossary, EconsentGlossaryGridDto>()
+                .ForMember(x => x.Project, x => x.MapFrom(a => a.EconsentSetup.Project.ProjectCode))
+                .ForMember(x => x.Document, x => x.MapFrom(a => a.EconsentSetup.DocumentName))
+                .ReverseMap();
         }
     }
 }

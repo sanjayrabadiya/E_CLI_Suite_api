@@ -140,6 +140,88 @@ namespace GSC.Respository.Screening
             _context.Save();
         }
 
+        public void UpdateTemplateConfigurationUploadRandomizationValue(DesignScreeningTemplateDto designScreeningTemplateDto, int screeningTemplateId)
+        {
+            var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
+            if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
+                return;
+
+            var templateVariable = designScreeningTemplateDto.Variables.Where(r => !screeningDesignVariableId.Contains(r.Id)
+            && r.CollectionSource == CollectionSources.TextBox
+            ).ToList();
+
+            var projectdata = _context.ScreeningTemplate
+                                            .Include(x => x.ScreeningVisit)
+                                            .ThenInclude(x => x.ScreeningEntry)
+                                            .ThenInclude(x => x.Randomization).Where(x => x.Id == screeningTemplateId).Select(x =>
+                                          new
+                                          {
+                                              ProjectId = x.ScreeningVisit.ScreeningEntry.Project.ParentProjectId,
+                                              RandomizationId = x.ScreeningVisit.ScreeningEntry.RandomizationId,
+                                              RandomizationNo = x.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber
+                                          }).FirstOrDefault();
+
+            if (projectdata == null)
+            {
+                return;
+            }
+
+            var RandomizationSetting = _context.RandomizationNumberSettings.Where(x => x.ProjectId == projectdata.ProjectId).FirstOrDefault();
+            if (RandomizationSetting == null)
+            {
+                return;
+            }
+            var verifyuploadsheetdata = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile).Where(x => x.SupplyManagementUploadFile.ProjectId == projectdata.ProjectId && x.RandomizationNo == Convert.ToInt32(projectdata.RandomizationNo) && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+
+            if (RandomizationSetting.IsIGT && verifyuploadsheetdata != null)
+            {
+                foreach (var variable in templateVariable)
+                {
+                  
+                    string value = string.Empty;
+                    var allocationsetting = _context.SupplyManagementAllocation.Where(x => x.DeletedDate == null && x.ProjectDesignVariableId == variable.Id).FirstOrDefault();
+                    if (allocationsetting != null)
+                    {
+                        variable.IsDisabled = true;
+                        if (allocationsetting.Type == SupplyManagementAllocationType.RandomizationNo)
+                        {
+                            value = Convert.ToString(verifyuploadsheetdata.RandomizationNo);
+                        }
+                        if (allocationsetting.Type == SupplyManagementAllocationType.ProductCode)
+                        {
+                            value = verifyuploadsheetdata.TreatmentType;
+                        }
+                        if (allocationsetting.Type == SupplyManagementAllocationType.ProductName)
+                        {
+                            var producttype = _context.ProductType.Where(x => x.ProductTypeCode == verifyuploadsheetdata.TreatmentType).FirstOrDefault();
+                            value = producttype != null ? producttype.ProductTypeName : "";
+                        }
+                        var screeningTemplateValue = new ScreeningTemplateValue
+                        {
+                            ScreeningTemplateId = screeningTemplateId,
+                            ProjectDesignVariableId = variable.Id,
+                            Value = value,
+
+                        };
+                        Add(screeningTemplateValue);
+
+
+                        var audit = new ScreeningTemplateValueAudit
+                        {
+                            ScreeningTemplateValue = screeningTemplateValue,
+                            Value = value,
+                            OldValue = null,
+                            Note = "Submitted with IWRS data"
+                        };
+                        _screeningTemplateValueAuditRepository.Save(audit);
+
+                    }
+
+                }
+            }
+            _context.Save();
+        }
+
         public int GetQueryStatusCount(int screeningTemplateId)
         {
             return All.Where(x => x.DeletedDate == null

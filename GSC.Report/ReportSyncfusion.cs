@@ -1059,7 +1059,7 @@ namespace GSC.Report
 
                                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
                                         textBoxField.Bounds = new RectangleF(350, result.Bounds.Y, 100, 20);
-                                        textBoxField.Text = variable.ScreeningValue;
+                                        textBoxField.Text = variable.ScreeningValue == null ? "" : variable.ScreeningValue;
                                         textBoxField.ReadOnly = true;
                                         document.Form.Fields.Add(textBoxField);
                                         // AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(460, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfontmini, layoutFormat);

@@ -25,6 +25,7 @@ using Microsoft.Extensions.Options;
 using GSC.Shared.Configuration;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Dto.Medra;
+using GSC.Domain.Context;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -46,6 +47,7 @@ namespace GSC.Api.Controllers.Attendance
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
+        private readonly IGSCContext _context;
         public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignRepository projectDesignRepository,
@@ -59,7 +61,8 @@ namespace GSC.Api.Controllers.Attendance
             IUserRepository userRepository,
             IUserRoleRepository userRoleRepository,
             IProjectRepository projectRepository,
-            IStudyVersionRepository studyVersionRepository
+            IStudyVersionRepository studyVersionRepository,
+            IGSCContext context
             )
         {
             _randomizationRepository = randomizationRepository;
@@ -77,6 +80,7 @@ namespace GSC.Api.Controllers.Attendance
             _userRoleRepository = userRoleRepository;
             _projectRepository = projectRepository;
             _studyVersionRepository = studyVersionRepository;
+            _context = context;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -241,10 +245,16 @@ namespace GSC.Api.Controllers.Attendance
             }
             var userdata = _userRepository.Find((int)randomization.UserId);
             var user = new UserViewModel();
+
+            var Project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
+            var projectSetting = _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefault();
+
             user = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userdata.UserName}");
             if (user.IsFirstTime == true)
             {
                 await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
+                if (projectSetting.IsEicf)
+                    _randomizationRepository.SendEmailOfStartEconsent(randomization);
             }
             else
             {
@@ -266,6 +276,8 @@ namespace GSC.Api.Controllers.Attendance
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
+            var Project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
+            var projectSetting = _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefault();
 
             var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
             if (!string.IsNullOrEmpty(validate))
@@ -283,7 +295,8 @@ namespace GSC.Api.Controllers.Attendance
 
             _randomizationRepository.SaveScreeningNumber(randomization, randomizationDto);
 
-            _randomizationRepository.SendEmailOfStartEconsent(randomization);
+            if (projectSetting == null || !projectSetting.IsEicf)
+                _randomizationRepository.SendEmailOfStartEconsent(randomization);
 
             await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, 2);
 
@@ -393,10 +406,16 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("GetRandomizationNumber/{id}")]
         public IActionResult GetRandomizationNumber(int id)
         {
+            var randdata = _randomizationRepository.All.Where(x => x.Id == id).FirstOrDefault();
             var isvalid = _randomizationRepository.IsRandomFormatSetInStudy(id);
             if (isvalid == true)
             {
                 var data = _randomizationRepository.GetRandomizationNumber(id);
+                if (data.IsIGT && randdata.PatientStatusId != ScreeningPatientStatus.Screening && randdata.PatientStatusId != ScreeningPatientStatus.OnTrial)
+                {
+                    ModelState.AddModelError("Message", "Patient status is not eligible for randomization");
+                    return BadRequest(ModelState);
+                }
                 if (data.IsIGT && string.IsNullOrEmpty(data.RandomizationNumber))
                 {
                     ModelState.AddModelError("Message", "Please upload randomization sheet");

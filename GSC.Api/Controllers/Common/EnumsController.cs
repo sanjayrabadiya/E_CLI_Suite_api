@@ -753,5 +753,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+
+        [HttpGet]
+        [Route("SupplyManagementAllocationType")]
+        public IActionResult SupplyManagementAllocationType()
+        {
+            var refrencetype = Enum.GetValues(typeof(SupplyManagementAllocationType))
+                .Cast<SupplyManagementAllocationType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }

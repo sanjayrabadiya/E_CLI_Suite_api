@@ -81,7 +81,7 @@ namespace GSC.Api.Controllers.Screening
             var attendance = _attendanceRepository.Find((int)screeningEntryDto.AttendanceId);
 
             screeningEntryDto.StudyVersion = attendance.StudyVersion;
-            screeningEntryDto.ScreeningDate = screeningEntryDto.ScreeningDate == null ? DateTime.Now : screeningEntryDto.ScreeningDate;
+            screeningEntryDto.ScreeningDate = screeningEntryDto.ScreeningDate == null ? attendance.AttendanceDate : screeningEntryDto.ScreeningDate;
 
             var screeningEntry = _mapper.Map<ScreeningEntry>(screeningEntryDto);
             _screeningEntryRepository.SaveScreeningAttendance(screeningEntry, screeningEntryDto.ProjectAttendanceTemplateIds);

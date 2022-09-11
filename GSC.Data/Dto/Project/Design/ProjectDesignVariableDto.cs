@@ -142,6 +142,8 @@ namespace GSC.Data.Dto.Project.Design
         public bool? IsLevelNo { get; set; }
         public string PreLabel { get; set; }
         public ScaleType? ScaleType { get; set; }
+        public bool? IsDisabled { get; set; }
+
     }
 
   

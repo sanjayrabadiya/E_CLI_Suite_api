@@ -6,10 +6,10 @@ using System.Text;
 
 namespace GSC.Data.Dto.Project.GeneralConfig
 {
-    public class CtmsSettingsDto : BaseDto
+    public class ProjectSettingsDto : BaseDto
     {
         public int ProjectId { get; set; }
         public bool IsCtms { get; set; }
-
+        public bool IsEicf { get; set; }
     }
 }

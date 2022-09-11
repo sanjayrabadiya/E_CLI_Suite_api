@@ -172,7 +172,8 @@ namespace GSC.Respository.Attendance
                 if (randomizationNumberDto.IsManualScreeningNo == true)
                 {
                     if (randomizationNumberDto.ScreeningNumber.Length != randomizationNumberDto.ScreeningLength)
-                        return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
+                        return "Please enter the number as length of " + randomizationNumberDto.ScreeningLength.ToString();
+                        //return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
                 }
                 return "";
             }
@@ -289,14 +290,31 @@ namespace GSC.Respository.Attendance
         {
             string randno = string.Empty;
 
-            var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-            && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
-
-            if (data != null)
+            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId).FirstOrDefault();
+            if (numerformate != null && numerformate.IsIGT)
             {
-                data.RandomizationId = obj.Id;
-                _context.SupplyManagementUploadFileDetail.Update(data);
-                //_context.Save();
+                var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
+                && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
+
+                if (data != null)
+                {
+                    data.RandomizationId = obj.Id;
+                    _context.SupplyManagementUploadFileDetail.Update(data);
+
+                }
+                else
+                {
+
+                    var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                   && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
+
+                    if (data1 != null)
+                    {
+                        data1.RandomizationId = obj.Id;
+                        _context.SupplyManagementUploadFileDetail.Update(data);
+
+                    }
+                }
             }
         }
 
@@ -383,10 +401,14 @@ namespace GSC.Respository.Attendance
                 x.IsShowEconsentIcon = (rolelist.Contains(_jwtTokenAccesser.RoleId) && projectright != null);
             });
 
-            var projectCode = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId).ProjectCode;
+            var project = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId);
+            var ProjectSettings = _context.ProjectSettings.Where(x => x.ProjectId == project.Id && x.DeletedDate == null).FirstOrDefault();
+
             result.ForEach(x =>
             {
-                x.ParentProjectCode = projectCode;
+                x.IsEicf = ProjectSettings != null ? ProjectSettings.IsEicf : false;
+                x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).Count() > 0 ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient == true) : false;
+                x.ParentProjectCode = project.ProjectCode;
                 var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
                 x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
             });
@@ -453,7 +475,7 @@ namespace GSC.Respository.Attendance
                     EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
                     audit.EconsentReviewDetailsId = data.Id;
                     audit.Activity = ICFAction.Screened;
-                    audit.PateientStatus = data.Randomization.PatientStatusId;
+                    audit.PateientStatus = data.Randomization?.PatientStatusId;
                     _econsentReviewDetailsAuditRepository.Add(audit);
                 }
                 string documentname = string.Join(",", documentDetails.Select(x => x.DocumentName).ToArray());
@@ -634,17 +656,41 @@ namespace GSC.Respository.Attendance
                 {
                     var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null);
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
+                    var noofHH = ProjectScheduleTemplates.Min(t => t.HH);
+                    var noofMM = ProjectScheduleTemplates.Min(t => t.MM);
                     var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
-                    var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
-                    var maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
-                    if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
-                        x.IsTemplateRestricted = false;
+
+                    if ((noofday == null) && (noofHH != null || noofMM != null))
+                    {
+                        var mindate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.NegativeDeviation * -1);
+                        var maxdate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.PositiveDeviation);
+                        var clientDate = DateTime.Now.AddHours(4).AddMinutes(30);
+
+                        if (clientDate >= mindate && clientDate <= maxdate)
+                            x.IsTemplateRestricted = false;
+                        else
+                        {
+                            x.IsTemplateRestricted = true;
+                            if (DateTime.Now > maxdate)
+                                x.IsPastTemplate = true;
+                        }
+                    }
                     else
                     {
-                        x.IsTemplateRestricted = true;
-                        if (DateTime.Today > maxdate)
-                            x.IsPastTemplate = true;
+                        var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
+                        var maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
+
+                        if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
+                            x.IsTemplateRestricted = false;
+                        else
+                        {
+                            x.IsTemplateRestricted = true;
+                            if (DateTime.Today > maxdate)
+                                x.IsPastTemplate = true;
+                        }
                     }
+
+
                 }
             });
             return data;
