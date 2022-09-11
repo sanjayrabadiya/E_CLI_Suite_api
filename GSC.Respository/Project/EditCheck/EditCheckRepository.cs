@@ -257,7 +257,8 @@ namespace GSC.Respository.Project.EditCheck
                     CollectionValue2 = r.CollectionValue2,
                     CollectionValue = r.CollectionValue,
                     DataType = r.ProjectDesignVariable.DataType,
-                    CheckBy = r.CheckBy
+                    CheckBy = r.CheckBy,
+                    Id = r.EditCheck.ProjectDesignId
                 }).ToList();
 
             if (isFormula)
@@ -265,6 +266,15 @@ namespace GSC.Respository.Project.EditCheck
 
             data.ForEach(x =>
             {
+
+                if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                {
+                    var variableAnnotation = _editCheckDetailRepository.GetCollectionSources(x.FieldName, x.Id);
+                    x.CollectionSource = variableAnnotation?.CollectionSource;
+                    x.DataType = variableAnnotation?.DataType;
+
+                }
+
                 if ((x.CollectionSource.IsDropDownCollection() || IsInFilter(x.Operator)) && !string.IsNullOrEmpty(x.CollectionValue))
                 {
                     x.CollectionValue = Convert.ToString(IsInFilter(x.Operator) ? "(" : "") + string.Join(", ", _context.ProjectDesignVariableValue
@@ -272,6 +282,8 @@ namespace GSC.Respository.Project.EditCheck
                                                    Select(a => a.ValueName).ToList()) + Convert.ToString(IsInFilter(x.Operator) ? ")" : "");
 
                 }
+
+
             });
 
             if (data.Any(x => x.Operator == Operator.Greater || x.Operator == Operator.GreaterEqual ||
