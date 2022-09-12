@@ -161,11 +161,19 @@ namespace GSC.Api.Controllers.Attendance
             userRole.UserRoleId = 2;
             _userRoleRepository.Add(userRole);
 
-
-
             _randomizationRepository.Add(randomization);
 
+            var Project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
+            var projectSetting = _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefault();
+
             if (_uow.Save() <= 0) throw new Exception("Creating randomization failed on save.");
+
+            if (projectSetting != null && projectSetting.IsEicf)
+            {
+                await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, 2);
+                _randomizationRepository.SendEmailOfStartEconsent(randomization);
+            }
+
             return Ok();
         }
 
@@ -253,8 +261,8 @@ namespace GSC.Api.Controllers.Attendance
             if (user.IsFirstTime == true)
             {
                 await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
-                if (projectSetting.IsEicf)
-                    _randomizationRepository.SendEmailOfStartEconsent(randomization);
+                //if (projectSetting.IsEicf)
+                //    _randomizationRepository.SendEmailOfStartEconsent(randomization);
             }
             else
             {
