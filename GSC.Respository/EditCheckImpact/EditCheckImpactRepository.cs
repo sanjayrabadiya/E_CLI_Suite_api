@@ -104,7 +104,7 @@ namespace GSC.Respository.EditCheckImpact
                     }
                 }
 
-                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && !r.IsSkip)
+                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && !r.IsSkip && r.CollectionSource != CollectionSources.NumericScale)
                 {
                     r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
                     r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
@@ -266,13 +266,13 @@ namespace GSC.Respository.EditCheckImpact
                         }
                     }
                 }
-                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && !isRepated)
+                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && r.CollectionSource != CollectionSources.NumericScale && !isRepated)
                 {
                     r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
                     r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
                 }
 
-                if (r.IsFormula && r.CollectionSource == CollectionSources.NumericScale && !string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.NumberScale == 0)
+                if (r.CollectionSource == CollectionSources.NumericScale && !string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.NumberScale == 0)
                     r.NumberScale = _impactService.NumericCollectionValue(r.ScreeningTemplateValue);
             });
 

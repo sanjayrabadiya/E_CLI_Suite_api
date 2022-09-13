@@ -112,6 +112,8 @@ namespace GSC.Data.Dto.Attendance
         public int? UserId { get; set; }
         public string Gen { get; set; }
         public bool IsFirstTime { get; set; }
+        public bool IsEicf { get; set; }
+        public bool IsAllEconsentReviewed { get; set; }
         public double? StudyVersion { get; set; }
 
     }

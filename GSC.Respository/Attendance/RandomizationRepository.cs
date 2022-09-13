@@ -425,10 +425,14 @@ namespace GSC.Respository.Attendance
                 x.IsShowEconsentIcon = (rolelist.Contains(_jwtTokenAccesser.RoleId) && projectright != null);
             });
 
-            var projectCode = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId).ProjectCode;
+            var project = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId);
+            var ProjectSettings = _context.ProjectSettings.Where(x => x.ProjectId == project.Id && x.DeletedDate == null).FirstOrDefault();
+
             result.ForEach(x =>
             {
-                x.ParentProjectCode = projectCode;
+                x.IsEicf = ProjectSettings != null ? ProjectSettings.IsEicf : false;
+                x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).Count() > 0 ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient == true) : false;
+                x.ParentProjectCode = project.ProjectCode;
                 var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
                 x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
             });
@@ -495,7 +499,7 @@ namespace GSC.Respository.Attendance
                     EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
                     audit.EconsentReviewDetailsId = data.Id;
                     audit.Activity = ICFAction.Screened;
-                    audit.PateientStatus = data.Randomization.PatientStatusId;
+                    audit.PateientStatus = data.Randomization?.PatientStatusId;
                     _econsentReviewDetailsAuditRepository.Add(audit);
                 }
                 string documentname = string.Join(",", documentDetails.Select(x => x.DocumentName).ToArray());
@@ -676,14 +680,17 @@ namespace GSC.Respository.Attendance
                 {
                     var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null);
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
+                    var noofHH = ProjectScheduleTemplates.Min(t => t.HH);
+                    var noofMM = ProjectScheduleTemplates.Min(t => t.MM);
                     var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
 
-                    if (noofday == null)
+                    if ((noofday == null) && (noofHH != null || noofMM != null))
                     {
                         var mindate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.NegativeDeviation * -1);
                         var maxdate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.PositiveDeviation);
+                        var clientDate = DateTime.Now.AddHours(4).AddMinutes(30);
 
-                        if (System.DateTime.Now >= mindate && System.DateTime.Now <= maxdate)
+                        if (clientDate >= mindate && clientDate <= maxdate)
                             x.IsTemplateRestricted = false;
                         else
                         {

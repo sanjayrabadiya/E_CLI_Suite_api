@@ -10,7 +10,7 @@ namespace GSC.Data.Entities.InformConcent
     {
         public int EconsentReviewDetailsId { get; set; }
         public ICFAction Activity { get; set; }
-        public ScreeningPatientStatus PateientStatus { get; set; }
+        public ScreeningPatientStatus? PateientStatus { get; set; }
 
         public EconsentReviewDetails EconsentReviewDetails { get; set; }
     }
