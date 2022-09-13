@@ -301,9 +301,6 @@ namespace GSC.Api.Controllers.Attendance
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-
-
-
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
 
             var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);

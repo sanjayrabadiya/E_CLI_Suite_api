@@ -101,12 +101,19 @@ namespace GSC.Respository.Attendance
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
         {
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
-            randomizationNumberDto = GenerateRandomizationNumber(randomization.Id);
 
-            if (randomizationNumberDto.IsManualRandomNo == true && !randomizationNumberDto.IsIGT)
+            if (randomizationNumberDto.IsIGT)
+            {
                 randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
+            }
             else
-                randomization.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
+            {
+                randomizationNumberDto = GenerateRandomizationNumber(randomization.Id);
+                if (randomizationNumberDto.IsManualRandomNo == true)
+                    randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
+                else
+                    randomization.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
+            }
 
             randomization.DateOfRandomization = randomizationDto.DateOfRandomization;
             randomization.StudyVersion = randomizationDto.StudyVersion;
@@ -173,7 +180,7 @@ namespace GSC.Respository.Attendance
                 {
                     if (randomizationNumberDto.ScreeningNumber.Length != randomizationNumberDto.ScreeningLength)
                         return "Please enter the number as length of " + randomizationNumberDto.ScreeningLength.ToString();
-                        //return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
+                    //return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
                 }
                 return "";
             }
@@ -256,32 +263,49 @@ namespace GSC.Respository.Attendance
         {
             string randno = string.Empty;
 
-            var data = _context.SupplyManagementUploadFileDetail
-                                        .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
-                                        && x.RandomizationId == null
-                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
-            if (data != null)
+            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == projectid && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+            if (SupplyManagementUploadFile == null)
             {
-                randno = Convert.ToString(data.RandomizationNo);
-                return randno;
+                return "";
             }
-            var datacountry = _context.SupplyManagementUploadFileDetail
+            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+            {
+                var data = _context.SupplyManagementUploadFileDetail
+                                            .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
+                                            && x.RandomizationId == null
+                                            && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                            && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+                if (data != null)
+                {
+                    randno = Convert.ToString(data.RandomizationNo);
+                    return randno;
+                }
+            }
+            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+            {
+                var datacountry = _context.SupplyManagementUploadFileDetail
                                         .Where(x => x.SupplyManagementUploadFile.CountryId == countryId
                                         && x.RandomizationId == null
+                                        && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                                         && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
-            if (datacountry != null)
-            {
-                randno = Convert.ToString(datacountry.RandomizationNo);
-                return randno;
+                if (datacountry != null)
+                {
+                    randno = Convert.ToString(datacountry.RandomizationNo);
+                    return randno;
+                }
             }
-            var datastudy = _context.SupplyManagementUploadFileDetail
+            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+            {
+                var datastudy = _context.SupplyManagementUploadFileDetail
                                         .Where(x => x.SupplyManagementUploadFile.ProjectId == projectid
                                         && x.RandomizationId == null
+                                        && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                                         && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
-            if (datastudy != null)
-            {
-                randno = Convert.ToString(datastudy.RandomizationNo);
-                return randno;
+                if (datastudy != null)
+                {
+                    randno = Convert.ToString(datastudy.RandomizationNo);
+                    return randno;
+                }
             }
             return randno;
 
@@ -311,7 +335,7 @@ namespace GSC.Respository.Attendance
                     if (data1 != null)
                     {
                         data1.RandomizationId = obj.Id;
-                        _context.SupplyManagementUploadFileDetail.Update(data);
+                        _context.SupplyManagementUploadFileDetail.Update(data1);
 
                     }
                 }
@@ -653,8 +677,9 @@ namespace GSC.Respository.Attendance
                     var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null);
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
                     var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
-                   
-                    if (noofday == null) {
+
+                    if (noofday == null)
+                    {
                         var mindate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.NegativeDeviation * -1);
                         var maxdate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.PositiveDeviation);
 
