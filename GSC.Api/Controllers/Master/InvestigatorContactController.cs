@@ -21,13 +21,17 @@ namespace GSC.Api.Controllers.Master
         private readonly IInvestigatorContactRepository _investigatorContactRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IInvestigatorContactDetailRepository _investigatorContactDetailRepository;
+        private readonly ISiteRepository _siteRepository;
 
-        public InvestigatorContactController(IInvestigatorContactRepository investigatorContactRepository,
+        public InvestigatorContactController(IInvestigatorContactRepository investigatorContactRepository, IInvestigatorContactDetailRepository investigatorContactDetailRepository, ISiteRepository siteRepository,
             IUnitOfWork uow, IMapper mapper)
         {
             _investigatorContactRepository = investigatorContactRepository;
             _uow = uow;
             _mapper = mapper;
+            _investigatorContactDetailRepository = investigatorContactDetailRepository;
+            _siteRepository = siteRepository;
         }
 
         // GET: api/<controller>
@@ -84,8 +88,28 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
+            var investigatorContactDetail = _investigatorContactDetailRepository.FindByInclude(x => x.InvestigatorContactId == investigatorContactDto.Id, x => x.ContactType).ToList();
+            var investigatorSite = _siteRepository.FindByInclude(x => x.InvestigatorContactId == investigatorContactDto.Id, x => x.ManageSite).ToList();
+
             _investigatorContactRepository.AddOrUpdate(investigatorContact);
             if (_uow.Save() <= 0) throw new Exception("Updating Investigator Contact failed on save.");
+
+            foreach (var item in investigatorContactDetail)
+            {
+                item.Id = 0;
+                item.InvestigatorContactId = investigatorContact.Id;
+                _investigatorContactDetailRepository.Add(item);
+            }
+
+            foreach (var item in investigatorSite)
+            {
+                item.Id = 0;
+                item.InvestigatorContactId = investigatorContact.Id;
+                _siteRepository.Add(item);
+
+            }
+            _uow.Save();
+
             return Ok(investigatorContact.Id);
         }
 
