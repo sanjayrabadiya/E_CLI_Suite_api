@@ -318,7 +318,7 @@ namespace GSC.Respository.Attendance
             if (numerformate != null && numerformate.IsIGT)
             {
                 var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
-                && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
+                && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                 if (data != null)
                 {
@@ -330,7 +330,7 @@ namespace GSC.Respository.Attendance
                 {
 
                     var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-                   && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
+                   && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                     if (data1 != null)
                     {
