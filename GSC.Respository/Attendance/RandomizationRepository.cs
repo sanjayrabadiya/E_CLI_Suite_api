@@ -317,20 +317,40 @@ namespace GSC.Respository.Attendance
             var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId).FirstOrDefault();
             if (numerformate != null && numerformate.IsIGT)
             {
-                var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
-                && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
-
-                if (data != null)
+                var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                if (SupplyManagementUploadFile == null)
                 {
-                    data.RandomizationId = obj.Id;
-                    _context.SupplyManagementUploadFileDetail.Update(data);
-
+                    return;
                 }
-                else
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
                 {
+                    var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
+                    && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
+                    if (data != null)
+                    {
+                        data.RandomizationId = obj.Id;
+                        _context.SupplyManagementUploadFileDetail.Update(data);
+
+                    }
+                }
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                {
+                    var country = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
+                    var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == country.CountryId
+                    && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+
+                    if (data1 != null)
+                    {
+                        data1.RandomizationId = obj.Id;
+                        _context.SupplyManagementUploadFileDetail.Update(data1);
+
+                    }
+                }
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                {
                     var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-                   && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                    && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                     if (data1 != null)
                     {
