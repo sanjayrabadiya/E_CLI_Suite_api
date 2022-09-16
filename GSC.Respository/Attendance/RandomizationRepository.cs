@@ -56,6 +56,7 @@ namespace GSC.Respository.Attendance
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
         private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
 
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
@@ -75,7 +76,7 @@ namespace GSC.Respository.Attendance
             IManageSiteRepository manageSiteRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting,
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
             IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
-            IUnitOfWork uow,
+            IUnitOfWork uow, IUserRoleRepository userRoleRepository,
             IAppSettingRepository appSettingRepository, IUploadSettingRepository uploadSettingRepository, IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository
             )
             : base(context)
@@ -96,6 +97,7 @@ namespace GSC.Respository.Attendance
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
             _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
+            _userRoleRepository = userRoleRepository;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -488,6 +490,18 @@ namespace GSC.Respository.Attendance
             }
         }
 
+        public async Task SendEmailOfScreenedtoPatientLAR(Randomization randomization, int sendtype)
+        {
+            var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
+            var studydata = _projectRepository.Find((int)studyId);
+            if (studydata.IsSendSMS == true || studydata.IsSendEmail == true)
+            {
+                var userdata = _userRepository.Find((int)randomization.LARUserId);
+                var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
+                await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.LegalEmail, randomization.LegalFirstName + " " + randomization.LegalLastName, userdata.UserName, userotp.Otp, studydata.ProjectCode, randomization.LegalEmergencyCoNumber, sendtype, studydata.IsSendEmail, studydata.IsSendSMS);
+            }
+        }
+
         public void SendEmailOfStartEconsent(Randomization randomization)
         {
             //var projectname = _projectRepository.Find(randomization.ProjectId).ProjectCode;
@@ -524,6 +538,43 @@ namespace GSC.Respository.Attendance
                 }
                 string documentname = string.Join(",", documentDetails.Select(x => x.DocumentName).ToArray());
                 _emailSenderRespository.SendEmailOfStartEconsent(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, documentname, study.ProjectCode);
+            }
+        }
+
+        public void SendEmailOfStartEconsentLAR(Randomization randomization)
+        {
+            var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
+            var study = _projectRepository.Find((int)studyid);
+            var documentDetails = _context.EconsentSetup.Where(x => x.DeletedDate == null && x.ProjectId == study.Id
+                && x.LanguageId == randomization.LanguageId && x.DeletedDate == null && x.DocumentStatusId == DocumentStatus.Final)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.DocumentName
+                }).ToList();
+
+            if (documentDetails.Count > 0)
+            {
+                var reviewrecord = documentDetails.Select(x => new EconsentReviewDetails
+                {
+                    RandomizationId = randomization.Id,
+                    EconsentSetupId = x.Id,
+                    IsReviewedByPatient = false,
+                    IsLAR = true
+                }).ToList();
+                _context.EconsentReviewDetails.AddRange(reviewrecord);
+                _context.Save();
+                //add audit report  
+                foreach (var data in reviewrecord)
+                {
+                    EconsentReviewDetailsAudit audit = new EconsentReviewDetailsAudit();
+                    audit.EconsentReviewDetailsId = data.Id;
+                    audit.Activity = ICFAction.Screened;
+                    audit.PateientStatus = data.Randomization?.PatientStatusId;
+                    _econsentReviewDetailsAuditRepository.Add(audit);
+                }
+                string documentname = string.Join(",", documentDetails.Select(x => x.DocumentName).ToArray());
+                _emailSenderRespository.SendEmailOfStartEconsent(randomization.LegalEmail, randomization.LegalFirstName + " " + randomization.LegalLastName, documentname, study.ProjectCode);
             }
         }
         public void ChangeStatustoConsentCompleted(int id)
@@ -584,7 +635,13 @@ namespace GSC.Respository.Attendance
         }
         public void ChangeStatustoWithdrawal()
         {
+            var roleName = _jwtTokenAccesser.RoleName;
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+
+            if (roleName == "LAR")
+            {
+                randomization = FindBy(x => x.LARUserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            }
             randomization.PatientStatusId = ScreeningPatientStatus.Withdrawal;
             Update(randomization);
             _context.Save();
@@ -1073,6 +1130,28 @@ namespace GSC.Respository.Attendance
             });
 
             return result;
+        }
+
+        public void AddRandomizationUser(UserDto userDto, CommonResponceView userdetails)
+        {
+            var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
+            user.Id = userdetails.Id;
+            _userRepository.Add(user);
+            UserRole userRole = new UserRole();
+            userRole.UserId = userdetails.Id;
+            userRole.UserRoleId = 2;
+            _userRoleRepository.Add(userRole);
+        }
+
+        public void AddRandomizationUserLAR(UserDto userLarDto, CommonResponceView userLardetails)
+        {
+            var userLar = _mapper.Map<Data.Entities.UserMgt.User>(userLarDto);
+            userLar.Id = userLardetails.Id;
+            _userRepository.Add(userLar);
+            UserRole userLarRole = new UserRole();
+            userLarRole.UserId = userLardetails.Id;
+            userLarRole.UserRoleId = _context.SecurityRole.Where(c => c.RoleShortName == "LAR").FirstOrDefault().Id;
+            _userRoleRepository.Add(userLarRole);
         }
     }
 }

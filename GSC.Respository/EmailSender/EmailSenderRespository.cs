@@ -158,6 +158,16 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendEmailOfLARReviewedPDFtoInvestigator(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath)
+        {
+            var emailMessage = ConfigureEmail("LARSignedDocumentToInvestigator", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientReviewedPDFtoInvestigator(emailMessage.MessageBody, userName, documentName, ProjectName, patientName);
+            emailMessage.Subject = ReplaceSubjectForPatientReviewedPDFtoInvestigator(emailMessage.Subject, documentName, patientName);
+            emailMessage.Attachments.Add(new Attachment(filepath));
+            _emailService.SendMail(emailMessage);
+        }
+
         public void SendEmailOfRejectedDocumenttoPatient(string toMail, string userName, string documentName, string ProjectName, string filepath)
         {
             var emailMessage = ConfigureEmail("RejectedSignedDocumentToPatient", userName);
@@ -229,6 +239,16 @@ namespace GSC.Respository.EmailSender
         public void SendWithDrawEmail(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath)
         {
             var emailMessage = ConfigureEmail("WithdrawDocumentpatient", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPatientWithDrawDocument(emailMessage.MessageBody, userName, documentName, ProjectName, patientName);
+            emailMessage.Subject = ReplaceSubjectForPatientWithDraw(emailMessage.Subject, documentName, patientName);
+            emailMessage.Attachments.Add(new Attachment(filepath));
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void SendWithDrawEmailLAR(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath)
+        {
+            var emailMessage = ConfigureEmail("WithdrawDocumentpatientLAR", userName);
             emailMessage.SendTo = toMail;
             emailMessage.MessageBody = ReplaceBodyForPatientWithDrawDocument(emailMessage.MessageBody, userName, documentName, ProjectName, patientName);
             emailMessage.Subject = ReplaceSubjectForPatientWithDraw(emailMessage.Subject, documentName, patientName);

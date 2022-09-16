@@ -4,9 +4,11 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Medra;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.Attendance;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
+using GSC.Shared.Security;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -48,5 +50,9 @@ namespace GSC.Respository.Attendance
         DashboardRecruitmentRateDto GetDashboardRecruitmentRate(int projectId);
 
         void UpdateRandomizationIdForIWRS(RandomizationDto obj);
+        Task SendEmailOfScreenedtoPatientLAR(Randomization randomization, int sendtype);
+        void SendEmailOfStartEconsentLAR(Randomization randomization);
+        void AddRandomizationUser(UserDto userDto, CommonResponceView userdetails);
+        void AddRandomizationUserLAR(UserDto userLarDto, CommonResponceView userLardetails);
     }
 }
