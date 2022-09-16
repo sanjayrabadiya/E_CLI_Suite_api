@@ -659,6 +659,12 @@ namespace GSC.Respository.Attendance
         public DashboardPatientDto GetDashboardPatientDetail()
         {
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+
+            if (_jwtTokenAccesser.RoleName == "LAR")
+            {
+                randomization = FindBy(x => x.LARUserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            }
+
             if (randomization != null)
             {
                 var project = _context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault();
@@ -690,7 +696,7 @@ namespace GSC.Respository.Attendance
 
                     dashboardPatientDto.siteAddress = _manageSiteRepository.Find((int)project.ManageSiteId).SiteAddress;
                 }
-                dashboardPatientDto.patientdetail = "Screening Number: " + randomization.ScreeningNumber + " Initial: " + randomization.Initial;
+                dashboardPatientDto.patientdetail = _jwtTokenAccesser.RoleName == "LAR" ? "LAR FirstName: " + randomization.LegalFirstName + ", LAR LastName: " + randomization.LegalLastName : "Screening Number: " + randomization.ScreeningNumber + " Initial: " + randomization.Initial;
                 //dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
                 //dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
                 //dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;
