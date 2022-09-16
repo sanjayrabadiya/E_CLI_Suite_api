@@ -255,11 +255,11 @@ namespace GSC.Respository.Attendance
             }
             else
             {
-                randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.CountryId);
+                randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId);
             }
             return randomizationNumberDto;
         }
-        public string GetRandNoIWRS(int projectid, int siteId, int countryId)
+        public string GetRandNoIWRS(int projectid, int siteId, int? countryId)
         {
             string randno = string.Empty;
 
@@ -283,16 +283,21 @@ namespace GSC.Respository.Attendance
             }
             if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
             {
-                var datacountry = _context.SupplyManagementUploadFileDetail
-                                        .Where(x => x.SupplyManagementUploadFile.CountryId == countryId
+                var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == countryId).FirstOrDefault();
+                if (site != null)
+                {
+                    var datacountry = _context.SupplyManagementUploadFileDetail
+                                        .Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
                                         && x.RandomizationId == null
                                         && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                                         && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
-                if (datacountry != null)
-                {
-                    randno = Convert.ToString(datacountry.RandomizationNo);
-                    return randno;
+                    if (datacountry != null)
+                    {
+                        randno = Convert.ToString(datacountry.RandomizationNo);
+                        return randno;
+                    }
                 }
+
             }
             if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
             {
@@ -337,15 +342,20 @@ namespace GSC.Respository.Attendance
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                 {
                     var country = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
-                    var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == country.CountryId
-                    && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
-
-                    if (data1 != null)
+                    var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == country.ManageSiteId).FirstOrDefault();
+                    if (site != null)
                     {
-                        data1.RandomizationId = obj.Id;
-                        _context.SupplyManagementUploadFileDetail.Update(data1);
+                        var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
+                  && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
+                        if (data1 != null)
+                        {
+                            data1.RandomizationId = obj.Id;
+                            _context.SupplyManagementUploadFileDetail.Update(data1);
+
+                        }
                     }
+
                 }
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
                 {

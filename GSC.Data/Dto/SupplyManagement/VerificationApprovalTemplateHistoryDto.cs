@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ReasonOth { get; set; }
         public int SecurityRoleId { get; set; }
         //public SecurityRole SecurityRole { get; set; }
+        public int? SendBySecurityRoleId { get; set; }
     }
 
     public class VerificationApprovalTemplateHistoryViewDto : BaseAuditDto
@@ -27,5 +28,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string AuditReason { get; set; }
         public string ReasonOth { get; set; }
         public string Status { get; set; }
+
+        public int? SendBySecurityRoleId { get; set; }
+        public string SendByRole { get; set; }
     }
 }

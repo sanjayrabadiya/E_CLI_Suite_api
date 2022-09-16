@@ -13,6 +13,7 @@ namespace GSC.Data.Entities.SupplyManagement
     {
         public int VerificationApprovalTemplateId { get; set; }
         public int SecurityRoleId { get; set; }
+        public int? SendBySecurityRoleId { get; set; }
         public int SendBy { get; set; }
         public DateTime SendOn { get; set; }
         public bool IsSendBack { get; set; }

@@ -106,7 +106,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendBy = _jwtTokenAccesser.UserId;
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendOn = _jwtTokenAccesser.GetClientDate();
             verificationApprovalTemplate.VerificationApprovalTemplateHistory.Status = Helper.ProductVerificationStatus.SentForApproval;
-            verificationApprovalTemplate.VerificationApprovalTemplateHistory.SecurityRoleId = _jwtTokenAccesser.RoleId;
+            verificationApprovalTemplate.VerificationApprovalTemplateHistory.SecurityRoleId = (int)verificationApprovalTemplateDto.SecurityRoleId;
+            verificationApprovalTemplate.VerificationApprovalTemplateHistory.SendBySecurityRoleId = _jwtTokenAccesser.RoleId;
             _verificationApprovalTemplateHistoryRepository.Add(verificationApprovalTemplate.VerificationApprovalTemplateHistory);
 
             // Set status Send for Approval
@@ -170,7 +171,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             verificationApprovalTemplateDto.IsSendBack = false;
             verificationApprovalTemplateDto.SendBy = _jwtTokenAccesser.UserId;
             verificationApprovalTemplateDto.SendOn = _jwtTokenAccesser.GetClientDate();
-            verificationApprovalTemplateDto.SecurityRoleId = _jwtTokenAccesser.RoleId;
+            verificationApprovalTemplateDto.SecurityRoleId = verification.SecurityRoleId;
+            verificationApprovalTemplateDto.SendBySecurityRoleId = _jwtTokenAccesser.RoleId;
             verificationApprovalTemplateDto.VerificationApprovalTemplateId = verification.VerificationApprovalTemplateId;
 
             var verificationApprovalTemplate = _mapper.Map<VerificationApprovalTemplateHistory>(verificationApprovalTemplateDto);
