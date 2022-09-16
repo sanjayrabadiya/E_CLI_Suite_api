@@ -203,7 +203,7 @@ namespace GSC.Respository.Project.EditCheck
                          string.IsNullOrEmpty(x.CollectionValue)
                              ? ""
                              :
-                               x.CollectionSource.IsDropDownCollection()
+                               x.CollectionSource.IsDropDownCollectionForEditCheck()
                                        ? string.Join(", ", _context.ProjectDesignVariableValue
                                                    .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
                                                    Select(a => a.ValueName).ToList())
@@ -275,7 +275,7 @@ namespace GSC.Respository.Project.EditCheck
 
                 }
 
-                if ((x.CollectionSource.IsDropDownCollection() || IsInFilter(x.Operator)) && !string.IsNullOrEmpty(x.CollectionValue))
+                if ((x.CollectionSource.IsDropDownCollectionForEditCheck() || IsInFilter(x.Operator)) && !string.IsNullOrEmpty(x.CollectionValue))
                 {
                     x.CollectionValue = Convert.ToString(IsInFilter(x.Operator) ? "(" : "") + string.Join(", ", _context.ProjectDesignVariableValue
                                                    .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).
@@ -376,7 +376,7 @@ namespace GSC.Respository.Project.EditCheck
                 var operatorName = x.Operator.GetDescription();
 
                 var collectionValue = (string.IsNullOrEmpty(x.CollectionValue) ? ""
-                         : x.CollectionSource.IsDropDownCollection() ?
+                         : x.CollectionSource.IsDropDownCollectionForEditCheck() ?
                          Convert.ToString(IsInFilter(x.Operator) ? "(" : "") +
                          string.Join(", ", _context.ProjectDesignVariableValue
                          .Where(t => ProjectDesignVariableId(x.CollectionValue).Contains(t.Id)).

@@ -55,7 +55,7 @@ namespace GSC.Respository.Project.EditCheck
                 IsSameTemplate = c.IsSameTemplate,
                 LogicalOperator = c.LogicalOperator,
                 Message = c.Message,
-                ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.ProjectDesignVariable.Values.Where(b => b.DeletedDate == null).ToList()),
+                ExtraData = c.EditCheck.IsFormula ? null : _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.ProjectDesignVariable.Values.Where(b => b.DeletedDate == null).ToList()),
                 QueryFormula = c.QueryFormula,
                 PeriodName = c.ProjectDesignVariable != null
                      ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName

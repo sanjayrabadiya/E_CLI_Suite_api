@@ -23,14 +23,13 @@ namespace GSC.Helper
         }
 
 
-        public static bool IsDropDownCollection(this CollectionSources? value)
+        public static bool IsDropDownCollectionForEditCheck(this CollectionSources? value)
         {
             if (value == null)
                 return false;
             else
                 return (value == CollectionSources.ComboBox ||
                                    value == CollectionSources.RadioButton ||
-                                   value == CollectionSources.NumericScale ||
                                    value == CollectionSources.CheckBox ||
                                    value == CollectionSources.MultiCheckBox);
         }
