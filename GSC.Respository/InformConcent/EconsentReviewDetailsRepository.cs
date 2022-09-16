@@ -815,7 +815,7 @@ namespace GSC.Respository.InformConcent
             AddString("DateTime:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Y + 180, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
             result = AddString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", result.Page, new Syncfusion.Drawing.RectangleF(140, result.Bounds.Y + 180, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
 
-            if (AllDoc.IsReviewedByPatient)
+            if (AllDoc != null && AllDoc.IsReviewedByPatient)
             {
                 //add signature
                 //pdfDocument = CreateSignature(pdfDocument, Id);
