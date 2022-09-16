@@ -24,7 +24,7 @@ namespace GSC.Audit
 
         void SetDictionariesForMaster()
         {
-            _dictionaries.Add(new Dictionary { FieldName = "TrialTypeId", DisplayName = "Trial Type", SourceColumn = "TrialTypeName", TableName = "TrialType", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "TrialTypeId", DisplayName = "Therapeutic Indication", SourceColumn = "TrialTypeName", TableName = "TrialType", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "OtherTitle", DisplayName = "Other Title" });
             //_dictionaries.Add(new Dictionary { FieldName = "Forename", DisplayName = "First Name" });
             //_dictionaries.Add(new Dictionary { FieldName = "MiddleName", DisplayName = "Middle Name" });

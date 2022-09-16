@@ -48,6 +48,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsLocked { get; set; }
         public int? UserId { get; set; }
         public double? StudyVersion { get; set; }
+        public int? LARUserId { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto

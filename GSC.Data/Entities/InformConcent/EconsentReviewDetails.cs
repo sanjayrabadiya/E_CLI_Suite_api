@@ -28,5 +28,6 @@ namespace GSC.Data.Entities.InformConcent
         public bool? IsWithDraw { get; set; }
         public string WithdrawReason { get; set; }
         public string WithdrawComment { get; set; }
+        public bool? IsLAR { get; set; }
     }
 }

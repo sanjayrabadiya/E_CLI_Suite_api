@@ -31,6 +31,7 @@ namespace GSC.Data.Dto.InformConcent
         public bool? IsApproved { get; set; }
         public int? ApproveRejectReasonId { get; set; }
         public string? ApproveRejectReasonOth { get; set; }
+        public bool? IsLAR { get; set; }
 
     }
 

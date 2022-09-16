@@ -88,7 +88,7 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(sectionsHeaders);
         }
 
-       
+
         [HttpPost]
         [Route("ImportSectionData/{id}/{sectionno}")]
         public string ImportSectionData(int id, int sectionno)
@@ -138,8 +138,18 @@ namespace GSC.Api.Controllers.InformConcent
         {
             //var json = _econsentReviewDetailsRepository.GetEconsentDocument(econsentreviewdetails);
             //return Ok(json);
+            var roleName = _jwtTokenAccesser.RoleName;
+
             var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
-            var reviewDetails = _context.EconsentReviewDetails.Where(x => x.RandomizationId == randomization.Id && x.DeletedDate == null).ToList();
+
+            if (roleName == "LAR")
+            {
+                randomization = _randomizationRepository.FindBy(x => x.LARUserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            }
+
+            var reviewDetails = _context.EconsentReviewDetails.Where(x => x.RandomizationId == randomization.Id && x.DeletedDate == null
+            && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).ToList();
+
             foreach (var item in reviewDetails)
             {
                 EconsentDocumetViwerDto econcentDetails = new EconsentDocumetViwerDto();
@@ -177,6 +187,20 @@ namespace GSC.Api.Controllers.InformConcent
         public IActionResult ApproveRejectEconsentDocument([FromBody] EconsentReviewDetailsDto econsentReviewDetailsDto)
         {
             if (econsentReviewDetailsDto.Id <= 0) return BadRequest();
+
+            var randomization = _randomizationRepository.All.Where(x => x.Id == econsentReviewDetailsDto.RandomizationId).FirstOrDefault();
+            if (randomization.LARUserId != null)
+            {
+                var econsentReviewDetails = _econsentReviewDetailsRepository.All.Where(y => y.RandomizationId == econsentReviewDetailsDto.RandomizationId
+                && y.EconsentSetupId == econsentReviewDetailsDto.EconsentSetupId).ToList();
+
+                if (econsentReviewDetails.Any(c => c.IsReviewedByPatient == false))
+                {
+                    ModelState.AddModelError("Message", "Patient or LAR review doesn't complete.");
+                    return BadRequest(ModelState);
+                }
+            }
+
             return Ok(_econsentReviewDetailsRepository.ApproveRejectEconsentDocument(econsentReviewDetailsDto));
         }
 

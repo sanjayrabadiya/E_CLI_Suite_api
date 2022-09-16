@@ -7,7 +7,8 @@ namespace GSC.Shared.Generic
         [Description("SuperAdmin")] SuperAdmin = 1,
         [Description("Administrator")] Administrator = 2,
         [Description("Patient")] Patient = 3,
-        [Description("User")] User = 4
+        [Description("User")] User = 4,
+        [Description("LAR")] LAR = 5
     }
 
     public enum AuditAction : short

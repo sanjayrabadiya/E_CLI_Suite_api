@@ -37,5 +37,7 @@ namespace GSC.Respository.EmailSender
         //void SendApproveVerificationEmail(string toMail);
         //void ApproveByApproverVerificationEmail(string toMail);
         //void RejectByApproverVerificationEmail(string toMail);
+        void SendEmailOfLARReviewedPDFtoInvestigator(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
+        void SendWithDrawEmailLAR(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
     }
 }

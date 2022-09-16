@@ -153,16 +153,33 @@ namespace GSC.Api.Controllers.Attendance
             }
             randomization.UserId = userdetails.Id;
 
-            var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
-            user.Id = userdetails.Id;
-            _userRepository.Add(user);
-            UserRole userRole = new UserRole();
-            userRole.UserId = userdetails.Id;
-            userRole.UserRoleId = 2;
-            _userRoleRepository.Add(userRole);
+            _randomizationRepository.AddRandomizationUser(userDto, userdetails);
+
+            if (randomization.LegalStatus == true)
+            {
+                //for data save in central - prakash
+                var userLarDto = new UserDto();
+                userLarDto.FirstName = randomization.LegalFirstName;
+                userLarDto.MiddleName = randomization.LegalMiddleName;
+                userLarDto.LastName = randomization.LegalLastName;
+                userLarDto.Email = randomization.LegalEmail;
+                userLarDto.UserType = UserMasterUserType.LAR;
+                userLarDto.UserName = RandomPassword.CreateRandomNumericNumber(6);
+                userLarDto.CompanyId = _jwtTokenAccesser.CompanyId;
+                userLarDto.IsFirstTime = true;
+                userLarDto.Language = randomizationDto.LanguageId;
+                CommonResponceView userLardetails = await _centreUserService.SaveUser(userLarDto, _environmentSetting.Value.CentralApi);
+                if (!string.IsNullOrEmpty(userLardetails.Message))
+                {
+                    ModelState.AddModelError("Message", userLardetails.Message);
+                    return BadRequest(ModelState);
+                }
+                randomization.LARUserId = userLardetails.Id;
+
+                _randomizationRepository.AddRandomizationUserLAR(userLarDto, userLardetails);
+            }
 
             _randomizationRepository.Add(randomization);
-
             var Project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
             var projectSetting = _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefault();
 
@@ -172,6 +189,13 @@ namespace GSC.Api.Controllers.Attendance
             {
                 await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, 2);
                 _randomizationRepository.SendEmailOfStartEconsent(randomization);
+
+                if (randomization.LegalStatus == true)
+                {
+                    await _randomizationRepository.SendEmailOfScreenedtoPatientLAR(randomization, 2);
+                    _randomizationRepository.SendEmailOfStartEconsentLAR(randomization);
+                }
+
             }
 
             return Ok();
@@ -206,6 +230,27 @@ namespace GSC.Api.Controllers.Attendance
             var user = _mapper.Map<Data.Entities.UserMgt.User>(userDto);
             user.Id = userdetails.Id;
             _userRepository.Update(user);
+
+            if (randomization.LegalFirstName != null)
+            {
+                var userLARDetail = _userRepository.FindBy(x => x.Id == details.LARUserId).FirstOrDefault();
+                userLARDetail.FirstName = RandomizationDto.LegalFirstName;
+                userLARDetail.MiddleName = RandomizationDto.LegalMiddleName;
+                userLARDetail.LastName = RandomizationDto.LegalLastName;
+                userLARDetail.Email = RandomizationDto.LegalEmail;
+                userLARDetail.Phone = RandomizationDto.LegalEmergencyCoNumber;
+                var userLARDto = _mapper.Map<UserDto>(userLARDetail);
+                CommonResponceView userLARDetails = await _centreUserService.UpdateUser(userLARDto, _environmentSetting.Value.CentralApi);
+                if (!string.IsNullOrEmpty(userLARDetails.Message))
+                {
+                    ModelState.AddModelError("Message", userLARDetails.Message);
+                    return BadRequest(ModelState);
+                }
+                randomization.LARUserId = userLARDetails.Id;
+                var userLAR = _mapper.Map<Data.Entities.UserMgt.User>(userLARDto);
+                userLAR.Id = userLARDetails.Id;
+                _userRepository.Update(userLAR);
+            }
 
             _randomizationRepository.Update(randomization);
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
