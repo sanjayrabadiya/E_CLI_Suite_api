@@ -35,7 +35,6 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IMapper _mapper;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
@@ -67,12 +66,16 @@ namespace GSC.Api.Controllers.UserMgt
         public async Task<IActionResult> GetRoles()
         {
             LoginDto dto = new LoginDto();
-            var user = await _centreUserService.ValidateClient();
-            if (user == null)
+            if (!_environmentSetting.Value.IsPremise)
             {
-                ModelState.AddModelError("UserName", "User not valid");
-                return BadRequest(ModelState);
+                var user = await _centreUserService.ValidateClient();
+                if (user == null)
+                {
+                    ModelState.AddModelError("UserName", "User not valid");
+                    return BadRequest(ModelState);
+                }
             }
+         
             var roles = _userRoleRepository.GetRoleByUserId(_jwtTokenAccesser.UserId);
 
             if (roles.Count <= 0)
