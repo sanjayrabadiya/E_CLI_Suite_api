@@ -201,7 +201,7 @@ namespace GSC.Respository.Project.Design
                 DataType = c.DataType,
                 VisitName = c.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName + "." + c.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                 CollectionSources = c.CollectionSource,
-                ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList())
+                ExtraData = isFormula ? null : _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList())
             }).ToList();
 
             return variableResult.GroupBy(x => new { x.Value, x.Code, x.DataType, x.CollectionSources }).Select
@@ -212,7 +212,7 @@ namespace GSC.Respository.Project.Design
                 DataType = c.Key.DataType,
                 CollectionSources = c.Key.CollectionSources,
                 VisitName = string.Join(", ", variableResult.Where(v => v.Value == c.Key.Value).Select(r => r.VisitName).ToList()),
-                ExtraData = variableResult.FirstOrDefault(v => v.Value == c.Key.Value)?.ExtraData
+                ExtraData = isFormula ? null : variableResult.FirstOrDefault(v => v.Value == c.Key.Value)?.ExtraData
             }).Where(x => x.Value != null).ToList();
         }
 
