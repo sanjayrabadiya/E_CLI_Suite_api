@@ -256,6 +256,7 @@ namespace GSC.Respository.Screening
             values.ForEach(t =>
             {
                 var ScreeningTemplateValueChild = GetScreeningTemplateValueChild(t.Id);
+
                 var MaxLevel = ScreeningTemplateValueChild.Max(x => x.LevelNo);
                 var variable = designTemplateDto.Variables.FirstOrDefault(v => v.ProjectDesignVariableId == t.ProjectDesignVariableId);
                 if (variable != null)
@@ -409,8 +410,11 @@ namespace GSC.Respository.Screening
                     {
                         if (Convert.ToString(r.ScreeningValue ?? "") != Convert.ToString(singleResult.Value ?? ""))
                         {
-                            _editCheckImpactRepository.InsertScreeningValue(projectDesignTemplateDto.ScreeningTemplateId,
+                           var newValueId= _editCheckImpactRepository.InsertScreeningValue(projectDesignTemplateDto.ScreeningTemplateId,
                                                           (int)r.ProjectDesignVariableId, singleResult.Value, singleResult.Note, singleResult.IsSoftFetch, r.CollectionSource, singleResult.EditCheckDisable);
+                            
+                            if (newValueId > 0 && r.ScreeningTemplateValueId == 0)
+                                r.ScreeningTemplateValueId = newValueId;
                         }
 
                         r.ScreeningValue = singleResult.Value;
