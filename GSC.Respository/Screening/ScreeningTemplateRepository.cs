@@ -497,14 +497,14 @@ namespace GSC.Respository.Screening
         {
             var variable = editCheckValidateDtos.
               Where(x => editCheckIds.Contains(x.EditCheckId) && x.IsTarget &&
-              (x.IsFormula || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+              (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
              Select(t => t.ProjectDesignVariableId).Distinct().ToList();
 
             foreach (var item in variable)
             {
                 var subEditCheckIds = editCheckValidateDtos.Where(x =>
                 (x.ProjectDesignVariableId == item || (x.FetchingProjectDesignVariableId == item) && !editCheckIds.Contains(x.EditCheckId) && x.IsTarget &&
-                (x.IsFormula || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch))).GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
+                (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch))).GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
                 result.AddRange(subEditCheckIds);
             }
         }
@@ -513,7 +513,7 @@ namespace GSC.Respository.Screening
         {
             return editCheckValidateDtos.
                Where(x => editCheckIds.Contains(x.EditCheckId) && !alreadyUsed.Contains(x.EditCheckId) &&
-               (x.IsFormula || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+               (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
               Select(t => t.ProjectDesignVariableId).Distinct().ToList();
         }
 
@@ -522,7 +522,7 @@ namespace GSC.Respository.Screening
         {
             return editCheckValidateDtos.
              Where(x => (x.ProjectDesignVariableId == projectDesignVariableId || (x.FetchingProjectDesignVariableId == projectDesignVariableId && x.FetchingProjectDesignTemplateId == projectDesignTemplateId)) && !alreadyUsed.Contains(x.EditCheckId) && x.IsTarget &&
-             (x.IsFormula || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+             (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
              GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
         }
 
@@ -754,7 +754,7 @@ namespace GSC.Respository.Screening
         {
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             var result = All.Where(x => x.DeletedDate == null && x.ScreeningVisit.Status != ScreeningVisitStatus.NotStarted);
-            
+
             if (filters.ProjectId != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.ProjectId);
             if (filters.StudyId != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.StudyId == filters.StudyId);
             if (filters.VolunteerId != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == filters.VolunteerId);
