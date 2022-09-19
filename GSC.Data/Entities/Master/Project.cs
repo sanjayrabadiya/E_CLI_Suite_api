@@ -11,9 +11,6 @@ namespace GSC.Data.Entities.Master
 {
     public class Project : BaseEntity, ICommonAduit
     {
-        private DateTime? _FromDate;
-
-        private DateTime? _ToDate;
         public string ProjectCode { get; set; }
 
         public string ProjectName { get; set; }
@@ -42,26 +39,16 @@ namespace GSC.Data.Entities.Master
         public RegulatoryType? RegulatoryType { get; set; }
         public ManageSite? ManageSite { get; set; }
 
-        public DateTime? FromDate
-        {
-            get => _FromDate?.UtcDate();
-            set => _FromDate = value?.UtcDate();
-        }
+        public DateTime? FromDate { get; set; }
 
-        public DateTime? ToDate
-        {
-            get => _ToDate?.UtcDate();
-            set => _ToDate = value?.UtcDate();
-        }
+        public DateTime? ToDate { get; set; }
 
         public int? CompanyId { get; set; }
         public int? InvestigatorContactId { get; set; }
         public IList<ProjectRight.ProjectRight> ProjectRight { get; set; }
 
         public ICollection<ProjectDesign> ProjectDesigns { get; set; }
-
         public int? AttendanceLimit { get; set; }
-
         public ICollection<Attendance.Attendance> Attendances { get; set; }
         public City City { get; set; }
         public Country Country { get; set; }
@@ -73,21 +60,7 @@ namespace GSC.Data.Entities.Master
         public InvestigatorContact InvestigatorContact { get; set; }
         [ForeignKey("ParentProjectId")]
         public List<Project> ChildProject { get; set; }
-        //public bool? IsManualRandomNo { get; set; }
-        //public bool? IsSiteDependentRandomNo { get; set; }
-        //public int? RandomNoLength { get; set; }
-        //public bool? IsAlphaNumRandomNo { get; set; }
-        ////public string? PrefixRandomNo { get; set; }
-        public bool? IsManualScreeningNo { get; set; }
-        //public bool? IsSiteDependentScreeningNo { get; set; }
-        //public int? ScreeningLength { get; set; }
-        //public bool? IsAlphaNumScreeningNo { get; set; }
-        ////public string? PrefixScreeningNo { get; set; }
-        //public int ScreeningNoseries { get; set; }
-        //public int RandomizationNoseries { get; set; }
         public int? ManageSiteId { get; set; }
-        //public int? RandomNoStartsWith { get; set; }
-        //public int? ScreeningNoStartsWith { get; set; }
         public bool IsTestSite { get; set; }
         public bool IsSendSMS { get; set; }
         public bool IsSendEmail { get; set; }

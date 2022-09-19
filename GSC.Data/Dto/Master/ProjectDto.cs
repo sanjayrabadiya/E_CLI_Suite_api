@@ -55,40 +55,12 @@ namespace GSC.Data.Dto.Master
         public int? NoofSite { get; set; }
         public int? CompanyId { get; set; }
         public bool Locked { get; set; }
-        public bool? IsManualRandomNo { get; set; }
-        public bool? IsSiteDependentRandomNo { get; set; }
-        public int? RandomNoLength { get; set; }
-        public bool? IsAlphaNumRandomNo { get; set; }
-        //public string? PrefixRandomNo { get; set; }
-        public bool? IsManualScreeningNo { get; set; }
-        public bool? IsSiteDependentScreeningNo { get; set; }
-        public int? ScreeningLength { get; set; }
-        public bool? IsAlphaNumScreeningNo { get; set; }
-        //public string? PrefixScreeningNo { get; set; }
         public int? ManageSiteId { get; set; }
-        public int? RandomNoStartsWith { get; set; }
-        public int? ScreeningNoStartsWith { get; set; }
         public bool IsTestSite { get; set; }
         public bool IsSendSMS { get; set; }
         public bool IsSendEmail { get; set; }
         public int? Recruitment { get; set; }
     }
-
-    //public class RandomizationAndScreeningNumberFormatDto : BaseDto
-    //{
-    //    public bool? IsManualRandomNo { get; set; }
-    //    public bool? IsSiteDependentRandomNo { get; set; }
-    //    public int? RandomNoLength { get; set; }
-    //    public bool? IsAlphaNumRandomNo { get; set; }
-    //    //public string? PrefixRandomNo { get; set; }
-    //    public bool? IsManualScreeningNo { get; set; }
-    //    public bool? IsSiteDependentScreeningNo { get; set; }
-    //    public int? ScreeningLength { get; set; }
-    //    public bool? IsAlphaNumScreeningNo { get; set; }
-    //    //public string? PrefixScreeningNo { get; set; }
-    //    public int? RandomNoStartsWith { get; set; }
-    //    public int? ScreeningNoStartsWith { get; set; }
-    //}
 
 
 

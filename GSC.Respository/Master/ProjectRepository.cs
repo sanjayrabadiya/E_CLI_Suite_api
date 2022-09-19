@@ -489,17 +489,18 @@ namespace GSC.Respository.Master
 
             siteDetailsDto.NoofSite = GetNoOfSite(projectId);
             siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.ManageSite.City.State.Country.Id).Select(t => t.Key).Count();
-            projectDetailsDto.Sites = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).Select(t => new BasicSiteDto
+            
+            projectDetailsDto.Sites = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null && x.ManageSite != null).Select(t => new BasicSiteDto
             {
                 SiteCode = t.ProjectCode,
                 SiteName = t.ProjectName,
-                SiteCountry = t.Country.CountryName
+                SiteCountry = t.ManageSite.City.State.Country.CountryName //t.Country.CountryName
             }).ToList();
 
             var project = Find(projectId);
             projectDetailsDto.SendSMS = project.IsSendSMS ? "Yes" : "No";
             projectDetailsDto.SendEmail = project.IsSendEmail ? "Yes" : "No";
-            projectDetailsDto.RandomizationAutomatic = project.IsManualScreeningNo == true ? "No" : "Yes";
+           // projectDetailsDto.RandomizationAutomatic = project.IsManualScreeningNo == true ? "No" : "Yes";
 
             siteDetailsDto.MarkAsCompleted = All.Any(x => x.ParentProjectId == projectId && x.DeletedDate == null);
 
