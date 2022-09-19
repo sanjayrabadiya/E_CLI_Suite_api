@@ -291,6 +291,7 @@ namespace GSC.Respository.Attendance
                     var datacountry = _context.SupplyManagementUploadFileDetail
                                         .Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
                                         && x.RandomizationId == null
+                                        && x.SupplyManagementUploadFile.ProjectId == projectid
                                         && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                                         && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
                     if (datacountry != null)
