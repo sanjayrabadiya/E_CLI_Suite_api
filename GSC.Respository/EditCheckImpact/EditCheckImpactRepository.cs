@@ -277,6 +277,7 @@ namespace GSC.Respository.EditCheckImpact
             });
 
             var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget && r.ScreeningTemplateId > 0).ToList();
+
             targetResult.Where(r => r.Operator == Operator.Enable && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
                   {
                       if (r.ValidateType == EditCheckValidateType.Passed)
@@ -386,7 +387,8 @@ namespace GSC.Respository.EditCheckImpact
                     }
 
 
-                    if ((r.Operator == Operator.SoftFetch || r.Operator == Operator.HardFetch) && r.FetchingProjectDesignVariableId != null)
+                    if (((r.Operator == Operator.SoftFetch && string.IsNullOrEmpty(r.ScreeningTemplateValue)) 
+                    || r.Operator == Operator.HardFetch) && r.FetchingProjectDesignVariableId != null)
                     {
                         if (r.ValidateType == EditCheckValidateType.ReferenceVerifed || r.ValidateType == EditCheckValidateType.Passed)
                         {
@@ -718,7 +720,7 @@ namespace GSC.Respository.EditCheckImpact
                             var singleTarget = validateResult.Target.FirstOrDefault(a => a.Id == t.EditCheckDetailId);
                             if (singleTarget != null)
                             {
-                                if (t.Operator != Operator.Enable)
+                                if (t.Operator != Operator.Enable && t.Operator!= Operator.SoftFetch && t.Operator != Operator.HardFetch)
                                     t.ScreeningTemplateValue = singleTarget.Result;
 
                                 t.SampleResult = singleTarget.SampleText + " " + validateResult.SampleText;
@@ -748,6 +750,7 @@ namespace GSC.Respository.EditCheckImpact
 
             if (screeningTemplateValue != null && screeningTemplateValue.Value == value)
                 return screeningTemplateValue.Id;
+
             if (isSoftFetch && screeningTemplateValue != null && !string.IsNullOrEmpty(screeningTemplateValue.Value))
                 return screeningTemplateValue.Id;
 
