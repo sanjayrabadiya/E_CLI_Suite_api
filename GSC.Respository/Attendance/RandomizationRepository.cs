@@ -103,8 +103,8 @@ namespace GSC.Respository.Attendance
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
         {
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
-
-            if (randomizationNumberDto.IsIGT)
+            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomizationDto.ParentProjectId).FirstOrDefault();
+            if (numerformate != null && numerformate.IsIGT)
             {
                 randomization.RandomizationNumber = randomizationDto.RandomizationNumber;
             }
@@ -191,6 +191,12 @@ namespace GSC.Respository.Attendance
 
         public string ValidateRandomizationNumber(RandomizationDto randomization)
         {
+            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomization.ParentProjectId).FirstOrDefault();
+            if (numerformate != null && numerformate.IsIGT)
+            {
+                return "";
+            }
+
             if (!_projectRepository.Find(randomization.ProjectId).IsTestSite)
             {
                 RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
@@ -349,7 +355,8 @@ namespace GSC.Respository.Attendance
                     if (site != null)
                     {
                         var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
-                  && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                           && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                           && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                         if (data1 != null)
                         {
@@ -374,7 +381,6 @@ namespace GSC.Respository.Attendance
                 }
             }
         }
-
         public bool IsScreeningFormatSetInStudy(int id)
         {
             var randomization = Find(id);
