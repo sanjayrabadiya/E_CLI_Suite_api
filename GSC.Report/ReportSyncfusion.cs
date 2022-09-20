@@ -1602,7 +1602,7 @@ namespace GSC.Report
             else
             {
                 fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
-                fileInfo.FileName = item.Initial.Replace("/", "") + ".pdf";
+                fileInfo.FileName = item.ScreeningNumber.Replace("/", "") +"_"+item.Initial.Replace("/", "") + ".pdf";
                 string fileName = fileInfo.FileName + ".pdf";
                 fileInfo.ChildFolderName = item.ProjectDetails.ProjectCode;
                 filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);
