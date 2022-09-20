@@ -2,10 +2,6 @@
 using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
-using GSC.Data.Entities.UserMgt;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Entities.Medra
 {
@@ -22,6 +18,6 @@ namespace GSC.Data.Entities.Medra
         public Domain Domain { get; set; }        
         public ProjectDesignVariable ProjectDesignVariable { get; set; }
         public MedraConfig MedraConfig { get; set; }
-        public Entities.Master.Project Project { get; set; }          
+        public Entities.Master.Project Project { get; set; }
     }
 }

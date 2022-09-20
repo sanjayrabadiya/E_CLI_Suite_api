@@ -446,7 +446,7 @@ namespace GSC.Api.Controllers.Project.Design
 
                             if (cloneValue != null)
                             {
-                                var clone = cloneValue.VariableValueLanguage.Where(b => b.Display == x.Display).FirstOrDefault();
+                                var clone = cloneValue.VariableValueLanguage.Where(b => b.LanguageId == x.LanguageId).FirstOrDefault();
                                 x.Id = clone?.Id ?? 0;
                             }
                             // Change by Tinku Mahato (14-04-2022)

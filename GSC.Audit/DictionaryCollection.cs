@@ -172,8 +172,8 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "MedraVersionId", DisplayName = "Medra Version", SourceColumn = "Version", TableName = "MedraVersion", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "LanguageId", DisplayName = "Language", SourceColumn = "LanguageName", TableName = "Language", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "IsByAnnotation", DisplayName = "Is By Annotation" });
-            _dictionaries.Add(new Dictionary { FieldName = "CoderProfile", DisplayName = "Coder Profile" });
-            _dictionaries.Add(new Dictionary { FieldName = "CoderApprover", DisplayName = "Coder Approver" });
+            _dictionaries.Add(new Dictionary { FieldName = "CoderProfile", DisplayName = "Coder Profile", SourceColumn = "RoleShortName", TableName = "SecurityRole", PkName = "Id" });
+            _dictionaries.Add(new Dictionary { FieldName = "CoderApprover", DisplayName = "Coder Approver", SourceColumn = "RoleShortName", TableName = "SecurityRole", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "Version", DisplayName = "Version" });
 
             // manage study audit

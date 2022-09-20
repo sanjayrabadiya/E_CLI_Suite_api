@@ -45,6 +45,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsDeleted { get; set; }
         public TableCollectionSource? TableCollectionSource { get; set; }
         public string Style { get; set; }
+        public string OriginalValue { get; set; }
     }
 
 

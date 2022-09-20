@@ -160,7 +160,8 @@ namespace GSC.Respository.Project.Design
                          InActiveVersion = c.InActiveVersion,
                          Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
                          TableCollectionSource = c.TableCollectionSource,
-                         Style=c.Style
+                         Style=c.Style,
+                         OriginalValue = c.ValueName
                      }).ToList();
 
 
