@@ -57,6 +57,8 @@ namespace GSC.Data.Dto.Configuration
         public CRFTypes CRFType { get; set; }
 
         public PdfLayouts PdfLayouts { get; set; }
+
+        public bool WithDocument { get; set; }
     }
     public class ReportVisitsDto
     {

@@ -512,7 +512,7 @@ namespace GSC.Report.Common
 
             var finaldata = _context.ProjectDesign.Where(x => x.ProjectId == reportSetting.ProjectId).Select(x => new DossierReportDto
             {
-                ProjectDetails = new ProjectDetails { ProjectCode = x.Project.ProjectCode, ProjectName = x.Project.ProjectName, ClientId = x.Project.ClientId },
+                ProjectDetails = new ProjectDetails { ProjectCode = x.Project.ProjectCode, ProjectName = x.Project.ProjectName, ClientId = x.Project.ClientId, ProjectDesignId = x.Id },
                 Period = x.ProjectDesignPeriods.Where(a => a.DeletedDate == null).Select(a => new ProjectDesignPeriodReportDto
                 {
                     DisplayName = a.DisplayName,
@@ -533,6 +533,7 @@ namespace GSC.Report.Common
                             TemplateName = n.TemplateName,
                             DesignOrder = n.DesignOrder,
                             Label = n.Label,
+                            PreLabel = n.PreLabel,
                             Domain = new DomainReportDto { DomainCode = n.Domain.DomainCode, DomainName = n.Domain.DomainName },
                             TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && (tn.IsBottom == false || tn.IsBottom == null)).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
                             TemplateNotesBottom = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && tn.IsBottom == true).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
@@ -559,7 +560,8 @@ namespace GSC.Report.Common
                                 },
                                 Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList(),
                                 VariableCategoryName = v.VariableCategory.CategoryName,
-                                Label = v.Label
+                                Label = v.Label,
+                                PreLabel = v.PreLabel
                             }).ToList()
                         }).ToList()
                     }).OrderBy(d => d.DesignOrder).ToList()
@@ -604,6 +606,7 @@ namespace GSC.Report.Common
                       TemplateName = a.ProjectDesignTemplate.TemplateName,
                       DesignOrder = a.ProjectDesignTemplate.DesignOrder,
                       Label = a.ProjectDesignTemplate.Label,
+                      PreLabel  = a.ProjectDesignTemplate.PreLabel,
                       RepeatSeqNo=a.RepeatSeqNo,
                       Domain = new DomainReportDto {
                         DomainCode = a.ProjectDesignTemplate.Domain.DomainCode, DomainName = a.ProjectDesignTemplate.Domain.DomainName
@@ -636,7 +639,11 @@ namespace GSC.Report.Common
                           ScreeningTemplateValueId=s.Id,
                           ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{Value=c.Value,ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,ScreeningTemplateValueId=c.ScreeningTemplateValueId,ValueName=c.ProjectDesignVariableValue.ValueName }).ToList(),
                           VariableCategoryName = s.ProjectDesignVariable.VariableCategory.CategoryName,
-                          Label = s.ProjectDesignVariable.Label
+                          Label = s.ProjectDesignVariable.Label,
+                          PreLabel = s.ProjectDesignVariable.PreLabel,
+                          IsDocument =  s.ProjectDesignVariable.IsDocument,
+                          DocPath =  s.DocPath,
+                          MimeType = s.MimeType
                       }).ToList(),
                       ScreeningTemplateReview=a.ScreeningTemplateReview.Where(r=>r.DeletedDate==null).Select(r=>new ScreeningTemplateReviewReportDto{
                       ScreeningTemplateId=r.ScreeningTemplateId,

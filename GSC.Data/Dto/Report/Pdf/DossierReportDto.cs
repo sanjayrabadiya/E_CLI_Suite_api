@@ -46,6 +46,10 @@ namespace GSC.Data.Dto.Report.Pdf
         //public int ProjectDesignId { get; set; }
 
         public string Label { get; set; }
+
+        public string PreLabel { get; set; }
+
+
         public DomainReportDto Domain { get; set; }
         public List<ProjectDesignTemplateNoteReportDto> TemplateNotes { get; set; }
 
@@ -97,7 +101,12 @@ namespace GSC.Data.Dto.Report.Pdf
 
         public string VariableCategoryName { get; set; }
 
-        
+        public string PreLabel { get; set; }
+
+        public bool IsDocument { get; set; }
+
+        public string DocPath { get; set; }
+        public string MimeType { get; set; }
     }
 
     public class UnitReportDto

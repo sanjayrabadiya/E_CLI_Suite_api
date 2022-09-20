@@ -599,6 +599,12 @@ namespace GSC.Report
                         IndexCreate(subbookmark, true);
                     }
                 }
+                if (reportSetting.PdfStatus == DossierPdfStatus.Subject && reportSetting.WithDocument)
+                {
+                    DesignDosierReportDocumentShow(item, document);
+                    DesignDosierReportDocumentShowPdf(item, document);
+                }
+
                 SetPageNumber();
                 MemoryStream memoryStream = new MemoryStream();
                 document.Save(memoryStream);
@@ -607,7 +613,7 @@ namespace GSC.Report
                 fileInfo.ModuleName = Enum.GetName(typeof(JobNameType), jobMonitoring.JobName);
                 fileInfo.FolderType = Enum.GetName(typeof(DossierPdfStatus), jobMonitoring.JobDetails);
 
-                //projectDetails.FirstOrDefault().ProjectDetails.ProjectCode + "-" + projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+
                 if (reportSetting.IsSync)
                 {
                     string filenName = reportSetting.PdfStatus == DossierPdfStatus.Blank ? fileInfo.ParentFolderName.Replace("/", "") + ".pdf" : item.Initial.Replace("/", "") + ".pdf";
@@ -670,6 +676,7 @@ namespace GSC.Report
             try
             {
 
+                var templateVariableSequenceNoSetting = _context.TemplateVariableSequenceNoSetting.Where(x => x.DeletedDate == null && x.ProjectDesignId == ProjectDesignId).FirstOrDefault();
 
                 DateTime dDate;
                 RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
@@ -699,12 +706,31 @@ namespace GSC.Report
                     {
                         if (reportSetting.AnnotationType == true)
                         {
-                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            if (templateVariableSequenceNoSetting != null)
+                            {
+                                if (templateVariableSequenceNoSetting.IsTemplateSeqNo)
+                                    result = AddString($"{designt.DesignOrder.ToString()} {designt.PreLabel} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                                else
+                                    result = AddString($"{designt.PreLabel} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+
+                            }
+                            else
+                                result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                         }
                         else
                         {
-                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            if (templateVariableSequenceNoSetting != null)
+                            {
+                                if (templateVariableSequenceNoSetting.IsTemplateSeqNo)
+                                    result = AddString($"{designt.DesignOrder.ToString()} {designt.PreLabel} {repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                                else
+                                    result = AddString($"{designt.PreLabel} {repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+
+                            }
+                            else
+                                result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+
 
                         }
                     }
@@ -741,7 +767,7 @@ namespace GSC.Report
                         PdfPen pen = new PdfPen(Color.Gray, 1f);
                         result.Page.Graphics.DrawLine(pen, 0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Bounds.Y + 20);
 
-                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
 
                     }
@@ -754,7 +780,9 @@ namespace GSC.Report
 
                             if (!string.IsNullOrEmpty(category))
                             {
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                 result = AddStringCategory($"{category}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 5, 400, 15), PdfBrushes.Black, categoryfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             }
                             foreach (var variable in variableList)
                             {
@@ -769,7 +797,7 @@ namespace GSC.Report
                                 if (!string.IsNullOrEmpty(variable.Label))
                                 {
                                     result = AddString($"{variable.Label}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 5, 290, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    result = AddString($" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 5, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    result = AddString($" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                                 }
                                 if (reportSetting.AnnotationType == true)
@@ -784,8 +812,19 @@ namespace GSC.Report
                                 }
                                 PdfLayoutResult secondresult = result;
                                 if (!reportSetting.IsSectionDisplay)
-                                    AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                {
+                                    if (templateVariableSequenceNoSetting != null)
+                                    {
+                                        if (templateVariableSequenceNoSetting.IsVariableSeqNo)
+                                            AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()} {variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        else
+                                            AddString($"{variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
+                                    }
+                                    else
+                                        AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                }
                                 if (variable.Unit != null)
                                 {
                                     if (reportSetting.AnnotationType == true)
@@ -954,7 +993,7 @@ namespace GSC.Report
                                     {
                                         foreach (var value in variable.Values)
                                         {
-                                            result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y + 5, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                            result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
                                             checkField.Bounds = new RectangleF(350, result.Bounds.Y, 15, 15);
                                             checkField.Style = PdfCheckBoxStyle.Check;
@@ -1071,11 +1110,11 @@ namespace GSC.Report
                                     if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
                                     {
                                         List<string> _points = new List<string>();
-                                        int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
-                                        int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
+                                        double lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToDouble(variable.LowRangeValue);
+                                        double highragnevalue = Convert.ToDouble(variable.HighRangeValue);
                                         double stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1.0 : Convert.ToDouble(variable.DefaultValue);
                                         //logic
-                                        for (int i = lowrangevalue; i <= highragnevalue; i++)
+                                        for (double i = lowrangevalue; i <= highragnevalue; i++)
                                         {
                                             if ((i % stepvalue) == 0)
                                                 _points.Add(i.ToString());
@@ -1098,7 +1137,7 @@ namespace GSC.Report
                                     {
                                         result = AddString(variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                     }
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 5, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                 }
                                 else
                                 {
@@ -1155,28 +1194,77 @@ namespace GSC.Report
                                     if (!string.IsNullOrEmpty(annotation) && !string.IsNullOrEmpty(CollectionAnnotation))
                                     {
                                         if (!reportSetting.IsSectionDisplay)
-                                            AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        {
+                                            if (templateVariableSequenceNoSetting != null)
+                                            {
+                                                if (templateVariableSequenceNoSetting.IsVariableSeqNo)
+                                                    AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()} {variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                                else
+                                                    AddString($"{variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
+                                            }
+                                            else
+                                            {
+                                                AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                            }
+                                        }
                                         result = AddString($"{variable.VariableName}\n {annotation}   {CollectionAnnotation} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                     }
                                     else if (!string.IsNullOrEmpty(annotation))
                                     {
                                         if (!reportSetting.IsSectionDisplay)
-                                            AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        {
+                                            if (templateVariableSequenceNoSetting != null)
+                                            {
+                                                if (templateVariableSequenceNoSetting.IsVariableSeqNo)
+                                                    AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()} {variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                                else
+                                                    AddString($"{variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                            }
+                                            else
+                                                AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                        }
 
                                         result = AddString($"{variable.VariableName}\n {annotation} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                     }
                                     else if (!string.IsNullOrEmpty(CollectionAnnotation))
                                     {
                                         if (!reportSetting.IsSectionDisplay)
-                                            AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        {
+                                            if (templateVariableSequenceNoSetting != null)
+                                            {
+                                                if (templateVariableSequenceNoSetting.IsVariableSeqNo)
+                                                    AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()} {variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                                else
+                                                    AddString($"{variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                            }
+                                            else
+                                                AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                        }
 
                                         result = AddString($"{variable.VariableName}\n {CollectionAnnotation} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                     }
                                     else
                                     {
                                         if (!reportSetting.IsSectionDisplay)
-                                            AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        {
+                                            if (templateVariableSequenceNoSetting != null)
+                                            {
+                                                if (templateVariableSequenceNoSetting.IsVariableSeqNo)
+                                                    AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()} {variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                                else
+                                                    AddString($"{variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                            }
+                                            else
+                                                AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                        }
 
                                         result = AddString($"{variable.VariableName} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                     }
@@ -1184,7 +1272,22 @@ namespace GSC.Report
                                 else
                                 {
                                     if (!reportSetting.IsSectionDisplay)
-                                        AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    {
+                                        if (templateVariableSequenceNoSetting != null)
+                                        {
+                                            if (templateVariableSequenceNoSetting.IsVariableSeqNo)
+                                                AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()} {variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                            else
+                                                AddString($"{variable.PreLabel}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+
+                                        }
+                                        else
+                                        {
+                                            AddString($"{designt.DesignOrder.ToString()}.{variable.DesignOrder.ToString()}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+
+                                        }
+                                    }
 
                                     result = AddString($"{variable.VariableName} \n ", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                 }
@@ -1488,11 +1591,11 @@ namespace GSC.Report
                                     if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
                                     {
                                         List<string> _points = new List<string>();
-                                        int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
-                                        int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
+                                        double lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToDouble(variable.LowRangeValue);
+                                        double highragnevalue = Convert.ToDouble(variable.HighRangeValue);
                                         double stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1.0 : Convert.ToDouble(variable.DefaultValue);
                                         //logic
-                                        for (int i = lowrangevalue; i <= highragnevalue; i++)
+                                        for (double i = lowrangevalue; i <= highragnevalue; i++)
                                         {
                                             if ((i % stepvalue) == 0)
                                                 _points.Add(i.ToString());
@@ -2391,6 +2494,72 @@ namespace GSC.Report
                 Stream stream2 = File.OpenRead(PathName);
                 pdfStreams.Add(stream2);
             }
+            mergeOptions.OptimizeResources = true;
+            mergeOptions.ExtendMargin = true;
+            PdfDocumentBase.Merge(document, mergeOptions, pdfStreams.Cast<object>().ToArray());
+        }
+
+        private void DesignDosierReportDocumentShow(DossierReportDto Docdata, PdfDocument document)
+        {
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+
+            foreach (var Period in Docdata.Period)
+            {
+                foreach (var visit in Period.Visit)
+                {
+                    foreach (var item in visit.ProjectDesignTemplatelist)
+                    {
+
+                        foreach (var variable in item.ProjectDesignVariable.Where(x => x.DocPath != null && x.MimeType != null))
+                        {
+                            string pathname = string.Empty;
+
+                            pathname = documentUrl + variable.DocPath;
+                            if (variable.MimeType == "jpeg" || variable.MimeType == "jpg" || variable.MimeType == "png")
+                            {
+                                PdfPage page = document.Pages.Add();
+                                int endIndex = document.Pages.Count - 1;
+                                PdfBitmap image = new PdfBitmap(GetStreamFromUrl(pathname));
+
+                                PdfLayoutFormat format = new PdfLayoutFormat();
+                                format.Break = PdfLayoutBreakType.FitPage;
+                                format.Layout = PdfLayoutType.OnePage;
+                                RectangleF imageBounds = new RectangleF(0, 0, 500, 600);
+
+                                //image.Draw(page, imageBounds, format);
+                                page.Graphics.DrawImage(image, 0, 10, 500, 500);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+        private void DesignDosierReportDocumentShowPdf(DossierReportDto Docdata, PdfDocument document)
+        {
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            PdfMergeOptions mergeOptions = new PdfMergeOptions();
+            List<Stream> pdfStreams = new List<Stream>();
+            foreach (var Period in Docdata.Period)
+            {
+                foreach (var visit in Period.Visit)
+                {
+                    foreach (var item in visit.ProjectDesignTemplatelist)
+                    {
+                        foreach (var variable in item.ProjectDesignVariable.Where(x => x.DocPath != null && x.MimeType != null && x.MimeType == "pdf"))
+                        {
+                            string pathname = string.Empty;
+
+                            pathname = documentUrl + variable.DocPath;
+                            Stream stream2 = File.OpenRead(pathname);
+                            pdfStreams.Add(stream2);
+
+                        }
+                    }
+                }
+            }
+
             mergeOptions.OptimizeResources = true;
             mergeOptions.ExtendMargin = true;
             PdfDocumentBase.Merge(document, mergeOptions, pdfStreams.Cast<object>().ToArray());
