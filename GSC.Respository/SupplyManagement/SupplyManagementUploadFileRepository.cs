@@ -235,6 +235,17 @@ namespace GSC.Respository.SupplyManagement
             string selectQuery = "";
             var projectDesignVisits = GetProjectDesignVisit(supplyManagementUploadFile.ProjectId);
             var j = 0;
+            var visitcheck = results;
+            var table = visitcheck.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").ToList();
+            var duplicates = table.GroupBy(x => x).Where(g => g.Count() > 1).Select(y => y.Key).ToList();
+            if (duplicates.Count > 0)
+            {
+                return "Visit name should not be duplicate.";
+            }
+            var visitcount = visitcheck.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").Count();
+            if (projectDesignVisits.Count() != (visitcount - 2))
+                return "Visit name not match with design visit.";
+
             foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
             {
                 selectQuery += "Column" + j + " is null or ";
@@ -255,6 +266,8 @@ namespace GSC.Respository.SupplyManagement
                 }
                 j++;
             }
+
+
             if (results.Tables[0].AsEnumerable().Where((row, index) => index > 4).ToList().Count > 0)
             {
                 DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.Substring(0, selectQuery.Length - 3));
