@@ -1114,11 +1114,15 @@ namespace GSC.Report
                                         double highragnevalue = Convert.ToDouble(variable.HighRangeValue);
                                         double stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1.0 : Convert.ToDouble(variable.DefaultValue);
                                         //logic
-                                        for (double i = lowrangevalue; i <= highragnevalue; i++)
+
+                                        for (double i = lowrangevalue; i <= highragnevalue;)
                                         {
-                                            if ((i % stepvalue) == 0)
-                                                _points.Add(i.ToString());
+                                            //if ((i % variable.LargeStep) == 0)
+                                            _points.Add(i.ToString());
+                                            i = i + (double)variable.LargeStep;
                                         }
+
+
                                         float xPos = 350;
                                         result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, result.Bounds.Y + 20), new PointF(xPos + 180, result.Bounds.Y + 20));
                                         float yPos = result.Bounds.Y + 10;
@@ -1595,10 +1599,11 @@ namespace GSC.Report
                                         double highragnevalue = Convert.ToDouble(variable.HighRangeValue);
                                         double stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1.0 : Convert.ToDouble(variable.DefaultValue);
                                         //logic
-                                        for (double i = lowrangevalue; i <= highragnevalue; i++)
+                                        for (double i = lowrangevalue; i <= highragnevalue;)
                                         {
-                                            if ((i % stepvalue) == 0)
+                                            if ((i % variable.LargeStep) == 0)
                                                 _points.Add(i.ToString());
+                                            i = i + Convert.ToDouble(variable.LargeStep);
                                         }
                                         float xPos = 50;
                                         result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, result.Bounds.Y + 20), new PointF(xPos + 180, result.Bounds.Y + 20));
@@ -1705,7 +1710,7 @@ namespace GSC.Report
             else
             {
                 fileInfo.ParentFolderName = fileInfo.ParentFolderName.Trim().Replace(" ", "").Replace("/", "");
-                fileInfo.FileName = item.ScreeningNumber.Replace("/", "") +"_"+item.Initial.Replace("/", "") + ".pdf";
+                fileInfo.FileName = item.ScreeningNumber.Replace("/", "") + "_" + item.Initial.Replace("/", "") + ".pdf";
                 string fileName = fileInfo.FileName + ".pdf";
                 fileInfo.ChildFolderName = item.ProjectDetails.ProjectCode;
                 filePath = System.IO.Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName, fileInfo.ChildFolderName, fileName);

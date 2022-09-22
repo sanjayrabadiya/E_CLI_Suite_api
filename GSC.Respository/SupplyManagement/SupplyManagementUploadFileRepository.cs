@@ -152,7 +152,7 @@ namespace GSC.Respository.SupplyManagement
                 worksheet.Range("A5:B5").Style.Fill.BackgroundColor = XLColor.LightGreen;
                 worksheet.Range("A5:B5").Style.Font.SetBold();
                 worksheet.Cell(5, 1).Value = "Randomization No";
-                worksheet.Cell(5, 2).Value = "Treatment Type";
+                worksheet.Cell(5, 2).Value = "Product Code";
 
                 var j = 3;
                 projectDesignVisits.ForEach(d =>
@@ -250,7 +250,7 @@ namespace GSC.Respository.SupplyManagement
                         if (item.ToString().Trim().ToLower() != "randomization no")
                             return "File is not Compatible!";
                     if (j == 1)
-                        if (item.ToString().Trim().ToLower() != "treatment type")
+                        if (item.ToString().Trim().ToLower() != "product code")
                             return "File is not Compatible!";
                 }
                 j++;
@@ -400,13 +400,13 @@ namespace GSC.Respository.SupplyManagement
                 var columns = dt.Columns.Count;
 
                 if (!result)
-                    return "Treatment type not match.";
+                    return "Product code not match.";
 
                 string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).ToArray();
                 var cellResult = dataRow.All(m => str.Contains(m));
 
                 if (!cellResult)
-                    return "Treatment type not match in cell.";
+                    return "Product code not match in cell.";
             }
 
             return "";
