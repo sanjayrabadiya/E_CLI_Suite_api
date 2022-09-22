@@ -368,5 +368,56 @@ namespace GSC.Respository.Master
 
             return result;
         }
+
+        public DashboardInformConsentStatusDto GetDashboardInformConsentCount(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var randomizations = _randomizationRepository.All.Include(c => c.EconsentReviewDetails).Where(x => x.DeletedDate == null && projectIds.Contains(x.ProjectId)).ToList();
+
+            var result = new DashboardInformConsentStatusDto();
+
+            result.TotalRandomization = randomizations.Count();
+            result.Screened = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.Screening).Count();
+            result.ConsentInProgress = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ConsentInProcess).Count();
+            result.ConsentCompleted = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ConsentCompleted).Count();
+            result.ReConsent = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess).Count();
+            result.ConsentWithdraw = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.Withdrawal).Count();
+
+            return result;
+
+        }
+
+        public List<DashboardInformConsentStatusDto> GetDashboardInformConsentChart(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var randomizations = _randomizationRepository.All.Include(c => c.EconsentReviewDetails).Where(x => x.DeletedDate == null && projectIds.Contains(x.ProjectId)).ToList();
+
+            var statusList = Enum.GetValues(typeof(InformConsentChart))
+               .Cast<InformConsentChart>().Select(e => new DropDownEnum
+               {
+                   Id = Convert.ToInt16(e),
+                   Value = e.GetDescription()
+               }).OrderBy(o => o.Id).ToList();
+
+            var result = new List<DashboardInformConsentStatusDto>();
+            statusList.ForEach(x =>
+            {
+                var obj = new DashboardInformConsentStatusDto();
+                obj.DisplayName = x.Value;
+                obj.Total = randomizations.Where(v => (x.Id == 1 ? v.PatientStatusId == ScreeningPatientStatus.Screening
+                                                : x.Id == 2 ? v.PatientStatusId == ScreeningPatientStatus.ConsentInProcess
+                                                : x.Id == 3 ? v.PatientStatusId == ScreeningPatientStatus.ConsentCompleted
+                                                : x.Id == 4 ? v.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess
+                                                : v.PatientStatusId == ScreeningPatientStatus.Withdrawal
+                                                )).Count();
+                result.Add(obj);
+            });
+
+            return result;
+
+        }
+
     }
 }

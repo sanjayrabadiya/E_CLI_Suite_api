@@ -931,4 +931,13 @@ namespace GSC.Helper
         [Description("Product Code")] ProductCode = 3,
         [Description("Product Name")] ProductName = 4
     }
+
+    public enum InformConsentChart : short
+    {
+        [Description("Screened")] Screened = 1,
+        [Description("Consent Inprogress")] ConsentInprogress = 2,
+        [Description("Consent Completed")] ConsentCompleted = 3,
+        [Description("ReConsent")] ReConsent = 4,
+        [Description("Consent Withdraw")] ConsentWithdraw = 5
+    }
 }

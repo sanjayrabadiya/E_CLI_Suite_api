@@ -979,7 +979,6 @@ namespace GSC.Respository.Attendance
             return result;
         }
 
-
         public List<DashboardRecruitmentStatusDisplayDto> GetDashboardRecruitmentStatus(int projectId)
         {
             var pro = _context.Project.Where(x => x.Id == projectId).FirstOrDefault();

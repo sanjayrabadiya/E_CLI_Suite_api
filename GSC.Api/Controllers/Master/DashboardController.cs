@@ -193,5 +193,21 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_projectDocumentReviewRepository.CountTranningNotification());
         }
+
+        [HttpGet]
+        [Route("GetDashboardInformConsentCount/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardInformConsentCount(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardInformConsentCount(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+
+        [HttpGet]
+        [Route("GetDashboardInformConsentChart/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardInformConsentChart(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardInformConsentChart(projectId, countryId, siteId);
+            return Ok(queries);
+        }
     }
 }

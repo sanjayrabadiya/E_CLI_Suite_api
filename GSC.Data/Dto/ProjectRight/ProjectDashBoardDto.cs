@@ -186,4 +186,19 @@ namespace GSC.Data.Dto.ProjectRight
         public string projectCode { get; set; }
         public DateTime CreatedDate { get; set; }
     }
+
+    public class DashboardInformConsentStatusDto
+    {
+        public int ProjectId { get; set; }
+        public int Screened { get; set; }
+        public int ConsentInProgress { get; set; }
+        public int ConsentCoSign { get; set; }
+        public int ConsentCompleted { get; set; }
+        public int ReConsent { get; set; }
+        public int ConsentWithdraw { get; set; }
+        public int TotalRandomization { get; set; }
+        public int? Total { get; set; }
+        public string DisplayName { get; set; }
+    }
+
 }

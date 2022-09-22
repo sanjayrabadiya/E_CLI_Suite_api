@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GSC.Data.Dto.ProjectRight;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,5 +16,7 @@ namespace GSC.Respository.Master
         dynamic GetQueryManagementTotalQueryStatus(int projectId, int countryId, int siteId);
         dynamic GetQueryManagementVisitWiseQuery(int projectId, int countryId, int siteId);
         dynamic GetQueryManagementRoleWiseQuery(int projectId, int countryId, int siteId);
+        DashboardInformConsentStatusDto GetDashboardInformConsentCount(int projectId, int countryId, int siteId);
+        List<DashboardInformConsentStatusDto> GetDashboardInformConsentChart(int projectId, int countryId, int siteId);
     }
 }
