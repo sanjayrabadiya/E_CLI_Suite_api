@@ -797,7 +797,7 @@ namespace GSC.Report
                                 if (!string.IsNullOrEmpty(variable.Label))
                                 {
                                     result = AddString($"{variable.Label}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 5, 290, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    result = AddString($" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    result = AddString($" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                                 }
                                 if (reportSetting.AnnotationType == true)
@@ -993,7 +993,7 @@ namespace GSC.Report
                                     {
                                         foreach (var value in variable.Values)
                                         {
-                                            result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                            result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y + 5, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                             PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
                                             checkField.Bounds = new RectangleF(350, result.Bounds.Y, 15, 15);
                                             checkField.Style = PdfCheckBoxStyle.Check;
@@ -1119,11 +1119,12 @@ namespace GSC.Report
                                         {
                                             //if ((i % variable.LargeStep) == 0)
                                             _points.Add(i.ToString());
-                                            i = i + (double)variable.LargeStep;
+                                            var str = (i + (double)variable.LargeStep).ToString("0.##");
+                                            i = Convert.ToDouble(str);
                                         }
 
 
-                                        float xPos = 350;
+                                        float xPos = 300;
                                         result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, result.Bounds.Y + 20), new PointF(xPos + 180, result.Bounds.Y + 20));
                                         float yPos = result.Bounds.Y + 10;
                                         float increment = (float)180 / (_points.Count - 1);
@@ -1141,7 +1142,7 @@ namespace GSC.Report
                                     {
                                         result = AddString(variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                     }
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 5, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                 }
                                 else
                                 {
