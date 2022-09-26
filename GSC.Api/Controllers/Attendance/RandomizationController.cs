@@ -299,19 +299,28 @@ namespace GSC.Api.Controllers.Attendance
             var userdata = _userRepository.Find((int)randomization.UserId);
             var user = new UserViewModel();
 
+            var userLARdata = _userRepository.Find((int)randomization.LARUserId);
+            var userLAR = new UserViewModel();
+
             var Project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
             var projectSetting = _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefault();
 
             user = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userdata.UserName}");
-            if (user.IsFirstTime == true)
+            userLAR = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userLARdata.UserName}");
+
+            if (user.IsFirstTime == true || userLAR.IsFirstTime == true)
             {
-                await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
+                if (user.IsFirstTime == true)
+                    await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
+
+                if (userLAR.IsFirstTime == true)
+                    await _randomizationRepository.SendEmailOfScreenedtoPatientLAR(randomization, type);
                 //if (projectSetting.IsEicf)
                 //    _randomizationRepository.SendEmailOfStartEconsent(randomization);
             }
             else
             {
-                ModelState.AddModelError("Message", "Patient already logged in");
+                ModelState.AddModelError("Message", "Patient or Lar already logged in");
                 return BadRequest(ModelState);
             }
 
