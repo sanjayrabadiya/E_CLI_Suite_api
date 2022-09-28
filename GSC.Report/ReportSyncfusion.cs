@@ -1602,9 +1602,9 @@ namespace GSC.Report
                                         //logic
                                         for (double i = lowrangevalue; i <= highragnevalue;)
                                         {
-                                            if ((i % variable.LargeStep) == 0)
-                                                _points.Add(i.ToString());
-                                            i = i + Convert.ToDouble(variable.LargeStep);
+                                            _points.Add(i.ToString());
+                                            var str = (i + (double)variable.LargeStep).ToString("0.##");
+                                            i = Convert.ToDouble(str);
                                         }
                                         float xPos = 50;
                                         result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, result.Bounds.Y + 20), new PointF(xPos + 180, result.Bounds.Y + 20));
