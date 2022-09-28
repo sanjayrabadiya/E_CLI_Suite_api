@@ -28,4 +28,12 @@ namespace GSC.Data.Dto.InformConcent
         public int PageSize { get; set; }
         public List<EconsentChatDto> ChatDetails { get; set; }
     }
+
+    public class EconsentChatCentralDto
+    {
+        public int ReceiverId { get; set; }
+
+        public IReadOnlyList<string> ReadOnlyData { get; set; }
+        public List<int> SenderIds { get; set; }
+    }
 }
