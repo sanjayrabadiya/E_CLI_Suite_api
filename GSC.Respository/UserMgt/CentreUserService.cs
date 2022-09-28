@@ -1,5 +1,7 @@
-﻿using GSC.Data.Dto.Master;
+﻿using GSC.Data.Dto.InformConcent;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.UserMgt;
+using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.UserMgt;
 using GSC.Respository.Configuration;
 using GSC.Respository.LogReport;
@@ -156,6 +158,70 @@ namespace GSC.Respository.UserMgt
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
 
             var result = await HttpService.Get<UserLockedGridDto>(_httpClient, clientUrl);
+            return result;
+        }
+
+        public async Task<EconsentChat> AllMessageDelivered(string clientUrl, EconsentChatCentralDto obj)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Put<EconsentChat>(_httpClient, clientUrl, obj);
+            return result;
+        }
+
+        public async Task<EconsentChat> AllMessageRead(string clientUrl)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Get<EconsentChat>(_httpClient, clientUrl);
+            return result;
+        }
+
+        public async Task<EConsentVideoDto> GenerateVideoSessionandToken(string clientUrl, EConsentVideoDto obj)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Put<EConsentVideoDto>(_httpClient, clientUrl, obj);
+            return result;
+        }
+
+        public async Task<EConsentVideoDto> DeliverFlagUpdate(string clientUrl, EConsentVideoDto obj)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Put<EConsentVideoDto>(_httpClient, clientUrl, obj);
+            return result;
+        }
+
+        public async Task<EConsentVideoDto> CallDeclined(string clientUrl, EConsentVideo obj)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Put<EConsentVideoDto>(_httpClient, clientUrl, obj);
+            return result;
+        }
+
+        public async Task<EConsentVideoDto> CallNotAnswered(string clientUrl, EConsentVideo obj)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Put<EConsentVideoDto>(_httpClient, clientUrl, obj);
+            return result;
+        }
+
+        public async Task<EConsentVideoDto> CallEndBySenderBeforeConnecting(string clientUrl, EConsentVideo obj)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Put<EConsentVideoDto>(_httpClient, clientUrl, obj);
+            return result;
+        }
+
+        public async Task<EConsentVideoDto> CallEndsuccessfullyafterconnecting(string clientUrl, EConsentVideo obj)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Put<EConsentVideoDto>(_httpClient, clientUrl, obj);
             return result;
         }
     }

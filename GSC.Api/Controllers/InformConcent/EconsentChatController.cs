@@ -11,11 +11,13 @@ using GSC.Data.Entities.InformConcent;
 using GSC.Respository.EmailSender;
 using GSC.Respository.InformConcent;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Configuration;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 
 namespace GSC.Api.Controllers.InformConcent
 {
@@ -30,20 +32,26 @@ namespace GSC.Api.Controllers.InformConcent
        // private readonly IHubContext<MessageHub> _hubcontext;
         private readonly IUserRepository _userRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly ICentreUserService _centreUserService;
+        private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IMapper _mapper;
 
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
-                                      //  IHubContext<MessageHub> hubcontext,
+                                        ICentreUserService centreUserService,
+                                         //  IHubContext<MessageHub> hubcontext,
+                                         IOptions<EnvironmentSetting> environmentSetting,
                                         IEconsentChatRepository econsentChatRepository, IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
                                         IMapper mapper)
         {
             _econsentChatRepository = econsentChatRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _centreUserService = centreUserService;
             //_hubcontext = hubcontext;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
+            _environmentSetting = environmentSetting;
             _mapper = mapper;
         }
 
@@ -144,7 +152,13 @@ namespace GSC.Api.Controllers.InformConcent
                     listData.Add(userlist[i].connectionId);
                 }
                 IReadOnlyList<string> readOnlyData = listData.AsReadOnly();
-             //   await _hubcontext.Clients.Clients(readOnlyData).SendAsync("AllMessageDelivered", receiverId);
+
+                EconsentChatCentralDto obj = new EconsentChatCentralDto();
+                obj.ReceiverId = receiverId;
+                obj.ReadOnlyData = readOnlyData;
+
+                var result = await _centreUserService.AllMessageDelivered($"{_environmentSetting.Value.CentralApi}Chat/AllMessageDelivered", obj);
+                //   await _hubcontext.Clients.Clients(readOnlyData).SendAsync("AllMessageDelivered", receiverId);
             }
             return Ok();
         }
@@ -155,12 +169,9 @@ namespace GSC.Api.Controllers.InformConcent
         {
             //all message read flag update when user clicks on particular user chat
             _econsentChatRepository.AllMessageRead(senderId);
-            var connection = ConnectedUser.Ids.Where(x => x.userId == senderId).ToList().FirstOrDefault();
-            if (connection != null)
-            {
-                var connectionId = connection.connectionId;
-              //  await _hubcontext.Clients.Client(connectionId).SendAsync("AllMessageRead", _jwtTokenAccesser.UserId);
-            }
+            
+            await _centreUserService.AllMessageRead($"{_environmentSetting.Value.CentralApi}Chat/AllMessageRead/{_jwtTokenAccesser.UserId}/{senderId}");
+            
             return Ok();
         }
     }
